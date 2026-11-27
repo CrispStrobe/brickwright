@@ -161,6 +161,10 @@ inner:
     dex
     bne outer
     rts
+
+; Point the reset vector at this program so the CPU starts at reset.
+    .segment "VECTORS"
+    .word reset, reset, reset
 `
     }
 ];
@@ -171,14 +175,14 @@ const Z80 = [
         id: 'blink',
         label: 'Toggle an output port',
         labelDe: 'Ausgabeport umschalten',
-        source: `; Toggle every bit of output port 0x01 with a delay between.
+        source: `; Toggle bit 0 of output port 0x01 with a delay between.
 ; The Z80 talks to ports with IN/OUT rather than memory addresses, which
 ; is the first thing that surprises anyone arriving from the 6502.
     .area CODE (ABS)
     .org 0x0000
 
 main:
-    ld   a, #0xff
+    ld   a, #0x01
     out  (0x01), a
     call delay
     ld   a, #0x00

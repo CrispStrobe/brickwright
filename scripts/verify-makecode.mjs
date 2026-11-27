@@ -258,10 +258,19 @@ try {
             buffer: Buffer.from(JSON.stringify(serialProject))});
         await waitFor(paneText, t => /a10-serial/.test(t), 30000);
         await clickAction('bw-makecode-emulate');
-        const serial = await waitFor(() => page.locator('[data-debug-panel]:visible [data-testid="bw-serial-console"]')
+        const compactPane = page.getByTestId('bw-right-pane-view');
+        const setPane = async (value, title) => {
+            if (await compactPane.isVisible()) await compactPane.selectOption(value);
+            else await page.getByTitle(title, {exact: true}).click();
+        };
+        await setPane('controller', 'Controller');
+        const widgets = page.locator('[data-bw-stage-dock="controller"]');
+        await widgets.getByRole('combobox', {name: 'Controller surface'}).selectOption('terminal');
+        const serial = await waitFor(() => widgets.getByTestId('bw-serial-console')
             .innerText().catch(() => ''), t => t.replace(/\r/g, '').split('\n').includes(greeting), 60000);
-        check('the compiled V2 guest prints the complete ordered line in the Debug console',
+        check('the compiled V2 guest prints the complete ordered line in the Controller terminal',
             serial.replace(/\r/g, '').split('\n').includes(greeting), serial.slice(0, 160));
+        await setPane('debugger', 'Debugger');
         const serialIdentity = await page.evaluate(() => document.body.innerText);
         check('the serial proof uses its own micro:bit V2 board and emulator ELF',
             /microbit-v2 board \(nrf52833/i.test(serialIdentity) &&

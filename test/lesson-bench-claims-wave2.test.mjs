@@ -208,65 +208,51 @@ test('measurement-range-error: the volts divider is exactly the documented /4', 
     }
 });
 
-// The OPEN DEFECT sentinel that stood here — "the LM358 stage never reaches its
-// documented x46.5" — fired on 2026-08-29 at the bw-board `4ae89b5` vendor bump
-// and was retired per its own instruction. bw-board `999eb66`+`187694f` replaced
-// the damped integrator's output-step halt with a secant solve on the INPUT
-// error. What replaces the sentinel is the measurement it was waiting for.
-test('measurement-range-error: the amps stage delivers its documented gain, and saturates where the part does', async () => {
+test('measurement-range-error: finite gain, input bias and output swing agree with the circuit', async () => {
     const {board, circuit} = await load('76-multimeter');
-    const documented = 1 + 100000 / 2200;   // 46.4545...
-    // RE-DERIVED 2026-11-24. bw-board 1d74deb1 (round 2, 2026-11-23) made the
-    // LM358 a finite-gain macromodel with the datasheet's 100 dB open-loop gain
-    // (TI SLOS068) and 50 Ω output resistance, so the stage realises the
-    // textbook FINITE-gain formula, 0.046% under the ideal — the same oracle
-    // bw-board's own analog-amps.test.mjs adopted. With u = A0·(v+ − v−), the
-    // output u − Rout·Vout·GL and v− = β·Vout, loaded only by its own feedback
-    // pair (the ADC pin is high-Z):
-    //   gain = A0 / (1 + Rout/(Rf + Rg) + A0·β)  = 46.43296468
-    // Measured 46.43296444 at every load: still hand arithmetic, still 1e-6,
-    // still input-independent, which was the D18 point.
-    const A0 = 1e5, ROUT = 50, RF = 100000, RG = 2200;
-    const realised = A0 / (1 + ROUT / (RF + RG) + A0 * RG / (RF + RG));
+    const openLoopGain = 1e5;
+    const outputResistance = 50;
+    const feedbackResistance = 100000;
+    const groundResistance = 2200;
+    const invertingBiasCurrent = 45e-9 - 5e-9 / 2;
+    const divider = groundResistance / (feedbackResistance + groundResistance);
+    const gain = openLoopGain /
+        (1 + outputResistance / (feedbackResistance + groundResistance) + openLoopGain * divider);
+    // KCL at the inverting input gives V− = divider × Vout + Ib × (Rf || Rg).
+    // Include the same voltage in the current through Rf and the output resistance.
+    const biasVoltage = invertingBiasCurrent * feedbackResistance * divider;
+    const outputOffset = -gain * biasVoltage * (1 - outputResistance / (feedbackResistance * openLoopGain));
     let t = 0n;
-    const gainAt = position => {
+    const measure = position => {
         circuit.setControl('load1', position);
         board.advanceTo(t += 20n * MS);
-        return {
-            gain: volts(board, 'amp1', '1_out') / volts(board, 'shunt1', 'a'),
-            out: volts(board, 'amp1', '1_out'),
-            shunt: volts(board, 'shunt1', 'a')
-        };
+        return {out: volts(board, 'amp1', '1_out'), shunt: volts(board, 'shunt1', 'a')};
     };
-    // Everywhere the output fits inside the swing the gain is the arithmetic,
-    // to ten figures, and it does NOT depend on the input any more.
-    for (const position of [0.25, 0.5, 0.75, 0.9, 0.95]) {
-        const {gain} = gainAt(position);
-        near(gain, realised, 1e-6, `closed-loop gain at load ${position}`);
+    const low = measure(0.25);
+    for (const position of [0.5, 0.75, 0.9, 0.95]) {
+        const {out, shunt} = measure(position);
+        near((out - low.out) / (shunt - low.shunt), gain, 1e-5, `closed-loop slope at load ${position}`);
+        near(out - gain * shunt, outputOffset, 1e-8, `bias offset at load ${position}`);
     }
-    // The lesson's own numbers, which its `test` hint quotes.
-    near(gainAt(0.5).out * 1000, 92.83, 0.01, 'amplifier output at 100 mA, in mV');
-    near(gainAt(0.75).out * 1000, 185.58, 0.01, 'amplifier output at 200 mA, in mV');
-    // The last click of the pot is the exercise: x46.43 of 98.0 mV asks for
-    // 4.552 V, and the macromodel's smooth clamp holds the top swing about
-    // 1.5 V under the rail (ground-sensing-opamp.js, VCC − 1.5 V).
-    const full = gainAt(1);
-    near(full.shunt * 1000, 98.04, 0.01, 'shunt drop at full pot travel, in mV');
-    assert.ok(full.shunt * documented > 4.5,
-        'full travel should ask for more than the amplifier can swing');
-    near(full.out, 3.4983, 0.001, 'the saturated output, one swing below the 5 V rail');
-    near(full.gain, 35.6831, 0.001, 'and the realised gain there');
-    // The hints were re-worded when this became true, so the content version moves.
-    assert.equal(lesson('measurement-range-error').version, 3,
-        'the measurement-range-error hints changed, so its content version must move with it');
+
+    const midpoint = measure(0.5);
+    const full = measure(1);
+    near(midpoint.shunt * 1000, 2, 0.01, 'midpoint shunt, in mV');
+    near(midpoint.out * 1000, 88.58, 0.01, 'midpoint amplifier output, in mV');
+    near(outputOffset * 1000, -4.25, 0.01, 'output offset, in mV');
+    near(full.shunt * 1000, 98.04, 0.01, 'full-travel shunt, in mV');
+    assert.ok(full.shunt * gain + outputOffset > 4.5, 'linear output would exceed available swing');
+    near(full.out, 3.4983, 0.001, 'saturated output, in V');
+
+    const rangeLesson = lesson('measurement-range-error');
+    assert.equal(rangeLesson.version, 4);
+    const testCheckpoint = rangeLesson.checkpoints.find(c => c.id === 'test');
     for (const lang of ['en', 'de']) {
-        const test_ = lesson('measurement-range-error').checkpoints.find(c => c.id === 'test');
-        assert.ok(/46[.,]4545/.test(test_.copy[lang].hint),
-            `the ${lang} test hint must quote the resistors' arithmetic`);
-        assert.ok(/46[.,]433/.test(test_.copy[lang].hint),
-            `the ${lang} test hint must quote the gain the bench now delivers`);
-        assert.ok(!/46[.,]5 (predicts|93)|erreicht seine Verstärkung nicht/.test(test_.copy[lang].hint),
-            `the ${lang} test hint still describes the defect that was fixed`);
+        const {hint} = testCheckpoint.copy[lang];
+        assert.match(hint, /88[.,]58/);
+        assert.match(hint, /4[.,]25 /);
+        assert.match(hint, /46[.,]433/);
+        assert.match(hint, /46[.,]4545/);
     }
 });
 

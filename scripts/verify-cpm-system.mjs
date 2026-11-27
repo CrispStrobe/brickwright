@@ -105,17 +105,11 @@ try {
     console.log('ok   CP/M machine imported; clicking Run');
     await page.getByTestId('bw-mm-run').first().click();
 
-    // OPEN THE DEBUGGER PANE. The boot lands in the debug panel, which mounts
-    // but paints nothing until the right pane shows it — the console was
-    // ATTACHED and had text while its input had no bounding box at all, so
-    // typing into it timed out. This is also what a person does: click 🐞.
-    const openDebugger = page.getByTestId('bw-open-circuit-debugger');
-    if (await openDebugger.count()) await openDebugger.first().click();
-
     // The serial console appears once the machine speaks; wait for it, then for
     // 'A>' to appear AND the text to stop growing (streamed output arrives in
     // pieces — assert on stability, not the first match).
-    await page.getByTestId('bw-serial-console').waitFor({state: 'attached', timeout: 30000});
+    await page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console')
+        .waitFor({state: 'visible', timeout: 30000});
     let sawAprompt = false, stableText = '';
     try {
         // A> present AND the text unchanged between two polls — streamed output
@@ -179,6 +173,44 @@ try {
     check(false, 'the CP/M boot flow ran without throwing', String(e.message || e).slice(0, 160));
 }
 
+// Also exercise the built-in lesson's Run button from the default Blocks workspace.
+try {
+    const page = await browser.newPage({viewport: {width: 1440, height: 960}});
+    try {
+        await page.addInitScript(() => {
+            localStorage.setItem('bw-starter-v1-complete', '1');
+            localStorage.setItem('bw-right-pane-hidden', '1');
+        });
+        await page.goto(url, {waitUntil: 'domcontentloaded'});
+        await page.getByTestId('bw-file-menu-trigger').click();
+        await page.getByText('Machines…', {exact: true}).click();
+        await page.getByRole('combobox', {name: 'Machine type'}).selectOption('z80');
+        await page.locator('[data-lesson-id="lesson-cpm-z80"]').getByTestId('bw-mm-lesson-run').click();
+        const output = page.locator('[data-testid="bw-serial-console"]:visible').first();
+        const input = page.locator('[data-testid="bw-serial-input"]:visible').first();
+        const expectOutput = text => page.waitForFunction(pattern =>
+            [...document.querySelectorAll('[data-testid="bw-serial-console"]')]
+                .some(el => el.getClientRects().length && new RegExp(pattern).test(el.textContent)),
+        text.source, {timeout: 30_000});
+        await output.waitFor({state: 'visible', timeout: 30_000});
+        await expectOutput(/A>/);
+        for (const [command, response] of [
+            ['DIR', /A:\s+BBCBASIC/], ['BBCBASIC', /BBC BASIC/], ['PRINT 2+2', /(?:^|\n)\s*4(?:\s|$)/]
+        ]) {
+            await input.fill(command);
+            await input.press('Enter');
+            await expectOutput(response);
+        }
+        check(!/BBCBASIC\s+2(?:\s|$)/.test(await output.innerText()),
+            'the built-in lesson lists one copy of BBCBASIC.COM');
+        check(true, 'the built-in CP/M lesson opens its console and runs BBC BASIC');
+    } finally {
+        await page.close();
+    }
+} catch (error) {
+    check(false, 'the built-in CP/M lesson opens its console and runs BBC BASIC', String(error.message || error));
+}
+
 // ─── LINUX ON RISC-V — the Machine Manager's lesson row ─────────────────────
 // Same surface, second machine: a fresh page (no CP/M state), the built-in
 // "Linux on RISC-V" row, its GPL licence line and source link, Run. The kernel,
@@ -224,6 +256,7 @@ async function startLinux(button, inspectRow = null) {
     const device = page.getByTestId('bw-device-select');
     await device.waitFor({state: 'visible', timeout: 60000});
     await device.selectOption('__manage__');
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('riscv32');
     const row = page.getByTestId('bw-mm-lesson').filter({hasText: 'Linux on RISC-V'});
     await row.waitFor({state: 'visible', timeout: 15000});
     if (inspectRow) await inspectRow(row);
@@ -236,10 +269,8 @@ async function startLinux(button, inspectRow = null) {
         throw new Error(`the Linux lesson did not start (${button}): ${why}`);
     });
     const fetched = (Date.now() - t0) / 1000;
-    const openDebugger = page.getByTestId('bw-open-circuit-debugger');
-    if (await openDebugger.count()) await openDebugger.first().click();
     await page.waitForFunction(`(() => {
-        const el = document.querySelector('[data-testid="bw-linux-terminal"]');
+        const el = document.querySelector('[data-bw-stage-dock="controller"] [data-testid="bw-linux-terminal"]');
         return !!el && el.dataset.terminalState === 'ready';
     })()`, null, {timeout: 60000, polling: 100});
     const up = await screenShows(page, /BWB-LINUX-USERSPACE-UP|bwb#/, 120000);
@@ -249,6 +280,7 @@ async function startLinux(button, inspectRow = null) {
 try {
     // ── Run: the post-boot snapshot ──
     const run = await startLinux('bw-mm-lesson-run', async row => {
+        await row.getByTestId('bw-mm-item-info').click();
         const licence = await row.getByTestId('bw-mm-lesson-licence').textContent();
         check(/GPL-2\.0/.test(licence) && /LGPL-2\.1/.test(licence) && /brickwright-media-lab/.test(licence),
             'the Linux lesson row carries its GPL/LGPL licence line and names where the media come from',

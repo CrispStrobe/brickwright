@@ -16,7 +16,7 @@ export const surveyRoverInteractions = async (page, {openSimLab, shotsDir, timeo
     await page.waitForFunction(() => window.__bwSimLab?.status === 'ready' &&
         window.__bwSimLab._pane.state.modelFile === 'survey-rover.ldr', null, {timeout: 60000});
 
-    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
         null, {timeout: 60000});
     assert.match(await page.locator('.cm-content').first().textContent(), /set motor stop action C hold/);
     await page.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session?.mat === 'plain',

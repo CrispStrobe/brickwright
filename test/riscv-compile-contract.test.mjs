@@ -15,7 +15,7 @@ test('with no endpoint it REFUSES — it does not fake a compile', async () => {
     const r = await compileRiscvC({source: HELLO});
     assert.equal(r.ok, false);
     assert.equal(r.code, 'no-compile-service');
-    assert.match(r.reason, /assembly runs in the browser/i);
+    assert.match(r.reason, /select browser for supported C programs/i);
 });
 
 test('empty source is a source refusal before anything is sent', async () => {

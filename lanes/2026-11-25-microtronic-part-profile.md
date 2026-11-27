@@ -24,3 +24,15 @@ remaining inherited whole-registry failure separately. No native TMS1600 or
 firmware work is included. Broader host and gallery CI failures remain visible
 and block landing under `lanes/PROTOCOL.md`; this claim does not waive them.
 
+## Review candidate; landing blocked
+
+The Microtronic entry and normally generated profile document are prepared.
+The generated package copy is byte-identical. All three installed Microtronic
+electrical/save-load checks pass again. The unchanged profile gate passes four
+checks and still fails the all-devices assertion for the thirteen pre-existing
+kinds; Microtronic is no longer missing. Generated-document freshness, mirrors
+and diff-whitespace checks pass. No compiler verb or family was added.
+
+Keep this lane claimed while the remaining host qualification is blocked.
+The dated evidence is in `docs/BUSCH-MICROTRONIC-QUALIFICATION.md`.
+

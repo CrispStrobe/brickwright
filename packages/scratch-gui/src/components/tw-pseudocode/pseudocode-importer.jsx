@@ -1,6 +1,11 @@
 import React from 'react';
+import {remoteMachineImagesAllowed, remoteToolchainsAllowed} from '../../lib/distribution-policy.js';
+import {createPortal} from 'react-dom';
 import {showDebuggerOnStage} from '../../lib/bw-debug/show-debugger-on-stage.js';
-import {Popup, toolStyles} from './sim-lab-toolbar.jsx';
+import {usesScratchStage} from './code-example-view.js';
+import {isMachinePickerBackdrop} from './machine-picker-view.js';
+import {collectCodeNotices} from './code-notices.js';
+import {Icon, Popup, toolStyles} from './sim-lab-toolbar.jsx';
 import ScrollRow from './toolbar-scroll-row.jsx';
 import {toolbarActionApplies} from '../../lib/code-toolbar-actions.js';
 import {notifyEditorMenuActions, registerEditorMenuActions} from '../../lib/editor-menu-actions.js';
@@ -17,6 +22,7 @@ import {IMPORT_ACCEPT, isImportableArtefact} from '../../lib/bw-makecode/accept.
 // synchronous — and the module is a few KB of strings, not a chunk worth
 // splitting.
 import {asmExamplesFor, riscvCExamplesFor, arduinoSketchExamplesFor} from '../../lib/bw-asm/examples.js';
+import {blinkChoices, blinkMachineLabel, blinkFamily, blinkMachines, blinkProgramSource, blinkSource, blinkStarter} from '../../lib/bw-asm/blink-machines.js';
 import {requestSketchBuild, sketchBoardFor, sketchFirmware} from '../../lib/bw-debug/arduino-sketch.js';
 import {armRunFor, imageFromIntelHex} from '../../lib/bw-asm/arm-image.js';
 import {
@@ -28,10 +34,15 @@ import {
     summarize as matrixSummary, explain as matrixExplain, LANGUAGES as MATRIX_LANGUAGES,
     DEVICES, DEVICE_GROUPS, cell as matrixCell
 } from '../../lib/bw-matrix/capabilities.js';
+import {basicProfileFor, basicProfilesFor, codeLanguageAvailable, hiddenCodeDrafts,
+    picoBasicProfileForDialect, standaloneBasicDrafts} from '../../lib/bw-matrix/code-languages.js';
+import {libraryMedia, loadPicoBasicFirmware, openLibraryMedia} from '../../lib/bw-machines/library-media.js';
+import {runMachineConfig} from '../../lib/bw-machines/run-machine.js';
+import {picoBasicCommands, picoBasicConsoleSpec} from '../../lib/bw-machines/pico-basic-source.js';
 import {feProgramToC} from '../../lib/bw-lang/fe-target-c.js';
 import {forthProgramToC} from '../../lib/bw-lang/forth-target-c.js';
 import {fetchTclProgramC} from '../../lib/bw-lang/tcl-target-c.js';
-import {showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
+import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import downloadBlob from '../../lib/download-blob.js';
 import animationResourceMenuItems from 'scratch-vm/src/util/bw-animation-resource-menu.js';
 import {conversionFailure} from '../../lib/bw-conversion-error.js';
@@ -79,7 +90,7 @@ for (const g of DEVICE_GROUPS) for (const d of g.devices) DEVICE_BY_ID[d.id] = {
 import {lowerableLines} from '../../lib/bw-fpga/pseudocode-expr.js';
 import {getFpgaEnabled} from '../../lib/bw-fpga-preferences.js';
 import {isSpike3Program, runSpike3OnVirtualHub} from '../../lib/spike3-python-run.js';
-import {isSpikeExtensionLoaded} from '../../lib/spike-port-snapshot.js';
+import {isSpikeExtensionLoaded, snapshotSpikePorts} from '../../lib/spike-port-snapshot.js';
 import {createCodeRunFeedback} from '../../lib/spike-arena/code-run-feedback.js';
 // Every yes/no question is awaited: `window.confirm` cannot block in the desktop/iOS app.
 import {confirmAsync, promptAsync} from '../../lib/native-dialog.js';
@@ -100,6 +111,8 @@ const FPGA_TAB_INDEX = 5;
 
 const L10N = {
     en: {
+        closeNotice: 'Close',
+        cpmRunHint: 'Run the CP/M program. Edits build with hosted SDCC.',
         actionFiles: 'Files', actionPrograms: 'Program and export', actionExamples: 'Examples',
         fileMenuTitle: 'Open, save, import, examples and reference',
         makeCircuit: '⚙ Make this a circuit',
@@ -108,8 +121,8 @@ const L10N = {
         loadExample: '📚 Load example…', loadExampleTitle: 'Load a built-in example',
         examplesLoading: 'Loading built-in examples…',
         examplesRetry: 'Built-in examples unavailable — retry',
-        openFile: '📂 Open', openFileTitle: t => `Open a source file (${t})`,
-        saveFile: '💾 Save', saveFileTitle: n => `Save this tab as ${n}`,
+        openFile: 'Open', openFileTitle: t => `Open a source file (${t})`,
+        saveFile: 'Save', saveFileTitle: n => `Save this tab as ${n}`,
         exportMakeCode: '📦 MakeCode source',
         exportMakeCodeTitle: 'Download the original recovered MakeCode project files for the official editor or PXT CLI',
         openBad: e => `Don't know that file type (${e}).`,
@@ -147,7 +160,8 @@ const L10N = {
         mcRun: '▶ Run in MakeCode simulator',
         mcRunTitle: 'Compile this MakeCode project with MakeCode\'s own compiler and run it in MakeCode\'s simulator — nothing is translated, so nothing is lost',
         mcRunCompiling: n => `Compiling ${n} with MakeCode…`,
-        moreLanguages: 'More languages',
+        toolbarLanguages: 'Languages', moreLanguages: 'More languages',
+        cardiacLanguage: 'CARDIAC decimal computer',
         cp1Language: 'Kosmos CP1 teaching language…',
         cp1Open: 'Open the Kosmos CP1 starter? This replaces the current circuit and CP1 source.',
         mcRunStarted: (n, t) => `${n} is running in MakeCode's ${({arcade: 'Arcade', calliopemini: 'Calliope mini', ev3: 'EV3', adafruit: 'Circuit Playground'})[t] || 'micro:bit'} simulator.`,
@@ -163,7 +177,7 @@ const L10N = {
         mcFirmwareTitle: 'Build the real firmware for this project\'s board (micro:bit or Calliope .hex, EV3, Circuit Playground or the chosen Arcade board .uf2), with the project inside so MakeCode can reopen it',
         mcFirmwareBuilding: n => `Building firmware for ${n}…`,
         mcFirmwareDone: f => `Saved ${f} — copy it onto the board's USB drive (MICROBIT, MINI, CPLAYBOOT, EV3) to flash it. MakeCode also opens it as a project.`,
-        mcNoRuntime: 'This build does not carry the MakeCode runtime (npm run sync:makecode was not run), so MakeCode projects cannot be compiled here.',
+        mcNoRuntime: 'MakeCode runtime files are unavailable in this build.',
         mcNoBase: u => `This project uses a C++ extension outside MakeCode's default set, and building its firmware needs MakeCode's cloud compiler. It still runs in the simulator; to flash it, open it on ${u}.`,
         mcBoardPick: 'Arcade board…',
         mcBoardTitle: 'The board to build this Arcade game\'s firmware for — MakeCode Arcade\'s own list of boards',
@@ -184,12 +198,18 @@ const L10N = {
         arcRunTitle: 'Turn this Scratch project into a MakeCode Arcade game (sprites from their costumes, scripts as code) and run it in MakeCode\'s Arcade simulator',
         arcExport: '⬆ To MakeCode Arcade',
         arcExportTitle: 'Save this project as a MakeCode Arcade game that arcade.makecode.com opens',
-        arcDone: (f, u, w) => `Saved ${f} — drop it on arcade.makecode.com.${u ? ` ${u} block kind(s) have no Arcade counterpart (commented where they stood).` : ''}${w ? ` ${w} costume(s) were matched to Arcade's 16 colours.` : ''}`,
-        arcStarted: (u, w) => `Running as a MakeCode Arcade game.${u ? ` ${u} block kind(s) have no Arcade counterpart.` : ''}${w ? ` ${w} costume(s) were matched to Arcade's 16 colours.` : ''}`,
+        gameWeb: '⬆ Playable web game (.zip)',
+        gameWebTitle: 'Export this project as an editable JavaScript game: open play.html in any browser',
+        gamePy: '⬆ Python + pygame game (.zip)',
+        gamePyTitle: 'Export this project as an editable Python game: pip install pygame, then python main.py',
+        gameDone: (f, a) => `Saved ${f}.${a ? ` ${a} block kind(s) run approximately — see README.md in the zip.` : ''}`,
+        gameRefused: r => `Not exported: these blocks have no game-runtime equivalent yet — ${r}`,
+        arcDone: (f, u) => `Saved ${f} — drop it on arcade.makecode.com.${u ? ` ${u} block kind(s) have no Arcade counterpart (commented where they stood).` : ''}`,
+        arcStarted: u => `Running as a MakeCode Arcade game.${u ? ` ${u} block kind(s) have no Arcade counterpart.` : ''}`,
         saveEmpty: 'Nothing to save — this tab is empty.',
         restored: t => `Restored your unsaved ${t}.`,
         loadCatalogTitle: 'Load a catalog example for this device',
-        noChips: 'no chips (Scratch stage)',
+        noChips: 'Scratch stage',
         searchExamples: 'Search examples…',
         catalogLoading: 'Loading example catalog…',
         catalogEmpty: 'No catalog examples for this device.',
@@ -231,6 +251,7 @@ const L10N = {
         basicRealDosBuilding: 'Compiling BASIC and preparing a real MS-DOS 2.0 boot disk…',
         basicRealDosFailed: (m) => `Could not prepare the MS-DOS boot disk: ${m}`,
         basicRealDosBooted: (n) => `Built ${n} bytes and booting real MS-DOS 2.0 — it runs PROG.COM at the A> prompt.`,
+        basicEmpty: 'Enter a BASIC program to run.',
         basicUbasicRunning: 'Running your BASIC on the libre uBASIC interpreter on the DOS bench…',
         basicUbasicFailed: (m) => `The uBASIC (on DOS) route could not run: ${m}`,
         feRunning: 'Running your fe (Lisp) on the libre fe interpreter on the DOS bench…',
@@ -308,6 +329,7 @@ const L10N = {
         // BASIC / ASM mode bar
         profile: 'Profile:', lineNumbers: 'Line numbers', alwaysOn6502: '(always on for 6502)',
         asmModeLabel: 'Mode:', asmSource: 'Source (editable)', asmListing: 'Listing (from compiler)',
+        asmBlinkRunning: (machine, route) => `Blink 0 is running on ${machine} · ${route}`,
         asmExampleLabel: 'Example:', asmExamplePick: 'choose…',
         asmExampleReplace: 'Replace what is in the assembly editor?',
         asmExampleLoaded: n => `Loaded "${n}". Press Assemble & Run to build it.`,
@@ -450,6 +472,8 @@ const L10N = {
         }
     },
     de: {
+        closeNotice: 'Schließen',
+        cpmRunHint: 'Führe das CP/M-Programm aus. Änderungen werden mit dem SDCC-Dienst kompiliert.',
         actionFiles: 'Dateien', actionPrograms: 'Programm und Export', actionExamples: 'Beispiele',
         fileMenuTitle: 'Öffnen, speichern, importieren, Beispiele und Referenz',
         makeCircuit: '⚙ Daraus eine Schaltung bauen',
@@ -458,8 +482,8 @@ const L10N = {
         loadExample: '📚 Beispiel laden…', loadExampleTitle: 'Ein eingebautes Beispiel laden',
         examplesLoading: 'Eingebaute Beispiele werden geladen…',
         examplesRetry: 'Eingebaute Beispiele nicht verfügbar — erneut versuchen',
-        openFile: '📂 Öffnen', openFileTitle: t => `Eine Quelldatei öffnen (${t})`,
-        saveFile: '💾 Speichern', saveFileTitle: n => `Diesen Tab als ${n} speichern`,
+        openFile: 'Öffnen', openFileTitle: t => `Eine Quelldatei öffnen (${t})`,
+        saveFile: 'Speichern', saveFileTitle: n => `Diesen Tab als ${n} speichern`,
         exportMakeCode: '📦 MakeCode-Quellcode',
         exportMakeCodeTitle: 'Die unveränderten, wiederhergestellten MakeCode-Projektdateien für den offiziellen Editor oder die PXT-CLI laden',
         openBad: e => `Unbekannter Dateityp (${e}).`,
@@ -497,7 +521,8 @@ const L10N = {
         mcRun: '▶ Im MakeCode-Simulator ausführen',
         mcRunTitle: 'Dieses MakeCode-Projekt mit dem MakeCode-eigenen Compiler übersetzen und im MakeCode-Simulator ausführen — es wird nichts umgewandelt, also geht nichts verloren',
         mcRunCompiling: n => `${n} wird mit MakeCode übersetzt…`,
-        moreLanguages: 'Weitere Sprachen',
+        toolbarLanguages: 'Sprachen', moreLanguages: 'Weitere Sprachen',
+        cardiacLanguage: 'CARDIAC-Dezimalrechner',
         cp1Language: 'Kosmos-CP1-Lernsprache…',
         cp1Open: 'Kosmos-CP1-Einstieg öffnen? Die aktuelle Schaltung und der CP1-Quelltext werden ersetzt.',
         mcRunStarted: (n, t) => `${n} läuft im MakeCode-Simulator (${({arcade: 'Arcade', calliopemini: 'Calliope mini', ev3: 'EV3', adafruit: 'Circuit Playground'})[t] || 'micro:bit'}).`,
@@ -513,7 +538,7 @@ const L10N = {
         mcFirmwareTitle: 'Die echte Firmware für das Board dieses Projekts bauen (micro:bit oder Calliope .hex, EV3, Circuit Playground oder das gewählte Arcade-Board .uf2), mit dem Projekt darin, damit MakeCode es wieder öffnen kann',
         mcFirmwareBuilding: n => `Firmware für ${n} wird gebaut…`,
         mcFirmwareDone: f => `${f} gespeichert — auf das USB-Laufwerk des Boards kopieren (MICROBIT, MINI, CPLAYBOOT, EV3), um es zu flashen. MakeCode öffnet die Datei auch als Projekt.`,
-        mcNoRuntime: 'Dieser Build enthält die MakeCode-Laufzeit nicht (npm run sync:makecode lief nicht), daher können MakeCode-Projekte hier nicht übersetzt werden.',
+        mcNoRuntime: 'Die MakeCode-Laufzeitdateien sind in diesem Build nicht verfügbar.',
         mcNoBase: u => `Dieses Projekt nutzt eine C++-Erweiterung außerhalb des MakeCode-Standardsatzes; seine Firmware braucht den Cloud-Compiler von MakeCode. Im Simulator läuft es trotzdem; zum Flashen auf ${u} öffnen.`,
         mcBoardPick: 'Arcade-Board…',
         mcBoardTitle: 'Das Board, für das die Firmware dieses Arcade-Spiels gebaut wird — die Board-Liste von MakeCode Arcade selbst',
@@ -534,12 +559,18 @@ const L10N = {
         arcRunTitle: 'Dieses Scratch-Projekt in ein MakeCode-Arcade-Spiel umwandeln (Figuren aus ihren Kostümen, Skripte als Code) und im MakeCode-Arcade-Simulator ausführen',
         arcExport: '⬆ Zu MakeCode Arcade',
         arcExportTitle: 'Dieses Projekt als MakeCode-Arcade-Spiel speichern, das arcade.makecode.com öffnet',
-        arcDone: (f, u, w) => `${f} gespeichert — auf arcade.makecode.com ablegen.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung (als Kommentar markiert).` : ''}${w ? ` ${w} Kostüm(e) wurden an die 16 Arcade-Farben angepasst.` : ''}`,
-        arcStarted: (u, w) => `Läuft als MakeCode-Arcade-Spiel.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung.` : ''}${w ? ` ${w} Kostüm(e) wurden an die 16 Arcade-Farben angepasst.` : ''}`,
+        gameWeb: '⬆ Spielbares Web-Spiel (.zip)',
+        gameWebTitle: 'Dieses Projekt als bearbeitbares JavaScript-Spiel exportieren: play.html in jedem Browser öffnen',
+        gamePy: '⬆ Python-+-pygame-Spiel (.zip)',
+        gamePyTitle: 'Dieses Projekt als bearbeitbares Python-Spiel exportieren: pip install pygame, dann python main.py',
+        gameDone: (f, a) => `${f} gespeichert.${a ? ` ${a} Blockart(en) laufen nur näherungsweise — siehe README.md im Zip.` : ''}`,
+        gameRefused: r => `Nicht exportiert: Für diese Blöcke gibt es noch keine Spiel-Laufzeit — ${r}`,
+        arcDone: (f, u) => `${f} gespeichert — auf arcade.makecode.com ablegen.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung (als Kommentar markiert).` : ''}`,
+        arcStarted: u => `Läuft als MakeCode-Arcade-Spiel.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung.` : ''}`,
         saveEmpty: 'Nichts zu speichern — dieser Tab ist leer.',
         restored: t => `Nicht gespeicherter ${t} wiederhergestellt.`,
         loadCatalogTitle: 'Ein Katalog-Beispiel für dieses Gerät laden',
-        noChips: 'ohne Chip (Scratch-Bühne)',
+        noChips: 'Scratch-Bühne',
         searchExamples: 'Beispiele suchen…',
         catalogLoading: 'Beispiel-Katalog wird geladen…',
         catalogEmpty: 'Keine Katalog-Beispiele für dieses Gerät.',
@@ -582,6 +613,7 @@ const L10N = {
         basicRealDosBuilding: 'Übersetze BASIC und bereite eine echte MS-DOS-2.0-Bootdiskette vor…',
         basicRealDosFailed: (m) => `Die MS-DOS-Bootdiskette konnte nicht vorbereitet werden: ${m}`,
         basicRealDosBooted: (n) => `${n} Bytes erzeugt — starte echtes MS-DOS 2.0; es führt PROG.COM am A>-Prompt aus.`,
+        basicEmpty: 'Gib ein BASIC-Programm zum Ausführen ein.',
         basicUbasicRunning: 'Führe dein BASIC mit dem freien uBASIC-Interpreter auf der DOS-Werkbank aus…',
         basicUbasicFailed: (m) => `Die uBASIC-(auf-DOS)-Route lief nicht: ${m}`,
         feRunning: 'Führe dein fe (Lisp) mit dem freien fe-Interpreter auf der DOS-Werkbank aus…',
@@ -659,6 +691,7 @@ const L10N = {
         // BASIC / ASM mode bar
         profile: 'Profil:', lineNumbers: 'Zeilennummern', alwaysOn6502: '(immer an bei 6502)',
         asmModeLabel: 'Modus:', asmSource: 'Source (editierbar)', asmListing: 'Listing (vom Compiler)',
+        asmBlinkRunning: (machine, route) => `LED 0 blinkt auf ${machine} · ${route}`,
         asmExampleLabel: 'Beispiel:', asmExamplePick: 'wählen…',
         asmExampleReplace: 'Inhalt des Assembler-Editors ersetzen?',
         asmExampleLoaded: n => `„${n}" geladen. Mit Assemblieren & Ausführen bauen.`,
@@ -809,44 +842,44 @@ const GROUPS = [
         // are not finished games and therefore do not belong in this gallery.
         // A game enters here only after an authored-art, onboarding, objective,
         // feedback, touch-control and live-VM audit.
-        ['g2048', '✨ Nova Grid — polished'],
-        ['sigil_grid', '☀️ Sigil Grid — solo / duo'],
-        ['vector_seven', '🏓 Vector Seven — first to 7'],
-        ['reactor_ricochet', '⚡ Reactor Ricochet — clear 20 cells'],
-        ['flux_vault', '🔷 Flux Vault — 3 puzzle chambers'],
-        ['neon_circuit', '💡 Neon Circuit — darken 3 boards'],
-        ['canal_command', '🚢 Canal Command — lift 4 boats'],
-        ['sky_skim', '🪽 Skyline Swoop — polished'],
-        ['missile_ballet', '✈️ Contrail Panic — polished'],
-        ['orbit_ward', '🛡️ Aegis Arc — polished'],
-        ['chroma_code', '💎 Prism Lock — polished'],
-        ['fusion_foundry', '☄️ Core Cascade — polished'],
-        ['rooftop_relay', '🏃 Neon Relay — polished'],
-        ['twinwall', '🪩 Rift Rally — polished'],
-        ['turbo_chicane', '🏁 Slipstream Circuit — polished'],
-        ['abyss_rescue', '🤿 Abyss Lift — polished'],
-        ['specter_sweep', '🔮 Wardlight — polished'],
-        ['moonlight_heist', '🐭 Pantry Prowl — polished'],
-        ['cloud_court', '🏐 Nimbus Volley — polished'],
-        ['ember_dojo', '⚔️ Ember Parry — polished'],
-        ['lockstep_lagoon', '🌊 Tidegate Rush — polished'],
-        ['rink_riot', '🏒 Blue-Line Breaker — polished'],
-        ['rim_reactor', '🏀 Orbit Hoops — polished'],
-        ['comet_cup', '☄️ Comet Strikers — polished'],
-        ['trench_signal', '🛸 Echo Trench — polished'],
-        ['whisker_switch', '🐭 Whisker Relay — polished'],
-        ['spiral_circuit', '🌀 Helix Rush — polished'],
-        ['lilyway_rescue', '🐸 Moonbank Hop — polished'],
-        ['rotor_rogue', '🏍️ Crosswind Courier — polished'],
-        ['prism_spire', '🏗️ Lumen Stack — polished'],
-        ['shard_sheriff', '🩸 Plasma Posse — polished'],
-        ['halo_foundry', '🛡️ Halo Lockdown — polished'],
-        ['corridor_kestrel', '🛸 Carrier Kestrel — polished'],
-        ['thunder_volley', '⚡ Skycourt Surge — polished'],
-        ['cascade_pair', '🌈 Chromafall Reactor — polished'],
-        ['mooncoil_odyssey', '🌙 Cratercoil — polished'],
-        ['cinder_thrust', '🚀 Magma Lift — polished'],
-        ['triple_bingo', '🎲 Triple Bingo — 3 players, one screen']
+        ['g2048', '✨ Nova Grid'],
+        ['sigil_grid', '☀️ Sigil Grid'],
+        ['vector_seven', '🏓 Vector Seven'],
+        ['reactor_ricochet', '⚡ Reactor Ricochet'],
+        ['flux_vault', '🔷 Flux Vault'],
+        ['neon_circuit', '💡 Neon Circuit'],
+        ['canal_command', '🚢 Canal Command'],
+        ['sky_skim', '🪽 Skyline Swoop'],
+        ['missile_ballet', '✈️ Contrail Panic'],
+        ['orbit_ward', '🛡️ Aegis Arc'],
+        ['chroma_code', '💎 Prism Lock'],
+        ['fusion_foundry', '☄️ Core Cascade'],
+        ['rooftop_relay', '🏃 Neon Relay'],
+        ['twinwall', '🪩 Rift Rally'],
+        ['turbo_chicane', '🏁 Slipstream Circuit'],
+        ['abyss_rescue', '🤿 Abyss Lift'],
+        ['specter_sweep', '🔮 Wardlight'],
+        ['moonlight_heist', '🐭 Pantry Prowl'],
+        ['cloud_court', '🏐 Nimbus Volley'],
+        ['ember_dojo', '⚔️ Ember Parry'],
+        ['lockstep_lagoon', '🌊 Tidegate Rush'],
+        ['rink_riot', '🏒 Blue-Line Breaker'],
+        ['rim_reactor', '🏀 Orbit Hoops'],
+        ['comet_cup', '☄️ Comet Strikers'],
+        ['trench_signal', '🛸 Echo Trench'],
+        ['whisker_switch', '🐭 Whisker Relay'],
+        ['spiral_circuit', '🌀 Helix Rush'],
+        ['lilyway_rescue', '🐸 Moonbank Hop'],
+        ['rotor_rogue', '🏍️ Crosswind Courier'],
+        ['prism_spire', '🏗️ Lumen Stack'],
+        ['shard_sheriff', '🩸 Plasma Posse'],
+        ['halo_foundry', '🛡️ Halo Lockdown'],
+        ['corridor_kestrel', '🛸 Carrier Kestrel'],
+        ['thunder_volley', '⚡ Skycourt Surge'],
+        ['cascade_pair', '🌈 Chromafall Reactor'],
+        ['mooncoil_odyssey', '🌙 Cratercoil'],
+        ['cinder_thrust', '🚀 Magma Lift'],
+        ['triple_bingo', '🎲 Triple Bingo']
     ]},
     {label: 'Demos', items: [
         ['game', '🎯 Complete Game'], ['art', '🎨 Digital Art'], ['physics', '⚡ Physics Demo'],
@@ -1205,6 +1238,9 @@ const CMEditor = React.lazy(() =>
     import(/* webpackChunkName: "bw-codemirror" */ '../../lib/codemirror-editor.jsx')
 );
 
+const MicrotronicSurface = React.lazy(() => import(/* webpackChunkName: "bw-microtronic-surface" */ './microtronic-surface.jsx'));
+const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
+
 // ── VDU terminal for BBC BASIC graphics (lazy-loaded) ──────────────
 const VduTerminal = React.lazy(() =>
     import(/* webpackChunkName: "bw-vdu-terminal" */ './vdu-terminal.jsx')
@@ -1236,6 +1272,10 @@ class PseudocodeImporter extends React.Component {
         // end up with (say) pseudocode sitting in the Python tab.
         this.state = {revealed: props.isVisible !== false, lang: 'pseudocode', importedPython: false,
             extraLangs: readExtraLangs(), langMenuOpen: false,
+            kim1PartId: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'kim1'
+                ? window.__bwMachineExtracted.config.partId : null,
+            kim1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'kim1',
+            cardiacActive: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cardiac',
             cp1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
             // The Arcade board picker: the boards (null until loaded) and the one chosen.
             arcadeBoards: null, arcadeBoard: '',
@@ -1245,8 +1285,8 @@ class PseudocodeImporter extends React.Component {
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
             basicProfile: 'bbc', basicLineNumbers: true,
-            uploads: [], status: '', conversionReport: null, reportExpanded: false, busy: false, showRef: false, showInfo: false, showMatrix: false,
-            showRepresentation: true,
+            uploads: [], status: '', conversionReport: null, busy: false, showInfo: false, showMatrix: false,
+            codeNotices: [], codeNoticeId: 0,
             showArt: false, output: null, running: false, picoSimRunning: false,
             codeSessionRunning: false, codeInput: null, codeInputValue: '', codeRunLabel: '',
             // Hardware-extension codegen options (see reference/runtime-drivers.md): the emitted
@@ -1317,13 +1357,133 @@ class PseudocodeImporter extends React.Component {
         this._autosaveTimer = null;
     }
 
+    onHardwareState = () => this.forceUpdate();
+
+    openLibraryCode = event => {
+        const program = event.detail;
+        if (!program) return;
+        const runtime = this.props.vm?.runtime;
+        if (runtime?.bwLibraryCode === program) delete runtime.bwLibraryCode;
+        this.setState(state => ({
+            lang: program.language, libraryProgram: program, libraryTarget: null, status: '', output: null,
+            ...(program.dosSourceName ? {basicProfile: 'i8086-ubasic'} : {}),
+            cardiacActive: false, cp1Active: false, kim1Active: false, microtronicActive: false,
+            buffers: {...state.buffers, [program.language]: program.text,
+                pseudocode: `DEVICE ${program.machine}\n${(state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}`}
+        }));
+    };
+
+    onLibraryMachineSelected = event => {
+        const selection = event.detail;
+        const runtime = this.props.vm?.runtime;
+        if (selection && runtime?.bwLibraryMachineSelection === selection) delete runtime.bwLibraryMachineSelection;
+        const kind = selection?.kind;
+        const device = kind === 'rp2040js' ? 'pico' : kind;
+        if (device !== 'i80386' && !DEVICE_BY_ID[device]) return;
+        const picoProfile = picoBasicProfileForDialect(selection.picoBasicConsole);
+        this.leaveCardiac();
+        this.leaveCp1();
+        this.setState(state => ({
+            ...(picoProfile && {basicProfile: picoProfile.id}),
+            asmRunDevice: null, libraryProgram: null, libraryTarget: device === 'i80386' ? device : null,
+            kim1Active: false, microtronicActive: false, langMenuOpen: false,
+            buffers: {...state.buffers, pseudocode: (device === 'i80386' ? '' : `DEVICE ${device.toUpperCase()}\n`) +
+                (state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}
+        }));
+    };
+
+    runLibraryProgram = async () => {
+        const program = this.state.libraryProgram;
+        if (!program || this.state.busy) return;
+        const source = this.activeCode();
+        this.setState({busy: true, status: ''});
+        try {
+            if (program.dosSourceName) {
+                if (!source.trim()) {
+                    this.setState({status: this.L.basicEmpty});
+                    return;
+                }
+                this.setState({status: this.L.basicUbasicRunning});
+                await program.run(source);
+                if (!this._unmounted) this.setState({status: ''});
+                return;
+            }
+            if (source === program.text) {
+                await program.run();
+                return;
+            }
+            if (program.compilerTarget !== 'z80-cpm' || !remoteToolchainsAllowed()) {
+                throw new Error('The CP/M compiler is unavailable in this build.');
+            }
+            this.setState({status: 'Compiling C for CP/M…'});
+            const {runCpmCom} = await import('../../lib/bw-machines/run-machine.js');
+            const out = await this.hostedCompileC(source, program.compilerTarget, 'bin');
+            const bytes = Uint8Array.from(atob(out.base64 || ''), char => char.charCodeAt(0));
+            if (out.origin !== 0x100 || !bytes.length || bytes.length > 0xcf00 || bytes.length !== out.bytes) {
+                throw new Error('The compiler returned an invalid CP/M image.');
+            }
+            if (this._unmounted || this.state.libraryProgram !== program || this.state.lang !== program.language) return;
+            if (this.activeCode() !== source) {
+                this.setState({status: 'The source changed during compilation. Run the updated program.'});
+                return;
+            }
+            await runCpmCom(program.config, bytes);
+            this.setState({status: ''});
+        } catch (error) {
+            if (!this._unmounted) this.setState({status: error.message});
+        } finally {
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    };
+
+    runActiveCode = event => {
+        if (!this.props.isVisible || this.state.cardiacActive || this.state.cp1Active ||
+            this.state.kim1Active || this.state.microtronicActive) return;
+        event.detail.editor = 'code';
+        if (this.state.lang !== 'basic' && !this.activeCode().trim()) return;
+        const {lang, libraryProgram, busy, running} = this.state;
+        const device = this.currentDevice();
+        if (!this.allowsCodeLanguage(lang)) return;
+        const target = asmTargetForDevice(device);
+        const actions = {
+            tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
+            forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
+            fe: () => target === 'riscv32' ? this.runFeOnRiscv() : this.runFeOnDosInterp(),
+            basic: () => this.runBasic(),
+            python: () => this.run(),
+            javascript: () => this.run(),
+            asm: this.state.asmMode === 'source' && (() => this.assembleAndRun()),
+            c: libraryProgram ? this.runLibraryProgram : target === 'riscv32' ? () => this.runCOnRiscv()
+                : target === 'z80' ? () => this.runCOnZ80()
+                    : target === 'i8086' ? () => this.runCOn8086()
+                        : sketchBoardFor(this.currentDevice()) ? () => this.runSketchOnAvr() : null
+        };
+        if (!actions[lang]) return;
+        event.preventDefault();
+        if (!busy && !running) actions[lang]();
+    };
+
     componentDidMount () {
         window.addEventListener('bw-stop-all', this._onStopCodeRun);
         this.bindCodeStopRuntime();
         this._unmounted = false;
+        window.addEventListener('bw-hardware-state', this.onHardwareState);
+        window.addEventListener('bw-library-code', this.openLibraryCode);
+        window.addEventListener('bw-code-machine-selected', this.onLibraryMachineSelected);
+        window.addEventListener('bw-run-active-code', this.runActiveCode);
+        this.onLibraryMachineSelected({detail: this.props.vm?.runtime?.bwLibraryMachineSelection});
+        this.openLibraryCode({detail: this.props.vm?.runtime?.bwLibraryCode});
+        window.addEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
+        window.addEventListener('bw-kim1-selection', this.selectKim1);
+        window.addEventListener('bw-microtronic-selected', this.selectMicrotronic);
+        window.addEventListener('bw-board-ready', this.updateMicrotronicPart);
+        this.updateMicrotronicPart();
+        window.addEventListener('bw-cardiac-selected', this.selectCardiac);
+        window.addEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
+        window.addEventListener('bw-cardiac-detached', this.detachCardiac);
         window.addEventListener('bw-cp1-circuit-detached', this.detachCp1);
         // CodeMirror arrives when the tab is first shown (_reveal), not now:
         // every TabPanel is force-rendered, so "mounted" is every first paint.
@@ -1362,8 +1522,10 @@ class PseudocodeImporter extends React.Component {
             const saved = this.readAutosave();
             if (saved) {
                 this._publishControlsFor(saved.code);
+                const restored = this.codeDocumentState(saved);
                 this.setState({
-                    ...this.codeDocumentState(saved),
+                    ...restored,
+                    ...this.restoreStandaloneBasic({...this.state, ...restored}, saved),
                     status: this.L.restored(LANG_LABEL[saved.lang] || saved.lang)
                 });
             } else if (this._codeRestoreError) {
@@ -1493,8 +1655,10 @@ class PseudocodeImporter extends React.Component {
             const saved = this.readAutosave();
             if (saved) {
                 this._publishControlsFor(saved.code);
+                const restored = this.codeDocumentState(saved);
                 this.setState({
-                    ...this.codeDocumentState(saved),
+                    ...restored,
+                    ...this.restoreStandaloneBasic({...this.state, ...restored}, saved),
                     status: refused
                         ? refusal()
                         : this.L.restored(LANG_LABEL[saved.lang] || saved.lang)
@@ -1570,7 +1734,19 @@ class PseudocodeImporter extends React.Component {
         if (!this.state.revealed) this.setState({revealed: true});
     }
 
+    static getDerivedStateFromProps (props, state) {
+        return collectCodeNotices(state, props.isVisible !== false);
+    }
+
     componentDidUpdate (prevProps, prevState) {
+        const hardware = this._picoBasicHardware;
+        if (hardware && (prevProps.vm !== this.props.vm || this.state.lang !== 'basic' ||
+            this.selectedBasicProfile()?.id !== hardware.profile.id)) this.closePicoBasicHardware();
+        if ((prevState.lang !== this.state.lang || prevState.libraryTarget !== this.state.libraryTarget ||
+            prevState.buffers.pseudocode !== this.state.buffers.pseudocode) &&
+            !this.allowsCodeLanguage(this.state.lang)) {
+            this.setState({lang: 'pseudocode', output: null, emptyTabOffer: null, langMenuOpen: false});
+        }
         if (prevProps.vm !== this.props.vm || prevState.codeTarget !== this.state.codeTarget) {
             this.disposeCodeRun();
             if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
@@ -1582,7 +1758,11 @@ class PseudocodeImporter extends React.Component {
             prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang]) this.invalidateArcadeReport();
         if (prevProps.isVisible !== this.props.isVisible || prevState.busy !== this.state.busy ||
             prevState.revealed !== this.state.revealed || prevState.buffers !== this.state.buffers ||
-            prevState.lang !== this.state.lang || prevState.asmMode !== this.state.asmMode) notifyEditorMenuActions();
+            prevState.lang !== this.state.lang || prevState.basicProfile !== this.state.basicProfile ||
+            prevState.asmMode !== this.state.asmMode) notifyEditorMenuActions();
+        if (prevProps.isVisible !== this.props.isVisible) {
+            this.setMaximizedChrome(this.props.isVisible !== false && this.state.maximized);
+        }
         if (this.props.isVisible && !this.state.revealed) this._reveal();
         // Tools may have opened while a hardware device was selected. If the
         // user then chooses "none" without closing it, onToggle does not fire
@@ -1594,8 +1774,10 @@ class PseudocodeImporter extends React.Component {
         // Debounced so a fast typist writes localStorage once per pause, not
         // once per keystroke. Watches the ACTIVE tab, both its language and
         // its text, so switching tabs re-saves under the new language.
+        const activeBuffer = this.state.lang === 'basic' ? this.standaloneBasicProfile()?.id || 'basic' : this.state.lang;
         if (prevState.codeDocument !== this.state.codeDocument || prevState.lang !== this.state.lang ||
-            prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang]) {
+            prevState.basicProfile !== this.state.basicProfile ||
+            prevState.buffers[activeBuffer] !== this.state.buffers[activeBuffer]) {
             if (this._autosaveTimer) clearTimeout(this._autosaveTimer);
             this._autosaveTimer = setTimeout(() => {
                 this._autosaveTimer = null;
@@ -1615,6 +1797,39 @@ class PseudocodeImporter extends React.Component {
             this._codeRestoreError = `Could not restore Code: ${error.message}. The saved source is retained.`;
             return null;
         }
+    }
+
+    /**
+     * Drafts that live beside the authored document: ASM/NQC and standalone
+     * BASIC profile buffers are edited independently, and a machine that hides
+     * a language keeps its authored text (hiddenCodeDrafts). A document state
+     * rebuilds every view buffer, so carry these across it.
+     */
+    withRetainedDrafts (next, state, lang = state.lang, target = this.codeDevice()) {
+        const own = next.codeDocument && next.codeDocument.lang;
+        const independent = {asm: state.buffers.asm ?? '', nqc: state.buffers.nqc ?? '', ...standaloneBasicDrafts(state.buffers)};
+        const keep = Object.fromEntries(Object.entries(independent).filter(([key, value]) => key !== own && value));
+        return {...next, buffers: {...next.buffers, ...keep,
+            ...hiddenCodeDrafts(state.authoredSources, state.buffers, target, lang)}};
+    }
+
+    /** A restored document whose generation options name a standalone Pico BASIC profile. */
+    restoreStandaloneBasic (state, document) {
+        const profile = document.lang === 'basic' && document.generationOptions &&
+            document.generationOptions.basicProfile;
+        if (!profile) return {};
+        const restored = this.restoreCodeBuffer(state, {lang: 'basic', code: document.code, profile});
+        return restored.basicProfile ? restored : {};
+    }
+
+    restoreCodeBuffer (state, saved) {
+        const profile = saved.lang === 'basic' && basicProfilesFor('pico').find(item => item.id === saved.profile && item.standalone);
+        if (profile && remoteMachineImagesAllowed()) {
+            return {basicProfile: profile.id, libraryTarget: null, buffers: {...state.buffers,
+                [profile.id]: saved.code, pseudocode: 'DEVICE PICO\n' +
+                    (state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}};
+        }
+        return {buffers: {...state.buffers, [saved.lang]: saved.code}};
     }
 
     writeAutosave () {
@@ -1673,6 +1888,12 @@ class PseudocodeImporter extends React.Component {
             this._codeArtwork = null;
             this._animationImport = null;
             this._makeCodeRequest = null;
+            const profile = lang === 'basic' && this.standaloneBasicProfile(lang);
+            if (profile) {
+                this.setState(st => ({lang, output: null, buffers: {...st.buffers, [profile.id]: String(reader.result)},
+                    status: this.L.openDone(file.name, LANG_LABEL[lang])}));
+                return;
+            }
             this.setState(st => ({
             ...this.codeDocumentState(createCodeDocument({lang, code: String(reader.result)})), uploads: [],
             // Same exclusivity the editor's own onChange uses: one authored
@@ -1876,14 +2097,15 @@ class PseudocodeImporter extends React.Component {
     _asmDevice () {
         const stc = this.currentStc();
         const rt = this.props.vm && this.props.vm.runtime;
-        return this.currentDevice() ||
+        return this.state.asmRunDevice || this.currentDevice() ||
             (stc && stc.device) ||
             (rt && (rt.bwDeviceId || rt.bwDeviceCore)) || '';
     }
 
     /** Starter programs for the selected device, or none. */
     _asmExamples () {
-        return asmExamplesFor(this._asmDevice());
+        const examples = asmExamplesFor(this._asmDevice());
+        return [{id: 'blink0', label: 'Blink 0', labelDe: 'LED 0 blinken'}, ...examples];
     }
 
     /**
@@ -1913,8 +2135,12 @@ class PseudocodeImporter extends React.Component {
         if (!example) return;
         const current = (this.state.buffers.asm || '').trim();
         if (current && !(await confirmAsync(this.L.asmExampleReplace))) return;
+        const family = example.source ? blinkFamily(example.source) : null;
+        const source = id === 'blink0' ? blinkStarter : family ? blinkSource(family) : example.source;
+        // ASM is an independent draft: an example replaces it, not the authored
+        // Pseudo/Python/JS document beside it.
         this.setState({
-            ...this.authoredCodeState('asm', example.source, this.currentDevice()),
+            buffers: {...this.state.buffers, asm: source},
             asmMode: 'source',
             status: this.L.asmExampleLoaded(
                 pickLocale(this.props.locale) === 'de' ? example.labelDe : example.label)
@@ -2124,7 +2350,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     canCompileToBlocks () {
-        return !this.state.busy && !!this.activeCode().trim() &&
+        return !this.state.busy && (this.state.lang !== 'basic' || !this.standaloneBasicProfile()) && !!this.activeCode().trim() &&
             (TWO_WAY.has(this.state.lang) || this.canLiftAsm());
     }
 
@@ -2138,7 +2364,7 @@ class PseudocodeImporter extends React.Component {
             // Match the toolbar: saving a snapshot is allowed while compiling.
             save: {label:'Save code as…',location:'file',enabled: true, run: this.saveCodeFile},
             'to-blocks': {label:'Convert code to blocks',location:'edit',enabled: this.canCompileToBlocks(), run: this.compile},
-            'from-blocks': {label:'Generate code from blocks',location:'edit',enabled: !this.state.busy, run: this.fromBlocks}
+            'from-blocks': {label:'Generate code from blocks',location:'edit',enabled: !this.state.busy && (this.state.lang !== 'basic' || !this.standaloneBasicProfile()), run: this.fromBlocks}
         };
     }
 
@@ -2551,6 +2777,7 @@ class PseudocodeImporter extends React.Component {
             /* webpackChunkName: "bw-makecode" */ '../../lib/bw-makecode/export-arcade.js');
         return projectJsonToArcade(JSON.stringify(project), {
             captureObservation: true,
+            browserPointer: true,
             name: 'brickwright-game',
             animationDocuments,
             costumeSvg: (t, c) => svgs.get(c.assetId) || null,
@@ -2607,8 +2834,8 @@ class PseudocodeImporter extends React.Component {
                             Object.getOwnPropertyDescriptor(evidence,'ownedJsonObservation')?.value:null;
                     } catch { /* Missing evidence cannot hide the original unsupported report. */ }
                     return {conversionReport: {direction: operation === 'export' ? 'Blocks → Arcade export' : 'Blocks → Arcade run',
-                        operation, outcome, preserved: false, changed: [], unsupported: [...out.unsupported],
-                        details: out.unsupportedDetails || [], observation: observation || null}, reportExpanded: Boolean(out.unsupported.length)};
+                        operation, outcome, preserved: false, changed: [...(out.warnings || [])], unsupported: [...out.unsupported],
+                        details: out.unsupportedDetails || [], observation: observation || null}};
                 } catch { return null; }
             });
         } catch { /* Reporting must not replace the original export/run outcome. */ }
@@ -2620,7 +2847,6 @@ class PseudocodeImporter extends React.Component {
         let out;
         try {
             out = await this.arcadeFromStage();
-            this.publishArcadeReport(request, out, 'run', 'Arcade source prepared; compiler result pending.');
             const {compileMakeCode} = await import(
                 /* webpackChunkName: "bw-makecode-pxt" */ '../../lib/bw-makecode/pxt-runtime.js');
             const built = await compileMakeCode({target: 'arcade', files: out.files});
@@ -2639,7 +2865,7 @@ class PseudocodeImporter extends React.Component {
             window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-debug-dock', value: 'makecode'}}));
             window.dispatchEvent(new CustomEvent('bw-makecode-load', {detail: program}));
             this.publishArcadeReport(request, out, 'run', 'Arcade source compiled and sent to the player; behavior is not verified.');
-            this.setState({busy: false, status: this.L.arcStarted(out.unsupported.length, out.warnings.length)});
+            this.setState({busy: false, status: this.L.arcStarted(out.unsupported.length)});
         } catch (err) {
             if (out) this.publishArcadeReport(request, out, 'run', 'Arcade run failed; the original error is shown in the status.');
             this.setState({busy: false, status: this.makeCodeFailure(err, 'arcade')});
@@ -2660,13 +2886,39 @@ class PseudocodeImporter extends React.Component {
             const name = JSON.parse(out.files['pxt.json']).name;
             const filename = `arcade-${String(name).replace(/[^a-z0-9_-]+/gi, '-').toLowerCase()}.mkcd`;
             const projectFile = makeCodeProjectFile(out.files, {name, target: 'arcade'});
-            await downloadBlob(filename, new Blob([projectFile], {type: 'application/octet-stream'}));
+            await downloadBlob(filename, new Blob([projectFile], {type: 'application/octet-stream'}),
+                {allowBrowserShare: false});
             this.publishArcadeReport(request, out, 'export', original.status === 'current' && original.target === 'arcade' ?
                 'Recovered original Arcade source saved; later behavior is not verified.' :
                 'Arcade source saved, including all reported unsupported operations; it has not been compiled or run.');
-            this.setState({busy: false, status: this.L.arcDone(filename, out.unsupported.length, out.warnings.length)});
+            this.setState({busy: false, status: this.L.arcDone(filename, out.unsupported.length)});
         } catch (err) {
             this.setState({busy: false, status: this.L.mcFailed('MakeCode Arcade', (err && err.message) || String(err))});
+        }
+    }
+
+    // The current project as a playable, editable game outside the editor:
+    // target 'web' (JavaScript, play.html) or 'pygame' (Python). The exporter
+    // (sb3-creator src/game, vendored) reads the saved .sb3 — the same bytes
+    // File > Save writes — and refuses blocks its runtime cannot reproduce.
+    async exportPlayableGame (target) {
+        this.setState({busy: true, conversionReport: null});
+        try {
+            const blob = await this.props.vm.saveProjectSb3();
+            const {exportGame, loadSb3, zipExport} = await import(
+                /* webpackChunkName: "bw-game-export" */ '../../lib/sb3-creator-game-export.js');
+            const title = (this.props && this.props.projectTitle) || 'brickwright-game';
+            const out = await exportGame(await loadSb3(await blob.arrayBuffer()), {target, title});
+            if (!out.ok) {
+                this.setState({busy: false, status: this.L.gameRefused(out.reasons.join('; '))});
+                return;
+            }
+            const filename = `${out.name}-${target === 'pygame' ? 'pygame' : 'web'}.zip`;
+            const zip = await zipExport(out.files, out.name);
+            await downloadBlob(filename, new Blob([zip], {type: 'application/zip'}));
+            this.setState({busy: false, status: this.L.gameDone(filename, Object.keys(out.report.approximate).length)});
+        } catch (err) {
+            this.setState({busy: false, status: this.L.mcFailed('game export', (err && err.message) || String(err))});
         }
     }
 
@@ -2691,9 +2943,16 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentWillUnmount () {
+        window.removeEventListener('bw-hardware-state', this.onHardwareState);
+        window.removeEventListener('bw-library-code', this.openLibraryCode);
+        window.removeEventListener('bw-code-machine-selected', this.onLibraryMachineSelected);
+        window.removeEventListener('bw-run-active-code', this.runActiveCode);
+        window.removeEventListener('bw-read-blocks-into-code', this.fromBlocks);
+        this.setMaximizedChrome(false);
         this._unmounted = true;
         this.disposeCodeRun();
         if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
+        if (this._picoBasicHardware) this.closePicoBasicHardware();
         window.removeEventListener('bw-stop-all', this._onStopCodeRun);
         if (this._codeStopRuntime) this._codeStopRuntime.removeListener('PROJECT_STOP_ALL', this._onStopCodeRun);
         this._codeStopRuntime = null;
@@ -2709,6 +2968,12 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-project-bundle-loaded', this._onBundleLoaded);
         window.removeEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.removeEventListener('bw-cp1-source-load', this.selectCp1);
+        window.removeEventListener('bw-kim1-selection', this.selectKim1);
+        window.removeEventListener('bw-microtronic-selected', this.selectMicrotronic);
+        window.removeEventListener('bw-board-ready', this.updateMicrotronicPart);
+        window.removeEventListener('bw-cardiac-selected', this.selectCardiac);
+        window.removeEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
+        window.removeEventListener('bw-cardiac-detached', this.detachCardiac);
         window.removeEventListener('bw-cp1-circuit-detached', this.detachCp1);
         // A pending debounce would otherwise lose the last edits on unmount.
         if (this._autosaveTimer) {
@@ -2793,7 +3058,12 @@ class PseudocodeImporter extends React.Component {
     /** Bridge older source-loading routes to the same authored-document owner. */
     codeDocumentSnapshot (state = this.state) {
         const lang = state.lang;
-        const code = state.buffers[lang] || '';
+        // Resolve the BASIC profile's machine from state, not currentDevice():
+        // currentDevice() reads the target through this snapshot.
+        const machine = lang === 'basic' && (state.libraryTarget || (state.codeDocument && state.codeDocument.target) ||
+            codeTargetFromSource('pseudocode', state.buffers.pseudocode || ''));
+        const standalone = lang === 'basic' && basicProfileFor(machine, state.basicProfile);
+        const code = state.buffers[standalone && standalone.standalone ? standalone.id : lang] || '';
         const document = state.codeDocument;
         if (document) {
             const expected = document.lang === lang ? document.code : document.projections[lang]?.code;
@@ -2864,6 +3134,8 @@ class PseudocodeImporter extends React.Component {
 
     /** Show or hide the on-request tabs (fe, Tcl); remembered per browser. */
     activeCode () {
+        const profile = this.state.lang === 'basic' && this.standaloneBasicProfile();
+        if (profile) return this.state.buffers[profile.id] || '';
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return this.state.asmListing;
         // A tab with no buffer yet (fe and Tcl were missing from the initial set and
         // crashed the editor when opened on an empty project) reads as empty.
@@ -2872,9 +3144,28 @@ class PseudocodeImporter extends React.Component {
     setActiveCode (text) {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
+        // A standalone BASIC profile edits its own draft beside the authored
+        // document; ASM and NQC drafts are edited independently as well.
+        const profile = this.state.lang === 'basic' && this.standaloneBasicProfile();
+        if (profile) {
+            this.setState(state => ({buffers: {...state.buffers, [profile.id]: text}}));
+            return;
+        }
         this._codeRestoreError = null;
-        this.setState(state => this.codeDocumentState(editCodeDocument(this.codeDocumentSnapshot(state),
-            {lang: state.lang, code: text, generationOptions: this.codeGenerationOptions(state)})));
+        this.setState(s => {
+            // An independent draft beside a document of another language stays a
+            // draft; when ASM/NQC IS the authored document, the edit revises it.
+            if ((s.lang === 'asm' || s.lang === 'nqc') && s.codeDocument && s.codeDocument.lang !== s.lang) {
+                return {buffers: {...s.buffers, [s.lang]: text}};
+            }
+            const device = s.buffers.pseudocode?.match(/^DEVICE\s+([\w-]+)[^\n]*/im);
+            const nextDevice = s.lang === 'pseudocode' ? text.match(/^DEVICE\s+([\w-]+)/im) : device;
+            const target = nextDevice?.[1]?.toLowerCase() || s.libraryTarget;
+            const next = this.withRetainedDrafts(this.codeDocumentState(editCodeDocument(this.codeDocumentSnapshot(s),
+                {lang: s.lang, code: text, generationOptions: this.codeGenerationOptions(s)})), s, s.lang, target);
+            return {...next, ...(nextDevice && {libraryTarget: null}),
+                authoredSources: {...hiddenCodeDrafts(s.authoredSources, s.buffers, target, s.lang), [s.lang]: text}};
+        });
     }
 
     // Lazily import the compiler through the registering door, which injects this
@@ -2900,20 +3191,25 @@ class PseudocodeImporter extends React.Component {
         return device(text);
     }
 
+    convertedSource ({pseudocode, warnings = []}) {
+        if (pseudocode?.trim() || !warnings.length) return pseudocode;
+        throw new Error(warnings.join(' · '));
+    }
+
     // source → pseudocode → parse() → project → generate(to). Returns {code} or {error}.
     async deriveBuffer (src, from, to) {
         try {
             const refusal = codeDocumentConversionRefusal(this.state.codeDocument, from, src);
             if (refusal) throw new Error(refusal);
             const SB3 = (await this.lib()).default;
-            let pseudo = src;
             let read = null;
             if (from === 'c') read = await this.readC(src);
-            else if (from === 'python') read = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(src);
-            else if (from === 'javascript') read = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(src);
-            else if (from === 'basic') read = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
+            else if (from === 'python' || from === 'javascript') {
+                const readers = await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js');
+                read = from === 'python' ? readers.readPython(src) : readers.readJavaScript(src);
+            } else if (from === 'basic') read = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
             else if (DOS_LANG[from]) read = (await DOS_LANG[from].load()).default(src);
-            if (read) pseudo = read.pseudocode;
+            const pseudo = read ? this.convertedSource(read) : src;
             const creator = new SB3();
             creator.parse(pseudo);
             const proj = creator.project;
@@ -2922,7 +3218,7 @@ class PseudocodeImporter extends React.Component {
             else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts(to));
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
-                const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+                const r = new SB3().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
                 if (!r.ok) throw new Error(r.reasons.join('; '));
                 code = r.basic;
             } else if (to === 'micropython') {
@@ -2981,8 +3277,34 @@ class PseudocodeImporter extends React.Component {
         try { localStorage.setItem(BW_EXTRA_LANGS_KEY, JSON.stringify(extraLangs)); } catch { /* per-browser convenience only */ }
         this.setState({extraLangs, langMenuOpen: false}, () => this.switchTab(l));
     }
+    selectKim1 = event => {
+        const kim1PartId = event.detail?.partId || null;
+        this.setState({kim1PartId, kim1Active: !!kim1PartId,
+            ...(kim1PartId ? {cp1Active: false, cardiacActive: false} : {})});
+    };
     detachCp1 = () => this.setState({cp1Active: false});
-    selectCp1 = () => this.setState({cp1Active: true});
+    selectCp1 = () => {
+        this.leaveCardiac();
+        this.setState({cp1Active: true, cardiacActive: false, kim1Active: false, microtronicActive: false});
+    };
+    detachCardiac = () => this.setState({cardiacActive: false});
+    selectCardiac = () => this.setState({cardiacActive: true, cp1Active: false, kim1Active: false, microtronicActive: false});
+    onCardiacMachineSelection = event => {
+        if (event.detail?.kind !== 'kim1' && this.state.kim1PartId) this.selectKim1({});
+        if (event.detail?.kind !== 'cardiac' && this.state.cardiacActive) this.detachCardiac();
+    };
+    leaveCardiac () {
+        if (window.__bwMachineExtracted?.kind === 'cardiac') {
+            window.dispatchEvent(new CustomEvent('bw-cardiac-code-selection', {detail: {active: false}}));
+        }
+        if (this.state.cardiacActive) this.detachCardiac();
+    }
+    openCardiacLanguage () {
+        this.leaveCp1();
+        this.setState({langMenuOpen: false});
+        window.dispatchEvent(new CustomEvent('bw-cardiac-code-selection', {detail: {active: true}}));
+        this.selectCardiac();
+    }
     leaveCp1 () {
         if (window.__bwMachineExtracted?.kind === 'cp1') {
             window.dispatchEvent(new CustomEvent('bw-cp1-code-selection', {detail: {active: false}}));
@@ -2991,6 +3313,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     async openCp1Language () {
+        this.leaveCardiac();
         this.setState({langMenuOpen: false});
         window.dispatchEvent(new CustomEvent('bw-cp1-code-selection', {detail: {active: true}}));
         if (window.__bwMachineExtracted?.kind === 'cp1') {
@@ -3010,11 +3333,32 @@ class PseudocodeImporter extends React.Component {
         }}));
     }
 
+    selectMicrotronic = event => {
+        const partId = event.detail?.partId || this.state.microtronicPartId;
+        if (partId) this.setState({microtronicPartId: partId, microtronicActive: true,
+            cp1Active: false, cardiacActive: false, kim1Active: false});
+    };
+
+    updateMicrotronicPart = () => {
+        const parts = this.props.vm?.runtime?.circuitBoard?.getParts?.() || [];
+        const partId = parts.find(part => part.kind === 'busch-microtronic')?.id || null;
+        if (this.state.microtronicPartId !== partId) this.setState({
+            microtronicPartId: partId, ...(partId ? {} : {microtronicActive: false})
+        });
+    };
+
     switchTab (to) {
         if (this.state.busy) return;
+        this.detachCardiac();
         this.leaveCp1();
+        this.setState({kim1Active: false, microtronicActive: false});
         const from = this.state.lang;
         if (to === from) return;
+        const standalone = (from === 'basic' || to === 'basic') && this.standaloneBasicProfile('basic');
+        if (to === 'basic' && standalone) {
+            this.setState({lang: 'basic', output: null, status: '', emptyTabOffer: null});
+            return;
+        }
         const document = this.codeDocumentSnapshot();
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
         // listing belongs to the program as it is now, and the program may have
@@ -3037,15 +3381,20 @@ class PseudocodeImporter extends React.Component {
         // view from that document instead of roundtripping generated async JS.
         const src = document.code;
         const sourceLang = document.lang;
-        // Leaving the ASM tab is not a conversion: assembly is not a source the
-        // other languages are derived from (deriveBuffer has no `asm` reader),
-        // and deriving used to parse the assembly AS PSEUDOCODE — every line was
-        // dropped and the tab filled with an empty program. Since D5 the parser
-        // refuses a line it cannot read, so that became an error that kept the
-        // learner on the ASM tab. Just switch.
-        if (from === 'asm' || existing || !src || !src.trim()) {
-            this.setState({...this.codeDocumentState(selectCodeDocumentLanguage(document, to,
-                {runtime: this.codeRuntimeFor(to, document.target)})),
+        // ASM source and NQC are edited independently. MicroPython has a
+        // generated preview, but switching away does not reparse it as Pseudocode.
+        // Leaving the ASM tab is not a conversion either: assembly is not a source
+        // the other languages are derived from.
+        const independent = !TWO_WAY.has(from) || to === 'nqc' || (from === 'basic' && standalone);
+        const hasSource = (buffer, language) => Boolean(buffer && (language === 'pseudocode' ?
+            buffer.replace(/^DEVICE\s+[^\n]*(?:\n|$)/im, '') : buffer).trim());
+        if (independent || (!TWO_WAY.has(to) && hasSource(this.state.buffers[to], to))) {
+            this.setState({lang: to, output: null, status: '', emptyTabOffer: null});
+            return;
+        }
+        if (existing || !src || !src.trim()) {
+            this.setState({...this.withRetainedDrafts(this.codeDocumentState(selectCodeDocumentLanguage(document, to,
+                {runtime: this.codeRuntimeFor(to, document.target)})), this.state, to),
                 output: null, status: '', emptyTabOffer: null});
             return;
         }
@@ -3071,7 +3420,7 @@ class PseudocodeImporter extends React.Component {
                 const next = addCodeProjection(document, {lang: to, code, sourceRevision: document.revision,
                     options: options || this.genOpts(to), diagnostics: diagnostics || null,
                     runtime: this.codeRuntimeFor(to, document.target)});
-                return {...this.codeDocumentState(next), busy: false, output: null, status: '', emptyTabOffer: null,
+                return {...this.withRetainedDrafts(this.codeDocumentState(next), state, to), busy: false, output: null, status: '', emptyTabOffer: null,
                     conversionReport: diagnostics || null};
             });
         });
@@ -3080,13 +3429,15 @@ class PseudocodeImporter extends React.Component {
     openEmptyTab (to) {
         if (this.state.busy || this.state.emptyTabOffer !== to) return;
         // The source buffer is kept; only the requested tab opens, empty.
+        const device = this.currentDevice();
         this.setState(state => {
             const document = this.codeDocumentSnapshot(state);
             const projections = {...document.projections};
             delete projections[to];
-            return {...this.codeDocumentState(selectCodeDocumentLanguage({...document, projections}, to,
-                {runtime: this.codeRuntimeFor(to, document.target)})),
-                output: null, status: '', statusExpanded: false, emptyTabOffer: null};
+            const next = this.withRetainedDrafts(this.codeDocumentState(selectCodeDocumentLanguage({...document, projections}, to,
+                {runtime: this.codeRuntimeFor(to, document.target)})), state, to);
+            if (to === 'pseudocode' && device && !next.buffers.pseudocode) next.buffers = {...next.buffers, pseudocode: `DEVICE ${device}\n`};
+            return {...next, output: null, status: '', statusExpanded: false, emptyTabOffer: null};
         });
     }
 
@@ -3199,13 +3550,133 @@ class PseudocodeImporter extends React.Component {
      * and 8086 benches; other targets assemble (errors surface here) and say
      * so rather than pretending to have run.
      */
-    async assembleAndRun () {
-        const source = this.state.buffers.asm;
+    chooseBlinkMachine (family, source) {
+        const choices = blinkChoices(family);
+        this.setState({actionsOpen: false, blinkChoice: {choices, source, id: choices[0].id}});
+    }
+
+    renderBlinkMachinePicker () {
+        const request = this.state.blinkChoice;
+        if (!request) return null;
+        const de = pickLocale(this.props.locale) === 'de';
+        const close = () => this.setState({blinkChoice: null});
+        return createPortal(
+            <dialog data-testid="bw-blink-machine-dialog"
+                ref={node => { if (node && !node.open) node.showModal(); }}
+                aria-label={de ? 'Zielsystem für LED 0' : 'Machine for Blink 0'}
+                onCancel={close}
+                style={{width: 330, maxWidth: 'calc(100vw - 32px)', padding: 14,
+                    border: '1px solid #94a3b8', borderRadius: 8, color: '#1e293b'}}>
+                <form onSubmit={event => {
+                    event.preventDefault();
+                    const machine = request.choices.find(option => option.id === request.id);
+                    this.setState({blinkChoice: null}, () => {
+                        if (this.state.buffers.asm === request.source) this.assembleAndRun(machine);
+                    });
+                }} style={{display: 'grid', gap: 10}}>
+                    <label htmlFor="bw-blink-machine">{de ? 'Zielsystem für LED 0' : 'Machine for Blink 0'}</label>
+                    <select id="bw-blink-machine" autoFocus value={request.id}
+                        onChange={event => this.setState({blinkChoice: {...request, id: event.target.value}})}>
+                        {request.choices.map(machine => <option key={machine.id} value={machine.id}>
+                            {blinkMachineLabel(machine, this.props.locale)}
+                        </option>)}
+                    </select>
+                    {request.choices.find(option => option.id === request.id)?.circuit &&
+                        this.props.vm?.runtime?.circuitBoard?.getParts?.().length > 0 &&
+                        <small>{de ? 'Die Beispielschaltung ersetzt die aktuelle Schaltung.' :
+                            'The example circuit replaces the current circuit.'}</small>}
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: 6}}>
+                        <button type="button" onClick={close}>{de ? 'Abbrechen' : 'Cancel'}</button>
+                        <button type="submit">{de ? 'Erstellen und starten' : 'Create and run'}</button>
+                    </div>
+                </form>
+            </dialog>, document.body);
+    }
+
+    async activeBlinkMachine (family) {
+        const runtime = this.props.vm?.runtime;
+        const board = runtime?.circuitBoard;
+        const parts = board?.getParts?.() || [];
+        const previous = window.__bwPendingMedia?.detail?.asmBlink;
+        const previousMachine = blinkMachines.find(machine => machine.id === previous?.id);
+        if (previousMachine && (family === 'any' || previousMachine.family === family) &&
+            (!previous.board || (previous.board === board &&
+                (!previous.led || parts.some(part => part.id === previous.led))))) {
+            return {machine: previousMachine, board: previous.board, config: previous.config, led: previous.led};
+        }
+        const model = runtime?.circuitModel;
+        if (!model) return null;
+        if ((family === 'any' || family === '8051') && parts.some(part => part.id === 'LED_led1')) {
+            const device = (runtime.stc?.device || this._asmDevice()).toLowerCase();
+            const machine = blinkMachines.find(item => item.family === '8051' && item.device === device);
+            const wired = board.getNets().some(net => net.terminals.some(end =>
+                end.part === 'LED_led1' && end.terminal === 'cathode') &&
+                net.terminals.some(end => String(end.terminal).toLowerCase() === 'p1.0'));
+            if (machine && wired) return {machine, board, led: 'LED_led1'};
+        }
+        if ((family === 'any' || family === '6502') && parts.some(part => part.kind === 'w65c02')) {
+            const config = await this.blinkCircuitConfig('6502', model);
+            if (config) return {machine: blinkMachines.find(machine => machine.id === '6502-wired'),
+                board, config};
+        }
+        if ((family === 'any' || family === 'z80') && parts.some(part => part.kind === 'z80')) {
+            const config = await this.blinkCircuitConfig('z80', model);
+            if (config) return {machine: blinkMachines.find(machine => machine.id === 'z80-virtual'), board, config};
+        }
+        return null;
+    }
+
+    async blinkCircuitConfig (family, model) {
+        const {extractMachine} = await import('bw-circuit-ui/model/machine-extract.js');
+        if (family === '6502') {
+            const {extract6502Machine} = await import('bw-board/m6502-extract.js');
+            const result = extractMachine(model, {extract6502Machine});
+            const resetVector = result.regions?.some(region => region.kind === 'rom' &&
+                region.start === 0x8000 && region.end === 0xffff);
+            if (result.ok && resetVector && result.chips.some(chip => chip.kind === 'via' && chip.at === 0x6000)) {
+                return {clockHz: 1000000, regions: result.regions, chips: result.chips};
+            }
+        } else {
+            const {extractZ80Machine} = await import('bw-board/z80-extract.js');
+            const result = extractMachine(model, {extractZ80Machine});
+            if (result.ok && result.ports?.some(port => port.kind === 'latch' && port.at === 1)) {
+                return {clockHz: 7372800, regions: result.regions, ports: result.ports};
+            }
+        }
+        return null;
+    }
+
+    async assembleAndRun (chosenMachine) {
+        if (this.state.busy || this.state.blinkChoice) return;
+        const originalSource = this.state.buffers.asm;
+        const family = blinkFamily(originalSource || '');
+        let active = null;
+        if (family && !chosenMachine) {
+            this.setState({busy: true});
+            try {
+                active = await this.activeBlinkMachine(family);
+            } catch (error) {
+                if (!this._unmounted) this.setState({busy: false, status: this.L.stError(error.message)});
+                return;
+            }
+            if (this._unmounted) return;
+            if (this.state.buffers.asm !== originalSource) {
+                this.setState({busy: false});
+                return;
+            }
+            if (!active) {
+                this.setState({busy: false});
+                this.chooseBlinkMachine(family, originalSource);
+                return;
+            }
+        }
+        const machine = chosenMachine || active?.machine;
+        const source = family === 'any' && machine ? blinkSource(machine.family) : blinkProgramSource(originalSource || '', family);
         if (!source || !source.trim()) {
             this.setState({status: this.L.asmWriteFirst});
             return;
         }
-        const device = this._asmDevice();
+        const device = machine?.device || this._asmDevice();
         const target = asmTargetForDevice(device);
         const route = asmRouteFor(device);
         const routeName = route === 'local' ? this.L.asmRouteLocal : this.L.asmRouteHosted;
@@ -3213,7 +3684,7 @@ class PseudocodeImporter extends React.Component {
         this.setState({busy: true, status: this.L.asmAssembling(routeName)});
         let out;
         try {
-            out = await requestAssembly({source, device, dialect: this.state.asmDialect});
+            out = await requestAssembly({source, device, dialect: machine ? 'auto' : this.state.asmDialect});
         } catch (e) {
             // 'source' is the user's program and the message names the line;
             // 'transport' is the network or a missing module and is not
@@ -3230,6 +3701,35 @@ class PseudocodeImporter extends React.Component {
         const warn = (out.dialect ? this.L.asmDialectUsed(out.dialect) : '') +
             (out.warnings.length ? this.L.asmWarnings(out.warnings) : '');
         const bench = BENCHES[out.target];
+        let asmBlink = null;
+        if (machine) {
+            if (this._unmounted || this.state.buffers.asm !== originalSource) {
+                if (!this._unmounted) this.setState({busy: false, status: ''});
+                return;
+            }
+            try {
+                const board = active?.board || (machine.circuit ? await this.prepareBlinkCircuit(machine) : null);
+                const config = active?.config || (board && machine.family === '6502'
+                    ? await this.blinkCircuitConfig('6502', this.props.vm.runtime.circuitModel) : null);
+                if (board && machine.family === '6502' && !config) throw new Error('The breadboard has no VIA at $6000');
+                if (this._unmounted || this.state.buffers.asm !== originalSource) {
+                    if (!this._unmounted) this.setState({busy: false});
+                    return;
+                }
+                asmBlink = {id: machine.id, device, label: machine.label.split(' · ')[1],
+                    led: active ? active.led : machine.led, board, config};
+                this.setState(state => ({buffers: {...state.buffers, asm: source}, asmRunDevice: device}));
+            } catch (error) {
+                this.setState({busy: false, status: this.L.stError(error.message)});
+                return;
+            }
+        }
+        if (machine?.family === '8051') {
+            this.deliverAssembly({format: 'firmware', kind: 'emulator',
+                firmware: {name: 'blink0.ihx', bytes: out.bytes, device, blinkOutputOnly: true}}, asmBlink,
+            this.L.asmBlinkRunning(blinkMachineLabel(machine, this.props.locale), routeName));
+            return;
+        }
         if (bench) {
             // HARDWARE THE SOURCE ASKS FOR. A pseudocode program declares its
             // pins and the build returns the chips they need; an assembly
@@ -3243,21 +3743,12 @@ class PseudocodeImporter extends React.Component {
             const detail = {rom: out.bytes, image: out.image || null,
                 listing: out.listing, target: out.target,
                 slotId: out.slotId, profile: out.profile, format: out.format,
+                ...(out.target === 'i8086' ? {i8086Assembly: true} : {}),
                 ...(chips.length ? {chips} : {})};
             const builtLen = out.bytes ? out.bytes.length
                 : (out.image ? out.image.segments.reduce((n, s) => n + s.bytes.length, 0) : 0);
-            // The default debugger dock is the optional right pane. A program
-            // handed to a hidden pane is technically running but unusable, so
-            // open the pane as part of the same user gesture (as the Arduboy
-            // and controller runners already do).
-            try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
-            window.dispatchEvent(new CustomEvent('bw-settings-change', {
-                detail: {key: 'bw-right-pane-hidden', value: '0'}
-            }));
-            window.__bwPendingMedia = {type: 'asm', detail};
-            window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
-            this.setState({busy: false,
-                status: this.L.asmBuiltBench(builtLen, routeName, bench) + warn});
+            this.deliverAssembly(detail, asmBlink, machine ? this.L.asmBlinkRunning(blinkMachineLabel(machine, this.props.locale), routeName) + warn :
+                this.L.asmBuiltBench(builtLen, routeName, bench) + warn);
         } else if (armRunFor(out.target)) {
             // N4: the hosted ARM chain returns Intel HEX; the STM32F030 light
             // tier and rp2040js take a flash/SRAM image. Same firmware hand-off
@@ -3285,6 +3776,47 @@ class PseudocodeImporter extends React.Component {
             this.setState({busy: false,
                 status: this.L.asmBuiltOnly(out.bytes.length, routeName, target) + warn});
         }
+    }
+
+    async prepareBlinkCircuit (machine) {
+        const response = await fetch(new URL(`examples/${machine.circuit}`, document.baseURI));
+        if (!response.ok) throw new Error(`Circuit HTTP ${response.status}`);
+        const data = await response.json();
+        if (machine.family === '8051') {
+            data.parts = data.parts.map(part => part.kind === 'mcu' ?
+                {...part, params: {...part.params, chip: machine.device}} : part);
+        }
+        return new Promise((resolve, reject) => {
+            const detail = {data: {...data, fileOnly: true}, asmBlinkReady: {resolve, reject}};
+            if (this._unmounted || window.dispatchEvent(new CustomEvent('bw-load-circuit-data', {detail, cancelable: true}))) {
+                reject(new Error('The Circuit editor is unavailable'));
+            }
+        });
+    }
+
+    deliverAssembly (detail, blink, status) {
+        try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
+        window.dispatchEvent(new CustomEvent('bw-settings-change', {
+            detail: {key: 'bw-right-pane-hidden', value: '0'}
+        }));
+        if (blink) {
+            detail.asmBlink = blink;
+            const timeout = setTimeout(() => detail.bootCompletion.reject(new Error('The machine did not start')), 30000);
+            detail.bootCompletion = {
+                resolve: () => {
+                    clearTimeout(timeout);
+                    if (!this._unmounted) this.setState({busy: false,
+                        ...(window.__bwPendingMedia?.detail === detail ? {status} : {})});
+                },
+                reject: error => {
+                    clearTimeout(timeout);
+                    if (!this._unmounted) this.setState({busy: false, status: this.L.stError(error.message)});
+                }
+            };
+        }
+        window.__bwPendingMedia = {type: 'asm', detail};
+        window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
+        if (!blink) this.setState({busy: false, status});
     }
 
     /**
@@ -3474,17 +4006,7 @@ class PseudocodeImporter extends React.Component {
         }));
     }
 
-    /**
-     * ▶ Run C on RISC-V — the C counterpart of the RV32IM assembler's ▶.
-     *
-     * C for rv32 needs a real cross-compiler, too heavy for the browser, so this
-     * posts the C to the HOSTED compile service (assemble-route's
-     * `requestRiscvCBuild`, client lib/bw-debug/riscv-compile.js). The service
-     * returns the SAME {entry, segments} image the local assembler produces, so
-     * it boots the SAME `bw-asm-rom-ready` → debug-panel → attachRiscV32 path (a
-     * `format: 'riscv'` detail). With no BW_RISCV_CC_ENDPOINT configured the
-     * route REFUSES by name — the status says so honestly, assembly still runs.
-     */
+    // Both RISC-V C compilers produce the same loadable image as ASM.
     // fe's own interpreter on RISC-V: one generated C file (bw-lang/fe-target-c.js)
     // on the hosted full-C route, booted like any RISC-V C program.
     runFeOnRiscv () {
@@ -3720,7 +4242,7 @@ class PseudocodeImporter extends React.Component {
      * browser-safe FAT12 injector (bw-board/dos-fat-inject) drops it as PROG.COM
      * onto a copy of the prebuilt MIT MS-DOS 2.0 boot image (a static asset), and
      * the DOS bench boots that disk — the boot sector loads IO.SYS -> MSDOS.SYS
-     * -> COMMAND.COM, which auto-runs PROG at the A> prompt. Nothing here touches
+     * -> COMMAND.COM, which runs PROG from AUTOEXEC.BAT. Nothing here touches
      * the receipt-pinned image BUILDER; it only injects into a prebuilt image.
      */
     async runBasicOnRealDos (code) {
@@ -3747,6 +4269,7 @@ class PseudocodeImporter extends React.Component {
             if (!res.ok) throw new Error(`base image HTTP ${res.status}`);
             const base = new Uint8Array(await res.arrayBuffer());
             disk = inj.injectFile(base, 'PROG.COM', out.bytes);
+            disk = inj.injectFile(disk, 'AUTOEXEC.BAT', new TextEncoder().encode('PROG\r\n'));
         } catch (e) {
             this.setState({busy: false, running: false, status: this.L.basicRealDosFailed(e.message)});
             return;
@@ -3988,6 +4511,16 @@ class PseudocodeImporter extends React.Component {
 
 
 
+    allowsCodeLanguage (lang) {
+        return codeLanguageAvailable(lang, this.codeDevice(), {
+            remoteImages: remoteMachineImagesAllowed(), riscvHosted: remoteToolchainsAllowed() && Boolean(RISCV_CC_ENDPOINT)
+        });
+    }
+
+    codeDevice () {
+        return this.state.libraryTarget || (this.state.lang === 'asm' && this.state.asmRunDevice) || this.currentDevice();
+    }
+
     // Target belongs to the authored document, including while its Pseudo view
     // is absent after editing Python/JS. A legacy source loader is reconciled
     // by codeDocumentSnapshot before it is saved or executed.
@@ -4020,8 +4553,11 @@ class PseudocodeImporter extends React.Component {
     // any hard blockers ("no ADC on this chip"). Code without pins just gets its
     // DEVICE line rewritten — there is nothing to refuse.
     async setDevice (deviceId) {
+        if (deviceId !== '__manage__' && this.state.asmRunDevice) this.setState({asmRunDevice: null});
+        if (this.state.libraryProgram && deviceId !== '__manage__') this.setState({libraryProgram: null});
         if (deviceId === 'kosmos-cp1') return this.openCp1Language();
         if (deviceId === '__manage__') {
+            this.setState({actionsOpen: false});
             // The "Manage machines…" entry is a command, not a device: open the
             // library modal (gui.jsx owns it) and leave the current device as-is,
             // so the controlled <select> snaps back to the real selection.
@@ -4030,6 +4566,9 @@ class PseudocodeImporter extends React.Component {
             }
             return;
         }
+        this.leaveCp1();
+        this.leaveCardiac();
+        this.setState({libraryTarget: null, kim1Active: false, microtronicActive: false, langMenuOpen: false});
         // Selecting an execution target for authored text does not recompile
         // an unrelated Pseudo projection or replace the visible source.
         const document = this.codeDocumentSnapshot();
@@ -4050,7 +4589,6 @@ class PseudocodeImporter extends React.Component {
             return;
         }
         if (!deviceId) {
-            this.leaveCp1();
             // "no chips" — pure Scratch stage mode. Drop the DEVICE line and the
             // runtime device hints; "Load example…" goes back to the stage games.
             this.setState({...this.retargetCodeState(document.code.replace(/^DEVICE\s+[\w-]+[^\n]*\n?/im, ''),
@@ -4150,6 +4688,10 @@ class PseudocodeImporter extends React.Component {
             // only the editor text, leaving the VM and generated MicroPython
             // on the previous device. Compile this route too, and await it so
             // the Calliope tab cannot open onto an empty/stale derivation.
+            if (deviceId === 'riscv32') {
+                this.publishAppliedDevice({device: deviceId});
+                return;
+            }
             await this.compile({pseudocode: nextSource});
             if (!ownsRequest()) return;
             if (['microbit', 'calliopemini'].includes(deviceId)) {
@@ -4205,6 +4747,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     async deployToPico () {
+        if (this._picoBasicHardware) await this.closePicoBasicHardware();
         const src = this.state.buffers.pseudocode || '';
         if (!src.trim()) return;
         this.setState({busy: true, status: ''});
@@ -4386,6 +4929,8 @@ class PseudocodeImporter extends React.Component {
         const device = this.currentDevice();
         const family = this.flashFamily(device);
         if (family === 'micropython') {
+            const basic = this.state.lang === 'basic' && this.selectedBasicProfile();
+            if (basic?.media) return this.downloadPicoBasicFirmware(basic);
             // The Pico decides by ARTEFACT KIND, not just device (L2): a C-tab
             // program is a bare-metal bin, which BOOTSEL drag-flashes as a UF2 —
             // the MicroPython REPL (deployToPico) cannot take a bin. Pseudocode
@@ -4540,7 +5085,7 @@ class PseudocodeImporter extends React.Component {
                     const next = addCodeProjection({...document, generationOptions: this.codeGenerationOptions(state)},
                         {lang, code, sourceRevision: document.revision, options: options || this.genOpts(lang),
                             diagnostics: diagnostics || null, runtime: this.codeRuntimeFor(lang, document.target)});
-                    return {...this.codeDocumentState(next), busy: false, status: '', output: null,
+                    return {...this.withRetainedDrafts(this.codeDocumentState(next), state, lang), busy: false, status: '', output: null,
                         conversionReport: diagnostics || null};
                 });
             });
@@ -4661,6 +5206,10 @@ class PseudocodeImporter extends React.Component {
 
     stopCodeRun () {
         if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
+        if (this._picoBasicHardware) {
+            if (this.state.busy) this.closePicoBasicHardware();
+            else this._picoBasicHardware.session?.terminal.send([3]);
+        }
         if (this._codeSession) this._codeSession.stop();
     }
 
@@ -5160,19 +5709,179 @@ class PseudocodeImporter extends React.Component {
             status: result && result.ok ? this.L.nqcSent : String((result && result.log) || 'download failed')});
     }
 
+    selectedBasicProfile () {
+        return basicProfileFor(this.codeDevice(), this.state.basicProfile);
+    }
+
+    standaloneBasicProfile (lang = this.state.lang) {
+        if (lang !== 'basic') return null;
+        const profile = this.selectedBasicProfile();
+        return profile?.standalone ? profile : null;
+    }
+
+    picoBasicHardwareText (key) {
+        const de = pickLocale(this.props.locale) === 'de';
+        const strings = {
+            terminal: ['Pico UART', 'Pico-UART'],
+            download: ['Download Pico BASIC UF2', 'Pico-BASIC-UF2 herunterladen'],
+            send: ['Replace Pico listing and run…', 'Programm auf Pico ersetzen und ausführen…'],
+            disconnect: ['Disconnect Pico UART', 'Pico-UART trennen'],
+            reset: ['Reset the Pico now. Keep the USB-to-UART adapter connected.', 'Pico jetzt zurücksetzen. Den USB-UART-Adapter verbunden lassen.'],
+            sent: ['Listing sent to Pico UART. Use Controller for input and output.', 'Programm an Pico-UART gesendet. Ein- und Ausgabe erfolgen im Controller.'],
+            noPort: ['No serial adapters found.', 'Keine seriellen Adapter gefunden.'],
+            port: ['Enter the number of your USB-to-UART adapter.', 'Nummer des USB-UART-Adapters eingeben.'],
+            badPort: ['Choose a number from the adapter list.', 'Eine Nummer aus der Adapterliste auswählen.'],
+            firmware: ['Copy the UF2 to the RPI-RP2 drive in BOOTSEL mode. The download contains the interpreter.',
+                'UF2 im BOOTSEL-Modus auf das Laufwerk RPI-RP2 kopieren. Der Download enthält den Interpreter.']
+        };
+        return strings[key][de ? 1 : 0];
+    }
+
+    async downloadPicoBasicFirmware (profile) {
+        if (this.state.busy) return;
+        this.setState({busy: true});
+        try {
+            const bytes = await loadPicoBasicFirmware(profile);
+            if (this._unmounted) return;
+            await downloadBlob(`${profile.media}.uf2`, new Blob([bytes], {type: 'application/octet-stream'}));
+            if (!this._unmounted) this.setState({status: this.picoBasicHardwareText('firmware')});
+        } catch (error) {
+            if (!this._unmounted) this.setState({status: error.message});
+        } finally {
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    }
+
+    closePicoBasicHardware = error => {
+        const job = this._picoBasicHardware;
+        if (!job) return this._picoBasicClosing;
+        this._picoBasicHardware = null;
+        job.unmirror?.();
+        window.removeEventListener('bw-machine-media-load', job.mediaChanged);
+        const close = job.session ? () => job.session.close() : () => job.transport?.close();
+        const closing = Promise.resolve().then(close).catch(() => {}).finally(() => {
+            if (this._picoBasicClosing === closing) this._picoBasicClosing = null;
+        });
+        this._picoBasicClosing = closing;
+        if (!this._unmounted) this.setState({picoBasicConnected: false, status: error ? String(error.message || error) : ''});
+        return closing;
+    };
+
+    async sendPicoBasicToHardware (profile) {
+        if (this.state.busy || this._picoBasicClosing) return;
+        let commands;
+        try {
+            commands = picoBasicCommands(this.activeCode(), profile.dialect);
+        } catch (error) {
+            this.setState({status: error.message});
+            return;
+        }
+        const existing = this._picoBasicHardware;
+        if (existing && existing.profile.id !== profile.id) return;
+        const job = existing || {profile, mediaChanged: () => this.closePicoBasicHardware()};
+        this._picoBasicHardware = job;
+        const owns = () => !this._unmounted && this._picoBasicHardware === job;
+        this.setState({busy: true, status: '', output: null});
+        try {
+            if (!existing) {
+                // Invoke the browser chooser before any asynchronous module loading.
+                const port = !window.__TAURI__?.core ? await navigator.serial.requestPort() : null;
+                const [{createPicoBasicConsole}, {Terminal}, tauri, {webSerialTransport}] = await Promise.all([
+                    import('../../lib/bw-machines/pico-basic-console.js'),
+                    import(/* webpackChunkName: "bw-xterm" */ '@xterm/xterm'),
+                    import('../../lib/pico-tauri-transport.js'),
+                    import('../../lib/pico-repl.js')
+                ]);
+                if (!owns()) return;
+                const {baudRate} = picoBasicConsoleSpec(profile.dialect);
+                if (port) {
+                    await port.open({baudRate});
+                    try {
+                        job.transport = webSerialTransport(port, {throwOnEof: true});
+                    } catch (error) {
+                        await port.close();
+                        throw error;
+                    }
+                } else {
+                    const ports = await tauri.listPorts();
+                    if (!ports.length) throw new Error(this.picoBasicHardwareText('noPort'));
+                    const choices = ports.map((path, i) => `${i + 1}. ${path}`).join('\n');
+                    const choice = await promptAsync(`${this.picoBasicHardwareText('port')}\n${choices}`, ports.length === 1 ? '1' : '');
+                    if (choice === null || !owns()) return;
+                    const path = ports[Number(choice) - 1];
+                    if (!path) throw new Error(this.picoBasicHardwareText('badPort'));
+                    job.transport = await tauri.openTransport(path, baudRate);
+                }
+                if (!owns()) {
+                    await job.transport.close();
+                    return;
+                }
+                job.session = createPicoBasicConsole({
+                    transport: job.transport, cursor: new Terminal({cols: 80, rows: 24, scrollback: 0, allowProposedApi: true}),
+                    dialect: profile.dialect, openingMessage: this.picoBasicHardwareText('reset'),
+                    onError: error => { if (owns()) this.closePicoBasicHardware(error); }
+                });
+                setCircuitView({fullWidth: false, dock: 'controller'});
+                job.unmirror = window.bwMirrorMachineTerminal?.({
+                    title: this.picoBasicHardwareText('terminal'), raw: job.session.terminal
+                }, true);
+                window.addEventListener('bw-machine-media-load', job.mediaChanged);
+                this.setState({picoBasicConnected: true, status: this.picoBasicHardwareText('reset')});
+            }
+            await job.session.run(commands);
+            if (owns()) this.setState({status: this.picoBasicHardwareText('sent')});
+        } catch (error) {
+            if (owns()) await this.closePicoBasicHardware(error.name === 'NotFoundError' ? null : error);
+        } finally {
+            if (owns() && !job.session) this.closePicoBasicHardware();
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    }
+
+    async runPicoBasic (source, profile) {
+        if (this._picoBasicHardware) await this.closePicoBasicHardware();
+        if (!remoteMachineImagesAllowed()) {
+            this.setState({status: 'Remote machine images are disabled in this build.'});
+            return;
+        }
+        const media = libraryMedia.find(entry => entry.id === profile.media);
+        this.setState({busy: true, status: this.L.basicLoading, output: null, basicRawOutput: '', basicIsBbc: false});
+        try {
+            const config = await openLibraryMedia(media);
+            if (this._unmounted || this.currentDevice() !== 'pico' || this.state.lang !== 'basic' ||
+                this.selectedBasicProfile()?.id !== profile.id) return;
+            await runMachineConfig(config, {picoBasicSource: source});
+            if (!this._unmounted) this.setState({status: ''});
+        } catch (error) {
+            if (!this._unmounted) this.setState({status: error.message});
+        } finally {
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    }
+
     async runBasic () {
+        const selection = this.selectedBasicProfile();
+        const profile = selection?.id;
+        if (!profile || this.state.busy || this.state.running) return;
         const code = this.activeCode();
-        if (!code.trim()) return;
+        if (!code.trim()) {
+            this.setState({status: this.L.basicEmpty});
+            return;
+        }
+        if (profile === 'i8086-ubasic' && this.state.libraryProgram?.dosSourceName) {
+            return this.runLibraryProgram();
+        }
         // The 8086 profile compiles BASIC to a .COM and boots the DOS bench (the
         // C/asm-tab path), rather than running a 6502/Z80 ROM interpreter.
-        if (this.state.basicProfile === 'i8086') return this.runBasicOn8086(code);
-        if (this.state.basicProfile === 'i8086-dos') return this.runBasicOnRealDos(code);
+        if (profile === 'i8086') return this.runBasicOn8086(code);
+        if (profile === 'i8086-dos') return this.runBasicOnRealDos(code);
         // The libre DOS-native interpreter path: uBASIC.EXE runs the program on
         // the 8086 DOS bench (the language itself runs on the machine).
-        if (this.state.basicProfile === 'i8086-ubasic') return this.runBasicOnDosInterp(code);
+        if (profile === 'i8086-ubasic') return this.runBasicOnDosInterp(code);
+        if (selection.media) return this.runPicoBasic(code, selection);
         this.setState({output: '', running: true, status: this.L.basicLoading, basicRawOutput: '', basicIsBbc: false});
         try {
-            const isBbc = this.state.basicProfile === 'bbc';
+            const isBbc = profile === 'bbc';
             let runner;
             if (isBbc) {
                 const {BbcZ80Runner} = await import(/* webpackChunkName: "bw-board" */ 'bw-board/bbc-z80-runner.js');
@@ -5208,9 +5917,9 @@ class PseudocodeImporter extends React.Component {
 
     // Fetch examples/index.json once — the same file the Circuit tab's gallery
     // loads (see circuit-tab.jsx loadExamples). Kept as a fetch, not an import:
-    // the catalog is data for a control most users never open. Only entries that
-    // are programs (kind 'program' or 'full') with an actual program.bw file are
-    // kept; circuit-only entries have nothing to put in the editor.
+    // the catalog is data for a control most users never open. An entry needs
+    // source for the Code editor. Wired ROM lessons can be tagged as circuits
+    // even when they ship a program and a bootable image.
     async loadCatalog () {
         if (this.state.catalog || this._catalogLoading) return;
         this._catalogLoading = true;
@@ -5219,7 +5928,7 @@ class PseudocodeImporter extends React.Component {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const list = (Array.isArray(data) ? data : (data.examples || []))
-                .filter(ex => (ex.kind === 'program' || ex.kind === 'full') && ex.files && ex.files.program);
+                .filter(ex => ex.files?.program && (ex.kind === 'program' || ex.kind === 'full' || ex.files.rom));
             this.setState({catalog: list, catalogError: null});
         } catch (e) {
             this.setState({catalogError: e.message});
@@ -5235,26 +5944,12 @@ class PseudocodeImporter extends React.Component {
         return normalizeDeviceId(id);
     }
 
-    /** All catalog entries, with compatibility flag for the given device. */
     catalogForDevice (device) {
-        const dev = this._normDevice(device);
-        return (this.state.catalog || []).map(ex => {
-            // Older catalog rows use singular `device`; treating its absence
-            // from `devices` as "works everywhere" exposed Nano/Mega examples
-            // under micro:bit and every other unrelated board.
+        const selected = this._normDevice(device);
+        return (this.state.catalog || []).filter(ex => {
             const devices = ex.devices || (ex.device ? [ex.device] : []);
-            const compatible = devices.length === 0 || devices.some(d => this._normDevice(d) === dev);
-            return { ...ex, devices, _compatible: compatible };
+            return devices.some(target => this._normDevice(target) === selected);
         });
-        // NO `.filter(ex => ex._compatible)` — REMOVED 2026-09-07. The catalogue
-        // is browsed BEFORE the chip is chosen, so filtering by the currently
-        // selected device hid most of it from a learner who had not yet made the
-        // choice being filtered on (owner report). It also made this file's own
-        // "Needs:" annotation unreachable: with the filter in place every row
-        // had _compatible true, so the label below never rendered and the sort
-        // comment described an ordering that could not occur. Each row already
-        // carries a chip per device in `ex.devices`; that is the pick, at the
-        // moment it is actionable.
     }
 
     // Load a catalog example's program.bw into the pseudocode editor. If the
@@ -5284,6 +5979,19 @@ class PseudocodeImporter extends React.Component {
             if (!res.ok) throw new Error(`program: HTTP ${res.status}`);
             let src = await res.text();
             const exDevice = this._normDevice((src.match(/^DEVICE\s+([\w-]+)/im) || [])[1]);
+            if (ex.files.rom && ex.files.circuit && /^(eater6502|6502|w65c02)$/.test(exDevice) &&
+                (!device || device === exDevice)) {
+                // The wired loader applies the circuit, faceplate and ROM in
+                // order. Compiling only the declaration leaves the VDP idle.
+                const outcome = await new Promise(complete => {
+                    const handled = !window.dispatchEvent(new CustomEvent('bw-open-wired-machine-example', {
+                        cancelable: true, detail: {example: ex, complete}
+                    }));
+                    if (!handled) complete({ok: false, error: 'The Circuit example loader is unavailable.'});
+                });
+                this.setState({busy: false, status: outcome.error ? this.L.stError(outcome.error) : ''});
+                return;
+            }
             let warnings = [];
             if (device && exDevice && exDevice !== device) {
                 const SB3Creator = (await this.lib()).default;
@@ -5315,7 +6023,7 @@ class PseudocodeImporter extends React.Component {
             this.setState({...this.authoredCodeState('pseudocode', src), busy: false, output: null, uploads: [],
                 status: warnings.length ? warnings.join('; ') : ''},
             () => {
-                Promise.resolve(this.compile()).catch(e => this.setState(
+                Promise.resolve(this.compile({scratchExample: !device && !exDevice && !ex.files?.controller})).catch(e => this.setState(
                     {status: `Loaded, but building the project failed: ${e.message}`}));
             });
             // A FACEPLATE example ships a controller layout beside its
@@ -5410,7 +6118,7 @@ class PseudocodeImporter extends React.Component {
             if (this._unmounted || this._bundledExampleSelection !== request) { resolve(); return; }
             this.setState({...patch, ...this.authoredCodeState('pseudocode', patch.buffers.pseudocode)}, () => {
                 if (this._unmounted || this._bundledExampleSelection !== request) { resolve(); return; }
-                Promise.resolve(this.compile()).then(() => {
+                Promise.resolve(this.compile({scratchExample: !device && !exampleDevice})).then(() => {
                     if (patch.status && !this._unmounted && this._bundledExampleSelection === request) {
                         this.setState(state => ({status: [patch.status, state.status].filter(Boolean).join(' · ')}));
                     }
@@ -5515,7 +6223,8 @@ class PseudocodeImporter extends React.Component {
         await this.compile();
         if (this.state.conversionReport?.preserved) showCircuitDebugger();
     }
-    async compile ({strict = false, pseudocode = null} = {}) {
+    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {
+        if (pseudocode == null && this.state.lang === 'basic' && this.standaloneBasicProfile()) return;
         const vm = this.props.vm;
         const conversionRequest = {};
         this._conversionRequest = conversionRequest;
@@ -5561,22 +6270,22 @@ class PseudocodeImporter extends React.Component {
                     publishEditor({status: this.L.asmLiftRefused(res.error.message, res.stats.lifted)});
                     return;
                 }
-                source = res.pseudocode;
+                source = this.convertedSource(res);
                 parseWarnings = [this.L.asmLifted(res.stats.lifted)];
             } else if (lang === 'python') {
                 const res = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(source);
                 if (strict && res.unsupported?.length) throw new Error(res.unsupported.join(' · '));
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'javascript') {
                 const res = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(source);
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'basic') {
                 const res = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(source);
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (DOS_LANG[lang]) {
                 const res = (await DOS_LANG[lang].load()).default(source);
                 if (strict && res.warnings.length) throw new Error(res.warnings.join(' · '));
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'c') {
                 // Keil C51 is a different dialect — sbit/sfr/_at_/reg5x headers that SDCC
                 // does not accept and our front end does not model. stc-compiler already
@@ -5590,7 +6299,7 @@ class PseudocodeImporter extends React.Component {
                     else parseWarnings.push(`could not reach the Keil translator (${t.error}) — parsing the original`);
                 }
                 const res = await this.readC(text);
-                source = res.pseudocode; parseWarnings = parseWarnings.concat(res.warnings || []);
+                source = this.convertedSource(res); parseWarnings = parseWarnings.concat(res.warnings || []);
             }
             const SB3Creator = (await this.lib()).default;
             const creator = new SB3Creator();
@@ -5743,22 +6452,24 @@ class PseudocodeImporter extends React.Component {
             // regenerate the other tabs from the compiled project
             if (!ownsEditor(this.state)) return;
             const proj = creator.project;
+            if (scratchExample && !stc?.device) {
+                setCircuitView({fullWidth: false, dock: 'off', rightPaneVisible: usesScratchStage(proj)});
+            }
             const nb = {...this.state.buffers};
             if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts('python'));
             if (lang !== 'javascript') nb.javascript = this.state.jsExecution === OWNED_CONSOLE_EXECUTION ? '' :
                 new SB3Creator().generateJavaScript(proj, this.genOpts('javascript'));
-            nb.c = new SB3Creator().generateC(proj);
-            {
-                const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+            if (lang !== 'c') nb.c = new SB3Creator().generateC(proj);
+            if (lang !== 'basic') {
+                const br = new SB3Creator().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
             }
-            nb.asm = ''; // cleared — re-fetched on next ASM tab switch
             // fe and Tcl are NOT regenerated here: their generators load lazily, and
             // awaiting them inside compile() raced with the user on a slow runner —
             // after the snapshot above it overwrote an edit typed meanwhile; before
             // loadProject it reloaded the project after a machine had started and
-            // stopped it. Cleared like ASM, they re-derive when their tab is opened.
+            // stopped it. Other interpreter tabs re-derive when opened.
             for (const l of Object.keys(DOS_LANG)) if (l !== lang) nb[l] = '';
             {
                 const mp = new SB3Creator().generateMicroPython(proj);
@@ -5768,8 +6479,8 @@ class PseudocodeImporter extends React.Component {
             if (missing.length) warns.push(`no sprite named: ${missing.join(', ')}`);
             const classified = classifyConversionWarnings(warns);
             publishEditor(state => ({
-                ...this.codeDocumentState(this.codeDocumentWithBuffers(nb, authoredDocument.lang, languageAtStart,
-                    {changed: classified.changed, unsupported: classified.unsupported}, authoredDocument)),
+                ...this.withRetainedDrafts(this.codeDocumentState(this.codeDocumentWithBuffers(nb, authoredDocument.lang, languageAtStart,
+                    {changed: classified.changed, unsupported: classified.unsupported}, authoredDocument)), state, lang),
                 // This flag belongs to the admitted buffer regeneration too.
                 importedPython: false,
                 uploads: state.uploads.filter(upload => !appliedUploads.has(upload)),
@@ -5793,6 +6504,7 @@ class PseudocodeImporter extends React.Component {
     }
     // Read the running project into all languages at once.
     async fromBlocks () {
+        if (this.state.lang === 'basic' && this.standaloneBasicProfile()) return;
         const request = {};
         this._deriveRequest = request;
         const vm = this.props.vm;
@@ -5808,7 +6520,7 @@ class PseudocodeImporter extends React.Component {
             const {assetLibraryRecords, withoutAssetLibraries} = await import('../../lib/bw-asset-library.js');
             const savedProject = JSON.parse(originalProject);
             const project = withoutAssetLibraries(savedProject, assetLibraryRecords(vm, savedProject));
-            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
             const mpResult = new SB3Creator().generateMicroPython(project);
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
@@ -5817,7 +6529,9 @@ class PseudocodeImporter extends React.Component {
                     new SB3Creator().generateJavaScript(project, this.genOpts('javascript')),
                 c: new SB3Creator().generateC(project),
                 basic: basicResult.ok ? basicResult.basic : `REM === Cannot show as BASIC ===\n${basicResult.reasons.map(s => 'REM ' + s).join('\n')}`,
-                asm: '', // cleared — re-fetched on next ASM tab switch
+                asm: this.state.buffers.asm ?? '',
+                nqc: this.state.buffers.nqc ?? '',
+                ...standaloneBasicDrafts(this.state.buffers),
                 micropython: mpResult.ok ? mpResult.py : `# === Cannot generate MicroPython ===\n${mpResult.reasons.map(s => '# ' + s).join('\n')}`,
                 ...(await dosLangBuffersFor(project, lang))
             };
@@ -5837,8 +6551,8 @@ class PseudocodeImporter extends React.Component {
             const unsupported = unsupportedDiagnostics.length;
             this._codeRestoreError = null;
             this.setState(state => ownsEditor(state) ? {
-                ...this.codeDocumentState(this.codeDocumentWithBuffers(buffers, 'pseudocode', lang,
-                    {changed: [], unsupported: unsupportedDiagnostics})),
+                ...this.withRetainedDrafts(this.codeDocumentState(this.codeDocumentWithBuffers(buffers, 'pseudocode', lang,
+                    {changed: [], unsupported: unsupportedDiagnostics})), state),
                 importedPython: false,
                 uploads: [], // the live project now owns its artwork; old import SVGs are stale
                 output: null,
@@ -5866,10 +6580,20 @@ class PseudocodeImporter extends React.Component {
         }
     }
 
+    setMaximizedChrome (active) {
+        if (active && this._chromeBeforeMaximize === undefined) {
+            this._chromeBeforeMaximize = document.body.classList.contains('bw-compact-chrome');
+        } else if (active || this._chromeBeforeMaximize === undefined) return;
+        const compact = active || this._chromeBeforeMaximize;
+        if (!active) this._chromeBeforeMaximize = undefined;
+        window.dispatchEvent(new CustomEvent('bw-chrome-compact-request', {detail: {compact}}));
+    }
+
     /** Toggle maximize: collapse reference/art/info panels and hide the right pane. */
     toggleMaximize () {
         const next = !this.state.maximized;
-        this.setState({maximized: next, showRef: false, showArt: false, showInfo: false, showMatrix: false});
+        this.setMaximizedChrome(next);
+        this.setState({maximized: next, actionsOpen: false, showArt: false, showInfo: false, showMatrix: false});
         try { localStorage.setItem('bw-editor-max', next ? '1' : '0'); } catch { /* noop */ }
         // Toggle the right pane via the existing mechanic
         window.dispatchEvent(new CustomEvent('bw-settings-change', {
@@ -5877,214 +6601,310 @@ class PseudocodeImporter extends React.Component {
         }));
     }
 
-    // The "Load example…" control when a chip is selected: a button opening a
-    // searchable popover over the catalog (examples/index.json). A native
-    // <select> cannot hold a search input, and the catalog is large enough
-    // (100+ programs, up to ~90 per device) that scrolling unaided is not an
-    // answer — hence the filter box the spec asks for.
-    renderCatalogControl (csel) {
-        const device = this.currentDevice();
-        const unsorted = this.catalogForDevice(device);
-        // Compatible examples first, then incompatible (greyed with "Needs:")
-        const list = unsorted.sort((a, b) => (b._compatible ? 1 : 0) - (a._compatible ? 1 : 0));
-        const q = this.state.exampleFilter.trim().toLowerCase();
+    renderAsmExamplePicker (menu) {
         const locale = pickLocale(this.props.locale);
-        const rows = q ? list.filter(ex => {
-            const t = ex.title || {};
-            return [t.en || '', t.de || '', ex.id].some(s => String(s).toLowerCase().includes(q));
-        }) : list;
-        const open = this.state.showCatalog;
         return (
-            <span style={{display: 'block', width: '100%', minWidth: 0}}>
-                <button type="button"
-                    onClick={() => { this.loadCatalog(); this.setState(s => ({showCatalog: !s.showCatalog})); }}
-                    style={{...csel, cursor: 'pointer', border: '1px solid #cbd5e1',
-                        background: open ? '#e2e8f0' : '#f1f5f9'}}
-                    aria-expanded={open}
-                    title={this.L.loadCatalogTitle} data-testid="bw-catalog-toggle">
-                    {this.L.loadExample}
-                </button>
-                {open && (
-                    <div style={{marginTop: 4, boxSizing: 'border-box',
-                        width: '100%', maxWidth: 340, maxHeight: 380, display: 'flex', flexDirection: 'column',
-                        background: '#fff', border: '1px solid #cbd5e1', borderRadius: 8,
-                        boxShadow: '0 8px 24px rgba(15,23,42,.18)', textAlign: 'left'}}
-                        data-testid="bw-catalog-panel"
-                        data-device={this.currentDevice() || ''}
-                        // loading vs ready vs error, so a reader can tell an
-                        // empty catalogue from one that has not arrived yet.
-                        data-catalog={this.state.catalogError ? 'error'
-                            : this.state.catalog ? 'ready' : 'loading'}>
-                        <input type="search" value={this.state.exampleFilter} autoFocus
-                            onChange={e => this.setState({exampleFilter: e.target.value})}
-                            placeholder={this.L.searchExamples}
-                            style={{margin: 8, padding: '6px 10px', border: '1px solid #cbd5e1',
-                                borderRadius: 6, font: 'inherit', fontSize: 13}}
-                            data-testid="bw-catalog-search" />
-                        <div style={{overflowY: 'auto', padding: '0 8px 8px', minHeight: 0}}>
-                            {this.state.catalogError ? (
-                                <div style={{padding: '6px 8px', fontSize: 12, color: '#b45309'}}>
-                                    {this.L.catalogUnavailable(this.state.catalogError)}
-                                </div>
-                            ) : !this.state.catalog ? (
-                                <div style={{padding: '6px 8px', fontSize: 12, color: '#64748b'}}>
-                                    {this.L.catalogLoading}
-                                </div>
-                            ) : rows.length === 0 ? (
-                                <div style={{padding: '6px 8px', fontSize: 12, color: '#64748b'}}>
-                                    {this.L.catalogNoMatch}
-                                </div>
-                            ) : rows.map(ex => {
-                                const t = ex.title || {};
-                                const title = (locale === 'de' ? t.de : t.en) || t.en || ex.id;
-                                // Every example is shown and none is greyed: the device is
-                                // picked after the example, so annotating against the current
-                                // one warns about a decision the learner has not taken. The
-                                // device chips below carry `ex.devices` and are the pick.
-                                const compat = true;
-                                return (
-                                    <button key={ex.id} type="button"
-                                        onClick={() => this.loadCatalogExample(ex)}
-                                        style={{display: 'block', width: '100%', textAlign: 'left',
-                                            padding: '5px 8px', border: 'none', borderRadius: 6,
-                                            background: 'transparent', cursor: 'pointer',
-                                            font: 'inherit', fontSize: 13,
-                                            color: compat ? '#1e293b' : '#94a3b8',
-                                            opacity: compat ? 1 : 0.7}}
-                                        title={ex.id} data-testid="bw-catalog-item">
-                                        {title}
-                                        <span style={{marginLeft: 6, fontSize: 11, color: '#94a3b8'}}>{ex.id}</span>
-                                        {(ex.devices || []).length > 1 ? (
-                                            <span style={{display: 'block', marginTop: 2}}>
-                                                {(ex.devices || []).map(d => {
-                                                    const isActive = this._normDevice(d) === this._normDevice(device);
-                                                    return (
-                                                        <span key={d} role="button" tabIndex={0}
-                                                            data-testid="bw-catalog-device"
-                                                            onClick={e => { e.stopPropagation(); this.loadCatalogExample(ex, d); }}
-                                                            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); this.loadCatalogExample(ex, d); } }}
-                                                            style={{display: 'inline-block', margin: '0 4px 2px 0',
-                                                                padding: '0 6px', borderRadius: 8, fontSize: 10,
-                                                                background: isActive ? '#3b82f6' : '#e2e8f0',
-                                                                color: isActive ? '#fff' : '#334155',
-                                                                cursor: 'pointer'}}>
-                                                            {DEVICE_CHIP_LABELS[d] || d}
-                                                        </span>
-                                                    );
-                                                })}
-                                            </span>
-                                        ) : null}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-            </span>
+            <label data-code-machine-select={menu || undefined}
+                style={menu ? undefined : {display: 'flex', alignItems: 'center', gap: 4}}>
+                {menu && <Icon name="example" />}
+                {this.L.asmExampleLabel}
+                <select data-testid={menu ? 'bw-asm-examples-menu' : 'bw-asm-examples'}
+                    disabled={this.state.busy} onChange={event => this.loadAsmExample(event.target.value)}
+                    style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}} value="">
+                    <option value="">{this.L.asmExamplePick}</option>
+                    {this._asmExamples().map(example => (
+                        <option key={example.id} value={example.id}>
+                            {locale === 'de' ? example.labelDe : example.label}
+                        </option>
+                    ))}
+                </select>
+            </label>
         );
     }
 
-    renderActionMenu (csel) {
+    renderCatalogControl (item) {
+        const {showCatalog, showCatalogFull, catalogError, catalog, exampleFilter} = this.state;
+        const device = this.currentDevice();
+        const locale = pickLocale(this.props.locale);
+        const de = locale === 'de';
+        const query = exampleFilter.trim().toLowerCase();
+        const rows = this.catalogForDevice(device).filter(({title = {}, id}) =>
+            !query || [title.en, title.de, id].some(value => String(value || '').toLowerCase().includes(query)));
+        const close = () => this.setState({showCatalogFull: false});
+        const list = full => (
+            <div data-testid="bw-catalog-panel" data-device={device || ''}
+                data-catalog={catalogError ? 'error' : catalog ? 'ready' : 'loading'}
+                style={{display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1,
+                    maxHeight: full ? undefined : 300, padding: 6, gap: 6}}>
+                <div style={{display: 'flex', gap: 6, alignItems: 'center'}}>
+                    <input type="search" value={exampleFilter} autoFocus onChange={e => this.setState({exampleFilter: e.target.value})}
+                        placeholder={this.L.searchExamples} aria-label={this.L.searchExamples}
+                        style={{flex: 1, minWidth: 0, padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, font: 'inherit'}}
+                        data-testid="bw-catalog-search" />
+                    {!full && <button type="button" style={toolStyles(false).button}
+                        aria-label={de ? 'Beispielbibliothek öffnen' : 'Open full examples library'}
+                        title={de ? 'Beispielbibliothek öffnen' : 'Open full examples library'}
+                        onClick={() => this.setState({showCatalogFull: true, actionsOpen: false})}>⛶</button>}
+                </div>
+                <div style={{overflowY: 'auto', minHeight: 0, scrollbarWidth: 'thin', display: 'grid',
+                    gridTemplateColumns: full ? 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))' : '1fr',
+                    gap: 4, alignContent: 'start'}}>
+                    {catalogError ? this.L.catalogUnavailable(catalogError) :
+                        !catalog ? this.L.catalogLoading :
+                            rows.length === 0 ? this.L.catalogNoMatch : rows.map(ex => {
+                                const names = ex.title || {};
+                                const title = names[locale] || names.en || ex.id;
+                                return <button key={ex.id} type="button"
+                                    onClick={() => {
+                                        this.setState({actionsOpen: false, showCatalogFull: false});
+                                        this.loadCatalogExample(ex, device);
+                                    }}
+                                    style={{...item, border: '1px solid #cbd5e1', background: '#fff'}}
+                                    title={ex.id} data-testid="bw-catalog-item">
+                                    {title}
+                                </button>;
+                            })}
+                </div>
+            </div>
+        );
+        return (
+            <div data-keep-open>
+                <button type="button" onClick={() => { this.loadCatalog(); this.setState(s => ({showCatalog: !s.showCatalog})); }}
+                    style={{...item, background: showCatalog ? '#e2e8f0' : '#f1f5f9'}}
+                    aria-expanded={showCatalog} title={this.L.loadCatalogTitle} data-testid="bw-catalog-toggle" data-overflow-action>
+                    <Icon name="example" />{this.L.loadExample.replace(/^📚\s*/, '')}<Icon name="chevronRight" size={12} />
+                </button>
+                {showCatalog && !showCatalogFull && this.state.actionsOpen && list(false)}
+                {showCatalogFull && createPortal(
+                    <dialog ref={node => { if (node && !node.open) node.showModal(); }} onClose={close}
+                        aria-label={de ? 'Beispielbibliothek' : 'Examples library'}
+                        style={{width: 'calc(100vw - 32px)', height: 'calc(100dvh - 32px)', maxWidth: 'none', maxHeight: 'none',
+                            boxSizing: 'border-box', border: '1px solid #94a3b8', borderRadius: 10, padding: 12, color: '#1e293b'}}>
+                        <div style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
+                            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 6px'}}>
+                                <strong>{de ? 'Beispiele' : 'Examples'} · {DEVICE_CHIP_LABELS[device] || device}</strong>
+                                <button type="button" onClick={close} style={toolStyles(false).button}
+                                    aria-label={de ? 'Schließen' : 'Close'}>×</button>
+                            </div>
+                            {list(true)}
+                        </div>
+                    </dialog>, document.body)}
+            </div>
+        );
+    }
+
+    renderMacDevicePicker () {
+        const current = this.codeDevice() || '';
+        const close = () => this.macDeviceDialog?.close();
+        const choose = id => {
+            close();
+            this.setDevice(id);
+        };
+        const item = (id, label) => <button type="button" key={id || 'none'} role="menuitemradio"
+            aria-checked={id === current} data-device-option={id} title={label}
+            style={{...toolStyles(false).button, display: 'block', textAlign: 'left', width: '100%',
+                overflow: 'hidden', textOverflow: 'ellipsis'}}
+            onClick={() => choose(id)}>{label}</button>;
+        const heading = {display: 'block', padding: '5px 8px 2px', fontSize: 11, color: '#64748b'};
+        return createPortal(<dialog ref={element => {this.macDeviceDialog = element;}}
+            data-testid="bw-mac-device-menu" aria-label={this.L.deviceTitle}
+            onClick={event => {
+                if (isMachinePickerBackdrop(event)) close();
+            }}
+            style={{width: 270, maxWidth: 'calc(100vw - 24px)', maxHeight: '70vh',
+                padding: 8, border: '1px solid #94a3b8', borderRadius: 8, fontSize: 12}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
+                <strong>{pickLocale(this.props.locale) === 'de' ? 'Zielsystem' : 'Machine'}</strong>
+                <button type="button" style={toolStyles(false).button} aria-label={this.L.closeNotice} onClick={close}>×</button>
+            </div>
+            <button type="button" style={{...toolStyles(false).button, justifyContent: 'flex-start', width: '100%'}}
+                onClick={() => choose('__manage__')}>{pickLocale(this.props.locale) === 'de' ? 'Maschinen verwalten…' : 'Manage machines…'}</button>
+            {item('', this.L.noChips)}
+            <strong style={heading}>Intel 8049</strong>
+            {item('kosmos-cp1', 'Kosmos CP1')}
+            {DEVICE_GROUPS.map(group => <React.Fragment key={group.label}>
+                <strong style={heading}>{group.label}</strong>
+                {group.devices.map(device => item(device.id, device.label))}
+            </React.Fragment>)}
+        </dialog>, document.body);
+    }
+
+    openCodeInfo () {
+        this.setState({showInfo: true, actionsOpen: false}, () => {
+            this.codeHelpClose?.focus();
+        });
+    }
+
+    dismissCodeNotice (notice) {
+        this.setState(state => ({
+            codeNotices: state.codeNotices.filter(item => item.id !== notice.id),
+            ...(notice.report && notice.report === state.conversionReport ? {conversionReport: null} : {})
+        }));
+    }
+
+    renderCodeInfo (machine) {
+        const {lang, asmMode, codeNotices, showInfo, emptyTabOffer} = this.state;
+        const locale = pickLocale(this.props.locale);
+        const de = locale === 'de';
+        const local = (english, german) => de ? german : english;
+        const close = () => this.setState({showInfo: false});
+        const count = codeNotices.filter(notice => notice.unread).length;
+        const latestStatus = codeNotices.find(notice => notice.status);
+        const latestReport = codeNotices.find(notice => notice.report);
+        const device = this.currentDevice();
+        const summary = !machine && device && matrixSummary(lang, device, locale);
+        const standalone = this.standaloneBasicProfile();
+        const notes = {
+            piccolo: local('PiccoloBASIC uses unnumbered source, lowercase keywords and labels.',
+                'PiccoloBASIC verwendet Quelltext ohne Zeilennummern, kleingeschriebene Schlüsselwörter und Sprungmarken.'),
+            stefan: local('Use line numbers for jumps and answer INPUT in Controller. SAVE, CATALOG and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
+                'Für Sprünge Zeilennummern verwenden und INPUT im Controller beantworten. SAVE, CATALOG und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.')
+        };
+        const basicProfile = lang === 'basic' && this.selectedBasicProfile();
+        const languageNote = standalone ? notes[standalone.dialect] + ' ' + local(
+            'Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',
+            'BASIC ausführen sendet den Quelltext an die UART-Konsole des Pico. Für diesen Dialekt ist keine Blockumwandlung verfügbar.'
+        ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
+        const note = basicProfile?.id === 'pico-bbcbasic' ? languageNote + ' ' + local(
+            'SAVE and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
+            'SAVE und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.'
+        ) : languageNote;
+        const picoHardwareHelp = basicProfile?.media && local(
+            'Download the UF2 and copy it to RPI-RP2 in BOOTSEL mode. Connect a 3.3 V USB-to-UART adapter with TX to GP1, RX to GP0 and GND to GND. Choose Replace Pico listing and run, select the adapter, then reset the Pico when prompted. This replaces the listing in memory. Use Controller for input and Ctrl+C.',
+            'UF2 herunterladen und im BOOTSEL-Modus nach RPI-RP2 kopieren. Einen 3,3-V-USB-UART-Adapter anschließen (TX an GP1, RX an GP0 und GND an GND). Programm auf Pico ersetzen und ausführen wählen, den Adapter auswählen und den Pico bei Aufforderung zurücksetzen. Das Programm im Speicher wird ersetzt. Eingabe und Strg+C erfolgen im Controller.'
+        );
+        const sections = standalone ? null : lang === 'pseudocode' ? SYNTAX : SUPPORTED[lang];
+        const closeStyle = {...toolStyles(false).button, fontSize: 18, lineHeight: 1};
+        const lane = {background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6, padding: '5px 8px'};
+
+        return <Popup id="code-info" testId="bw-code-info-popover"
+            open={this.props.isVisible !== false && showInfo} align="right" width={440} role="dialog"
+            label={this.L.infoAria} closeOnPick={false} onClose={close}
+            onToggle={() => showInfo ? close() : this.openCodeInfo()}
+            button={<button type="button" data-testid="bw-code-info" aria-label={this.L.infoAria}
+                title={this.L.infoAria} style={{...toolStyles(false).button, position: 'relative'}}>
+                <Icon name="help" />
+                {count > 0 && <span data-testid="bw-code-info-count" style={{position: 'absolute', right: -3, top: 0,
+                    borderRadius: 9, minWidth: 13, padding: '1px 3px', background: '#6435c9', color: '#fff',
+                    fontSize: 9, lineHeight: '12px', textAlign: 'center'}} aria-label={local(
+                    `${count} unread notices`, `${count} ungelesene Meldungen`)}>{count}</span>}
+            </button>}>
+            <div data-code-help style={{padding: 4, display: 'grid', gap: 8, color: '#334155', overflowWrap: 'anywhere'}}>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <strong>{this.L.infoAria}</strong>
+                    <button ref={node => { this.codeHelpClose = node; }} type="button" style={closeStyle}
+                        aria-label={local('Close Code help', 'Code-Hilfe schließen')} onClick={event => {
+                            const trigger = event.currentTarget.ownerDocument.querySelector('[data-testid="bw-code-info"]');
+                            close();
+                            trigger?.focus();
+                        }}>×</button>
+                </div>
+                {codeNotices.length > 0 && <section aria-label={local('Notices', 'Meldungen')}
+                    data-testid="bw-code-notices" style={{display: 'grid', gap: 5}}>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <strong>{local('Notices', 'Meldungen')}</strong>
+                        <button type="button" style={{...closeStyle, fontSize: 22}} data-testid="bw-clear-code-notices"
+                            aria-label={local('Clear all notices', 'Alle Meldungen löschen')}
+                            title={local('Clear all notices', 'Alle Meldungen löschen')}
+                            onClick={() => {
+                                this.codeHelpClose?.focus();
+                                this.setState({codeNotices: [], conversionReport: null, status: '', emptyTabOffer: null});
+                            }}>×</button>
+                    </div>
+                    {codeNotices.map(notice => {
+                        const report = notice.report;
+                        return <div key={notice.id} data-code-notice style={{...lane, display: 'flex', alignItems: 'flex-start', gap: 8}}>
+                            {report ? <details data-testid={notice === latestReport ? 'bw-conversion-report' : undefined}
+                                open={(!report.preserved || report.changed.length > 0 || report.unsupported.length > 0) || undefined}
+                                style={{flex: 1, minWidth: 0}}>
+                                <summary style={{cursor: 'pointer', fontWeight: 600}}>
+                                    {local('Conversion report', 'Umwandlungsbericht')}: {report.direction}
+                                </summary>
+                                <div data-testid={notice === latestReport ? 'bw-conversion-preserved' : undefined}>
+                                    {report.operation ? report.outcome : <>{local('Preserved', 'Bewahrt')}: {report.preserved ?
+                                        local('project structure generated and loaded', 'Projektstruktur erzeugt und geladen') :
+                                        local('no — conversion failed', 'nein — Umwandlung fehlgeschlagen')}</>}
+                                </div>
+                                <div data-testid={notice === latestReport ? 'bw-conversion-changed' : undefined}>
+                                    {local('Changed', 'Geändert')}: {report.changed.join(' · ') ||
+                                        local('no reported changes', 'keine gemeldeten Änderungen')}
+                                </div>
+                                <div data-testid={notice === latestReport ? 'bw-conversion-unsupported' : undefined}
+                                    style={{color: report.unsupported.length ? '#92400e' : undefined}}>
+                                    {local('Unsupported', 'Nicht unterstützt')}: {report.unsupported.join(' · ') ||
+                                        local('nothing reported', 'nichts gemeldet')}
+                                </div>
+                                {report.details?.length > 0 && <pre data-testid={notice === latestReport ?
+                                    'bw-conversion-refusal-details' : undefined} style={{whiteSpace: 'pre-wrap', fontSize: 11}}>
+                                    {JSON.stringify(report.details, null, 2)}
+                                </pre>}
+                            </details> : <div style={{flex: 1, minWidth: 0, whiteSpace: 'pre-wrap'}}
+                                data-testid={notice === latestStatus ? 'bw-code-status' : undefined}>
+                                {notice.status}
+                                {notice === latestStatus && notice.offer && notice.offer === emptyTabOffer &&
+                                    <button type="button" data-testid="bw-open-empty-tab" onClick={() => {
+                                        this.openEmptyTab(notice.offer);
+                                        this.dismissCodeNotice(notice);
+                                        close();
+                                    }}>{this.L.openEmptyTab(notice.offer)}</button>}
+                            </div>}
+                            <button type="button" style={closeStyle}
+                                data-testid={notice === latestReport ? 'bw-dismiss-conversion-report' : notice === latestStatus ?
+                                    /^(Restored your unsaved |Nicht gespeicherter )/.test(notice.status) ?
+                                        'bw-dismiss-restored' : 'bw-dismiss-code-status' : undefined}
+                                aria-label={this.L.dismissNotice} title={this.L.dismissNotice}
+                                onClick={() => {
+                                    this.codeHelpClose?.focus();
+                                    this.dismissCodeNotice(notice);
+                                }}>×</button>
+                        </div>;
+                    })}
+                </section>}
+                {!machine && <>
+                    {device && <div>{deviceHelp(device)}</div>}
+                    {summary && <div data-testid="bw-code-device-capabilities"><strong>{summary}</strong>
+                        <div>{matrixExplain(lang, device, locale)}</div>
+                    </div>}
+                    <div data-testid="bw-representation-status">{representationNotice(lang, asmMode, this.props.locale)}</div>
+                    {TWO_WAY.has(lang) && <div>{local(
+                        'To blocks converts the active editor. From blocks reads the project into Code. Conversion reports identify unsupported operations.',
+                        'Zu Blöcken übersetzt den aktiven Editor. Von Blöcken liest das Projekt als Code. Der Umwandlungsbericht nennt nicht unterstützte Befehle.'
+                    )}</div>}
+                    {note && <div style={{whiteSpace: 'pre-wrap'}} data-code-language-note={lang}>{note}</div>}
+                    {picoHardwareHelp && <div>{picoHardwareHelp}</div>}
+                    {sections?.length > 0 && <details><summary>{this.L.reference}</summary>
+                        {sections.map(([heading, items]) => <div key={heading}>
+                            <strong>{this.L.h[heading] || heading}</strong>
+                            <ul style={{margin: '2px 0 8px', paddingLeft: 20}}>
+                                {items.map(text => <li key={text}><code>{text}</code></li>)}
+                            </ul>
+                        </div>)}
+                    </details>}
+                </>}
+                <div>{local('Ctrl or ⌘ + F searches. Ctrl or ⌘ + Z undoes a text edit.',
+                    'Strg oder ⌘ + F sucht. Strg oder ⌘ + Z macht eine Texteingabe rückgängig.')}</div>
+            </div>
+        </Popup>;
+    }
+
+    renderActionMenu (csel, renderCodeControls, renderLanguages, machine, renderDeviceSelect) {
         const item = {...csel, ...toolStyles(false).button, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
             width: '100%', boxSizing: 'border-box', textAlign: 'left', cursor: 'pointer', height: 'auto',
             minHeight: 32, padding: '6px 8px', whiteSpace: 'normal', fontSize: 12};
         return (
-            <Popup id="code-actions" anchorTestId="bw-code-actions" testId="bw-code-actions-menu"
-                open={this.props.isVisible !== false && this.state.actionsOpen} align="right" width={260} keepMounted
+            <Popup id="code-actions" overflowMenu anchorTestId="bw-code-actions" testId="bw-code-actions-menu"
+                open={this.props.isVisible !== false && this.state.actionsOpen} align="right" width={270} keepMounted
                 label={L10N[pickLocale(this.props.locale)].fileMenuTitle}
                 onToggle={() => this.setState(state => ({actionsOpen: !state.actionsOpen}))}
                 onClose={() => this.setState({actionsOpen: false})}
                 button={<button type="button" data-testid="bw-code-actions-trigger" style={toolStyles(false).button}
                     title={L10N[pickLocale(this.props.locale)].fileMenuTitle}
-                    aria-label={L10N[pickLocale(this.props.locale)].fileMenuTitle}>⋯</button>}>
-                <div style={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <strong style={{padding: '4px 8px', fontSize: 11, color: '#64748b'}}>{this.L.actionFiles}</strong>
-                    <label style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
-                        data-testid="bw-open-file" role="button" tabIndex={this.state.busy ? -1 : 0} aria-disabled={this.state.busy}
-                        onKeyDown={event => {
-                            if (event.key !== 'Enter' && event.key !== ' ') return;
-                            event.preventDefault();
-                            if (!this.state.busy) this._codeFileInput.current?.click();
-                        }}>
-                        {this.L.openFile}
-                        <input ref={this._codeFileInput} type="file" accept={`${CODE_ACCEPT},${IMPORT_ACCEPT}`} style={{display: 'none'}}
-                            disabled={this.state.busy}
-                            onChange={event => { this.setState({actionsOpen: false}); this.openCodeFile(event); }} />
-                    </label>
-                    <button type="button" onClick={this.saveCodeFile} style={item}
-                        title={this.L.saveFileTitle(this.saveFileName())} data-testid="bw-save-file">
-                        {this.L.saveFile}
-                    </button>
-                    <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionPrograms}</strong>
-                    {this.state.lang === 'micropython' ? (
-                        <button type="button" onClick={() => this.downloadMicrobitHex()} style={item}
-                            disabled={this.state.busy || !this.state.buffers.micropython.trim() || /^# ===/.test(this.state.buffers.micropython)}
-                            title={this.L.microbitNeedFirmware} data-testid="bw-microbit-download-hex">
-                            {this.L.downloadHex}
-                        </button>
-                    ) : null}
-                    <button type="button" onClick={this.openMakeCodeShare} style={item}
-                        title={this.L.mcShareTitle} data-testid="bw-makecode-share">
-                        {this.L.mcShare}
-                    </button>
-                    {['microbit', 'calliopemini', 'ev3', 'cpx'].includes(this.currentDevice()) ? (
-                        <button type="button" onClick={this.exportMakeCode} style={item}
-                            title={this.L.mcExportTitle} disabled={this.state.busy}
-                            data-testid="bw-makecode-export">{this.L.mcExport}</button>
-                    ) : null}
-                    {this._makeCodeProject ? (
-                        <button type="button" onClick={() => this.exportMakeCodeSource()} style={item}
-                            title={this.L.exportMakeCodeTitle} data-testid="bw-export-makecode-source">
-                            {this.L.exportMakeCode}
-                        </button>
-                    ) : null}
-                    {((this._makeCodeProject && MAKECODE_RUNNABLE.includes(this._makeCodeProject.target)) ||
-                        ['microbit', 'calliopemini'].includes(this.currentDevice())) &&
-                        this.makeCodeRunOffered(this._makeCodeProject ? this._makeCodeProject.target :
-                            (this.currentDevice() === 'calliopemini' ? 'calliopemini' : 'microbit')) ? (
-                            <button type="button" onClick={() => this.runInMakeCode()} style={item}
-                                title={this.L.mcRunTitle} disabled={this.state.busy}
-                                data-testid="bw-makecode-run">{this.L.mcRun}</button>
-                        ) : null}
-                    {(this._makeCodeProject ? this._makeCodeProject.target === 'microbit' : this.currentDevice() === 'microbit') &&
-                        this.makeCodeRunOffered('microbit') ? (
-                            <button type="button" onClick={() => this.runOnEmulatedMicrobit()} style={item}
-                                title={this.L.mcEmulateTitle} disabled={this.state.busy}
-                                data-testid="bw-makecode-emulate">{this.L.mcEmulate}</button>
-                        ) : null}
-                    {this._makeCodeProject && this._makeCodeProject.target === 'arcade' ? (
-                        <select value={this.state.arcadeBoard} style={item} disabled={this.state.busy}
-                            title={this.L.mcBoardTitle} data-testid="bw-makecode-arcade-board"
-                            data-boards={(this.state.arcadeBoards || []).length}
-                            onChange={e => this.setState({arcadeBoard: e.target.value})}>
-                            <option value="">{this.L.mcBoardPick}</option>
-                            {(this.state.arcadeBoards || []).filter(b => !b.card).map(b => (
-                                <option key={arcadeBoardKey(b)} value={arcadeBoardKey(b)}>{b.name}</option>
-                            ))}
-                            <optgroup label={this.L.mcBoardByChip}>
-                                {(this.state.arcadeBoards || []).filter(b => b.card).map(b => (
-                                    <option key={arcadeBoardKey(b)} value={arcadeBoardKey(b)}>{`${b.name} (${b.chip})`}</option>
-                                ))}
-                            </optgroup>
-                        </select>
-                    ) : null}
-                    {(this._makeCodeProject && MAKECODE_FIRMWARE[this._makeCodeProject.target]) ||
-                        (!this._makeCodeProject && ['microbit', 'calliopemini'].includes(this.currentDevice())) ? (
-                            <button type="button" onClick={() => this.downloadMakeCodeFirmware()} style={item}
-                                title={this.L.mcFirmwareTitle} disabled={this.state.busy}
-                                data-testid="bw-makecode-firmware">{this.L.mcFirmware}</button>
-                        ) : null}
-                    <button type="button" onClick={() => this.runAsArcade()} style={item}
-                        title={this.L.arcRunTitle} disabled={this.state.busy}
-                        data-testid="bw-makecode-arcade-run">{this.L.arcRun}</button>
-                    <button type="button" onClick={() => this.exportArcade()} style={item}
-                        title={this.L.arcExportTitle} disabled={this.state.busy}
-                        data-testid="bw-makecode-arcade-export">{this.L.arcExport}</button>
-                    <div style={{borderTop: '1px solid #e2e8f0', margin: '3px 0'}} />
-                    <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionExamples}</strong>
+                    aria-label={this.L.fileMenuTitle}><Icon name="more" /></button>}>
+                {!machine && (
+                    <div data-code-menu-group role="group" aria-label={this.L.actionExamples}>
                     {this.currentDevice() ? this.renderCatalogControl(item) :
                         this.state.bundledExamplesStatus === 'error' ? (
-                            <button type="button" onClick={this._loadBundledExamples} style={item}
+                            <button type="button" onClick={this._loadBundledExamples} data-overflow-action style={item}
                                 title={this.L.loadExampleTitle} data-testid="bw-load-example-retry">
                                 {this.L.examplesRetry}
                             </button>
@@ -6104,13 +6924,120 @@ class PseudocodeImporter extends React.Component {
                             ))}
                         </select>
                     )}
-                    <button type="button" onClick={() => this.setState(s => ({showRef: !s.showRef}))}
-                        style={item} title={this.L.referenceTitle(this.state.lang)}>📝 {this.L.reference}</button>
-                    <button type="button" onClick={() => this.setState(s => ({showArt: !s.showArt}))}
-                        style={item} title={this.L.customArtTitle}>
-                        🖼️ {this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
+                    </div>
+                )}
+                {this.state.actionsOpen && <>
+                    <div data-code-menu-group data-code-overflow-controls>
+                        {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
+                            !machine && renderCodeControls(true)}
+                        {machine && renderDeviceSelect(true)}
+                        <button type="button" onClick={() => this.openCodeInfo()} data-overflow-action>
+                            <Icon name="help" />{this.L.infoAria}
+                        </button>
+                        <details>
+                            <summary data-overflow-action><Icon name="example" />{this.L.toolbarLanguages}<Icon name="chevronRight" size={12} /></summary>
+                            <div>{renderLanguages(true)}</div>
+                        </details>
+                    </div>
+                </>}
+                {!machine && <>
+                    <div data-code-menu-group role="group" aria-label={this.L.actionFiles}>
+                    <label data-overflow-action style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
+                        data-testid="bw-open-file" role="button" tabIndex={this.state.busy ? -1 : 0} aria-disabled={this.state.busy}
+                        onKeyDown={event => {
+                            if (event.key !== 'Enter' && event.key !== ' ') return;
+                            event.preventDefault();
+                            if (!this.state.busy) this._codeFileInput.current?.click();
+                        }}>
+                        <Icon name="open" />{this.L.openFile}
+                        <input ref={this._codeFileInput} type="file" accept={`${CODE_ACCEPT},${IMPORT_ACCEPT}`} style={{display: 'none'}}
+                            disabled={this.state.busy}
+                            onChange={event => { this.setState({actionsOpen: false}); this.openCodeFile(event); }} />
+                    </label>
+                    <button type="button" onClick={this.saveCodeFile} data-overflow-action style={item}
+                        title={this.L.saveFileTitle(this.saveFileName())} data-testid="bw-save-file">
+                        <Icon name="save" />{this.L.saveFile}
                     </button>
-                </div>
+                    </div>
+                    <div data-code-menu-group role="group" aria-label={this.L.actionPrograms}>
+                    {this.state.lang === 'micropython' ? (
+                        <button type="button" onClick={() => this.downloadMicrobitHex()} data-overflow-action style={item}
+                            disabled={this.state.busy || !this.state.buffers.micropython.trim() || /^# ===/.test(this.state.buffers.micropython)}
+                            title={this.L.microbitNeedFirmware} data-testid="bw-microbit-download-hex">
+                            {this.L.downloadHex}
+                        </button>
+                    ) : null}
+                    <button type="button" onClick={this.openMakeCodeShare} data-overflow-action style={item}
+                        title={this.L.mcShareTitle} data-testid="bw-makecode-share">
+                        <Icon name="link" />{this.L.mcShare.replace(/^🔗\s*/, '')}
+                    </button>
+                    {['microbit', 'calliopemini', 'ev3', 'cpx'].includes(this.currentDevice()) ? (
+                        <button type="button" onClick={this.exportMakeCode} data-overflow-action style={item}
+                            title={this.L.mcExportTitle} disabled={this.state.busy}
+                            data-testid="bw-makecode-export">{this.L.mcExport}</button>
+                    ) : null}
+                    {this._makeCodeProject ? (
+                        <button type="button" onClick={() => this.exportMakeCodeSource()} data-overflow-action style={item}
+                            title={this.L.exportMakeCodeTitle} data-testid="bw-export-makecode-source">
+                            {this.L.exportMakeCode}
+                        </button>
+                    ) : null}
+                    {((this._makeCodeProject && MAKECODE_RUNNABLE.includes(this._makeCodeProject.target)) ||
+                        ['microbit', 'calliopemini'].includes(this.currentDevice())) &&
+                        this.makeCodeRunOffered(this._makeCodeProject ? this._makeCodeProject.target :
+                            (this.currentDevice() === 'calliopemini' ? 'calliopemini' : 'microbit')) ? (
+                            <button type="button" onClick={() => this.runInMakeCode()} data-overflow-action style={item}
+                                title={this.L.mcRunTitle} disabled={this.state.busy}
+                                data-testid="bw-makecode-run">{this.L.mcRun}</button>
+                        ) : null}
+                    {(this._makeCodeProject ? this._makeCodeProject.target === 'microbit' : this.currentDevice() === 'microbit') &&
+                        this.makeCodeRunOffered('microbit') ? (
+                            <button type="button" onClick={() => this.runOnEmulatedMicrobit()} data-overflow-action style={item}
+                                title={this.L.mcEmulateTitle} disabled={this.state.busy}
+                                data-testid="bw-makecode-emulate">{this.L.mcEmulate}</button>
+                        ) : null}
+                    {this._makeCodeProject && this._makeCodeProject.target === 'arcade' ? (
+                        <select value={this.state.arcadeBoard} data-overflow-action style={item} disabled={this.state.busy}
+                            title={this.L.mcBoardTitle} data-testid="bw-makecode-arcade-board"
+                            data-boards={(this.state.arcadeBoards || []).length}
+                            onChange={e => this.setState({arcadeBoard: e.target.value})}>
+                            <option value="">{this.L.mcBoardPick}</option>
+                            {(this.state.arcadeBoards || []).filter(b => !b.card).map(b => (
+                                <option key={arcadeBoardKey(b)} value={arcadeBoardKey(b)}>{b.name}</option>
+                            ))}
+                            <optgroup label={this.L.mcBoardByChip}>
+                                {(this.state.arcadeBoards || []).filter(b => b.card).map(b => (
+                                    <option key={arcadeBoardKey(b)} value={arcadeBoardKey(b)}>{`${b.name} (${b.chip})`}</option>
+                                ))}
+                            </optgroup>
+                        </select>
+                    ) : null}
+                    {(this._makeCodeProject && MAKECODE_FIRMWARE[this._makeCodeProject.target]) ||
+                        (!this._makeCodeProject && ['microbit', 'calliopemini'].includes(this.currentDevice())) ? (
+                            <button type="button" onClick={() => this.downloadMakeCodeFirmware()} data-overflow-action style={item}
+                                title={this.L.mcFirmwareTitle} disabled={this.state.busy}
+                                data-testid="bw-makecode-firmware">{this.L.mcFirmware}</button>
+                        ) : null}
+                    <button type="button" onClick={() => this.runAsArcade()} data-overflow-action style={item}
+                        title={this.L.arcRunTitle} disabled={this.state.busy}
+                        data-testid="bw-makecode-arcade-run"><Icon name="run" />{this.L.arcRun.replace(/^▶\s*/, '')}</button>
+                    <button type="button" onClick={() => this.exportArcade()} data-overflow-action style={item}
+                        title={this.L.arcExportTitle} disabled={this.state.busy}
+                        data-testid="bw-makecode-arcade-export"><Icon name="save" />{this.L.arcExport.replace(/^⬆\s*/, '')}</button>
+                    <button type="button" onClick={() => this.exportPlayableGame('web')} data-overflow-action style={item}
+                        title={this.L.gameWebTitle} disabled={this.state.busy}
+                        data-testid="bw-game-export-web"><Icon name="save" />{this.L.gameWeb.replace(/^⬆\s*/, '')}</button>
+                    <button type="button" onClick={() => this.exportPlayableGame('pygame')} data-overflow-action style={item}
+                        title={this.L.gamePyTitle} disabled={this.state.busy}
+                        data-testid="bw-game-export-pygame"><Icon name="save" />{this.L.gamePy.replace(/^⬆\s*/, '')}</button>
+                    </div>
+                    <div data-code-menu-group role="group" aria-label={this.L.reference}>
+                    <button type="button" onClick={() => this.setState(s => ({showArt: !s.showArt}))}
+                        data-overflow-action style={item} title={this.L.customArtTitle}>
+                        <Icon name="view-fit" />{this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
+                    </button>
+                    </div>
+                </>}
             </Popup>
         );
     }
@@ -6201,11 +7128,13 @@ class PseudocodeImporter extends React.Component {
         const actionBtn = {...btn, padding: '5px 9px', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0};
         const sel = {padding: '6px 10px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'};
         const max = this.state.maximized;
+        const codeDevice = this.codeDevice();
+        const usesMacDevicePicker = typeof window !== 'undefined' && window.__TAURI__ && /^Mac/.test(navigator.platform);
         const ownedConsoleSource = Boolean(codeDocumentConversionRefusal(
             this.state.codeDocument, this.state.lang, this.activeCode()));
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
         const languageTabStyle = active => ({
-            padding: '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
+            padding: this.state.cardiacActive ? '5px 6px' : '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
             borderRadius: '8px 8px 0 0', cursor: 'pointer', fontWeight: active ? 700 : 500, fontSize: 13,
             background: active ? '#fff' : '#eef2f7', color: active ? '#1e293b' : '#64748b',
             position: 'relative', top: active ? 0 : 1, whiteSpace: 'nowrap'
@@ -6214,118 +7143,90 @@ class PseudocodeImporter extends React.Component {
         const showSpikeAction = isSpikeExtensionLoaded(this.props.vm) || spikeCode;
         // The device this tab is writing for: the MakeCode project's target, else the DEVICE header.
         const toolbarDevice = (this._makeCodeProject && this._makeCodeProject.target) || this.currentDevice();
-        const applies = id => toolbarActionApplies(id, {device: toolbarDevice, evidence: showSpikeAction});
-        return (
-            <div style={wrap} data-testid="bw-code-editor">
-                {/* ── Single merged row: language tabs (left) + compact controls (right) ── */}
-                {/* paddingRight reserves the top-right corner for the floating
-                    "Show right panel" button, which is absolutely positioned at
-                    z-index 20 over this very area. The two did not collide while
-                    the editor chrome was 92px tall and this row sat at y=109;
-                    shrinking the chrome to one row moved the row to y=52 and the
-                    maximize button landed under it — measured, ⊞ at x=980 with
-                    the floating button at x=992, covered and untappable. The
-                    room is reserved unconditionally because the overlay is there
-                    at every chrome height; it was only ever luck that they
-                    missed each other. */}
-                <ScrollRow testId="bw-lang-row" label={this.L.toolbarLabel}
-                    style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
-                    trailing={(
-                        <React.Fragment>
-                            {!this.state.cp1Active && this.renderActionMenu(csel)}
-                    <button onClick={() => this.toggleMaximize()}
-                        style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
-                            color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
-                        title={max ? this.L.restoreTitle : this.L.maximizeTitle}
-                        aria-label={max ? this.L.restoreTitle : this.L.maximizeTitle} aria-pressed={max}
-                        data-testid="bw-editor-maximize">
-                        {max ? '⊡' : '⊞'}
-                    </button>
-
-                        </React.Fragment>
-                    )}>
-                    {[['pseudocode', '🧩 Pseudo'], ['python', '🐍 Py'], ['javascript', '🟨 JS'], ['c', '🔧 C'], ['basic', '📺 BAS'], ['asm', '🔩 ASM'],
-                        ...this.visibleOptionalLangs().map(([l, label]) => [l, label]),
-                        // The tab follows the DEVICE line, except when a
-                        // MicroPython program was imported from a .hex: there
-                        // is no pseudocode then, and hiding the tab would hide
-                        // the Run button of the one program we can run as-is.
-                        ...(['microbit', 'calliopemini'].includes(this.currentDevice()) ||
-                            (this.state.buffers.micropython || '').trim() ?
-                            [['micropython', this.currentDevice() === 'calliopemini' ? '🤖 Calliope' : '🤖 micro:bit']] : []),
-                        // NQC appears for people who have an RCX and stays out
-                        // of everyone else's way. The RCX is not a DEVICE line
-                        // — it is reached through an extension — so the test
-                        // is whether that extension is loaded, plus the usual
-                        // "there is already something in the buffer" so a
-                        // file you opened does not vanish when you switch tabs.
-                        ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
-                            [['nqc', '🧱 NQC']] : [])].map(([l, label]) => {
-                        const active = !this.state.cp1Active && this.state.lang === l;
-                        return (
-                            <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
-                                disabled={this.state.busy && !active}
-                                style={languageTabStyle(active)}>
-                                {label}
-                            </button>
-                        );
-                    })}
-                    <button type="button" data-testid="bw-code-cp1-tab" onClick={() => this.openCp1Language()}
-                        disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
-                        style={languageTabStyle(this.state.cp1Active)}>
-                        CP1
-                    </button>
-                    {(() => {
-                        const shown = this.visibleOptionalLangs().map(([l]) => l);
-                        const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
-                        return (
-                            <Popup id="code-lang-more" anchorTestId="bw-lang-more-anchor" testId="bw-lang-more-menu" role="menu"
-                                open={this.props.isVisible !== false && this.state.langMenuOpen} align="left" width={220}
-                                label={this.L.moreLanguages}
-                                onToggle={() => { if (!this.state.busy) this.setState(s => ({langMenuOpen: !s.langMenuOpen})); }}
-                                onClose={() => this.setState({langMenuOpen: false})}
-                                button={<button type="button" data-testid="bw-lang-more" disabled={this.state.busy}
-                                    aria-label={this.L.moreLanguages} title={this.L.moreLanguages}
-                                    style={{padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '8px 8px 0 0', cursor: 'pointer',
-                                        fontWeight: 700, fontSize: 13, background: '#eef2f7', color: '#64748b', position: 'relative', top: 1}}>
-                                    +
-                                </button>}>
-                                <button type="button" role="menuitem" data-testid="bw-code-open-cp1"
-                                    onClick={() => this.openCp1Language()}
-                                    style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left',
-                                        cursor: 'pointer', fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
-                                    {this.L.cp1Language}
-                                </button>
-                                {hidden.map(([l, label, name]) => (
-                                    <button key={l} type="button" role="menuitem" onClick={() => this.addOptionalLang(l)}
-                                        style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left', cursor: 'pointer',
-                                            fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
-                                        {label} — {name}
-                                    </button>
-                                ))}
-                            </Popup>
-                        );
-                    })()}
-                    {!this.state.cp1Active && <React.Fragment>
-                    {/* Convert/run actions live in the tab row, in maximize mode too. */}
-                    <div data-testid="bw-code-action-row" style={{display: 'inline-flex', alignSelf: 'center',
+        const applies = id => toolbarActionApplies(id, {device: toolbarDevice,
+            evidence: id === 'spike-arena' ? snapshotSpikePorts(this.props.vm?.runtime).connected : showSpikeAction});
+        const showPythonRunTargets = this.state.lang === 'python' && this.activeCode().trim() &&
+            window.__TAURI_INTERNALS__ && applies('spike-nuttx');
+        const german = pickLocale(this.props.locale) === 'de';
+        const selectedMachine = this.state.cp1Active ? 'kosmos-cp1' : this.state.cardiacActive ? 'cardiac' :
+            this.state.kim1Active ? 'kim1' : this.state.microtronicActive ? 'microtronic' : this.state.libraryTarget;
+        const machineLabel = {'kosmos-cp1': 'Kosmos CP1', cardiac: 'CARDIAC', kim1: 'KIM-1',
+            microtronic: 'Microtronic', i80386: '80386'}[selectedMachine] || DEVICE_BY_ID[codeDevice]?.label || this.L.noChips;
+        const renderDeviceSelect = menu => (
+                        <div data-code-machine-select={menu || undefined} style={menu ? undefined : {display: 'contents'}}>
+                        {menu && <Icon name="chip" />}
+                        {usesMacDevicePicker ? <button type="button" aria-haspopup="dialog"
+                            aria-label={this.L.deviceTitle} title={this.L.deviceTitle}
+                            data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
+                            style={{...csel, alignSelf: 'center', cursor: 'pointer', whiteSpace: 'nowrap',
+                                minWidth: 0, flexShrink: menu ? 1 : 0, overflow: 'hidden', textOverflow: 'ellipsis'}}
+                            onClick={() => this.setState({actionsOpen: false}, () => {
+                                const dialog = this.macDeviceDialog;
+                                if (dialog && !dialog.open) {
+                                    dialog.showModal();
+                                    dialog.querySelector('[aria-checked="true"]')?.focus();
+                                }
+                            })}>
+                            {machineLabel} ▾
+                        </button> : (
+                        <select value={selectedMachine || codeDevice || ''} onChange={e => this.setDevice(e.target.value)}
+                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0, whiteSpace: 'nowrap',
+                                flexShrink: menu ? 1 : 0}} title={this.L.deviceTitle}
+                            data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
+                            <option value="">{this.L.noChips}</option>
+                            {selectedMachine && selectedMachine !== 'kosmos-cp1' &&
+                                <option value={selectedMachine} disabled>{machineLabel}</option>}
+                            <optgroup label="Intel 8049">
+                                <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
+                            </optgroup>
+                            {DEVICE_GROUPS.map(g => (
+                                <optgroup key={g.label} label={g.label}>
+                                    {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
+                                </optgroup>
+                            ))}
+                            {/* Opens the machine library (gui.jsx renders it); not a device. */}
+                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
+                        </select>)}
+                        </div>
+        );
+        const picoBasicHardware = this.state.lang === 'basic' && this.selectedBasicProfile()?.media
+            ? this.selectedBasicProfile() : null;
+        const renderCodeControls = menu => (
+            <React.Fragment>
+                    <div data-testid={menu ? undefined : "bw-code-action-row"} style={{display: 'inline-flex', alignSelf: 'center',
                         alignItems: 'center', gap: 6, flexWrap: 'nowrap', flexShrink: 0}}>
                         <button onClick={this.compile}
                             aria-label={this.L.toBlocks}
                             disabled={!this.canCompileToBlocks()}
                             title={this.L.toBlocksTitle(LANG_LABEL[this.state.lang])}
                             style={actionBtn}>
-                            <span aria-hidden="true">⇦ ▣</span>
+                            {menu ? <><Icon name="to-blocks" />{this.L.toBlocks.replace('⇦ ', '')}</> : <span aria-hidden="true">⇦ ▣</span>}
                         </button>
-                        <button onClick={this.fromBlocks} disabled={this.state.busy}
+                        <button onClick={this.fromBlocks} disabled={this.state.busy || Boolean(this.standaloneBasicProfile())}
                             aria-label={this.L.fromBlocks}
                             title={this.L.fromBlocksTitle}
                             style={{...actionBtn, background: 'linear-gradient(135deg,#a55b80,#8e4a6c)'}}>
-                            <span aria-hidden="true">▣ ⇨</span>
+                            {menu ? <><Icon name="from-blocks" />{this.L.fromBlocks.replace(' ⇨', '')}</> : <span aria-hidden="true">▣ ⇨</span>}
                         </button>
-                        {this.currentDevice() === 'pico' ? (
+                        {menu && picoBasicHardware && <React.Fragment>
+                            <button type="button" data-testid="bw-pico-basic-download"
+                                disabled={this.state.busy} onClick={() => this.downloadPicoBasicFirmware(picoBasicHardware)}>
+                                {this.picoBasicHardwareText('download')}
+                            </button>
+                            {(navigator.serial || window.__TAURI__?.core) && <button type="button"
+                                data-testid="bw-pico-basic-hardware-send" disabled={this.state.busy || !this.activeCode().trim()}
+                                onClick={() => {
+                                    this.setState({actionsOpen: false});
+                                    this.sendPicoBasicToHardware(picoBasicHardware);
+                                }}>
+                                {this.picoBasicHardwareText('send')}
+                            </button>}
+                            {this.state.picoBasicConnected && <button type="button" data-testid="bw-pico-basic-disconnect"
+                                onClick={() => this.closePicoBasicHardware()}>{this.picoBasicHardwareText('disconnect')}</button>}
+                        </React.Fragment>}
+                        {this.currentDevice() === 'pico' && !picoBasicHardware ? (
                             <button onClick={this.deployToPico} disabled={this.state.busy}
-                                data-testid="bw-deploy-pico"
+                                data-testid={menu ? "bw-deploy-pico-menu" : "bw-deploy-pico"}
                                 title={this.L.deployPicoTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#2f9e44,#237a34)'}}>
                                 {this.L.deployPico}
@@ -6334,7 +7235,7 @@ class PseudocodeImporter extends React.Component {
                         {this.state.lang === 'pseudocode' && applies('spike-usb') ? (
                             <span style={{display: 'inline-flex', gap: 5, alignItems: 'center', flexWrap: 'nowrap'}}>
                                 <select value={this.state.spikeUsbRoute} disabled={this.state.busy}
-                                    aria-label={this.L.spikeUsbRouteLabel} data-testid="bw-spike-usb-route"
+                                    aria-label={this.L.spikeUsbRouteLabel} data-testid={menu ? "bw-spike-usb-route-menu" : "bw-spike-usb-route"}
                                     onChange={e => this.setState({spikeUsbRoute: e.target.value})}
                                     style={{...csel, maxWidth: 180}}>
                                     <option value="direct">{this.L.spikeUsbDirect}</option>
@@ -6354,11 +7255,11 @@ class PseudocodeImporter extends React.Component {
                                 ) : null}
                                 <button onClick={() => this.runSpikeUsb(true)} disabled={this.state.busy}
                                     title={this.L.probeSpikeUsbTitle}
-                                    data-testid="bw-probe-spike-usb" style={actionBtn}>
+                                    data-testid={menu ? "bw-probe-spike-usb-menu" : "bw-probe-spike-usb"} style={actionBtn}>
                                     {this.L.probeSpikeUsb}
                                 </button>
                                 <button onClick={() => this.runSpikeUsb(false)} disabled={this.state.busy || !(this.state.buffers.pseudocode || '').trim()}
-                                    data-testid="bw-run-spike-usb" style={{...actionBtn, background: '#d97706', color: '#fff'}}>
+                                    data-testid={menu ? "bw-run-spike-usb-menu" : "bw-run-spike-usb"} style={{...actionBtn, background: '#d97706', color: '#fff'}}>
                                     {this.L.runSpikeUsb}
                                 </button>
                             </span>
@@ -6371,7 +7272,7 @@ class PseudocodeImporter extends React.Component {
                          && this.state.lang === 'pseudocode'
                          && this.flashFamily(this.currentDevice()) !== null ? (
                             <button onClick={this.flashToBoard} disabled={this.state.busy}
-                                data-testid="bw-flash-board"
+                                data-testid={menu ? "bw-flash-board-menu" : "bw-flash-board"}
                                 title={this.L.flashBoardTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#c9761b,#a35d12)'}}>
                                 {this.L.flashBoard}
@@ -6387,7 +7288,7 @@ class PseudocodeImporter extends React.Component {
                         {this.state.lang === 'pseudocode'
                          && asmTargetForDevice(this.currentDevice()) === 'i8086' ? (
                                 <button onClick={this.runPseudocodeOn8086} disabled={this.state.busy}
-                                    data-testid="bw-run-8086"
+                                    data-testid={menu ? "bw-run-8086-menu" : "bw-run-8086"}
                                     title={this.L.run8086Title}
                                     style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                     {this.L.run8086}
@@ -6400,12 +7301,12 @@ class PseudocodeImporter extends React.Component {
                          && asmTargetForDevice(this.currentDevice()) === 'i8086' ? (
                                 <React.Fragment>
                                     <button onClick={() => this.exportI8086('com')} disabled={this.state.busy}
-                                        data-testid="bw-export-8086-com" title={this.L.export8086ComTitle}
+                                        data-testid={menu ? "bw-export-8086-com-menu" : "bw-export-8086-com"} title={this.L.export8086ComTitle}
                                         style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
                                         {this.L.export8086Com}
                                     </button>
                                     <button onClick={() => this.exportI8086('img')} disabled={this.state.busy}
-                                        data-testid="bw-export-8086-img" title={this.L.export8086ImgTitle}
+                                        data-testid={menu ? "bw-export-8086-img-menu" : "bw-export-8086-img"} title={this.L.export8086ImgTitle}
                                         style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
                                         {this.L.export8086Img}
                                     </button>
@@ -6419,7 +7320,7 @@ class PseudocodeImporter extends React.Component {
                         {this.state.lang === 'c'
                          && cRouteFor(this.currentDevice()) === 'local' ? (
                                 <button onClick={this.runCOn8086} disabled={this.state.busy}
-                                    data-testid="bw-run-c-8086"
+                                    data-testid={menu ? "bw-run-c-8086-menu" : "bw-run-c-8086"}
                                     title={this.L.runC8086Title}
                                     style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                     {this.L.runC8086}
@@ -6435,7 +7336,7 @@ class PseudocodeImporter extends React.Component {
                                 <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
                                     <label style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
                                         {this.L.asmExampleLabel}
-                                        <select data-testid="bw-riscv-c-examples"
+                                        <select data-testid={menu ? "bw-riscv-c-examples-menu" : "bw-riscv-c-examples"}
                                             onChange={e => this.loadRiscvCExample(e.target.value)}
                                             value=""
                                             disabled={this.state.busy}
@@ -6451,16 +7352,16 @@ class PseudocodeImporter extends React.Component {
                                     <label title={this.L.runCRiscvRouteTitle}
                                         style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
                                         <select value={this.state.riscvCRoute}
-                                            data-testid="bw-riscv-c-route"
+                                            data-testid={menu ? "bw-riscv-c-route-menu" : "bw-riscv-c-route"}
                                             onChange={e => this.setState({riscvCRoute: e.target.value})}
                                             disabled={this.state.busy}
                                             style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
                                             <option value="browser">{this.L.runCRiscvRouteBrowser}</option>
-                                            <option value="server">{this.L.runCRiscvRouteServer}</option>
+                                            <option value="server" disabled={!RISCV_CC_ENDPOINT}>{this.L.runCRiscvRouteServer}</option>
                                         </select>
                                     </label>
                                     <button onClick={() => this.runCOnRiscv()} disabled={this.state.busy}
-                                        data-testid="bw-run-c-riscv"
+                                        data-testid={menu ? "bw-run-c-riscv-menu" : "bw-run-c-riscv"}
                                         title={this.L.runCRiscvTitle}
                                         style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                         {this.L.runCRiscv}
@@ -6469,7 +7370,7 @@ class PseudocodeImporter extends React.Component {
                                         offer the full compiler on the server in one click. */}
                                     {this.state.riscvCanRetryServer ? (
                                         <button onClick={() => this.runCOnRiscv('server')} disabled={this.state.busy}
-                                            data-testid="bw-run-c-riscv-server"
+                                            data-testid={menu ? "bw-run-c-riscv-server-menu" : "bw-run-c-riscv-server"}
                                             title={this.L.runCRiscvTryServerTitle}
                                             style={{...actionBtn, background: 'linear-gradient(135deg,#f08c00,#e67700)'}}>
                                             {this.L.runCRiscvTryServer}
@@ -6488,7 +7389,7 @@ class PseudocodeImporter extends React.Component {
                                 <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
                                     <label style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
                                         {this.L.asmExampleLabel}
-                                        <select data-testid="bw-arduino-sketch-examples"
+                                        <select data-testid={menu ? "bw-arduino-sketch-examples-menu" : "bw-arduino-sketch-examples"}
                                             onChange={e => this.loadArduinoSketchExample(e.target.value)}
                                             value=""
                                             disabled={this.state.busy}
@@ -6502,7 +7403,7 @@ class PseudocodeImporter extends React.Component {
                                         </select>
                                     </label>
                                     <button onClick={this.runSketchOnAvr} disabled={this.state.busy}
-                                        data-testid="bw-run-arduino-sketch"
+                                        data-testid={menu ? "bw-run-arduino-sketch-menu" : "bw-run-arduino-sketch"}
                                         title={this.L.runSketchTitle}
                                         style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                         {this.L.runSketch}
@@ -6511,9 +7412,9 @@ class PseudocodeImporter extends React.Component {
                             ) : null}
                         {/* N1: the Z80 bench's C ▶, gated by the route function that
                             decides what a Z80 is (asmTargetForDevice). */}
-                        {this.state.lang === 'c' && asmTargetForDevice(this.currentDevice()) === 'z80' ? (
+                        {this.state.lang === 'c' && !this.state.libraryProgram && asmTargetForDevice(this.currentDevice()) === 'z80' ? (
                                 <button onClick={this.runCOnZ80} disabled={this.state.busy}
-                                    data-testid="bw-run-c-z80"
+                                    data-testid={menu ? "bw-run-c-z80-menu" : "bw-run-c-z80"}
                                     title={this.L.runCZ80Title}
                                     style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                     {this.L.runCZ80}
@@ -6521,7 +7422,7 @@ class PseudocodeImporter extends React.Component {
                             ) : null}
                         {this.currentDevice() === 'stm32f030' && this.state.lang === 'pseudocode' ? (
                             <button onClick={this.flashStm32ViaSwd} disabled={this.state.busy}
-                                data-testid="bw-flash-swd"
+                                data-testid={menu ? "bw-flash-swd-menu" : "bw-flash-swd"}
                                 title={this.L.flashSwdTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#1b7fc9,#125fa3)'}}>
                                 {this.L.flashSwd}
@@ -6565,14 +7466,14 @@ class PseudocodeImporter extends React.Component {
                         ) : null}
                         {(this.state.lang === 'python' || this.state.lang === 'javascript') && this.activeCode().trim() ? (
                             <button onClick={this.run} disabled={this.state.running}
-                                data-testid="bw-code-run"
+                                data-testid={menu ? "bw-code-run-menu" : "bw-code-run"}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                 ▶ {this.L.run} {this.state.lang === 'python' ? 'Python' : 'JavaScript'}
                             </button>
                         ) : null}
                         {this.state.codeSessionRunning ? (
                             <button type="button" onClick={this._onStopCodeRun}
-                                data-testid="bw-code-stop" style={actionBtn}>
+                                data-testid={menu ? "bw-code-stop-menu" : "bw-code-stop"} style={actionBtn}>
                                 ■ {this.L.stop}
                             </button>
                         ) : null}
@@ -6581,26 +7482,32 @@ class PseudocodeImporter extends React.Component {
                             {applies('spike-arena') ? (
                                 <button onClick={() => this.openSpikeArena()} title={this.L.openSpikeArenaTitle}
                                     style={{...actionBtn, background: 'linear-gradient(135deg,#e8590c,#c2410c)'}}
-                                    data-testid="bw-open-spike-arena">
+                                    data-testid={menu ? "bw-open-spike-arena-menu" : "bw-open-spike-arena"}>
                                     {this.L.openSpikeArena}
                                 </button>
                             ) : null}
-                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
-                                <button type="button" onClick={() => this.runOnNuttxPython()} disabled={this.state.busy}
-                                    style={actionBtn} data-testid="bw-spike-nuttx-python-run"
-                                    title={pickLocale(this.props.locale) === 'de' ? 'Python in unserer vollständigen NuttX-Firmware ausführen. Benötigt das Desktop-Paket mit eingebettetem MicroPython; Roboter-API: brickwright.' :
-                                        'Run Python in our full NuttX firmware. Requires the desktop package with embedded MicroPython; robot API: brickwright.'}>
-                                    ▶ Python · NuttX
-                                </button> : null}
-                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
-                                <button type="button" onClick={() => this.runOnMicroPythonImage()} disabled={this.state.busy}
-                                    style={actionBtn} data-testid="bw-spike-micropython-run"
-                                    title={pickLocale(this.props.locale) === 'de' ? 'Lokales MicroPython-Anwendungsimage auswählen und Python in Renode ausführen. Benötigt ein Desktop-Paket mit MicroPython-Simulationsprofil.' :
-                                        'Choose a local MicroPython application image and run Python in Renode. Requires a desktop package with the MicroPython simulation profile.'}>
-                                    ▶ MicroPython · Image
-                                </button> : null}
+                            {menu && showPythonRunTargets && (
+                                <details data-testid="bw-python-run-on">
+                                    <summary data-overflow-action>
+                                        <span aria-hidden="true">▶</span>{german ? 'Ausführen auf' : 'Run on'}
+                                        <Icon name="chevronRight" size={12} />
+                                    </summary>
+                                    <div>
+                                        <button type="button" onClick={() => this.runOnNuttxPython()} disabled={this.state.busy}
+                                            data-testid="bw-spike-nuttx-python-run-menu"
+                                            title={german ? 'Python in der NuttX-Firmware ausführen' : 'Run Python in the NuttX firmware'}>
+                                            NuttX
+                                        </button>
+                                        <button type="button" onClick={() => this.runOnMicroPythonImage()} disabled={this.state.busy}
+                                            data-testid="bw-spike-micropython-run-menu"
+                                            title={german ? 'Lokales MicroPython-Image in Renode ausführen' : 'Run with a local MicroPython image in Renode'}>
+                                            {german ? 'MicroPython-Image…' : 'MicroPython image…'}
+                                        </button>
+                                    </div>
+                                </details>
+                            )}
                             {applies('spike-firmware') && window.__TAURI_INTERNALS__ && ((this.state.lang === 'pseudocode' && this.currentDevice() === 'spike') || (this.state.lang === 'python' && isSpike3Program(this.activeCode()))) ? <button type="button" onClick={() => this.runOnSpikeFirmware()}
-                                disabled={this.state.busy} style={actionBtn} data-testid="bw-spike-firmware-run"
+                                disabled={this.state.busy} style={actionBtn} data-testid={menu ? "bw-spike-firmware-run-menu" : "bw-spike-firmware-run"}
                                 title={this.L.spikeFirmwareRunTitle}>
                                 ▶ Firmware
                             </button> : null}
@@ -6608,33 +7515,33 @@ class PseudocodeImporter extends React.Component {
                         {this.state.lang === 'python' && isSpike3Program(this.activeCode()) ? (
                             <button onClick={() => this.runOnSpike3()} title={this.L.runOnSpike3Title} disabled={this.state.busy}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#f59e0b,#d97706)'}}
-                                data-testid="bw-spike3-run">
+                                data-testid={menu ? "bw-spike3-run-menu" : "bw-spike3-run"}>
                                 {this.L.runOnSpike3}
                             </button>
                         ) : null}
                         {this.state.spike3Running ? (
-                            <button onClick={() => this.stopSpike3()} data-testid="bw-spike3-stop"
+                            <button onClick={() => this.stopSpike3()} data-testid={menu ? "bw-spike3-stop-menu" : "bw-spike3-stop"}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}>
                                 {this.L.spike3Stop}
                             </button>
                         ) : null}
                         {this.state.picoSimRunning ? (
-                            <button onClick={() => this.stopPicoSim()} data-testid="bw-pico-sim-stop"
+                            <button onClick={() => this.stopPicoSim()} data-testid={menu ? "bw-pico-sim-stop-menu" : "bw-pico-sim-stop"}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}>
                                 ■ {this.L.stop}
                             </button>
                         ) : null}
                         {this.state.lang === 'basic' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runBasic()} disabled={this.state.running}
+                            <button onClick={() => this.runBasic()} disabled={this.state.running || this.state.busy}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-basic-run">
+                                data-testid={menu ? "bw-basic-run-menu" : "bw-basic-run"}>
                                 {this.L.runBasic}
                             </button>
                         ) : null}
                         {this.state.lang === 'fe' && this.activeCode().trim() ? (
                             <button onClick={() => this.runFeOnDosInterp()} disabled={this.state.running}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-fe-run">
+                                data-testid={menu ? "bw-fe-run-menu" : "bw-fe-run"}>
                                 {this.L.runFe}
                             </button>
                         ) : null}
@@ -6642,14 +7549,14 @@ class PseudocodeImporter extends React.Component {
                             <button onClick={() => this.runFeOnRiscv()} disabled={this.state.running || this.state.busy}
                                 title={this.L.runFeRiscvTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-fe-run-riscv">
+                                data-testid={menu ? "bw-fe-run-riscv-menu" : "bw-fe-run-riscv"}>
                                 {this.L.runFeRiscv}
                             </button>
                         ) : null}
                         {this.state.lang === 'forth' && this.activeCode().trim() ? (
                             <button onClick={() => this.runForthOnDosInterp()} disabled={this.state.running}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-forth-run">
+                                data-testid={menu ? "bw-forth-run-menu" : "bw-forth-run"}>
                                 {this.L.runForth}
                             </button>
                         ) : null}
@@ -6657,14 +7564,14 @@ class PseudocodeImporter extends React.Component {
                             <button onClick={() => this.runForthOnRiscv()} disabled={this.state.running || this.state.busy}
                                 title={this.L.runForthRiscvTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-forth-run-riscv">
+                                data-testid={menu ? "bw-forth-run-riscv-menu" : "bw-forth-run-riscv"}>
                                 {this.L.runForthRiscv}
                             </button>
                         ) : null}
                         {this.state.lang === 'tcl' && this.activeCode().trim() ? (
                             <button onClick={() => this.runTclOnDosInterp()} disabled={this.state.running}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-tcl-run">
+                                data-testid={menu ? "bw-tcl-run-menu" : "bw-tcl-run"}>
                                 {this.L.runTcl}
                             </button>
                         ) : null}
@@ -6674,7 +7581,7 @@ class PseudocodeImporter extends React.Component {
                                 disabled={this.state.running || this.state.busy}
                                 title={this.L.runViaBlocksTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#4c97ff,#4280d7)'}}
-                                data-testid="bw-run-via-blocks">
+                                data-testid={menu ? "bw-run-via-blocks-menu" : "bw-run-via-blocks"}>
                                 {this.L.runViaBlocks(this.currentDevice())}
                             </button>
                         ) : null}
@@ -6682,130 +7589,221 @@ class PseudocodeImporter extends React.Component {
                             <button onClick={() => this.runTclOnRiscv()} disabled={this.state.running || this.state.busy}
                                 title={this.L.runTclRiscvTitle}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-tcl-run-riscv">
+                                data-testid={menu ? "bw-tcl-run-riscv-menu" : "bw-tcl-run-riscv"}>
                                 {this.L.runTclRiscv}
                             </button>
                         ) : null}
-                        {this.state.lang === 'c' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showCInfo: !s.showCInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showCInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showCInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                title={this.L.cNote.slice(0, 60)} data-testid="bw-c-info-toggle">i</button>
-                        ) : null}
+                        {menu && this.state.lang === 'asm' && this.state.asmMode === 'source' && <>
+                            <button type="button" data-testid="bw-asm-assemble-menu"
+                                disabled={this.state.busy || !this.state.buffers.asm.trim()} onClick={() => this.assembleAndRun()}>
+                                <Icon name="run" />{this.L.assembleAndRun.replace(/^🔩\s*/, '')}
+                            </button>
+                            {this.renderAsmExamplePicker(true)}
+                        </>}
+                        {this.state.lang === this.state.libraryProgram?.language && (
+                            <button type="button" style={actionBtn} onClick={this.runLibraryProgram}
+                                disabled={this.state.busy} title={this.L.cpmRunHint}
+                                data-testid={menu ? 'bw-library-code-run-menu' : 'bw-library-code-run'}>
+                                {menu ? <Icon name="run" /> : '▶ '}{this.state.libraryProgram.title}
+                            </button>
+                        )}
                         {this.state.lang === 'nqc' ? (
                             <React.Fragment>
                                 <button type="button" onClick={() => this.compileNqcToFile()}
                                     disabled={this.state.busy || !(this.state.buffers.nqc || '').trim()}
-                                    data-testid="bw-nqc-compile" title={this.L.nqcNote.slice(0, 80)}
+                                    data-testid={menu ? "bw-nqc-compile-menu" : "bw-nqc-compile"} title={this.L.nqcNote.slice(0, 80)}
                                     style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
                                     {this.L.nqcCompile}
                                 </button>
                                 <button type="button" onClick={() => this.sendNqcToBrick()}
                                     disabled={this.state.busy || !(this.state.buffers.nqc || '').trim()}
-                                    data-testid="bw-nqc-send" title={this.L.nqcNote.slice(0, 80)}
+                                    data-testid={menu ? "bw-nqc-send-menu" : "bw-nqc-send"} title={this.L.nqcNote.slice(0, 80)}
                                     style={{...actionBtn, background: '#4c97ff', color: '#fff'}}>
                                     {this.L.nqcSend}
                                 </button>
-                                <button type="button" onClick={() => this.setState(st => ({showNqcInfo: !st.showNqcInfo}))}
-                                    style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                        padding: 0, border: 'none', borderRadius: '50%', background: this.state.showNqcInfo ? '#4c97ff' : '#e2e8f0',
-                                        color: this.state.showNqcInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                    title={this.L.nqcNote.slice(0, 60)} data-testid="bw-nqc-info-toggle">i</button>
                             </React.Fragment>
                         ) : null}
-                        {this.state.lang === 'basic' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showBasicInfo: !s.showBasicInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showBasicInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showBasicInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
-                                title={this.L.basicInfoTitle} data-testid="bw-basic-info-toggle">i</button>
-                        ) : null}
-                        {this.state.lang === 'asm' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showAsmInfo: !s.showAsmInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showAsmInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showAsmInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
-                                title={this.L.asmInfoTitle} data-testid="bw-asm-info-toggle">i</button>
-                        ) : null}
                     </div>
-                    <span style={{flex: 1, minWidth: 4}} />
+                    {!menu && <span style={{flex: 1, minWidth: 4}} />}
                     {/* Compact controls */}
                     <React.Fragment>
-                        <button type="button" onClick={() => this.setState(s => ({showInfo: !s.showInfo}))}
-                            aria-label={this.L.infoAria} title={this.L.infoTitle}
-                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
-                                padding: 0, border: 'none', borderRadius: '50%', background: this.state.showInfo ? '#4c97ff' : '#e2e8f0',
-                                color: this.state.showInfo ? '#fff' : '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                                fontStyle: 'italic', alignSelf: 'center'}}>
-                            i
-                        </button>
                         <button type="button" onClick={() => this.setState(s => ({showMatrix: !s.showMatrix}))}
                             aria-label={this.L.matrixAria} title={this.L.matrixTitle}
-                            data-testid="bw-matrix-toggle"
+                            data-testid={menu ? "bw-matrix-toggle-menu" : "bw-matrix-toggle"}
                             style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
                                 padding: '0 6px', border: 'none', borderRadius: 10,
                                 background: this.state.showMatrix ? '#4c97ff' : '#e2e8f0',
                                 color: this.state.showMatrix ? '#fff' : '#475569', fontSize: 11, fontWeight: 700,
                                 cursor: 'pointer', alignSelf: 'center'}}>
-                            ⊞⊟
+                            {menu ? <><Icon name="grid" /><span>{pickLocale(this.props.locale) === 'de' ? 'Sprachmatrix' : 'Language matrix'}</span></> :
+                                <span aria-hidden="true">⊞⊟</span>}
                         </button>
                         <button type="button" onClick={() => showCircuitDebugger()}
                             aria-label={pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}
                             title={pickLocale(this.props.locale) === 'de' ? 'Debugger im rechten Bereich öffnen' : 'Open debugger in the right pane'}
-                            data-testid="bw-open-circuit-debugger"
+                            data-testid={menu ? "bw-open-circuit-debugger-menu" : "bw-open-circuit-debugger"}
                             style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
                                 padding: '0 7px', border: 'none', borderRadius: 10, background: '#e2e8f0',
                                 color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', alignSelf: 'center'}}>
-                            {'🐞 Debugger'}
+                            {menu ? <><Icon name="debugger" />{pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}</> :
+                                <span aria-hidden="true">🐞</span>}
                         </button>
-                        <select value={this.currentDevice() || ''} onChange={e => this.setDevice(e.target.value)}
-                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
-                            data-testid="bw-device-select">
-                            <option value="">{this.L.noChips}</option>
-                            <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
-                            {DEVICE_GROUPS.map(g => (
-                                <optgroup key={g.label} label={g.label}>
-                                    {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
-                                </optgroup>
-                            ))}
-                            {/* Opens the machine library (gui.jsx renders it); not a device. */}
-                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
-                        </select>
-                        {/* What this language can do on this device: native, lowered, or
-                            an open task — one line, read from lib/bw-matrix/capabilities.js,
-                            the same table the docs are generated from. Title = the long form. */}
-                        {this.currentDevice() && matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale)) ? (
-                            <span style={{alignSelf: 'center', display: 'inline-flex'}}>
-                                {/* The reach summary is long; keep it behind an (i) button, in a portalled
-                                    pop-up (the toolbar scrolls sideways and would clip an absolute one). */}
-                                <Popup id="code-matrix-info" anchorTestId="bw-matrix-badge-anchor" testId="bw-matrix-badge-popover"
-                                    open={this.props.isVisible !== false && this.state.matrixInfoOpen} align="right" width={320}
-                                    label={this.L.matrixInfoAria}
-                                    onToggle={() => this.setState(state => ({matrixInfoOpen: !state.matrixInfoOpen}))}
-                                    onClose={() => this.setState({matrixInfoOpen: false})}
-                                    button={<button type="button" data-testid="bw-matrix-badge"
-                                        aria-label={this.L.matrixInfoAria}
-                                        data-summary={matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        title={matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        style={{width: 20, height: 20, padding: 0, borderRadius: '50%', fontSize: 11,
-                                            fontWeight: 700, fontStyle: 'italic', fontFamily: 'Georgia, serif', lineHeight: '18px',
-                                            color: '#475569', background: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer'}}>
-                                        i
-                                    </button>}>
-                                    <div style={{padding: '2px 4px', color: '#334155'}}>
-                                        <strong style={{display: 'block'}}>
-                                            {matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        </strong>
-                                        {matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                    </div>
-                                </Popup>
-                            </span>
-                        ) : null}
+                        {renderDeviceSelect(menu)}
                     </React.Fragment>
+            </React.Fragment>
+        );
+        const machine = this.state.microtronicActive ? 'microtronic' : this.state.cardiacActive ? 'cardiac' : this.state.cp1Active ? 'cp1' :
+            this.state.kim1Active ? 'kim1' : null;
+        const languageAvailable = lang => !machine && this.allowsCodeLanguage(lang);
+        const basicProfile = this.selectedBasicProfile();
+        const basicProfileLabels = {bbc: 'BBC BASIC (Z80)', ms: '6502 BASIC', i8086: '8086 BASIC (native)',
+            'i8086-dos': '8086 BASIC (MS-DOS 2.0)', 'i8086-ubasic': 'uBASIC (DOS)', 'pico-bbcbasic': 'PicoBB BBC BASIC',
+            'pico-piccolo': 'PiccoloBASIC', 'pico-stefan': 'Stefan’s BASIC'};
+        const renderLanguages = menu => (
+            <React.Fragment>
+                    {[['pseudocode', '🧩 Pseudo'], ['python', '🐍 Py'], ['javascript', '🟨 JS'], ['c', '🔧 C'], ['basic', '📺 BAS'], ['asm', '🔩 ASM'],
+                        ...this.visibleOptionalLangs().map(([l, label]) => [l, label]),
+                        // The tab follows the DEVICE line, except when a
+                        // MicroPython program was imported from a .hex: there
+                        // is no pseudocode then, and hiding the tab would hide
+                        // the Run button of the one program we can run as-is.
+                        ...(['microbit', 'calliopemini'].includes(codeDevice) ||
+                            (!codeDevice && (this.state.buffers.micropython || '').trim()) ?
+                            [['micropython', this.currentDevice() === 'calliopemini' ? '🤖 Calliope' : '🤖 micro:bit']] : []),
+                        // NQC appears for people who have an RCX and stays out
+                        // of everyone else's way. The RCX is not a DEVICE line
+                        // — it is reached through an extension — so the test
+                        // is whether that extension is loaded, plus the usual
+                        // "there is already something in the buffer" so a
+                        // file you opened does not vanish when you switch tabs.
+                        ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
+                            [['nqc', '🧱 NQC']] : [])].filter(([l]) => languageAvailable(l)).map(([l, label]) => {
+                        const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && !this.state.microtronicActive && this.state.lang === l;
+                        return (
+                            <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
+                                disabled={this.state.busy && !active} title={menu ? LANG_LABEL[l] : label}
+                                aria-label={menu ? (l === 'micropython' ? label.replace(/^\S+\s+/, '') : LANG_LABEL[l]) : label}
+                                style={languageTabStyle(active)}>
+                                {menu ? (l === 'micropython' ? label.replace(/^\S+\s+/, '') : LANG_LABEL[l]) :
+                                    this.state.cardiacActive ? label.split(' ')[0] : label}
+                            </button>
+                        );
+                    })}
+                    {this.state.cp1Active && <button type="button" data-testid={menu ? "bw-code-cp1-tab-menu" : "bw-code-cp1-tab"} onClick={() => this.openCp1Language()}
+                        disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
+                        style={languageTabStyle(this.state.cp1Active)}>
+                        CP1
+                    </button>}
+                    {this.state.cardiacActive && <button type="button" data-testid={menu ? "bw-code-cardiac-tab-menu" : "bw-code-cardiac-tab"} onClick={() => this.openCardiacLanguage()}
+                        disabled={this.state.busy} aria-pressed={this.state.cardiacActive}
+                        title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
+                        CARDIAC
+                    </button>}
+                    {this.state.microtronicPartId && (!machine || machine === 'microtronic') && <button type="button"
+                        data-testid={menu ? 'bw-code-microtronic-tab-menu' : 'bw-code-microtronic-tab'}
+                        onClick={this.selectMicrotronic} aria-pressed={!!this.state.microtronicActive}
+                        style={languageTabStyle(this.state.microtronicActive)}>Microtronic</button>}
+                    {this.state.kim1PartId && (!machine || machine === 'kim1') && <button type="button" data-testid={menu ? "bw-code-kim1-tab-menu" : "bw-code-kim1-tab"}
+                        onClick={() => this.setState({kim1Active: true, cp1Active: false, cardiacActive: false, microtronicActive: false})}
+                        aria-pressed={this.state.kim1Active} style={languageTabStyle(this.state.kim1Active)}>
+                        KIM-1
+                    </button>}
+                    {(() => {
+                        const shown = this.visibleOptionalLangs().map(([l]) => l);
+                        const hidden = BW_OPTIONAL_LANGS.filter(([l]) => languageAvailable(l) && !shown.includes(l))
+                            .map(([language, label, name]) => [language, label, name, () => this.addOptionalLang(language)]);
+                        if (!machine && !codeDevice) hidden.push(['cp1', 'CP1', this.L.cp1Language, () => this.openCp1Language()]);
+                        if (!machine && !codeDevice) hidden.push(['cardiac', 'CARDIAC', this.L.cardiacLanguage, () => this.openCardiacLanguage()]);
+                        if (!hidden.length) return null;
+                        if (menu) return hidden.map(([language, label, name, open]) =>
+                            <button key={language} type="button" title={name} disabled={this.state.busy}
+                                onClick={open}>{LANG_LABEL[language] || label}</button>);
+                        return (
+                            <Popup id="code-lang-more" anchorTestId="bw-lang-more-anchor" testId="bw-lang-more-menu" role="menu"
+                                open={this.props.isVisible !== false && this.state.langMenuOpen} align="left" width={220}
+                                label={this.L.moreLanguages}
+                                onToggle={() => { if (!this.state.busy) this.setState(s => ({langMenuOpen: !s.langMenuOpen})); }}
+                                onClose={() => this.setState({langMenuOpen: false})}
+                                button={<button type="button" data-testid="bw-lang-more" disabled={this.state.busy}
+                                    aria-label={this.L.moreLanguages} title={this.L.moreLanguages}
+                                    style={{padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '8px 8px 0 0', cursor: 'pointer',
+                                        fontWeight: 700, fontSize: 13, background: '#eef2f7', color: '#64748b', position: 'relative', top: 1}}>
+                                    +
+                                </button>}>
+                                {hidden.map(([l, label, name, open]) => (
+                                    <button key={l} type="button" role="menuitem" title={name} onClick={open}
+                                        style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left', cursor: 'pointer',
+                                            fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
+                                        {label}
+                                    </button>
+                                ))}
+                            </Popup>
+                        );
+                    })()}
+            </React.Fragment>
+        );
+        const languageBar = (
+                <ScrollRow testId="bw-lang-row" label={this.L.toolbarLabel}
+                    style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
+                    trailing={(
+                        <React.Fragment>
+                            {this.renderCodeInfo(machine)}
+                            {this.renderActionMenu(csel, renderCodeControls, renderLanguages, machine, renderDeviceSelect)}
+                    <button onClick={() => this.toggleMaximize()}
+                        style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
+                            color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
+                        title={max ? this.L.restoreTitle : this.L.maximizeTitle}
+                        aria-label={max ? this.L.restoreTitle : this.L.maximizeTitle} aria-pressed={max}
+                        data-testid="bw-editor-maximize">
+                        {max ? '⊡' : '⊞'}
+                    </button>
+
+                        </React.Fragment>
+                    )}>
+                    {renderLanguages(false)}
+                    {this.state.cardiacActive && !this.state.actionsOpen && <div ref={this.props.onCardiacToolsSlot}
+                        data-cardiac-tools-slot style={{display: 'flex', flexShrink: 0, alignItems: 'center', paddingLeft: 4}} />}
+                    {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && !this.state.microtronicActive && <React.Fragment>
+                    {renderCodeControls(false)}
                     </React.Fragment>}
                 </ScrollRow>
-                {this.state.cp1Active ? (
+        );
+        return (
+            <div style={{...wrap, position: 'relative'}} data-testid="bw-code-editor"
+                data-code-operation-status={this.state.status || undefined}>
+                {usesMacDevicePicker && this.renderMacDevicePicker()}
+                {max ? <details data-code-max-tools style={{position: 'absolute', top: 8, left: 16, right: 52,
+                    zIndex: 20, pointerEvents: 'none'}} onKeyDown={event => {
+                    if (event.key === 'Escape') {
+                        event.currentTarget.open = false;
+                        event.currentTarget.querySelector('summary')?.focus();
+                    }
+                }}>
+                    <summary data-testid="bw-max-editor-tools" aria-label={this.L.toolbarLabel} title={this.L.toolbarLabel}
+                        style={{listStyle: 'none', textAlign: 'center', cursor: 'pointer', width: 28, marginLeft: 'auto',
+                            pointerEvents: 'auto', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 6, background: '#fff'}}>
+                        …
+                    </summary>
+                    <div style={{pointerEvents: 'auto', background: '#f1f5f9', padding: 4, borderRadius: 6,
+                        border: '1px solid #cbd5e1', boxShadow: '0 2px 8px #0002'}}>
+                        {languageBar}
+                    </div>
+                </details> : languageBar}
+                {this.renderBlinkMachinePicker()}
+                {this.state.microtronicActive ? (
+                    <React.Suspense fallback={null}>
+                        <MicrotronicSurface vm={this.props.vm} partId={this.state.microtronicPartId} variant="code"
+                            locale={this.props.locale} Editor={CMEditor} />
+                    </React.Suspense>
+                ) : this.state.kim1Active ? (
+                    <React.Suspense fallback={null}>
+                        <Kim1Surface vm={this.props.vm} partId={this.state.kim1PartId} variant="code"
+                            locale={this.props.locale} Editor={CMEditor} />
+                    </React.Suspense>
+                ) : this.state.cardiacActive ? (
+                    <div ref={this.props.onCardiacCodeSlot} data-cardiac-language-pane
+                        style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
+                ) : this.state.cp1Active ? (
                     <div ref={this.props.onCp1CodeSlot} data-cp1-language-pane
                         style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
                 ) : <React.Fragment>
@@ -6816,170 +7814,24 @@ class PseudocodeImporter extends React.Component {
                         {this.L.jsConsoleHint}
                     </div>
                 ) : null}
-                {/* Transient messages sit under the row, not in it: they can be long and expand. */}
-                {this.state.status || this.state.conversionReport ? (
-                    <div data-testid="bw-code-notices" style={{display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'flex-start',
-                        flexShrink: 0, minWidth: 0, paddingTop: 4}}>
-                    {/* A one-line status pill; click to read all of it on its own line. */}
-                    {this.state.status ? <div data-testid="bw-code-status" role="status"
-                        data-expanded={this.state.statusExpanded ? 'true' : 'false'}
-                        style={{fontSize: 12, display: 'flex', alignItems: 'flex-start', gap: 4, alignSelf: 'center',
-                            minWidth: 0, flexShrink: 1, padding: '0 0 0 8px', border: '1px solid #cbd5e1', borderRadius: 12,
-                            background: '#f8fafc', ...(this.state.statusExpanded ?
-                                {flexBasis: '100%', maxHeight: 72, overflowY: 'auto', borderRadius: 6} : {maxWidth: 280})}}>
-                        <span title={this.state.status}
-                            onClick={() => this.setState(state => ({statusExpanded: !state.statusExpanded}))}
-                            style={{flex: '1 1 0', minWidth: 0, cursor: 'pointer', alignSelf: 'center',
-                                ...(this.state.statusExpanded ? {whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'} :
-                                    {whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'})}}>
-                            {this.state.status}
-                        </span>
-                        {this.state.emptyTabOffer ? <button type="button" data-testid="bw-open-empty-tab"
-                            onClick={() => this.openEmptyTab(this.state.emptyTabOffer)}
-                            style={{border: '1px solid #cbd5e1', borderRadius: 10, background: '#fff', cursor: 'pointer',
-                                flexShrink: 0, fontSize: 11, padding: '1px 8px', alignSelf: 'center'}}>
-                            {this.L.openEmptyTab(this.state.emptyTabOffer)}
-                        </button> : null}
-                        <button type="button"
-                            data-testid={/^(Restored your unsaved |Nicht gespeicherter )/.test(this.state.status) ?
-                                'bw-dismiss-restored' : 'bw-dismiss-code-status'}
-                            aria-label={this.L.dismissNotice} onClick={() => this.setState({status: '', statusExpanded: false, emptyTabOffer: null})}
-                            style={{border: 0, background: 'transparent', cursor: 'pointer', flexShrink: 0,
-                                fontSize: 18, lineHeight: 1, padding: 4}}>×</button>
-                    </div> : null}
-                    {this.state.conversionReport ? (() => {
-                        const report = this.state.conversionReport;
-                        const de = pickLocale(this.props.locale) === 'de';
-                        const exp = this.state.reportExpanded;
-                        return (
-                            <div data-testid="bw-conversion-report" role="status"
-                                style={{border: '1px solid #cbd5e1', alignSelf: 'center',
-                                    borderRadius: exp ? 6 : 12, background: '#f8fafc', fontSize: 12, color: '#334155',
-                                    flexShrink: 1, minWidth: 0, maxHeight: 180, overflowY: 'auto', overflowWrap: 'anywhere',
-                                    ...(exp ? {flexBasis: '100%'} : {maxWidth: 360})}}>
-                                <div style={{display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center', padding: exp ? '7px 10px 4px' : '4px 8px', cursor: 'pointer', fontWeight: 600}}
-                                    onClick={() => this.setState(s => ({reportExpanded: !s.reportExpanded}))}>
-                                    <span style={{width: 16, display: 'inline-block', fontSize: 10}}>{exp ? '▼' : '▶'}</span>
-                                    {de ? 'Umwandlungsbericht' : 'Conversion report'}: {report.direction}
-                                    {!exp && (
-                                        <span style={{marginLeft: 'auto', display: 'flex', gap: 6, fontSize: 11}}>
-                                            {report.operation || report.preserved ? null : <span style={{color: '#991b1b'}}>❌</span>}
-                                            {report.changed.length > 0 && <span style={{color: '#0284c7'}}>{report.changed.length} {de ? 'geändert' : 'changed'}</span>}
-                                            {report.unsupported.length > 0 && <span style={{color: '#92400e'}}>{report.unsupported.length} {de ? 'nicht unterstützt' : 'unsupported'}</span>}
-                                            {!report.operation && report.preserved && report.changed.length === 0 && report.unsupported.length === 0 && <span style={{color: '#166534'}}>✓ OK</span>}
-                                        </span>
-                                    )}
-                                    <button type="button" data-testid="bw-dismiss-conversion-report"
-                                        aria-label={this.L.dismissNotice} title={this.L.dismissNotice}
-                                        onClick={event => { event.stopPropagation(); this.setState({conversionReport: null}); }}
-                                        style={{marginLeft: 'auto', border: 0, background: 'transparent', cursor: 'pointer',
-                                            fontSize: 18, lineHeight: 1, padding: 4}}>×</button>
-                                </div>
-                                {exp && (
-                                    <div style={{padding: '0 10px 7px 26px'}}>
-                                        <div data-testid="bw-conversion-preserved" style={{color: report.preserved ? '#166534' : '#991b1b'}}>
-                                            {report.operation ? report.outcome : <>{de ? 'Bewahrt' : 'Preserved'}: {report.preserved ?
-                                                (de ? 'Projektstruktur erzeugt und geladen' : 'project structure generated and loaded') :
-                                                (de ? 'nein — Umwandlung fehlgeschlagen' : 'no — conversion failed')}</>}
-                                        </div>
-                                        <div data-testid="bw-conversion-changed">
-                                            {de ? 'Geändert' : 'Changed'}: {report.changed.length ? report.changed.join(' · ') :
-                                                (de ? 'keine gemeldeten Änderungen' : 'no reported changes')}
-                                        </div>
-                                        <div data-testid="bw-conversion-unsupported"
-                                            style={{color: report.unsupported.length ? '#92400e' : '#334155'}}>
-                                            {de ? 'Nicht unterstützt' : 'Unsupported'}: {report.unsupported.length ?
-                                                report.unsupported.join(' · ') : (de ? 'nichts gemeldet' : 'nothing reported')}
-                                        </div>
-                                        {report.details?.length > 0 && <pre data-testid="bw-conversion-refusal-details"
-                                            style={{whiteSpace: 'pre-wrap', fontSize: 11}}>{JSON.stringify(report.details, null, 2)}</pre>}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })() : null}
-                    </div>
-                ) : null}
-
-                {this.state.showRepresentation && !max && !ownedConsoleSource && (
-                    <div data-testid="bw-representation-status" role="status"
-                        style={{padding: '5px 10px', background: '#fff8e1', border: '1px solid #f0c36d',
-                            borderRadius: '0 0 6px 6px', color: '#5d4300', fontSize: 11, lineHeight: 1.35,
-                            flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <span>{representationNotice(this.state.lang, this.state.asmMode, this.props.locale)}</span>
-                        <button onClick={() => this.setState({showRepresentation: false})} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', fontSize: 14}}>✕</button>
-                    </div>
-                )}
-
                 {this.state.showMatrix && !max && this.renderMatrixPanel()}
 
-                {this.state.showInfo && !max && (
-                    <div style={{padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: '0 0 8px 8px', fontSize: 12, color: '#334155', flexShrink: 0}}>
-                        <div style={{fontWeight: 'bold', marginBottom: 6, color: '#1e3a8a'}}>
-                            {this.currentDevice() ? deviceHelp(this.currentDevice()) : deviceHelp('default')}
-                        </div>
-                        {pickLocale(this.props.locale) === 'de' ? (
-                            <React.Fragment>
-                                Schreibe dein Projekt als Code in jedem Tab. <strong>Pseudocode</strong>, <strong>Python</strong>,{' '}
-                                <strong>JavaScript</strong>, <strong>C</strong> und <strong>BASIC</strong> wandeln nur die{' '}
-                                unterstützte Teilmenge in beide Richtungen um; Warnungen benennen nicht darstellbare Konstrukte:{' '}
-                                <strong>⇦ Zu Blöcken</strong> kompiliert den aktiven Tab, <strong>Von Blöcken ⇨</strong>{' '}
-                                liest das aktuelle Projekt in jede Sprache ein, Tab-Wechsel wandelt um.{' '}
-                                <strong>ASM</strong> ist bewusst einbahnig — schreiben, assemblieren, ausführen; kein Rückweg zu Blöcken.{' '}
-                                <strong>micro:bit</strong> wird für DEVICE MICROBIT generiert (noch kein Rücklesen).{' '}
-                                Sprite-/Stift-Verhalten liegt in den Blöcken (die Wahrheit) — Kommentare bleiben erhalten.
-                            </React.Fragment>
-                        ) : (
-                            <React.Fragment>
-                                Write your project as code in any tab. <strong>Pseudocode</strong>, <strong>Python</strong>,{' '}
-                                <strong>JavaScript</strong>, <strong>C</strong> and <strong>BASIC</strong> convert only the{' '}
-                                supported subset in both directions; warnings identify constructs that cannot be represented:{' '}
-                                <strong>⇦ To blocks</strong> compiles the active tab, <strong>From blocks ⇨</strong>{' '}
-                                reads the current project into every language, switching tabs converts.{' '}
-                                <strong>ASM</strong> is deliberately one-way — write, assemble and run.{' '}
-                                <strong>micro:bit</strong> is generated for DEVICE MICROBIT (no reader yet).{' '}
-                                Sprite/pen behaviour lives in the blocks (ground truth) — comments are kept.
-                            </React.Fragment>
-                        )}
-                    </div>
-                )}
-
-                {this.state.showRef && !max && (
-                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))',
-                        gap: 12, marginBottom: 4, padding: 10, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0',
-                        fontSize: 12, flexShrink: 0}}>
-                        {(this.state.lang === 'pseudocode' ? SYNTAX : SUPPORTED[this.state.lang] || []).map(([h, items]) => (
-                            <div key={h}>
-                                <div style={{fontWeight: 700, marginBottom: 4}}>{this.L.h[h] || h}</div>
-                                <ul style={{margin: 0, paddingLeft: 16}}>
-                                    {items.map((it, i) => (
-                                        <li key={i}><code style={{fontSize: 11}}>{it}</code></li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {this.state.lang === 'basic' && !max && (
+                {this.state.lang === 'basic' && basicProfile && !max && (
                     <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
                             {this.L.profile}
-                            <select value={this.state.basicProfile} onChange={e => this.setGenOpt({basicProfile: e.target.value})}
+                            <select value={basicProfile.id} data-testid="bw-basic-profile" onChange={e => this.setGenOpt({basicProfile: e.target.value})}
                                 style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
-                                <option value="bbc">{'BBC BASIC'}</option>
-                                <option value="ms">{'6502 BASIC'}</option>
-                                <option value="i8086">{'8086 BASIC (native)'}</option>
-                                <option value="i8086-dos">{'8086 BASIC (real MS-DOS 2.0)'}</option>
-                                <option value="i8086-ubasic">{'BASIC (uBASIC on DOS)'}</option>
+                                {basicProfilesFor(codeDevice).map(({id}) =>
+                                    <option key={id} value={id}>{basicProfileLabels[id]}</option>)}
                             </select>
                         </label>
-                        <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
+                        {!this.standaloneBasicProfile() && <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
                             <input type="checkbox" checked={this.state.basicLineNumbers}
-                                disabled={this.state.basicProfile === 'ms'}
+                                disabled={basicProfile.id === 'ms'}
                                 onChange={e => this.setGenOpt({basicLineNumbers: e.target.checked})} />
-                            {this.L.lineNumbers}{' '}{this.state.basicProfile === 'ms' ? this.L.alwaysOn6502 : ''}
-                        </label>
+                            {this.L.lineNumbers}{' '}{basicProfile.id === 'ms' ? this.L.alwaysOn6502 : ''}
+                        </label>}
                     </div>
                 )}
                 {this.state.lang === 'asm' && !max && (
@@ -7009,25 +7861,7 @@ class PseudocodeImporter extends React.Component {
                                 </select>
                             </label>
                         )}
-                        {this.state.asmMode === 'source' && this._asmExamples().length > 0 && (
-                            <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
-                                {this.L.asmExampleLabel}
-                                <select
-                                    data-testid="bw-asm-examples"
-                                    disabled={this.state.busy}
-                                    onChange={e => this.loadAsmExample(e.target.value)}
-                                    style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}
-                                    value=""
-                                >
-                                    <option value="">{this.L.asmExamplePick}</option>
-                                    {this._asmExamples().map(ex => (
-                                        <option key={ex.id} value={ex.id}>
-                                            {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        )}
+                        {this.state.asmMode === 'source' && this.renderAsmExamplePicker(false)}
                         {/* The licence is the CONDITION these ship under, so it
                             is visible where they are chosen rather than only in
                             THIRD-PARTY-NOTICES.md. The programs also carry their
@@ -7327,43 +8161,6 @@ class PseudocodeImporter extends React.Component {
                     </div>
                 ) : null}
 
-                {this.state.lang === 'basic' && this.state.showBasicInfo && (
-                    <div style={{padding: '6px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: 8, fontSize: 13, color: '#334155', marginTop: 4, flexShrink: 0}}
-                        data-testid="bw-basic-info-panel">
-                        {this.L.basicNote}
-                    </div>
-                )}
-                {this.state.lang === 'asm' && this.state.showAsmInfo && (
-                    <div style={{padding: '6px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: 8, fontSize: 13, color: '#334155', marginTop: 4, flexShrink: 0}}
-                        data-testid="bw-asm-info-panel">
-                        {this.L.asmNote}
-                    </div>
-                )}
-                {/* The C note is a paragraph, not a phrase: 700 characters naming the
-                    silent-tone gap, the 8086 port-I/O primitives and the MOVZX trap. It
-                    used to render as a bare inline span in this toolbar row, which is
-                    the "too small and does not wrap" the owner reported. It now uses the
-                    same (i) panel BASIC and ASM already had, and wraps long tokens
-                    (bw_outb(port, value), stc-compiler.vercel.app) instead of pushing
-                    the row sideways. */}
-                {this.state.lang === 'nqc' && this.state.showNqcInfo && (
-                    <div style={{margin: '6px 0', padding: '8px 10px', background: '#f1f5f9',
-                        border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, lineHeight: 1.5, color: '#334155'}}
-                    data-testid="bw-nqc-info">
-                        {this.L.nqcNote}
-                    </div>
-                )}
-                {this.state.lang === 'c' && this.state.showCInfo && (
-                    <div style={{padding: '10px 14px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: '#334155', marginTop: 4,
-                        flexShrink: 0, maxWidth: 'min(880px, 94vw)', whiteSpace: 'pre-wrap',
-                        overflowWrap: 'anywhere'}}
-                        data-testid="bw-c-info-panel">
-                        {this.L.cNote}
-                    </div>
-                )}
                 {/* VDU terminal for BBC BASIC — renders DRAW/MOVE/PLOT graphics */}
                 {this.state.basicIsBbc && this.state.basicRawOutput ? (
                     <React.Suspense fallback={null}>
@@ -7404,6 +8201,8 @@ class PseudocodeImporter extends React.Component {
 
 PseudocodeImporter.propTypes = {
     onCp1CodeSlot: PropTypes.func,
+    onCardiacCodeSlot: PropTypes.func,
+    onCardiacToolsSlot: PropTypes.func,
     vm: PropTypes.shape({loadProject: PropTypes.func, toJSON: PropTypes.func}).isRequired,
     locale: PropTypes.string,
     // Whether this tab is the selected one. Gates the CodeMirror chunk and the

@@ -38,7 +38,8 @@ export const STATIC_RECORDS = Object.freeze([
         record: 'static/roms/cpm-roms.provenance.json', trackedMirror: true,
         assets: [
             {file: 'static/roms/cpm22-64k.bin', supplier: 'roms/cpm/cpm22-64k.bin'},
-            {file: 'static/roms/cpm-bios.bin', supplier: 'roms/cpm/bios.bin'}
+            {file: 'static/roms/cpm-bios.bin', supplier: 'roms/cpm/bios.bin'},
+            {file: 'static/roms/cpm-bios-vdp.bin', supplier: 'roms/cpm/bios-vdp.bin'}
         ]
     },
     {

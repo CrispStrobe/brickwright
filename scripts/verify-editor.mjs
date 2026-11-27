@@ -186,7 +186,8 @@ async function verify () {
             } else {
                 fail('Maximize toggle did not set localStorage');
             }
-            // Toggle back
+            // Toggle back through the maximized toolbar.
+            await page.getByTestId('bw-max-editor-tools').click();
             await maxBtn.click();
             await page.waitForTimeout(300);
             const restored = await page.evaluate(() => localStorage.getItem('bw-editor-max'));
@@ -257,7 +258,7 @@ async function verify () {
             // The note moved behind an (i) toggle (owner ask); the check
             // opens it first — grepping body text tested the RETIRED
             // always-visible layout and failed on the new one.
-            const asmInfo = page.locator('[data-testid="bw-asm-info-toggle"]');
+            const asmInfo = page.getByTestId('bw-code-info');
             if (await asmInfo.count() === 1) {
                 await asmInfo.click();
                 await page.waitForTimeout(300);

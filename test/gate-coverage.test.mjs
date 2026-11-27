@@ -68,9 +68,9 @@ const KNOWN_UNWIRED = {
         + 'generated type-1 HDD and a fixed viewport, so a CI-fetchable substitute would not satisfy it. '
         + 'Run `FREEDOS_IMAGE=/path/to/x86BOOT-1200.img FREEDOS_HDD=/path/to/type1-hdd.img '
         + 'npm run verify:i80386-freedos-real-browser`.',
-    'verify-machine-video-boot.mjs': 'manual/local: boots a real OS from the manager and watches its screen '
-        + 'render into a Widgets simplevga widget. NEEDS a local bootable image (ELKS_IMG) and self-skips '
-        + '(exit 0) without one, so it cannot run in CI. Run `ELKS_IMG=/path/to/fd1440-fat.img node scripts/verify-machine-video-boot.mjs`.',
+    'verify-machine-video-boot.mjs': 'manual/local: launches the real ELKS lesson and verifies video and '
+        + 'fullscreen in the built GUI. It downloads the pinned floppy unless ELKS_IMG points to a local copy. '
+        + 'Run `node scripts/verify-machine-video-boot.mjs` after building the GUI.',
     'verify-soft-core-synth.mjs': 'manual/local + network: sends the PicoRV32 soft-core example through the '
         + 'LIVE hosted Gowin flow (Yosys -> nextpnr -> gowin_pack) and asserts a real Tang Nano 20K bitstream '
         + 'comes back — ~170s of place-and-route against synth.crispstro.be, which routine CI must not depend '

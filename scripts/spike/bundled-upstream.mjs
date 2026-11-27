@@ -84,7 +84,7 @@ export const MAP = {
     spikeprimeBridge: 'extensions/CrispStrobe/legospike_bridge.js',
     spikeprimeble: 'extensions/CrispStrobe/legospike_ble.js',
     legospikeprimeBLE: 'extensions/CrispStrobe/legospikeprime_ble.js',
-    stc12: 'extensions/CrispStrobe/stc12.js',
+    stc12: {repo: 'CrispStrobe/extensions', pin: 'stc12', path: 'extensions/CrispStrobe/stc12.js'},
     stc12live: 'extensions/CrispStrobe/stc12live.js',
     universalgamepad: 'extensions/CrispStrobe/gamepad.js',
     wedo2unified: {repo: 'CrispStrobe/extensions', pin: 'wedo2unified', path: 'extensions/CrispStrobe/lego_wedo2_universal.js'},
@@ -95,7 +95,7 @@ export const MAP = {
     // bitops_* and devices_* opcodes — so the gallery is their proper home
     // rather than a courtesy copy.
     bitops: 'extensions/CrispStrobe/bitops.js',
-    devices: 'extensions/CrispStrobe/devices.js',
+    devices: {repo: 'CrispStrobe/extensions', pin: 'devices', path: 'extensions/CrispStrobe/devices.js'},
     microbitplus: {repo: 'CrispStrobe/extensions', pin: 'microbitplus', path: 'extensions/CrispStrobe/microbitplus.js'},
     // Keyed by DIRECTORY, which is not this one's extension id: the folder is
     // `text2speech` (it replaced the stock extension of that name) while the

@@ -10,7 +10,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import JSZip from 'jszip';
 import {chromium} from 'playwright';
-import {openCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {waitForArcadeStageFrame} from './lib/arcade-stage-frame.mjs';
 import {makeCodeProjectFile, readMakeCodeProjectText} from '../overlay/scratch-gui/src/lib/bw-makecode/project-file.js';
 import {svgToPixels} from '../overlay/scratch-gui/src/lib/bw-makecode/pixel-image.js';
@@ -88,8 +88,9 @@ const freshPage = async () => {
 const openFile = async file => {
     await codeTab(); await openCodeActions(page);
     await page.getByTestId('bw-open-file').locator('input[type=file]').setInputFiles(file);
-    await page.getByText(/Imported the Arcade game/).first().waitFor({state: 'visible', timeout: 60000});
+    await (await openCodeInfo(page)).getByTestId('bw-code-status').filter({hasText: /Imported the Arcade game/}).waitFor({state: 'visible', timeout: 60000});
     assert.doesNotMatch(await page.getByTestId('bw-code-status').innerText(), /unsupported|not translated|could not|partial/i);
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     assert.doesNotMatch(await readCode(), /# unsupported:/);
 };
 // The real renderer must present the expected complete frame. No fixed sleep

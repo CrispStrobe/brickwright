@@ -29,7 +29,7 @@ const prepare = async (page, {file, extension, mat = null}) => {
     await page.waitForFunction(f => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.modelFile === f &&
         window.__bwSimLab._pane.session, file, {timeout: 60000});
 
-    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
         null, {timeout: 60000});
     if (mat) {
         await page.waitForFunction(m => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session?.mat === m, mat, {timeout: 60000});

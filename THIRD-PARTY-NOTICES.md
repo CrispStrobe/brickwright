@@ -1969,11 +1969,23 @@ R.T. Russell. This project uses the name only to describe compatibility
   BASIC (Z80) from rtrussell/BBCZ80, shipped **unmodified**. Loaded at
   run time by BbcZ80Runner over a BDOS console shim on the Z80 core.
 
+## Devices and STC12 extensions — MPL-2.0
+
+The Devices and STC12 / 8051 pins extensions are by CrispStrobe. The
+bundled copies retain their MPL-2.0 source headers. The corresponding upstream
+sources are pinned in `bundled-upstream-pins.json`.
+
+## BBC-style video lesson ROM — BSD-3-Clause
+
+`static/roms/bbc-video-6502.rom` is built from the Brickwright lesson source
+in `firmware/bbc-video-6502/main.s`. Copyright (c) 2026, Christian Ströbele
+(CrispStrobe). Distributed under the BSD-3-Clause licence.
+
 ## CP/M 2.2 (Z80) — redistributable (DRDOS grant) + MIT
 
 The Z80 machine can boot a **real CP/M 2.2 computer** (an `A>` prompt, not
 the BDOS shim above) via lite's `attachZ80` `cpm-system` profile, which loads
-two ROMs vendored **unmodified** from bw-board's `roms/cpm/` at the pinned sha
+the CCP+BDOS and a BIOS ROM vendored **unmodified** from bw-board's `roms/cpm/` at the pinned sha
 (recorded in `cpm-roms.provenance.json` beside them). The boot itself is
 bw-board's `createCpmSystem`, reached through the z80 adapter's `cpmSystem`
 option.
@@ -1987,8 +1999,10 @@ option.
 - **BIOS** — our own, no Digital Research code (MC6850 ACIA console + a host
   RAM-disk controller). **MIT**, (c) the BrickWright project.
 - **What ships:** `static/roms/cpm22-64k.bin` (the CCP+BDOS) and
-  `static/roms/cpm-bios.bin` (our BIOS), with `cpm-roms.provenance.json`
-  beside them recording both upstreams, licences, holders and SHA-256s.
+  `static/roms/cpm-bios.bin` (serial BIOS). The alternate serial and
+  TMS9918A video BIOS is `static/roms/cpm-bios-vdp.bin` (MIT with
+  public-domain FUNSCII glyphs). The `cpm-roms.provenance.json` file records
+  upstream sources, licences, holders and SHA-256s for all three files.
 
 ## Microsoft BASIC for 6502 (V1.1) — MIT
 
@@ -2763,7 +2777,8 @@ Emscripten runtime (MIT) and the Brotli static dictionary (MIT); it contains no
 OpenCASCADE code. Its NOTICE, LICENSE and full MIT and Apache-2.0 texts are part
 of the SDK's `NOTICE.txt`. The kernel lives under `static/cad-sdk/assets/exact/`
 and is fetched only when a user runs an exact feature, exact measurement, STEP
-export or STEP import; the service worker caches it only after such a request.
+export, STEP import, a drawing from exact edges or a manufacturing check (from the
+CAD tab's File menu, its toolbar or the terminal); the service worker caches it only after such a request.
 
 The optional Scout TT project generator retains the Adafruit CAD Parts MIT
 notice at `licenses/adafruit-cad-parts-MIT.txt` (Copyright (c) 2016 Adafruit

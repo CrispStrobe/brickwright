@@ -224,7 +224,7 @@ export async function runProgram (source, {frames = 12, keys = [], uploads = [],
  */
 export async function runCreatedProgram (creator, {frames = 12, keys = [], uploads = [], storage = false,
     retainExtensionTimers = false, frameAuthority = 'manual', countExtensionCalls = true,
-    animationResources = [], artworkContext = null, artworkVM = null, observeRun = null} = {}) {
+    animationResources = [], artworkContext = null, artworkVM = null, observeRun = null, circuitBoard} = {}) {
     if(typeof countExtensionCalls!=='boolean')throw new Error('Extension call observation must be explicitly boolean');
     for (const upload of uploads) {
         if (upload.mode === 'add') {
@@ -311,6 +311,7 @@ export async function runCreatedProgram (creator, {frames = 12, keys = [], uploa
         }
     }
     if (creator.project.stc) vm.runtime.stc = creator.project.stc;
+    if (circuitBoard) vm.runtime.circuitBoard = circuitBoard;
     const loadedOpcodes = new Set();
     let blockCount = 0;
     for (const target of vm.runtime.targets) {

@@ -3,6 +3,7 @@ import {
     applyBrickwrightInspection,
     rollbackBrickwrightInspection
 } from './bw-project-bundle';
+import {restorePicoFlashProject} from './bw-machines/pico-basic-flash.js';
 import {inspectArtwork, applyArtwork} from './bw-artwork-bundle';
 import {unpackLms, setActiveLms, clearActiveLms} from './mindstorms-lms';
 
@@ -50,6 +51,7 @@ const loadProjectFile = async (vm, input, filename) => {
         }
         throw error;
     });
+    restorePicoFlashProject(vm.runtime?.getTargetForStage?.(), inspection.picoFlash);
     applyArtwork(artwork, vm);
     if (lms) setActiveLms(lms);
     else clearActiveLms();

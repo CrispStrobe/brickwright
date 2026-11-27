@@ -127,7 +127,7 @@ const check = (name, ok, detail = '') => {
     if (!ok) failures.push(name);
 };
 const statusText = () => page.evaluate(() =>
-    (document.querySelector('[data-testid="bw-code-status"]') || {}).textContent || '');
+    document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || '');
 
 /** Poll read() until accept(result) or the timeout — a wait on the CONDITION,
  *  never a fixed sleep (the fleet rule; test/wait-census.test.mjs enforces it).
@@ -269,7 +269,7 @@ try {
         const body = document.body.innerText.slice(0, 3000);
         const m = /not expressible|deploy failed|not in this build/i.test(body)
             ? (body.match(/[^\n]*(?:failed|not )[^\n]*/i) || [''])[0].slice(0, 120) : null;
-        const status = (document.querySelector('[data-testid="bw-code-status"]') || {}).textContent || '';
+        const status = document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || '';
         // The module's read-only diagnostic hook: enumerated?, REPL banner?, how
         // far the emulator advanced — this is what tells a slow boot from a CDC
         // that never came up.

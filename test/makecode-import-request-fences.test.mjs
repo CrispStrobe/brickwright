@@ -8,7 +8,7 @@ const later=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve
 function fixture() {
  const readers=[],effects=[],requests=[],waits=new Map();let stage={},answer='share';
  class Reader{constructor(){this.result=new Uint8Array([1]).buffer;readers.push(this);}readAsArrayBuffer(file){this.file=file;}}
- const names=['currentMakeCodeRequest','openArtefactFile','openMakeCodeShare','applyMakeCodeImport','componentWillUnmount','disposeCodeRun'];
+ const names=['currentMakeCodeRequest','openArtefactFile','openMakeCodeShare','applyMakeCodeImport','componentWillUnmount','setMaximizedChrome','disposeCodeRun'];
  const labels=new Function(source.match(/^const LANG_LABEL = .*;$/m)[0]+'\nreturn LANG_LABEL;')();
  // Evaluate only these OWN source methods over authored IO/UI stubs. No JSX,
  // React, DOM, SDK, Scratch VM, browser or translated guest is executed.

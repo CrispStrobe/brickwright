@@ -15,7 +15,7 @@ const methods = [
     'activeCode () {', 'setActiveCode (text) {', 'async deriveBuffer (src, from, to) {',
     'switchTab (to) {', 'openEmptyTab (to) {', 'setGenOpt (patch) {', 'async setDevice (deviceId) {',
     'readAutosave () {', 'writeAutosave () {', 'async fromBlocks () {',
-    'async compile ({strict = false, pseudocode = null} = {}) {'
+    'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {'
 ].map(signature => codeEditorMethod(source, signature)).join('\n');
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const deferred = () => {

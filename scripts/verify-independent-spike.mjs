@@ -13,7 +13,7 @@ const tests=['spike-arena-contact','spike-arena-project-editing','spike-virtual-
  'virtual-spike-prime','virtual-spike-classic','virtual-spike-panel','virtual-spike-shared-state',
  'spike-firmware-program','spike-renode-arena-session','spike-renode-arena','native-renode-capability'];
 let result;
- result=spawnSync(process.execPath,['--test','--import','./scripts/lib/register-gui-scope.mjs',...tests.map(name=>`test/${name}.test.mjs`)],
+ result=spawnSync(process.execPath,['--test','--test-reporter=tap','--import','./scripts/lib/register-gui-scope.mjs',...tests.map(name=>`test/${name}.test.mjs`)],
   {cwd:root,encoding:'utf8',timeout:180000,maxBuffer:16*1024*1024});
 const out=evidenceDirectory;mkdirSync(out,{recursive:true});
 writeFileSync(resolve(out,'virtual-spike-suite.tap'),`${result.stdout||''}${result.stderr||''}`);

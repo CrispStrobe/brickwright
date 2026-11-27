@@ -18,7 +18,7 @@ import assert from 'node:assert/strict';
 import {readFileSync, existsSync} from 'node:fs';
 import {join} from 'node:path';
 
-import {SOURCE, INTEGRATED, REPO, guiDependencyFile} from './helpers/bw-integrated.mjs';
+import {SOURCE, INTEGRATED, REPO, guiDependencyFile, importSource} from './helpers/bw-integrated.mjs';
 
 const CHIPS = join(INTEGRATED, 'node_modules', 'bw-board', 'src', 'avr-chips.js');
 const canRun = existsSync(CHIPS) &&
@@ -37,6 +37,21 @@ const litPixels = fb => {
     for (const p of pixels) if (p) n++;
     return n;
 };
+
+test('DEVICE ARDUBOY converts to Scratch blocks and survives the SB3 round trip', async () => {
+    const {default: SB3Creator} = await importSource('src/lib/sb3-creator.js');
+    const creator = new SB3Creator();
+    const project = creator.parse('DEVICE ARDUBOY\nGLOBAL score = 0\nSTAGE:\nWHEN flag clicked:\n    set score to 42\n');
+    assert.equal(project.stc.device, 'arduboy');
+    assert.equal(project.stc.clock, 16000000);
+    assert.ok(Object.values(project.targets[0].blocks).some(block => block.opcode === 'data_setvariableto'));
+    assert.match(creator.generateC(project), /Use an Arduboy sketch or a compiled \.hex/);
+    const {default: JSZip} = await import(guiDependencyFile('jszip/lib/index.js'));
+    const archive = await JSZip.loadAsync(await (await creator.generateSB3()).arrayBuffer());
+    const saved = JSON.parse(await archive.file('project.json').async('string'));
+    delete saved.stc; // Scratch VM keeps the stage comment when it serializes an SB3.
+    assert.match(new SB3Creator().decompile(saved), /^DEVICE ARDUBOY/m);
+});
 
 test('the ATmega32U4 is a chip definition, not new emulator code', {skip: SKIP}, async () => {
     // avr8js ships a generic AVR core and no chip definitions at all, so a

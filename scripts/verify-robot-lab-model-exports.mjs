@@ -17,7 +17,7 @@ try{
  const page=await init('en-US');assert.equal(await page.getByTestId('bw-code-status').count(),0);
  await page.getByTestId('bw-sim-lab-examples').click();const gallery=page.getByTestId('bw-sim-examples');await gallery.getByRole('searchbox').fill('straight-eight');
  await gallery.locator('[data-model="straight-eight.ldr"]').getByRole('button',{name:/^Open model \+ program:/}).click();await gallery.waitFor({state:'hidden'});
- await page.waitForFunction(()=>window.__bwSimLab._pane.state.shipped==='straight-eight.ldr'&&!window.__bwSimLab._pane.state.programLoading&&document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'));
+ await page.waitForFunction(()=>window.__bwSimLab._pane.state.shipped==='straight-eight.ldr'&&!window.__bwSimLab._pane.state.programLoading&&document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'));
  assert.match(await page.locator('input[class*="project-title"]').inputValue(),/Straight Eight/);
  for(const [id,pieces,phases]of [['atlas-arm',237,[45,45,-15]],['switchback-lift',341,[10,-30]],['straight-eight',113,[]]])for(const ext of ['ldr','mpd']){
   const name=`${id}.${ext}`;await openFile(page,{name,buffer:readFileSync(`artifacts/atlas-switchback/fixed-library/models/${name}`)});

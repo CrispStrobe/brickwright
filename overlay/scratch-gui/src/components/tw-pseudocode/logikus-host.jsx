@@ -126,6 +126,14 @@ export default function LogikusHost ({panel, locale, vm}) {
             } catch (failure) { setError(failure.message); }
         };
         const collect = () => { if (current.current) save(current.current); };
+        const addControl = event => {
+            const name = event.detail?.name;
+            if (!name || projectGeneration.current !== getWorkspaceGeneration()) return;
+            const preset = getPreset('lamp');
+            const next = current.current || createWorkspace({program: preset.program, presetId: preset.id});
+            save(bridge.current.install(next, name));
+        };
+        window.addEventListener('bw-logikus-add-control', addControl);
         window.addEventListener('bw-logikus-open', open);
         window.addEventListener('bw-project-bundle-loaded', restore);
         window.addEventListener('bw-project-bundle-collect', collect);
@@ -133,6 +141,7 @@ export default function LogikusHost ({panel, locale, vm}) {
         document.addEventListener('visibilitychange', visibility);
         vm?.runtime?.on?.('PROJECT_STOP_ALL', release);
         return () => {
+            window.removeEventListener('bw-logikus-add-control', addControl);
             window.removeEventListener('bw-logikus-open', open);
             window.removeEventListener('bw-project-bundle-loaded', restore);
             window.removeEventListener('bw-project-bundle-collect', collect);

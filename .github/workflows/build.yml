@@ -3549,6 +3549,46 @@ jobs:
         timeout-minutes: 3  # derived: p95 7 s × 3 → 3 min over 20 green runs to 36823340082; max 12 s in run 36544779088 (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: PROOF_URL=http://localhost:8617/ node scripts/verify-i80386-local-hdd-gui.mjs
+      - name: Browser gate — Code BASIC profiles and guest keyboard
+        id: bw_browser_code_basic_profiles
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-code-basic-profiles.mjs http://127.0.0.1:8617/
+      - name: Browser gate — ASM Blink 0 machine selection and Code overflow
+        id: bw_browser_code_asm_blink
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-asm-blink-machines.mjs http://127.0.0.1:8617/
+      - name: Browser gate — Code machine switching and reload
+        id: bw_browser_code_machine_recovery
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-code-machine-recovery.mjs http://127.0.0.1:8617/
+      - name: Browser gate — Machines example catalog handoffs
+        id: bw_browser_machine_catalog_handoffs
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-machine-project-library.mjs http://127.0.0.1:8617/
+      - name: Browser gate — firmware library launches through Controller
+        id: bw_browser_machine_firmware_library
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-controller-machine-library.mjs http://127.0.0.1:8617/
+      - name: Browser gate — CPU groups and PicoBB LittleFS
+        id: bw_browser_machine_pico_littlefs
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-machine-groups-picobb.mjs http://127.0.0.1:8617/
+      - name: Browser gate — Microtronic through Circuits, Code and Controller
+        id: bw_browser_microtronic_controller
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-microtronic-circuit.mjs http://127.0.0.1:8617/
+      - name: Browser gate — native TMS1600 firmware, input and output
+        id: bw_browser_tms1600_controller
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-tms1600-browser.mjs http://127.0.0.1:8617/
       # The debugger docked beside a running x86 machine must own its controls:
       # a hosted event's real click on Pause landed on the Widgets Full screen
       # button. Real page, real (unforced) click, hit-test at Pause's centre.
@@ -4093,6 +4133,16 @@ jobs:
         timeout-minutes: 3  # derived: p95 12 s × 3 → 3 min over 20 green runs to 36823340082; max 13 s in run 36375211475 (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: PROOF_URL=http://localhost:8617/ node scripts/verify-makecode.mjs
+      - name: Browser gate — Code runs a minimal Arcade project and reports unsupported blocks
+        id: bw_browser_code_arcade_run
+        timeout-minutes: 3  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: |
+          if [ ! -s packages/scratch-gui/build/static/makecode/arcade/target.json ]; then
+            echo "::warning::Skipping the Code Arcade browser check because the Arcade runtime is unavailable"
+            exit 0
+          fi
+          node scripts/verify-code-arcade-run.mjs http://127.0.0.1:8617/
 
       # Native CPX blocks must drive the same state in the pane and circuit face.
       # Keep this journey separate so its duration and failure receipt are visible.

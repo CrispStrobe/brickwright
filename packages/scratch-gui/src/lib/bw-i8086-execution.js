@@ -1,12 +1,14 @@
 // App policy: preferences are requests, never declarations of provider support.
 export const I8086_EXECUTION_KEY = 'bw-i8086-execution';
 const modes = ['auto', 'functional', 'wired'];
-const catalog = ['8086', '80186'].flatMap(family =>
+const catalog = ['8086', '80186', '80286'].flatMap(family =>
     ['dos-services', 'functional-hardware'].map(semantics => ({
         id: `${family}-${semantics}-js`, family, semantics, implementation: 'javascript',
         rank: 0, capabilities: [], reference: false, experimental: false,
         qualification: 'qualified',
-        evidence: 'brickwright-lite@411828a304dd84759cd4c1fb82444e72944ffbdc: existing i8086 DOS/hardware constructors and test/i8086-{checkpoints,bios-boots,execution-workload}.test.mjs'
+        evidence: family === '80286'
+            ? 'bw-board i8086-286-variant and i80286-blink-demo real-mode fixtures'
+            : 'brickwright-lite@411828a304dd84759cd4c1fb82444e72944ffbdc: existing i8086 DOS/hardware constructors and test/i8086-{checkpoints,bios-boots,execution-workload}.test.mjs'
     })));
 
 /** Injectable only for tests; production owns the catalog and the package loader. */

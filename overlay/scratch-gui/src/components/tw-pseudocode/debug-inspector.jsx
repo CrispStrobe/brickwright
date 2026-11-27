@@ -257,13 +257,7 @@ class DebugInspector extends React.Component {
         if (!runner) return null;
         const {variables, previous, live, rows} = this.valuesAndPrevious();
         const started = rows.length > 0 || variables.length > 0;
-        if (!started) {
-            return (
-                <div style={{...CARD, color: '#5d6d7e', fontSize: 12}}>
-                    {this.tx('nothing')}
-                </div>
-            );
-        }
+        if (!started) return null;
         return (
             <div>
                 {this.renderTimeline(rows, live)}

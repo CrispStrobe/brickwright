@@ -16,7 +16,7 @@ const lt1001Fixture = JSON.parse(readFileSync(
     new URL('../test/fixtures/lt1001-precision-follower.json', import.meta.url), 'utf8'));
 
 const url = process.env.PROOF_URL || 'https://crispstrobe.github.io/brickwright-lite/';
-const browser = await chromium.launch();
+const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const page = await browser.newPage({viewport: {width: 1440, height: 900}});
 const failures = [];
 const check = (name, ok, detail = '') => {
@@ -56,7 +56,33 @@ try {
                 circuitData: {vcc: 5, parts: value, wires: [], holeWires: [], fileOnly: true}
             }, resolve);
         }), parts);
-        await page.waitForTimeout(250);
+        await page.waitForFunction(expected => {
+            const live = window.__circuit?.parts;
+            return live?.length === expected.length && expected.every(({id, kind}) =>
+                live.some(part => part.id === id && part.kind === kind));
+        }, parts.map(({id, kind}) => ({id, kind})));
+    };
+
+    const checkDip = async (face, label, pinCount, pins) => {
+        await face.waitFor({state: 'visible', timeout: 10000});
+        let markings;
+        let packageMatches;
+        if (await face.getAttribute('data-dip-art')) {
+            const image = face.and(page.locator('[data-art-loaded="true"]')).locator('image');
+            await image.waitFor({state: 'visible'});
+            markings = await image.evaluate(async element => {
+                const response = await fetch(element.getAttribute('href'));
+                if (!response.ok) throw new Error(`DIP artwork HTTP ${response.status}`);
+                const svg = new DOMParser().parseFromString(await response.text(), 'image/svg+xml');
+                return [...svg.querySelectorAll('text')].map(node => node.textContent.trim());
+            });
+            packageMatches = pins.every(pin => markings.includes(pin));
+        } else {
+            markings = await face.textContent();
+            packageMatches = markings.includes(`DIP-${pinCount}`) && pins.every(pin => markings.includes(pin));
+        }
+        check(`${label} renders its labelled ${pinCount}-pin DIP`,
+            await face.count() === 1 && markings.includes(label) && packageMatches);
     };
 
     await load([{id: 'uno', kind: 'arduino_uno', params: {}, x: 520, y: 260, rotation: 0}]);
@@ -166,13 +192,9 @@ try {
     await page.evaluate(value => new Promise(resolve => {
         window.__bwRenderingCircuitTab.setState({circuitData: value}, resolve);
     }), lm324Fixture);
-    const lm324Face = designer.locator('[data-dip-body="lm324"][data-dip-label="LM324"]');
-    await lm324Face.waitFor({state: 'visible', timeout: 10000});
-    const lm324FaceText = await lm324Face.textContent();
-    check('LM324 renders as the truthful labelled PDIP-14 face',
-        await lm324Face.count() === 1 && /DIP-14/.test(lm324FaceText) &&
-        ['1_out', '2_out', '3_out', '4_out', 'vcc', 'gnd'].every(name => lm324FaceText.includes(name)),
-        lm324FaceText.replace(/\s+/g, ' ').trim());
+    await checkDip(designer.locator('[data-dip-body="lm324"]'), 'LM324', 14,
+        ['1_out', '1_neg', '1_pos', 'vcc', '2_pos', '2_neg', '2_out',
+            '3_out', '3_neg', '3_pos', 'gnd', '4_pos', '4_neg', '4_out']);
     const lm324 = await page.evaluate(() => {
         const circuit = window.__circuit;
         const board = circuit?.board;
@@ -199,14 +221,8 @@ try {
     await page.evaluate(value => new Promise(resolve => {
         window.__bwRenderingCircuitTab.setState({circuitData: value}, resolve);
     }), lm741Fixture);
-    const lm741Face = designer.locator('[data-dip-body="lm741"][data-dip-label="LM741"]');
-    await lm741Face.waitFor({state: 'visible', timeout: 10000});
-    const lm741FaceText = await lm741Face.textContent();
-    check('LM741 renders as the truthful labelled PDIP-8 face',
-        await lm741Face.count() === 1 && /DIP-8/.test(lm741FaceText) &&
-        ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 'nc']
-            .every(name => lm741FaceText.includes(name)),
-        lm741FaceText.replace(/\s+/g, ' ').trim());
+    await checkDip(designer.locator('[data-dip-body="lm741"]'), 'LM741', 8,
+        ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 'nc']);
     const lm741 = await page.evaluate(() => {
         const circuit = window.__circuit;
         const board = circuit?.board;
@@ -548,14 +564,8 @@ try {
     await page.evaluate(value => new Promise(resolve => {
         window.__bwRenderingCircuitTab.setState({circuitData: value}, resolve);
     }), lt1001Fixture);
-    const lt1001Face = designer.locator('[data-part-face="lt1001"][data-dip-body="lt1001"]');
-    await lt1001Face.waitFor({state: 'visible', timeout: 10000});
-    const lt1001FaceText = await lt1001Face.textContent();
-    check('LT1001 renders as the truthful labelled PDIP-8 face',
-        await lt1001Face.count() === 1 && /LT1001/.test(lt1001FaceText) &&
-        ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 'nc']
-            .every(name => lt1001FaceText.includes(name)),
-        lt1001FaceText.replace(/\s+/g, ' ').trim());
+    await checkDip(designer.locator('[data-dip-body="lt1001"]'), 'LT1001', 8,
+        ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 'nc']);
     const lt1001 = await page.evaluate(() => {
         const circuit = window.__circuit;
         const board = circuit?.board;

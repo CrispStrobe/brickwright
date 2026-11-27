@@ -17,14 +17,15 @@ function fixture () {
     const method = between('        async snapshotAtaMaster()', '\n\n        /** Move the PC.');
     const stop = between('        stop() {', '\n\n        setSpeed');
     const destroy = between('        destroy({preserveRuntime = false} = {}) {', '\n    };');
+    const basic = between('    function publishBasicSerial(active)', '    const runner = {');
     const attach = between('    async function attach(built) {', '        const device =');
     vm.runInContext(`
         ${declarations}
         let destroyed = false, activeRunTo = null, vm = null;
-        let board = null, symbols = null, runToTarget = null, runToController = null;
+        let board = null, xtKeyboard = null, pcSerialInput = null, symbols = null, runToTarget = null, runToController = null;
         let unsubscribeBps = null, unsubscribeDebugEvents = null, unsubscribeDebugInputs = null;
         let debugEventsTarget = null, i8086ExecutionResult = null;
-        let engineNotes, serialTerminal, serialEsc, terminalOutput, linuxProgressWatch;
+        let engineNotes, serialTerminal, serialEsc, terminalOutput, terminalFrame, disposeTerminal, basicStartup;
         const i8086ExecutionLifetime = new AbortController();
         let releaseHook = () => {};
         const i8086Execution = {release() {releaseHook();}};
@@ -33,6 +34,7 @@ function fixture () {
         const unschedule = () => {}, clearGlow = () => {}, setStatus = () => {};
         const setValueResolver = () => {}, unsubscribeRecordingEvents = () => {};
         const resetEventBreakpointRuntime = () => {};
+        ${basic}
         const runner = {${method}\n${stop}\n${destroy}};
         ${attach} throw new Error('authored-engine-construction-stop'); }
         globalThis.api = {runner, attach,

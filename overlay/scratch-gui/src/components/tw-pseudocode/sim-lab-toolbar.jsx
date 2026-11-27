@@ -69,6 +69,15 @@ export const ICONS = {
     open: 'M3 6h6l2 2h10v3M3 6v13h15l3-8H6l-3 8',
     save: 'M12 4v11M7 10l5 5 5-5M4 20h16',
     example: 'M14 3H6v18h12V7zM14 3v4h4M10 12l-2 2 2 2M14 12l2 2-2 2',
+    'clean-up': 'M8 4h12M8 9h12M8 14h12M8 19h12M4 4h.01M4 9h.01M4 14h.01M4 19h.01',
+    'zoom-in': 'M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM15 15l6 6M7 10h6M10 7v6',
+    'zoom-out': 'M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM15 15l6 6M7 10h6',
+    'add-extension': 'M10 3H5a2 2 0 0 0-2 2v4a3 3 0 0 1 0 6v4a2 2 0 0 0 2 2h5a3 3 0 0 1 6 0h3a2 2 0 0 0 2-2v-4a3 3 0 0 1 0-6V5a2 2 0 0 0-2-2h-3a3 3 0 0 1-6 0z',
+    'to-blocks': 'M20 4h-7v16h7zM10 12H3m0 0 4-4m-4 4 4 4',
+    'from-blocks': 'M4 4h7v16H4zM14 12h7m0 0-4-4m4 4-4 4',
+    debugger: 'M8 9h8v6a4 4 0 0 1-8 0zM9 9V7a3 3 0 0 1 6 0v2M5 10l3 2M4 15h4m-3 5 4-3m10-7-3 2m4 3h-4m3 5-4-3M9 5 7 3m8 2 2-2',
+    chip: 'M7 7h10v10H7zM10 3v4m4-4v4m-4 10v4m4-4v4M3 10h4m-4 4h4m10-4h4m-4 4h4',
+    link: 'M9 15l6-6m-5 8-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m-2 8a4 4 0 0 0 6 0l5-5a4 4 0 0 0-6-6l-2 2',
     help: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01',
     more: 'M5 12h.01M12 12h.01M19 12h.01',
     caret: 'M6 9l6 6 6-6',
@@ -125,7 +134,7 @@ export const ToolButton = ({item, T, coarse, inMenu = false}) => {
     const keys = T.keys[item.id];
     if (inMenu) {
         return (
-            <button type="button" data-testid={`bw-sim-lab-${item.id}`} disabled={item.disabled} title={title} aria-label={item.label}
+            <button type="button" data-overflow-action data-testid={`bw-sim-lab-${item.id}`} disabled={item.disabled} title={title} aria-label={item.label}
                 aria-keyshortcuts={keys || undefined} onClick={item.run} {...aria}
                 style={{...s.button, justifyContent: 'flex-start', width: '100%', height: coarse ? 40 : 30, padding: '0 8px',
                     ...(on ? {background: '#e0e7ff', color: '#312e81'} : {}), opacity: item.disabled ? 0.45 : 1}}>
@@ -151,7 +160,7 @@ export const ToolButton = ({item, T, coarse, inMenu = false}) => {
  * Closes on Escape and on a press outside it (the pane's outside-press handler,
  * which looks for [data-sim-lab-popup]).
  */
-export const Popup = ({id, open, onToggle, onClose, button, children, align = 'left', width = 260, label, closeOnPick = true, testId, role = 'group', anchorTestId, keepMounted = false}) => {
+export const Popup = ({id, open, onToggle, onClose, button, children, align = 'left', width = 260, label, closeOnPick = true, testId, role = 'group', anchorTestId, keepMounted = false, overflowMenu = false}) => {
     const anchor = React.useRef(null);
     const panel = React.useRef(null);
     const toggle = React.useRef(onToggle);
@@ -208,15 +217,17 @@ export const Popup = ({id, open, onToggle, onClose, button, children, align = 'l
             // The panel is portalled to <body>, so Tab would leave it for the end of the page: arrows move
             // between its controls, ArrowDown on the button opens it onto the first, and Tab off either
             // end returns to the button.
-            const items = Array.from(panel.current?.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [role="menuitem"]:not([aria-disabled="true"]), [tabindex="0"]') || []);
+            const items = Array.from(panel.current?.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary, [role="menuitem"]:not([aria-disabled="true"]), [tabindex="0"]') || [])
+                .filter(item => item.getClientRects().length > 0);
             if (e.target === trigger && e.key === 'ArrowDown' && role !== 'dialog') {
                 e.preventDefault();
                 if (!open) onToggle();
-                requestAnimationFrame(() => (Array.from(panel.current?.querySelectorAll('button:not([disabled]), [role="menuitem"]:not([aria-disabled="true"])') || [])[0])?.focus());
+                requestAnimationFrame(() => (Array.from(panel.current?.querySelectorAll('button:not([disabled]), select:not([disabled]), summary, [role="menuitem"]:not([aria-disabled="true"])') || [])
+                    .find(item => item.getClientRects().length > 0))?.focus());
                 return;
             }
             if (!open || !panel.current || !panel.current.contains(e.target) || !items.length) return;
-            const at = items.indexOf(e.target.closest('button, a[href], input, select, [role="menuitem"], [tabindex="0"]'));
+            const at = items.indexOf(e.target.closest('button, a[href], input, select, summary, [role="menuitem"], [tabindex="0"]'));
             const field = e.target.matches && e.target.matches('input, select, textarea');
             if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !field && role !== 'dialog') {
                 e.preventDefault();
@@ -229,13 +240,18 @@ export const Popup = ({id, open, onToggle, onClose, button, children, align = 'l
         }}>
         {React.cloneElement(button, {'aria-haspopup': role === 'dialog' ? 'dialog' : 'true', 'aria-expanded': open, ...trigger.current})}
         {open || keepMounted ? createPortal(
-            <div ref={panel} role={role} data-sim-lab-popup={id} aria-label={label} data-testid={testId || `bw-sim-lab-${id}-menu`}
+            <div ref={panel} role={role} data-sim-lab-popup={id} data-editor-overflow={overflowMenu || undefined} aria-label={label} data-testid={testId || `bw-sim-lab-${id}-menu`}
                 onClick={e => {
                     if (!closeOnPick || !e.target.closest) return;
                     const pick = e.target.closest('button');
                     // A disclosure button (aria-expanded) or one marked data-keep-open opens something INSIDE
                     // the menu; closing would hide what it just showed.
-                    if (pick && !pick.closest('[aria-expanded], [data-keep-open]')) onClose();
+                    if (pick && !pick.closest('[aria-expanded], [data-keep-open]')) {
+                        if (overflowMenu && e.detail === 0 && panel.current?.contains(document.activeElement)) {
+                            anchor.current?.querySelector('button')?.focus();
+                        }
+                        onClose();
+                    }
                 }}
                 style={{position: 'fixed', ...position, zIndex: 3000, width, maxWidth: 'calc(100vw - 16px)', maxHeight: '65vh',
                     overflowY: 'auto', display: open ? 'flex' : 'none', flexDirection: 'column', alignItems: 'stretch', gap: 2, padding: 6, fontSize: 12,

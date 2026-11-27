@@ -42,42 +42,19 @@ const method = (source, header) => {
     return source.slice(source.indexOf('{', start) + 1, end);
 };
 
-const KINDS = ['emulator', 'avr8js', 'atmega2560', 'attiny85', 'attiny88', 'rp2040js', 'stm32f0', 'labwired',
-    'z80', 'eater6502', 'riscv32', 'i8086', 'i80386', 'cp1'];
-
-test('the green flag\'s author rule is start()\'s own split, for every kind, media and firmware', () => {
-    // start() picks `built`: null for an interpreter or boot-media machine,
-    // the user's firmware, else build() — the project's own blocks. Its
-    // expression is evaluated here as written, so the two cannot drift.
+test('the green flag and debugger share the same program ownership rule', () => {
     const runner = read('lib/bw-debug/debug-runner.js');
-    // Delimited by the two fixed texts around the condition (indexOf, not a lazy
-    // capture, which a nested parenthesis would cut short).
-    const head = 'const built = ';
-    const tail = ' ? null';
-    const at = runner.indexOf(head);
-    const end = runner.indexOf(tail, at);
-    assert.ok(at > 0 && end > at, 'start()\'s choice of what to run moved — re-read it before trusting the author rule');
-    const condition = runner.slice(at + head.length, end);
-    assert.match(runner.slice(end), /^ \? null\s*: userFirmware \? await builtFromUserFirmware\(selectedKind\)\s*: await build\(\);/,
-        'start() no longer ends in firmware-else-build — re-read it');
-    // eslint-disable-next-line no-new-func
-    const startCompiles = new Function('selectedKind', 'bootMedia', 'userFirmware',
-        `return (${condition}) ? false : userFirmware ? false : true;`);
-    let compared = 0;
-    for (const selectedKind of KINDS) {
-        for (const bootMedia of [null, {name: 'rom'}]) {
-            for (const userFirmware of [null, {name: 'fw.hex'}]) {
-                assert.equal(runnerCompilesProjectBlocks({selectedKind, bootMedia, userFirmware}),
-                    startCompiles(selectedKind, bootMedia, userFirmware), `${selectedKind} media=${!!bootMedia} fw=${!!userFirmware}`);
-                compared++;
-            }
-        }
+    assert.match(runner, /const built = runnerCompilesProjectBlocks\(\{selectedKind, bootMedia}\)/);
+    for (const kind of ['cardiac', 'cp1', 'z80', 'eater6502', 'riscv32', 'i8086', 'i80286', 'i80386']) {
+        assert.equal(runnerCompilesProjectBlocks({selectedKind: kind}), false, kind);
+        assert.equal(runnerCompilesProjectBlocks({selectedKind: kind, bootMedia: {name: 'ROM'}}), false, kind);
     }
-    assert.equal(compared, KINDS.length * 4);
-    // The cases the browser measured, named.
-    assert.equal(runnerCompilesProjectBlocks({selectedKind: 'emulator'}), true, 'an STC12 block program is the VM\'s');
-    assert.equal(runnerCompilesProjectBlocks({selectedKind: 'eater6502'}), false, 'a 6502 bench runs its ROM, not the blocks');
-    assert.equal(runnerCompilesProjectBlocks({selectedKind: 'avr8js', userFirmware: {}}), false, 'loaded firmware is the runner\'s');
+    for (const kind of ['emulator', 'avr8js', 'atmega2560', 'attiny85', 'attiny88', 'rp2040js',
+        'stm32f0', 'stm32g0', 'esp8266', 'labwired', 'serial']) {
+        assert.equal(runnerCompilesProjectBlocks({selectedKind: kind}), true, kind);
+        assert.equal(runnerCompilesProjectBlocks({selectedKind: kind, userFirmware: {name: 'firmware'}}), false, kind);
+    }
+    assert.equal(runnerCompilesProjectBlocks({selectedKind: 'rp2040js', bootMedia: {name: 'UF2'}}), false);
 });
 
 test('the Debug pane: a green flag starts the runner only when it is the run\'s author, else ends its session', async () => {
@@ -108,6 +85,46 @@ test('the Debug pane: a green flag starts the runner only when it is the run\'s 
     assert.deepEqual(await run({kind: 'eater6502', device: 'eater6502'}), ['start'], 'a machine bench still starts on the flag');
     assert.deepEqual(await run({kind: 'i8086', device: 'i8086', bootMedia: {name: 'dos'}}), ['start']);
     assert.deepEqual(await run({kind: 'emulator', device: 'STC12C5A60S2', userFirmware: {name: 'a.hex'}}), ['start'], 'loaded firmware still starts');
+});
+
+test('Circuit Sim starts wired blocks and supports a second run after stop', () => {
+    const source = read('components/tw-pseudocode/circuit-tab.jsx');
+    assert.match(source, /onSimulationStart=\{this\.handleSimulationStart\}/);
+    const driving = source.match(/const stcDrives = ([\s\S]*?);/)[1];
+    const actions = [];
+    const window = {dispatchEvent: event => actions.push(event.type)};
+    const run = new Function('window', 'CustomEvent', `const stcDrives = ${driving};
+        ${method(source, 'handleSimulationStart ()')}`);
+    const vm = {
+        runtime: {},
+        start: () => actions.push('vm-start'),
+        greenFlag: () => actions.push('vm-flag'),
+        stopAll: () => actions.push('vm-stop')
+    };
+    const circuit = {
+        props: {vm},
+        state: {stc: {device: 'stc12c5a60s2', pins: [{name: 'button'}]}},
+        handleProjectStart: () => actions.push('simulation-only')
+    };
+    const simulate = () => run.call(circuit, window, CustomEvent);
+    simulate();
+    vm.stopAll();
+    simulate();
+    assert.deepEqual(actions, [
+        'vm-start', 'bw-green-flag', 'vm-flag', 'vm-stop',
+        'vm-start', 'bw-green-flag', 'vm-flag'
+    ]);
+
+    for (const state of [
+        {circuitData: {fileOnly: true}},
+        {machineBooted: true},
+        {stc: {device: 'microbit', pins: [{name: 'button'}]}},
+        {stc: null}
+    ]) {
+        actions.length = 0;
+        run.call({...circuit, state: {...circuit.state, ...state}}, window, CustomEvent);
+        assert.deepEqual(actions, ['simulation-only']);
+    }
 });
 
 test('the circuit tab shows a runner\'s board only while its run lives', () => {
@@ -176,10 +193,11 @@ test('a board that outlives a run keeps its clock moving when the target\'s rest
     assert.equal(boardTimeBase(null, target), 0n);
     // And the runner uses it at every (re)start and on both of its clocks.
     const runner = read('lib/bw-debug/debug-runner.js');
-    // start({paused:true}) may pause the freshly reset target before rebasing;
-    // no other statement may intervene before the board's clock is aligned.
-    assert.match(runner,
-        /session\.start\(\);\s*(?:if \(paused\) session\.pause\(\);\s*)?boardBaseNs = boardTimeBase\(board, target\);/);
+    const startSession = runner.indexOf('session.start();');
+    const baseAfterReset = runner.indexOf('boardBaseNs = boardTimeBase(board, target);', startSession);
+    const publishRunning = runner.indexOf("setStatus(paused ? 'paused' : 'running');", startSession);
+    assert.ok(startSession >= 0 && baseAfterReset > startSession && publishRunning > baseAfterReset,
+        'the runner rebases the board after starting the session and before publishing it as running');
     assert.equal((runner.match(/advanceTo\(target\.timeNs\(\) \+ boardBaseNs\)/g) || []).length, 2);
     assert.doesNotMatch(runner, /advanceTo\(target\.timeNs\(\)\)/, 'a pump that advances without the base');
 });

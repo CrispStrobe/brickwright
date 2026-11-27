@@ -1,0 +1,514 @@
+{
+  "wave": "cardiac-9",
+  "title": {
+    "en": "CARDIAC: you can follow every instruction",
+    "de": "CARDIAC: jeden Befehl nachvollziehen"
+  },
+  "lessons": [
+    {
+      "id": "cardiac-you-are-cpu",
+      "version": 1,
+      "exampleId": "cardiac-echo",
+      "loadMode": "program-only",
+      "wave": "cardiac-9",
+      "topic": "fetch-and-memory",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "discover",
+      "ageGuidance": "11+",
+      "minutes": 15,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [],
+      "copy": {
+        "en": {
+          "title": "You are the processor",
+          "objective": "Predict one instruction at a time and follow a number from input through memory to output."
+        },
+        "de": {
+          "title": "Du bist der Prozessor",
+          "objective": "Sage jeden Befehl voraus und verfolge eine Zahl von der Eingabe über den Speicher zur Ausgabe."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Open the echo example. Read 080 at cell 01, 580 at cell 02 and 900 at cell 03. Before running, predict what each instruction changes when the input is 042.",
+              "explain": "The first digit selects an operation; the last two digits are its operand. INP 80 writes the next input word into cell 80. OUT 80 reads that cell.",
+              "hint": "080 is an instruction referring to address 80, not the number that will be printed. HRS ends this run. The example starts at 01; cell 00 stays fixed at 001.",
+              "manual": "I predicted each memory and output change"
+            },
+            "de": {
+              "action": "Öffne das Echo-Beispiel. Lies 080 in Zelle 01, 580 in Zelle 02 und 900 in Zelle 03. Sage vor dem Lauf voraus, was jeder Befehl bei der Eingabe 042 verändert.",
+              "explain": "Die erste Ziffer wählt die Operation; die letzten beiden bilden ihren Operanden. INP 80 schreibt das nächste Eingabewort in Zelle 80. OUT 80 liest diese Zelle.",
+              "hint": "080 verweist als Befehl auf Adresse 80; es ist nicht die auszugebende Zahl. HRS beendet diesen Lauf. Das Beispiel startet bei 01; Zelle 00 bleibt fest auf 001.",
+              "manual": "Ich habe jede Speicher- und Ausgabeänderung vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Assemble and load the source, queue the supplied 042 input, then step one instruction at a time. Compare the PC, cell 80, input queue and output strip with your predictions.",
+              "explain": "These views observe the same machine. Reading the listing does not establish that an instruction executed. A wait for input does not consume a word or complete INP.",
+              "hint": "After INP, cell 80 is 042 and the input queue is empty. After OUT, the output strip contains 042. The accumulator can remain zero throughout this program.",
+              "manual": "I compared all three executed instructions with my predictions"
+            },
+            "de": {
+              "action": "Übersetze und lade den Quelltext, stelle die Eingabe 042 bereit und führe jeweils einen Befehl aus. Vergleiche PC, Zelle 80, Eingabewarteschlange und Ausgabestreifen mit deinen Vorhersagen.",
+              "explain": "Die Ansichten beobachten dieselbe Maschine. Ein gelesener Befehl ist noch kein ausgeführter Befehl. Warten auf Eingabe verbraucht kein Wort und schließt INP nicht ab.",
+              "hint": "Nach INP enthält Zelle 80 den Wert 042; die Eingabewarteschlange ist leer. Nach OUT steht 042 auf dem Ausgabestreifen. Der Akkumulator kann dabei stets null bleiben.",
+              "manual": "Ich habe alle drei ausgeführten Befehle mit meinen Vorhersagen verglichen"
+            }
+          }
+        },
+        {
+          "id": "explain",
+          "copy": {
+            "en": {
+              "action": "Repeat a fresh run with 073. Explain which word belongs to the program, which word is data, and why no addition was needed.",
+              "explain": "A stored program controls what happens to its input. A number in memory is not automatically an instruction; its role depends on how execution uses it.",
+              "hint": "Point to instruction 080, address 80 and value 073 separately. Stepping is an educational execution control, not a claim about the speed of historical electronics.",
+              "manual": "I distinguished the instruction, address and stored value"
+            },
+            "de": {
+              "action": "Wiederhole einen neuen Lauf mit 073. Erkläre, welches Wort zum Programm gehört, welches Daten enthält und warum keine Addition nötig war.",
+              "explain": "Ein gespeichertes Programm bestimmt, was mit seiner Eingabe geschieht. Eine Zahl im Speicher ist nicht automatisch ein Befehl; ihre Rolle ergibt sich aus ihrer Verwendung.",
+              "hint": "Zeige getrennt auf Befehl 080, Adresse 80 und Wert 073. Einzelschritte sind eine Lernsteuerung und keine Aussage über die Geschwindigkeit historischer Elektronik.",
+              "manual": "Ich habe Befehl, Adresse und gespeicherten Wert unterschieden"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cardiac-accumulator",
+      "version": 1,
+      "exampleId": "cardiac-add",
+      "loadMode": "program-only",
+      "wave": "cardiac-9",
+      "topic": "accumulator-and-store",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 18,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cardiac-you-are-cpu"
+      ],
+      "copy": {
+        "en": {
+          "title": "A calculator that remembers",
+          "objective": "Trace load, addition and store without confusing the accumulator with the output cell."
+        },
+        "de": {
+          "title": "Ein Rechner mit Gedächtnis",
+          "objective": "Verfolge Laden, Addieren und Speichern, ohne Akkumulator und Ausgabezelle zu verwechseln."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "For inputs 017 and 025, predict cells 80 and 81 after the input instructions, the accumulator after CLA and ADD, and cell 82 after STO.",
+              "explain": "CLA copies memory into the accumulator. ADD changes the accumulator. STO then copies its stored-word value into memory.",
+              "hint": "The sequence should leave 017 in cell 80, 025 in cell 81 and 042 in cell 82. OUT reads a memory cell, so an addition alone does not change the output strip.",
+              "manual": "I predicted the separate accumulator and memory states"
+            },
+            "de": {
+              "action": "Sage für die Eingaben 017 und 025 die Zellen 80 und 81 nach den Eingabebefehlen, den Akkumulator nach CLA und ADD sowie Zelle 82 nach STO voraus.",
+              "explain": "CLA kopiert Speicher in den Akkumulator. ADD verändert den Akkumulator. STO kopiert anschließend den Wert im Speicherwortformat in den Speicher.",
+              "hint": "Danach sollten 017 in Zelle 80, 025 in Zelle 81 und 042 in Zelle 82 stehen. OUT liest eine Speicherzelle; eine Addition allein verändert den Ausgabestreifen nicht.",
+              "manual": "Ich habe Akkumulator- und Speicherzustände getrennt vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Load the source and queue the two inputs in order. Step through both INP instructions, CLA, ADD, STO and OUT. Record the actual accumulator and destination-cell values.",
+              "explain": "Only the executed state establishes where the sum exists. The source label total is an address name; its value comes from memory.",
+              "hint": "At ADD completion the accumulator is 042 while cell 82 can still be 000. After STO, cell 82 is 042; only OUT appends it to the output strip.",
+              "manual": "I observed the sum move from accumulator to memory to output"
+            },
+            "de": {
+              "action": "Lade den Quelltext und stelle beide Eingaben in der richtigen Reihenfolge bereit. Führe beide INP-Befehle, CLA, ADD, STO und OUT einzeln aus. Notiere Akkumulator und Zielzelle.",
+              "explain": "Erst der ausgeführte Zustand zeigt, wo die Summe vorhanden ist. Die Marke total bezeichnet eine Adresse; ihr Wert stammt aus dem Speicher.",
+              "hint": "Nach ADD ist der Akkumulator 042, während Zelle 82 noch 000 sein kann. Nach STO enthält Zelle 82 den Wert 042; erst OUT hängt ihn an den Ausgabestreifen an.",
+              "manual": "Ich habe den Weg der Summe vom Akkumulator über den Speicher zur Ausgabe beobachtet"
+            }
+          }
+        },
+        {
+          "id": "transfer",
+          "copy": {
+            "en": {
+              "action": "Try fresh runs with 0 + 0 and -5 + 12. Explain the result and identify where a blocks or high-level assignment would hide a load or store.",
+              "explain": "The algorithm can be described in several languages, but this small decimal machine is not a general compiler target for every language feature.",
+              "hint": "Expected outputs are 000 and 007. Keep results within -999 through 999 here; wider accumulator values and stored-word truncation need a separate experiment.",
+              "manual": "I tested two new input pairs and explained the hidden machine work"
+            },
+            "de": {
+              "action": "Probiere neue Läufe mit 0 + 0 und -5 + 12. Erkläre das Ergebnis und benenne Lade- oder Speicherarbeit, die eine Zuweisung in Blöcken oder einer Hochsprache verbirgt.",
+              "explain": "Der Algorithmus lässt sich in mehreren Sprachen beschreiben. Diese kleine dezimale Maschine ist aber kein allgemeines Compilerziel für alle Sprachfunktionen.",
+              "hint": "Erwartete Ausgaben sind 000 und 007. Halte die Ergebnisse hier zwischen -999 und 999; größere Akkumulatorwerte und das Kürzen beim Speichern brauchen ein eigenes Experiment.",
+              "manual": "Ich habe zwei neue Eingabepaare geprüft und die verborgene Maschinenarbeit erklärt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cardiac-negative-branch",
+      "version": 1,
+      "exampleId": "cardiac-countdown",
+      "loadMode": "program-only",
+      "wave": "cardiac-9",
+      "topic": "negative-branch-boundary",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 20,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cardiac-accumulator"
+      ],
+      "copy": {
+        "en": {
+          "title": "Zero chooses a different path",
+          "objective": "Use a countdown to distinguish a negative value from zero and verify both TAC paths."
+        },
+        "de": {
+          "title": "Null nimmt einen anderen Weg",
+          "objective": "Unterscheide mit einem Countdown negative Werte von null und prüfe beide TAC-Wege."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Predict the complete output for starting values 003, 000 and -001 before running any of them. State exactly when TAC should branch.",
+              "explain": "TAC transfers control only when the accumulator is negative. Zero follows the next instruction, just like a positive value.",
+              "hint": "The expected strips are 003, 002, 001, 000; then 000 alone; then no output. In the first run -001 is stored, but the branch prevents it from being printed.",
+              "manual": "I predicted positive, zero and negative starting cases"
+            },
+            "de": {
+              "action": "Sage vor dem Ausführen die vollständige Ausgabe für Startwerte 003, 000 und -001 voraus. Beschreibe genau, wann TAC springen soll.",
+              "explain": "TAC springt nur bei einem negativen Akkumulatorwert. Null folgt wie ein positiver Wert dem nächsten Befehl.",
+              "hint": "Erwartet werden 003, 002, 001, 000; danach nur 000; danach keine Ausgabe. Im ersten Lauf wird -001 gespeichert, aber der Sprung verhindert seine Ausgabe.",
+              "manual": "Ich habe positive, nullwertige und negative Startfälle vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Run each case from a fresh loaded image. Step the TAC instruction once with accumulator zero and once with accumulator -001; compare the resulting PC and output strip.",
+              "explain": "A branch is an observed change in control flow, not a highlight inferred from source text. Reloading starts with the authored data again.",
+              "hint": "Use the label done to find the halt destination. The ordinary JMP also writes a return instruction to cell 99; keep your countdown data elsewhere.",
+              "manual": "I observed both branch outcomes and all three output strips"
+            },
+            "de": {
+              "action": "Starte jeden Fall mit einem frisch geladenen Speicherbild. Führe TAC einmal mit Akkumulator null und einmal mit -001 aus; vergleiche den folgenden PC und den Ausgabestreifen.",
+              "explain": "Ein Sprung ist eine beobachtete Änderung des Kontrollflusses, keine aus dem Quelltext vermutete Hervorhebung. Neues Laden stellt die geschriebenen Anfangsdaten wieder her.",
+              "hint": "Die Marke done zeigt das Haltziel. Auch ein gewöhnliches JMP schreibt einen Rücksprungbefehl nach Zelle 99; speichere die Countdown-Daten deshalb anderswo.",
+              "manual": "Ich habe beide Sprungausgänge und alle drei Ausgabestreifen beobachtet"
+            }
+          }
+        },
+        {
+          "id": "explain",
+          "copy": {
+            "en": {
+              "action": "Explain why replacing the test with a vague instruction such as stop at zero changes this program. Relate the same boundary question to a sensor threshold.",
+              "explain": "The order of testing, output and decrement determines whether a boundary value is included. Naming the comparison makes that behavior reviewable.",
+              "hint": "A threshold program can subtract a threshold and branch on a negative result. Equality then follows the nonnegative path.",
+              "manual": "I explained the boundary and the order of operations"
+            },
+            "de": {
+              "action": "Erkläre, warum eine ungenaue Regel wie bei null stoppen das Verhalten verändern kann. Übertrage dieselbe Grenzfrage auf einen Sensorschwellwert.",
+              "explain": "Die Reihenfolge von Test, Ausgabe und Abzählen bestimmt, ob ein Grenzwert dazugehört. Eine benannte Vergleichsregel macht das Verhalten überprüfbar.",
+              "hint": "Ein Schwellwertprogramm kann die Schwelle abziehen und bei negativem Ergebnis springen. Gleichheit nimmt dann den nichtnegativen Weg.",
+              "manual": "Ich habe den Grenzfall und die Reihenfolge erklärt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cardiac-input-output",
+      "version": 1,
+      "exampleId": "cardiac-night-light",
+      "loadMode": "program-and-circuit",
+      "wave": "cardiac-9",
+      "topic": "numeric-io-and-adapter",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging",
+        "widgets",
+        "circuits"
+      ],
+      "depth": "practitioner",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cardiac-negative-branch"
+      ],
+      "copy": {
+        "en": {
+          "title": "A number controls a light",
+          "objective": "Connect a decimal decision to a modern circuit adapter while keeping input sampling and output ownership explicit."
+        },
+        "de": {
+          "title": "Eine Zahl steuert ein Licht",
+          "objective": "Verbinde eine dezimale Entscheidung mit einem modernen Schaltungsadapter und unterscheide Abtastung und Ausgangssteuerung."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Predict the output words for 200, 500, 800 and 300 using the stored threshold 500. Identify the input cell, decision cell and two output paths.",
+              "explain": "Each INP consumes one sample. The program subtracts the threshold and stores its decision before OUT reads the decision cell.",
+              "hint": "Cell 80 holds the sample, 81 the threshold and 84 the decision. Expected output is 001, 000, 000, 001. Equality is not negative.",
+              "manual": "I predicted all four decisions and their memory locations"
+            },
+            "de": {
+              "action": "Sage die Ausgabewörter für 200, 500, 800 und 300 bei gespeicherter Schwelle 500 voraus. Finde Eingabezelle, Entscheidungszelle und beide Ausgabewege.",
+              "explain": "Jedes INP verbraucht eine Probe. Das Programm zieht die Schwelle ab und speichert seine Entscheidung, bevor OUT die Entscheidungszelle liest.",
+              "hint": "Zelle 80 enthält die Probe, 81 die Schwelle und 84 die Entscheidung. Erwartet wird 001, 000, 000, 001. Gleichheit ist nicht negativ.",
+              "manual": "Ich habe alle vier Entscheidungen und ihre Speicherorte vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Select Manual cards as the input source, then use Run source + cards for the supplied numeric strip. Compare the actual output with the prediction, then inspect the waiting state after the fourth sample has been processed.",
+              "explain": "Running out of cards pauses input progress; it does not supply an implicit zero. The last output remains an observed value until another OUT occurs.",
+              "hint": "The machine should wait at the next INP with the output strip ending in 001. Compare the current PC, input queue and output separately.",
+              "manual": "I observed all four outputs and the genuine input wait"
+            },
+            "de": {
+              "action": "Wähle Manuelle Karten als Eingabequelle und starte den mitgelieferten Zahlenstreifen mit Quelle + Karten starten. Vergleiche die echte Ausgabe mit der Vorhersage und prüfe danach den Wartezustand nach der vierten Probe.",
+              "explain": "Ein leerer Eingabestreifen hält die Eingabeverarbeitung an; er liefert keine automatische null. Die letzte Ausgabe bleibt bestehen, bis ein weiteres OUT ausgeführt wird.",
+              "hint": "Die Maschine sollte beim nächsten INP warten; der Ausgabestreifen endet auf 001. Vergleiche PC, Eingabewarteschlange und Ausgabe getrennt.",
+              "manual": "Ich habe alle vier Ausgaben und das tatsächliche Warten beobachtet"
+            }
+          }
+        },
+        {
+          "id": "circuit",
+          "copy": {
+            "en": {
+              "action": "Select Circuit adapter, then assemble and load a fresh run with no queued cards. Turn the light-level potentiometer, sample it once with the adapter control, and follow that one card through the decision to the LED. Pause, change the input and distinguish a new queued sample from a newly executed output.",
+              "explain": "This is a modern Brickwright adapter, not historical CARDIAC GPIO. It converts the circuit input over 0–5 V into 0–999 and latches its output high only for the word 001. The potentiometer stands in for a light-level signal.",
+              "hint": "Read the actual sampled card instead of guessing from knob position. An input change or queued card does not itself change the output latch. Check the emitted word, latch and solved LED branch separately; simulation instruction speed is not a historical electrical clock.",
+              "manual": "I traced a sampled circuit input to an executed output and the LED"
+            },
+            "de": {
+              "action": "Wähle Schaltungsadapter und lade mit Assemblieren & laden einen neuen Lauf ohne wartende Karten. Drehe das Helligkeitspotentiometer, taste es einmal über den Adapter ab und verfolge diese Karte bis zur Entscheidung und LED. Pausiere, ändere die Eingabe und unterscheide eine neue Karte von einer neu ausgeführten Ausgabe.",
+              "explain": "Dies ist ein moderner Brickwright-Adapter und kein historisches CARDIAC-GPIO. Er wandelt 0–5 V am Schaltungseingang in 0–999 um und hält seinen Ausgang nur für das Wort 001 auf High. Das Potentiometer ersetzt ein Helligkeitssignal.",
+              "hint": "Lies die tatsächlich abgetastete Karte, statt aus der Knopfstellung zu raten. Eine Eingabeänderung oder neue Karte verändert den Ausgangslatch nicht von selbst. Prüfe Ausgabewort, Latch und berechneten LED-Zweig getrennt; das Simulationstempo ist kein historischer elektrischer Takt.",
+              "manual": "Ich habe eine abgetastete Schaltungseingabe bis zur ausgeführten Ausgabe und LED verfolgt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cardiac-bootstrap",
+      "version": 1,
+      "exampleId": "cardiac-bootstrap",
+      "loadMode": "program-only",
+      "wave": "cardiac-9",
+      "topic": "stored-program-loading",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "practitioner",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cardiac-accumulator"
+      ],
+      "copy": {
+        "en": {
+          "title": "A program loads a program",
+          "objective": "Follow how the fixed word at 00 and the input strip create and start an addition program."
+        },
+        "de": {
+          "title": "Ein Programm lädt ein Programm",
+          "objective": "Verfolge, wie das feste Wort bei 00 und ein Eingabestreifen ein Additionsprogramm erzeugen und starten."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Inspect the initial image: only fixed cell 00 is authored as 001. Predict where the first two input words 002 and 800 will be stored and which instruction executes afterward.",
+              "explain": "001 means INP 01. After it stores 002 in cell 01, that cell becomes INP 02. The next input 800 then becomes JMP 00 in cell 02.",
+              "hint": "The instruction pointer advances into the newly written words. Loading a program is itself a sequence of memory writes and control-flow decisions.",
+              "manual": "I predicted the first two writes and the return to 00"
+            },
+            "de": {
+              "action": "Prüfe das Anfangsbild: Nur die feste Zelle 00 ist als 001 vorgegeben. Sage voraus, wohin die ersten Eingaben 002 und 800 geschrieben werden und welcher Befehl danach läuft.",
+              "explain": "001 bedeutet INP 01. Nachdem 002 in Zelle 01 steht, ist diese Zelle INP 02. Die nächste Eingabe 800 wird dann zu JMP 00 in Zelle 02.",
+              "hint": "Der Befehlszähler läuft in die neu geschriebenen Wörter hinein. Auch das Laden eines Programms ist eine Folge von Speicherzugriffen und Kontrollflussentscheidungen.",
+              "manual": "Ich habe die ersten beiden Schreibzugriffe und die Rückkehr nach 00 vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Load this initial image and queue the supplied bootstrap strip once. Step through its writes to cells 20–25 and 81. Observe 820 replacing cell 01, then follow execution into cell 20.",
+              "explain": "The loading loop alternates an input-destination instruction with its payload value. The final 820 redirects control to the program just installed.",
+              "hint": "The payload at 20–25 reads input into 80, adds cell 81, stores back to 80, outputs 80 and halts. Cell 81 receives 007. A JMP also updates cell 99.",
+              "manual": "I observed the payload being written and execution entering it"
+            },
+            "de": {
+              "action": "Lade dieses Anfangsbild und stelle den Bootstrap-Streifen genau einmal bereit. Verfolge schrittweise seine Schreibzugriffe auf 20–25 und 81. Beobachte, wie 820 Zelle 01 ersetzt, und folge dann der Ausführung nach Zelle 20.",
+              "explain": "Der Lader wechselt zwischen einem Eingabe-Zielbefehl und dessen Nutzwert. Das abschließende 820 führt zum gerade installierten Programm.",
+              "hint": "Das Programm bei 20–25 liest nach 80, addiert Zelle 81, speichert nach 80, gibt 80 aus und hält an. Zelle 81 erhält 007. Ein JMP verändert außerdem Zelle 99.",
+              "manual": "Ich habe das Schreiben des Programms und den Eintritt in seine Ausführung beobachtet"
+            }
+          }
+        },
+        {
+          "id": "explain",
+          "copy": {
+            "en": {
+              "action": "Continue until the installed program consumes 035 and outputs 042. Explain how the input strip changes role from loading instructions and program words to the running program’s data.",
+              "explain": "The same numeric channel can carry several kinds of information. Their meaning comes from the program that consumes each word, not from the appearance of the number.",
+              "hint": "Record the actual final output and a few installed words. Merely opening the example or seeing the expected source is not evidence that bootstrapping occurred.",
+              "manual": "I observed 042 and explained the input strip’s changing role"
+            },
+            "de": {
+              "action": "Führe weiter aus, bis das installierte Programm 035 verbraucht und 042 ausgibt. Erkläre, wie der Eingabestreifen von Ladebefehlen und Programmwörtern zu Daten des laufenden Programms übergeht.",
+              "explain": "Derselbe Zahlenkanal kann verschiedene Informationen tragen. Ihre Bedeutung entsteht durch das Programm, das ein Wort verarbeitet, nicht durch das Aussehen der Zahl.",
+              "hint": "Notiere die tatsächliche Endausgabe und einige installierte Wörter. Ein geöffnetes Beispiel oder der erwartete Quelltext beweisen keinen ausgeführten Bootstrap.",
+              "manual": "Ich habe 042 beobachtet und den Rollenwechsel des Eingabestreifens erklärt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cardiac-self-modification",
+      "version": 1,
+      "exampleId": "cardiac-self-modify",
+      "loadMode": "program-only",
+      "wave": "cardiac-9",
+      "topic": "code-as-writable-data",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "advanced",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cardiac-negative-branch",
+        "cardiac-bootstrap"
+      ],
+      "copy": {
+        "en": {
+          "title": "The instruction in RAM changes",
+          "objective": "Trace a program that modifies its own OUT instruction while preserving the distinction between source and live memory."
+        },
+        "de": {
+          "title": "Der Befehl im RAM verändert sich",
+          "objective": "Verfolge ein Programm, das seinen OUT-Befehl verändert, und unterscheide Quelltext vom laufenden Speicher."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Read the instruction at cell 10 and the data at 80–82. Predict what adding one to the word 580 changes and which values three visits to cell 10 should output.",
+              "explain": "Adding one changes 580 to 581: the opcode stays OUT while its memory operand moves from 80 to 81. A later increment selects 82.",
+              "hint": "Expected outputs are 011, 022 and 033. The program changes an instruction word, not the source label table.",
+              "manual": "I predicted the changed instruction words and three outputs"
+            },
+            "de": {
+              "action": "Lies den Befehl bei 10 und die Daten bei 80–82. Sage voraus, was das Addieren von eins zu 580 verändert und welche Werte drei Besuche bei Zelle 10 ausgeben.",
+              "explain": "Aus 580 wird durch Addition von eins 581: Der Opcode bleibt OUT, aber sein Speicheroperand wechselt von 80 zu 81. Der nächste Schritt wählt 82.",
+              "hint": "Erwartete Ausgaben sind 011, 022 und 033. Das Programm verändert ein Befehlswort, nicht die Quelltextmarke table.",
+              "manual": "Ich habe die veränderten Befehlswörter und drei Ausgaben vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Load the example and step through each STO to cell 10. Compare the live word with the unchanged source listing, then follow the next executed OUT and its actual output value.",
+              "explain": "The engine executes live memory. A source mapping describes the authored word and can become stale after execution writes that address.",
+              "hint": "After the first write, live cell 10 should be 581 while the authored listing still encodes 580. A source view must show that mismatch rather than claim exact agreement.",
+              "manual": "I observed the live instruction change and the resulting output"
+            },
+            "de": {
+              "action": "Lade das Beispiel und verfolge jedes STO nach Zelle 10 einzeln. Vergleiche das laufende Wort mit dem unveränderten Quelllisting und beobachte das nächste OUT samt tatsächlicher Ausgabe.",
+              "explain": "Die Maschine führt den laufenden Speicher aus. Eine Quellzuordnung beschreibt das geschriebene Anfangswort und kann nach einem Schreibzugriff veraltet sein.",
+              "hint": "Nach dem ersten Schreiben sollte Zelle 10 den Wert 581 enthalten, während das Quelllisting weiter 580 codiert. Die Quellansicht muss diese Abweichung zeigen, statt genaue Übereinstimmung zu behaupten.",
+              "manual": "Ich habe die Befehlsänderung und ihre Ausgabewirkung beobachtet"
+            }
+          }
+        },
+        {
+          "id": "explain",
+          "copy": {
+            "en": {
+              "action": "At halt, inspect cell 10 again and explain why it contains 583 even though only three values were printed. Reload the source and distinguish that fresh image from continuing a modified run.",
+              "explain": "The program patches the instruction before it tests whether another iteration is needed. A memory value can therefore be written without ever being executed.",
+              "hint": "The three outputs remain 011, 022 and 033. The last patch happens before the remaining count becomes negative and TAC reaches HRS. Ordinary source loading restores the authored program; it is not session replay.",
+              "manual": "I explained the unused final instruction and the fresh-load boundary"
+            },
+            "de": {
+              "action": "Prüfe beim Halt erneut Zelle 10 und erkläre, warum dort 583 steht, obwohl nur drei Werte ausgegeben wurden. Lade den Quelltext neu und unterscheide dieses Anfangsbild vom Fortsetzen eines veränderten Laufs.",
+              "explain": "Das Programm ändert den Befehl, bevor es prüft, ob ein weiterer Durchlauf nötig ist. Ein Speicherwert kann deshalb geschrieben werden, ohne je ausgeführt zu werden.",
+              "hint": "Die drei Ausgaben bleiben 011, 022 und 033. Die letzte Änderung geschieht vor dem negativen Restzähler und dem TAC-Sprung zu HRS. Normales Laden stellt das geschriebene Programm wieder her; es ist kein Sitzungs-Replay.",
+              "manual": "Ich habe den unbenutzten letzten Befehl und die Grenze zum neuen Laden erklärt"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

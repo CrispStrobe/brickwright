@@ -670,6 +670,28 @@ const CENSUS = [
            + 'a mismatch is refused by slot name, test/elks-lesson.test.mjs).'
     },
     {
+        file: 'overlay/scratch-gui/src/lib/bw-machines/library-media.js',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${item.revision',
+        class: 'sha-const',
+        why: 'The built-in list selects the default immutable media-lab commit or a per-entry full commit. '
+           + 'The catalog test checks every override. Manifest and source reads refuse redirects.'
+    },
+    {
+        file: 'scripts/verify-machine-video-boot.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/*/projects/elks/fd1440-fat.img',
+        class: 'source-link',
+        why: 'Playwright interception pattern. The handler fulfills intercepted requests with a local test image.'
+    },
+    {
+        file: 'test/machine-manager-native-blocks-ui.test.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/example/media/0123456789/brickwright-media.json',
+        class: 'source-link',
+        why: 'Synthetic manifest URL answered by the test fetch mock. It exercises relative path resolution without a network request.'
+    },
+    {
         file: 'scripts/verify-native-downloads-e2e.mjs',
         kind: 'raw',
         text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/',
@@ -697,6 +719,7 @@ const SHA_CONSTANTS = [
     ['scripts/admit-arrays-number-value-test-source.mjs', /commit: '([^']+)'/],
     ['overlay/scratch-gui/src/lib/bw-machines/lessons.js', /const LINUX_MEDIA_COMMIT = '([0-9a-zA-Z]+)'/],
     ['overlay/scratch-gui/src/lib/bw-machines/lessons.js', /const ELKS_MEDIA_COMMIT = '([0-9a-zA-Z]+)'/],
+    ['overlay/scratch-gui/src/lib/bw-machines/library-media.js', /const MEDIA_REVISION = '([^']+)'/],
     ['scripts/verify-native-downloads-e2e.mjs', /'([0-9a-zA-Z]+)\/riscv32-linux\/Image'/],
     ['scripts/build-bbcsdl-reference.sh', /^BBCSDL_COMMIT=([0-9a-zA-Z]+)/m]
 ];
@@ -860,6 +883,13 @@ describe('fetch pinning: every fetch that decides what ships names an immutable 
             assert.match(m[1], FULL_SHA,
                 `${file} pins "${m[1]}", which is not a 40-hex sha. Resolve it with:\n`
                 + `  gh api repos/<owner>/<repo>/commits/${m[1]} --jq .sha`);
+        }
+    });
+
+    test('built-in machine media overrides name full commit shas', async () => {
+        const {libraryMedia} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-media.js');
+        for (const item of libraryMedia) {
+            if (item.revision !== undefined) assert.match(item.revision, FULL_SHA, item.id);
         }
     });
 

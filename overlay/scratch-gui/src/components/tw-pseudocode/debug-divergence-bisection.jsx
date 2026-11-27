@@ -6,31 +6,31 @@ const BUTTON = {padding: '3px 7px', borderRadius: 3, border: '1px solid #2c3e50'
 
 const cursor = value => value ? `${value.branchId}#${value.eventCursor}` : '—';
 
-const DebugDivergenceBisection = ({status, disabled, onMarkGood, onMarkBad, onStart, onCancel}) => {
+const DebugDivergenceBisection = ({t, status, disabled, onMarkGood, onMarkBad, onStart, onCancel}) => {
     const running = status?.phase === 'running' || status?.phase === 'cancelling';
     return <section data-debug-divergence-bisection style={{display: 'flex', gap: 5,
         alignItems: 'center', flexWrap: 'wrap'}}>
-        <strong>{'Divergence'}</strong>
-        <span data-debug-bisection-good>{`Good ${cursor(status?.good)}`}</span>
-        <span data-debug-bisection-bad>{`Bad ${cursor(status?.bad)}`}</span>
         <button data-debug-bisection-mark-good style={BUTTON} disabled={disabled || running}
-            onClick={onMarkGood}>{'Mark good'}</button>
+            title={`${t('markGood')} · ${cursor(status?.good)}`} aria-label={t('markGood')} aria-pressed={!!status?.good}
+            onClick={onMarkGood}><span data-debug-bisection-good>✓</span></button>
         <button data-debug-bisection-mark-bad style={BUTTON} disabled={disabled || running}
-            onClick={onMarkBad}>{'Mark bad'}</button>
+            title={`${t('markBad')} · ${cursor(status?.bad)}`} aria-label={t('markBad')} aria-pressed={!!status?.bad}
+            onClick={onMarkBad}><span data-debug-bisection-bad>✕</span></button>
         <button data-debug-bisection-start style={BUTTON}
-            disabled={disabled || running || !status?.good || !status?.bad} onClick={onStart}>{'Bisect'}</button>
-        <button data-debug-bisection-cancel style={BUTTON} disabled={!running}
-            onClick={onCancel}>{'Cancel'}</button>
+            disabled={disabled || running || !status?.good || !status?.bad} onClick={onStart} title={t('bisect')} aria-label={t('bisect')}>⇄</button>
+        {running && <button data-debug-bisection-cancel style={BUTTON} disabled={!running}
+            onClick={onCancel} title={t('cancelBisect')} aria-label={t('cancelBisect')}>⏹</button>}
         {running ? <progress data-debug-bisection-progress max={status.maxProbes || 1}
             value={status.probes || 0} /> : null}
         {status?.result ? <span data-debug-bisection-result role="status">
-            {status.result.accepted ? `First mismatch #${status.result.firstMismatchEventSeq}` :
+            {status.result.accepted ? `${t('firstMismatch')} #${status.result.firstMismatchEventSeq}` :
                 (status.result.reason || status.result.code)}
         </span> : null}
     </section>;
 };
 
 DebugDivergenceBisection.propTypes = {
+    t: PropTypes.func.isRequired,
     status: PropTypes.object,
     disabled: PropTypes.bool,
     onMarkGood: PropTypes.func.isRequired,

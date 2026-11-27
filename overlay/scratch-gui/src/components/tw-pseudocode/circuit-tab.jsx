@@ -1,6 +1,9 @@
+import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
+import {addCardiacFace, addMicrotronicFace, addKim1Face} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {makeT} from '../../lib/bw-i18n.js';
+import {createCardiacWorkspace, CARDIAC_WORKSPACE_KEY, readCardiacWorkspaceActive, setCardiacWorkspaceActive} from '../../lib/cardiac-project.js';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
@@ -50,6 +53,8 @@ const PANEL_L10N = {
 };
 const pt = makeT(PANEL_L10N);
 
+
+const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
 const DebugPanel = React.lazy(() =>
     import(/* webpackChunkName: "bw-debug-panel" */ './debug-panel.jsx')
@@ -126,6 +131,20 @@ const DEBUG_LIVE_REFRESH_MS = 250;
 // These modes share the right column with panes owned by gui.jsx. Remember
 // their selection too, so a controller/device face never covers a stale
 // debugger portal that still thinks the column belongs to it.
+function CircuitPanelNavigation({Switch, panel, drc, locale, onSelect, menu, onPick}) {
+    return <>
+        <Switch {...{panel, drc, locale, onSelect, menu, onPick}} />
+        {menu && <button type="button" className="circuit-menu-row" data-testid="bw-circuit-machines"
+            onClick={() => {
+                onPick?.();
+                window.dispatchEvent(new CustomEvent('bw-open-machine-manager'));
+            }}>
+            <span aria-hidden="true" style={{width: 18, textAlign: 'center'}}>▣</span>
+            <span className="circuit-menu-label">{/^de/i.test(locale) ? 'Maschinen…' : 'Machines…'}</span>
+        </button>}
+    </>;
+}
+
 const CIRCUIT_DOCKS = new Set(['top', 'right', 'off', 'solo']);
 const DEVICE_DOCKS = new Set(['controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots']);
 
@@ -181,6 +200,7 @@ class CircuitTab extends React.Component {
         this.handleDeclarationChange = this.handleDeclarationChange.bind(this);
         this.handleCircuitEdit = this.handleCircuitEdit.bind(this);
         this.handleProjectStart = this.handleProjectStart.bind(this);
+        this.handleSimulationStart = this.handleSimulationStart.bind(this);
         this.handleVmProjectStart = this.handleVmProjectStart.bind(this);
         this.handleVmStopAll = this.handleVmStopAll.bind(this);
         this.handleRunnerGone = this.handleRunnerGone.bind(this);
@@ -298,9 +318,40 @@ class CircuitTab extends React.Component {
         // model, but the designer re-renders only on its own edits or a fresh
         // circuitData prop — so it hands us the built circuit's JSON and we LOAD
         // it, the same path a saved circuit takes (re-renders + applies live).
-        this._loadCircuitData = event => {
-            const data = event && event.detail && event.detail.data;
+        this._loadCircuitData = async event => {
+            const {data, asmBlinkReady} = event?.detail || {};
             if (!data || !Array.isArray(data.parts)) return;
+            if (asmBlinkReady) {
+                event.preventDefault();
+                try {
+                    await this.load({explicit: true});
+                    const board = await new Promise((resolve, reject) => {
+                        const expected = data.parts.filter(part => part.kind !== 'breadboard');
+                        const done = () => {
+                            window.removeEventListener('bw-board-ready', ready);
+                            clearTimeout(timeout);
+                        };
+                        const ready = () => {
+                            const live = this.props.vm?.runtime;
+                            const board = live?.circuitBoard;
+                            if (!live?.circuitModel || !board || !expected.every(part =>
+                                board.getParts().some(placed => placed.id === part.id))) return;
+                            done();
+                            resolve(board);
+                        };
+                        const timeout = setTimeout(() => {
+                            done();
+                            reject(new Error('The example circuit could not be loaded'));
+                        }, 15000);
+                        window.addEventListener('bw-board-ready', ready);
+                        this.setState({circuitData: data, panel: 'designer'}, ready);
+                    });
+                    asmBlinkReady.resolve(board);
+                } catch (error) {
+                    asmBlinkReady.reject(error);
+                }
+                return;
+            }
             this._markReactUpdate('host:fpga-demo');
             this.setState({circuitData: data});
             if (typeof this._applyToLiveCircuit === 'function') this._applyToLiveCircuit(data);
@@ -404,7 +455,14 @@ class CircuitTab extends React.Component {
                     this._markReactUpdate('host:circuit-data');
                     this.setState({circuitData: parsed});
                     this._applyToLiveCircuit(parsed);
-                    if (this.activateCp1Circuit(parsed)) this.showControllerDock();
+                    const cp1 = this.activateCp1Circuit(parsed);
+                    const cardiacPart = parsed.parts?.find(part => part.kind === 'cardiac');
+                    if (cp1) {
+                        setCardiacWorkspaceActive(localStorage, false);
+                        this.showControllerDock();
+                    } else if (cardiacPart) this.activateCardiac(cardiacPart.id);
+                    else if (readCardiacWorkspaceActive(localStorage)) this.activateCardiac();
+                    else this._onCardiacCodeSelection({detail: {active: false}});
                 } else if (event?.detail?.outcome === 'legacy' || event?.detail?.outcome === 'loaded') {
                     try { localStorage.setItem('bw-circuit-file-loaded', '1'); } catch (e) { /* full */ }
                     const emptied = {version: 1, parts: [], wires: []};
@@ -412,6 +470,8 @@ class CircuitTab extends React.Component {
                     this.setState({circuitData: emptied});
                     this._applyToLiveCircuit(emptied);
                     this.activateCp1Circuit(emptied);
+                    if (readCardiacWorkspaceActive(localStorage)) this.activateCardiac();
+                    else this._onCardiacCodeSelection({detail: {active: false}});
                 }
                 // The GUI owns project Widgets restoration, including when Circuit is hidden.
             } catch (e) {
@@ -478,6 +538,9 @@ class CircuitTab extends React.Component {
                 try { localStorage.setItem('bw-right-pane-hidden', value === '1' ? '1' : '0'); } catch { /* private mode */ }
                 this.setState({rightPaneHidden: value === '1'});
             }
+            if (key === 'bw-device-id' && value !== 'cardiac') {
+                this._onCardiacCodeSelection({detail: {active: false}});
+            }
             if (key === 'bw-device-id' && value !== 'cp1' && value !== 'kosmos-cp1') {
                 this._onCp1CodeSelection({detail: {active: false}});
             }
@@ -501,6 +564,12 @@ class CircuitTab extends React.Component {
         // first one — it replays the stash on mount. Same for a program
         // delivered (preset / file / ASM) before the panel finished mounting.
         this._machineExtractedHandler = e => {
+            if (window.__bwMachineExtracted?.kind === 'cardiac' && e?.detail?.kind !== 'cardiac') {
+                setCardiacWorkspaceActive(localStorage, false);
+                const runtime = this.props.vm?.runtime;
+                if (runtime?.bwDeviceCore === 'cardiac') runtime.bwDeviceCore = this._cardiacNormalCore;
+                this._cardiacNormalCore = undefined;
+            }
             window.__bwMachineExtracted = e && e.detail;
             if (e.detail?.clearLoadedMedia) delete window.__bwPendingMedia;
             this._markReactUpdate('host:machine-booted');
@@ -508,9 +577,19 @@ class CircuitTab extends React.Component {
         };
         window.addEventListener('bw-machine-extracted', this._machineExtractedHandler);
         window.addEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
+        window.addEventListener('bw-cardiac-code-selection', this._onCardiacCodeSelection);
+        window.addEventListener('bw-cardiac-run-request', this._onCardiacRunRequest);
+        window.addEventListener('bw-cardiac-open', this._onCardiacOpen);
+        window.addEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.addEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         this._mediaStashHandler = e => {
-            window.__bwPendingMedia = {type: 'media', detail: e && e.detail};
+            const detail = e?.detail;
+            const previous = window.__bwPendingMedia?.detail;
+            window.__bwPendingMedia = {type: 'media', detail};
+            if (detail !== previous) {
+                if (detail?.machineView === 'debugger') showCircuitDebugger();
+                if (detail?.machineView === 'controller') setCircuitView({fullWidth: false, dock: 'controller'});
+            }
             this._markReactUpdate('host:machine-booted');
             this.setState({machineBooted: true});
         };
@@ -529,7 +608,7 @@ class CircuitTab extends React.Component {
         // board must show THAT wiring and seating, not the authored default
         // and never the runner's inferred fallback.
         this._benchHandler = async (e) => {
-            const {benchPath, exampleId} = (e && e.detail) || {};
+            const {benchPath, exampleId, device} = (e && e.detail) || {};
             if (!benchPath) return;
             try {
                 const res = await fetch(`examples/${benchPath}`);
@@ -543,7 +622,9 @@ class CircuitTab extends React.Component {
                     throw new Error('not a circuit (no parts with wires or nets)');
                 }
                 this._markReactUpdate('host:circuit-data');
-                this.setState({circuitData: {...data, fileOnly: true},
+                // Keep the file's wiring through designer inference. Sim can
+                // still run the loaded program when it matches this device.
+                this.setState({circuitData: {...data, fileOnly: true, catalogProgramDevice: normalizeDeviceId(device)},
                     loadingExample: null, examplesError: null});
             } catch (err) {
                 this.setState({examplesError:
@@ -551,6 +632,14 @@ class CircuitTab extends React.Component {
             }
         };
         window.addEventListener('bw-example-bench', this._benchHandler);
+        this._openMachineExample = event => {
+            const {example, complete} = event.detail || {};
+            if (!example?.files?.rom || typeof complete !== 'function') return;
+            event.preventDefault();
+            this.loadExample(example, {activateCircuit: true})
+                .then(complete, error => complete({ok: false, error: error.message}));
+        };
+        window.addEventListener('bw-open-wired-machine-example', this._openMachineExample);
         // The Scratch controls dispatch these user-level events even when the
         // VM has no executable MCU program. Keep the designer simulation in
         // lockstep with Green Flag/Red Flag in that case too.
@@ -673,12 +762,7 @@ class CircuitTab extends React.Component {
                 this.state.debugDock === 'right' && this._stageRightRendered;
             this._stageHost.style.display =
                 (portalNow && this._portalRendered) || rightHere ? 'block' : 'none';
-            // The host shows the debugger either on the dedicated Circuit tab
-            // (rightHere) or, while coding, through the solo debugger portal.
-            const debuggerDock = this.state.debugDock === 'right' || this.state.debugDock === 'solo' ||
-                this._controllerSplitLive();
-            const debuggerHere = rightHere || (debuggerDock && portalNow && this._portalRendered);
-            this._layoutStageHost(debuggerHere && (rightHere || !!this._soloDebuggerLive));
+
         }
     }
 
@@ -716,7 +800,6 @@ class CircuitTab extends React.Component {
         if (this._unregisterUndo) this._unregisterUndo();
         cancelAnimationFrame(this._hostResizeFrame);
         cancelAnimationFrame(this._circuitFileReplayFrame);
-        if (this._hostMO) this._hostMO.disconnect();
         this._circuitFileReplayFrame = null;
         this._circuitFilePending = null;
         if (this._hostRO) { this._hostRO.disconnect(); this._hostRO = null; }
@@ -729,10 +812,15 @@ class CircuitTab extends React.Component {
         window.removeEventListener('bw-start-journey', this._starterJourneyHandler);
         window.removeEventListener('bw-machine-extracted', this._machineExtractedHandler);
         window.removeEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
+        window.removeEventListener('bw-cardiac-code-selection', this._onCardiacCodeSelection);
+        window.removeEventListener('bw-cardiac-run-request', this._onCardiacRunRequest);
+        window.removeEventListener('bw-cardiac-open', this._onCardiacOpen);
+        window.removeEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.removeEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         window.removeEventListener('bw-machine-media-load', this._mediaStashHandler);
         window.removeEventListener('bw-asm-rom-ready', this._asmStashHandler);
         window.removeEventListener('bw-example-bench', this._benchHandler);
+        window.removeEventListener('bw-open-wired-machine-example', this._openMachineExample);
         window.removeEventListener('bw-green-flag', this._greenFlagHandler);
         window.removeEventListener('bw-stop-all', this._stopAllHandler);
         window.removeEventListener('bw-power-off', this._powerOffHandler);
@@ -860,9 +948,28 @@ class CircuitTab extends React.Component {
         }
     }
 
-    handleProjectStart () {
+    handleProjectStart (event) {
         if (this._coupledBoard) return;
-        this.setState(state => ({runToken: (state.runToken || 0) + 1}));
+        this.setState(state => ({runToken: (state.runToken || 0) + 1,
+            runMachineOnFlag: event?.detail?.runMachine !== false}));
+    }
+
+    handleSimulationStart () {
+        const {vm} = this.props;
+        const {stc, circuitData, machineBooted} = this.state;
+        const device = vm?.runtime?.bwDeviceId || stc?.device;
+        const programBench = circuitData?.catalogProgramDevice &&
+            circuitData.catalogProgramDevice === normalizeDeviceId(device);
+        if (!vm || this._coupledBoard || machineBooted || (circuitData?.fileOnly && !programBench) ||
+            !stcDrives(stc) || device === 'microbit' || device === 'calliopemini') {
+            this.handleProjectStart();
+            return;
+        }
+        // This button originates the run. The Circuit and Debugger listeners
+        // observe the flag, while the VM executes the blocks on the visible board.
+        vm.start();
+        window.dispatchEvent(new CustomEvent('bw-green-flag'));
+        vm.greenFlag();
     }
 
     handleProjectStop () {
@@ -918,29 +1025,6 @@ class CircuitTab extends React.Component {
         return this._debugHost;
     }
 
-    /** A live debugger and the Widgets dock (data-bw-stage-dock, gui.jsx)
-     *  both claim the whole stage column. Stacked, one always covers the
-     *  other: the Widgets "Full screen" button sat exactly over the
-     *  debugger's Pause, and raising the debugger hid the machine display
-     *  instead. So split the column: the dock keeps the top half and the
-     *  host takes the bottom half (z-index 2 over the dock's 1, below the
-     *  stage header). Anything else keeps the full-column host at z-index
-     *  0, under dock panes such as Arcade, exactly as before. */
-    _layoutStageHost (debuggerLive) {
-        this._debuggerLive = !!debuggerLive;
-        const host = this._stageHost;
-        const dock = host.parentElement &&
-            host.parentElement.querySelector(':scope > [data-bw-stage-dock]');
-        const split = !!(debuggerLive && dock);
-        if (this._splitDock && this._splitDock !== dock) this._splitDock.style.maxHeight = '';
-        this._splitDock = split ? dock : null;
-        if (dock) dock.style.maxHeight = split ? 'calc(50% - 44px)' : '';
-        host.style.top = split ? '50%' : '0';
-        host.style.zIndex = split ? '2' : '0';
-        if (split) host.dataset.bwDebuggerSplit = 'true';
-        else delete host.dataset.bwDebuggerSplit;
-    }
-
     _ensureStageHost () {
         if (this._stageHost && document.contains(this._stageHost)) return this._stageHost;
         const wrap = document.querySelector('div[class*="stage-and-target-wrapper"]');
@@ -968,15 +1052,6 @@ class CircuitTab extends React.Component {
             });
             this._hostRO.observe(wrap);
         }
-        // The Widgets dock mounts lazily, after this tab's own update, so the
-        // split must also be re-applied when the column's children change.
-        if (typeof MutationObserver !== 'undefined') {
-            if (this._hostMO) this._hostMO.disconnect();
-            this._hostMO = new MutationObserver(() => {
-                if (this._stageHost && this._stageHost.style.display !== 'none') this._layoutStageHost(this._debuggerLive);
-            });
-            this._hostMO.observe(wrap, {childList: true});
-        }
         return host;
     }
 
@@ -1001,28 +1076,14 @@ class CircuitTab extends React.Component {
         }
     }
 
-    /** The Widgets controller dock beside a debugger that has a live machine
-     *  or program. #1691 began remembering device docks here; before that a
-     *  'controller' selection left the circuit dock in place, and the split
-     *  column (Widgets above, debugger below) is that dock's documented
-     *  layout in gui.jsx. Other device panes still own the whole column. */
-    _controllerSplitLive () {
-        return this.state.debugDock === 'controller' &&
-            window.__bwMachineExtracted?.kind !== 'cp1' &&
-            !!(stcDrives(this.state.stc) || this.state.machineBooted);
-    }
-
     /** While coding (any other tab), the circuit takes the stage's column —
      *  the owner's default: you watch the LED you are programming, not an
      *  empty Scratch stage. Only when there is circuit content to show. */
     _stagePortalOn () {
         if (this.props.isVisible || !this.state.showInStage) return false;
-        // gui.jsx owns controller and device panes. Leave their column clear
-        // while retaining the same debugger portal and runner off screen.
-        // The controller (Widgets) dock is the one exception: beside a live
-        // machine or program it shares the column with the debugger, split by
-        // _layoutStageHost, so Pause stays reachable next to the machine.
-        if (!CIRCUIT_DOCKS.has(this.state.debugDock) && !this._controllerSplitLive()) return false;
+        // Controller and device panes own their whole column. The runner
+        // stays mounted in its portal while the debugger view is hidden.
+        if (!CIRCUIT_DOCKS.has(this.state.debugDock)) return false;
         // This is a presentation choice, not a capability check. Debugger
         // mode must still show the designer for an empty project so the user
         // can build the circuit before adding MCU code.
@@ -1217,6 +1278,9 @@ class CircuitTab extends React.Component {
      * half-worked: the panels kept saying they had no circuit.)
      */
     handleCircuitReady (circuit) {
+        const selectedMachine = window.__bwMachineExtracted;
+        const selectedCardiac = selectedMachine?.kind === 'cardiac' ? selectedMachine : null;
+        const virtualCardiac = selectedCardiac && !selectedCardiac.config?.partId;
         // Deleting/clearing the circuit must STOP the debugger: a live
         // runner kept driving a board that no longer exists (owner
         // report, 2026-08-17). An empty board with a runner attached =
@@ -1226,12 +1290,16 @@ class CircuitTab extends React.Component {
                 ? (circuit.parts.size ?? circuit.parts.length ?? 0) : 0;
             const hadParts = this.state.circuit && this.state.circuit.parts
                 ? (this.state.circuit.parts.size ?? this.state.circuit.parts.length ?? 0) : 0;
-            if (nParts === 0 && hadParts > 0) {
+            if (nParts === 0 && hadParts > 0 && !virtualCardiac) {
                 this.setState(st => ({stopToken: (st.stopToken || 0) + 1}));
             }
         } catch { /* never block circuit publication */ }
         this._markReactUpdate('host:circuit-ready');
         this.setState({circuit});
+        if (selectedCardiac?.config?.partId && this._cardiacAttachedBoard &&
+            !circuit?.parts?.some(part => part.kind === 'cardiac' && part.id === selectedCardiac.config.partId)) {
+            this._onCardiacCodeSelection({detail: {active: false}});
+        }
         if (typeof window !== 'undefined') {
             const parts = circuit && circuit.parts ?
                 (circuit.parts.size ?? circuit.parts.length ?? 0) : 0;
@@ -1431,7 +1499,7 @@ class CircuitTab extends React.Component {
     async loadStarterJourney (event) {
         const journey = event && event.detail || {};
         const finish = detail => {
-            window.dispatchEvent(new CustomEvent('bw-starter-result', {
+            if (journey.id) window.dispatchEvent(new CustomEvent('bw-starter-result', {
                 detail: {journeyId: journey.id, ...detail}
             }));
             journey.onResult?.(detail);
@@ -1478,10 +1546,125 @@ class CircuitTab extends React.Component {
         this._cp1NormalDock = null;
     };
 
+    _onCardiacCodeSelection = event => {
+        if (event.detail?.active) {
+            if (window.__bwMachineExtracted?.kind !== 'cardiac') this.activateCardiac();
+            else this.showCardiacController();
+            window.dispatchEvent(new CustomEvent('bw-cardiac-selected'));
+            return;
+        }
+        if (window.__bwMachineExtracted?.kind !== 'cardiac') return;
+        this._cardiacAttachedBoard = null;
+        setCardiacWorkspaceActive(localStorage, false);
+        delete window.__bwMachineExtracted;
+        const runtime = this.props.vm?.runtime;
+        if (runtime?.bwDeviceCore === 'cardiac') runtime.bwDeviceCore = this._cardiacNormalCore;
+        this._cardiacNormalCore = undefined;
+        this.setState({machineBooted: false});
+        window.dispatchEvent(new CustomEvent('bw-cardiac-detached'));
+    };
+
+    _onCardiacProgramLoaded = async event => {
+        // CircuitTab retains the model even when the Designer is hidden. Its
+        // normal parameter writer preserves the accepted initial image there.
+        try {
+            const {acceptedCardiacProgram, saveCardiacProgram} = await import('bw-circuit-ui/model/cardiac-controls.js');
+            const circuit = this.state.circuit;
+            const partId = event.detail?.partId;
+            const board = this.props.vm?.runtime?.circuitBoard;
+            const program = acceptedCardiacProgram(board, circuit?.getPart?.(partId), event.detail?.program);
+            if (!program || !saveCardiacProgram(circuit, partId, program)) return;
+            circuit.setPartParam(partId, 'program', program);
+            const record = circuitAutosaveRecord(circuit, readCircuitOwner(localStorage));
+            if (record !== null) localStorage.setItem('bw-circuit-autosave', record);
+        } catch (error) {
+            this.setState({examplesError: `CARDIAC program could not be saved to the circuit: ${error.message}`});
+        }
+    };
+
+    _onCardiacOpen = event => {
+        const partId = event.detail?.partId;
+        const board = this.props.vm?.runtime?.circuitBoard;
+        if (!partId || !board?.getParts?.().some(part => part.id === partId && part.kind === 'cardiac')) return;
+        this.activateCardiac(partId);
+    };
+
+    _onCardiacRunRequest = () => {
+        if (window.__bwMachineExtracted?.kind === 'cardiac') this.showCardiacController();
+    };
+
+    showCardiacController () {
+        const panel = this.props.vm?.runtime?.controllerPanel;
+        if (panel && addCardiacFace(panel)) {
+            window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                detail: {data: serializeControllerPanel(panel)}
+            }));
+        }
+        this.showControllerDock();
+    }
+
+    activateCardiac (partId = null) {
+        if (window.__bwMachineExtracted?.kind === 'cp1') this._onCp1CodeSelection({detail: {active: false}});
+        setCardiacWorkspaceActive(localStorage, true);
+        const runtime = this.props.vm?.runtime;
+        if (runtime?.bwDeviceCore !== 'cardiac') this._cardiacNormalCore = runtime?.bwDeviceCore;
+        if (runtime) runtime.bwDeviceCore = 'cardiac';
+        const board = runtime?.circuitBoard;
+        this._cardiacAttachedBoard = partId &&
+            board?.getParts?.().some(part => part.kind === 'cardiac' && part.id === partId) ? board : null;
+        const config = partId ? {partId} : {};
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cardiac', config, clearLoadedMedia: true}}));
+        window.dispatchEvent(new CustomEvent('bw-cardiac-selected'));
+        this.showCardiacController();
+        return config;
+    }
+
+    async loadCardiacExample (example, opts = {}) {
+        this.setState({loadingExample: example.id, examplesError: null});
+        try {
+            const sourceResponse = await fetch(`examples/${example.files.cardiac}`);
+            if (!sourceResponse.ok) throw new Error(`CARDIAC source: HTTP ${sourceResponse.status}`);
+            const source = await sourceResponse.text();
+            let inputDeck = '';
+            if (example.files.deck) {
+                const deckResponse = await fetch(`examples/${example.files.deck}`);
+                if (!deckResponse.ok) throw new Error(`CARDIAC deck: HTTP ${deckResponse.status}`);
+                inputDeck = await deckResponse.text();
+            }
+            if (source.length > 131072 || inputDeck.length > 32768) throw new Error('CARDIAC example exceeds workspace limits.');
+            // Persist before mounting: a lazy host can miss the source event.
+            const draft = createCardiacWorkspace(source, inputDeck);
+            if (example.files.circuit) draft.inputMode = 'circuit';
+            let partId = null;
+            if (example.files.circuit) {
+                await this.load({explicit: true});
+                const opened = await this.loadExample({...example, files: {...example.files, cardiac: null}}, opts);
+                if (!opened.ok) return opened;
+                const data = opened.circuitData;
+                const part = data?.parts?.find(item => item.kind === 'cardiac');
+                if (!part) throw new Error('The CARDIAC example needs a CARDIAC adapter.');
+                this._applyToLiveCircuit(data);
+                partId = part.id;
+            }
+            localStorage.setItem(CARDIAC_WORKSPACE_KEY, JSON.stringify(draft));
+            this.activateCardiac(partId);
+            if (!partId) window.dispatchEvent(new CustomEvent('bw-activate-tab', {detail: {index: 3}}));
+            window.dispatchEvent(new CustomEvent('bw-cardiac-source-load',
+                {detail: {source, inputDeck, inputMode: draft.inputMode, exampleId: example.id}}));
+            this.publishExampleTitle(example);
+            this.setState({loadingExample: null});
+            return {ok: true};
+        } catch (error) {
+            this.setState({loadingExample: null, examplesError: error.message});
+            return {ok: false, error: error.message};
+        }
+    }
+
     _onCp1CodeSelection = event => {
         const runtime = this.props.vm?.runtime;
         const active = window.__bwMachineExtracted;
         if (event.detail?.active) {
+            if (active?.kind === 'cardiac') this._onCardiacCodeSelection({detail: {active: false}});
             const suspended = this._cp1Suspended;
             if (active?.kind === 'cp1' || !suspended) return;
             const parts = this.state.circuit?.parts || this.state.circuitData?.parts;
@@ -1489,6 +1672,7 @@ class CircuitTab extends React.Component {
             if (!parts?.some(part => part.kind === 'kosmos-cp1' && part.id === suspended.config.partId)) return;
             this._cp1NormalCore = runtime?.bwDeviceCore;
             if (runtime) runtime.bwDeviceCore = 'cp1';
+            delete window.__bwPendingMedia;
             window.dispatchEvent(new CustomEvent('bw-machine-extracted', {
                 detail: {kind: 'cp1', config: suspended.config, resumeCp1: true}
             }));
@@ -1521,13 +1705,33 @@ class CircuitTab extends React.Component {
             window.dispatchEvent(new CustomEvent('bw-cp1-circuit-detached'));
             return null;
         }
+        if (window.__bwMachineExtracted?.kind === 'cardiac') this._onCardiacCodeSelection({detail: {active: false}});
         const config = {partId: part.id, expansion: part.params?.expansion === true,
             clockHz: part.params?.clockHz || 6000000};
         if (runtime && runtime.bwDeviceCore !== 'cp1') this._cp1NormalCore = runtime.bwDeviceCore;
         if (runtime) runtime.bwDeviceCore = 'cp1';
-        if (useDefaultMonitor && window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
+        if (window.__bwPendingMedia && (useDefaultMonitor || window.__bwPendingMedia.detail?.kind !== 'cp1')) {
+            delete window.__bwPendingMedia;
+        }
         window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config, useDefaultMonitor}}));
         return config;
+    }
+
+    selectKim1 (part) {
+        const current = window.__bwMachineExtracted;
+        if (!part) {
+            if (current?.kind === 'kim1') {
+                delete window.__bwMachineExtracted;
+                window.dispatchEvent(new CustomEvent('bw-kim1-selection'));
+                this.setState({machineBooted: false});
+            }
+            return;
+        }
+        if (current?.kind === 'kim1' && current.config.partId === part.id) return;
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {
+            detail: {kind: 'kim1', config: {partId: part.id}, clearLoadedMedia: true}
+        }));
+        window.dispatchEvent(new CustomEvent('bw-kim1-selection', {detail: {partId: part.id}}));
     }
 
     handleWiredBootReady = (data, board, result) => {
@@ -1586,6 +1790,7 @@ class CircuitTab extends React.Component {
 
     /** Program-only starters (currently LEGO) have no fictional circuit to load. */
     async loadProgramOnlyStarter (example) {
+        if (example.files?.cardiac) return this.loadCardiacExample(example);
         const message = /^de/i.test(navigator.language) ?
             `„${example.id}" öffnen?\n\nDas ersetzt das aktuelle Projekt. Nicht Gespeichertes geht verloren.` :
             `Open "${example.id}"?\n\nThis replaces the current project. Anything unsaved is lost.`;
@@ -1758,6 +1963,7 @@ class CircuitTab extends React.Component {
     }
 
     async loadExample (ex, opts) {
+        if (ex?.files?.cardiac) return this.loadCardiacExample(ex, opts);
         // The Examples browser's device chip arrives here as opts.device
         // (with opts.bench naming the generated per-device circuit). It
         // used to be DROPPED: clicking Pico on any example loaded the
@@ -1796,6 +2002,10 @@ class CircuitTab extends React.Component {
         }
         this.setState({loadingExample: ex.id, examplesError: null});
         try {
+            if (opts?.activateCircuit) {
+                await this.load({explicit: true});
+                window.dispatchEvent(new CustomEvent('bw-activate-tab', {detail: {index: 4}}));
+            }
             // Which circuit: the authored one for the authored device, the
             // generated bench for a genuinely different picked device.
             let circuitPath = path;
@@ -1815,6 +2025,9 @@ class CircuitTab extends React.Component {
                 !(Array.isArray(data.wires) || Array.isArray(data.nets))) {
                 throw new Error('not a circuit (no parts with wires or nets)');
             }
+            const microtronicPart = data.parts.find(item => item.kind === 'busch-microtronic');
+            const kim1Part = data.parts.find(item => item.kind === 'kim-1');
+            if (!kim1Part) this.selectKim1(null);
             if (ex.files?.cp1) {
                 const sourceResponse = await fetch(`examples/${ex.files.cp1}`);
                 if (!sourceResponse.ok) throw new Error(`CP1 program: HTTP ${sourceResponse.status}`);
@@ -1853,7 +2066,27 @@ class CircuitTab extends React.Component {
             // behind a toggle nobody knows to press.
             try {
                 const applied = await this.applyControllerLayout(ex);
-                if (applied || ex.files?.cp1) this.showControllerDock();
+                if (kim1Part) {
+                    this.selectKim1(kim1Part);
+                    const panel = this.props.vm?.runtime?.controllerPanel;
+                    if (panel && addKim1Face(panel, kim1Part.id)) {
+                        panel.setMode('play');
+                        window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                            detail: {data: serializeControllerPanel(panel)}
+                        }));
+                    }
+                }
+                if (microtronicPart) {
+                    const panel = this.props.vm?.runtime?.controllerPanel;
+                    if (panel && addMicrotronicFace(panel, microtronicPart.id)) {
+                        panel.setMode('play');
+                        window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                            detail: {data: serializeControllerPanel(panel)}
+                        }));
+                    }
+                    window.dispatchEvent(new CustomEvent('bw-microtronic-selected', {detail: {partId: microtronicPart.id}}));
+                }
+                if (applied || ex.files?.cp1 || kim1Part || microtronicPart) this.showControllerDock();
             } catch (e) {
                 console.warn('[brickwright] example controller layout failed', e);
             }
@@ -1938,7 +2171,8 @@ class CircuitTab extends React.Component {
                     `"${ex.id}" loaded, but its program declares no pins, so the ` +
                     'debugger stays hidden.'});
             }
-            return programError ? {ok: false, error: programError} : {ok: true};
+            return programError ? {ok: false, error: programError} :
+                {ok: true, circuitData: hasProgram ? data : {...data, fileOnly: true}};
         } catch (e) {
             this.setState({loadingExample: null, examplesError:
                 `Could not open "${ex.id}": ${e.message}. The board is unchanged.`});
@@ -2309,18 +2543,15 @@ class CircuitTab extends React.Component {
         // applies while portalled: on the dedicated Circuit tab, 'right'
         // keeps the designer beside the panel (below) and 'solo' falls back
         // to the instruments-column dock, so the designer stays reachable.
-        if ((this.state.debugDock === 'solo' || this.state.debugDock === 'right' ||
-            this._controllerSplitLive()) && this._stagePortalOn() && !this.state.cadCircuitRequested) {
+        if ((this.state.debugDock === 'solo' || this.state.debugDock === 'right') &&
+            this._stagePortalOn() && !this.state.cadCircuitRequested) {
             this._portalOn = true;
-            // Read by the host layout pass: only a debugger with a live machine
-            // or program shares the column with a dock pane (_layoutStageHost).
-            this._soloDebuggerLive = !!(stcDrives(stc) || this.state.machineBooted);
             const solo = (
                 // paddingTop clears the stage-header row: the panel (and the
                 // no-code warning) rendered flush against the tab strip and
                 // read as misplaced (owner report, 2026-08-17 — and 7 hours
                 // before that).
-                <div style={{...box, overflow: 'auto', paddingTop: this._controllerSplitLive() ? 4 : 48}} data-debugger-solo-pane>
+                <div style={{...box, overflow: 'auto', paddingTop: 48}} data-debugger-solo-pane>
                     <HostMount host={this._ensureDebugHost()} />
                 </div>
             );
@@ -2347,7 +2578,7 @@ class CircuitTab extends React.Component {
         this._portalOn = !this.state.cadCircuitRequested && this._stagePortalOn();
         // On the dedicated Circuit tab 'solo' behaves as 'top': the designer
         // with the compact debugger in its Instruments column.
-        const cp1ControllerDock = this.state.debugDock === 'controller' && window.__bwMachineExtracted?.kind === 'cp1';
+        const cp1ControllerDock = this.state.debugDock === 'controller' && ['cp1', 'cardiac', 'kim1'].includes(window.__bwMachineExtracted?.kind);
         const dock = this.state.debugDock === 'solo' || cp1ControllerDock ? 'top'
             : CIRCUIT_DOCKS.has(this.state.debugDock) ? this.state.debugDock : 'off';
         const content = (
@@ -2393,6 +2624,8 @@ class CircuitTab extends React.Component {
                     onEditorMenuActions={this.handleDesignerMenuActions}
                     onCircuitReady={c => { window.__circuit = c; if (this.props.vm && this.props.vm.runtime) this.props.vm.runtime.circuitModel = c; this.handleCircuitReady(c); }}
                     circuitData={this.state.circuitData || undefined}
+                    microtronicInstruments={false}
+                    kim1Instruments={window.__bwMachineExtracted?.kind !== 'kim1'}
                     onWiredBootReady={this.handleWiredBootReady}
                     onBoardReady={(board) => {
                         // Same diagnosis hook the standalone harness exposes —
@@ -2404,6 +2637,13 @@ class CircuitTab extends React.Component {
                         const vm = this.props.vm;
                         if (vm && vm.runtime) {
                             vm.runtime.circuitBoard = board;
+                            this.selectKim1(board.getParts?.().find(part => part.kind === 'kim-1'));
+                            const cardiac = window.__bwMachineExtracted;
+                            if (cardiac?.kind === 'cardiac' && cardiac.config?.partId && this._cardiacAttachedBoard !== board &&
+                                board.getParts?.().some(part => part.kind === 'cardiac' && part.id === cardiac.config.partId)) {
+                                this._cardiacAttachedBoard = board;
+                                window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: cardiac}));
+                            }
                             // A published board mutates independently of debugger props.
                             // Publish only changes to the S040 selection to avoid render loops.
                             const ids = s040PartIds(board);
@@ -2430,8 +2670,8 @@ class CircuitTab extends React.Component {
                         return undefined; // default: simulator assumed
                     })()}
                         onCircuitEdit={this.handleCircuitEdit}
-                        onOpenMachineLibrary={kind => window.dispatchEvent(new CustomEvent('bw-open-machine-manager',
-                            {detail: {kind}}))}
+                        onOpenMachineLibrary={(kind, presets) => window.dispatchEvent(new CustomEvent('bw-open-machine-manager',
+                            {detail: {kind, presets}}))}
                         onDeclarationChange={this.handleDeclarationChange}
                         panelNav={this.renderPanelStrip()}
                         lang={String(this.props.locale || 'en').slice(0, 2) === 'de' ? 'de' : 'en'}
@@ -2466,7 +2706,7 @@ class CircuitTab extends React.Component {
                     benchOpen={this.state.machineBooted}
                         runToken={this.state.runToken}
                         stopToken={this.state.stopToken}
-                        onSimulationStart={this.handleProjectStart}
+                        onSimulationStart={this.handleSimulationStart}
                     />))}
                 </div>
                 </div>
@@ -2509,12 +2749,20 @@ class CircuitTab extends React.Component {
      *  '>>' to the right pane and back (owner requirement, 2026-08-17). */
     renderDebugPanel () {
         const {stc} = this.state;
+        const machine = window.__bwMachineExtracted;
+        if (machine?.kind === 'kim1') return <PanelBoundary>
+            <React.Suspense fallback={null}>
+                <Kim1Surface vm={this.props.vm} partId={machine.config.partId}
+                    locale={this.props.locale} variant="debugger" />
+            </React.Suspense>
+        </PanelBoundary>;
         return (
             <PanelBoundary>
                 <React.Suspense fallback={null}>
                     {profileReactSubtree(React, 'DebugPanel', (<DebugPanel
                         clockHz={(stc && Number(stc.clock)) || 11059200}
                         runToken={this.state.runToken}
+                        runMachineOnFlag={this.state.runMachineOnFlag}
                         stopToken={this.state.stopToken}
                         s040PartIds={this.state.s040PartIds}
                         onRunnerChange={this.handleRunnerChange}
@@ -2593,8 +2841,8 @@ class CircuitTab extends React.Component {
     renderPanelStrip () {
         const {panels, panel} = this.state;
         if (!panels) return null;
-        return (<panels.PanelSwitch panel={panel} drc={this.drcWarnings()} locale={this.props.locale}
-            onSelect={this.selectPanel} />);
+        return <CircuitPanelNavigation Switch={panels.PanelSwitch} panel={panel} drc={this.drcWarnings()}
+            locale={this.props.locale} onSelect={this.selectPanel} />;
     }
 
     renderPanel () {

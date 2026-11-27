@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "status": "app_passed_release_gate_blocked",
+  "applicationAcceptance": {
+    "status": "passed",
+    "application": "Brickwright",
+    "fullApplicationBuild": true,
+    "sourceCommit": "1512f923b42d64ab13dfdba969ef02fc1591bc8d",
+    "packageCommits": {
+      "board": "e834b270cd21ca90be4407610566cdd75750168d",
+      "ui": "a76feb3000e30902537ef986c8c4c76cecf8e407"
+    },
+    "buildManifest": {
+      "schema": 2,
+      "product": "Brickwright",
+      "commit": "1512f92",
+      "builtAt": "2026-11-25T22:26:26.951Z",
+      "distributionPolicy": {
+        "remoteExtensions": "allow",
+        "executableToolchains": "allow",
+        "machineImages": "allow"
+      }
+    },
+    "browser": "151.0.7922.34",
+    "checks": [
+      "The source-bound Brickwright build opens the KIM-1 gallery lesson, artwork and all 23 front-panel keys",
+      "Two real switches reach the CPU through PB and light the matching external PA LEDs",
+      "A newly entered NMOS program executes and stores 42 in RAM",
+      "Invalid source is rejected atomically, and SST exposes the next instruction on the display",
+      "Keypad memory edits and RS retention reach the serialized app circuit"
+    ]
+  },
+  "evidence": {
+    "run": "https://github.com/CrispStrobe/brickwright/actions/runs/45709736264",
+    "appJob": {
+      "id": 139540746767,
+      "conclusion": "success",
+      "url": "https://github.com/CrispStrobe/brickwright/actions/runs/45709736264/job/139540746767"
+    },
+    "artifact": {
+      "id": 15067749331,
+      "name": "kim1-app-1512f923b42d64ab13dfdba969ef02fc1591bc8d",
+      "url": "https://github.com/CrispStrobe/brickwright/actions/runs/45709736264/artifacts/15067749331",
+      "zipBytes": 498093,
+      "zipSha256": "165f22c98f8bc584258ca84b295cf17613de50addfe57736e99c4e01ee3f1179",
+      "expiresAt": "2026-12-09T22:28:27Z"
+    },
+    "files": [
+      {
+        "path": "kim1-brickwright-desktop.png",
+        "bytes": 258123,
+        "sha256": "89ad92c16a63c56e3cd453b51ab74713df77b72afe9a6527908eef8802f47bc6"
+      },
+      {
+        "path": "kim1-brickwright-panel.png",
+        "bytes": 245477,
+        "sha256": "8e3b7ddf3902c3c373b0786752a930af1ff8af8a29998b6535897f87cb21d981"
+      },
+      {
+        "path": "result.json",
+        "bytes": 1057,
+        "sha256": "89bcd98de18aa07ee1569dc6ab9b956eb3e5fc1c4e7b9a8df6e5ef238be3651e"
+      }
+    ]
+  },
+  "sourceTests": {
+    "passed": 179,
+    "failed": 0,
+    "skipped": 0
+  },
+  "installedPackageVerification": {
+    "installedRoots": [
+      "node_modules",
+      "packages/scratch-gui/node_modules"
+    ],
+    "method": "pinned-git-npm-pack-bytes",
+    "packages": [
+      {
+        "name": "bw-board",
+        "commit": "e834b270cd21ca90be4407610566cdd75750168d",
+        "files": 13752
+      },
+      {
+        "name": "bw-circuit-ui",
+        "commit": "a76feb3000e30902537ef986c8c4c76cecf8e407",
+        "files": 1475
+      }
+    ],
+    "singleEngineResolutionVerifiedInBothRoots": true,
+    "dependenciesVerified": false
+  },
+  "productionBuild": {
+    "status": "passed",
+    "environment": {
+      "NODE_ENV": "production",
+      "BW_ENABLE_CAD": "0",
+      "BW_ENABLE_FPGA": "0"
+    },
+    "emittedNativeBrokerProof": "passed",
+    "emittedUpstreamLicenseNotices": "passed",
+    "buildDistributionPolicy": "passed",
+    "noGplPayloadAndNoLgplSparseSolver": {
+      "status": "passed",
+      "filesChecked": 11724
+    }
+  },
+  "visualReview": {
+    "reviewed": [
+      "kim1-brickwright-desktop.png",
+      "kim1-brickwright-panel.png"
+    ],
+    "result": "The complete wired circuit fits the canvas; the front-panel display, 23 keys, SST and program editor are legible.",
+    "negativeTestNote": "The panel screenshot retains the expected device-control-refused warning from the deliberate malformed-program test. Subsequent valid loading, stepping, keypad edits and reset all passed."
+  },
+  "qualificationBoundary": {
+    "fullAppAcceptancePassed": true,
+    "releaseQualified": false,
+    "overallWorkflowConclusion": "failure",
+    "upstreamEvidenceJob": {
+      "id": 139540746414,
+      "conclusion": "failure",
+      "url": "https://github.com/CrispStrobe/brickwright/actions/runs/45709736264/job/139540746414"
+    },
+    "reason": "The unchanged verifier found no successful complete bw-board CI run for exact pin e834b270cd21ca90be4407610566cdd75750168d. The ordinary engine test job has the same multimeter failure on the exact pre-KIM base and candidate.",
+    "comparisonReceipt": "2026-11-25-kim1-engine-ci-comparison.json",
+    "gateWaived": false,
+    "featureMerged": false,
+    "deployed": false,
+    "coverageLimits": [
+      "The app build uses the existing circuit acceptance profile with CAD and FPGA disabled.",
+      "Instruction-level CPU vectors do not qualify every bus transaction or asynchronous interrupt timing.",
+      "The independent learning monitor does not provide historical ROM services or cassette/TTY routines."
+    ]
+  }
+}

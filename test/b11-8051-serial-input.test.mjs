@@ -1,6 +1,6 @@
 /**
  * Task B11: a typed line reaches an 8051 program intact, through exactly what
- * Lite ships -- the vendored emu8051 WASM (emu8051-stc 68ef757a) driven by the
+ * Lite ships -- the vendored emu8051 WASM at the shipping pin, driven by the
  * pinned bw-board's emu8051 adapter -- and the debugger still accepts that
  * build's checkpoints.
  *
@@ -142,14 +142,15 @@ test('the gallery\'s guess-the-number, compiled by the app\'s 8051 route, plays 
         assert.match(out, new RegExp(`Got it in ${guesses} tries!\\r\\n$`), 'the program counted every guess');
     });
 
-test('the debugger accepts this build\'s checkpoint layout (bw-board #410 and emu8051-stc #2 agree)', async () => {
+test('the debugger accepts this build\'s checkpoint layout (shipping native and adapter pins agree)', async () => {
     const {wasm} = await boot();
     const {createEmu8051DebugTarget} = await import(pathToFileURL(DEBUG));
-    assert.equal(wasm._emu_checkpoint_build_id() >>> 0, 0x80510102);
+    assert.equal(wasm._emu_checkpoint_build_id() >>> 0, 0x80510103);
     const target = createEmu8051DebugTarget(wasm);
     const checkpoint = target.capabilities().extensions?.checkpoint;
     assert.ok(checkpoint && checkpoint.supported !== false, JSON.stringify(checkpoint));
-    assert.equal(checkpoint.buildId, 0x80510102);
+    assert.equal(checkpoint.buildId, 0x80510103);
+    assert.equal(checkpoint.size, 443561);
 });
 
 test('the debug runner wires serial both ways for the 8051 and input for the Pico', () => {

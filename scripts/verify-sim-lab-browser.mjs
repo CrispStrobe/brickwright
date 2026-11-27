@@ -336,7 +336,7 @@ const openSimLab = async (page, {noWebgl = false, typed = false, program = PROGR
         await page.keyboard.insertText(program);
     } else if (program) {
         await page.evaluate(code => window.dispatchEvent(new CustomEvent('bw-load-pseudocode', {detail: {code, source: 'sim-lab-proof'}})), program);
-        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
     }
     if (via === 'arena') {
@@ -471,9 +471,9 @@ try {
         if (process.env.SIM_DEBUG) {
             await page.screenshot({path: resolve(artifacts, 'to-blocks.png'), fullPage: true});
             console.log('DEBUG to-blocks', await page.getByRole('button', {name: '⇦ To blocks'}).count(),
-                JSON.stringify(await page.evaluate(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent || '(none)')));
+                JSON.stringify(await page.evaluate(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || '(none)')));
         }
-        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         await openRobotLabTab(page);
         await page.getByTestId('bw-sim-lab-pause').click();
@@ -485,7 +485,7 @@ try {
                 const h = window.__bwSimLab._pane.hub;
                 return {connected: h.data.connected, sim: h.data.simulationEnabled, motors: h.data.motors.slice(0, 2), last: h.data.lastCommand,
                     pair: h.movementPair, owner: h.clockOwner, sameHub: h === window.__brickwrightVirtualSpike?.hubState, time: window.__bwSimLab._pane.session.time,
-                    status: window.__bwSimLab.status, code: document.querySelector('[data-testid="bw-code-status"]')?.textContent};
+                    status: window.__bwSimLab.status, code: document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus};
             })));
         }
         await page.waitForFunction(start => {
@@ -651,7 +651,7 @@ try {
         await lf.getByTestId('bw-sim-lab-mat').selectOption('line-oval');
         await lf.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session?.mat === 'line-oval', null, {timeout: 60000});
 
-        await lf.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await lf.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         assert.match(await lf.locator('.cm-content').first().textContent(), /IF spike color C is black THEN:/, 'the example is in the Code tab');
         assert.ok(await lf.evaluate(() => window.__bwSimLab._pane.spikeLoaded()), 'the example became SPIKE blocks');
@@ -731,7 +731,7 @@ try {
             await ex.getByTestId('bw-sim-lab-info-toggle').click();
             await info.waitFor({timeout: 10000});
 
-            await ex.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+            await ex.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
                 null, {timeout: 60000});
             assert.match(await ex.locator('.cm-content').first().textContent(), example.code, `the ${example.name}'s example is in the Code tab`);
             assert.ok(await ex.evaluate(() => window.__bwSimLab._pane.spikeLoaded()), 'the example became SPIKE blocks');
@@ -1164,7 +1164,7 @@ try {
         await fl.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.modelFile === 'forklift.ldr' &&
             window.__bwSimLab._pane.session, null, {timeout: 60000});
 
-        await fl.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await fl.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         assert.match(await fl.locator('.cm-content').first().textContent(), /run motor C clockwise 573 degrees/, 'the Forklift\'s example is in the Code tab');
         await fl.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session?.mat === 'warehouse', null, {timeout: 60000});
@@ -1206,7 +1206,7 @@ try {
         await pn.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.modelFile === 'pneumatic-press.ldr' &&
             window.__bwSimLab._pane.session, null, {timeout: 60000});
 
-        await pn.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await pn.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         await pn.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session, null, {timeout: 60000});
         await openManualControls(pn);
@@ -1300,7 +1300,7 @@ try {
         await su.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.shipped === 'sumo' &&
             window.__bwSimLab._pane.session, null, {timeout: 60000});
 
-        await su.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await su.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         assert.match(await su.locator('.cm-content').first().textContent(), /wait until spike color C is black/, 'the sumo example is in the Code tab');
         await su.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session?.mat === 'sumo', null, {timeout: 60000});
@@ -1625,7 +1625,7 @@ try {
             return {url:location.href,model:p?.state.modelFile,status:p?.state.status,
                 programLoading:p?.state.programLoading,message:p?.state.message,info:p?.state.info,
                 gallery:p?.state.examplesOpen,lesson:p?.state.lessonKey,
-                codeStatus:document.querySelector('[data-testid="bw-code-status"]')?.textContent,
+                codeStatus:document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus,
                 target:!!vm?.editingTarget,threads:vm?.runtime.threads.length,
                 instructions:i&&{status:i.status,page:i.page,steps:i.steps,stats:i.stats,error:i.error},
                 alerts:[...document.querySelectorAll('[role="alert"]')].map(e=>e.textContent)};

@@ -195,7 +195,7 @@ export const hubsBtInteractions = async ({browser, errors, openSimLab, wallBudge
         await openSimLab(page, {program: null});
         await openModel(page, 'ev3-wall-stopper.ldr');
 
-        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         assert.match(await page.locator('.cm-content').first().textContent(), /wait until \(ev3 distance 4 cm\) < 15/);
         out.device = await page.evaluate(() => {

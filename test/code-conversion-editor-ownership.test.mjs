@@ -15,7 +15,7 @@ const extract = (start, end) => {
     assert.ok(a >= 0 && b > a, `Actual method boundaries: ${start}`);
     return original.slice(a, b);
 };
-const methods = extract('    async compile ({strict = false, pseudocode = null} = {}) {',
+const methods = extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
     '    // Read the running project into all languages at once.') +
     extract('    async loadAsmExample (id) {', '    openArtefactFile (file) {') +
     extract('    publishAppliedDevice (stc) {',
@@ -115,11 +115,11 @@ function fixture (hold = null, failure = null) {
     }};
 }
 
-test('ordinary conversion still regenerates buffers, clears old ASM and finishes busy', async () => {
+test('ordinary conversion still regenerates buffers, retains authored ASM and finishes busy', async () => {
     const f = fixture(); await f.editor.compile();
     assert.deepEqual(f.calls, ['load', 'refresh']);
     assert.equal(f.editor.state.buffers.python, 'generated Python');
-    assert.equal(f.editor.state.buffers.asm, '');
+    assert.equal(f.editor.state.buffers.asm, 'old ASM');
     assert.equal(f.editor.state.importedPython, false);
     assert.equal(f.editor.state.status, 'Blocks loaded.');
     assert.equal(f.editor.state.busy, false);
@@ -130,7 +130,7 @@ test('explicit device-retarget source still compiles while ASM is selected', asy
     await f.editor.compile({pseudocode: 'DEVICE i8086'});
     assert.deepEqual(f.calls, ['load', 'refresh']);
     assert.equal(f.editor.state.lang, 'asm');
-    assert.equal(f.editor.state.buffers.asm, '');
+    assert.equal(f.editor.state.buffers.asm, 'old ASM');
     assert.equal(f.editor.state.status, 'Blocks loaded.');
     assert.equal(f.editor.state.codeDocument.lang, 'pseudocode');
     assert.equal(f.editor.state.codeDocument.code, 'DEVICE i8086');

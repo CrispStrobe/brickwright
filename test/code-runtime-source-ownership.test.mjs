@@ -60,6 +60,7 @@ function fixture ({generatedView = false} = {}) {
             stWarn: text => `Warning: ${text}`
         },
         leaveCp1 () {},
+        detachCardiac () {},
         invalidateArcadeReport () {},
         deriveBuffer (code, from, to) {
             const gate = deferred();
@@ -403,6 +404,7 @@ function runFixture (context, {lang = 'javascript', code = 'console.log("clicked
         invalidateArcadeReport () {},
         _reveal () {},
         writeAutosave () {},
+        setMaximizedChrome () {},
         picoRuns: 0,
         async runPicoSim () { this.picoRuns++; },
         legacySources: [],

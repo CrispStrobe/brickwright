@@ -34,13 +34,18 @@
  * @module
  */
 
+import {createBasicStartup, isBundledMicrosoftBasic, microsoftBasicLine} from './basic-startup.js';
 import {loadCp1Monitor} from '../cp1-monitor.js';
 import {
     listBreakpoints, subscribeBreakpoints, toggleBreakpoint,
     setCondition, conditionOf, allConditions
 } from './breakpoints.js';
 import { parseCondition } from './condition.js';
-import {createLinuxConsole} from './linux-console.js';
+import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.js';
+import {createReadyGatedInput} from './ready-gated-input.js';
+import {createTerminalOutput} from './terminal-output.js';
+import {picoBasicAtPrompt, picoBasicConsoleSpec} from '../bw-machines/pico-basic-source.js';
+import {mountPicoFlashStorage} from '../bw-machines/pico-basic-flash.js';
 import {createEngineeringInputRoute} from './engineering-input-route.js';
 import {cpmFileName} from './cpm-z80.js';
 import { canRecordDebugInput } from 'bw-board/debug-replay-contract.js';
@@ -481,9 +486,9 @@ export function boardTimeBase (board, target) {
  * (task B8: one board per run, one author per board).
  */
 export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, userFirmware = null}) {
-    if (selectedKind === 'cp1') return false;
+    if (selectedKind === 'cp1' || selectedKind === 'cardiac') return false;
     if (selectedKind === 'z80' || selectedKind === 'eater6502' || selectedKind === 'riscv32') return false;
-    if ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) return false;
+    if (selectedKind === 'i8086' || selectedKind === 'i80286' || selectedKind === 'i80386') return false;
     // An rp2040 .uf2 media bundle boots prebuilt firmware from flash; it does
     // not compile the project's blocks (a bare rp2040js/pico firmware run still does).
     if (selectedKind === 'rp2040js' && bootMedia) return false;
@@ -493,6 +498,7 @@ export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, us
 export function selectDebugTargetKind(device, requested = 'emulator') {
     if (requested !== 'emulator') return requested;
     const normalized = String(device || '').toLowerCase();
+    if (normalized === 'cardiac') return 'cardiac';
     if (['cp1', 'kosmos-cp1', '8049'].includes(normalized)) return 'cp1';
     if (['arduino-uno', 'arduino-nano', 'atmega328p', 'atmega168p'].includes(normalized)) return 'avr8js';
     if (['arduino-mega', 'atmega2560'].includes(normalized)) return 'atmega2560';
@@ -627,11 +633,14 @@ export function selectEsp32S040Circuit (sourceBoard, model, mcuId = null) {
     return {sourceBoard, mcuId: selected[0].id};
 }
 
+let picoTerminalSequence = 0;
+
 export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.vercel.app', targetKind = 'emulator', machineConfig = null, bootMedia = null, labwiredChip = null, labwiredBoardVariant = null, esp32S040McuId = null, esp32s3Console = 'uart0', onChange = () => {} }) {
     let session = null;
     // Invalidate stop/start even when target and session references are reused.
     let hddSnapshotOwner = {};
     let target = null;
+    let cardiacInitialSnapshot = null;
     let cp1LessonBatch = null;
     let cp1RunKeyUntil = null;
     let cp2Recording = null;
@@ -655,6 +664,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let capsOf = null;
     let cycleProviderOf = null;
     let board = null;
+    let xtKeyboard = null;
+    let pcSerialInput = null;
+    let cpmAutoRun = null;
     /**
      * Board time minus target time, fixed at each (re)start (boardTimeBase).
      * The target's clock restarts at zero on every run; a board that has
@@ -870,6 +882,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let conditionErrors = {};
     /** Serial output buffer — bytes received from adapter.onSerial, decoded as UTF-8. */
     let serialLines = [];
+    let basicStartup = null;
     /**
      * The serial face is a TERMINAL, not a log: set for a booted Linux, whose
      * shell edits its own line — backspace-space-backspace to erase, ANSI CSI
@@ -887,7 +900,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
      */
     let terminalOutput = null;
     /** Per-frame boot-progress hook for the Linux lesson, or null. */
-    let linuxProgressWatch = null;
+    let terminalFrame = null;
+    let disposeTerminal = null;
     /**
      * Set by destroy(). A runner destroyed while its start() is still awaiting
      * attach() must not come back to life when attach resolves: before this,
@@ -1601,9 +1615,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         serialTerminal = false;
         serialEsc = 0;
         terminalOutput = null;
+        disposeTerminal?.();
+        disposeTerminal = null;
         delete runner.terminal;
-        linuxProgressWatch = null;
-        const device = String(projectStc(null)?.device || '').toLowerCase();
+        terminalFrame = null;
+        const device = String(built?.device || projectStc(null)?.device || '').toLowerCase();
         const selectedTargetKind = selectDebugTargetKind(device, targetKind);
         // The picker offers two targets and only one of them can be honoured
         // here yet. Refusing with the reason is the house rule: silently
@@ -1624,6 +1640,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             return attachZ80();
         }
 
+        if (selectedTargetKind === 'cardiac') return attachCardiac();
         if (selectedTargetKind === 'cp1') return attachCp1();
 
         if (selectedTargetKind === 'riscv32') {
@@ -1635,8 +1652,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             return attachEater6502();
         }
 
-        if (selectedTargetKind === 'i8086') {
-            return attachI8086();
+        if (selectedTargetKind === 'i8086' || selectedTargetKind === 'i80286') {
+            return attachI8086(selectedTargetKind === 'i80286' ? '80286' : bootMedia?.x86Variant);
         }
 
         if (selectedTargetKind === 'i80386') {
@@ -1695,7 +1712,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const wasm = await createEmu8051({
             locateFile: (file) => new URL(`static/${file}`, document.baseURI).href
         });
-        const stc = projectStc(null);
+        const stc = projectStc(null) || {};
         const fosc = Number(stc.clock) || 11059200;
 
         // ORDER MATTERS, and getting it wrong fails silently.
@@ -1723,7 +1740,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // unused ports cost nothing. (First application of this fix was
         // reverted by a concurrent reset --hard before it was committed.)
         const adapter = createEmu8051Adapter(wasm, { fosc, ports: [0, 1, 2, 3, 4, 5],
-            part: String(stc.device || '').toLowerCase() });
+            part: String(built.device || stc.device || '').toLowerCase() });
 
         // The board, so the LEDs light and the buzzer sounds while debugging.
         // It is driven by the emulator through boundary A and knows nothing
@@ -1804,7 +1821,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // point — the exact failure setCondition() warns about.
         if (vm && vm.runtime) vm.runtime._bwDebugVariables = () => runner.variables();
         symbols = built.symbols;
-        variableTable = (symbols.variables || []).filter((v) => v.space);
+        variableTable = (symbols?.variables || []).filter((v) => v.space);
         pinTable = stc.pins || [];
         // `instructionLength` IS INJECTED, not imported by the vendored file.
         // Upstream's emu8051-debug.js used to `import '../bw-debug/opcodes.js'` --
@@ -1887,6 +1904,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // yield breakpoints and block-level position reporting.
         const {target: avrTarget, adapter: avrAdapter} = await createDebugTarget(avrKind, {
             board, hex: built.hex, symbols: built.symbols, clockHz,
+            chip: (built.device || stc.device)?.toLowerCase() === 'atmega168p' ? 'atmega168p' : undefined,
         });
 
         // Wire serial output: each byte from the AVR's USART0 (print
@@ -2080,13 +2098,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             { createDebugSession, BoardImpl, inferNetlist },
             { createRp2040jsAdapter },
             { parseUF2, FLASH_BASE },
-            { createRp2040jsDebugTarget }
+            { createRp2040jsDebugTarget },
+            { Terminal }
         ] = await Promise.all([
             import(/* webpackChunkName: "bw-board" */ 'bw-board'),
             import(/* webpackChunkName: "bw-board" */ 'bw-board/rp2040js-adapter.js'),
             import(/* webpackChunkName: "bw-board" */ 'bw-board/uf2.js'),
-            import(/* webpackChunkName: "bw-board" */ 'bw-board/rp2040js-debug.js')
+            import(/* webpackChunkName: "bw-board" */ 'bw-board/rp2040js-debug.js'),
+            import(/* webpackChunkName: "bw-xterm" */ '@xterm/xterm')
         ]);
+        if (destroyed) return null;
 
         // Flatten the UF2 to a flat flash image (byte 0 at FLASH_BASE). Refuse
         // by name on a bad image rather than booting an empty flash into a NOP
@@ -2120,41 +2141,66 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const adapter = createRp2040jsAdapter({ clockHz, vcc: 3.3 });
         adapter.attachBoard(board);
         adapter.bootFromFlash(flash);
+        const project = vm?.runtime?.getTargetForStage?.();
+        const flashStorage = mountPicoFlashStorage(project, adapter.rp2040.flash, flash.length,
+            bootMedia.picoFlashStorage, () => {
+                if (vm.runtime.getTargetForStage() === project) vm.runtime.emitProjectChanged?.();
+            });
 
-        const feedByte = (b) => adapter.rp2040.uart[0].feedByte(b & 0xff);
-
-        // Serial out → the panel's console, and auto-answer the console's VT100
-        // cursor-position probe (ESC[6n): the firmware queries terminal size on
-        // start and BLOCKS until it gets ESC[rows;colsR. The panel's <pre>
-        // terminal cannot answer, so the runner does — 24x80, the same reply the
-        // CLI proof gives. Without this PicoBB hangs before its banner.
+        const uart = adapter.rp2040.uart[0];
+        const feedByte = byte => uart.feedByte(byte & 0xff);
+        const output = createTerminalOutput();
+        const input = createReadyGatedInput({isReady: () => true, send: feedByte,
+            canAccept: () => uart.rxFIFO.empty, burst: 32});
+        // PicoBB probes for the current position, then the right edge, and
+        // restores the position it was given. Keep the parser alive offscreen
+        // so queries work with the Controller hidden or after it remounts.
+        const cursor = new Terminal({cols: TERMINAL_COLS, rows: TERMINAL_ROWS, scrollback: 0});
+        cursor.onData(reply => {
+            if (/^\x1b\[\d+;\d+R$/.test(reply)) input.write(new TextEncoder().encode(reply));
+        });
+        const commands = bootMedia.picoBasicCommands || [];
+        const consoleSpec = picoBasicConsoleSpec(bootMedia.picoBasicConsole || 'bbc');
+        const encoder = new TextEncoder();
+        let nextCommand = 0;
+        let sawBanner = false;
+        const unsubscribeCursor = output.subscribe(bytes => cursor.write(bytes, () => {
+            if (!sawBanner || nextCommand >= commands.length || input.pending()) return;
+            if (picoBasicAtPrompt(cursor.buffer.active, consoleSpec)) {
+                input.write(encoder.encode(commands[nextCommand++] + '\r'));
+            }
+        }));
+        disposeTerminal = () => {
+            flashStorage?.dispose();
+            unsubscribeCursor();
+            cursor.dispose();
+        };
         let lineBuf = '';
-        let probe = '';
-        serialLines = [];
-        adapter.onSerial((byte) => {
-            probe = (probe + String.fromCharCode(byte)).slice(-4);
-            if (probe === '\x1b[6n') {
-                for (const c of '\x1b[24;80R') feedByte(c.charCodeAt(0));
-                probe = '';
-            }
+        let wakeOnPrompt = bootMedia.picoWakeOnPrompt === true;
+
+        adapter.onSerial(byte => {
             const ch = String.fromCharCode(byte);
-            if (ch === '\n') {
-                serialLines.push(lineBuf);
-                lineBuf = '';
-                if (serialLines.length > 200) serialLines.shift();
-            } else if (ch !== '\r') {
-                lineBuf += ch;
+            if (wakeOnPrompt || (commands.length && !sawBanner)) {
+                if (ch === '\n') {
+                    if (lineBuf.includes(consoleSpec.banner)) sawBanner = true;
+                    if (wakeOnPrompt && lineBuf.trim() === 'Waiting for connection') {
+                        wakeOnPrompt = false;
+                        feedByte(13);
+                    }
+                    lineBuf = '';
+                } else if (ch !== '\r') lineBuf = (lineBuf + ch).slice(-512);
             }
+            output.push(byte);
         });
 
-        // RX into the REPL: what the serial console types reaches UART0. A string
-        // (a typed line, CR-terminated by the panel) or a single byte. This is
-        // what turns on the panel's serial input box (canSendSerial).
-        runner.sendSerial = (data) => {
-            const bytes = typeof data === 'number'
-                ? [data & 0xff]
-                : Array.from(String(data), ch => ch.charCodeAt(0) & 0xff);
-            for (const b of bytes) feedByte(b);
+        runner.sendSerial = data => input.write(typeof data === 'number' ? [data] :
+            typeof data === 'string' ? new TextEncoder().encode(data) : data);
+        runner.terminal = {id: `pico-uart-${++picoTerminalSequence}`, kind: 'pico',
+            rows: TERMINAL_ROWS, cols: TERMINAL_COLS, subscribe: output.subscribe, send: input.write};
+        terminalFrame = () => {
+            output.deliver();
+            input.flush();
+            flashStorage?.tick(performance.now());
         };
 
         setValueResolver((blockId) => runner.valuesAtBlock(blockId));
@@ -2859,7 +2905,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // Bound the 8086's work inside one browser callback. The session
             // carries unspent PROGRAM time forward, so this protects input and
             // paint latency without changing timer/wait semantics.
-            ...(targetKind === 'i8086' ? {wallBudgetMs: 8, maxQuantumNs: 1_000_000} : {}),
+            ...(targetKind === 'i8086' ? {wallBudgetMs: 8, maxQuantumNs: 1_000_000,
+                ...(bootMedia?.dosFastStart ? {speed: 16} : {})} : {}),
             // createDebugSession reports through onChange ONLY. This bench
             // once passed onHalt/onRun, which the session never calls: a
             // breakpoint hit halted the target and stopped the pump, but no
@@ -3050,6 +3097,25 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     }
 
     // ── 6502 machine bench ──────────────────────────────────────────────
+    async function attachCardiac() {
+        const {createDebugTarget, createDebugSession} =
+            await import(/* webpackChunkName: "bw-board" */ 'bw-board');
+        const selected = machineConfig?.partId ? designerBoard().board : null;
+        if (machineConfig?.partId && !selected) throw new Error('The CARDIAC circuit is not ready. Open the circuit and try again.');
+        if (selected) board = selected;
+        const result = await createDebugTarget('cardiac', {
+            ...(selected ? {board: selected, partId: machineConfig.partId} : {}),
+            ...(!selected && machineConfig?.program ? {program: machineConfig.program} : {})
+        });
+        wireMachineBench(result, createDebugSession);
+        // The circuit may already have executed. The first session start must
+        // adopt that state, including queued cards, rather than reset it.
+        cardiacInitialSnapshot = selected ? target.snapshot() : null;
+        delete runner.sendSerial;
+        setStatus('ready', 'CARDIAC · decimal instruction stepping');
+        return session;
+    }
+
     // 6502 media uses its library map, the extracted circuit, or the
     // preset's default map. BASIC can use the extracted circuit when
     // the serial ACIA is at its expected address.
@@ -3079,7 +3145,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
 
         const targetOpts = {};
-        const declaredMachine = bootMedia?.machineConfig6502;
+        const blink = bootMedia?.asmBlink;
+        const declaredMachine = bootMedia?.machineConfig6502 || blink?.config;
         let readyMsg;
         if (bootMedia) {
             setStatus('attaching', S('boot.media', {name: bootMedia.name || S('noun.image')}));
@@ -3089,10 +3156,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (bootMedia.profile === 'py65mon') {
                 targetOpts.py65mon = true;
                 readyMsg = S('ready.py65mon', {name: bootMedia.name || S('noun.image')});
+            } else if (bootMedia.profile === 'gpascal' && !declaredMachine) {
+                targetOpts.gpascal = true;
+                readyMsg = S('ready.eater', {name: bootMedia.name || 'G-Pascal'});
             } else if (declaredMachine) {
                 targetOpts.config = {clockHz: 1_000_000, chips: [], ...declaredMachine};
                 readyMsg = S('ready.eater', {name: bootMedia.name || S('noun.image')});
-            } else if (machineConfig && (bootMedia.profile !== 'eater' ||
+            } else if (!blink && machineConfig && (bootMedia.profile !== 'eater' ||
                 (machineConfig.chips || []).some(chip => chip.kind === 'acia' && chip.at === 0x5000))) {
                 targetOpts.config = benchConfig6502();
                 readyMsg = S('ready.extracted', {
@@ -3115,7 +3185,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.tali');
         }
 
-        const db = declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
+        const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
+            declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
         if (db.board) {
             targetOpts.board = db.board;
             // Machine targets drive the designer's real board rather than a
@@ -3144,6 +3215,19 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         const result = await createDebugTarget('eater6502', targetOpts);
         wireMachineBench(result, createDebugSession);
+        if (blink && !blink.led) {
+            const via = Object.values(result.adapter.machine.chips).find(chip => Number.isInteger(chip.orb));
+            if (!via) throw new Error('Blink requires a 65C22 VIA');
+            runner.asmBlinkValue = () => via.orb & via.ddrb & 1;
+        }
+        if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
+        if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||
+            (declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom))) {
+            const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
+            basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
+            runner.sendBasicLine = line => runner.sendSerial(microsoftBasicLine(line));
+            runner.console6502Source = 'ACIA';
+        }
         setStatus('ready', readyMsg);
         return session;
     }
@@ -3154,6 +3238,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // ROM boots the extracted config (or the default Searle map). With no
     // media at all, the default remains BBC BASIC.
     async function attachZ80() {
+        cpmAutoRun = null;
         const { createDebugTarget, createDebugSession } =
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
 
@@ -3167,18 +3252,30 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // in the com slot).
         const isCpmSystem = bootMedia && bootMedia.profile === 'cpm-system';
         const isCom = !isCpmSystem && bootMedia && (bootMedia.slot === 'com' || bootMedia.profile === 'cpm');
-        if (isCpmSystem) {
+        const spectrum = bootMedia?.spectrum;
+        const blink = bootMedia?.asmBlink;
+        if (spectrum) {
+            targetOpts.config = spectrum.kind === 'zx128' ? {clockHz: 3_546_900, zx128: true}
+                : {clockHz: 3_500_000, regions: [{kind: 'rom', start: 0, end: 0x3fff}], ula: true};
+            readyMsg = bootMedia.name;
+        } else if (isCpmSystem) {
             setStatus('attaching', S('cpm-system.booting'));
             const fetchRom = async (p) => {
                 const r = await fetch(new URL(p, document.baseURI).href);
                 if (!r.ok) throw new Error(`Failed to load ${p}: HTTP ${r.status}`);
                 return new Uint8Array(await r.arrayBuffer());
             };
+            const vdpConsole = bootMedia.machinePreset === 'CPM64K_TMS9918';
             const [ccpBdos, bios] = await Promise.all([
                 fetchRom('static/roms/cpm22-64k.bin'),
-                fetchRom('static/roms/cpm-bios.bin')
+                fetchRom(vdpConsole ? 'static/roms/cpm-bios-vdp.bin' : 'static/roms/cpm-bios.bin')
             ]);
-            const files = {};
+            if (vdpConsole) {
+                const {CPM64K} = await import('bw-board/z80-machine.js');
+                targetOpts.config = {...CPM64K,
+                    ports: [...CPM64K.ports, {kind: 'vdp', name: 'vdp1', at: 0x98}]};
+            }
+            const files = {...bootMedia.cpmFiles};
             const bbc = await fetchRom('static/roms/bbcbasic.com').catch(() => null);
             if (bbc) files['BBCBASIC.COM'] = bbc;
             if (bootMedia.bytes || bootMedia.url) {
@@ -3190,6 +3287,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 files[cpmFileName(bootMedia.name)] = (await resolveMediaImage(bootMedia)).bytes;
             }
             targetOpts.cpmSystem = { ccpBdos, bios, files };
+            cpmAutoRun = bootMedia.cpmLaunch || null;
             readyMsg = S('cpm-system.ready') +
                 (files['BBCBASIC.COM'] ? S('cpm-system.ready.bbcbasic') : '');
         } else if (isCom) {
@@ -3201,7 +3299,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             const img = await resolveMediaImage(bootMedia);
             targetOpts.rom = img.bytes;
             if (img.origin != null) targetOpts.romAt = img.origin;
-            if (machineConfig) targetOpts.config = benchConfigZ80();
+            if (blink) {
+                const {SEARLE} = await import('bw-board/z80-machine.js');
+                targetOpts.config = blink.config || {...SEARLE,
+                    ports: [...SEARLE.ports, {kind: 'latch', name: 'blink', at: 1}]};
+            } else if (machineConfig) targetOpts.config = benchConfigZ80();
             readyMsg = S('ready.romOnMap', {
                 name: bootMedia.name || S('noun.rom'),
                 map: S(machineConfig ? 'map.extracted' : 'map.searle')
@@ -3218,14 +3320,29 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.bbcbasic');
         }
 
-        const db = designerBoard();
+        const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
+            designerBoard();
         if (db.board) {
             targetOpts.board = db.board;
             board = db.board;
         }
         readyMsg += ` — ${db.why}`;
+        // The latch emits pin edges even with no external circuit. Its value
+        // is read directly by the virtual indicator.
+        if (blink && !targetOpts.board) targetOpts.board = {advanceTo () {}, setPin () {}};
         const result = await createDebugTarget('z80', targetOpts);
+        if (spectrum) {
+            const {applyMedia} = await import('bw-board/machine-media.js');
+            const {errors} = applyMedia(result, spectrum.entries, {kind: spectrum.kind});
+            if (errors.length) throw new Error(errors.map(({slot, error}) => `${slot}: ${error}`).join(', '));
+        }
         wireMachineBench(result, createDebugSession);
+        if (blink) {
+            const port = targetOpts.config.ports.find(device => device.kind === 'latch' && device.at === 1);
+            const latch = result.adapter.machine.chips[port.name];
+            runner.asmBlinkValue = () => latch.value & 1;
+        }
+        if (spectrum) runner.setSpectrumKeys = names => result.target.setKeys(names);
         setStatus('ready', readyMsg);
         return session;
     }
@@ -3328,7 +3445,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             send: data => linuxConsole.send(data)
         };
         let shown = '';
-        linuxProgressWatch = () => {
+        terminalFrame = () => {
             const p = target && typeof target.linuxProgress === 'function' ? target.linuxProgress() : null;
             if (!p) return;
             linuxConsole.frame();
@@ -3363,7 +3480,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // a ROM. A .COM loaded at F0000 executes nothing, and a machine that
     // executes nothing is indistinguishable on screen from one that failed to
     // start — the exact shape of failure this codebase keeps paying for.
-    async function attachI8086() {
+    async function attachI8086(requestedVariant) {
+        // The functional 8088 shares the 8086 instruction core.
+        const variant = requestedVariant === '8088' ? '8086' : requestedVariant;
         const targetOpts = {};
         let readyMsg;
         const isDosProgram = bootMedia &&
@@ -3402,7 +3521,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             let exited = null;
             const bench = await createI8086DosBench({
                 executionSignal: i8086ExecutionLifetime.signal,
-                bytes: img.bytes, format,
+                bytes: img.bytes, format, args: bootMedia.dosArgs, variant: variant || bootMedia.dosVariant,
+                files: bootMedia.dosFiles ? new Map(bootMedia.dosFiles) : undefined,
                 // Hardware the program asked for. `createI8086DosBench`
                 // merges these onto the preset BY NAME, so a scheduled
                 // program's IRQ0-wired timer replaces the preset's plain one
@@ -3453,6 +3573,12 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 bench.sendKeys(typeof data === 'number'
                     ? String.fromCharCode(data & 0xff) : String(data));
             };
+            runner.i8086MediaIo = {
+                serial: true,
+                terminalName: 'DOS Console',
+                ...(bootMedia.i8086Assembly ? {display: 'cga', dosKeyboard: true, gpio: 'A'} : {})
+            };
+            runner.dosScreenText = bench.screenText;
             if (exited === null) {
                 setStatus('ready', S('ready.dosBench', {
                     name: bootMedia.name || S('noun.program'), format
@@ -3476,6 +3602,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // every sector; supplied as an opt-in onInterrupt hook, no vendored
         // change, exactly as bw-board's own ELKS scripts do it.)
         let floppyBoot = null;
+        const virtualHardware = bootMedia?.i8086Hardware === 'virtual' || (!bootMedia && !machineConfig);
         if (bootMedia && (bootMedia.slot === 'floppy' || bootMedia.profile === 'floppy-os')) {
             setStatus('attaching', S('boot.media', {name: bootMedia.name || S('noun.floppy')}));
             const { PCXT8086 } =
@@ -3512,11 +3639,18 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // executing open bus, which on screen is indistinguishable from a
             // machine that never started.
             if (img.origin != null) targetOpts.romAt = img.origin;
-            else if (typeof bootMedia.romAt === 'number') targetOpts.romAt = bootMedia.romAt;
-            if (machineConfig) targetOpts.config = benchConfigI8086();
+            else targetOpts.romAt = bootMedia.romAt ?? (0x100000 - img.bytes.length);
+            if (virtualHardware) {
+                const {i8086VirtualHardware} = await import('./i8086-media-hardware.js');
+                targetOpts.config = bootMedia.machineConfig8086
+                    ? {clockHz: 4_772_727, chips: [], ...bootMedia.machineConfig8086}
+                    : i8086VirtualHardware(bootMedia.profile);
+            } else if (machineConfig) {
+                targetOpts.config = benchConfigI8086();
+            }
             readyMsg = S('ready.romOnMap', {
                 name: bootMedia.name || S('noun.rom'),
-                map: S(machineConfig ? 'map.extracted' : 'map.default8086')
+                map: S(!virtualHardware && machineConfig ? 'map.extracted' : 'map.default8086')
             });
         } else if (machineConfig) {
             setStatus('attaching', S('boot.extracted8086'));
@@ -3547,7 +3681,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // Machine Loader uses; it gives the same answer here and the right
             // one for the 32K demo ROMs beside it.
             targetOpts.romAt = 0x100000 - targetOpts.rom.length;
-            if (machineConfig) targetOpts.config = benchConfigI8086();
+            const {PCXT8086} = await import('bw-board/i8086-machine.js');
+            targetOpts.config = PCXT8086;
             // No serial console on this ROM, and saying so is the point: its
             // INT 14h is a stub and the BIOS equipment word reports no COM
             // port, because the XT config has no 8250. Output is the CGA text
@@ -3555,7 +3690,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.xtBios');
         }
 
-        const db = designerBoard();
+        const db = virtualHardware || floppyBoot ? {board: null, why: 'virtual PC'} : designerBoard();
+        if (typeof window !== 'undefined') window.__bwMachineBoard = db;
         if (db.board) {
             targetOpts.board = db.board;
             board = db.board;
@@ -3584,6 +3720,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // consumer, so there is no moment where the preference is unapplied.
         const {BREADBOARD8086} = await import('bw-board/i8086-machine.js');
         targetOpts.config = withI8086MemoryPreference(targetOpts.config ?? BREADBOARD8086);
+        if (variant) targetOpts.config = {...targetOpts.config, variant};
 
         const result = await i8086Execution.construct({context: 'hardware',
             family: targetOpts.config.variant || '8086', signal: i8086ExecutionLifetime.signal},
@@ -3617,6 +3754,25 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             machine.reset();
         }
         wireMachineBench(result, createDebugSession);
+        const machine = result.adapter?.machine || result.target?.machine;
+        const chips = targetOpts.config.chips || [];
+        runner.i8086MediaIo = {
+            display: chips.find(chip => ['cga', 'vga', 'ega', 'hercules'].includes(chip.kind))?.kind,
+            serial: chips.some(chip => ['uart16550', 'acia6850', 'usart8251'].includes(chip.kind)),
+            gpio: bootMedia?.profile === 'blink'
+        };
+        const {createPcInputQueue} = await import('../bw-machines/pc-input-queue.js');
+        const pic = machine?.chips?.[chips.find(chip => chip.kind === 'pic')?.name];
+        if (runner.keyIn && pic && chips.some(chip => chip.kind === 'ppi') && !targetOpts.config.a20) {
+            xtKeyboard = createPcInputQueue(runner.keyIn, () => !!((pic.irr | pic.isr) & 2));
+            runner.keyIn = byte => xtKeyboard.enqueue(byte);
+        }
+        const uart = machine?.chips?.[chips.find(chip => chip.kind === 'uart16550')?.name];
+        if (uart) {
+            pcSerialInput = createPcInputQueue(runner.sendSerial, () => uart.rxFifo.length > 0);
+            runner.sendSerial = data => pcSerialInput.enqueue(data);
+        }
+        if (machine?.canTakeMouse?.()) runner.mouseIn = event => machine.mouseIn(event);
         setStatus('ready', readyMsg);
         return session;
     }
@@ -3660,23 +3816,31 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // decoder honours). The LGPL VGABios is the C000h option ROM.
         const biosUrl = new URL('static/roms/free-386-bochs-bios.rom', document.baseURI).href;
         const vgaUrl = new URL('static/roms/free-386-vgabios-lgpl.bin', document.baseURI).href;
-        const [biosRes, vgaRes] = await Promise.all([fetch(biosUrl), fetch(vgaUrl)]);
-        if (!biosRes.ok) throw new Error(`Failed to load the free-386 BIOS: HTTP ${biosRes.status}`);
-        if (!vgaRes.ok) throw new Error(`Failed to load the free-386 VGABios: HTTP ${vgaRes.status}`);
-        const bios = new Uint8Array(await biosRes.arrayBuffer());
-        const vga = new Uint8Array(await vgaRes.arrayBuffer());
+        const biosBoot = bootMedia?.slot === 'bios' || bootMedia?.slot === 'rom';
+        const dosBios = biosBoot ? await resolveMediaImage(bootMedia) : null;
+        const companionBios = bootMedia?.i80386Media?.bios;
+        const companionVga = bootMedia?.i80386Media?.['vga-rom'];
+        const fallback = async (url, label) => {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to load ${label}: HTTP ${response.status}`);
+            return new Uint8Array(await response.arrayBuffer());
+        };
+        const [bios, vga] = await Promise.all([
+            dosBios?.bytes ?? companionBios ?? fallback(biosUrl, 'the free-386 BIOS'),
+            companionVga ?? fallback(vgaUrl, 'the free-386 VGA BIOS')
+        ]);
+        const biosAddress = dosBios?.origin ?? (biosBoot ? bootMedia.romAt : null) ?? (0x100000 - bios.length);
+        if (biosAddress < 0xf0000 || biosAddress + bios.length !== 0x100000 || bios.length < 16) {
+            throw new Error('The 386 BIOS must fit the 64 KiB ROM window through FFFFFh.');
+        }
+        if (vga.length > 0xa000) throw new Error('The VGA option ROM exceeds its 40 KiB window.');
 
-        // A 386 boots either a floppy (µPD765, drive A:) or a hard disk (the
-        // ATA16 controller, drive C:). The config's boot slot decides — 'floppy'
-        // (or the floppy-os profile) is the disk-in-A: case, everything else
-        // ('hdd'/'disk'/'hd') is the hard-disk case. A hard disk also needs the
-        // image resolved BEFORE construction (the adapter attaches ATA from its
-        // constructor hooks), so resolve it here.
-        const isFloppy = !!bootMedia &&
-            (bootMedia.slot === 'floppy' || bootMedia.profile === 'floppy-os');
-        const isHdd = !!bootMedia && !isFloppy;
-        let bootImg = null;
-        if (bootMedia) bootImg = await resolveMediaImage(bootMedia);
+        const isFloppy = bootMedia?.slot === 'floppy' || bootMedia?.profile === 'floppy-os';
+        const isHdd = ['hdd', 'disk', 'hd'].includes(bootMedia?.slot);
+        if (bootMedia && !biosBoot && !isFloppy && !isHdd) {
+            throw new Error('Choose a 386 BIOS, a boot floppy or a hard disk image.');
+        }
+        const bootImg = isFloppy || isHdd ? await resolveMediaImage(bootMedia) : null;
 
         // The FreeDOS-VGA preset carves a 32K option-ROM window at C0000h; the
         // LGPL VGABios is 38400 bytes, so widen that one region to C0000-C9FFF
@@ -3739,8 +3903,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         // Firmware at its three aliases (F0000h, FF0000h, C0000h), before the
         // media so the BIOS is resident when the machine boots the disk.
-        machine.loadRom(bios, 0xf0000);
-        machine.loadRom(bios, 0xff0000);
+        machine.loadRom(bios, biosAddress);
+        machine.loadRom(bios, 0xf00000 + biosAddress);
         machine.loadRom(vga, 0xc0000);
 
         let readyMsg = S('ready.free386NoMedia');
@@ -3903,11 +4067,22 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const perfProbe = typeof window !== 'undefined' ? window.__BW_I8086_PERF__ : null;
         const perfWallStart = perfProbe ? performance.now() : 0;
         const perfSimStart = perfProbe ? target.timeNs() : 0n;
+        xtKeyboard?.pump();
+        pcSerialInput?.pump();
         let outcome = session.pump();
+        if (outcome === 'ran') {
+            const lastLine = serialLines.at(-1);
+            basicStartup?.answer(lastLine, runner.sendSerial);
+            if (cpmAutoRun && lastLine === 'A>') {
+                const command = cpmAutoRun;
+                cpmAutoRun = null;
+                runner.sendSerial(`${command}\r`);
+            }
+        }
         if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
             releaseCp1RunKey();
         }
-        if (linuxProgressWatch) linuxProgressWatch();
+        if (terminalFrame) terminalFrame();
 
         // Absorb skipped hits in this frame rather than one per frame. Bounded,
         // because a pause point inside a tight loop with a condition that never
@@ -4006,7 +4181,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // symbols when the firmware brought its own (a compiled sketch's
             // table, built WITH this image); a picked .hex has none.
             return { hex: text, image: null, symbols: fw.symbols || null, c: null,
-                bytes: text.length, f_cpu: fw.fCpu || null, format: 'ihx' };
+                bytes: text.length, f_cpu: fw.fCpu || null, device: fw.device, format: 'ihx' };
         }
         if (kind === 'rp2040js' || kind === 'stm32f0' || kind === 'stm32g0') {
             const bytes = fw.bytes || new TextEncoder().encode(fw.text || '');
@@ -4137,7 +4312,48 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         return [...cp1BreakpointHandles.keys()].sort((a, b) => a - b);
     };
+    function publishBasicSerial(active) {
+        const runtime = vm?.runtime;
+        const send = runner.sendBasicLine;
+        if (!runtime || !send) return;
+        if (active && board && runtime.bwRunBoard === board) {
+            runtime.bwBasicSerial = send;
+        } else if (runtime.bwBasicSerial === send) {
+            delete runtime.bwBasicSerial;
+        } else {
+            return;
+        }
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-board-ready'));
+    }
     const runner = {
+        cardiacSnapshot() {
+            if (target?.kind !== 'cardiac') return null;
+            const observed = target.snapshot();
+            return observed.cardiac || observed;
+        },
+        cardiacControl(verb, value) {
+            if (target?.kind !== 'cardiac' || typeof target.control !== 'function') {
+                throw new Error('Open the CARDIAC machine before using its controls.');
+            }
+            // Deliberate input may be queued while running. Editing the image
+            // or single-stepping always owns the shared session's pause.
+            if (!['enqueueInput', 'sampleInput', 'toggleBreakpoint'].includes(verb)) {
+                session.pause();
+                unschedule();
+            }
+            target.control(verb, value);
+            const observed = runner.cardiacSnapshot();
+            if (verb === 'loadProgram' && machineConfig?.partId && typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('bw-cardiac-program-loaded', {detail: {
+                    partId: machineConfig.partId, program: observed.program
+                }}));
+            }
+            if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-cardiac-observation', {
+                detail: {partId: machineConfig?.partId || null, ...observed}
+            }));
+            setStatus(observed.running ? 'running' : 'paused', observed.error || '');
+            return observed;
+        },
         cp1Snapshot() {
             if (target?.kind !== 'cp1') return null;
             const observed = target.snapshot();
@@ -4297,7 +4513,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     // from an AVR lesson to a machine bench and describe an
                     // image that is not running.
                     imageProvenance = null;
-                    const device = String(projectStc(null)?.device || '').toLowerCase();
+                    const device = String(userFirmware?.device || projectStc(null)?.device || '').toLowerCase();
                     const selectedKind = selectDebugTargetKind(device, targetKind);
                     // This selector consumes an existing merged flash image.
                     // Refuse before build() so an empty picker cannot compile
@@ -4309,16 +4525,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                             ? 'ESP32-4848S040: load firmware before starting; blocks compilation is not supported'
                             : 'ESP32-S3: load a merged .bin firmware file before starting ROM boot');
                     }
-                    // Z80/6502 interactive interpreters: no compile step
-                    // riscv32 never compiles the project: its program is the
-                    // Code tab's assembled image, a shipped RTOS image, or a
-                    // booted Linux — all of which arrive as bootMedia.
-                    const built = (selectedKind === 'cp1' || selectedKind === 'z80' || selectedKind === 'eater6502' ||
-                        selectedKind === 'riscv32' ||
-                        ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) ||
-                        (selectedKind === 'rp2040js' && bootMedia)) ? null
-                        : userFirmware ? await builtFromUserFirmware(selectedKind)
-                            : await build();
+                    const built = runnerCompilesProjectBlocks({selectedKind, bootMedia})
+                        ? (userFirmware ? await builtFromUserFirmware(selectedKind) : await build())
+                        : null;
                     await attach(built);
                     if (destroyed) {
                         // Torn down while attaching: release what attach built
@@ -4335,6 +4544,12 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     unsubscribeBps = subscribeBreakpoints(syncBreakpoints);
                 }
                 session.start();
+                if (cardiacInitialSnapshot) {
+                    const saved = cardiacInitialSnapshot.cardiac || cardiacInitialSnapshot;
+                    target.control('restore', {...saved, running: false});
+                    cardiacInitialSnapshot = null;
+                    if (!paused) target.run();
+                }
                 if (paused) session.pause();
                 boardBaseNs = boardTimeBase(board, target);
                 if (destroyed) return {accepted: false, code: 'destroyed'};
@@ -4346,6 +4561,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-board-ready'));
                 }
                 if (destroyed) return {accepted: false, code: 'destroyed'};
+                publishBasicSerial(true);
                 setStatus(paused ? 'paused' : 'running');
                 if (paused) unschedule(); else schedule();
             } catch (e) {
@@ -4405,6 +4621,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
 
         stop() {
+            xtKeyboard?.clear();
+            pcSerialInput?.clear();
+            publishBasicSerial(false);
             cancelCp2Recording();
             cp1LessonBatch?.clear();
             hddSnapshotOwner = {};
@@ -4414,6 +4633,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 activeRunTo = null;
             }
             if (session) session.stop();
+            if (basicStartup) {
+                basicStartup.reset();
+                serialLines = [];
+            }
             clearGlow();
             // The run board dies with the run — fall back to the designer's.
             if (vm && vm.runtime && vm.runtime.bwRunBoard) {
@@ -5592,12 +5815,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         symbols: () => symbols,
 
         destroy({preserveRuntime = false} = {}) {
+            publishBasicSerial(false);
             i8086ExecutionLifetime.abort();
             i8086Execution.release(i8086ExecutionResult);
             // The aborted lifetime fences reentry even if release throws.
             hddSnapshotOwner = {};
             i8086ExecutionResult = null;
             destroyed = true;
+            disposeTerminal?.();
+            disposeTerminal = null;
+            terminalFrame = null;
             if (!preserveRuntime) {setValueResolver(null);
                 if (vm && vm.runtime) delete vm.runtime._bwDebugVariables;}
             unschedule();

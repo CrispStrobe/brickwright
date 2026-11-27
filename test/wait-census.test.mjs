@@ -123,9 +123,10 @@ const censusJson = () => JSON.parse(execFileSync('node',
 // whoever wires them should replace the trackpad settles with conditions
 // first, since that is when they would start costing CI time.
 const CEILING = {
-    ciSleepMs: 120_180,     // 110 sleeps across the CI browser-gate scripts
+    // 2026-11-27 census after replacing the Circuit fixture delay with a model-state wait.
+    ciSleepMs: 120_080,
     ciSleeps: 110,
-    totalSleeps: 198,       // census of run 45318622606 (see the 2026-11-24 note)
+    totalSleeps: 197,
     scratchFiles: 10        // _tmp- scripts that contain waits
 };
 

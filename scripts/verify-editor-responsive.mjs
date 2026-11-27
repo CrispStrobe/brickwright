@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {openCodeActions as openCodeMenu} from './lib-code-actions.mjs';
+import {openCodeActions as openCodeMenu, openCodeInfo} from './lib-code-actions.mjs';
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2026 Brickwright contributors
 import assert from 'node:assert/strict';
@@ -72,10 +72,12 @@ try {
     }})));
     await page.getByTestId('bw-open-spike-arena').waitFor();
     await page.getByRole('button', {name: /To blocks/}).click();
+    await openCodeInfo(page);
     await page.getByTestId('bw-conversion-report').waitFor({timeout: 60000});
     await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
         null, {timeout: 60000});
     assert.match(await page.getByTestId('bw-code-status').innerText(), /Blocks loaded/);
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     if (mutation === 'rigid-column') {
         await page.addStyleTag({content: '[data-editor-pane] {flex: 1 0 620px !important; min-width: 620px !important;}'});
     }
@@ -98,7 +100,7 @@ try {
         const dimensions = await editor.evaluate(element => ({width: element.clientWidth, scroll: element.scrollWidth}));
         assert.ok(dimensions.scroll <= dimensions.width + 2, JSON.stringify(dimensions));
         assert.ok(widths.left > 120, 'the main editor remains usable');
-        check(`right pane reaches ${fraction * 100}% with conversion messages visible`, widths);
+        check(`right pane reaches ${fraction * 100}% with conversion notices available`, widths);
     }
     const tabList = page.locator('[role="tablist"]');
     assert.notEqual(await tabList.getAttribute('data-bw-tab-icons-only'), null,
@@ -119,11 +121,13 @@ try {
     await page.keyboard.press('ArrowRight');
     assert.ok(Math.abs(await rightWidth() - originalWidth) < 2);
     check('keyboard divider adjustment grows and shrinks the right pane');
+    await openCodeInfo(page);
     await page.getByTestId('bw-dismiss-code-status').click();
-    assert.equal(await page.getByTestId('bw-code-status').count(), 0);
+    assert.equal(await page.getByText('Blocks loaded.', {exact: true}).count(), 0);
     await page.getByTestId('bw-dismiss-conversion-report').click();
     assert.equal(await page.getByTestId('bw-conversion-report').count(), 0);
     check('status and conversion report can both be dismissed');
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     await page.setViewportSize({width: 900, height: 800});
     await page.waitForFunction(() => window.innerWidth === 900);
     const narrow = await editor.evaluate(element => ({width: element.clientWidth, scroll: element.scrollWidth,

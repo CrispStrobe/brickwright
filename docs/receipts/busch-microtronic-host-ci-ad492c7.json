@@ -1,0 +1,1062 @@
+{
+  "schema": "bw.microtronic-ci-blockers.v1",
+  "repository": "CrispStrobe/brickwright",
+  "pullRequest": 1846,
+  "headSha": "ad492c7ac87d2ca393e0da9ceed4d96a3da16563",
+  "observedAt": "2026-11-25T22:49:48.234Z",
+  "completion": "Final dated review snapshot; selected jobs were still pending at the observation time. Monitoring stopped at parent request.",
+  "monitoringStoppedAt": "2026-11-25T22:50:24.375Z",
+  "monitoringStatus": "stopped-at-parent-request",
+  "ordinaryFailedUnitTests": 41,
+  "remainingJobs": [
+    {
+      "run": "Build (permissive base)",
+      "runId": 45705080927,
+      "id": 139535523788,
+      "name": "unit (8/8)",
+      "status": "in_progress",
+      "conclusion": null,
+      "activeStep": "Run unit tests",
+      "failedSteps": []
+    },
+    {
+      "run": "Build (permissive base)",
+      "runId": 45705080927,
+      "id": 139535523855,
+      "name": "unit (5/8)",
+      "status": "in_progress",
+      "conclusion": null,
+      "activeStep": "Run unit tests",
+      "failedSteps": []
+    },
+    {
+      "run": "Build (permissive base)",
+      "runId": 45705080927,
+      "id": 139535523918,
+      "name": "unit (3/8)",
+      "status": "in_progress",
+      "conclusion": null,
+      "activeStep": "Run unit tests",
+      "failedSteps": []
+    }
+  ],
+  "scopeBoundary": "Read-only assessment. No test gate, assertion, exception, source, workflow, seal or baseline was modified; no CI retry/cancel action taken.",
+  "baselineLimit": "Git blob identity proves source inputs are unchanged, not that a baseline job passed. Previous feature-head unit runs were cancelled. The pre-feature first-parent comparison is included separately from the previous feature head.",
+  "sourceIdentityEvidence": {
+    "commits": {
+      "3b85b7524": "3b85b7524a779bdffcfa743dec491e9aac02a61e",
+      "3dd88b7ea": "3dd88b7ea953ce73e96faa956066f20eda71b250",
+      "ad492c7ac": "ad492c7ac87d2ca393e0da9ceed4d96a3da16563"
+    },
+    "identities": {
+      "test/circuit-file-menu-reach.test.mjs": {
+        "3b85b7524": "92ceb6ecd7765d4f527f47ef5c1a0ecbe5f4375d",
+        "3dd88b7ea": "92ceb6ecd7765d4f527f47ef5c1a0ecbe5f4375d",
+        "ad492c7ac": "92ceb6ecd7765d4f527f47ef5c1a0ecbe5f4375d"
+      },
+      "overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx": {
+        "3b85b7524": "3a3fe8ace91e4678ea078283849ee425f8ed649b",
+        "3dd88b7ea": "3a3fe8ace91e4678ea078283849ee425f8ed649b",
+        "ad492c7ac": "3a3fe8ace91e4678ea078283849ee425f8ed649b"
+      },
+      "test/runner-status-l10n.test.mjs": {
+        "3b85b7524": "e77c73e0e4b0159bb794e37376c41e730e01e5af",
+        "3dd88b7ea": "e77c73e0e4b0159bb794e37376c41e730e01e5af",
+        "ad492c7ac": "e77c73e0e4b0159bb794e37376c41e730e01e5af"
+      },
+      "scripts/measure-status-strings.mjs": {
+        "3b85b7524": "b1b49dbd41a73b6ee0898a47fae3e629ce6ff01d",
+        "3dd88b7ea": "b1b49dbd41a73b6ee0898a47fae3e629ce6ff01d",
+        "ad492c7ac": "b1b49dbd41a73b6ee0898a47fae3e629ce6ff01d"
+      },
+      "overlay/scratch-gui/src/lib/bw-debug/debug-runner.js": {
+        "3b85b7524": "22c9c51aaf43335906119df0e0110db71f1e570f",
+        "3dd88b7ea": "22c9c51aaf43335906119df0e0110db71f1e570f",
+        "ad492c7ac": "22c9c51aaf43335906119df0e0110db71f1e570f"
+      },
+      "overlay/scratch-gui/src/lib/bw-debug/runner-status-l10n.js": {
+        "3b85b7524": "361b0c8c632e2127826b4aa77e1859563dd1c499",
+        "3dd88b7ea": "361b0c8c632e2127826b4aa77e1859563dd1c499",
+        "ad492c7ac": "361b0c8c632e2127826b4aa77e1859563dd1c499"
+      },
+      "test/bw-parts-conformance.test.mjs": {
+        "3b85b7524": "a9519cd2f7854ffee00df6b1760d0d34757dce1f",
+        "3dd88b7ea": "a9519cd2f7854ffee00df6b1760d0d34757dce1f",
+        "ad492c7ac": "a9519cd2f7854ffee00df6b1760d0d34757dce1f"
+      },
+      "overlay/scratch-gui/src/lib/bw-parts/profiles.js": {
+        "3b85b7524": "9c7e27bcbac85be7210fd975cf833fa82eca0bf8",
+        "3dd88b7ea": "9c7e27bcbac85be7210fd975cf833fa82eca0bf8",
+        "ad492c7ac": "9c7e27bcbac85be7210fd975cf833fa82eca0bf8"
+      },
+      "test/circuit-corpus-invariants.test.mjs": {
+        "3b85b7524": "9dfc06a9d529ed5a20922c964dcf34afe8c35ae3",
+        "3dd88b7ea": "9dfc06a9d529ed5a20922c964dcf34afe8c35ae3",
+        "ad492c7ac": "9dfc06a9d529ed5a20922c964dcf34afe8c35ae3"
+      },
+      "test/code-tab-empty-target-after-failed-conversion.test.mjs": {
+        "3b85b7524": "f4e03a12cc538ebd1b3f3eb674262597223aea0b",
+        "3dd88b7ea": "f4e03a12cc538ebd1b3f3eb674262597223aea0b",
+        "ad492c7ac": "f4e03a12cc538ebd1b3f3eb674262597223aea0b"
+      },
+      "test/esp32s040-host.test.mjs": {
+        "3b85b7524": "376e021ee6ae0afa53999eaf075a0ca8f165f1ef",
+        "3dd88b7ea": "376e021ee6ae0afa53999eaf075a0ca8f165f1ef",
+        "ad492c7ac": "376e021ee6ae0afa53999eaf075a0ca8f165f1ef"
+      },
+      "test/i18n-no-hardcoded-strings.test.mjs": {
+        "3b85b7524": "efcec5869b0224f7a7df83587cf59ebfeafa7261",
+        "3dd88b7ea": "efcec5869b0224f7a7df83587cf59ebfeafa7261",
+        "ad492c7ac": "efcec5869b0224f7a7df83587cf59ebfeafa7261"
+      },
+      "overlay/scratch-gui/src/components/tw-pseudocode/controller-panel-view.jsx": {
+        "3b85b7524": "35b2c15b8bef087759e01512e20d8fee0654b183",
+        "3dd88b7ea": "35b2c15b8bef087759e01512e20d8fee0654b183",
+        "ad492c7ac": "35b2c15b8bef087759e01512e20d8fee0654b183"
+      },
+      "test/robot-editor-menu.test.mjs": {
+        "3b85b7524": "3ffe35fc549ed92bfeddf39fae24671a7c61f1db",
+        "3dd88b7ea": "3ffe35fc549ed92bfeddf39fae24671a7c61f1db",
+        "ad492c7ac": "3ffe35fc549ed92bfeddf39fae24671a7c61f1db"
+      },
+      "overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-pane.jsx": {
+        "3b85b7524": "f1fd44e03d1ebc39e4b1189923cb536243a7a467",
+        "3dd88b7ea": "f1fd44e03d1ebc39e4b1189923cb536243a7a467",
+        "ad492c7ac": "f1fd44e03d1ebc39e4b1189923cb536243a7a467"
+      },
+      "test/b8-one-board-per-run.test.mjs": {
+        "3b85b7524": "2c4e9d119526bfe2026b999478e657a27cf1c53b",
+        "3dd88b7ea": "2c4e9d119526bfe2026b999478e657a27cf1c53b",
+        "ad492c7ac": "2c4e9d119526bfe2026b999478e657a27cf1c53b"
+      },
+      "test/bw-sim-resonance-intake.test.mjs": {
+        "3b85b7524": "66d260c10feb820e72fd4f604bc552a77835dedd",
+        "3dd88b7ea": "66d260c10feb820e72fd4f604bc552a77835dedd",
+        "ad492c7ac": "66d260c10feb820e72fd4f604bc552a77835dedd"
+      },
+      "overlay/scratch-gui/src/lib/bw-sim/sim-session.js": {
+        "3b85b7524": "e4fb7df69399ad1afc6e8f44595accf03d410342",
+        "3dd88b7ea": "e4fb7df69399ad1afc6e8f44595accf03d410342",
+        "ad492c7ac": "e4fb7df69399ad1afc6e8f44595accf03d410342"
+      },
+      "test/emitted-native-broker-proof.test.mjs": {
+        "3b85b7524": "cb81da2f5724c29e76c9c81b9fc070632de51fbb",
+        "3dd88b7ea": "cb81da2f5724c29e76c9c81b9fc070632de51fbb",
+        "ad492c7ac": "cb81da2f5724c29e76c9c81b9fc070632de51fbb"
+      },
+      "overlay/scratch-gui/webpack.config.js": {
+        "3b85b7524": "652b9a65f0f78866b3b3c973e37c7c50c36b8e9e",
+        "3dd88b7ea": "652b9a65f0f78866b3b3c973e37c7c50c36b8e9e",
+        "ad492c7ac": "652b9a65f0f78866b3b3c973e37c7c50c36b8e9e"
+      },
+      "test/no-nul-in-text.test.mjs": {
+        "3b85b7524": "980c2997ce944afbc6e482a61d9e73311633b1df",
+        "3dd88b7ea": "980c2997ce944afbc6e482a61d9e73311633b1df",
+        "ad492c7ac": "980c2997ce944afbc6e482a61d9e73311633b1df"
+      },
+      "overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack": {
+        "3b85b7524": "f2f17b5ea171315c60e1fa5a7c091c9b6cb16583",
+        "3dd88b7ea": "f2f17b5ea171315c60e1fa5a7c091c9b6cb16583",
+        "ad492c7ac": "f2f17b5ea171315c60e1fa5a7c091c9b6cb16583"
+      },
+      "test/schematic-visual-baselines.test.mjs": {
+        "3b85b7524": "ac0bd1f29be012ccce67586fd9138c7352041189",
+        "3dd88b7ea": "ac0bd1f29be012ccce67586fd9138c7352041189",
+        "ad492c7ac": "ac0bd1f29be012ccce67586fd9138c7352041189"
+      },
+      "scripts/render-schematic.mjs": {
+        "3b85b7524": "e0f16be5492b32bac9928b82f2d892a36cf641ef",
+        "3dd88b7ea": "e0f16be5492b32bac9928b82f2d892a36cf641ef",
+        "ad492c7ac": "e0f16be5492b32bac9928b82f2d892a36cf641ef"
+      },
+      "overlay/scratch-gui/examples/10-motor-speed/circuit.pico.json": {
+        "3b85b7524": "04d8afdbd533e93195441b96a5c26578db407dc2",
+        "3dd88b7ea": "04d8afdbd533e93195441b96a5c26578db407dc2",
+        "ad492c7ac": "04d8afdbd533e93195441b96a5c26578db407dc2"
+      },
+      "docs/schematic-baselines/10-motor-speed-circuit.pico.svg": {
+        "3b85b7524": "9a2a3a03a4e8c85a85db17b43906de6610af6695",
+        "3dd88b7ea": "9a2a3a03a4e8c85a85db17b43906de6610af6695",
+        "ad492c7ac": "9a2a3a03a4e8c85a85db17b43906de6610af6695"
+      },
+      "overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx": {
+        "3b85b7524": "72863183403e21c404d633443f24fd0abc388b8d",
+        "3dd88b7ea": "72863183403e21c404d633443f24fd0abc388b8d",
+        "ad492c7ac": "72863183403e21c404d633443f24fd0abc388b8d"
+      },
+      "overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx": {
+        "3b85b7524": "754fecf3ccce05c5799c55f1478dca6c23eebc2d",
+        "3dd88b7ea": "754fecf3ccce05c5799c55f1478dca6c23eebc2d",
+        "ad492c7ac": "754fecf3ccce05c5799c55f1478dca6c23eebc2d"
+      },
+      "overlay/scratch-gui/src/lib/bw-debug/engineering-input-route.js": {
+        "3b85b7524": "533e4c5e5f32a2f19873f4f957d8274a64559fef",
+        "3dd88b7ea": "533e4c5e5f32a2f19873f4f957d8274a64559fef",
+        "ad492c7ac": "533e4c5e5f32a2f19873f4f957d8274a64559fef"
+      },
+      "overlay/scratch-gui/src/lib/bw-debug/runner-ownership.js": {
+        "3b85b7524": "d582fba59b4e275734d4db63e3864053c9a40ece",
+        "3dd88b7ea": "d582fba59b4e275734d4db63e3864053c9a40ece",
+        "ad492c7ac": "d582fba59b4e275734d4db63e3864053c9a40ece"
+      },
+      "test/helpers/js-scope.mjs": {
+        "3b85b7524": "245b67b4f09fffb301ebca342240a756ac2b7175",
+        "3dd88b7ea": "245b67b4f09fffb301ebca342240a756ac2b7175",
+        "ad492c7ac": "245b67b4f09fffb301ebca342240a756ac2b7175"
+      },
+      "test/declared-pins-wired.test.mjs": {
+        "3b85b7524": "877864e0b853aee6a70f28ceba1f50f73c69e66a",
+        "3dd88b7ea": "877864e0b853aee6a70f28ceba1f50f73c69e66a",
+        "ad492c7ac": "877864e0b853aee6a70f28ceba1f50f73c69e66a"
+      },
+      "test/global-editor-undo.test.mjs": {
+        "3b85b7524": "bf358f2d80456ed148619278ae7e048abcd97c1d",
+        "3dd88b7ea": "bf358f2d80456ed148619278ae7e048abcd97c1d",
+        "ad492c7ac": "bf358f2d80456ed148619278ae7e048abcd97c1d"
+      },
+      "test/i80386-hdd-gui-browser-setup.test.mjs": {
+        "3b85b7524": "bff1bf66c7d8e840094c88ac7001c9944a51e0ea",
+        "3dd88b7ea": "bff1bf66c7d8e840094c88ac7001c9944a51e0ea",
+        "ad492c7ac": "bff1bf66c7d8e840094c88ac7001c9944a51e0ea"
+      },
+      "test/bw-sim-editor-paste-lifecycle.test.mjs": {
+        "3b85b7524": "3cbaeb65f3dfd7553815daa2acfd8c05610d5603",
+        "3dd88b7ea": "3cbaeb65f3dfd7553815daa2acfd8c05610d5603",
+        "ad492c7ac": "3cbaeb65f3dfd7553815daa2acfd8c05610d5603"
+      },
+      "test/ci-step-census.test.mjs": {
+        "3b85b7524": "3780b451a42bdd32a35165db89a3299ab039ad45",
+        "3dd88b7ea": "3780b451a42bdd32a35165db89a3299ab039ad45",
+        "ad492c7ac": "3780b451a42bdd32a35165db89a3299ab039ad45"
+      },
+      "test/circuit-designer-ux-contract.test.mjs": {
+        "3b85b7524": "6cf35836cddf4b7b925c6e2607e76680cc534c70",
+        "3dd88b7ea": "6cf35836cddf4b7b925c6e2607e76680cc534c70",
+        "ad492c7ac": "6cf35836cddf4b7b925c6e2607e76680cc534c70"
+      },
+      "test/i8086-random-literal-reach.test.mjs": {
+        "3b85b7524": "a2c3cb950f972c51645b64622fe7d3e4c9e84dec",
+        "3dd88b7ea": "a2c3cb950f972c51645b64622fe7d3e4c9e84dec",
+        "ad492c7ac": "a2c3cb950f972c51645b64622fe7d3e4c9e84dec"
+      },
+      ".github/workflows/i80386-hdd-gui-actual.yml": {
+        "3b85b7524": "81afad79ed3827eb539e684427cbfbddb7e64d4f",
+        "3dd88b7ea": "81afad79ed3827eb539e684427cbfbddb7e64d4f",
+        "ad492c7ac": "81afad79ed3827eb539e684427cbfbddb7e64d4f"
+      },
+      ".github/workflows/cp1-qualification.yml": {
+        "3b85b7524": "ccfa7013f0bb691b462d49b74f71d4a9e101da0b",
+        "3dd88b7ea": "ccfa7013f0bb691b462d49b74f71d4a9e101da0b",
+        "ad492c7ac": "ccfa7013f0bb691b462d49b74f71d4a9e101da0b"
+      },
+      ".github/workflows/reference-qualified-instrument-controls.yml": {
+        "3b85b7524": "187f590aded5c9a83f8a52c2ae4de282356c76a8",
+        "3dd88b7ea": "187f590aded5c9a83f8a52c2ae4de282356c76a8",
+        "ad492c7ac": "187f590aded5c9a83f8a52c2ae4de282356c76a8"
+      },
+      "overlay/scratch-gui/src/lib/bw-sim/editor/editor-view3d.js": {
+        "3b85b7524": "a79a65caffe06b2f22f3852f23dd0637052b440b",
+        "3dd88b7ea": "a79a65caffe06b2f22f3852f23dd0637052b440b",
+        "ad492c7ac": "a79a65caffe06b2f22f3852f23dd0637052b440b"
+      },
+      "docs/generated/ci-step-census.json": {
+        "3b85b7524": "0eab104f5bd3800b60d57ddc1a44ae95537dd621",
+        "3dd88b7ea": "0eab104f5bd3800b60d57ddc1a44ae95537dd621",
+        "ad492c7ac": "0eab104f5bd3800b60d57ddc1a44ae95537dd621"
+      },
+      "scripts/gen-ci-steps.mjs": {
+        "3b85b7524": "33b5c51bfad06c47570e30966d83283c852ec29a",
+        "3dd88b7ea": "33b5c51bfad06c47570e30966d83283c852ec29a",
+        "ad492c7ac": "33b5c51bfad06c47570e30966d83283c852ec29a"
+      },
+      "scripts/measure-i8086-random-literal-reach.mjs": {
+        "3b85b7524": "d6103e9a9a282333d9877d2429526045c116740b",
+        "3dd88b7ea": "d6103e9a9a282333d9877d2429526045c116740b",
+        "ad492c7ac": "d6103e9a9a282333d9877d2429526045c116740b"
+      },
+      "overlay/scratch-gui/src/lib/sb3-creator.js": {
+        "3b85b7524": "bda527ae585dfe611663dd08d7023c05fcfc796e",
+        "3dd88b7ea": "bda527ae585dfe611663dd08d7023c05fcfc796e",
+        "ad492c7ac": "bda527ae585dfe611663dd08d7023c05fcfc796e"
+      },
+      ".github/workflows/build.yml": {
+        "3b85b7524": "f9f1e2533c1d8db642adef3e1900c433a1ff71b9",
+        "3dd88b7ea": "f9f1e2533c1d8db642adef3e1900c433a1ff71b9",
+        "ad492c7ac": "f9f1e2533c1d8db642adef3e1900c433a1ff71b9"
+      }
+    },
+    "pins": {
+      "3b85b7524": {
+        "bw-circuit-ui": "11532a80eee13b7dad4451e167dc6780bd546ea0",
+        "bw-board": "9ff1fff362db4366e11ab47abd62e1f04edc6af6",
+        "sb3-creator": "1c29f69fd22c86ecb0051938eedb246921cb3b88"
+      },
+      "3dd88b7ea": {
+        "bw-circuit-ui": "0a1b15edb0daecd723c7c07126450d84b86e3e68",
+        "bw-board": "cc18f3c8d84d68e008450e65ddf838b8ec03c7f7",
+        "sb3-creator": "1c29f69fd22c86ecb0051938eedb246921cb3b88"
+      },
+      "ad492c7ac": {
+        "bw-circuit-ui": "0a1b15edb0daecd723c7c07126450d84b86e3e68",
+        "bw-board": "cc18f3c8d84d68e008450e65ddf838b8ec03c7f7",
+        "sb3-creator": "1c29f69fd22c86ecb0051938eedb246921cb3b88"
+      }
+    },
+    "corpusComparison": [
+      {
+        "commit": "3b85b7524a779bdffcfa743dec491e9aac02a61e",
+        "cp1Circuits": 56,
+        "cp1PathBlobSha256": "f1241b6721330746faf7bdf3256f04e6e943b85e37f590d54832a5417bbf851b",
+        "labPrograms": 336,
+        "labPathBlobSha256": "efe0cc9735b38f6991b64f41fd6fb117ebc6164bc2593b81fac930a25922eada"
+      },
+      {
+        "commit": "3dd88b7ea953ce73e96faa956066f20eda71b250",
+        "cp1Circuits": 56,
+        "cp1PathBlobSha256": "f1241b6721330746faf7bdf3256f04e6e943b85e37f590d54832a5417bbf851b",
+        "labPrograms": 336,
+        "labPathBlobSha256": "efe0cc9735b38f6991b64f41fd6fb117ebc6164bc2593b81fac930a25922eada"
+      },
+      {
+        "commit": "ad492c7ac87d2ca393e0da9ceed4d96a3da16563",
+        "cp1Circuits": 56,
+        "cp1PathBlobSha256": "f1241b6721330746faf7bdf3256f04e6e943b85e37f590d54832a5417bbf851b",
+        "labPrograms": 336,
+        "labPathBlobSha256": "efe0cc9735b38f6991b64f41fd6fb117ebc6164bc2593b81fac930a25922eada"
+      },
+      {
+        "cp1IdenticalAcrossCommits": true,
+        "labProgramsIdenticalAcrossCommits": true
+      },
+      {
+        "path": "overlay/scratch-gui/examples/cp1-first-display/circuit.json",
+        "blob": "9f28a90bc1dbb8ffc282b21c731139daa1750c92",
+        "parts": [
+          [
+            "cp1",
+            "kosmos-cp1"
+          ]
+        ],
+        "wires": 0,
+        "nets": 0
+      },
+      {
+        "path": "overlay/scratch-gui/examples/cp1-descending-sum/circuit.json",
+        "blob": "9f28a90bc1dbb8ffc282b21c731139daa1750c92",
+        "parts": [
+          [
+            "cp1",
+            "kosmos-cp1"
+          ]
+        ],
+        "wires": 0,
+        "nets": 0
+      },
+      {
+        "path": "overlay/scratch-gui/examples/cp1-crate-division/circuit.json",
+        "blob": "9f28a90bc1dbb8ffc282b21c731139daa1750c92",
+        "parts": [
+          [
+            "cp1",
+            "kosmos-cp1"
+          ]
+        ],
+        "wires": 0,
+        "nets": 0
+      },
+      {
+        "path": "overlay/scratch-gui/examples/cp1-lookup-card/circuit.json",
+        "blob": "9f28a90bc1dbb8ffc282b21c731139daa1750c92",
+        "parts": [
+          [
+            "cp1",
+            "kosmos-cp1"
+          ]
+        ],
+        "wires": 0,
+        "nets": 0
+      },
+      {
+        "path": "overlay/scratch-gui/examples/cp1-instruction-patch/circuit.json",
+        "blob": "9f28a90bc1dbb8ffc282b21c731139daa1750c92",
+        "parts": [
+          [
+            "cp1",
+            "kosmos-cp1"
+          ]
+        ],
+        "wires": 0,
+        "nets": 0
+      }
+    ],
+    "schematicComparison": {
+      "receiptFile": "microtronic-schematic-baseline-comparison.json",
+      "oldEqualsNew": true,
+      "newEqualsInstalled": true,
+      "oldEqualsGolden": false,
+      "sha256": {
+        "golden": "a852e416abfaeb34b778d61a3296994894a9538f4af097da8a3fb41163e2ce1f",
+        "installed": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3",
+        "old": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3",
+        "current": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3"
+      },
+      "outputMetadata": {
+        "width": 540,
+        "height": 396,
+        "symbols": 8,
+        "wires": 3,
+        "generic": 1,
+        "wireSymbolCrossings": [],
+        "symbolOverlaps": []
+      },
+      "onlyGoldenDifferenceIsTheFourAttributesBelow": true
+    },
+    "arcadeWitness": [
+      {
+        "uiCommit": "11532a80eee13b7dad4451e167dc6780bd546ea0",
+        "gitBlob": "e95117eea735c310c9277c02b7c15bbcaaa16b72",
+        "bytes": 12255,
+        "sha256": "de986c25aff4cd9beeb85b929c06cf6cc7c6fa72a778b51dc4b46153b280c316"
+      },
+      {
+        "uiCommit": "0a1b15edb0daecd723c7c07126450d84b86e3e68",
+        "gitBlob": "b06d76ccd5f16edaabdb578c42a92d4ca066e2e4",
+        "bytes": 12394,
+        "sha256": "2e6d600625ec72fcd71885a6c824fe19a4c2f80b631e2566a8d9a02eba2d22be"
+      },
+      {
+        "hostCommit": "3b85b7524a779bdffcfa743dec491e9aac02a61e",
+        "workflowBlob": "f9f1e2533c1d8db642adef3e1900c433a1ff71b9",
+        "stepSha256": "81886cd3b23471bdcad9f8c8d11dba3f4fb577796d288b9150c08ca3cccc33c8",
+        "expectedUiHashPresent": true
+      },
+      {
+        "hostCommit": "3dd88b7ea953ce73e96faa956066f20eda71b250",
+        "workflowBlob": "f9f1e2533c1d8db642adef3e1900c433a1ff71b9",
+        "stepSha256": "81886cd3b23471bdcad9f8c8d11dba3f4fb577796d288b9150c08ca3cccc33c8",
+        "expectedUiHashPresent": true
+      },
+      {
+        "hostCommit": "ad492c7ac87d2ca393e0da9ceed4d96a3da16563",
+        "workflowBlob": "f9f1e2533c1d8db642adef3e1900c433a1ff71b9",
+        "stepSha256": "81886cd3b23471bdcad9f8c8d11dba3f4fb577796d288b9150c08ca3cccc33c8",
+        "expectedUiHashPresent": true
+      },
+      {
+        "localInstalled": "packages/scratch-gui/node_modules/bw-circuit-ui/package.json",
+        "bytes": 12394,
+        "sha256": "2e6d600625ec72fcd71885a6c824fe19a4c2f80b631e2566a8d9a02eba2d22be"
+      }
+    ]
+  },
+  "supplierProductionDeltas": {
+    "board": [
+      "src/board.js",
+      "src/devices/analog-amps.js",
+      "src/devices/dc-motor.js",
+      "src/devices/microtronic.js",
+      "src/devices/misc-parts.js",
+      "src/devices/tier1-parts.js",
+      "src/lm386.js",
+      "src/mechanical-shaft.js",
+      "src/microtronic-machine.js",
+      "src/mna.js",
+      "src/optics.js",
+      "src/register-all.js",
+      "src/rf-bands.js"
+    ],
+    "circuitUI": [
+      "src/components/CircuitDesigner.jsx",
+      "src/components/MicrotronicPanel.jsx",
+      "src/components/PartPalette.jsx",
+      "src/components/microtronic-panel.css",
+      "src/i18n/palette-de.js",
+      "src/interaction/hittest.js",
+      "src/model/microtronic-controls.js",
+      "src/model/microtronic-demo.js",
+      "src/model/part-art.js",
+      "src/parts-data/ART-PROVENANCE.md",
+      "src/parts-data/busch-microtronic.json",
+      "src/parts-data/busch-microtronic.svg",
+      "src/parts-data/index.js"
+    ],
+    "note": "These are changed src paths between pre-feature host supplier pins and candidate supplier pins; no runtime was changed by this review."
+  },
+  "groups": [
+    {
+      "id": "microtronic-gallery-owner",
+      "scope": "microtronic-integration",
+      "jobId": 139524859175,
+      "testPath": null,
+      "sourcePaths": [
+        "overlay/scratch-gui/examples/index.json",
+        "overlay/scratch-gui/examples/busch-microtronic-wired-io/circuit.json",
+        "overlay/scratch-gui/examples/busch-microtronic-wired-io/intro.md",
+        "overlay/scratch-gui/examples/busch-microtronic-wired-io/intro.de.md"
+      ],
+      "symptom": "sync-examples --check: stale index.json and three orphan Microtronic files versus pinned sb3-creator 1c29f69fd22c86ecb0051938eedb246921cb3b88.",
+      "baseline": "Prior vendor job 139494784738/run 45696392481 succeeded, but that 3dd88b7 tree omitted the Microtronic gallery directory. It does not qualify the restored example. Required ownership is upstream sb3-creator; no checker exclusion.",
+      "count": 1,
+      "countUnit": "workflow-step"
+    },
+    {
+      "id": "microtronic-profile",
+      "scope": "microtronic-integration",
+      "jobId": 139535523763,
+      "testPath": "test/bw-parts-conformance.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/lib/bw-parts/profiles.js"
+      ],
+      "symptom": "busch-microtronic has no PROGRAMMABLE or named REFUSED profile row.",
+      "baseline": "Pre-feature Board 9ff1fff→candidate Board cc18f3c register-all.js adds only Microtronic import/call. This is the feature's own new registry-coverage omission. The same failed assertion also lists 13 inherited kinds.",
+      "count": 1,
+      "countUnit": "shared-unit-test"
+    },
+    {
+      "id": "inherited-profile-kinds",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523763,
+      "testPath": "test/bw-parts-conformance.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/lib/bw-parts/profiles.js"
+      ],
+      "symptom": "Thirteen non-Microtronic kinds have no profile: bending_ruler, cd4046, ceramic_filter, coil_pendulum, dipole, dual_gate_mosfet, fm_if, humidity_comb, induction_loop, kosmos-cp1, ptc_sensor, sa612, spark_gap.",
+      "baseline": "Host test/profile blobs are identical before feature and at candidate; all 13 kinds already occur in registered pre-feature Board 9ff1fff modules. Shared failed assertion with Microtronic; do not double-count.",
+      "count": 1,
+      "countUnit": "shared-unit-test"
+    },
+    {
+      "id": "cold-file-listener-reader",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523763,
+      "testPath": "test/circuit-file-menu-reach.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx"
+      ],
+      "symptom": "Source reader treats unconditional File listener as inside visibility block.",
+      "baseline": "Test and CircuitTab blobs identical at 3b85 / 3dd / ad. Reader searches loadExamples(); at offset 68446 past componentDidMount, then compares listener offset 3411 against unrelated guardEnd 68780. Actual registration follows closed visibility block.",
+      "count": 1
+    },
+    {
+      "id": "cp1-ready-translation",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523763,
+      "testPath": "test/runner-status-l10n.test.mjs",
+      "sourcePaths": [
+        "scripts/measure-status-strings.mjs",
+        "overlay/scratch-gui/src/lib/bw-debug/debug-runner.js",
+        "overlay/scratch-gui/src/lib/bw-debug/runner-status-l10n.js"
+      ],
+      "symptom": "One hardcoded status: debug-runner.js:3076 CP1 firmware loaded: ${media.name || 'user ROM'}.",
+      "baseline": "All test/scanner/runner/translation blobs identical at 3b85 / 3dd / ad. git blame attributes line to incoming 72cad0d38. Scanner observed 78 statuses, 1 untranslated template.",
+      "count": 1
+    },
+    {
+      "id": "corpus-fixed-count",
+      "scope": "preexisting-corpus-contract-with-one-new-example",
+      "jobId": 139535523755,
+      "testPath": "test/circuit-corpus-invariants.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/examples"
+      ],
+      "symptom": "1947 selected circuit files versus hardcoded 1650.",
+      "baseline": "Same test filter selects 1946 at 3dd88b7 and 1947 at ad492c7; only added circuit is Microtronic. Count already stale before this restoration. Count failure does not itself establish every later wiring assertion passed.",
+      "count": 1
+    },
+    {
+      "id": "conversion-fixture",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523755,
+      "testPath": "test/code-tab-empty-target-after-failed-conversion.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx"
+      ],
+      "symptom": "Three tests invoke extracted switchTab with a fixture lacking leaveCp1.",
+      "baseline": "Both test and production source blobs identical at 3b85 / 3dd / ad.",
+      "count": 3
+    },
+    {
+      "id": "esp32-fixture",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523755,
+      "testPath": "test/esp32s040-host.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/lib/bw-debug/debug-runner.js",
+        "overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx",
+        "overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx",
+        "overlay/scratch-gui/src/lib/bw-debug/engineering-input-route.js",
+        "overlay/scratch-gui/src/lib/bw-debug/runner-ownership.js"
+      ],
+      "symptom": "15 failures: extracted fixture lacks unsubscribeCp1Lessons/publishCp1Observations; source ordering reader also rejects owner-release placement.",
+      "baseline": "Test and relevant runner/panel/CircuitTab/ownership/input-route blobs identical at 3b85 / 3dd / ad. Observed fixture/reference errors do not establish a live ESP32 runtime defect.",
+      "count": 15
+    },
+    {
+      "id": "controller-grid-translation",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523755,
+      "testPath": "test/i18n-no-hardcoded-strings.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/components/tw-pseudocode/controller-panel-view.jsx"
+      ],
+      "symptom": "Hardcoded user-facing Grid snap string.",
+      "baseline": "Test and controller component blobs identical at 3b85 / 3dd / ad.",
+      "count": 1
+    },
+    {
+      "id": "robot-menu-fixture",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523755,
+      "testPath": "test/robot-editor-menu.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-pane.jsx",
+        "test/helpers/js-scope.mjs"
+      ],
+      "symptom": "Passive fixture lacks runFromToolbar used by actual menu action.",
+      "baseline": "Test, source component and extraction helper blobs identical at 3b85 / 3dd / ad.",
+      "count": 1
+    },
+    {
+      "id": "board-clock-reader",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523799,
+      "testPath": "test/b8-one-board-per-run.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/lib/bw-debug/debug-runner.js"
+      ],
+      "symptom": "Expected adjacency regex session.start(); boardBaseNs=boardTimeBase(board,target) no longer matches runner.",
+      "baseline": "Test and runner blobs identical at 3b85 / 3dd / ad. This is the observed source contract failure; runtime timing has not been newly tested by this inventory.",
+      "count": 1
+    },
+    {
+      "id": "resonance-seal",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523799,
+      "testPath": "test/bw-sim-resonance-intake.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/lib/bw-sim/sim-session.js"
+      ],
+      "symptom": "Legacy MODELS structure SHA256 expected abcdfa1b102676bfb722410acad20e0a4f786103dde3c541a78c0a44f3f16cbe; actual ec5435fa653c2927eb0b13d7ad99b84fdb281f25592920a94d0c145a744e2262.",
+      "baseline": "Test and MODELS-owning sim-session.js blobs identical at 3b85 / 3dd / ad. Historical seal is not changed or waived.",
+      "count": 1
+    },
+    {
+      "id": "broker-copy-reader",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523799,
+      "testPath": "test/emitted-native-broker-proof.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/webpack.config.js"
+      ],
+      "symptom": "Source regex for static copy configuration/preserveProofAssetInfo does not match.",
+      "baseline": "Test and webpack config blobs identical at 3b85 / 3dd / ad. Production emitted broker proof passed separately; source assertion remains an ordinary blocker.",
+      "count": 1
+    },
+    {
+      "id": "binary-pack-classification",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523799,
+      "testPath": "test/no-nul-in-text.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack"
+      ],
+      "symptom": "gzip .pack asset scanned as text; 4601 NUL bytes.",
+      "baseline": "Gate and binary asset blobs identical at 3b85 / 3dd / ad. No format exclusion was added by this review.",
+      "count": 1
+    },
+    {
+      "id": "schematic-golden",
+      "scope": "unrelated-preexisting-golden",
+      "jobId": 139535523799,
+      "testPath": "test/schematic-visual-baselines.test.mjs",
+      "sourcePaths": [
+        "scripts/render-schematic.mjs",
+        "overlay/scratch-gui/examples/10-motor-speed/circuit.pico.json",
+        "docs/schematic-baselines/10-motor-speed-circuit.pico.svg"
+      ],
+      "symptom": "Generated 10-motor-speed-circuit.pico.svg differs from reviewed SVG.",
+      "baseline": "Executed old UI 11532, new UI 0a and installed UI with exact production renderer AuditBoard setup and each supplier's full JSON sidecars. All three SVGs are identical SHA256 9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3, differing from golden a852e416abfaeb34b778d61a3296994894a9538f4af097da8a3fb41163e2ce1f only by four attributes of one wire detour (y=201→193). Receipt: microtronic-schematic-baseline-comparison.json. No rebaseline or waiver.",
+      "count": 1
+    },
+    {
+      "id": "declared-cp1-empty-netlist",
+      "scope": "unrelated-preexisting-corpus",
+      "jobId": 139535523811,
+      "testPath": "test/declared-pins-wired.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/examples"
+      ],
+      "symptom": "Corpus walk reports 11 CP1 circuits resolving empty netlists (including cp1-first-display, cp1-descending-sum, cp1-crate-division, cp1-lookup-card, cp1-instruction-patch).",
+      "baseline": "Test and all 56 CP1 circuit path/blob pairs are identical at 3b85 / 3dd / ad (aggregate SHA256 f1241b6721330746faf7bdf3256f04e6e943b85e37f590d54832a5417bbf851b). All five names in the failure share blob 9f28a90bc1dbb8ffc282b21c731139daa1750c92 and contain one kosmos-cp1 part, zero wires and zero explicit nets. No Microtronic example appears in the failure.",
+      "count": 1
+    },
+    {
+      "id": "widget-mode-width-reader",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523811,
+      "testPath": "test/global-editor-undo.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/components/tw-pseudocode/controller-panel-view.jsx"
+      ],
+      "symptom": "Widget Editor mode-button source assertion expects width: 34.",
+      "baseline": "Both test and controller component blobs identical at 3b85 / 3dd / ad.",
+      "count": 1
+    },
+    {
+      "id": "hdd-browser-setup-repo-readers",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523811,
+      "testPath": "test/i80386-hdd-gui-browser-setup.test.mjs",
+      "sourcePaths": [
+        ".github/workflows/i80386-hdd-gui-actual.yml"
+      ],
+      "symptom": "Two held-job/source-gate assertions reject repository-ID migration: font-bridge SHA expected 62748cdd405870b2490aa9ea712480e905e9a7dec51e15edf705a5806356c270, actual bf1364cbce91f6e1a952533d2e201fd3247bd45dae22ec86ed7f9da1b56a4d08; actual-v9 exact gate reader still expects github.repository == 'CrispStrobe/brickwright-lite'.",
+      "baseline": "Test and workflow blobs identical at 3b85 / 3dd / ad. Workflow blob 81afad79ed3827eb539e684427cbfbddb7e64d4f retains inherited repository-ID migration; source test still expects repository name. These are separate readers from the already repaired HDD controls workflow. No seal or assertion changed by this review.",
+      "count": 2
+    },
+    {
+      "id": "paste-disposal-fixture",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523877,
+      "testPath": "test/bw-sim-editor-paste-lifecycle.test.mjs",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/lib/bw-sim/editor/editor-view3d.js"
+      ],
+      "symptom": "Four extracted dispose/paste fixture tests fail with CAMERA_PREFERENCES_EVENT is not defined.",
+      "baseline": "Test and editor-view3d.js blobs identical at 3b85 / 3dd / ad. Production module imports CAMERA_PREFERENCES_EVENT; extracted new Function fixture omits it and other disposal dependencies.",
+      "count": 4
+    },
+    {
+      "id": "ci-census-coverage",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523877,
+      "testPath": "test/ci-step-census.test.mjs",
+      "sourcePaths": [
+        "docs/generated/ci-step-census.json",
+        "scripts/gen-ci-steps.mjs",
+        ".github/workflows/cp1-qualification.yml",
+        ".github/workflows/reference-qualified-instrument-controls.yml"
+      ],
+      "symptom": "Dated census never saw cp1-qualification.yml and reference-qualified-instrument-controls.yml.",
+      "baseline": "Test, generator, stored census and both named workflow blobs identical at 3b85 / 3dd / ad. No census regeneration or gate waiver by this review.",
+      "count": 1
+    },
+    {
+      "id": "circuit-examples-selector-reader",
+      "scope": "unrelated-preexisting-ui-contract",
+      "jobId": 139535523877,
+      "testPath": "test/circuit-designer-ux-contract.test.mjs:43",
+      "sourcePaths": [
+        "node_modules/bw-circuit-ui/src/components/CircuitDesigner.jsx"
+      ],
+      "symptom": "Source assertion requires data-examples-selector.",
+      "baseline": "Test blob identical at 3b85 / 3dd / ad. Immutable CircuitDesigner source contains zero literal occurrences at BOTH old UI 11532a80eee13b7dad4451e167dc6780bd546ea0 (blob 92fbfdf555e1e34afdcef88fbaec00de0600e6b8) and new UI 0a1b15edb0daecd723c7c07126450d84b86e3e68 (blob c548f85364ed8c2d417baeede572071b212fbde6).",
+      "count": 1
+    },
+    {
+      "id": "circuit-cp1-dock-reader",
+      "scope": "unrelated-preexisting-host",
+      "jobId": 139535523877,
+      "testPath": "test/circuit-designer-ux-contract.test.mjs:100",
+      "sourcePaths": [
+        "overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx"
+      ],
+      "symptom": "Exact dock-selection regex rejects existing || cp1ControllerDock condition.",
+      "baseline": "Test and CircuitTab blobs identical at 3b85 / 3dd / ad. Current source deliberately sends CP1 controller dock to top as well as solo; observed source assertion is narrower.",
+      "count": 1
+    },
+    {
+      "id": "i8086-lab-fixed-count",
+      "scope": "unrelated-preexisting-corpus",
+      "jobId": 139535523877,
+      "testPath": "test/i8086-random-literal-reach.test.mjs:102",
+      "sourcePaths": [
+        "scripts/measure-i8086-random-literal-reach.mjs",
+        "overlay/scratch-gui/src/lib/sb3-creator.js",
+        "overlay/scratch-gui/examples/lab-*/program.bw"
+      ],
+      "symptom": "Lab gallery program count is 336 versus fixed expected 92.",
+      "baseline": "Test, measurement and emitter blobs identical at 3b85 / 3dd / ad. All three trees contain the same 336 lab program path/blob pairs (aggregate SHA256 efe0cc9735b38f6991b64f41fd6fb117ebc6164bc2593b81fac930a25922eada). Microtronic is not a lab-* program.",
+      "count": 1
+    },
+    {
+      "id": "arcade-ui-package-witness",
+      "scope": "unrelated-preexisting-source-witness",
+      "jobId": 139545484543,
+      "testPath": null,
+      "gate": "Build / Arcade numeric authoring / Install the declared GUI dependencies",
+      "sourcePaths": [
+        ".github/workflows/build.yml",
+        "packages/scratch-gui/node_modules/bw-circuit-ui/package.json"
+      ],
+      "symptom": "Official-build Arcade acceptance stops before browser execution because its held SHA256 for bw-circuit-ui/package.json (3acf189088f4f11d16067d95c0be4a6cb91861d316799fa0a24edb607dfe6c4a) does not match installed supplier bytes. Board i8086.js witness passed.",
+      "baseline": "Workflow blob f9f1e2533c1d8db642adef3e1900c433a1ff71b9 and exact step SHA256 81886cd3b23471bdcad9f8c8d11dba3f4fb577796d288b9150c08ca3cccc33c8 are identical at 3b85 / 3dd / ad. Old UI 11532 source package.json hashes de986c25aff4cd9beeb85b929c06cf6cc7c6fa72a778b51dc4b46153b280c316; new UI 0a and local installed package hash 2e6d600625ec72fcd71885a6c824fe19a4c2f80b631e2566a8d9a02eba2d22be. Both source pins differ from witness. No baseline Arcade run or waiver is claimed.",
+      "count": 1,
+      "countUnit": "workflow-step"
+    }
+  ],
+  "leafFailures": [
+    {
+      "shard": 1,
+      "name": "pending clipboard resolve after closing the view does not paste",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:34:5'",
+      "error": "  error: 'CAMERA_PREFERENCES_EVENT is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    Object.dispose (eval at fixture (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:25:17), <anonymous>:19:36)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:38:11)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.start (node:internal/test_runner/test:944:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ..."
+    },
+    {
+      "shard": 1,
+      "name": "pending clipboard reject after closing the view does not paste",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:34:5'",
+      "error": "  error: 'CAMERA_PREFERENCES_EVENT is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    Object.dispose (eval at fixture (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:25:17), <anonymous>:19:36)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:38:11)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)\n  ..."
+    },
+    {
+      "shard": 1,
+      "name": "a closed view refuses both clipboard reads and immediate local paste",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:45:1'",
+      "error": "  error: 'CAMERA_PREFERENCES_EVENT is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    Object.dispose (eval at fixture (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:25:17), <anonymous>:19:36)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:48:11)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 1,
+      "name": "disposal cancels an active pointer and releases space before clipboard completion",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:73:1'",
+      "error": "  error: 'CAMERA_PREFERENCES_EVENT is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    Object.dispose (eval at fixture (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:25:17), <anonymous>:19:36)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/bw-sim-editor-paste-lifecycle.test.mjs:74:28)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 1,
+      "name": "the readings are the generator's: they name their runs and sha, and cover every workflow in the tree",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/ci-step-census.test.mjs:83:1'",
+      "error": "  error: |-\n    workflow(s) in the tree the readings never saw — regenerate:\n      cp1-qualification.yml\n      reference-qualified-instrument-controls.yml\n    + actual - expected\n    \n    + [\n    +   'cp1-qualification.yml',\n    +   'reference-qualified-instrument-controls.yml'\n    + ]\n    - []\n    \n  code: 'ERR_ASSERTION'"
+    },
+    {
+      "shard": 1,
+      "name": "Circuit Designer side selectors expose toggle and divider",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/circuit-designer-ux-contract.test.mjs:43:1'",
+      "error": "  error: |-\n    The input did not match the regular expression /data-examples-selector/. Input:\n    \n    '/**\\n' +\n      ' * CircuitDesigner — the top-level React component for embedding.\\n' +\n      ' *\\n' +\n      ' * Props:\\n' +\n      ' *   project: { device?, clock?, pins: StcPin[] }\\n' +\n      ' *     Pin declarations from the project. The circuit is re-inferred\\n' +\n      ' *     whenever this prop changes (shallow compare on pins array).\\n' +\n      ' *\\n' +\n      ' *   board?: BoardImpl\\n' +\n      ' *     Optional external board instance. When provided, the component\\n' +"
+    },
+    {
+      "shard": 1,
+      "name": "debugger selection is not disabled merely because the Circuit tab is active",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/circuit-designer-ux-contract.test.mjs:100:1'",
+      "error": "  error: |-\n    The input did not match the regular expression /const dock = this\\.state\\.debugDock === 'solo' \\? 'top'\\s*:\\s*CIRCUIT_DOCKS\\.has\\(this\\.state\\.debugDock\\) \\? this\\.state\\.debugDock : 'off';/. Input:\n    \n    \"import React from 'react';\\n\" +\n      \"import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';\\n\" +\n      \"import {makeT} from '../../lib/bw-i18n.js';\\n\" +\n      \"import ReactDOM from 'react-dom';\\n\" +\n      \"import PropTypes from 'prop-types';\\n\" +\n      \"import {connect} from 'react-redux';\\n\" +\n      \"import {normalizeDeviceId, resolveExampleBench} from '../../lib/example-bench.js';\\n\" +\n      \"import {advanceDebugPhase} from '../../lib/bw-debug/debug-phase-transition.js';\\n\" +\n      \"import {shouldLoadCircuitDesigner} from '../../lib/bw-debug/circuit-designer-load-policy.js';\\n\" +\n      \"import {getReactPerformanceProbe, profileReactSubtree} from '../../lib/bw-debug/react-perf-profiler.js';\\n\" +"
+    },
+    {
+      "shard": 1,
+      "name": "N2f production holds device 62 and mixed generation 62 without neutralisation",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/i8086-random-literal-reach.test.mjs:102:1'",
+      "error": "  error: |-\n    the lab-* gallery program count moved\n    \n    336 !== 92\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 92\n  actual: 336\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/i8086-random-literal-reach.test.mjs:162:16)\n    async Test.run (node:internal/test_runner/test:1054:7)"
+    },
+    {
+      "shard": 2,
+      "name": "every shipped circuit resolves every wire endpoint into a real electrical net",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/circuit-corpus-invariants.test.mjs:35:1'",
+      "error": "  error: |-\n    the gate must cover the complete vendored corpus\n    \n    1947 !== 1650\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 1650\n  actual: 1947\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/circuit-corpus-invariants.test.mjs:258:12)\n    async Test.run (node:internal/test_runner/test:1054:7)"
+    },
+    {
+      "shard": 2,
+      "name": "a failed conversion keeps Python and offers an empty Pseudocode editor",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:30:1'",
+      "error": "  error: 'this.leaveCp1 is not a function'\n  code: 'ERR_TEST_FAILURE'\n  name: 'TypeError'\n  stack: |-\n    Object.switchTab (eval at pane (file:///home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:19:15), <anonymous>:5:14)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:32:7)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.start (node:internal/test_runner/test:944:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "the offer is only usable for the tab whose conversion failed and not while busy",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:45:1'",
+      "error": "  error: 'this.leaveCp1 is not a function'\n  code: 'ERR_TEST_FAILURE'\n  name: 'TypeError'\n  stack: |-\n    Object.switchTab (eval at pane (file:///home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:19:15), <anonymous>:5:14)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:47:7)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "a successful conversion still switches with the converted code and no offer",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:54:1'",
+      "error": "  error: 'this.leaveCp1 is not a function'\n  code: 'ERR_TEST_FAILURE'\n  name: 'TypeError'\n  stack: |-\n    Object.switchTab (eval at pane (file:///home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:19:15), <anonymous>:5:14)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/code-tab-empty-target-after-failed-conversion.test.mjs:56:7)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during validator-import cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'unsubscribeCp1Lessons is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    Object.destroy (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:967:3)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:327:18)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during board-import cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during engine-import cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during wasm-load cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during boot-import cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during rom-import cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during rom-fetch cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "detach during factory cannot publish over a replacement or leak a target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:323:5'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:326:9)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "a session returned during synchronous teardown is disposed without starting",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:352:1'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:354:22)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "a synchronous board-ready teardown disposes the not-yet-adopted target",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:366:1'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:369:22)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "live attach retains pending video and transfers target/session cleanup to the runner",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:378:1'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:380:5)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "stop/restart republishes the reused board and cleanup frees the current reset machine once",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:397:1'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:399:5)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "a target cleanup error still frees WASM and clears runner publications",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:419:1'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    async TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:421:5)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ..."
+    },
+    {
+      "shard": 2,
+      "name": "actual start refuses missing firmware, raw BIN and Cortex-M UF2 without loading or compiling",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:433:1'",
+      "error": "  error: 'publishCp1Observations is not defined'\n  code: 'ERR_TEST_FAILURE'\n  name: 'ReferenceError'\n  stack: |-\n    emit (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:824:3)\n    setStatus (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:805:3)\n    Object.start (eval at runnerLifecycle (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:288:12), <anonymous>:915:67)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:436:24)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)"
+    },
+    {
+      "shard": 2,
+      "name": "the checked host source connects exact owner, input and live video and releases before runner destruction",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:555:1'",
+      "error": "  error: 'only window listener detachment may precede owner release; other cleanup follows it'\n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: true\n  actual: false\n  operator: '=='\n  stack: |-\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/esp32s040-host.test.mjs:569:12)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)"
+    },
+    {
+      "shard": 2,
+      "name": "no component hardcodes a title, aria-label or placeholder",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/i18n-no-hardcoded-strings.test.mjs:72:1'",
+      "error": "  error: |-\n    these render to a person and cannot be translated — see lib/bw-i18n.js\n    + actual - expected\n    \n    + [\n    +   'components/tw-pseudocode/controller-panel-view.jsx: Grid snap'\n    + ]\n    - []\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected:\n  actual:"
+    },
+    {
+      "shard": 2,
+      "name": "Robot registry revalidates selection, running state and explicit full-tab ownership at click time",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/robot-editor-menu.test.mjs:64:1'",
+      "error": "  error: 'this.runFromToolbar is not a function'\n  code: 'ERR_TEST_FAILURE'\n  name: 'TypeError'\n  stack: |-\n    Object.run (eval at method (file:///home/runner/work/brickwright/brickwright/test/robot-editor-menu.test.mjs:15:54), <anonymous>:24:106)\n    runEditorMenuAction (file:///home/runner/work/brickwright/brickwright/overlay/scratch-gui/src/lib/editor-menu-actions.js:68:19)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/robot-editor-menu.test.mjs:72:22)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)"
+    },
+    {
+      "shard": 4,
+      "name": "(1) every bw-board device id has a profile or a named refusal",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/bw-parts-conformance.test.mjs:62:1'",
+      "error": "  error: |-\n    these bw-board part ids have no row in lib/bw-parts/profiles.js — a part that bw-board registers but the registry does not catalogue is exactly the silent gap P1 closes. Add each to PROGRAMMABLE (with its verbs) or to a REFUSED category:\n      bending_ruler\n      busch-microtronic\n      cd4046\n      ceramic_filter\n      coil_pendulum\n      dipole\n      dual_gate_mosfet\n      fm_if\n      humidity_comb\n      induction_loop\n      kosmos-cp1"
+    },
+    {
+      "shard": 4,
+      "name": "the cold-start listener is registered unconditionally, and replays what it queued",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/circuit-file-menu-reach.test.mjs:66:1'",
+      "error": "  error: 'the cold-start listener is inside the isVisible guard, so it is registered only in the case where it was never needed'\n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: true\n  actual: false\n  operator: '=='\n  stack: |-\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/circuit-file-menu-reach.test.mjs:79:12)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)\n    Test.run (node:internal/test_runner/test:1101:12)"
+    },
+    {
+      "shard": 4,
+      "name": "no status string in the runner is a hardcoded sentence",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/runner-status-l10n.test.mjs:107:1'",
+      "error": "  error: |-\n    1 hardcoded status string(s) — route them through lib/bw-debug/runner-status-l10n.js (run: node scripts/measure-status-strings.mjs)\n    \n    1 !== 0\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 0\n  actual: 1\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/runner-status-l10n.test.mjs:110:12)\n    Test.runInAsyncScope (node:async_hooks:214:14)"
+    },
+    {
+      "shard": 6,
+      "name": "a board that outlives a run keeps its clock moving when the target's restarts at zero",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/b8-one-board-per-run.test.mjs:148:1'",
+      "error": "  error: |-\n    The input did not match the regular expression /session\\.start\\(\\);\\s*boardBaseNs = boardTimeBase\\(board, target\\);/. Input:\n    \n    '/**\\n' +\n      ' * The debug runner — everything between \"a project\" and \"a glowing block\".\\n' +\n      ' *\\n' +\n      ' * Design: `sb3-creator/reference/debugger-ui.md`. This is the host side of it:\\n' +\n      ' * bw-board owns the target and the session (both framework-free and tested in\\n' +\n      ' * Node), and this file owns the four things only a browser can do — route the\\n' +\n      ' * compiler, instantiate the WASM, drive a frame loop, and light\\n' +\n      ' * up a block in the editor.\\n' +\n      ' *\\n' +\n      ' *     project  --generateC({debug:true})-->  C + @bw yield map\\n' +"
+    },
+    {
+      "shard": 6,
+      "name": "three Resonance presets share one assembly; the original files and behaviour are unchanged",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/bw-sim-resonance-intake.test.mjs:53:1'",
+      "error": "  error: |-\n    Expected values to be strictly equal:\n    + actual - expected\n    \n    + 'ec5435fa653c2927eb0b13d7ad99b84fdb281f25592920a94d0c145a744e2262'\n    - 'abcdfa1b102676bfb722410acad20e0a4f786103dde3c541a78c0a44f3f16cbe'\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 'abcdfa1b102676bfb722410acad20e0a4f786103dde3c541a78c0a44f3f16cbe'\n  actual: 'ec5435fa653c2927eb0b13d7ad99b84fdb281f25592920a94d0c145a744e2262'\n  operator: 'strictEqual'\n  stack: |-"
+    },
+    {
+      "shard": 6,
+      "name": "only content-addressed broker proof sources opt out of asset minification",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/emitted-native-broker-proof.test.mjs:11:1'",
+      "error": "  error: |-\n    The input did not match the regular expression /from: 'static',\\s+to: 'static',\\s+(?:globOptions:[^\\n]+\\s+)?info: preserveProofAssetInfo/. Input:\n    \n    \"const path = require('path');\\n\" +\n      \"const {readFileSync} = require('node:fs');\\n\" +\n      \"const webpack = require('webpack');\\n\" +\n      \"const {artworkDirectory, buildGalleryArtworkIndexes} = require('./gallery-artwork-index.cjs');\\n\" +\n      '\\n' +\n      '// Plugins\\n' +\n      \"const CopyWebpackPlugin = require('copy-webpack-plugin');\\n\" +\n      \"const HtmlWebpackPlugin = require('html-webpack-plugin');\\n\" +\n      \"const reactProfiling = process.env.BW_REACT_PROFILE === '1';\\n\" +\n      \"const remoteCodePolicy = process.env.BW_REMOTE_CODE_POLICY || 'allow';\\n\" +"
+    },
+    {
+      "shard": 6,
+      "name": "tracked app and installed upstream source text is free of NUL bytes, except the 2 KNOWN with their pins",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/no-nul-in-text.test.mjs:192:1'",
+      "error": "  error: |-\n    literal NUL byte(s) in tracked text:\n      overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 3: literal NUL — …\u001f�\b<NUL><NUL><NUL><NUL><NUL>\u0002\u0013Խ���q%�*\u0005�\u001f… (an escape was probably meant; a NUL makes grep, diff and merge call this file binary)\n      overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 4: literal NUL — …\u001f�\b<NUL><NUL><NUL><NUL><NUL>\u0002\u0013Խ���q%�*\u0005�\u001f�… (an escape was probably meant; a NUL makes grep, diff and merge call this file binary)\n      overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 5: literal NUL — …\u001f�\b<NUL><NUL><NUL><NUL><NUL>\u0002\u0013Խ���q%�*\u0005�\u001f��… (an escape was probably meant; a NUL makes grep, diff and merge call this file binary)\n      overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 6: literal NUL — …\u001f�\b<NUL><NUL><NUL><NUL><NUL>\u0002\u0013Խ���q%�*\u0005�\u001f���… (an escape was probably meant; a NUL makes grep, diff and merge call this file binary)\n      overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 7: literal NUL — …\u001f�\b<NUL><NUL><NUL><NUL><NUL>\u0002\u0013Խ���q%�*\u0005�\u001f��̌… (an escape was probably meant; a NUL makes grep, diff and merge call this file binary)\n      overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack: and 4596 more NUL(s), 4601 in all — if this file is binary by format, add its extension to BINARY_BY_ROLE with its reason\n    + actual - expected\n    \n    + [\n    +   'overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 3: literal NUL — …\\x1F�\\b<NUL><NUL><NUL><NUL><NUL>\\x02\\x13Խ���q%�*\\x05�\\x1F… (an escape was probably meant; a NUL makes grep, diff and merge call this file binary)',\n    +   'overlay/scratch-gui/static/sim-lab/robot-build-ldraw.pack:1 byte 4: literal NUL — …\\x1F�\\b<NUL><NUL><NUL><NUL><NUL>\\x02\\x13Խ���q%�*\\x05�\\x1F�… (an escape was probably mea"
+    },
+    {
+      "shard": 6,
+      "name": "reviewed schematic SVGs remain byte-for-byte deterministic",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/schematic-visual-baselines.test.mjs:16:1'",
+      "error": "  error: |-\n    10-motor-speed-circuit.pico.svg changed; inspect PNG/SVG before accepting it\n    + actual - expected\n    \n    + '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"540\" height=\"396\" viewBox=\"0 0 540 396\"><rect width=\"540\" height=\"396\" fill=\"#ffffff\"/><g fill=\"none\" stroke=\"#1e293b\" stroke-width=\"1.2\"><line x1=\"186\" y1=\"237\" x2=\"186\" y2=\"278\"/><line x1=\"240\" y1=\"237\" x2=\"186\" y2=\"237\"/><line x1=\"270\" y1=\"278\" x2=\"186\" y2=\"278\"/></g><g fill=\"none\" stroke=\"#1e293b\" stroke-width=\"1.2\"><line x1=\"390\" y1=\"163\" x2=\"390\" y2=\"193\"/><line x1=\"390\" y1=\"193\" x2=\"240\" y2=\"193\"/><line x1=\"240\" y1=\"193\" x2=\"240\" y2=\"219\"/></g><g fill=\"none\" stroke=\"#1e293b\" stroke-width=\"1.2\"><line x1=\"390\" y1=\"88\" x2=\"390\" y2=\"115\"/><line x1=\"390\" y1=\"115\" x2=\"450\" y2=\"115\"/><line x1=\"450\" y1=\"115\" x2=\"450\" y2=\"163\"/></g><g><line x1=\"450\" y1=\"76\" x2=\"463\" y2=\"76\" stroke=\"#1e293b\" stroke-width=\"1.2\"/><text x=\"466\" y=\"78.5\" text-anchor=\"start\" font-size=\"6.5\" font-family=\"monospace\" fill=\"#64748b\">N04</text></g><g><line x1=\"240\" y1=\"83\" x2=\"227\" y2=\"83\" stroke=\"#1e293b\" stroke-width=\"1.2\"/><text x=\"224\" y=\"85.5\" text-anchor=\"end\" font-size=\"6.5\" font-family=\"monospace\" fill=\"#64748b\">N04</text></g><g><line x1=\"300\" y1=\"153\" x2=\"313\" y2=\"153\" stroke=\"#1e293b\" stroke-width=\"1.2\"/><text x=\"316\" y=\"155.5\" text-anchor=\"start\" font-size=\"6.5\" font-family=\"monospace\" fill=\"#64748b\">N04</text></g><g><line x1=\"450\" y1=\"100\" x2=\"463\" y2=\"100\" stroke=\"#1e293b\" stroke-width=\"1.2\"/><text x=\"466\" y=\"102.5\" text-anchor=\"start\" font-size=\"6.5\" font-family=\"monospace\" fill=\"#64748b\">GND</text></g><g><line x1=\"300\" y1=\"219\" x2=\"313\" y2=\"219\" stroke=\"#1e293b\" stroke-width=\"1.2\"/><text x=\"316\" y=\"221.5\" text-anchor=\"start\" font-size=\"6.5\" font-family=\"monospace\" fill=\"#64748b\">GND</text></g><g><line x1=\"390\" y"
+    },
+    {
+      "shard": 7,
+      "name": "INSTRUMENT: the corpus walk actually derived something",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/declared-pins-wired.test.mjs:307:1'",
+      "error": "  error: '11 circuit(s) resolved an EMPTY netlist: cp1-first-display, cp1-descending-sum, cp1-crate-division, cp1-lookup-card, cp1-instruction-patch — a registry that never populated produces exactly this'\n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: true\n  actual: false\n  operator: '=='\n  stack: |-\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/declared-pins-wired.test.mjs:330:12)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.start (node:internal/test_runner/test:944:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ..."
+    },
+    {
+      "shard": 7,
+      "name": "Widget Editor mode switch is two compact accessible icons, not translated text",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/global-editor-undo.test.mjs:49:1'",
+      "error": "  error: |-\n    The input did not match the regular expression /width:\\s*34/. Input:\n    \n    '<button\\n' +\n      '                            type=\"button\"\\n' +\n      '                            data-testid=\"bw-ctl-mode-edit\"\\n' +\n      \"                            aria-label={t('edit')}\\n\" +\n      \"                            aria-pressed={mode === 'edit'}\\n\" +\n      \"                            title={t('edit')}\\n\" +\n      \"                            onClick={() => this._setMode('edit')}\\n\" +\n      '                            style={{\\n' +\n      \"                                width: 24, height: 28, padding: 0, fontSize: 16, border: 'none',\\n\" +\n      \"                                cursor: 'pointer', fontWeight: 600,\\n\" +"
+    },
+    {
+      "shard": 7,
+      "name": "retired F9 and V8 preserve their reviewed helper and source order",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/i80386-hdd-gui-browser-setup.test.mjs:240:1'",
+      "error": "  error: |-\n    unrelated font-bridge job remains byte-exact\n    + actual - expected\n    \n    + 'bf1364cbce91f6e1a952533d2e201fd3247bd45dae22ec86ed7f9da1b56a4d08'\n    - '62748cdd405870b2490aa9ea712480e905e9a7dec51e15edf705a5806356c270'\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: '62748cdd405870b2490aa9ea712480e905e9a7dec51e15edf705a5806356c270'\n  actual: 'bf1364cbce91f6e1a952533d2e201fd3247bd45dae22ec86ed7f9da1b56a4d08'\n  operator: 'strictEqual'\n  stack: |-"
+    },
+    {
+      "shard": 7,
+      "name": "same-job V9 keeps admission, setup, phase, ACK, entry and terminal delivery ordered",
+      "location": "  location: '/home/runner/work/brickwright/brickwright/test/i80386-hdd-gui-browser-setup.test.mjs:343:1'",
+      "error": "  error: 'one exact source/actor/ref-bound new execution gate'\n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: true\n  actual: false\n  operator: '=='\n  stack: |-\n    checkActualV9Source (file:///home/runner/work/brickwright/brickwright/test/i80386-hdd-gui-browser-setup.test.mjs:175:12)\n    TestContext.<anonymous> (file:///home/runner/work/brickwright/brickwright/test/i80386-hdd-gui-browser-setup.test.mjs:344:5)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n    Test.postRun (node:internal/test_runner/test:1173:19)"
+    }
+  ],
+  "logFiles": [
+    "ci-ad492c7-vendor-freshness-job139524859175.log",
+    "ci-ad492c7-unit2-job139535523755.log",
+    "ci-ad492c7-unit4-job139535523763.log",
+    "ci-ad492c7-unit6-job139535523799.log",
+    "ci-ad492c7-unit7-job139535523811.log",
+    "ci-ad492c7-unit1-job139535523877.log",
+    "microtronic-schematic-baseline-comparison.json",
+    "ci-ad492c7-arcade-job139545484543.log"
+  ],
+  "ciReceiptFile": "ci-pr1846-ad492c7.json",
+  "separateAdvisory": {
+    "name": "extension gallery served-byte drift",
+    "newFailure": false,
+    "description": "Both current failed vendor run 45705080944 and prior green run 45696392481 report 1 changed / 0 added / 0 dropped against the same extensions deployment 7516873061 / source 102b42f7852298fd8cb9f1d6459cec6bcea73d51. The check intentionally treats byte drift as advisory; capability checks passed."
+  }
+}

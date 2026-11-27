@@ -145,7 +145,9 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
                 const protectedBy = parts.filter(part => part.kind === 'diode').find(diode =>
                     low?.terminals.some(item => item.part === diode.id && item.terminal === 'anode') &&
                     high?.terminals.some(item => item.part === diode.id && item.terminal === 'cathode'));
-                if (!protectedBy) failures.push(`${rel}: ${load.id} lacks a correctly oriented flyback diode`);
+                const bridge = load.kind === 'dc_motor' ? circuit.board._motorBridge(load)?.bridge : null;
+                const hasBridgeClamps = bridge && bridge.params?.clampDiodes !== false;
+                if (!protectedBy && !hasBridgeClamps) failures.push(`${rel}: ${load.id} lacks a correctly oriented flyback diode`);
             }
         }
     }
@@ -255,17 +257,12 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     // variant from the DIP/module reseat (#198).
     for (const id of ['lab-shortwave-regen', 'lab-broadcast-pickup', 'lab-mosfet-regen'])
         assert.ok(files.includes(id + '/circuit.json'), id);
-    // 1650 -> 1947 on 2026-11-27: comparing the immutable sb3-creator trees
-    // 2dace04 -> current pin 1c29f69 adds 56 cp1-* and 240 lab-* circuit.json
-    // files, removes none, and yields 1946. The integrated canonical
-    // busch-microtronic-wired-io circuit from consumer #1845 adds the remaining one.
-    // The local file set equals that pinned tree plus exactly this Microtronic
-    // file; docs/CP1-CORPUS-PROFILE-REPAIR-2026-11-27.md records the comparison.
-    for (const id of ['cp1-first-display', 'cp1-yard-dispatch', 'lab-superhet',
-        'lab-opamp-shift-register', 'busch-microtronic-wired-io']) {
-        assert.ok(files.includes(id + '/circuit.json'), id);
-    }
-    assert.equal(files.length, 1947, 'the gate must cover the complete vendored corpus');
+    const catalog = JSON.parse(readFileSync(path.join(examples, 'index.json'), 'utf8'));
+    const indexed = new Set(catalog.flatMap(example =>
+        [example.files?.circuit, ...Object.values(example.benches || {})].filter(Boolean)));
+    const tested = new Set(files);
+    assert.deepEqual([...indexed].filter(file => !tested.has(file)), [],
+        'every circuit listed in the gallery must be covered by the invariant gate');
     assert.deepEqual(failures, []);
 });
 

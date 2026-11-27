@@ -13,6 +13,15 @@
 // so a Node test drives this without a DOM or the network.
 
 import {activateConfig, defaultImageFetcher} from './activate.js';
+import {picoBasicCommands} from './pico-basic-source.js';
+import {ubasicSource} from './ubasic-source.js';
+export function runCpmCom(config, bytes) {
+    const url = 'local-media:compiled.com';
+    const compiled = {...config, slots: {...config.slots, com: {url}}};
+    return runMachineConfig(compiled, {
+        fetcher: ref => ref.url === url ? {bytes} : defaultImageFetcher(ref)
+    });
+}
 
 /**
  * Boot a machine config.
@@ -53,7 +62,8 @@ export async function runMachineConfig(config, opts = {}) {
         slotId: bm.slot,
         bytes: bm.bytes,
         kind: activated.targetKind,
-        profile: bm.profile || null,
+        profile: activated.targetKind === 'i8086' && bm.slot === 'rom'
+            ? opts.i8086RomProfile || bm.profile || null : bm.profile || null,
         name: bm.name || null,
         nativeBlocks: bm.nativeBlocks === true,
         machinePreset: activated.machinePreset || null,
@@ -62,6 +72,32 @@ export async function runMachineConfig(config, opts = {}) {
         // stays in the Debug instrument).
         widgets: Array.isArray(activated.widgets) ? activated.widgets : []
     };
+    if (bm.cpmLaunch) {
+        detail.cpmLaunch = bm.cpmLaunch;
+        detail.cpmFiles = bm.cpmFiles;
+    }
+    if (bm.spectrum) detail.spectrum = bm.spectrum;
+    if (bm.picoWakeOnPrompt) detail.picoWakeOnPrompt = true;
+    if (bm.picoBasicConsole) detail.picoBasicConsole = bm.picoBasicConsole;
+    if (bm.picoFlashStorage) detail.picoFlashStorage = bm.picoFlashStorage;
+    if (opts.picoBasicSource != null) {
+        if (!bm.picoBasicConsole || detail.kind !== 'rp2040js' || bm.slot !== 'flash') {
+            throw new Error('BASIC source needs compatible Pico UART firmware.');
+        }
+        detail.picoBasicCommands = picoBasicCommands(opts.picoBasicSource, bm.picoBasicConsole);
+    }
+    if (bm.dosFastStart) detail.dosFastStart = true;
+    if (bm.x86Variant) detail.x86Variant = bm.x86Variant;
+    if (bm.dosVariant) detail.dosVariant = bm.dosVariant;
+    if (bm.dosArgs) detail.dosArgs = bm.dosArgs;
+    if (bm.dosFiles) detail.dosFiles = bm.dosFiles;
+    if (opts.dosSource) {
+        const {name, text} = opts.dosSource;
+        if (activated.targetKind !== 'i8086' || bm.slot !== 'exe' || !bm.dosFiles?.has(name)) {
+            throw new Error('The DOS image does not declare this program file.');
+        }
+        detail.dosFiles = new Map(bm.dosFiles).set(name, new TextEncoder().encode(ubasicSource(text)));
+    }
     if (typeof bm.romAt === 'number') detail.romAt = bm.romAt;
     if (bm.geometry) detail.geometry = {...bm.geometry};
     // A Linux kernel boots WITH its initramfs: both were fetched and
@@ -86,15 +122,20 @@ export async function runMachineConfig(config, opts = {}) {
     if (activated.machineConfig && Array.isArray(activated.machineConfig.chips)) {
         detail.chips = activated.machineConfig.chips;
     }
-    if (activated.targetKind === 'eater6502' && Array.isArray(activated.machineConfig?.regions)) {
-        detail.machineConfig6502 = activated.machineConfig;
+    if (Array.isArray(activated.machineConfig?.regions)) {
+        if (activated.targetKind === 'eater6502') detail.machineConfig6502 = activated.machineConfig;
+        if (activated.targetKind === 'i8086') detail.machineConfig8086 = activated.machineConfig;
     }
 
     // DOM event listeners cannot return a Promise to dispatchEvent(). For the
-    // named browser 386 route, wait for the panel's actual attach result so a
+    // browser machine routes below, wait for the panel's actual attach result so a
     // failed ROM/media load remains visible in Machine Manager. Injected
     // dispatchers keep the old synchronous contract unless a test opts in.
-    const awaitBoot = activated.machinePreset === 'freedos-vga' &&
+    const serialMachine = ['z80', 'rp2040js', 'eater6502', 'riscv32'].includes(activated.targetKind);
+    if (serialMachine) detail.machineView = activated.videoWidget ? 'controller' : 'debugger';
+    const awaitBoot = (activated.machinePreset === 'freedos-vga' || serialMachine ||
+        (activated.targetKind === 'i80386' && bm.slot === 'bios') ||
+        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
     let completion = null;
     let timer = null;
@@ -107,7 +148,7 @@ export async function runMachineConfig(config, opts = {}) {
                 else resolve();
             };
             detail.bootCompletion = {resolve: () => settle(null), reject: settle};
-            timer = setTimeout(() => settle(new Error('timed out waiting for the 386 machine to attach')), 60000);
+            timer = setTimeout(() => settle(new Error('timed out waiting for the machine to attach')), 60000);
         });
     }
     try {

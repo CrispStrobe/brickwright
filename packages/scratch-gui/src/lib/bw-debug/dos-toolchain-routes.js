@@ -8,6 +8,7 @@
 // against its media-lab bundle on a real run, set `verified: true`, then wire
 // the language button.
 
+import {ubasicSource} from '../bw-machines/ubasic-source.js';
 import {compileAndRunOnDos, runDosProgram} from './dos-compile.js';
 import {runCpmProgram} from './cpm-compile.js';
 
@@ -202,7 +203,7 @@ export async function runDosToolchain(routeId, source, opts = {}) {
     return compileAndRunOnDos({
         compiler, compilerFormat: route.compilerFormat,
         support: support || {},
-        sources: {[route.sourceName]: source},
+        sources: {[route.sourceName]: routeId === 'ubasic' && typeof source === 'string' ? ubasicSource(source) : source},
         compileKeys: route.compileKeys, runKeys: route.runKeys,
         outputName: route.outputName, run: !!route.run,
         // A route may pin the CPU variant it was built for (uBASIC needs the

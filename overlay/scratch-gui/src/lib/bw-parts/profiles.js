@@ -226,6 +226,9 @@ export const REFUSED = Object.freeze({
         'arduino_mega', 'arduino_nano', 'arduino_uno', 'attiny85', 'attiny88', 'attiny88_qfn32',
         'eater6502', 'pi_pico', 'stc15_mcu', 'stm32f030', 'w65c02', 'z80',
         'i8086', 'i8088', 'mcu',
+        // Learner instructions run from its Circuits panel; it has no
+        // Code-tab compiler target or emitted peripheral verb.
+        'busch-microtronic',
         // The ESP8266 board (bw-board #580): its own DEVICE ESP8266 program runs on it.
         'esp8266',
         // The ESP32-4848S040 board (bw-board #722): its own firmware runs on it.

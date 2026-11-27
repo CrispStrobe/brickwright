@@ -446,7 +446,7 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // switching INTO fe or Tcl fell through to generateJavaScript.
     const derive = scopeAfter(importer, 'async deriveBuffer (src, from, to)');
     assert.match(derive, /else if \(DOS_LANG\[from\]\) read = \(await DOS_LANG\[from\]\.load\(\)\)\.default\(src\);/);
-    assert.match(derive, /if \(read\) pseudo = read\.pseudocode;/);
+    assert.match(derive, /const pseudo = read \? this\.convertedSource\(read\) : src;/);
     assert.match(importer, /\} else if \(DOS_LANG\[to\]\) \{\n\s+code = DOS_LANG\[to\]\.generate/);
     // The reference panel says what each subset is.
     assert.match(importer, /\n {4}tcl: \[\n {8}\['Overview', \['Jim Tcl/);

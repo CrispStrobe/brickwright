@@ -1,5 +1,7 @@
 # Brickwright roadmap
 
+The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
+
 ## Code runtimes and game export (Python and JavaScript) — 2026-11-27
 
 See the [full plan and acceptance criteria](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)

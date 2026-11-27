@@ -110,7 +110,8 @@ export async function runSmoke () {
             sha256: createHash('sha256').update(await readFile(index)).digest('hex')};
         ({server, url: report.url} = await serveBuild(build));
         const {chromium} = await import('playwright');
-        browser = await chromium.launch({headless: true});
+        const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+        browser = await chromium.launch({headless: true, ...(executablePath ? {executablePath} : {})});
         report.browserVersion = browser.version();
         const context = await browser.newContext({viewport: {width: 1440, height: 1000}, locale: 'en-US'});
         page = await context.newPage();
@@ -162,7 +163,7 @@ export async function runSmoke () {
             await lab.getByRole('heading', {name: 'Logikus Lab', exact: true}).waitFor();
         };
 
-        await scenario('Open Logikus through the production Widgets controls', async () => {
+        await scenario('Open Logikus on demand from the Add Widget menu', async () => {
             await page.goto(report.url, {waitUntil: 'domcontentloaded', timeout: 60000});
             const paneToggle = page.locator('[data-right-pane-toggle]');
             await paneToggle.waitFor({state: 'visible', timeout: 60000});
@@ -181,9 +182,20 @@ export async function runSmoke () {
             } else {
                 await expanded.first().click();
             }
-            await openFromWidgets();
+            assert.equal(await page.getByTestId('bw-open-logikus').count(), 0);
+            const addWidget = page.getByRole('button', {name: '+ Add Widget', exact: true});
+            await addWidget.click();
+            await page.getByRole('button', {name: 'Logikus switch', exact: true}).click();
+            const widget = page.getByTestId('bw-ctl-widget-logikus_S0');
+            await widget.waitFor();
+            await page.getByTestId('bw-ctl-remove-logikus_S0').click();
+            await widget.waitFor({state: 'hidden'});
+            assert.equal(await page.getByTestId('bw-open-logikus').count(), 0);
+            await addWidget.click();
+            await page.getByRole('button', {name: 'Logikus Lab', exact: true}).click();
+            await lab.waitFor();
             await selectRailway();
-            return {entry: 'right pane → Widgets → Logikus Lab'};
+            return {entry: 'Controller → + Add Widget → Logikus Lab'};
         });
 
         await scenario('Railway requests and occupancy use the same live inputs and outputs', async () => {

@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {chromium} from 'playwright';
+import {openCodeInfo} from './lib-code-actions.mjs';
 
 const url = process.env.PROOF_URL || process.env.BW_URL;
 if (!url) throw new Error('PROOF_URL must name the production build under qualification');
@@ -27,7 +28,7 @@ WHEN switch moved right:
 let browser;
 let page;
 try {
-    browser = await chromium.launch();
+    browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
     page = await browser.newPage({viewport: {width: 1600, height: 1100}, locale: 'en-US'});
     page.setDefaultTimeout(30000);
     page.on('pageerror', error => report.pageErrors.push(error.message));
@@ -48,7 +49,9 @@ try {
     await editor.waitFor({state: 'visible'});
     await editor.fill(program);
     await page.getByRole('button', {name: /To blocks/}).first().click();
-    await page.getByText('Blocks loaded.', {exact: true}).waitFor({state: 'visible'});
+    const codeInfo = await openCodeInfo(page);
+    await codeInfo.getByText('Blocks loaded.', {exact: true}).waitFor({state: 'visible'});
+    await page.getByTestId('bw-code-info').click();
     await page.waitForFunction(() => {
         const runtime = window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime;
         return runtime?.stc?.device === 'cpx' && runtime.targets.some(target =>

@@ -155,7 +155,7 @@ test('the status line has every Linux boot phase bw-board reports, in EN and DE'
         }
     }
     assert.match(statusT('en', 'linux.booting', {phase: 'x', percent: 42}), /42%/);
-    assert.match(statusT('de', 'linux.ready'), /bwb#/);
+    assert.match(statusT('de', 'linux.ready'), /Linux auf RISC-V/);
     assert.ok(STRINGS.de['linux.ready']);
 });
 

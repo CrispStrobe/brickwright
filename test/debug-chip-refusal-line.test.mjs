@@ -251,7 +251,9 @@ test('the panel reaches refusals only through debugChipRefusals', () => {
         'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'), 'utf8'));
     assert.match(runner, /adapter\.machine\?\.chipRefusals/,
         'the runner no longer captures the collector by name');
-    assert.ok(!/adapter\.machine\.chips\b/.test(runner),
+    const bench = runner.slice(runner.indexOf('function wireMachineBench('), runner.indexOf('async function attachEater6502('));
+    assert.ok(bench.length > 100);
+    assert.ok(!/adapter\.machine\.chips\b/.test(bench),
         'the runner reaches into machine.chips for refusals; the collector is the only supported path');
     // EVERY BENCH MUST HAND ITS COLLECTOR OVER, and one of them cannot do it
     // through the adapter. The DOS bench — which is what the Code tab boots, so

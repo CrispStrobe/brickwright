@@ -25,6 +25,7 @@ try {
     if (await toggle.count() && await toggle.getAttribute('aria-pressed') === 'false') await toggle.click();
     await page.getByTestId('bw-device-select').selectOption('__manage__');
     await page.getByTestId('bw-machine-manager').waitFor();
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('i80386');
     // Authored boot sector: cli; xor ax,ax; mov ds,ax; mov edi,0x89abcdef; spin.
     const disk = Buffer.alloc(512 * 4 * 17);
     Buffer.from('fa31c08ed866b87856341266bfefcdab896640ebfc', 'hex').copy(disk); disk[510] = 0x55; disk[511] = 0xaa;

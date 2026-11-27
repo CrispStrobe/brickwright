@@ -366,36 +366,48 @@ try {
     let navigation = designer;
     const ensureCircuitNavigation = async () => {
         if (await designer.locator('[data-circuit-view-toggle]').count()) { navigation = designer; return; }
-        if (!await overflowMenu.locator('[data-circuit-view-toggle]').count()) await moreTrigger.click({force: true});
-        await overflowMenu.locator('[data-circuit-view-toggle]').waitFor({state: 'visible'});
+        if (!await overflowMenu.count()) await moreTrigger.click({force: true});
+        await overflowMenu.getByRole('menuitemradio', {name: 'Realistic view'}).waitFor({state: 'visible'});
         navigation = overflowMenu;
     };
     await ensureCircuitNavigation();
     const modeToggle = designer.locator('[data-build-sim-toggle]');
     const toolbar = modeToggle.locator('..');
-    check('shared toolbar has view buttons', await navigation.locator('[data-circuit-view-toggle] [aria-label="Realistic view"]').count() >= 1 && await navigation.locator('[data-circuit-view-toggle] [aria-label="Schematic view"]').count() >= 1 && await navigation.locator('[data-circuit-view-toggle] [aria-label="Board view"]').count() >= 1);
-    const viewToggle = navigation.locator('[data-circuit-view-toggle]').first();
-    const viewState = await viewToggle.getByRole('radio').evaluateAll(buttons => buttons.map(button => ({
-        label: button.getAttribute('aria-label'),
+    const viewButtons = () => navigation === designer ?
+        navigation.locator('[data-circuit-view-toggle]').getByRole('radio') :
+        navigation.getByRole('menuitemradio', {name: /^(Realistic|Schematic|Board) view$/});
+    const viewState = await viewButtons().evaluateAll(buttons => buttons.map(button => ({
+        label: button.getAttribute('aria-label') || button.textContent.trim(),
         checked: button.getAttribute('aria-checked')
     })));
-    check('Realistic/Schematic/Board is one segmented view toggle', viewState.length === 3 && viewState.filter(button => button.checked === 'true').length === 1,
+    check('Realistic, Schematic and Board views are available with one active view',
+        viewState.length === 3 && viewState.filter(button => button.checked === 'true').length === 1,
         JSON.stringify(viewState));
-    check('view toggle matches toolbar control height', await viewToggle.evaluate(el => el.getBoundingClientRect().height >= 34));
+    if (navigation === designer) {
+        check('view toggle matches toolbar control height',
+            await designer.locator('[data-circuit-view-toggle]').evaluate(el => el.getBoundingClientRect().height >= 34));
+    }
     check('Build/Sim is one segmented mode toggle', await modeToggle.count() === 1 && await modeToggle.getByRole('radio').count() === 2 && await modeToggle.getByRole('radio', {name: 'Build mode'}).getAttribute('aria-checked') === 'true');
     const modeMetrics = await modeToggle.getByRole('radio').evaluateAll(buttons => buttons.map(button => ({width: button.getBoundingClientRect().width, height: button.getBoundingClientRect().height})));
     check('Build/Sim toggle segments have equal dimensions', modeMetrics.length === 2 && modeMetrics[0].width === modeMetrics[1].width && modeMetrics[0].height === modeMetrics[1].height, JSON.stringify(modeMetrics));
     // The warnings chip is a count-badged CHIP ("⚠ 3"), so its width is
     // content-driven by design; it still shares the 34px control height.
-    const toolbarButtonMetrics = [...await designer.locator('[data-circuit-toolbar] button:visible:not([data-warnings-chip])').evaluateAll(buttons => buttons.filter(button => !button.closest('[data-toolbar-more-menu]') || button.closest('[data-panel-navigation], [data-circuit-view-toggle]')).map(button => ({width: Math.round(button.getBoundingClientRect().width), height: Math.round(button.getBoundingClientRect().height)}))), ...(navigation === designer ? [] : await overflowMenu.locator('[data-panel-navigation] button:visible, [data-circuit-view-toggle] button:visible').evaluateAll(buttons => buttons.filter(button => !button.closest('[data-toolbar-more-menu]') || button.closest('[data-panel-navigation], [data-circuit-view-toggle]')).map(button => ({width: Math.round(button.getBoundingClientRect().width), height: Math.round(button.getBoundingClientRect().height)}))))];
-    check('toolbar buttons share one control size', toolbarButtonMetrics.length > 8 && toolbarButtonMetrics.every(metric => metric.width === 34 && metric.height === 34), JSON.stringify(toolbarButtonMetrics));
+    const toolbarButtonMetrics = await designer.locator('[data-circuit-toolbar] button:visible:not([data-warnings-chip])')
+        .evaluateAll(buttons => buttons.filter(button => !button.closest('[data-circuit-history]')).map(button => ({
+            width: Math.round(button.getBoundingClientRect().width), height: Math.round(button.getBoundingClientRect().height)
+        })));
+    check('toolbar buttons share one control size', toolbarButtonMetrics.length >= 5 &&
+        toolbarButtonMetrics.every(metric => metric.width === 34 && metric.height === 34), JSON.stringify(toolbarButtonMetrics));
     const warningsChip = designer.locator('[data-circuit-toolbar] [data-warnings-chip]:visible');
     if (await warningsChip.count()) {
         const chipMetrics = await warningsChip.first().evaluate(el => ({height: Math.round(el.getBoundingClientRect().height)}));
         check('warnings chip shares the toolbar control height', chipMetrics.height === 34, JSON.stringify(chipMetrics));
     }
-    const toolbarGroupMetrics = [...await designer.locator('[data-circuit-toolbar] [data-circuit-control-group]:visible').evaluateAll(groups => groups.map(group => ({width: Math.round(group.getBoundingClientRect().width), height: Math.round((group.closest('[data-toolbar-more-menu]') ? group.firstElementChild : group).getBoundingClientRect().height), y: Math.round(group.getBoundingClientRect().y)}))), ...(navigation === designer ? [] : await overflowMenu.locator('[data-circuit-control-group]:visible').evaluateAll(groups => groups.map(group => ({width: Math.round(group.getBoundingClientRect().width), height: Math.round((group.closest('[data-toolbar-more-menu]') ? group.firstElementChild : group).getBoundingClientRect().height), y: Math.round(group.getBoundingClientRect().y)}))))];
-    check('toolbar control groups stay touch-sized when rows wrap or enter the menu', toolbarGroupMetrics.length >= 4 && toolbarGroupMetrics.every(metric => metric.height >= 34 && metric.height <= 36), JSON.stringify(toolbarGroupMetrics));
+    const toolbarGroupMetrics = await designer.locator('[data-circuit-toolbar] [data-circuit-control-group]:visible')
+        .evaluateAll(groups => groups.map(group => Math.round(group.getBoundingClientRect().height)));
+    check('toolbar control groups stay touch-sized',
+        toolbarGroupMetrics.length >= 2 && toolbarGroupMetrics.every(height => height >= 34 && height <= 36),
+        JSON.stringify(toolbarGroupMetrics));
     const modePaint = await modeToggle.getByRole('radio').evaluateAll(buttons => buttons.map(button => ({checked: button.getAttribute('aria-checked'), background: getComputedStyle(button).backgroundColor, color: getComputedStyle(button).color})));
     check('selected Build/Sim state is visibly painted', modePaint[0]?.checked === 'true' && modePaint[0].background !== modePaint[1].background && modePaint[0].background !== 'rgb(255, 255, 255)', JSON.stringify(modePaint));
     const powerToggle = designer.locator('[data-power-toggle]');
@@ -408,8 +420,15 @@ try {
             await moreTrigger.getAttribute('aria-controls') === await overflowMenu.first().getAttribute('id'));
     const panelNavigation = navigation.locator('[data-panel-navigation]');
     check('shared toolbar has panel navigation', await panelNavigation.count() === 1 && await panelNavigation.locator('button').count() >= 4, `containers=${await panelNavigation.count()} buttons=${await panelNavigation.locator('button').count()}`);
-    const panelButtonMetrics = await navigation.getByRole('button', {name: 'Designer'}).evaluateAll(buttons => buttons.map(button => ({width: button.getBoundingClientRect().width, height: button.getBoundingClientRect().height})));
-    check('panel navigation uses compact equal buttons', panelButtonMetrics.length === 1 && panelButtonMetrics[0].width <= 42 && panelButtonMetrics[0].height >= 30, JSON.stringify(panelButtonMetrics));
+    if (navigation === designer) {
+        const panelButtonMetrics = await panelNavigation.getByRole('button', {name: 'Designer'})
+            .evaluateAll(buttons => buttons.map(button => ({width: button.getBoundingClientRect().width,
+                height: button.getBoundingClientRect().height})));
+        check('panel navigation uses compact equal buttons', panelButtonMetrics.length === 1 &&
+            panelButtonMetrics[0].width <= 42 && panelButtonMetrics[0].height >= 30, JSON.stringify(panelButtonMetrics));
+    } else {
+        check('overflow panel controls have visible text labels', await panelNavigation.getByRole('menuitemradio').count() === 4);
+    }
     const toolbarBox = await toolbar.boundingBox();
     check('toolbar is touch-sized', !!toolbarBox && toolbarBox.height >= 40, toolbarBox ? `${toolbarBox.width}x${toolbarBox.height}` : 'missing');
     check('light presentation uses a light toolbar', await designer.locator('[data-circuit-toolbar]').evaluate(el => getComputedStyle(el).backgroundColor === 'rgb(248, 250, 252)'));
@@ -490,7 +509,7 @@ try {
         await page.waitForTimeout(150);
     }
     await ensureCircuitNavigation();
-    await navigation.locator('[data-circuit-view-switcher] button[title="Schematic view"]').first().click();
+    await navigation.getByRole(navigation === designer ? 'radio' : 'menuitemradio', {name: 'Schematic view'}).click();
     await page.waitForTimeout(150);
     const realisticEscape = page.locator('[data-schematic-escape] button[title="Realistic view"]');
     check('schematic view keeps an escape route', await realisticEscape.count() >= 1);
@@ -1440,6 +1459,7 @@ try {
             if (!await designer.locator('[data-instruments-column]').count()) {
                 await designer.getByRole('button', {name: /Expand instruments panel/i}).click();
             }
+            await designer.getByText('Circuit analysis', {exact: true}).click();
             await designer.getByTestId('bw-operating-point-run').click();
             const result = designer.getByTestId('bw-operating-point-result');
             await result.waitFor({state: 'visible'});

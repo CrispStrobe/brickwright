@@ -365,9 +365,12 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> ece2e0d3 (2026-11-25): Independent CP1 gallery exercises.
     // -> df11b236 (2026-11-25): Kosmos CP1 curriculum and prior mainline examples.
     // -> 1c29f69f (2026-11-25): electronics benches and the CP3/CP4 lesson.
+    // -> 0e75fbde (2026-11-26): KIM-1 and Busch gallery entries and expected behavior. The compiler source is unchanged.
+    // -> f823a41b (2026-11-26): 6502 circuit and Controller gallery integration.
+    // -> 1b414786 (2026-11-27): update multimeter guidance for LM358 input bias.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '1c29f69fd22c86ecb0051938eedb246921cb3b88');
+        '1b414786039b9cc412a498a8307126ee6422066b');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);

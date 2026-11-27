@@ -104,7 +104,7 @@ try {
     check(await more.count() === 1, 'the language row has a "+" control');
     await more.click();
     const menu = page.getByTestId('bw-lang-more-menu');
-    check(await menu.getByRole('menuitem').count() === 3, '"+" offers fe, Tcl and Forth',
+    check(await menu.getByRole('menuitem').count() === 5, '"+" offers fe, Tcl, Forth, CP1 and CARDIAC',
         (await menu.innerText().catch(() => '')).replace(/\s+/g, ' '));
     await menu.getByRole('menuitem', {name: /Tcl/}).click();
     check(await tabNamed('○ Tcl').getAttribute('aria-pressed') === 'true', 'choosing Tcl opens its tab');
@@ -128,9 +128,9 @@ try {
     check(await page.getByRole('button', {name: /Run (Python|JavaScript)/i}).count() === 0,
         'BASIC tab never exposes a wrong-language Run control');
 
-    const infoToggle = page.getByTestId('bw-basic-info-toggle');
+    const infoToggle = page.getByTestId('bw-code-info');
     await infoToggle.click();
-    const infoPanel = page.getByTestId('bw-basic-info-panel');
+    const infoPanel = page.locator('[data-code-language-note="basic"]');
     await infoPanel.waitFor({state: 'visible', timeout: 10000});
     const infoText = await infoPanel.innerText();
     check(infoText.includes('BBC BASIC') && infoText.includes(INFO_TOKEN),
@@ -160,9 +160,11 @@ try {
 
     const maximize = page.getByTestId('bw-editor-maximize');
     await maximize.click();
+    await page.getByTestId('bw-max-editor-tools').waitFor();
+    check(await page.locator('body.bw-compact-chrome').count() === 1, 'maximize collapses the top menu');
+    check(!await langRow.isVisible(), 'maximize folds the language bar into its overflow menu');
+    await page.getByTestId('bw-max-editor-tools').click();
     await page.getByTitle('Restore panels').waitFor({state: 'visible', timeout: 10000});
-    // The merged row, which now also holds the conversion actions, is
-    // deliberately retained in maximize mode.
     check(await page.getByTestId('bw-device-select').isVisible(),
         'maximize retains the compact target selector');
     const actions = page.getByTestId('bw-code-action-row');

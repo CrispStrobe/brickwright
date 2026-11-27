@@ -25,6 +25,7 @@ const help = `Brickwright Lite CLI
   bwlite toolchain status|install|remove|compile ...
   bwlite 8051 build PROGRAM.bw|PROGRAM.c --out FIRMWARE.ihx
   bwlite 8051 flash FIRMWARE.ihx --port SERIAL_DEVICE
+  bwlite circuit test [EXAMPLE_ID] [--device DEVICE] [--smoke-only] [--jobs N] [--timeout-ms MS] [--json]
   bwlite machine validate|normalize|import-dosbox|import-manifest|import-repo|activate ...
   bwlite fpga ...
   bwlite makecode ...
@@ -89,11 +90,11 @@ const runScript = (script, rest) => {
     else process.exitCode = result.status ?? 1;
 };
 
-if (!args.length || args.includes('--help') || args[0] === 'help') {
+if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0] === 'help') {
     console.log(help);
-} else if (['toolchain', 'machine', 'fpga', 'makecode'].includes(args[0])) {
+} else if (['toolchain', 'machine', 'fpga', 'makecode', 'circuit'].includes(args[0])) {
     const scripts = {toolchain: 'scripts/bw-toolchain.mjs', machine: 'scripts/machine-manager.mjs',
-        fpga: 'scripts/bw-fpga.mjs', makecode: 'scripts/makecode.mjs'};
+        fpga: 'scripts/bw-fpga.mjs', makecode: 'scripts/makecode.mjs', circuit: 'scripts/circuit-examples.mjs'};
     runScript(scripts[args[0]], args.slice(1));
 } else if (args[0] === '8051' && ['build', 'flash'].includes(args[1])) {
     const mode = args[1];

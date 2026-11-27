@@ -99,6 +99,123 @@ function _othersStopped (s: Sprite, t: number): boolean {
     }
     return false
 }`},
+    scratchDecimal: {deps: [], ts: `function _scratchDecimal (value: any): number {
+    const n = +value
+    return isNaN(n) ? 0 : n
+}`},
+    scratchFactorial: {deps: ['scratchDecimal'], ts: `function _scratchFactorial (input: any): any {
+    const n = _scratchDecimal(input)
+    if (n < 0 || Math.floor(n) !== n) return ""
+    if (n > 170) return Infinity
+    let result = 1
+    for (let factor = 2; factor <= n; factor++) result *= factor
+    return result
+}`},
+    scratchDigitSum: {deps: ['scratchDecimal'], ts: `function _scratchDigitSum (input: any): any {
+    let n = Math.abs(_scratchDecimal(input))
+    if (n - n !== 0 || Math.floor(n) !== n) return ""
+    let result = 0
+    while (n > 0) {
+        result += n % 10
+        n = Math.floor(n / 10)
+    }
+    return result
+}`},
+    scratchMultiple: {deps: ['scratchDecimal'], ts: `function _scratchMultiple (left: any, right: any): boolean {
+    const a = _scratchDecimal(left)
+    const b = _scratchDecimal(right)
+    return a - a === 0 && b - b === 0 && Math.floor(a) === a && Math.floor(b) === b && b !== 0 && a % b === 0
+}`},
+    namedArrayRange: {deps: [], ts: `function _namedArrayRange (start: any, end: any): number[] {
+    let value = +start
+    const last = +end
+    const values: number[] = []
+    if (value - value !== 0 || last - last !== 0) return values
+    while (value <= last) {
+        values.push(value)
+        if (value + 1 === value) break
+        value++
+    }
+    return values
+}`},
+    namedArraySum: {deps: [], ts: `function _namedArraySum (values: any[]): number {
+    if (!values) return 0
+    let result = 0
+    for (const value of values) {
+        result += Array.isArray(value) ? _namedArraySum(<any[]>value) : +(value || 0)
+    }
+    return result
+}`},
+    namedArrayMax: {deps: [], ts: `function _namedArrayMax (values: any[]): number {
+    if (!values) return 0
+    let result = -Infinity
+    for (const value of values) {
+        const item = Array.isArray(value) ? _namedArrayMax(<any[]>value) : +value
+        result = Math.max(result, item)
+    }
+    return result
+}`},
+    scratchPose: {deps: [], ts: `function _scratchDirection (s: Sprite): number {
+    const d = s.data["_bwScratchDirection"]
+    return d === undefined ? 90 : d
+}
+function _scratchPoint (s: Sprite, d: number) {
+    d = ((d % 360) + 360) % 360
+    if (d > 180) d -= 360
+    s.data["_bwScratchDirection"] = d
+    const style = s.data["_bwScratchRotationStyle"]
+    const flip = style === "left-right" && d < 0
+    if (flip !== !!s.data["_bwScratchFlipped"]) {
+        const art = s.image.clone()
+        art.flipX()
+        s.setImage(art)
+        s.data["_bwScratchFlipped"] = flip
+    }
+    s.rotationDegrees = style === "left-right" || style === "don't rotate" ? 0 : d - 90
+}
+function _scratchRotationStyle (s: Sprite, style: string) {
+    s.data["_bwScratchRotationStyle"] = style
+    _scratchPoint(s, _scratchDirection(s))
+}
+function _scratchPoseCostume (s: Sprite) {
+    s.data["_bwScratchFlipped"] = false
+    _scratchPoint(s, _scratchDirection(s))
+}`},
+    scratchEffects: {deps: ['scratchPose'], ts: `function _scratchRenderEffects (s: Sprite, hueTable: number[][]) {
+    const raw = s.data["_bwScratchRawArt"] as Image
+    const hue = s.data["_bwScratchHue"] || 0
+    const ghost = s.data["_bwScratchGhost"] || 0
+    const result = hue || ghost ? raw.clone() : raw
+    if (hue || ghost) {
+        const shift = ((hue % 200) + 200) % 200
+        const colours = hueTable[Math.round(shift * hueTable.length / 200) % hueTable.length]
+        const threshold = Math.round(16 * (100 - ghost) / 100)
+        const dither = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
+        for (let y = 0; y < raw.height; y++) {
+            for (let x = 0; x < raw.width; x++) {
+                const pixel = raw.getPixel(x, y)
+                if (pixel) result.setPixel(x, y, dither[(y % 4) * 4 + x % 4] < threshold ? colours[pixel] : 0)
+            }
+        }
+    }
+    s.setImage(result)
+    if (s.data["_bwScratchRotationStyle"]) _scratchPoseCostume(s)
+}
+function _scratchEffectsCostume (s: Sprite, hueTable: number[][]) {
+    s.data["_bwScratchRawArt"] = s.image
+    _scratchRenderEffects(s, hueTable)
+}
+function _scratchSetEffect (s: Sprite, key: string, by: number, delta: boolean, hueTable: number[][]) {
+    let value = (delta ? s.data[key] || 0 : 0) + by
+    if (key === "_bwScratchGhost") value = Math.clamp(0, 100, value)
+    s.data[key] = value
+    _scratchRenderEffects(s, hueTable)
+}
+function _scratchClearEffects (s: Sprite, hueTable: number[][]) {
+    s.data["_bwScratchGhost"] = 0
+    s.data["_bwScratchHue"] = 0
+    _scratchRenderEffects(s, hueTable)
+}`},
     costume: {deps: [], ts: `function _costume (s: Sprite): number {
     const c = s.data["_c"]
     return c ? c : 0
@@ -181,6 +298,14 @@ function _penTo (s: Sprite, x: number, y: number) {
     const y0 = s.y
     s.setPosition(x, y)
     if (s.data["_pd"]) _penLine(s, x0, y0, s.x, s.y)
+}`},
+    penHue: {deps: ['pen'], ts: `function _scratchPenHue (sprite: Sprite, value: number, relative: boolean, table: number[][]) {
+    const base: number = sprite.data["_pcBase"] || sprite.data["_pc"]
+    sprite.data["_pcBase"] = base
+    const previous: number = sprite.data["_pcHue"] || 0
+    const hue = ((relative ? previous + value : value) % 100 + 100) % 100
+    sprite.data["_pcHue"] = hue
+    sprite.data["_pc"] = table[Math.round(hue * table.length / 100) % table.length][base]
 }`},
     plain: {deps: [], ts: `function _plain (c: number): Image {
     const i = image.create(160, 120)

@@ -42,6 +42,7 @@ const REPO = 'CrispStrobe/sb3-creator';
 const REF = process.env.SB3CREATOR_REF || 'main';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const lib = path.join(here, '..', 'overlay', 'scratch-gui', 'src', 'lib');
+const cliLib = path.join(here, 'lib', 'vendor');
 const check = process.argv.includes('--check');
 // Lite intentionally carries a small downstream UI/asset dialect on top of the
 // shared compiler. Freshness CI passes this flag so it can report that delta
@@ -66,6 +67,9 @@ const RAW = `https://raw.githubusercontent.com/${REPO}/${remoteSha}`;
 
 // [source path relative to the sb3-creator repo, local vendored destination]
 const FILES = [
+    ['scripts/lib/assert-blocks.mjs', path.join(cliLib, 'sb3-assert-blocks.mjs')],
+    ['src/utils/cardiacProgram.js', path.join(lib, 'cardiac-program.js')],
+    ['src/utils/cardiacExamples.js', path.join(lib, 'cardiac-examples.js')],
     ['src/utils/cp1Program.js', path.join(lib, 'cp1-program.js')],
     ['src/utils/sb3Creator.js', path.join(lib, 'sb3-creator.js')],
     ['src/utils/procedureParameterConstraints.js', path.join(lib, 'procedureParameterConstraints.js')],
@@ -456,7 +460,7 @@ if (!check) {
     // mirror obligation; all 14 compiler destinations do.
     const mirrorDir = path.join(here, '..', 'packages', 'scratch-gui', 'src', 'lib');
     const { copied, unreadable } = await mirrorIntoPackages(
-        FILES.map(([, dest]) => dest), mirrorDir, { readFile, writeFile });
+        FILES.map(([, dest]) => dest).filter(dest => path.dirname(dest) === lib), mirrorDir, { readFile, writeFile });
     if (copied.length) {
         console.log(`  mirrored ${copied.length} file(s) into packages/scratch-gui/src/lib:`);
         for (const f of copied) console.log(`    ${f}`);

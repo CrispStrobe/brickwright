@@ -192,3 +192,23 @@ test('the flag the view depends on actually exists in the vendored copy', () => 
         + 'and the toolbar control will throw when pressed');
     assert.equal(p.hideBindings, false, 'and its default must be showing');
 });
+
+test('display bindings present only compatible circuit part choices', () => {
+    const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/controller-panel-view.jsx', import.meta.url), 'utf8');
+    const method = source.match(/^    (_circuitParts\(widget\) \{[\s\S]*?^    \})/m)?.[1];
+    assert.ok(method, 'the Controller view owns the part picker');
+    const Picker = new Function(`return class Picker { ${method} }`)();
+    const picker = new Picker();
+    picker.props = {board: {parts: [
+        {id: 'vga', kind: 'simplevga_card'},
+        {id: 'logic', kind: 'w65c22'},
+        {id: 'video', kind: 'tms9918'},
+        {id: 'small', kind: 'char_lcd'},
+        {id: 'display', kind: 'hd44780'}
+    ]}};
+    assert.deepEqual(picker._circuitParts({type: 'lcd'}).map(part => part.id), ['display', 'small']);
+    assert.deepEqual(picker._circuitParts({type: 'simplevga'}).map(part => part.id), ['vga', 'video']);
+    assert.equal(picker._circuitParts({type: 'slider'}).length, 5);
+    picker.props = {board: null};
+    assert.deepEqual(picker._circuitParts({type: 'lcd'}), []);
+});

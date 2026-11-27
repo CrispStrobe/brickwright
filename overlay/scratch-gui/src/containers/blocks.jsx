@@ -3,6 +3,7 @@ import debounce from 'lodash.debounce';
 import defaultsDeep from 'lodash.defaultsdeep';
 import makeToolboxXML from '../lib/make-toolbox-xml';
 import PropTypes from 'prop-types';
+import {Icon, Popup, toolStyles} from '../components/tw-pseudocode/sim-lab-toolbar.jsx';
 import React from 'react';
 import VMScratchBlocks from '../lib/blocks';
 import VM from 'scratch-vm';
@@ -95,7 +96,8 @@ class Blocks extends React.Component {
         this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
 
         this.state = {
-            prompt: null
+            prompt: null,
+            toolsOpen: false
         };
         this.onTargetsUpdate = debounce(this.onTargetsUpdate, 100);
         this.toolboxUpdateQueue = [];
@@ -279,6 +281,7 @@ class Blocks extends React.Component {
         return (
             this.props.artworkOnly !== nextProps.artworkOnly ||
             this.state.prompt !== nextState.prompt ||
+            this.state.toolsOpen !== nextState.toolsOpen ||
             this.props.isVisible !== nextProps.isVisible ||
             this._renderedToolboxXML !== nextProps.toolboxXML ||
             this.props.extensionLibraryVisible !== nextProps.extensionLibraryVisible ||
@@ -326,6 +329,7 @@ class Blocks extends React.Component {
             window.dispatchEvent(new Event('resize'));
         } else {
             this.workspace.setVisible(false);
+            if (this.state.toolsOpen) this.setState({toolsOpen: false});
         }
     }
     componentWillUnmount () {
@@ -704,11 +708,48 @@ class Blocks extends React.Component {
                 this.updateToolbox(); // To show new variables/custom blocks
             });
     }
+    renderTools (onAddExtension, onReadCode) {
+        const de = /^de/i.test(this.props.locale);
+        const title = de ? 'Weitere Blockwerkzeuge' : 'More Blocks controls';
+        const commands = [
+            ['undo', de ? 'Rückgängig' : 'Undo', () => this.workspace.undo(false), this.workspace?.undoStack_.length > 0],
+            ['redo', de ? 'Wiederholen' : 'Redo', () => this.workspace.undo(true), this.workspace?.redoStack_.length > 0],
+            ['clean-up', de ? 'Blöcke aufräumen' : 'Clean up blocks', () => this.workspace.cleanUp()],
+            ['zoom-in', de ? 'Vergrößern' : 'Zoom in', () => this.workspace.zoomCenter(1)],
+            ['zoom-out', de ? 'Verkleinern' : 'Zoom out', () => this.workspace.zoomCenter(-1)],
+            ['view-home', de ? 'Ansicht zurücksetzen' : 'Reset view', () => {
+                this.workspace.setScale(this.workspace.options.zoomOptions.startScale);
+                this.workspace.scrollCenter();
+            }],
+            ...(onReadCode ? [['from-blocks', de ? 'Als Code lesen' : 'Read Blocks into Code', onReadCode]] : []),
+            ...(onAddExtension ? [['add-extension', de ? 'Erweiterung hinzufügen' : 'Add extension', onAddExtension]] : [])
+        ];
+        return (
+            <div style={{position: 'absolute', top: 8, right: 10, zIndex: 2}}>
+                <Popup id="blocks-actions" overflowMenu label={title} align="right" width={270}
+                    open={this.props.isVisible && this.state.toolsOpen}
+                    onToggle={() => this.setState(s => ({toolsOpen: !s.toolsOpen}))}
+                    onClose={() => this.setState({toolsOpen: false})}
+                    button={<button type="button" data-testid="bw-blocks-actions-trigger"
+                        title={title} aria-label={title} style={toolStyles(false).button}><Icon name="more" /></button>}>
+                    {commands.map(([icon, label, run, enabled = true]) => (
+                        <button key={icon} type="button" data-overflow-action onClick={run} disabled={!enabled || !this.workspace}>
+                            <Icon name={icon} />
+                            <span>{label}</span>
+                        </button>
+                    ))}
+                </Popup>
+            </div>
+        );
+    }
+
     render () {
         /* eslint-disable no-unused-vars */
         const {
             artworkOnly,
             onEditArtwork,
+            onAddExtension,
+            onReadCode,
             anyModalVisible,
             canUseCloud,
             customProceduresVisible,
@@ -742,6 +783,7 @@ class Blocks extends React.Component {
                     onDrop={this.handleDrop}
                     {...props}
                 />
+                {isVisible && !artworkOnly && this.renderTools(onAddExtension, onReadCode)}
                 {this.state.prompt ? (
                     <Prompt
                         defaultValue={this.state.prompt.defaultValue}
@@ -778,6 +820,8 @@ class Blocks extends React.Component {
 
 Blocks.propTypes = {
     artworkOnly: PropTypes.bool,
+    onAddExtension: PropTypes.func,
+    onReadCode: PropTypes.func,
     onEditArtwork: PropTypes.func,
     anyModalVisible: PropTypes.bool,
     canUseCloud: PropTypes.bool,

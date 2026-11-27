@@ -103,6 +103,8 @@ import { join } from 'node:path';
  * transformation it has no way to apply.
  */
 export const SB3_CREATOR_FILES = Object.freeze([
+    ['cardiac-program.js', 'src/utils/cardiacProgram.js'],
+    ['cardiac-examples.js', 'src/utils/cardiacExamples.js'],
     ['sb3-creator.js', 'src/utils/sb3Creator.js'],
     ['procedureParameterConstraints.js', 'src/utils/procedureParameterConstraints.js'],
     ['trace-oracle.js', 'src/utils/traceOracle.js'],

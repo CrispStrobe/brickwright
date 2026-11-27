@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {openCodeInfo} from './lib-code-actions.mjs';
 
 const requireFromGui = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
 const JSZip = requireFromGui('jszip');
@@ -18,7 +19,7 @@ const invalidPath = resolve(artifacts, 'invalid-sidecar.sb3');
 const source = 'SPRITE Cat:\n  WHEN flag clicked:\n    say "bundle integrity" for 2 seconds';
 const errors = [];
 
-const browser = await chromium.launch({headless: true});
+const browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const newContext = async ({starterComplete = true} = {}) => {
     const context = await browser.newContext({viewport: {width: 1600, height: 1000},
         acceptDownloads: true});
@@ -77,8 +78,9 @@ try {
     if (await showRight.count()) await showRight.click();
     await page.locator('button[title="Controller"]:visible').click();
     await page.getByTestId('bw-controller-canvas').waitFor({state: 'visible', timeout: 15000});
-    await page.getByText('+ Add Widget', {exact: true}).click();
-    await page.getByText('Slider', {exact: true}).click();
+    await page.getByTestId('bw-ctl-mode-edit').click();
+    await page.getByRole('button', {name: '+ Add Widget', exact: true}).click();
+    await page.getByRole('button', {name: 'Slider', exact: true}).click();
     await page.getByTestId('bw-ctl-widget-slider1').waitFor({state: 'visible'});
 
     await page.getByText('File', {exact: true}).click();
@@ -146,8 +148,9 @@ try {
     await page.getByText(/saved by a newer version of Brickwright/)
         .waitFor({state: 'visible', timeout: 15000});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
-    await page.getByText(/Brickwright state v7 was not applied: preserved-not-applied/)
-        .waitFor({timeout: 15000});
+    const futureInfo = await openCodeInfo(page);
+    await futureInfo.getByText(/Brickwright state v7 was not applied: preserved-not-applied/).waitFor({timeout: 15000});
+    await page.keyboard.press('Escape');
     const afterFuture = await projectKeys(page);
     if (JSON.stringify(afterFuture) !== JSON.stringify(beforeRefusal)) {
         const changed = Object.keys(beforeRefusal).filter(key => beforeRefusal[key] !== afterFuture[key]);
@@ -162,7 +165,9 @@ try {
     await page.getByText(/Brickwright data could not be read/)
         .waitFor({state: 'visible', timeout: 15000});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
-    await page.getByText(/Brickwright state was not applied: invalid JSON/).waitFor({timeout: 15000});
+    const invalidInfo = await openCodeInfo(page);
+    await invalidInfo.getByText(/Brickwright state was not applied: invalid JSON/).waitFor({timeout: 15000});
+    await page.keyboard.press('Escape');
     const afterInvalid = await projectKeys(page);
     if (JSON.stringify(afterInvalid) !== JSON.stringify(beforeRefusal)) {
         const changed = Object.keys(beforeRefusal).filter(key => beforeRefusal[key] !== afterInvalid[key]);
@@ -175,8 +180,11 @@ try {
     }
 
     await openProject(page, vanillaPath);
-    await page.waitForFunction(() => ['bw-code-autosave', 'bw-circuit-autosave', 'bw-ctl-widgets']
-        .every(key => localStorage.getItem(key) === null), null, {timeout: 45000});
+    await page.waitForFunction(() => {
+        const read = key => JSON.parse(localStorage.getItem(key));
+        return !read('bw-code-autosave')?.code?.trim() && !read('bw-circuit-autosave')?.parts?.length &&
+            !read('bw-ctl-widgets')?.widgets?.length;
+    }, null, {timeout: 15000});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
     await page.waitForFunction(() => !(document.querySelector('.cm-content')?.textContent || '').trim(),
         null, {timeout: 15000});

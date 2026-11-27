@@ -134,7 +134,7 @@ export async function requestSketchBuild ({source, device, compile}) {
 /** The firmware object debug-runner's setFirmware takes, for a built sketch. */
 export function sketchFirmware (built, name = 'sketch.hex') {
     return {name, bytes: null, text: built.hex, fCpu: built.clockHz,
-        symbols: built.symbols || null};
+        symbols: built.symbols || null, device: built.target};
 }
 
 /** Bytes of program an Intel HEX text describes (data records only). */

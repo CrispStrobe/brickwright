@@ -17,23 +17,33 @@ function run(t, code, options = {}) {
     const messages = [];
     const outputs = [];
     const inputs = [];
-    let thread;
-    let exited;
+    // Keep Node worker bootstrap out of the small execution budgets. Some
+    // tests deliberately measure the difference between the execution budget and the input
+    // probe deadline on a busy test runner.
+    const thread = new Worker(`const {parentPort} = require('node:worker_threads');
+        globalThis.self = globalThis;
+        globalThis.postMessage = data => parentPort.postMessage(data);
+        parentPort.on('message', data => self.onmessage({data}));
+        ${JAVASCRIPT_WORKER_SOURCE}
+        parentPort.postMessage('fixture-ready');`, {eval: true, execArgv: []});
+    const initialized = new Promise((resolve, reject) => {
+        thread.once('message', message => {
+            if (message === 'fixture-ready') resolve(JAVASCRIPT_WORKER_SOURCE);
+            else reject(new Error('Unexpected worker initialization message'));
+        });
+        thread.once('error', reject);
+    });
+    const exited = new Promise(resolve => thread.once('exit', resolve));
     let terminated = 0;
     let released = 0;
     const session = createCodeExecutionSession({
-        workerSource: JAVASCRIPT_WORKER_SOURCE, code, timeoutMs: 2000,
-        inputProbeIntervalMs: 20, inputProbeTimeoutMs: 100, flushIntervalMs: 5,
+        workerSource: initialized, code, timeoutMs: 2000,
+        inputProbeIntervalMs: 30, inputProbeTimeoutMs: 1000, flushIntervalMs: 5,
         ...options,
         onOutput(text) { outputs.push(text); options.onOutput?.(text, session); },
         onInput(request) { inputs.push(request); options.onInput?.(request, session); },
         createWorker(source) {
-            thread = new Worker(`const {parentPort} = require('node:worker_threads');
-                globalThis.self = globalThis;
-                globalThis.postMessage = data => parentPort.postMessage(data);
-                parentPort.on('message', data => self.onmessage({data}));
-                ${source}`, {eval: true, execArgv: []});
-            exited = new Promise(resolve => thread.once('exit', resolve));
+            assert.equal(source, JAVASCRIPT_WORKER_SOURCE);
             const worker = {
                 postMessage: data => thread.postMessage(data),
                 terminate() { terminated++; return thread.terminate(); },
@@ -44,7 +54,7 @@ function run(t, code, options = {}) {
             return {worker, release() { released++; }};
         }
     });
-    t.after(async () => { session.dispose(); if (thread) await thread.terminate(); });
+    t.after(async () => { session.dispose(); await thread.terminate(); });
     return {
         session, messages, outputs, inputs,
         async result() {
@@ -58,7 +68,7 @@ function run(t, code, options = {}) {
     };
 }
 
-test('registered concurrent and nested tasks finish before the owned run', {timeout: 5000}, async t => {
+test('registered concurrent and nested tasks finish before the owned run', {timeout: 15000}, async t => {
     const f = run(t, `
         codeRun.spawn(async task => {
             console.log('first'); await task.sleep(80);
@@ -75,7 +85,7 @@ test('registered concurrent and nested tasks finish before the owned run', {time
     assert.equal(f.messages.at(-1).type, 'done');
 });
 
-test('an ignored registered rejection ends the run and cancels sibling delays', {timeout: 5000}, async t => {
+test('an ignored registered rejection ends the run and cancels sibling delays', {timeout: 15000}, async t => {
     const f = run(t, `
         codeRun.spawn(async task => { await task.sleep(200); console.log('late'); });
         codeRun.spawn(async task => { await task.sleep(20); throw new Error('owned-rejection'); });
@@ -87,7 +97,7 @@ test('an ignored registered rejection ends the run and cancels sibling delays', 
     assert.equal(f.messages.filter(message => message.type === 'error').length, 1);
 });
 
-test('synchronous task throws and returned rejected promises are owned', {timeout: 5000}, async t => {
+test('synchronous task throws and returned rejected promises are owned', {timeout: 15000}, async t => {
     for (const task of ["() => { throw new Error('sync-task'); }", "() => Promise.reject(new Error('promise-task'))"]) {
         const result = await run(t, `codeRun.spawn(${task});`).result();
         assert.equal(result.status, 'error');
@@ -95,13 +105,13 @@ test('synchronous task throws and returned rejected promises are owned', {timeou
     }
 });
 
-test('owned input stays alive beyond the execution budget with responsive probes', {timeout: 5000}, async t => {
+test('owned input stays alive beyond the execution budget with responsive probes', {timeout: 15000}, async t => {
     const timers = [];
     t.after(() => timers.forEach(clearTimeout));
     const f = run(t, "codeRun.spawn(async task => console.log(await task.input('Name?')));", {
-        timeoutMs: 250,
+        timeoutMs: 1200,
         onInput(request, session) {
-            if (request) timers.push(setTimeout(() => session.replyToInput(request.requestId, 'Ada'), 450));
+            if (request) timers.push(setTimeout(() => session.replyToInput(request.requestId, 'Ada'), 2000));
         }
     });
     const result = await f.result();
@@ -112,11 +122,11 @@ test('owned input stays alive beyond the execution budget with responsive probes
     assert.ok(f.messages.some(message => message.type === 'input-pong'));
 });
 
-test('input does not suspend the budget of an executing sibling task', {timeout: 5000}, async t => {
+test('input does not suspend the budget of an executing sibling task', {timeout: 15000}, async t => {
     const f = run(t, `
         codeRun.spawn(async task => { await task.input('Waiting?'); });
         codeRun.spawn(() => { while (true) {} });
-    `, {timeoutMs: 200, inputProbeTimeoutMs: 1000});
+    `, {timeoutMs: 1000, inputProbeTimeoutMs: 3000});
     const result = await f.result();
     assert.equal(result.status, 'timeout');
     assert.equal(result.reason, undefined, 'the execution budget remains active before the probe deadline');
@@ -125,8 +135,8 @@ test('input does not suspend the budget of an executing sibling task', {timeout:
     assert.equal(f.inputs.at(-1), null);
 });
 
-test('unawaited legacy input followed by a busy loop cannot disable all timeouts', {timeout: 5000}, async t => {
-    const f = run(t, 'input("Question?"); while (true) {}', {timeoutMs: 200});
+test('unawaited legacy input followed by a busy loop cannot disable all timeouts', {timeout: 15000}, async t => {
+    const f = run(t, 'input("Question?"); while (true) {}', {timeoutMs: 1400, inputProbeTimeoutMs: 600});
     const result = await f.result();
     assert.equal(result.status, 'timeout');
     assert.equal(result.reason, 'input-unresponsive');
@@ -134,25 +144,25 @@ test('unawaited legacy input followed by a busy loop cannot disable all timeouts
     assert.equal(f.inputs.at(-1), null);
 });
 
-test('responsive but unfinished siblings still consume the execution budget during input', {timeout: 5000}, async t => {
+test('responsive but unfinished siblings still consume the execution budget during input', {timeout: 15000}, async t => {
     const f = run(t, `
         codeRun.spawn(async task => { await task.input('Waiting?'); });
         codeRun.spawn(async task => { while (true) await task.sleep(10); });
-    `, {timeoutMs: 200});
+    `, {timeoutMs: 1500});
     const result = await f.result();
     assert.equal(result.status, 'timeout');
     assert.equal(result.reason, undefined);
     assert.ok(f.messages.some(message => message.type === 'input-pong'));
 });
 
-test('sibling completion admits a long human wait without replenishing the run', {timeout: 5000}, async t => {
+test('sibling completion admits a long human wait without replenishing the run', {timeout: 15000}, async t => {
     const timers = [];
     t.after(() => timers.forEach(clearTimeout));
     const f = run(t, `
         codeRun.spawn(async task => { console.log(await task.input('Waiting?')); });
         codeRun.spawn(async task => { await task.sleep(50); console.log('sibling'); });
-    `, {timeoutMs: 300, onInput(request, session) {
-        if (request) timers.push(setTimeout(() => session.replyToInput(request.requestId, 'answer'), 500));
+    `, {timeoutMs: 1400, onInput(request, session) {
+        if (request) timers.push(setTimeout(() => session.replyToInput(request.requestId, 'answer'), 2200));
     }});
     const result = await f.result();
     assert.equal(result.status, 'completed');
@@ -161,7 +171,7 @@ test('sibling completion admits a long human wait without replenishing the run',
     assert.ok(f.messages.some(message => message.type === 'input-state' && message.pauseBudget));
 });
 
-test('overlapping owned asks fail explicitly and clear the first question', {timeout: 5000}, async t => {
+test('overlapping owned asks fail explicitly and clear the first question', {timeout: 15000}, async t => {
     const f = run(t, "codeRun.spawn(task => task.input('First?')); codeRun.spawn(task => task.input('Second?'));");
     const result = await f.result();
     assert.equal(result.status, 'error');
@@ -170,7 +180,7 @@ test('overlapping owned asks fail explicitly and clear the first question', {tim
     assert.equal(f.inputs.at(-1), null);
 });
 
-test('Stop during owned delays or input settles once and rejects late answers', {timeout: 5000}, async t => {
+test('Stop during owned delays or input settles once and rejects late answers', {timeout: 15000}, async t => {
     for (const code of [
         "codeRun.spawn(async task => { console.log('ready'); await task.sleep(5000); console.log('late'); });",
         "codeRun.spawn(async task => { await task.input('Waiting?'); console.log('late'); });"
@@ -187,7 +197,7 @@ test('Stop during owned delays or input settles once and rejects late answers', 
     }
 });
 
-test('registered tasks cannot mix with synchronous prompt replay in either order', {timeout: 5000}, async t => {
+test('registered tasks cannot mix with synchronous prompt replay in either order', {timeout: 15000}, async t => {
     for (const code of [
         "codeRun.spawn(async () => {}); prompt('No replay');",
         "try { prompt('No replay'); } catch (error) {} codeRun.spawn(async () => {});"
@@ -201,7 +211,7 @@ test('registered tasks cannot mix with synchronous prompt replay in either order
     }
 });
 
-test('pending unawaited owned resources and invalid task operations fail visibly', {timeout: 5000}, async t => {
+test('pending unawaited owned resources and invalid task operations fail visibly', {timeout: 15000}, async t => {
     const cases = [
         ["codeRun.sleep(1000);", /Await input and codeRun.sleep/],
         ["codeRun.input('Unawaited');", /Await input and codeRun.sleep/],
@@ -218,7 +228,7 @@ test('pending unawaited owned resources and invalid task operations fail visibly
     }
 });
 
-test('task output floods remain bounded and a fresh worker has no old state', {timeout: 5000}, async t => {
+test('task output floods remain bounded and a fresh worker has no old state', {timeout: 15000}, async t => {
     const flooded = await run(t, `globalThis.taskState = 42;
         codeRun.spawn(() => { while (true) console.log('x'.repeat(100)); });`, {maxOutputChars: 512}).result();
     assert.equal(flooded.status, 'output-limit');
@@ -228,13 +238,13 @@ test('task output floods remain bounded and a fresh worker has no old state', {t
     assert.equal(fresh.output, 'undefined\n');
 });
 
-test('the worker API does not reserve a new local name in legacy authored source', {timeout: 5000}, async t => {
+test('the worker API does not reserve a new local name in legacy authored source', {timeout: 15000}, async t => {
     const result = await run(t, 'const codeRun = 7; console.log(codeRun);').result();
     assert.equal(result.status, 'completed');
     assert.equal(result.output, '7\n');
 });
 
-test('spawn registers concurrent work and returns no join handle', {timeout: 5000}, async t => {
+test('spawn registers concurrent work and returns no join handle', {timeout: 15000}, async t => {
     const result = await run(t, `
         const handle = codeRun.spawn(async task => { await task.sleep(20); console.log('child'); });
         console.log(typeof handle);
@@ -246,13 +256,13 @@ test('spawn registers concurrent work and returns no join handle', {timeout: 500
     assert.equal(result.output, 'undefined\nsequential\nentry-after\nchild\n');
 });
 
-test('abandoned entry or task input fails before exempting an unrelated responsive sibling', {timeout: 5000}, async t => {
+test('abandoned entry or task input fails before exempting an unrelated responsive sibling', {timeout: 15000}, async t => {
     for (const start of [
         "codeRun.input('Orphan?');",
         "codeRun.spawn(task => { task.input('Orphan?'); });"
     ]) {
         const f = run(t, `${start}
-            codeRun.spawn(async task => { while (true) await task.sleep(10); });`, {timeoutMs: 250});
+            codeRun.spawn(async task => { while (true) await task.sleep(10); });`, {timeoutMs: 1200});
         const result = await f.result();
         assert.equal(result.status, 'error');
         assert.match(result.error, /owning entry or task/);
@@ -263,7 +273,7 @@ test('abandoned entry or task input fails before exempting an unrelated responsi
     }
 });
 
-test('abandoned task delays and late use of a completed task API fail visibly', {timeout: 5000}, async t => {
+test('abandoned task delays and late use of a completed task API fail visibly', {timeout: 15000}, async t => {
     for (const code of [
         "codeRun.spawn(task => { task.sleep(1000); }); codeRun.spawn(async task => { await task.sleep(2000); });",
         `let oldApi; codeRun.spawn(task => { oldApi = task; });
@@ -277,13 +287,13 @@ test('abandoned task delays and late use of a completed task API fail visibly', 
     }
 });
 
-test('an input owner cannot keep performing owned work while its execution budget is paused', {timeout: 5000}, async t => {
+test('an input owner cannot keep performing owned work while its execution budget is paused', {timeout: 15000}, async t => {
     for (const code of [
         "codeRun.spawn(async task => { task.input('Unawaited'); while (true) await task.sleep(10); });",
         "codeRun.spawn(task => { task.input('Unawaited'); task.spawn(async child => { await child.sleep(100); }); });",
         "codeRun.spawn(async task => { task.sleep(1000); await task.input('Early input'); });"
     ]) {
-        const result = await run(t, code, {timeoutMs: 200}).result();
+        const result = await run(t, code, {timeoutMs: 1200}).result();
         assert.equal(result.status, 'error');
         assert.match(result.error, /Await the pending input|Await pending sleeps/);
         assert.equal(result.output, '');

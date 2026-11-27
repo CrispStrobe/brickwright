@@ -61,6 +61,7 @@ const openManager = async page => {
     await device.waitFor({state: 'visible', timeout: 60000});
     await device.selectOption('__manage__');
     await page.getByTestId('bw-machine-manager').waitFor({state: 'visible'});
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('i80386');
 };
 const errors = [];
 try {

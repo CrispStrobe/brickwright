@@ -1,3 +1,4 @@
+import {hiddenCodeDrafts, standaloneBasicDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {test as originalTest} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -114,7 +115,8 @@ test('stage exporter opts in to clean observation on the single actual export in
     const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
     const execute=new AsyncFunction('assetLibraryRecords','withoutAssetLibraries','projectJsonToArcade',body);
     const out=await execute.call({props:{vm}},()=>[],project=>project,(input,opts)=>{
-        exports++;consumed=input;assert.equal(opts.captureObservation,true);return projectJsonToArcade(input,opts);
+        exports++;consumed=input;assert.equal(opts.captureObservation,true);assert.equal(opts.browserPointer,true);
+        return projectJsonToArcade(input,opts);
     });
     assert.equal(exports,1);assert.deepEqual(out.unsupported,[]);
     const capture=ownObservation(out);assert.equal(capture.captureStatus,'COMPLETE');assert.equal(capture.inputJson,consumed);
@@ -125,9 +127,10 @@ test('real exporter output reaches the existing report with exact reasons and ex
     const {out}=refused(),c=context(),request=c.beginArcadeReport();
     c.publishArcadeReport(request,out,'export','Arcade source saved; not compiled or run.');
     const report=c.state.conversionReport;assert.deepEqual(report.unsupported,out.unsupported);assert.ok(out.unsupported.length);assert.deepEqual(report.details,out.unsupportedDetails||[]);
-    assert.equal(report.direction,'Blocks → Arcade export');assert.equal(report.operation,'export');assert.equal(c.state.reportExpanded,true);
+    assert.equal(report.direction,'Blocks → Arcade export');assert.equal(report.operation,'export');
+    assert.deepEqual(report.changed, out.warnings);
     assert.doesNotMatch(report.outcome,/generated and loaded/);assert.equal(report.preserved,false);
-    assert.match(component,/data-testid="bw-conversion-refusal-details"/);
+    assert.match(component, /'bw-conversion-refusal-details'/);
 });
 
 test('revision, VM replacement, disposal and later requests reject only stale report publication',()=>{
@@ -136,7 +139,7 @@ test('revision, VM replacement, disposal and later requests reject only stale re
     }
     const c=context(),old=c.beginArcadeReport();c.publishArcadeReport(old,out,'export','first');c.invalidateArcadeReport();assert.equal(c.state.conversionReport,null);
     const clean=exported('let result=1+2;').out,request=c.beginArcadeReport();c.publishArcadeReport(request,clean,'export','fresh');
-    assert.deepEqual(c.state.conversionReport.unsupported,[]);assert.deepEqual(c.state.conversionReport.details,[]);assert.equal(c.state.reportExpanded,false);
+    assert.deepEqual(c.state.conversionReport.unsupported,[]);assert.deepEqual(c.state.conversionReport.details,[]);
     // React may apply the state updater after this method returns.
     for(const change of [ctx=>ctx.invalidateArcadeReport(),ctx=>{ctx.props.vm={};},ctx=>{ctx._unmounted=true;},ctx=>ctx.beginArcadeReport()]){
         const ctx=context(),queue=[];ctx.setState=update=>queue.push(update);

@@ -71,6 +71,20 @@ const MenuItem = ({children, className, ariaLabel, expanded = false, disabled = 
     const [keyboardClosed, setKeyboardClosed] = React.useState(false);
     const hasSubmenu = React.Children.toArray(children).some(child => child && child.type === Submenu);
     const open = !keyboardClosed && (expanded || keyboardOpen);
+    // A long submenu (the CAD editor's tools, say) is moved up and scrolls inside the window
+    // rather than running off its bottom edge, where a tablet could never reach its last items.
+    const fitSubmenu = () => requestAnimationFrame(() => {
+        const submenu = ref.current && Array.from(ref.current.children).find(child => child.classList.contains(styles.submenu));
+        const list = submenu && submenu.firstElementChild;
+        if (!list || getComputedStyle(submenu).display === 'none') return;
+        submenu.style.top = '';
+        list.style.maxHeight = '';
+        const box = submenu.getBoundingClientRect(), bottom = window.innerHeight - 8;
+        const shift = box.bottom > bottom ? Math.max(0, Math.min(box.bottom - bottom, box.top - 8)) : 0;
+        if (shift) submenu.style.top = `${-1 - shift}px`;
+        if (box.bottom - shift > bottom) list.style.maxHeight = `${Math.max(120, bottom - (box.top - shift))}px`;
+    });
+    React.useLayoutEffect(() => { if (hasSubmenu && open) fitSubmenu(); }, [hasSubmenu, open]);
     const closeSubmenu = () => {
         setKeyboardOpen(false);
         setKeyboardClosed(true);
@@ -94,7 +108,7 @@ const MenuItem = ({children, className, ariaLabel, expanded = false, disabled = 
             aria-haspopup={hasSubmenu ? 'menu' : undefined}
             aria-expanded={hasSubmenu ? open : undefined}
             data-keyboard-closed={keyboardClosed || undefined}
-            onMouseEnter={() => setKeyboardClosed(false)}
+            onMouseEnter={() => { setKeyboardClosed(false); if (hasSubmenu) fitSubmenu(); }}
             onBlur={event => {
                 if (!event.currentTarget.contains(event.relatedTarget)) {
                     setKeyboardOpen(false);

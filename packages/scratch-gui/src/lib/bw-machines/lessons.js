@@ -23,6 +23,7 @@
 // SLOT NAME, before anything boots. The licence line and the source link are
 // shown next to the Run button, so the offer travels with the binary.
 
+import {MSBASIC_ROM_SHA256} from '../bw-debug/basic-startup.js';
 import {remoteMachineImagesAllowed} from '../distribution-policy.js';
 //
 // WHY raw.githubusercontent.com AT A COMMIT, not the release download: a
@@ -108,7 +109,6 @@ const CPM_BBCBASIC_SHA256 = '833839801fe3edbb73b91613eb43ea6052822d2d09dafd08639
 // whose config (RAM $0000-$3FFF, ROM $8000-$FFFF, 65C51 ACIA console at $5000) is
 // given inline here — the same config bw-board's EATER6502 preset uses, which the
 // media-lab project's proof relies on. Keep the SHA in step with the shipped ROM.
-const MSBASIC_ROM_SHA256 = '89c5072ea5162f8990676492d8a4c04c8b4dd3d54186e48ca576f93f2e63816c';
 const EATER6502_CONFIG = Object.freeze({
     clockHz: 1_000_000,
     regions: [
@@ -150,16 +150,22 @@ const TABLE = {
             'Run fetches the floppy ({size}) from brickwright-media-lab and checks its SHA-256 first.',
         'elks.source': 'Source code',
         'cpm.title': 'BBC BASIC on CP/M 2.2',
+        'cpm.vdpTitle': 'BBC BASIC on CP/M 2.2 + TMS9918A',
+        'cpm.vdpSummary': 'Click the 40×24 Controller screen to type. At A>, run BBCBASIC, then try PRINT 2+2. ' +
+            'The Z80 drives the VDP at ports $98 and $99. CP/M and BBC BASIC are bundled.',
         'cpm.summary': 'DRI’s real CP/M 2.2 (CCP+BDOS, not a shim) boots on the emulated Z80 to the A> prompt. ' +
             'BBC BASIC is on drive A: — type DIR to list it, BBCBASIC to run it. ' +
             'The console is the Debug panel’s serial terminal. Everything ships in the app — no download.',
         'cpm.licence': 'CP/M 2.2 is DRI’s redistributable release (2022 grant); BBC BASIC (Z80) is zlib (R.T. Russell). ' +
             'Both ship in this app.',
         'cpm.source': 'Project',
+        'bbcVideo.title': 'BBC-style video on 6502',
+        'bbcVideo.summary': 'Focus the Controller display and press 0–6 to change modes. The 6502 draws both the text and the colour bars into screen RAM.',
+        'bbcVideo.licence': 'Original Brickwright demonstration ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC on 6502',
         'msbasic.summary': 'Microsoft’s original 1978 6502 BASIC (V1.1, the MIT release) boots on the emulated ' +
-            'Ben Eater 6502 to the MICROSOFT BASIC V1.1 banner and the OK prompt. Answer MEMORY SIZE? and ' +
-            'WIDTH? with Enter, then type a program (PRINT 2+2, or 10 FOR I=1 TO 3 …). ' +
+            'Ben Eater 6502 to the OK prompt with the default memory size and terminal width. ' +
+            'Try PRINT 2+2 in the debugger’s serial console. ' +
             'The console is the Debug panel’s serial terminal (the 65C51 ACIA). Ships in the app — no download.',
         'msbasic.licence': 'Microsoft BASIC for 6502 is MIT (Microsoft’s 1978 source, MIT release; built with ca65). ' +
             'It ships in this app.',
@@ -188,16 +194,22 @@ const TABLE = {
             'Ausführen lädt die Diskette ({size}) von brickwright-media-lab und prüft vorher ihre SHA-256.',
         'elks.source': 'Quellcode',
         'cpm.title': 'BBC BASIC auf CP/M 2.2',
+        'cpm.vdpTitle': 'BBC BASIC auf CP/M 2.2 + TMS9918A',
+        'cpm.vdpSummary': 'Klicke auf den 40×24-Controller-Bildschirm. Gib bei A> BBCBASIC und dann PRINT 2+2 ein. ' +
+            'Der Z80 steuert den VDP über die Ports $98 und $99. CP/M und BBC BASIC sind enthalten.',
         'cpm.summary': 'DRIs echtes CP/M 2.2 (CCP+BDOS, kein Shim) startet auf dem emulierten Z80 am A>-Prompt. ' +
             'BBC BASIC liegt auf Laufwerk A: — DIR listet es, BBCBASIC startet es. ' +
             'Die Konsole ist das serielle Terminal im Debug-Panel. Alles ist in der App enthalten — kein Download.',
         'cpm.licence': 'CP/M 2.2 ist DRIs weitergabefähige Ausgabe (Freigabe 2022); BBC BASIC (Z80) steht unter zlib (R.T. Russell). ' +
             'Beides ist in dieser App enthalten.',
         'cpm.source': 'Projekt',
+        'bbcVideo.title': 'BBC-artige Bildausgabe auf dem 6502',
+        'bbcVideo.summary': 'Die Controller-Anzeige anklicken und mit 0–6 den Modus wechseln. Der 6502 zeichnet Text und Farbbalken direkt in den Bildspeicher.',
+        'bbcVideo.licence': 'Brickwright-Demo-ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC auf 6502',
         'msbasic.summary': 'Microsofts ursprüngliches 6502-BASIC von 1978 (V1.1, die MIT-Ausgabe) startet auf dem ' +
-            'emulierten Ben-Eater-6502 mit dem Banner MICROSOFT BASIC V1.1 und dem OK-Prompt. Beantworte MEMORY SIZE? ' +
-            'und WIDTH? mit der Eingabetaste und tippe dann ein Programm (PRINT 2+2 oder 10 FOR I=1 TO 3 …). ' +
+            'emulierten Ben-Eater-6502 mit Standardwerten für Speichergröße und Terminalbreite bis zum OK-Prompt. ' +
+            'Probiere PRINT 2+2 im seriellen Terminal des Debuggers. ' +
             'Die Konsole ist das serielle Terminal im Debug-Panel (der 65C51-ACIA). In der App enthalten — kein Download.',
         'msbasic.licence': 'Microsoft BASIC für 6502 steht unter MIT (Microsofts Quellcode von 1978, MIT-Ausgabe; mit ca65 gebaut). ' +
             'Es ist in dieser App enthalten.',
@@ -318,7 +330,7 @@ export function lessonMachines (locale) {
     // self-contained build. A `cpmsys` boot slot selects the real-CP/M boot
     // (debug-runner attachZ80 cpm-system branch, which also loads the system ROMs
     // from static/roms); the slot points at BBC BASIC, placed on drive A:. The
-    // title makes its CP/M 8.3 name BBCBASIC.COM, so it coincides with the copy
+    // program name is BBCBASIC.COM, so it coincides with the copy
     // the boot already loads — one A: entry, not a duplicate. The console is the
     // Debug serial terminal (no video widget). CP/M 2.2 is DRI-redistributable
     // and BBC BASIC is zlib, so neither is GPL media — hence not behind the gate.
@@ -332,6 +344,7 @@ export function lessonMachines (locale) {
         tags: ['lesson', 'cpm'],
         provenance: {
             source: 'brickwright-media-lab/projects/bbc-basic-z80',
+            program: {name: 'BBCBASIC.COM'},
             license: 'CP/M 2.2 (DRI redistributable, 2022 grant) + zlib (BBC BASIC Z80)',
             sourceCode: `${MEDIA_LAB}/tree/main/projects/bbc-basic-z80`
         }
@@ -341,6 +354,22 @@ export function lessonMachines (locale) {
         summary: t('cpm.summary'),
         licence: t('cpm.licence'),
         source: `${MEDIA_LAB}/tree/main/projects/bbc-basic-z80`,
+        sourceLabel: t('cpm.source'),
+        size: '25 KB'
+    });
+
+    rows.push({
+        config: newMachineConfig({
+            ...cpmConfig,
+            id: 'lesson-cpm-z80-vdp',
+            title: t('cpm.vdpTitle'),
+            machineConfig: 'CPM64K_TMS9918',
+            widgets: [{name: 'TMS9918A', type: 'simplevga', source: 'video',
+                config: {width: 256, height: 192}}]
+        }),
+        summary: t('cpm.vdpSummary'),
+        licence: t('cpm.licence'),
+        source: cpmConfig.provenance.sourceCode,
         sourceLabel: t('cpm.source'),
         size: '25 KB'
     });
@@ -373,6 +402,31 @@ export function lessonMachines (locale) {
         source: `${MEDIA_LAB}/tree/main/projects/ms-basic-6502`,
         sourceLabel: t('msbasic.source'),
         size: '32 KB'
+    });
+
+    rows.push({
+        config: newMachineConfig({
+            id: 'lesson-bbc-video-6502',
+            title: t('bbcVideo.title'),
+            executionMode: 'functional',
+            machine: 'eater6502',
+            machineConfig: {
+                clockHz: 2_000_000,
+                regions: [{kind: 'ram', start: 0x0000, end: 0x7fff}, {kind: 'rom', start: 0xc000, end: 0xffff}],
+                chips: [{kind: 'bbcvideo', name: 'bbcVideo', at: 0x8000},
+                    {kind: 'console', name: 'keyboard', at: 0x9000}]
+            },
+            slots: {rom: {url: 'static/roms/bbc-video-6502.rom',
+                sha256: 'e6680ddfce4ea46fbed0af304aa8d10820fe1aa8ac68cc8e4ca482468701927e'}},
+            bootOrder: ['rom'],
+            tags: ['lesson', 'video'],
+            widgets: [{name: 'BBC-style display', type: 'simplevga', source: 'video',
+                config: {width: 640, height: 256, displayAspect: 4 / 3}}],
+            provenance: {source: 'Brickwright', license: 'BSD-3-Clause'}
+        }),
+        summary: t('bbcVideo.summary'),
+        licence: t('bbcVideo.licence'),
+        size: '16 KB'
     });
 
     return rows;

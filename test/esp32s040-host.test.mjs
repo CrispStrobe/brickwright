@@ -67,12 +67,6 @@ const runnerFunctions = names => names.map(name => {
     assert.ok(declaration, `missing actual runner function ${name}`);
     return withTestImports(declaration);
 }).join('\n');
-const runnerBindings = names => names.map(name => {
-    const declaration = runnerDeclaration.body.body.find(node => node.type === 'VariableDeclaration' &&
-        node.declarations.some(binding => binding.id.name === name));
-    assert.ok(declaration, `missing actual runner binding ${name}`);
-    return withTestImports(declaration);
-}).join('\n');
 const runnerObject = runnerDeclaration.body.body.filter(node => node.type === 'VariableDeclaration')
     .flatMap(node => node.declarations).find(node => node.id.name === 'runner').init;
 const runnerMethods = names => names.map(name => {
@@ -297,13 +291,15 @@ function runnerLifecycle ({pauseAt, firmware = {name: 'test.bin', bytes: Uint8Ar
         const esp32S040McuId = null, esp32s3Console = 'uart0';
         let board = null, target = null, session = null, symbols = null, destroyed = false;
         let releaseEsp32S040Target = null;
-        ${runnerBindings(['cp1LessonBatch', 'cp2Recording', 'cancelCp2Recording', 'unsubscribeCp1Lessons'])}
         let engineNotes = [], serialLines = [], variableTable = [], pinTable = [], status = {};
         let hddSnapshotOwner = {}, serialTerminal, serialEsc, terminalOutput, linuxProgressWatch;
         let imageProvenance, boardBaseNs, reverseCursor, blockOf, yieldOf;
         let unsubscribeBps, unsubscribeDebugEvents, unsubscribeDebugInputs, debugEventsTarget;
         let i8086ExecutionResult, activeRunTo, runToTarget, runToController;
+        let cp1LessonBatch = null, unsubscribeCp1Lessons, disposeTerminal, terminalFrame;
+        const xtKeyboard = null, pcSerialInput = null, basicStartup = null, cardiacInitialSnapshot = null;
         const noop = () => {}, projectStc = () => null, selectDebugTargetKind = (_device, kind) => kind;
+        const cancelCp2Recording = noop;
         const beginForwardBranch = () => ({accepted: true}), reverseContinue = {reset: noop};
         const resetEventBreakpointRuntime = noop, syncBreakpoints = noop, subscribeBreakpoints = () => noop;
         const boardTimeBase = () => 0, schedule = () => {counts.scheduled++;}, unschedule = noop;
@@ -315,8 +311,10 @@ function runnerLifecycle ({pauseAt, firmware = {name: 'test.bin', bytes: Uint8Ar
         const snapshotEmitter = {immediate: () => phases.push(status.phase)};
         const S = value => value;
         class CustomEvent {constructor(type) {this.type = type;}}
+        ${exported('runnerCompilesProjectBlocks')}
         ${runnerFunctions(['attach', 'attachLabwiredTarget', 'attachEsp32S040', 'esp32S3BootOptions',
-        'finishLabwiredAttach', 'builtFromUserFirmware', 'setStatus', 'publishCp1Observations', 'emit'])}
+        'finishLabwiredAttach', 'builtFromUserFirmware', 'setStatus', 'publishCp1Observations',
+        'publishBasicSerial', 'emit'])}
         const runner = {${runnerMethods(['start', 'stop', 'destroy'])}, variables: () => []};
         return {runner, board: () => board, state: () => status};
     `)({vm, counts, phases, window, userFirmware: firmware, labwiredChip: selection},
@@ -533,7 +531,8 @@ for (const pauseAt of ['creation', 'start']) {
             if (pauseAt === 'creation') {reached.resolve(); await resume.promise;}
             return old;
         };
-        panel.mirrorLabwiredDisplay = runner => events.push(runner === old ? 'old:mirror' : 'new:mirror');
+        panel.state.kind = 'labwired';
+        panel.mirrorRunnerDisplay = runner => events.push(runner === old ? 'old:mirror' : 'new:mirror');
         const starting = panel.onStart();
         await reached.promise;
         panel._teardownRunner();
@@ -550,13 +549,21 @@ for (const pauseAt of ['creation', 'start']) {
 
 test('the current panel runner still starts and mirrors normally, and paused runs resume', async () => {
     const panel = panelHost(), events = [];
-    const current = {start: async () => events.push('start'), resume: () => events.push('resume')};
+    const running = {phase: 'running'};
+    const current = {start: async () => events.push('start'), resume: () => events.push('resume'),
+        state: () => running};
+    panel.state.kind = 'labwired';
     panel._createRunner = async () => current;
-    panel.mirrorLabwiredDisplay = runner => {assert.equal(runner, current); events.push('mirror');};
+    panel.mirrorRunnerDisplay = runner => {assert.equal(runner, current); events.push('mirror');};
+    panel._mountGuestTerminal = (runner, state) => {
+        assert.equal(runner, current);
+        assert.equal(state, running);
+        events.push('terminal');
+    };
     await panel.onStart();
     panel.state.ui.phase = 'paused';
     await panel.onStart();
-    assert.deepEqual(events, ['start', 'mirror', 'resume']);
+    assert.deepEqual(events, ['start', 'mirror', 'terminal', 'resume']);
 });
 
 test('the checked host source connects exact owner, input and live video and releases before runner destruction', () => {
@@ -574,16 +581,11 @@ test('the checked host source connects exact owner, input and live video and rel
         node.expression.callee.property.name === 'releaseEsp32S040Input');
     assert.ok(releaseIndex >= 0, 'unmount unconditionally releases the S040 owner');
     assert.ok(statements.slice(0, releaseIndex).every(node => {
-        if (node.type !== 'ExpressionStatement') return false;
-        const expression = node.expression;
-        // Gallery invalidation only fences a pending promise; it cannot call
-        // the runner or release the target before the final accepted touch-up.
-        if (expression.type === 'AssignmentExpression' && expression.operator === '=' &&
-            expression.left.type === 'MemberExpression' && expression.left.object.type === 'ThisExpression' &&
-            expression.left.property.name === 'galleryArtworkRequest' && expression.right.type === 'NullLiteral') return true;
-        return expression.type === 'CallExpression' && expression.callee.type === 'MemberExpression' &&
-            expression.callee.object.name === 'window' && expression.callee.property.name === 'removeEventListener';
-    }), 'only gallery request invalidation and window listener detachment may precede owner release; other cleanup follows it');
+        if (generate(node).code === 'this.galleryArtworkRequest = null;') return true;
+        const call = node.expression;
+        return call?.type === 'CallExpression' && call.callee.type === 'MemberExpression' &&
+            call.callee.object.name === 'window' && call.callee.property.name === 'removeEventListener';
+    }), 'only invalidating pending artwork and detaching window listeners may precede input release');
     assert.doesNotMatch(circuitSource, /data-no-code-indicator/);
     assert.match(panelSource, /esp32S040McuId: this\.state\.esp32S040McuId \|\| null/);
     assert.match(panelSource, /data-esp32s040-part/);

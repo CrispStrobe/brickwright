@@ -265,6 +265,21 @@ architecture. Lessons sit beside the live project and use prediction,
 observation, hints, resumable progress, and manual fallbacks — not a
 click-through slideshow.
 
+### Follow a whole computer with CARDIAC
+
+Open **Code → CARDIAC** to explore a decimal computer with 100 memory words
+and ten instructions. Assemble labelled source, feed numeric cards, inspect
+every memory change, set a breakpoint, or predict the next program counter
+and accumulator before taking a step. Code and Controller share one machine.
+
+Six original English/German lessons connect arithmetic and branching to
+bootstrapping and self-modifying code. The night-light example adds an explicitly
+modern circuit adapter: sample a voltage into an input card, let the program
+make its decision, and watch the solved resistor/LED circuit respond. Saved
+projects keep unfinished source separately from the last loaded image and
+reopen paused. See the [CARDIAC Lab guide](docs/CARDIAC-LAB.md) for the exact
+compatibility profile, examples, reference comparisons and verification scope.
+
 ### Use it as a native app
 
 One Tauri 2 project produces apps for **macOS, Windows, Linux, iOS and
@@ -294,6 +309,8 @@ bwlite 8051 build program.bw --out program.ihx
 bwlite 8051 flash program.ihx --port /dev/cu.usbserial-XXXX
 bwlite toolchain status
 bwlite machine validate machine.json
+bwlite circuit test 05-counter --device stc12c5a60s2
+bwlite circuit test --json > circuit-report.json
 ```
 
 `convert` reads `.bw`, `.sb3`, `.c`, `.py`, `.js` and `.bas`, and writes
@@ -303,6 +320,13 @@ uses installed SDCC; `8051 flash` uses installed `stcgal` and an explicit
 serial port (and the STC's usual cold power-cycle into its ISP bootloader).
 `machine` manages emulator configurations and boot plans; `toolchain`, `fpga`
 and `makecode` forward to their repository CLIs.
+
+`circuit test` loads, powers and advances every selected gallery bench with the
+same circuit engine the app uses. The JSON report gives a separate functional
+verdict. Scripted scenarios run the actual lesson program in the headless
+Scratch VM and measure the circuit's response to inputs. A bench without a
+scenario is marked `unverified` for behavior. Use `--smoke-only` to skip
+functional checks. Failed or incomplete checks set exit status 1.
 
 SPIKE over USB needs LEGO MINDSTORMS MicroPython firmware and Python with
 `pyserial`. See the [CLI guide](docs/CLI.md) (it maps old `bw` references to

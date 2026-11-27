@@ -50,26 +50,13 @@ test('both surfaces still render through ONE markdown implementation', () => {
     }
 });
 
-test('the C note has the (i) panel that BASIC and ASM already had, and is not inline in the toolbar', () => {
+test('language-specific notes share the Code help popover with wrapping', () => {
     const importer = readFileSync(IMPORTER, 'utf8');
-    assert.match(importer, /data-testid="bw-c-info-toggle"/, 'the C note has no (i) toggle');
-    assert.match(importer, /data-testid="bw-c-info-panel"/, 'the C note has no panel');
-    assert.doesNotMatch(importer, /<span style=\{\{fontSize: 13, color: '#64748b'\}\}>\{this\.L\.cNote\}<\/span>/,
-        'the C note is inline in the toolbar row again');
-    // and the panel wraps, which is the whole complaint
-    const panel = importer.slice(importer.indexOf('bw-c-info-panel') - 600, importer.indexOf('bw-c-info-panel'));
-    assert.match(panel, /overflowWrap: 'anywhere'/, 'the C panel does not wrap long tokens');
-    assert.match(panel, /maxWidth: 'min\(880px, 94vw\)'/, 'the C panel does not bound its width');
-});
-
-test('every language note that exists is reachable the same way (no odd one out)', () => {
-    const importer = readFileSync(IMPORTER, 'utf8');
-    for (const lang of ['basic', 'asm', 'c']) {
-        assert.match(importer, new RegExp(`data-testid="bw-${lang}-info-toggle"`),
-            `the ${lang} note has no (i) toggle while its siblings do`);
-        assert.match(importer, new RegExp(`data-testid="bw-${lang}-info-panel"`),
-            `the ${lang} note has no panel while its siblings do`);
-    }
+    assert.match(importer, /data-testid="bw-code-info"/);
+    assert.match(importer, /testId="bw-code-info-popover"/);
+    assert.match(importer, /data-code-help[^\n]*overflowWrap: 'anywhere'/);
+    assert.match(importer, /const note = \{basic: this\.L\.basicNote, asm: this\.L\.asmNote, nqc: this\.L\.nqcNote, c: this\.L\.cNote\}/);
+    assert.doesNotMatch(importer, /bw-(?:asm|basic|nqc|c)-info-toggle/);
 });
 
 // The tone gap itself is the EMITTER's property, and the emitter (sb3-creator.js)

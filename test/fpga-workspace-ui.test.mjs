@@ -21,8 +21,12 @@ const jsx = require('@babel/plugin-transform-react-jsx');
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/fpga-tab.jsx', import.meta.url), 'utf8');
 const program = parser.parse(source, {sourceType: 'module', plugins: ['jsx']}).program;
 const declaration = name => program.body.flatMap(node => node.declarations || []).find(node => node.id.name === name);
-const strings = declaration('L10N').init;
-const locales = vm.runInNewContext(`(${source.slice(strings.start, strings.end)})`);
+const literal = name => {
+    const {start, end} = declaration(name).init;
+    return vm.runInNewContext(`(${source.slice(start, end)})`);
+};
+const locales = literal('L10N');
+const workspaceModes = literal('workspaceModes');
 const renderNode = declaration('FpgaTab').init.body.body.findLast(node => node.type === 'ReturnStatement').argument;
 const renderCode = babel.transformSync(`(${source.slice(renderNode.start, renderNode.end)})`, {
     configFile: false, babelrc: false, plugins: [jsx], comments: false
@@ -31,7 +35,7 @@ const element = (type, props, ...children) => ({type, props: {...props, children
 const nodes = (node, visibleOnly = false, visible = true) => {
     if (!node || typeof node !== 'object') return [];
     visible = visible && !node.props.hidden;
-    const descendantsVisible = visible && node.type !== 'FpgaInfo';
+    const descendantsVisible = visible && node.type !== 'FpgaInfo' && (node.type !== 'Popup' || node.props.open);
     return [...(!visibleOnly || visible ? [node] : []),
         ...node.props.children.flatMap(child => nodes(child, visibleOnly, descendantsVisible))];
 };
@@ -46,12 +50,12 @@ const button = (tree, label) => nodes(tree).find(node => node.type === 'button' 
 function fixture (overrides = {}) {
     const state = {
         React: {createElement: element, Fragment: 'Fragment', Suspense: 'Suspense'},
-        FpgaInfo: 'FpgaInfo', Icon: 'Icon', Row: 'Row', FpgaGateBuilderRf: 'Canvas',
+        FpgaInfo: 'FpgaInfo', Icon: 'Icon', Popup: 'Popup', Row: 'Row', FpgaGateBuilderRf: 'Canvas',
         FpgaSchematic: 'Schematic', FpgaWaveform: 'Waveform', L10N: locales,
         pickLocale: locale => locale === 'de' ? 'de' : 'en', props: {locale: 'en'}, T: locales.en,
         tools: {button: {}, primary: {}, pressed: {}, stop: {}}, toolbar: {}, selector: {}, field: {},
         EXAMPLES, selectedExample: EXAMPLES[0], exampleId: EXAMPLES[0].id,
-        workspace: 'design', editor: 'canvas', realization: 'demo', buildTarget: 'service',
+        workspace: 'design', workspaceMenuOpen: false, workspaceModes, editor: 'canvas', realization: 'demo', buildTarget: 'service',
         simulationView: 'schematic', controllerDisplay: 'leds', cmosGate: 'nand', icGate: 'and',
         icCircuit: 'half_adder', LOGIC_IC_GATES: ['and', 'or'], IC_CIRCUITS: {half_adder: {label: 'Half adder'}},
         circuitLabel: spec => spec.label, tr: (locale, key) => key,
@@ -68,7 +72,7 @@ function fixture (overrides = {}) {
         wireDemoBoard: () => {}, realizeGate: () => {}, realizeIcGate: () => {}, realizeIcCircuit: () => {},
         ...overrides
     };
-    for (const name of ['Workspace', 'Editor', 'ExampleId', 'Realization', 'BuildTarget', 'SimulationView',
+    for (const name of ['Workspace', 'WorkspaceMenuOpen', 'Editor', 'ExampleId', 'Realization', 'BuildTarget', 'SimulationView',
         'GuideDismissed', 'ControllerDisplay', 'CmosGate', 'IcGate', 'IcCircuit', 'Hdl', 'Text', 'Synth', 'Seed', 'ClockCycles',
         'AutoRun', 'Mirrored', 'Inputs', 'NetlistText', 'Local', 'LocalBusy', 'Building', 'FlashMsg', 'Backend']) {
         const key = name[0].toLowerCase() + name.slice(1);

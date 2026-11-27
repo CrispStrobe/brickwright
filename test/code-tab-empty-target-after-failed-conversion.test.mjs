@@ -26,6 +26,7 @@ const pane = (deriveResult) => {
             buffers: {python: 'import hub\nhub.light_matrix.show_image("HAPPY")\n', pseudocode: ''}},
         L: {stConverting: to => `Converting to ${to}…`, stCantShow: (to, e) => `Can't show as ${to}: ${e}`},
         leaveCp1 () {},
+        detachCardiac () {},
         deriveBuffer: async () => deriveResult,
         setState (patch) { Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch); }
     });

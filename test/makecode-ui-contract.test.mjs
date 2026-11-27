@@ -125,7 +125,7 @@ test('costumes are handed over under the names compile() reads', () => {
     for (const field of ['sprite:', 'filename:', 'svg:', 'mode:']) {
         assert.ok(uploads.includes(field), `uploads entries must carry ${field}`);
     }
-    const signature = 'async compile ({strict = false, pseudocode = null} = {}) {';
+    const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {';
     const method = balancedFrom(source, source.indexOf(signature) + signature.length - 1, '{', '}');
     assert.match(method, /const uploads = this\.state\.uploads/);
     const compile = scopeAfter(method, 'uploads.forEach');
@@ -150,7 +150,7 @@ test('the micro:bit tab appears for an imported .py, which has no DEVICE line', 
     // Hiding it would hide the Run-on-simulator button for the one
     // imported program that needs no translation at all.
     assert.match(source,
-        /\['microbit', 'calliopemini'\]\.includes\(this\.currentDevice\(\)\) \|\|\s*\(this\.state\.buffers\.micropython \|\| ''\)\.trim\(\)/,
+        /\['microbit', 'calliopemini'\]\.includes\(codeDevice\) \|\|\s*\(!codeDevice && \(this\.state\.buffers\.micropython \|\| ''\)\.trim\(\)\)/,
         'and it reads that buffer defensively — see the buffer-shape test below');
     assert.match(source, /importedPython: res\.kind === 'micropython'/);
 });

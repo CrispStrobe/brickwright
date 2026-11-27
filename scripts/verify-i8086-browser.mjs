@@ -97,7 +97,7 @@ const waitForCodeIdle = async () => page.waitForFunction(() => {
 
 try {
     if (!url) ({server, url} = await serveBuild());
-    browser = await chromium.launch({headless: true});
+    browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
     page = await browser.newPage({viewport: {width: 1600, height: 1050}});
     for (const name of ['bw-board.MIT.txt', 'bw-circuit-ui.MPL-2.0.txt', 'bw-packages.sources.json']) {
         const response = await page.request.get(new URL(`static/licenses/${name}`, url).href);
@@ -126,6 +126,7 @@ try {
             sessionStorage.setItem('bw-i8086-browser-initialized', '1');
         }
         localStorage.setItem('bw-starter-v1-complete', '1');
+        localStorage.setItem('bw-debug-diagnostics', '1');
     });
 
     // Keep the built app and its lazy chunks local, but make a hosted compiler
@@ -177,12 +178,14 @@ try {
 
     await page.getByTestId('bw-asm-assemble').click();
     await page.waitForFunction(() => /Assembled \d+ bytes in this browser.*booting the 8086 bench/.test(
-        document.querySelector('[data-testid="bw-code-status"]')?.textContent || ''),
+        document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || ''),
     null, {timeout: 30000});
     record('the ASM button reports the local route and boots the 8086 bench', true);
 
     await page.getByRole('tab', {name: /Circuit/}).click();
 
+    const surface = page.getByRole('combobox', {name: 'Controller surface'});
+    await surface.selectOption('terminal');
     await page.waitForFunction(() => /Type something\. ESC quits\./.test(
         document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''),
     null, {timeout: 30000});
@@ -191,8 +194,9 @@ try {
     // Read the actual canvas. DOM text alone would stay green if the CGA face
     // stopped painting; requiring dark and foreground samples rejects both a
     // blank canvas and a one-colour fill.
+    await surface.selectOption('screen');
     await page.waitForFunction(() => {
-        const canvas = document.querySelector('[data-vdp-screen] canvas');
+        const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
         if (!canvas || !canvas.width || !canvas.height) return false;
         const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
         let dark = 0;
@@ -204,14 +208,13 @@ try {
         }
         return dark > 100 && foreground > 40;
     }, null, {timeout: 30000, polling: 'raf'});
-    const canvasSize = await page.locator('[data-vdp-screen] canvas').evaluate(
+    const canvasSize = await page.getByTestId('bw-machine-canvas').evaluate(
         canvas => `${canvas.width}x${canvas.height}`);
     record('the CGA face contains background and rendered foreground pixels', true, canvasSize);
 
-    const input = page.getByTestId('bw-serial-input');
-    await input.waitFor({state: 'visible', timeout: 15000});
-    await input.fill('Z');
-    await input.press('Enter');
+    await page.getByTestId('bw-machine-canvas').click();
+    await page.keyboard.press('Shift+KeyZ');
+    await surface.selectOption('terminal');
     await page.waitForFunction(() => /Z\s+5A/.test(
         document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''),
     null, {timeout: 20000});
@@ -229,27 +232,23 @@ try {
 
     await page.getByTestId('bw-asm-assemble').click();
     await page.getByRole('tab', {name: /Circuit/}).click();
-    await page.waitForFunction(() => {
-        const status = document.querySelector('[data-testid="bw-code-status"]')?.textContent || '';
-        const led = document.querySelector('[data-testid="bw-led-ppi1-a-7"]');
-        return /Assembled \d+ bytes in this browser.*booting the 8086 bench/.test(status) &&
-            led && !/not driven/.test(led.getAttribute('aria-label') || '');
-    }, null, {timeout: 30000});
-
-    const topLed = page.getByTestId('bw-led-ppi1-a-7');
-    const firstTopState = await topLed.getAttribute('aria-label');
+    await surface.selectOption('widgets');
+    const gpio = page.getByTestId('bw-ctl-bargraph-PC GPIO');
+    await gpio.waitFor();
+    const initialPortA = Number((await gpio.innerText()).trim());
     await page.waitForFunction(before => {
-        const now = document.querySelector('[data-testid="bw-led-ppi1-a-7"]')?.getAttribute('aria-label');
-        return now && now !== before && !/not driven/.test(now);
-    }, firstTopState, {timeout: 5000, polling: 'raf'});
-    record('the running 8255 program changes a driven output', true, firstTopState || 'no initial label');
+        const output = document.querySelector('[data-testid="bw-ctl-bargraph-PC GPIO"]');
+        return output && (Number(output.textContent) & 0x80) !== (before & 0x80);
+    }, initialPortA, {timeout: 10000});
+    record('the running 8255 program changes a driven output', true, String(initialPortA));
 
-    const pc0 = page.getByTestId('bw-switch-ppi1-c-0');
+    const pc0 = page.getByTestId('bw-ctl-button-PC switch');
     await pc0.waitFor({state: 'visible', timeout: 15000});
     await pc0.click();
-    await page.waitForFunction(() => [0, 1, 2, 3].every(bit =>
-        /: on$/.test(document.querySelector(`[data-testid="bw-led-ppi1-a-${bit}"]`)
-            ?.getAttribute('aria-label') || '')),
+    await page.waitForFunction(() => {
+        const output = document.querySelector('[data-testid="bw-ctl-bargraph-PC GPIO"]');
+        return output && (Number(output.textContent) & 0x0f) === 0x0f;
+    },
     null, {timeout: 5000, polling: 'raf'});
     record('closing 8255 PC0 makes the program drive PA0..PA3 high', true);
 
@@ -294,8 +293,18 @@ try {
             time: String(target.timeNs()), mem: Array.from(target.readMem('mem', 0, 256))});
     }, projectState));
     await page.screenshot({path: join(artifacts, 'execution-diagnostics.png'), fullPage: true});
+    // On a warm runner the benchmark can finish before a second browser
+    // round trip. Use the visible Cancel control on its first rendered frame.
+    await lab.evaluate(element => {
+        const observer = new MutationObserver(() => {
+            const cancel = element.querySelector('[data-testid="i8086-lab-cancel"]');
+            if (!cancel) return;
+            observer.disconnect();
+            cancel.click();
+        });
+        observer.observe(element, {childList: true, subtree: true});
+    });
     await page.getByTestId('i8086-lab-run').click();
-    await page.getByTestId('i8086-lab-cancel').click();
     await page.waitForFunction(() => /cancelled/.test(document.querySelector('[data-testid="i8086-lab-status"]')?.textContent || ''),
         null, {timeout: 15000});
     record('benchmark cancellation returns control without an accepted result', true);

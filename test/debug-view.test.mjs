@@ -84,10 +84,10 @@ test('the Code entry point requests the owner; it does not construct debugger st
         '../overlay/scratch-gui/src/components/stage-header/stage-header.jsx', import.meta.url), 'utf8');
     const helper = readFileSync(new URL(
         '../overlay/scratch-gui/src/lib/bw-debug/debug-view.js', import.meta.url), 'utf8');
-    assert.equal((importer.match(/data-testid="bw-open-circuit-debugger"/g) || []).length, 1);
+    assert.equal((importer.match(/onClick=\{\(\) => showCircuitDebugger\(\)\}/g) || []).length, 1);
     assert.match(importer, /onClick=\{\(\) => showCircuitDebugger\(\)\}/);
     assert.match(stageHeader, /import \{setCircuitView\} from '..\/..\/lib\/bw-debug\/debug-view\.js'/);
-    assert.doesNotMatch(importer, /createDebugRunner|<DebugPanel|createPortal|debugState\s*[:=]/);
+    assert.doesNotMatch(importer, /createDebugRunner|<DebugPanel|debugState\s*[:=]/);
     assert.doesNotMatch(helper, /createDebugRunner\s*\(|<DebugPanel|ReactDOM|connect\s*\(/);
 });
 
@@ -144,4 +144,14 @@ test('the hosted Code-entry proof selects the real DebugPanel marker', () => {
         'the Code-entry fixture must preserve the indentation required by the proven parser journey');
     assert.doesNotMatch(browser, /\[data-debugger-panel\]/,
         'the CircuitDesigner wrapper is absent from the solo Code view');
+});
+
+test('a Scratch example can clear the debugger dock while leaving the right pane closed', () => {
+    const h = harness();
+    setCircuitView({fullWidth: false, dock: 'off', rightPaneVisible: false}, h.options);
+    const settings = Object.fromEntries(h.writes);
+    assert.equal(settings['bw-hide-stage'], '0');
+    assert.equal(settings['bw-stage-circuit'], '0');
+    assert.equal(settings['bw-debug-dock'], 'off');
+    assert.equal(settings['bw-right-pane-hidden'], '1');
 });

@@ -3,10 +3,12 @@ import {validateCp1Workspace} from './cp1-project.js';
 import {LOGIKUS_STORAGE_KEY, LOGIKUS_WORKSPACE_MAX_BYTES, validateWorkspace as validateLogikusWorkspace,
     getLiveWorkspace as getLiveLogikusWorkspace, setLiveWorkspace as setLiveLogikusWorkspace,
     getWorkspaceGeneration as getLogikusGeneration, setWorkspaceGeneration as setLogikusGeneration} from './logikus/workspace.js';
+import {validateCardiacWorkspace} from './cardiac-project.js';
 import {CAD_PROJECT_PATH, CAD_STORAGE_KEY, CAD_PROJECT_LIMIT, inspectCadText, readCadText, getLiveCadText, setLiveCadText, getCadProjectGeneration, setCadProjectGeneration} from './bw-cad-project.js';
 import {sandboxWorld, SANDBOX_STORAGE_KEY} from './spike-arena/arena-sandbox.js';
 import {simLabRecord, SIM_LAB_STORAGE_KEY, SIM_LAB_LIMIT} from './bw-sim/model/sim-lab-persist.js';
 import {simLabSaveFailure, refuseSimLabSave, clearSimLabSaveFailure} from './bw-sim/model/sim-lab-save-state.js';
+import {capturePicoFlashProject, decodePicoFlashProject} from './bw-machines/pico-basic-flash.js';
 import {validateCodeDocumentRecord} from './code-source-document.js';
 /**
  * Carry the Circuit, Code and Widgets tabs (and the SPIKE arena sandbox and the
@@ -46,8 +48,8 @@ const BUNDLE_VERSION = 2;
 const MAX_BUNDLE_BYTES = 2 * 1024 * 1024;
 const SECTION_LIMITS = Object.freeze({code: 512 * 1024, circuit: 1024 * 1024,
     controller: 512 * 1024, spikeArena: 1024 * 1024, simLab: SIM_LAB_LIMIT, cadCircuit: 32 * 1024, fpga: 512 * 1024, cp1: 256 * 1024,
-    logikus: LOGIKUS_WORKSPACE_MAX_BYTES});
-const KNOWN_SECTIONS = Object.freeze(['code', 'circuit', 'controller', 'legacyWidgets', 'spikeArena', 'simLab', 'fpga', 'cadCircuit', 'cp1', 'logikus']);
+    cardiac: 256 * 1024, logikus: LOGIKUS_WORKSPACE_MAX_BYTES});
+const KNOWN_SECTIONS = Object.freeze(['code', 'circuit', 'controller', 'legacyWidgets', 'spikeArena', 'simLab', 'fpga', 'cadCircuit', 'cp1', 'logikus', 'cardiac', 'picoFlash']);
 // The FPGA lab's Verilog/constraints and its gate-builder canvas (fpga-tab.jsx,
 // fpga-gate-builder-rf.jsx) travel as one optional `fpga` section.
 const FPGA_DESIGN_KEY = 'bw-fpga-autosave';
@@ -62,7 +64,7 @@ const utf8Size = value => new TextEncoder().encode(value).byteLength;
  * project, and copying them between machines would be a surprise.
  */
 const EXACT_KEYS = ['bw-circuit-autosave', 'bw-code-autosave', 'bw-ctl-widgets', SANDBOX_STORAGE_KEY,
-    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY, CONNECTIONS_KEY, 'bw-cp1-workspace', LOGIKUS_STORAGE_KEY];
+    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY, CONNECTIONS_KEY, 'bw-cp1-workspace', LOGIKUS_STORAGE_KEY, 'bw-cardiac-workspace'];
 // The old per-widget prefix stays on the allowlist so a file saved while it
 // was documented (nothing ever wrote such keys, but a hand-built bundle
 // might) still restores; the panel itself serializes to ONE key above.
@@ -88,6 +90,11 @@ const decodeSection = (name, value) => {
     }
     if (name === 'spikeArena') return sandboxWorld(value);
     if (name === 'logikus') return validateLogikusWorkspace(value);
+    if (name === 'cardiac') {
+        const result = validateCardiacWorkspace(value);
+        if (!result.ok) throw new Error(result.errors.map(item => item.message).join('; '));
+        return result.project;
+    }
     if (name === 'cp1') {
         const result = validateCp1Workspace(value);
         if (!result.ok) throw new Error(result.errors.map(item => item.message).join('; '));
@@ -117,6 +124,7 @@ const decodeStored = (name, value) => {
 const encodeProjectState = raw => {
     const state = {};
     if (raw[LOGIKUS_STORAGE_KEY] !== undefined) state.logikus = decodeStored('logikus', raw[LOGIKUS_STORAGE_KEY]);
+    if (raw['bw-cardiac-workspace'] !== undefined) state.cardiac = decodeStored('cardiac', raw['bw-cardiac-workspace']);
     if (raw['bw-cp1-workspace'] !== undefined) state.cp1 = decodeStored('cp1', raw['bw-cp1-workspace']);
     if (raw[CONNECTIONS_KEY] !== undefined) state.cadCircuit = decodeStored('cadCircuit', raw[CONNECTIONS_KEY]);
     if (raw[SANDBOX_STORAGE_KEY] !== undefined) state.spikeArena = decodeStored('spikeArena', raw[SANDBOX_STORAGE_KEY]);
@@ -146,6 +154,7 @@ const decodeProjectState = state => {
     if (!isRecord(state)) throw new Error('state must be an object');
     const raw = {};
     if (state.logikus !== undefined) raw[LOGIKUS_STORAGE_KEY] = JSON.stringify(decodeSection('logikus', state.logikus));
+    if (state.cardiac !== undefined) raw['bw-cardiac-workspace'] = JSON.stringify(decodeSection('cardiac', state.cardiac));
     if (state.cp1 !== undefined) raw['bw-cp1-workspace'] = JSON.stringify(decodeSection('cp1', state.cp1));
     if (state.cadCircuit !== undefined) raw[CONNECTIONS_KEY] = JSON.stringify(decodeSection('cadCircuit', state.cadCircuit));
     if (state.spikeArena !== undefined) raw[SANDBOX_STORAGE_KEY] = JSON.stringify(decodeSection('spikeArena', state.spikeArena));
@@ -212,9 +221,11 @@ const parseBundleDocument = text => {
             return {outcome: 'invalid', version, reason: `format must be ${BUNDLE_FORMAT}`};
         }
         const state = decodeProjectState(doc.state);
+        // Flash belongs to the loaded VM's stage and is installed only after the VM accepts the archive.
+        const picoFlash = doc.state.picoFlash === undefined ? undefined : decodePicoFlashProject(doc.state.picoFlash);
         const unknownSections = Object.fromEntries(Object.entries(doc.state)
             .filter(([key]) => !KNOWN_SECTIONS.includes(key)));
-        return {outcome: 'loaded', version, state, passthrough: doc, unknownSections,
+        return {outcome: 'loaded', version, state, picoFlash, passthrough: doc, unknownSections,
             report: {action: 'applied', version, supportedVersion: BUNDLE_VERSION,
                 unknownSections: Object.keys(unknownSections)}};
     } catch (error) {
@@ -372,7 +383,7 @@ const loadJSZip = async () => {
  * @param {object} options - injectable clock for deterministic archive tests
  * @returns {Promise<Blob>} the blob to hand to the download
  */
-const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip = null} = {}) => {
+const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip = null, project = null} = {}) => {
     // Save-what-you-SEE, not what the debounced autosaves last wrote: the
     // circuit autosave only updates on an EDIT, so a loaded-but-untouched
     // example saved the PREVIOUS bench (measured: the screen showed the
@@ -403,26 +414,27 @@ const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip =
     // refusal belongs to this collection event, not a different loaded project.
     if (codeSaveRefusals.length) refuseCode(codeSaveRefusals[0]);
     const state = collectState();
+    const picoFlash = capturePicoFlashProject(project);
     if (state['bw-code-autosave'] !== undefined) {
         // Validate outside the archive fallback catch: malformed or unsupported
         // Code must not become a successful .sb3 with its source omitted.
         try { decodeStored('code', state['bw-code-autosave']); } catch (error) { refuseCode(error.message); }
     }
     if (state[CAD_STORAGE_KEY]) inspectCadText(state[CAD_STORAGE_KEY]);
-    if (Object.keys(state).length === 0 && !preservedBundle && !mutateZip) return blob;
+    if (Object.keys(state).length === 0 && !picoFlash && !preservedBundle && !mutateZip) return blob;
     try {
         const JSZip = await loadJSZip();
         const zip = await JSZip.loadAsync(await blob.arrayBuffer());
         let document;
         if (preservedBundle?.outcome === 'future') {
             zip.file(BUNDLE_PATH, preservedBundle.text);
-        } else if (Object.keys(state).length || preservedBundle) {
+        } else if (Object.keys(state).length || picoFlash || preservedBundle) {
             const previous = preservedBundle?.outcome === 'loaded' ? preservedBundle.document : {};
             const priorState = isRecord(previous.state) ? previous.state : {};
             const unknown = Object.fromEntries(Object.entries(priorState)
                 .filter(([key]) => !KNOWN_SECTIONS.includes(key)));
             document = {...previous, format: BUNDLE_FORMAT, version: BUNDLE_VERSION,
-                savedAt: now().toISOString(), state: {...unknown, ...encodeProjectState(state)}};
+                savedAt: now().toISOString(), state: {...unknown, ...encodeProjectState(state), ...(picoFlash && {picoFlash})}};
         }
         if (document) {
             const serialized = JSON.stringify(document);
@@ -439,7 +451,7 @@ const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip =
         if (mutateZip) await mutateZip(zip);
         return await zip.generateAsync({type: 'blob', compression: 'DEFLATE'});
     } catch (e) {
-        if (e.code === 'BW_PROJECT_BUNDLE_SIZE') throw e;
+        if (e.code === 'BW_PROJECT_BUNDLE_SIZE' || picoFlash) throw e;
         // eslint-disable-next-line no-console
         console.warn('[brickwright] could not attach tab state to the project', e);
         return blob;

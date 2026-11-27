@@ -1,4 +1,6 @@
-# Brickwright Lite improvement plan
+# Brickwright improvement plan
+
+The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
 
 ## Code execution and game export (Python and JavaScript) — 2026-11-27
 
@@ -71,7 +73,7 @@ Status: active execution plan
 Started: 2026-08-21  
 Product promise: **Build circuits. Program machines. See how they work.**
 
-Brickwright Lite is a native, open-source visual computing workbench. It combines
+Brickwright is a native, open-source visual computing workbench. It combines
 block programming, editable structured code, circuit design and simulation,
 debugging, and direct control of supported LEGO hubs. It is not a TurboWarp fork.
 It uses upstream Scratch components where they are useful, alongside Brickwright's

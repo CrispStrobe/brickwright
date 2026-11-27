@@ -55,27 +55,16 @@ test('the comment stripper strips, and only comments', () => {
     assert.equal(code('const a = 1;').includes('const a = 1'), true);
 });
 
-test('U1-2: the catalogue does not narrow or label by the pre-selected device', () => {
+test('Circuit examples stay general, while Code matches the selected target', () => {
     const browser = code(read('bw-circuit-ui/components/ExamplesBrowser.jsx'));
-    assert.ok(browser.length > 2000, 'the catalogue source did not load; every check below is vacuous');
-    assert.ok(!/deviceCompat\s*\(/.test(browser),
-        'ExamplesBrowser calls deviceCompat again. The device is chosen AFTER the example, so a '
-        + 'card greyed against the current chip warns about a decision the learner has not taken.');
-    assert.ok(!/deviceCompatReason/.test(browser),
-        'the "Needs: …" card annotation is back');
+    assert.ok(browser.length > 2000, 'the catalogue source did not load');
+    assert.doesNotMatch(browser, /deviceCompat\s*\(|deviceCompatReason/);
 
     const importer = code(read('components/tw-pseudocode/pseudocode-importer.jsx'));
-    assert.ok(importer.length > 2000, 'the importer source did not load');
-    assert.ok(!/\.filter\(\s*ex\s*=>\s*ex\._compatible\s*\)/.test(importer),
-        'catalogForDevice filters incompatible examples out again. That HIDES most of the '
-        + 'catalogue from a learner browsing before they have chosen a chip — and it also made '
-        + 'this file\'s own "Needs:" label unreachable, so the softening never rendered.');
-    assert.ok(!/catalogNeeds/.test(importer),
-        'the "Benötigt: …" row annotation is back');
-    // The replacement must be present, not merely the old thing absent: the
-    // device chips are where the pick actually happens.
-    assert.match(importer, /data-testid="bw-catalog-device"/,
-        'the per-device chips are gone, so nothing offers the example\'s devices at all');
+    assert.match(importer, /devices\.some\(target => this\._normDevice\(target\) === selected\)/);
+    assert.match(importer, /this\.loadCatalogExample\(ex, device\)/);
+    assert.match(importer, /Open full examples library/);
+    assert.doesNotMatch(importer, /data-testid="bw-catalog-device"/);
 });
 
 test('U1-1: the active example reaches the Code tab from BOTH load paths', () => {
