@@ -234,6 +234,7 @@ const directMenuValue = (block, slot, blocks) => block.fields?.[slot]?.[0] ?? le
 const settingType = (block, blocks) => directMenuValue(block, 'TYPE', blocks);
 import {svgToPixels, quantizeRgba, toImgLiteral, remapPalette, nearestIndex} from './pixel-image.js';
 import {planScratchArcadeKeyboard} from './scratch-arcade-keyboard.js';
+import {scratchArcadeHueTable} from './scratch-arcade-effects.js';
 // arcade-character-animations Predicate members.
 const CHARACTER_PREDICATE_NAMES = ['NotMoving', 'Moving', 'FacingUp', 'FacingRight', 'FacingDown', 'FacingLeft', 'MovingUp', 'MovingRight',
     'MovingDown', 'MovingLeft', 'HittingWallUp', 'HittingWallRight', 'HittingWallDown', 'HittingWallLeft'];
@@ -856,6 +857,7 @@ class ArcadeEmitter {
         this.costumeUsers = new Set();
         this.scratchPose = new Set();
         this.scratchScale = new Set();
+        this.scratchEffects = new Set();
         this.penUsers = new Set();
         this.usesBackdrops = false;
         this.usesPen = false;
@@ -888,6 +890,10 @@ class ArcadeEmitter {
                     this.scratchPose.add(t.name);
                 }
                 if (!t.isStage && /^looks_(size|setsizeto|changesizeby)$/.test(b.opcode)) this.scratchScale.add(t.name);
+                if (!t.isStage && (b.opcode === 'looks_cleargraphiceffects' ||
+                    /^looks_(changeeffectby|seteffectto)$/.test(b.opcode) && ['ghost', 'color'].includes(this.field(b, 'EFFECT').toLowerCase()))) {
+                    this.scratchEffects.add(t.name);
+                }
                 if (/^looks_(switchbackdropto|switchbackdroptoandwait|nextbackdrop|backdropnumbername)$|^event_whenbackdropswitchesto$/.test(b.opcode)) {
                     this.usesBackdrops = true;
                 }
@@ -1191,6 +1197,14 @@ class ArcadeEmitter {
         while (this.auxiliarySymbols.has(name) || functions.has(name)) name += '_';
         this.auxiliarySymbols.add(name);
         return name;
+    }
+
+    scratchEffectTable () {
+        if (!this.hueTableName) {
+            this.hueTableName = this.reserveAuxiliarySymbol('__bwScratchHueTable');
+            this.warn('Scratch color and ghost effects are drawn with Arcade palette colors and dithered transparency.');
+        }
+        return this.hueTableName;
     }
 
     scratchTextAnswer () {
@@ -2917,6 +2931,25 @@ class ArcadeEmitter {
             push(me + '.setScale(Math.max(0.01, ' + scale + '))');
             return;
         }
+        case 'looks_changeeffectby':
+        case 'looks_seteffectto':
+        case 'looks_cleargraphiceffects': {
+            const effect = this.field(b, 'EFFECT').toLowerCase();
+            if (!me || b.opcode !== 'looks_cleargraphiceffects' && !['color', 'ghost'].includes(effect)) {
+                push('// ' + this.note(b.opcode + (effect ? ': ' + effect : '')));
+                return;
+            }
+            const table = this.scratchEffectTable();
+            if (b.opcode === 'looks_cleargraphiceffects') {
+                push(this.use('scratchEffects', '_scratchClearEffects(' + me + ', ' + table + ')'));
+            } else {
+                const property = effect === 'ghost' ? '_bwScratchGhost' : '_bwScratchHue';
+                const delta = b.opcode === 'looks_changeeffectby';
+                push(this.use('scratchEffects', '_scratchSetEffect(' + me + ', ' + JSON.stringify(property) + ', ' +
+                    v(delta ? 'CHANGE' : 'VALUE') + ', ' + delta + ', ' + table + ')'));
+            }
+            return;
+        }
         case 'motion_changexby':
             if (me && pen) push(this.use('pen', `_penTo(${me}, ${me}.x + ${v('DX')} / 3, ${me}.y)`));
             else if (me) push(`${me}.x += ${v('DX')} / 3`);
@@ -3759,7 +3792,11 @@ class ArcadeEmitter {
             const set = this.costumeSet(this.target);
             const setCostume = index => {
                 push(`_setCostume(${me}, ${set}, ${index})`);
-                if (this.scratchPose.has(this.target.name)) push(this.use('scratchPose', '_scratchPoseCostume(' + me + ')'));
+                if (this.scratchEffects.has(this.target.name)) {
+                    push(this.use('scratchEffects', '_scratchEffectsCostume(' + me + ', ' + this.scratchEffectTable() + ')'));
+                } else if (this.scratchPose.has(this.target.name)) {
+                    push(this.use('scratchPose', '_scratchPoseCostume(' + me + ')'));
+                }
             };
             if (b.opcode === 'looks_nextcostume') {
                 setCostume(`_costume(${me}) + 1`);
@@ -5449,6 +5486,9 @@ class ArcadeEmitter {
             }
             out.push(`${s}.setPosition(${Number(t.x || 0)} / 3 + 80, 60 - ${Number(t.y || 0)} / 3)`);
             if (t.visible === false) out.push(`${s}.setFlag(SpriteFlag.Invisible, true)`);
+            if (this.scratchEffects.has(t.name)) {
+                out.push(this.use('scratchEffects', '_scratchEffectsCostume(' + s + ', ' + this.scratchEffectTable() + ')'));
+            }
             if (this.scratchPose.has(t.name)) {
                 const style = t.rotationStyle || 'all around';
                 out.push(this.use('scratchPose', '_scratchRotationStyle(' + s + ', ' + JSON.stringify(style) + ')'));
@@ -5470,6 +5510,7 @@ class ArcadeEmitter {
             const keys = ['_c', '_pd', '_pc', '_ps', ...(this.cloneVars.get(name) || new Map()).keys()];
             const pose = this.scratchPose.has(name);
             if (pose) keys.push('_bwScratchDirection', '_bwScratchRotationStyle', '_bwScratchFlipped');
+            if (this.scratchEffects.has(name)) keys.push('_bwScratchRawArt', '_bwScratchHue', '_bwScratchGhost');
             generated.push([
                 `function _all_${id} (): Sprite[] {`,
                 `    return [${this.spriteVar.get(name)}].concat(sprites.allOfKind(${kind}))`,
@@ -5547,6 +5588,9 @@ class ArcadeEmitter {
         }
         if (this.pointer) this.pointerSource(pre, handlers);
         if (this.textAnswer) pre.push('let ' + this.textAnswer + ' = ""');
+        if (this.hueTableName) {
+            pre.push('const ' + this.hueTableName + ': number[][] = ' + JSON.stringify(scratchArcadeHueTable(this.palette, 32)));
+        }
         // The green flag's scripts run side by side. An imported Arcade program
         // (one flag script, nothing that can stop it) is its own startup code, run
         // in place, so it keeps PXT's order: what it creates exists before the
