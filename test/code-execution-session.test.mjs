@@ -33,7 +33,8 @@ const fakeClock = () => {
         get pending () { return timers.size; }
     };
 };
-const fixture = options => {
+const fixture = (options = {}) => {
+    const {respondToInputProbes = true, ...sessionOptions} = options;
     const clock = fakeClock();
     const output = [];
     const inputs = [];
@@ -41,7 +42,12 @@ const fixture = options => {
     let terminated = 0;
     let released = 0;
     const worker = {
-        postMessage: data => sent.push(data),
+        postMessage: data => {
+            sent.push(data);
+            if (respondToInputProbes && data.type === 'input-ping') {
+                worker.emit({...data, type: 'input-pong'});
+            }
+        },
         terminate: () => { terminated++; },
         emit: data => worker.onmessage?.({data})
     };
@@ -51,7 +57,7 @@ const fixture = options => {
         onOutput: (text, metadata) => output.push({text, ...metadata}),
         onInput: request => inputs.push(request),
         createWorker: () => ({worker, release: () => { released++; }}),
-        ...options
+        ...sessionOptions
     });
     return {session, worker, clock, output, inputs, sent,
         emit: data => worker.emit({runId: session.id, ...data}),
@@ -111,6 +117,8 @@ test('input flushes output, pauses only the remaining execution budget, and vali
     assert.equal(f.inputs.at(-1).prompt, 'Name?');
     f.clock.advance(10000);
     assert.equal(f.terminated, 0, 'human waiting time is not execution time');
+    assert.ok(f.sent.filter(message => message.type === 'input-ping').length >= 30,
+        'long human waits still require a responsive worker');
     assert.equal(f.session.replyToInput(2, 'wrong request'), false);
     assert.equal(f.session.replyToInput(1, 'Ada'), true);
     assert.equal(f.inputs.at(-1), null);
@@ -122,6 +130,165 @@ test('input flushes output, pauses only the remaining execution budget, and vali
     assert.equal((await f.session.promise).status, 'timeout');
     assert.equal(f.terminated, 1);
     assert.equal(f.clock.pending, 0);
+});
+
+test('an input request cannot suspend protection against an unresponsive worker', async () => {
+    const f = fixture({respondToInputProbes: false, inputProbeIntervalMs: 10, inputProbeTimeoutMs: 30});
+    await drain();
+    f.clock.advance(20);
+    f.emit({type: 'input', requestId: 1, prompt: 'Never awaited'});
+    f.clock.advance(10);
+    const ping = f.sent.at(-1);
+    assert.deepEqual(ping, {type: 'input-ping', runId: f.session.id, requestId: 1, probeId: 1});
+    f.emit({type: 'out', text: 'output is not a responsiveness reply'});
+    f.clock.advance(29);
+    assert.equal(f.terminated, 0);
+    f.clock.advance(1);
+    assert.equal(f.terminated, 1, 'an unanswered probe terminates the worker at its deadline');
+    const result = await f.session.promise;
+    assert.equal(result.status, 'timeout');
+    assert.equal(result.reason, 'input-unresponsive');
+    assert.equal(f.inputs.at(-1), null);
+    assert.equal(f.session.replyToInput(1, 'too late'), false);
+    assert.equal(f.terminated, 1);
+    assert.equal(f.released, 1);
+    assert.equal(f.clock.pending, 0);
+});
+
+test('only the current run, question and outstanding probe can satisfy the watchdog', async () => {
+    const f = fixture({respondToInputProbes: false, inputProbeIntervalMs: 10, inputProbeTimeoutMs: 30});
+    await drain();
+    f.emit({type: 'input', requestId: 1, prompt: 'First'});
+    f.clock.advance(10);
+    const firstPing = f.sent.at(-1);
+    f.emit({...firstPing, type: 'input-pong'});
+    f.clock.advance(10);
+    const nextPing = f.sent.at(-1);
+    assert.notEqual(nextPing.probeId, firstPing.probeId);
+    f.emit({...firstPing, type: 'input-pong'});
+    f.emit({...nextPing, type: 'input-pong', runId: 'old-run'});
+    f.emit({...nextPing, type: 'input-pong', requestId: 2});
+    f.emit({...nextPing, type: 'input-pong', probeId: nextPing.probeId + 1});
+    f.clock.advance(30);
+    assert.equal((await f.session.promise).reason, 'input-unresponsive');
+    assert.equal(f.clock.pending, 0);
+});
+
+test('reply clears the old probe and an old question cannot keep a newer question alive', async () => {
+    const f = fixture({respondToInputProbes: false, inputProbeIntervalMs: 10, inputProbeTimeoutMs: 30});
+    await drain();
+    f.emit({type: 'input', requestId: 'first', prompt: 'First'});
+    f.clock.advance(10);
+    const oldPing = f.sent.at(-1);
+    assert.equal(f.session.replyToInput('first', 'one'), true);
+    assert.equal(f.clock.pending, 1, 'only the resumed execution deadline remains');
+    f.emit({type: 'input', requestId: 'second', prompt: 'Second'});
+    f.clock.advance(10);
+    f.emit({...oldPing, type: 'input-pong'});
+    f.clock.advance(30);
+    assert.equal((await f.session.promise).reason, 'input-unresponsive');
+    assert.equal(f.clock.pending, 0);
+});
+
+test('other owned work retains its execution deadline while input is pending', async () => {
+    const f = fixture({inputProbeIntervalMs: 10});
+    await drain();
+    f.clock.advance(20);
+    f.emit({type: 'input', requestId: 1, prompt: 'Sibling is running', pauseBudget: false});
+    f.clock.advance(79);
+    assert.equal(f.terminated, 0);
+    f.clock.advance(1);
+    const result = await f.session.promise;
+    assert.equal(result.status, 'timeout');
+    assert.equal(result.reason, undefined, 'responsive siblings are bounded by execution time');
+    assert.equal(f.clock.pending, 0);
+});
+
+test('input-state transitions and a reply charge active time exactly once', async () => {
+    const f = fixture();
+    await drain();
+    f.clock.advance(20);
+    f.emit({type: 'input', requestId: 1, prompt: 'Wait for siblings', pauseBudget: false});
+    f.clock.advance(30);
+    f.emit({type: 'input-state', requestId: 1, pauseBudget: true});
+    f.clock.advance(20);
+    f.emit({type: 'input-state', requestId: 1, pauseBudget: true});
+    f.clock.advance(10000);
+    assert.equal(f.terminated, 0);
+    f.emit({type: 'input-state', requestId: 1, pauseBudget: false});
+    f.clock.advance(10);
+    f.emit({type: 'input-state', requestId: 1, pauseBudget: false});
+    f.clock.advance(10);
+    assert.equal(f.session.replyToInput(1, 'answer'), true);
+    f.clock.advance(29);
+    assert.equal(f.terminated, 0, '50 ms before the pause plus 49 ms after it is still admitted');
+    f.clock.advance(1);
+    assert.equal((await f.session.promise).status, 'timeout');
+    assert.equal(f.clock.pending, 0);
+});
+
+test('stale input-state messages cannot resume or pause another question', async () => {
+    const f = fixture();
+    await drain();
+    f.emit({type: 'input', requestId: 1, prompt: 'Current'});
+    f.emit({type: 'input-state', requestId: 1, pauseBudget: false, runId: 'old-run'});
+    f.emit({type: 'input-state', requestId: 2, pauseBudget: false});
+    f.clock.advance(10000);
+    assert.equal(f.terminated, 0);
+    assert.equal(f.session.replyToInput(1, 'done'), true);
+    f.emit({type: 'input-state', requestId: 1, pauseBudget: true});
+    f.clock.advance(100);
+    assert.equal((await f.session.promise).status, 'timeout');
+    assert.equal(f.clock.pending, 0);
+});
+
+test('invalid current input budget state is an error, not a deadline waiver', async () => {
+    for (const initial of [true, false]) {
+        const f = fixture();
+        await drain();
+        if (initial) f.emit({type: 'input', requestId: 1, prompt: 'Invalid', pauseBudget: 'yes'});
+        else {
+            f.emit({type: 'input', requestId: 1, prompt: 'Valid'});
+            f.emit({type: 'input-state', requestId: 1, pauseBudget: 'yes'});
+        }
+        assert.equal((await f.session.promise).status, 'error');
+        assert.equal(f.clock.pending, 0);
+        assert.equal(f.terminated, 1);
+    }
+});
+
+test('every terminal path disposes a pending input probe exactly once', async () => {
+    for (const outcome of ['done', 'error', 'output-limit', 'stop', 'dispose']) {
+        const f = fixture({respondToInputProbes: false, inputProbeIntervalMs: 10});
+        await drain();
+        f.emit({type: 'input', requestId: 1, prompt: outcome});
+        f.clock.advance(10);
+        const queuedHandler = f.worker.onmessage;
+        const ping = f.sent.at(-1);
+        if (outcome === 'stop') f.session.stop();
+        else if (outcome === 'dispose') f.session.dispose();
+        else f.emit({type: outcome, text: 'expected error'});
+        await f.session.promise;
+        queuedHandler({data: {...ping, type: 'input-pong'}});
+        f.clock.advance(10000);
+        assert.equal(f.clock.pending, 0, outcome);
+        assert.equal(f.terminated, 1, outcome);
+        assert.equal(f.released, 1, outcome);
+        assert.equal(f.inputs.at(-1), null, outcome);
+    }
+});
+
+test('a failed input probe dispatch releases the session without waiting for its timeout', async () => {
+    const f = fixture({inputProbeIntervalMs: 10});
+    await drain();
+    f.emit({type: 'input', requestId: 1, prompt: 'Value'});
+    f.worker.postMessage = () => { throw new Error('probe dispatch failed'); };
+    f.clock.advance(10);
+    const result = await f.session.promise;
+    assert.equal(result.status, 'error');
+    assert.equal(result.error, 'probe dispatch failed');
+    assert.equal(f.clock.pending, 0);
+    assert.equal(f.terminated, 1);
 });
 
 test('Stop while waiting clears input and ignores a late answer and queued messages', async () => {

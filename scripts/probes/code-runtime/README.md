@@ -251,3 +251,53 @@ not roll back global, time, network or persistent side effects. Prefer explicit
 React UI, production CSP, offline delivery, other browsers/native WebViews and
 mobile/device behavior remain separate gates. The earlier runtime-comparison
 results are retained; this probe closes only the named console-worker checks.
+
+### Owned-task and input-watchdog continuation
+
+`session-task-browser-results.json` records the later scoped `codeRun` candidate:
+**38/38 cases pass, zero page errors**. The original 19-case receipt above is
+retained with its original source hashes. The new receipt includes the production
+module and probe hashes, canonical generator source hash, exact generator commit,
+and the actual generated source used in each of three generator/worker cases.
+
+After installing this directory's existing probe dependencies, select a checkout
+of the canonical generator implementing `owned-console-v1`:
+
+```sh
+mkdir -p tmp
+TMPDIR="$PWD/tmp" node session-browser-probe.mjs \
+  --generator-root=/absolute/path/to/sb3-creator \
+  --output=session-task-browser-rerun.json
+```
+
+That generator checkout needs its own locked dependencies for source imports.
+Omitting `--generator-root` runs only the production session/worker cases; it does
+not establish generator integration. A supplied old generator is rejected rather
+than silently testing hand-written replacement output. This explicit external
+source probe does not adopt or modify Brickwright's pinned generator.
+
+The new cases cover registered concurrent/nested completion, ignored rejection,
+task-scoped input/sleeps, Stop, orphan input, invalid continued owned work while
+input is pending, active sibling execution budgets, missing responsiveness
+replies, completed-scope use, output limits and restart. The actual generated
+programs cover concurrent flags and an awaited procedure, input longer than the
+execution budget, and Stop during a wait. The scoped API does not discover
+arbitrary native timers/promises or infer joins: `spawn` registers concurrent
+work and returns `undefined`; sequential work uses awaited local functions.
+
+The 139 focused source/worker controls are reproducible from the repository root:
+
+```sh
+node --test test/code-execution-session.test.mjs \
+  test/code-javascript-tasks.test.mjs \
+  test/code-runtime-source-ownership.test.mjs \
+  test/code-tab-empty-target-after-failed-conversion.test.mjs \
+  test/code-conversion-editor-ownership.test.mjs \
+  test/code-tab-run-via-blocks.test.mjs \
+  test/spike-code-caller-ownership.test.mjs
+```
+
+These controls and the static browser harness do not qualify the rendered React
+application, production CSP, Scratch game semantics, other browsers or native
+platforms. The generator option remains opt-in upstream and is not selected by
+Brickwright's current Code tab or vendored dependency pin.

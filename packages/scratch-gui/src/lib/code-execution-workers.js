@@ -15,6 +15,7 @@ const WORKER_START = String.raw`(function () {
     var outputTimer = null;
     var inputSequence = 0;
     var pendingInput = null;
+    var canPauseForInput = function () { return true; };
     var outputLimitSignal = {};
 
     function post(type, fields) {
@@ -71,9 +72,10 @@ const WORKER_START = String.raw`(function () {
         if (prompt.length > 4096) return Promise.reject(new Error('Input prompt exceeds the preview limit.'));
         if (inputSequence >= 1000) return Promise.reject(new Error('The program asked more than 1000 questions.'));
         return new Promise(function (resolve) {
-            pendingInput = {requestId: ++inputSequence, resolve: resolve};
+            pendingInput = {requestId: ++inputSequence, resolve: resolve, pauseBudget: canPauseForInput()};
             flush();
-            post('input', {requestId: pendingInput.requestId, prompt: prompt});
+            post('input', {requestId: pendingInput.requestId, prompt: prompt,
+                pauseBudget: pendingInput.pauseBudget});
         });
     }
     function log() {
@@ -92,6 +94,14 @@ const WORKER_START = String.raw`(function () {
 const WORKER_END = String.raw`
     self.onmessage = function (event) {
         var message = event.data || {};
+        if (message.type === 'input-ping') {
+            if (!finished && started && message.runId === runId && pendingInput &&
+                message.requestId === pendingInput.requestId && Number.isSafeInteger(message.probeId) &&
+                message.probeId > 0) {
+                post('input-pong', {requestId: pendingInput.requestId, probeId: message.probeId});
+            }
+            return;
+        }
         if (message.type === 'input-reply') {
             if (!finished && message.runId === runId && pendingInput &&
                 message.requestId === pendingInput.requestId && typeof message.value === 'string') {
@@ -132,13 +142,23 @@ const WORKER_END = String.raw`
 const JAVASCRIPT_BODY = String.raw`
     function execute(code) {
         // The body is an async function: explicit top-level await and returned
-        // Promises belong to this run. Detached async tasks are not registered.
+        // Promises belong to this run. Additional tasks must use codeRun.spawn;
+        // arbitrary detached timers/promises are not discovered automatically.
         var AsyncFunction = Object.getPrototypeOf(new Function('return async function () {};')()).constructor;
         var program = new AsyncFunction('console', 'prompt', 'input', 'Math', code);
         var answers = [];
         var randoms = [];
         var attempts = 0;
         var nativeRandom = Math.random;
+        var activeScope;
+        // A global API avoids reserving a new parameter in existing authored
+        // source. Generated owned-console source reserves its own codeRun name.
+        Object.defineProperty(self, 'codeRun', {value: Object.freeze({
+            version: 1,
+            spawn: function (task) { return activeScope.spawn(task); },
+            input: function (question) { return activeScope.input(question); },
+            sleep: function (milliseconds) { return activeScope.sleep(milliseconds); }
+        })});
 
         function attempt() {
             if (finished) return;
@@ -146,12 +166,135 @@ const JAVASCRIPT_BODY = String.raw`
             var nextAnswer = 0;
             var nextRandom = 0;
             var replayQuestion = null;
+            var usedPrompt = false;
+            var ownedUsed = false;
+            var closed = false;
+            var spawned = 0;
+            var tasks = new Set();
+            var sleeps = new Set();
+            var root = {closed: false, input: null, sleeps: new Set()};
+            var inputOwner = null;
+            var resolveLifetime;
+            var rejectLifetime;
+            var lifetime = new Promise(function (resolve, reject) {
+                resolveLifetime = resolve;
+                rejectLifetime = reject;
+            });
+            canPauseForInput = function () {
+                // Sleeping siblings still consume the console budget. Only a
+                // sole tracked owner may wait for a human without that charge.
+                return !ownedUsed || (inputOwner && !inputOwner.closed &&
+                    tasks.size + (root.closed ? 0 : 1) === 1);
+            };
+            function inputState() {
+                if (finished || !pendingInput) return;
+                var pause = canPauseForInput();
+                if (pendingInput.pauseBudget === pause) return;
+                pendingInput.pauseBudget = pause;
+                post('input-state', {requestId: pendingInput.requestId, pauseBudget: pause});
+            }
+            function failScope(error) {
+                if (closed) return;
+                closed = true;
+                root.closed = true;
+                tasks.forEach(function (task) { task.closed = true; });
+                sleeps.forEach(function (timer) { clearTimeout(timer); });
+                sleeps.clear();
+                rejectLifetime(error);
+            }
+            function settleScope() {
+                if (closed) return;
+                inputState();
+                if (!root.closed || tasks.size) return;
+                if (pendingInput || sleeps.size) {
+                    failScope(new Error('Await input and codeRun.sleep inside the entry or a registered task.'));
+                    return;
+                }
+                closed = true;
+                resolveLifetime();
+            }
+            function activateOwned(owner) {
+                if (closed || finished || owner.closed) throw new Error('This code task has ended. Use the API supplied to the active task.');
+                if (owner.input) throw new Error('Await the pending input in its owning entry or task before starting more work.');
+                if (usedPrompt) throw new Error('Synchronous prompt replay cannot be mixed with codeRun tasks. Use codeRun.input.');
+                if (pendingInput && !inputOwner) throw new Error('Finish the entry input before registering codeRun tasks.');
+                ownedUsed = true;
+            }
+            function completeOwner(owner) {
+                if (closed || owner.closed) return;
+                owner.closed = true;
+                if (owner !== root) tasks.delete(owner);
+                if (owner.input || owner.sleeps.size) {
+                    failScope(new Error('Await input and codeRun.sleep inside their owning entry or task.'));
+                    return;
+                }
+                settleScope();
+            }
+            function apiFor(owner) { return Object.freeze({
+                version: 1,
+                spawn: function (task) {
+                    activateOwned(owner);
+                    if (typeof task !== 'function') throw new Error('codeRun.spawn requires a function.');
+                    if (tasks.size >= 256 || spawned >= 10000) throw new Error('The codeRun task limit was exceeded.');
+                    spawned++;
+                    var child = {closed: false, input: null, sleeps: new Set()};
+                    var childApi = apiFor(child);
+                    tasks.add(child);
+                    var promise = Promise.resolve().then(function () { return task(childApi); });
+                    // Attach both handlers immediately. A task rejection fails
+                    // the whole run. spawn is registration-only (returns void),
+                    // not a join primitive: sequential work awaits local async
+                    // functions within the same owner. No promise graph guessing.
+                    promise.then(function () { completeOwner(child); }, failScope);
+                    inputState();
+                },
+                input: function (question) {
+                    activateOwned(owner);
+                    if (pendingInput) throw new Error('Only one input request can be pending.');
+                    if (owner.sleeps.size) throw new Error('Await pending sleeps in this task before requesting input.');
+                    var token = {};
+                    owner.input = token;
+                    inputOwner = owner;
+                    function releaseInput() {
+                        if (owner.input === token) owner.input = null;
+                        if (inputOwner === owner) inputOwner = null;
+                    }
+                    return ask(question).then(function (answer) {
+                        releaseInput();
+                        return answer;
+                    }, function (error) {
+                        releaseInput();
+                        failScope(error);
+                        throw error;
+                    });
+                },
+                sleep: function (milliseconds) {
+                    activateOwned(owner);
+                    if (!Number.isFinite(milliseconds) || milliseconds < 0 || milliseconds > 2147483647) {
+                        throw new Error('codeRun.sleep requires finite milliseconds between 0 and 2147483647.');
+                    }
+                    if (sleeps.size >= 256) throw new Error('The codeRun sleep limit was exceeded.');
+                    return new Promise(function (resolve) {
+                        var timer = setTimeout(function () {
+                            sleeps.delete(timer);
+                            owner.sleeps.delete(timer);
+                            resolve();
+                        }, milliseconds);
+                        sleeps.add(timer);
+                        owner.sleeps.add(timer);
+                    });
+                }
+            }); }
+            activeScope = apiFor(root);
             function prompt(question) {
+                if (ownedUsed) throw new Error('Synchronous prompt replay cannot be mixed with codeRun tasks. Use codeRun.input.');
+                usedPrompt = true;
                 if (nextAnswer < answers.length) return answers[nextAnswer++];
                 if (!replayQuestion) replayQuestion = {question: question};
                 throw replayQuestion;
             }
             function input(question) {
+                if (ownedUsed) return activeScope.input(question);
                 if (replayQuestion) return Promise.reject(new Error('An unanswered prompt must finish before async input.'));
                 if (nextAnswer < answers.length) return Promise.resolve(answers[nextAnswer++]);
                 if (pendingInput) return Promise.reject(new Error('Only one input request can be pending.'));
@@ -169,7 +312,12 @@ const JAVASCRIPT_BODY = String.raw`
                     return attempt();
                 });
             }
-            return program(previewConsole, prompt, input, replayMath).then(afterAttempt, function (error) {
+            Promise.resolve().then(function () { return program(previewConsole, prompt, input, replayMath); }).then(function () {
+                completeOwner(root);
+            }, function (error) {
+                failScope(error);
+            });
+            return lifetime.then(afterAttempt, function (error) {
                 if (!replayQuestion || error !== replayQuestion) throw error;
                 return afterAttempt();
             });
@@ -200,7 +348,7 @@ const PYTHON_BODY = String.raw`
     }
 `;
 
-/** Console JavaScript: synchronous prompt replay and explicitly awaited input/tasks. */
+/** Console JS: legacy prompt replay, awaited entry, and versioned codeRun tasks. */
 export const JAVASCRIPT_WORKER_SOURCE = WORKER_START + JAVASCRIPT_BODY + WORKER_END;
 
 /** Build the existing Skulpt interpreter's console worker from lazily loaded sources. */

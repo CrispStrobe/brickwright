@@ -87,3 +87,21 @@ adoption paths are already claimed by
 This lane does not delete that lesson, duplicate its claim, advance its pin or
 waive its gate. Keep the implementation candidate reviewable while that owner
 qualifies the adoption and hosted candidate qualification completes.
+
+### Continuation inspection
+
+The remote `18113510` candidate's hosted checks confirmed the gallery failure in
+[45956026910](https://github.com/CrispStrobe/brickwright/actions/runs/45956026910)
+and three inherited HDD workflow identity-reader failures in
+[45956027049](https://github.com/CrispStrobe/brickwright/actions/runs/45956027049).
+The latter test/workflow bytes match main, and their repair is already owned by
+PR #1846's `2026-11-25-microtronic-host-ci-controls` claim. They are not changed
+here. The initial build census was incomplete; no successful overall qualification
+is inferred.
+
+The explicitly claimed
+[owned JavaScript console follow-on](2026-11-27-javascript-owned-console-tasks.md)
+adds scoped tasks and repairs the reproduced input-watchdog gap. Its 139 focused
+controls and 38-case production-worker/browser receipt supersede coverage only
+for those named sources and behaviors. Its required hosted qualification and
+normal supplier adoption remain pending.
