@@ -66,7 +66,8 @@ try {
     try {
         await german.getByTestId('bw-settings-menu-trigger').click();
         await german.getByText('Preferences', {exact: true}).click();
-        await german.getByLabel('Language', {exact: true}).selectOption('de');
+        const language = german.locator('select:visible').filter({has: german.locator('option[value="de"]')});
+        await language.selectOption('de');
         await german.waitForFunction(() => window.__brickwrightStore?.getState().locales?.locale === 'de');
         await german.evaluate(() => window.dispatchEvent(new CustomEvent('bw-open-machine-manager')));
         const dialog = german.getByTestId('bw-machine-manager');
