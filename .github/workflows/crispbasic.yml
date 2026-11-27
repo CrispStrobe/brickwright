@@ -4,8 +4,16 @@ on:
     branches: ['**']
     paths:
       - 'packages/crisp-basic/**'
-      - 'overlay/scratch-gui/src/lib/crispbasic-runner.js'
-      - 'packages/scratch-gui/src/lib/crispbasic-runner.js'
+      - 'overlay/scratch-gui/src/lib/crispbasic-*.js'
+      - 'packages/scratch-gui/src/lib/crispbasic-*.js'
+      - 'overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
+      - 'packages/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
+      - 'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'
+      - 'packages/scratch-gui/src/lib/bw-debug/debug-runner.js'
+      - 'overlay/scratch-gui/src/lib/pico-sim-run.js'
+      - 'packages/scratch-gui/src/lib/pico-sim-run.js'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
       - 'overlay/scratch-gui/src/lib/sb3-creator*.js'
       - 'packages/scratch-gui/src/lib/sb3-creator*.js'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
@@ -19,14 +27,25 @@ on:
       - 'scripts/lib/crispbasic-*.mjs'
       - 'scripts/integrate.mjs'
       - 'test/crispbasic-*.test.mjs'
+      - 'test/circuit-cad-cancellation.test.mjs'
+      - 'test/circuit-cad-bridge.test.mjs'
+      - 'test/b8-one-board-per-run.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/crispbasic.yml'
   pull_request:
     paths:
       - 'packages/crisp-basic/**'
-      - 'overlay/scratch-gui/src/lib/crispbasic-runner.js'
-      - 'packages/scratch-gui/src/lib/crispbasic-runner.js'
+      - 'overlay/scratch-gui/src/lib/crispbasic-*.js'
+      - 'packages/scratch-gui/src/lib/crispbasic-*.js'
+      - 'overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
+      - 'packages/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
+      - 'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'
+      - 'packages/scratch-gui/src/lib/bw-debug/debug-runner.js'
+      - 'overlay/scratch-gui/src/lib/pico-sim-run.js'
+      - 'packages/scratch-gui/src/lib/pico-sim-run.js'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
       - 'overlay/scratch-gui/src/lib/sb3-creator*.js'
       - 'packages/scratch-gui/src/lib/sb3-creator*.js'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
@@ -40,6 +59,9 @@ on:
       - 'scripts/lib/crispbasic-*.mjs'
       - 'scripts/integrate.mjs'
       - 'test/crispbasic-*.test.mjs'
+      - 'test/circuit-cad-cancellation.test.mjs'
+      - 'test/circuit-cad-bridge.test.mjs'
+      - 'test/b8-one-board-per-run.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/crispbasic.yml'
@@ -136,6 +158,9 @@ jobs:
           npm run package:crispbasic:check
       - name: Verify generated BASIC and Brickwright session integration
         run: npm run test:brickwright
+      - name: Verify shared circuit ownership and existing CAD cancellation
+        working-directory: .
+        run: node --test test/circuit-cad-cancellation.test.mjs test/circuit-cad-bridge.test.mjs test/b8-one-board-per-run.test.mjs
       - name: Verify staged assets and Brickwright rendering in Chromium
         working-directory: .
         run: node scripts/verify-crispbasic-browser.mjs

@@ -3,8 +3,9 @@
 `src/simulation-host.mjs` defines a deterministic JavaScript reference host for
 logical digital pins. WASM sessions can now connect BASIC to this host through
 an opt-in, bounded request/reply bridge. The same host interface is the boundary
-for a future Brickwright board-solver adapter. The Code tab and Circuit canvas
-are not connected to it yet, and it does not drive a physical board. No
+for the GUI-owned [Brickwright board-solver adapter](BOARD-SIMULATION.md).
+The Code tab can explicitly connect that adapter to the Circuit canvas. Neither
+host drives a physical board. No
 electrical network, voltage, current, contention, analog signal, PWM, interrupt,
 or peripheral is simulated by the reference host.
 
@@ -95,8 +96,9 @@ The default clock ceiling is `2147483647` milliseconds. Time does not wrap or
 borrow the wall clock. A `maxTimeMs` option may reduce the ceiling, including to
 zero. Exceeding it raises `time-limit` before changing anything.
 
-There is deliberately no instruction-to-time conversion. An eventual circuit
-adapter must define how the board solver advances between host requests. The
+There is deliberately no instruction-to-time conversion. The
+[circuit adapter](BOARD-SIMULATION.md) defines how its solver advances between
+host requests. The
 reference host cannot qualify CPU cycle timing or physical-device fidelity.
 
 ### Trace and resource bounds
@@ -258,8 +260,8 @@ Every dispatched request consumes the cumulative `maxRequests` budget,
 including `FNmillis` and requests that receive ordinary domain errors. The
 request budget therefore bounds programs whose operations create no trace.
 The reference host independently enforces its existing atomic trace, scheduled
-input and time budgets. A `request-limit`, `trace-limit`, `input-limit` or
-`time-limit` produces:
+input and time budgets. A `request-limit`, `trace-limit`, `input-limit`,
+`time-limit` or adapter `solver-limit` produces:
 
 ```js
 {status: 'simulation-limit', error: {kind: 'simulation', code: 'trace-limit', /* message */}}
@@ -314,12 +316,12 @@ library nor enables the private intrinsic. Inspect
 `session.capabilities.simulation` for availability, enabled state, contract
 version and request budget.
 
-The next implementation step is the Brickwright board-solver adapter and Code
-tab wiring. It must map logical IDs to the active board, drive/sense it at
-defined simulated times and reject unknown or unavailable features. Existing
-generator hardware comments remain comments; this change does not turn them
-into working hardware operations. PicoBB and other physical targets still need
-independent execution and pin/timing evidence.
+The GUI-owned [Brickwright board adapter](BOARD-SIMULATION.md) maps logical IDs
+to the active Circuit board and uses cooperative solver advancement, electrical
+reads and exclusive run ownership. Enable it with the Code tab's **Connect
+Circuit** option. Existing generator hardware comments remain comments;
+authored library calls are the supported route in this milestone. PicoBB and
+other physical targets still need independent execution and pin/timing evidence.
 
 ## Validation
 

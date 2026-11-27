@@ -228,11 +228,13 @@ const L10N = {
         basicCrispCompleted: code => code ? `Completed (exit ${code}).` : 'Completed.',
         basicCrispTimeout: 'CrispBASIC reached the 60-second run limit.',
         basicCrispOutputLimit: 'CrispBASIC reached the output limit.',
+        basicCrispSimulationLimit: 'CrispBASIC reached a circuit simulation limit.',
+        basicConnectCircuit: 'Connect Circuit',
         basicCrispError: 'CrispBASIC could not finish this program.',
         basicInputLine: 'Program input', basicInputKey: 'One character (empty for Enter)',
         basicInputSend: 'Send', basicInputEnd: 'End input',
         basicInputKeyError: 'Enter one Latin-1 character, or leave the field empty for Enter.',
-        basicCrispScope: 'Text, input and basic VDU drawing. Files, graphics queries, sound, GPIO and source debugging are unavailable. Runs stop after 60 seconds.',
+        basicCrispScope: 'Text, input and basic VDU drawing. Connect Circuit enables digital pins and simulated time on the current circuit. Physical hardware, files, graphics queries, sound and source debugging are unavailable. Runs stop after 60 seconds.',
         basic8086Building: 'Compiling BASIC for the 8086 in this browser…',
         basicRealDosBuilding: 'Compiling BASIC and preparing a real MS-DOS 2.0 boot disk…',
         basicRealDosFailed: (m) => `Could not prepare the MS-DOS boot disk: ${m}`,
@@ -583,11 +585,13 @@ const L10N = {
         basicCrispCompleted: code => code ? `Beendet (Exit ${code}).` : 'Beendet.',
         basicCrispTimeout: 'CrispBASIC hat die Laufzeitgrenze von 60 Sekunden erreicht.',
         basicCrispOutputLimit: 'CrispBASIC hat die Ausgabegrenze erreicht.',
+        basicCrispSimulationLimit: 'CrispBASIC hat eine Grenze der Schaltungssimulation erreicht.',
+        basicConnectCircuit: 'Schaltung verbinden',
         basicCrispError: 'CrispBASIC konnte dieses Programm nicht beenden.',
         basicInputLine: 'Programmeingabe', basicInputKey: 'Ein Zeichen (leer für Eingabetaste)',
         basicInputSend: 'Senden', basicInputEnd: 'Eingabe beenden',
         basicInputKeyError: 'Ein Latin-1-Zeichen eingeben oder das Feld für die Eingabetaste leer lassen.',
-        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Dateien, Grafikabfragen, Ton, GPIO und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
+        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Schaltung verbinden aktiviert digitale Pins und simulierte Zeit in der aktuellen Schaltung. Physische Hardware, Dateien, Grafikabfragen, Ton und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
         basic8086Building: 'Übersetze BASIC für den 8086 in diesem Browser…',
         basicRealDosBuilding: 'Übersetze BASIC und bereite eine echte MS-DOS-2.0-Bootdiskette vor…',
         basicRealDosFailed: (m) => `Die MS-DOS-Bootdiskette konnte nicht vorbereitet werden: ${m}`,
@@ -1287,7 +1291,7 @@ class PseudocodeImporter extends React.Component {
             // ever left without one — a missing buffer made activeCode()
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
-            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false,
+            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false, basicConnectCircuit: false,
             basicFilename: 'editor.bas', basicOutputRunId: 0,
             basicWarnings: [], basicGenerationFailed: false,
             basicInputMethod: null, basicInputValue: '', basicInputError: '', basicDiagnostic: null,
@@ -4959,6 +4963,7 @@ class PseudocodeImporter extends React.Component {
         if (this._unmounted || this._crispBasicRun || this._crispBasicReset || this.state.running) return;
         const epoch = this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
         const run = {source: code, filename: this.state.basicFilename || 'editor.bas', runner: null, cancelled: false};
+        const circuit = this.state.basicConnectCircuit ? {runtime: this.props.vm?.runtime} : undefined;
         this._crispBasicRun = run;
         const owns = () => !this._unmounted && this._crispBasicRun === run;
         const ownsOutcome = () => !this._unmounted && this._crispBasicEpoch === epoch;
@@ -4969,10 +4974,26 @@ class PseudocodeImporter extends React.Component {
         this.setHighlightedLine(null);
         let result;
         let failure;
+        // A project/circuit replacement during the editor's cold import must
+        // revoke this Run before the loaded adapter can acquire a new board.
+        const pendingCircuitChange = event => {
+            if (run.runner || !owns()) return;
+            if (event.type === 'bw-project-bundle-loaded' &&
+                ['future', 'invalid', 'storage-failed'].includes(event.detail?.outcome)) return;
+            if (event.type === 'bw-settings-change' && event.detail?.key !== 'bw-device-id') return;
+            this.stopCrispBasic();
+        };
+        const circuitEvents = circuit && typeof window !== 'undefined' ?
+            ['bw-circuit-changed', 'bw-board-ready', 'bw-project-bundle-loaded', 'bw-settings-change',
+                'bw-stop-all', 'bw-power-off', 'bw-green-flag'] : [];
+        for (const name of circuitEvents) window.addEventListener(name, pendingCircuitChange);
+        const circuitRuntimeEvents = circuit?.runtime?.on && circuit?.runtime?.off ?
+            ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED'].map(name => [name, () => pendingCircuitChange({type: name})]) : [];
+        for (const [name, handler] of circuitRuntimeEvents) circuit.runtime.on(name, handler);
         try {
             const {createCrispBasicRunner} = await this.loadCrispBasicRunner();
             if (!owns() || run.cancelled) return;
-            run.runner = createCrispBasicRunner({onEvent: event => {
+            run.runner = createCrispBasicRunner({...(circuit ? {circuit} : {}), onEvent: event => {
                 if (!owns() || run.cancelled) return;
                 if (event.type === 'state' && (event.state === 'loading' || event.state === 'running')) {
                     this.setState(() => ownsOutcome() && !run.cancelled ? {
@@ -4993,6 +5014,8 @@ class PseudocodeImporter extends React.Component {
         } catch (error) {
             failure = error;
         } finally {
+            for (const name of circuitEvents) window.removeEventListener(name, pendingCircuitChange);
+            for (const [name, handler] of circuitRuntimeEvents) circuit.runtime.off(name, handler);
             // Run owns a fresh adapter. Do not enable the next Run until its
             // worker and callbacks have been disposed, even on a host failure.
             try { if (run.runner) await run.runner.dispose(); }
@@ -5006,6 +5029,7 @@ class PseudocodeImporter extends React.Component {
                     else if (result.status === 'cancelled') status = this.L.basicCrispStopped;
                     else if (result.status === 'timeout') status = this.L.basicCrispTimeout;
                     else if (result.status === 'output-limit') status = this.L.basicCrispOutputLimit;
+                    else if (result.status === 'simulation-limit') status = this.L.basicCrispSimulationLimit;
                 }
                 const diagnostic = error ? this.crispBasicDiagnostic(error, run.filename) : null;
                 this.setState(() => ownsOutcome() ? {running: false, crispBasicActive: false, status, basicDiagnostic: diagnostic,
@@ -6566,6 +6590,15 @@ class PseudocodeImporter extends React.Component {
                                 style={actionBtn} data-testid="bw-crispbasic-reset">
                                 {this.L.basicCrispReset}
                             </button>
+                        ) : null}
+                        {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                            <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}>
+                                <input type="checkbox" checked={Boolean(this.state.basicConnectCircuit)}
+                                    disabled={this.state.running || this.state.basicResetting}
+                                    onChange={event => this.setState({basicConnectCircuit: event.target.checked})}
+                                    data-testid="bw-crispbasic-connect-circuit" />
+                                {this.L.basicConnectCircuit}
+                            </label>
                         ) : null}
                         {this.state.lang === 'fe' && this.activeCode().trim() ? (
                             <button onClick={() => this.runFeOnDosInterp()} disabled={this.state.running}

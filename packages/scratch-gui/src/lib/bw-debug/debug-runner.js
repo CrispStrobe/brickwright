@@ -1024,7 +1024,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         eventBreakpointCounters.clear();
     }
 
+    function circuitMutationRefusal() {
+        if (!vm?.runtime?.bwCrispBasicSimulation) return null;
+        const message = 'Stop BASIC before changing or stepping the circuit debugger';
+        return {accepted: false, code: 'circuit-owned', reason: message, unsupported: message, refused: message};
+    }
+
     function beginForwardBranch(requestedBranchId = null) {
+        const denied = circuitMutationRefusal();
+        if (denied) return denied;
         if (reverseCursor === null) return {accepted: true, forked: false};
         const parent = forkRecordingStore.active();
         let branchId = requestedBranchId;
@@ -4279,6 +4287,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         /** Build, attach, and run. The ⚑ of the debug world. */
         async start({paused = false} = {}) {
+            if (vm?.runtime?.bwCrispBasicSimulation) {
+                throw new Error('Stop BASIC before starting the circuit debugger');
+            }
+            if (vm?.runtime?.bwCircuitRunPreparing) throw new Error('Another circuit run is preparing');
             if (['preparing','compiling','running'].includes(vm?.runtime?.cadCircuitSimulation?.state().phase)) {
                 throw new Error('Stop the circuit–CAD simulation before starting the debugger');
             }
@@ -4287,6 +4299,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             reverseCursor = null;
             reverseContinue.reset();
             if (!session) resetEventBreakpointRuntime();
+            const preparation = {};
+            if (vm?.runtime) vm.runtime.bwCircuitRunPreparing = preparation;
             try {
                 if (!session) {
                     // Clear it HERE and not in build(): the ROM and
@@ -4362,6 +4376,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     window.__bwRecoverFromStaleBuild(e && e.message);
                 if (recovering) setStatus('attaching', S('app.updated'));
                 else setStatus('error', e.message);
+            } finally {
+                if (vm?.runtime?.bwCircuitRunPreparing === preparation) delete vm.runtime.bwCircuitRunPreparing;
             }
         },
 
@@ -5734,6 +5750,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         reverseToEvent: eventCursor => runner.reverseDebugToEvent(eventCursor),
         onAccepted: () => reverseContinue.reset()
     });
+    // Stop retains a loaded target for inspection, so direct register/reset
+    // and cycle commands also need the same canvas ownership gate as Run.
+    for (const name of ['resetCpu', 'wipe', 'stepCycle', 'restoreSnapshot', 'writeMem', 'writeReg', 'setPc',
+        'cp1Reset', 'cp1LoadProgram', 'cp1RunProgram', 'cp1WriteCell', 'cp1SetInput', 'cp1Key']) {
+        const mutate = runner[name];
+        runner[name] = function (...args) {
+            return circuitMutationRefusal() || mutate.apply(this, args);
+        };
+    }
     return runner;
 }
 

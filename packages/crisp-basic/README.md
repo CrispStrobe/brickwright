@@ -9,10 +9,10 @@ and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
 access. The Brickwright Code tab now adapts this runtime, with interactive input,
 Stop/Reset, mapped diagnostics and the existing partial VDU renderer. Version
-`0.1.0-dev.4` adds an opt-in, bounded BASIC-to-simulation bridge for WASM sessions,
-using a deterministic logical-pin reference host or an application-owned adapter.
-Connecting that bridge to Brickwright's board solver and Code tab, full graphics,
-source debugging and physical-board targets remain subsequent work.
+`0.1.0-dev.5` connects the opt-in BASIC simulation bridge to the active Brickwright
+Circuit board through a GUI-owned adapter. Digital pin operations use the pinned
+electrical solver, and integer-millisecond delays advance its clock cooperatively.
+Full graphics, source debugging and physical-board targets remain subsequent work.
 
 ## Try it
 
@@ -69,11 +69,11 @@ separate Z80 engine remains available for retrocomputing. See
 [BRICKWRIGHT.md](BRICKWRIGHT.md) for build order, controls, asset integrity,
 focused integration tests and the exact rendering/circuit boundaries.
 
-The [simulation API](SIMULATION.md) defines deterministic logical pins and
-integer-millisecond time and connects them to ordinary BASIC procedures and
-functions when an embedding application enables it. The Code tab does not yet
-enable this bridge, and BASIC does not drive the Circuit canvas or physical
-hardware.
+The [simulation API](SIMULATION.md) connects ordinary BASIC procedures and
+functions to logical pins and integer-millisecond time. In the Code tab, enable
+**Connect Circuit** to use the active supported circuit board. The
+[board adapter contract](BOARD-SIMULATION.md) specifies pin numbers, electrical
+reads, clock ownership and cancellation. Physical hardware is not connected.
 
 ### Test suites
 
@@ -310,7 +310,7 @@ cancellation contract.
 
 The default request budget is 4096, configurable from 1 to 1000000, including
 `FNmillis` requests that do not create trace records. Request, trace, scheduled
-input and simulated-time budget failures produce the parent-owned
+input, simulated-time and adapter solver-work budget failures produce the parent-owned
 `simulation-limit` outcome. Ordinary domain failures are catchable BASIC errors
 `201..209`; unhandled bridge errors also carry `error.simulationCode`. User source
 numbers and public library overrides retain their normal meanings. `TIME` and
@@ -334,7 +334,7 @@ milliseconds.
 | Source debugger | Not implemented | Not implemented |
 | Host files, native calls, raw memory | Retained for trusted local programs | Denied; virtual files also unavailable |
 | Time | Host time | Monotonic `TIME`/`TIME=` and `WAIT`; no `TIME$` or event timers |
-| App integration / physical boards | Planned | Code tab/VDU integration; board-solver connection and physical boards planned |
+| App integration / physical boards | Planned | Code tab/VDU integration and opt-in Circuit board-solver connection; physical boards planned |
 
 **The native backend is for trusted local programs.** It retains upstream
 native memory, `SYS`/`CALL`, filesystem and OS facilities. A temporary working

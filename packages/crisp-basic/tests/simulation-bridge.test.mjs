@@ -176,7 +176,7 @@ test('typed argument and state errors cross as bounded codes, without arbitrary 
     assert.ok(result.output.length < 3000);
 });
 
-for (const code of ['trace-limit', 'input-limit', 'time-limit']) {
+for (const code of ['trace-limit', 'input-limit', 'time-limit', 'solver-limit']) {
     test(`${code} remains a parent terminal outcome and never becomes a BASIC reply`, async t => {
         const {host, calls} = hostFor({millis() { throw new SimulationError(code, 'budget exhausted'); }});
         const result = await sessionFor(t, {simulation: {createHost: () => host}})

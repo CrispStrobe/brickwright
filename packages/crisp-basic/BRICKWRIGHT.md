@@ -69,7 +69,7 @@ and WASM digests, the actual import list, and licence hashes. The deterministic
 manifest records every shipped asset. `package:crispbasic:check` rejects missing,
 extra, modified and stale files. An invalid build leaves the prior payload
 intact. Source, toolchain and runtime notices accompany the shipped binary.
-Version `0.1.0-dev.4` has 20 manifest-listed payload assets, plus `manifest.json`;
+Version `0.1.0-dev.5` has 20 manifest-listed payload assets, plus `manifest.json`;
 the added runtime modules are `src/simulation-host.mjs` and
 `src/simulation-protocol.mjs`. Rebuild and repackage the C/WASM artifact when
 upgrading; the simulation API checks its ABI marker before enabling the bridge.
@@ -95,7 +95,7 @@ qualified. Graphics queries such as `POINT` remain unavailable in the
 restricted interpreter. Text output is a transcript, not a complete terminal
 screen model. No source debugger is supplied by this integration.
 
-## Simulation bridge and remaining circuit adapter
+## Simulation bridge and Circuit adapter
 
 `@crispstrobe/crispbasic/simulation` exposes the dependency-free deterministic
 reference host described in [SIMULATION.md](SIMULATION.md). It defines logical
@@ -109,25 +109,37 @@ and installs the ordinary `PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`,
 `simulation.createHost({signal, runId})` factory can supply a custom host;
 operations may return Promises while cancellation and request/time/I/O limits
 remain parent-owned. The factory, disposer and synchronous operation work must
-return promptly. A future board adapter must check cancellation/disposal before
+return promptly. Board adapters must check cancellation/disposal before
 deferred changes; ignored late replies do not undo external side effects.
 
-The default Code tab adapter does not yet pass these simulation options, and
-the generator still emits its existing hardware comments. The next integration
-step is the board-solver adapter and explicit GUI wiring. BASIC programs do not
-yet drive the Circuit canvas or physical pins. The standalone reference host
-therefore keeps `basicBridge: false`, `hardware: false`, and
-`circuitPhysics: false`; the configured WASM session separately describes an
-enabled bridge. Native sessions have no bridge. The SYS/file/raw-memory policy,
-`TIME` and `WAIT` semantics remain unchanged.
+The Code tab's **Connect Circuit** checkbox explicitly enables the GUI-owned
+adapter. Open a supported circuit before enabling it. The run acquires that
+same canvas board, applies the documented logical pin map and uses the existing
+solver for digital drive and electrical sense. `PROCdelay` advances solver time
+in cooperative batches; `FNmillis` starts at zero relative to the acquired clock.
+Starting BASIC does not reset the circuit's controls or component history.
+
+Stop, Reset, unmount, circuit edits and project replacement release the captured
+pin/clock ownership. Competing debugger, firmware and coupled-simulation starts
+are refused while BASIC owns the board. No synthetic bench substitutes for an
+unavailable or rejected circuit. [BOARD-SIMULATION.md](BOARD-SIMULATION.md)
+specifies supported controllers, electrical semantics, limits and a runnable
+example. The generator still emits its existing hardware comments.
+
+The standalone reference host retains `basicBridge: false`, `hardware: false`
+and `circuitPhysics: false`; the Circuit host advertises circuit physics, and
+the configured WASM session separately advertises the enabled bridge. Physical
+hardware, native-backend simulation, analog I/O, PWM and interrupts remain
+unavailable through this library. The SYS/file/raw-memory policy, `TIME` and
+`WAIT` semantics remain unchanged.
 
 The library lives outside authored source records, preserving numbering and
 normal user definitions. Its typed domain errors map to original call sites;
 parent resource failures produce `simulation-limit` and cannot be handled away
 by BASIC. [SIMULATION.md](SIMULATION.md) specifies the error codes, ownership,
 ABI negotiation and resource bounds. [VALIDATION.md](VALIDATION.md) records the
-current revision's qualification status; the GUI tests below do not themselves
-establish board-solver or physical-device behavior.
+current revision's qualification status, including the focused actual-solver
+tests and their limits. No physical-device behavior is established.
 
 ## Verification
 
@@ -156,5 +168,6 @@ the real editor lifecycle methods and control JSX together with the real
 `VduTerminal`, using a small React shell around those seams. It checks actual
 workers, input, Stop/Reset/unmount, error mapping, lazy loading, a non-root URL
 prefix, missing assets and canvas pixels. This is focused integration evidence;
-it is not a complete production GUI build, circuit qualification or validation
-of browsers other than Chromium.
+it is not a complete production GUI build, general circuit qualification or
+validation of browsers other than Chromium. Connected-run tests also use the
+actual pinned solver for fixed LED, switch, clock and cleanup expectations.

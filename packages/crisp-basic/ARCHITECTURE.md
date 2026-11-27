@@ -163,12 +163,21 @@ bytes to the existing decoder/renderer, provides input and Stop/Reset, and
 preserves the Z80 runner as an explicit retro engine. Fixed output and canvas
 checks cover basic MOVE/DRAW, not full graphics compatibility or queries.
 
-The bounded BASIC-to-simulation request/reply bridge and reference host are now
-implemented. The next integration work is a board-solver adapter and Code tab
-wiring: map logical pins to the active board, define how solver time advances
-between requests, expose required capabilities and reject unavailable features.
-No BASIC-to-Circuit-canvas or physical-pin connection is claimed yet. Preserve
-per-run ownership, cooperative adapter cancellation and parent-owned limits.
+The bounded BASIC-to-simulation bridge now has a GUI-owned board-solver adapter
+and an explicit **Connect Circuit** option. It maps supported logical pin IDs
+to the active canvas board, senses its electrical solution and advances its
+existing clock only through cooperative `PROCdelay` batches. The run's elapsed
+clock starts at zero without resetting circuit component state. Token-protected
+GUI handoff and the solver's external-clock lease prevent competing ownership;
+run invalidation releases the captured host before the designer resumes.
+Request, trace, time and cumulative solver-work ceilings remain parent-owned.
+See [BOARD-SIMULATION.md](BOARD-SIMULATION.md) for the exact supported boards,
+pin maps, timing semantics and qualification limits.
+
+Next, qualify a full production GUI bundle and decide how the generator should
+emit the portable library calls with explicit unsupported-operation diagnostics.
+Extend board and peripheral capabilities only with corresponding solver tests.
+No physical-pin connection is claimed.
 
 The GUI renderer currently implements only part of the VDU semantics. It is
 not a correctness oracle for the full graphics language. CrispBASIC's engine
@@ -191,8 +200,9 @@ unsupported debugger operation must never silently run.
 
 The first five ordinary BASIC procedures/functions and their deterministic
 simulation bridge are implemented. Their pin modes, integer-millisecond units,
-range errors and unavailable features are explicit. After the board-solver
-adapter, implement the corresponding library on a PicoBB target and compare
+range errors and unavailable features are explicit. The board-solver adapter is
+implemented; the next portable-host step is the corresponding library on a
+PicoBB target. Compare
 observable pin/timing traces using independent target evidence. Do not treat the
 JavaScript reference host as evidence of physical-device equivalence.
 

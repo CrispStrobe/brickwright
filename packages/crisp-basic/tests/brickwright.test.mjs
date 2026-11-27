@@ -7,8 +7,10 @@ import test, {before, after} from 'node:test';
 import SB3Creator from '../../../overlay/scratch-gui/src/lib/sb3-creator.js';
 import basicToPseudocode from '../../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
 import {createCrispBasicRunner} from '../../../overlay/scratch-gui/src/lib/crispbasic-runner.js';
+import {createCrispBasicBoardHost} from '../../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
 import {packageCrispBasic} from '../../../scripts/package-crispbasic.mjs';
+import {createCrispBasicCircuitFixture} from '../../../scripts/lib/crispbasic-circuit-fixture.mjs';
 
 let directory, assetBaseURL;
 before(async () => {
@@ -18,9 +20,10 @@ before(async () => {
 });
 after(async () => { if (directory) await rm(directory, {recursive: true, force: true}); });
 
-function runnerFor (t, onEvent) {
+function runnerFor (t, onEvent, options = {}) {
     const events = [];
-    const runner = createCrispBasicRunner({assetBaseURL, onEvent: event => { events.push(event); onEvent?.(event, runner); }});
+    const runner = createCrispBasicRunner({...options, assetBaseURL,
+        onEvent: event => { events.push(event); onEvent?.(event, runner); }});
     t.after(() => runner.dispose());
     return {runner, events, view: () => events.filter(event => event.type === 'view').at(-1)};
 }
@@ -132,4 +135,179 @@ test('the UI adapter retains restricted SYS refusal and reports unavailable grap
     assert.equal(f.runner.capabilities.circuitPins, false);
     assert.equal(f.runner.capabilities.graphicsQueries, false);
     assert.equal(f.runner.capabilities.sourceDebugger, false);
+});
+
+function circuitFor (t) {
+    const fixture = createCrispBasicCircuitFixture();
+    const eventTarget = new EventTarget();
+    const ownership = [];
+    const listener = event => {
+        ownership.push(event.detail);
+        // The Node integration supplies the Designer acknowledgement; the
+        // browser suite exercises its real Circuit tab event handler too.
+        event.detail.ready?.();
+    };
+    eventTarget.addEventListener('bw-circuit-clock-owner', listener);
+    t.after(() => eventTarget.removeEventListener('bw-circuit-clock-owner', listener));
+    return {...fixture, eventTarget, ownership, circuit: {runtime: fixture.runtime, eventTarget}};
+}
+
+test('packaged BASIC drives a real Uno LED and senses its circuit button at explicit simulated time', async t => {
+    const c = circuitFor(t);
+    let paused;
+    const f = runnerFor(t, (event, runner) => {
+        if (event.type !== 'input') return;
+        paused = {currentMa: -c.board.branchCurrent('led', 'anode') * 1000,
+            outputVolts: c.board.readAnalog('d13'), timeNs: c.board.timeNs,
+            sense: c.board.readPin('d2'), clockOwned: Boolean(c.board._externalClock)};
+        c.board.setControl('button', 1);
+        runner.writeInput('continue\n');
+    }, {circuit: c.circuit});
+    const result = await f.runner.run(`PROCpinMode(13,"output")
+PROCdigitalWrite(13,1)
+PROCpinMode(2,"input-pullup")
+PRINT STR$(FNdigitalRead(2))
+PROCdelay(25)
+PRINT STR$(FNmillis)
+INPUT "" a$
+PRINT STR$(FNdigitalRead(2))
+PROCdigitalWrite(13,0)
+END
+`, {filename: 'circuit.bas', interactive: true});
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '1\r\n25\r\n\r\n0\r\n');
+    assert.ok(paused.currentMa > 10 && paused.currentMa < 16,
+        `5 V through 220 ohms and a red LED produced ${paused.currentMa} mA`);
+    assert.ok(paused.outputVolts > 4.5 && paused.outputVolts < 5);
+    assert.equal(paused.timeNs, 25000000n);
+    assert.equal(paused.sense, 1);
+    assert.equal(paused.clockOwned, true);
+    assert.equal(c.board.timeNs, 25000000n);
+    assert.ok(c.board.getPinStates().every(pin => pin.mode === 'input'));
+    assert.equal(c.board.powered, false);
+    assert.equal(c.board._externalClock, null);
+    assert.equal(c.runtime.bwCrispBasicSimulation, undefined);
+    assert.equal(c.ownership[0].board, c.board);
+    assert.equal(c.ownership.at(-1).board, null);
+});
+
+test('a fresh circuit run restarts FNmillis while retaining the active board clock and button state', async t => {
+    const c = circuitFor(t);
+    c.board.setControl('button', 1);
+    const f = runnerFor(t, undefined, {circuit: c.circuit});
+    const source = 'PROCpinMode(2,"input-pullup")\nPRINT STR$(FNmillis)+":"+STR$(FNdigitalRead(2))\nPROCdelay(7)\nPRINT STR$(FNmillis)\nEND\n';
+    for (let run = 1; run <= 2; run++) {
+        const result = await f.runner.run(source);
+        assert.equal(result.status, 'completed', JSON.stringify(result.error));
+        assert.equal(result.text, '0:0\r\n7\r\n');
+        assert.equal(c.board.timeNs, BigInt(run) * 7000000n);
+        assert.equal(c.board._externalClock, null);
+        assert.equal(c.runtime.bwCrispBasicSimulation, undefined);
+    }
+});
+
+test('Stop during a real solver delay abandons deferred work and releases the circuit before resolving', async t => {
+    const c = circuitFor(t);
+    let progress;
+    const progressed = new Promise(resolve => { progress = resolve; });
+    const onChange = () => { if (c.board.timeNs > 0n) progress(); };
+    c.board.onChange(onChange);
+    t.after(() => c.board.offChange(onChange));
+    const f = runnerFor(t, undefined, {circuit: c.circuit});
+    const pending = f.runner.run('PROCpinMode(13,"output")\nPROCdigitalWrite(13,1)\nPROCdelay(50000)\nPRINT "late"\nEND\n');
+    await Promise.race([progressed, pending.then(result => { throw new Error(`Run stopped before progress: ${JSON.stringify(result)}`); })]);
+    f.runner.cancel();
+    const result = await pending;
+    assert.equal(result.status, 'cancelled', JSON.stringify(result.error));
+    assert.equal(result.text, '');
+    const stopped = c.board.timeNs;
+    assert.ok(stopped > 0n && stopped < 50000000000n);
+    assert.equal(c.board._externalClock, null);
+    assert.equal(c.runtime.bwCrispBasicSimulation, undefined);
+    assert.ok(c.board.getPinStates().every(pin => pin.mode === 'input'));
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(c.board.timeNs, stopped, 'a cancelled delay continued to advance the board');
+});
+
+test('circuit time ceilings remain parent-owned even with a BASIC error handler', async t => {
+    const c = circuitFor(t);
+    const f = runnerFor(t, undefined, {circuit: c.circuit});
+    const result = await f.runner.run('ON ERROR PRINT "caught":END\nPROCdelay(60001)\nPRINT "late"\nEND\n');
+    assert.equal(result.status, 'simulation-limit', JSON.stringify(result.error));
+    assert.equal(result.text, '');
+    assert.equal(c.board.timeNs, 0n);
+    assert.equal(c.board._externalClock, null);
+    assert.equal(c.runtime.bwCrispBasicSimulation, undefined);
+});
+
+test('real solver work exhaustion terminates packaged WASM outside BASIC error handling', async t => {
+    const {board} = createCrispBasicCircuitFixture();
+    const runtime = await import(new URL('browser.mjs', assetBaseURL));
+    let host;
+    const session = runtime.createWasmSession({
+        moduleURL: new URL('wasm/crispbasic.mjs', assetBaseURL).href,
+        workerURL: new URL('src/wasm-worker.mjs', assetBaseURL).href,
+        simulation: {createHost ({signal}) {
+            host = createCrispBasicBoardHost({board, signal, SimulationError: runtime.SimulationError,
+                maxSolverSteps: 2, maxStepsPerBatch: 1});
+            return host;
+        }}
+    });
+    t.after(() => session.dispose());
+    const result = await session.run('ON ERROR PRINT "caught":END\nPROCdelay(3)\nPRINT "late"\nEND\n');
+    assert.equal(result.status, 'simulation-limit', JSON.stringify(result.error));
+    assert.equal(result.error.kind, 'simulation');
+    assert.equal(result.error.code, 'solver-limit');
+    assert.equal(result.text, '');
+    assert.equal(board.timeNs, 2000000n, 'the parent retains only the two completed solver steps');
+    assert.equal(host.solverSteps, 2);
+    assert.equal(host.state, 'disposed');
+    assert.deepEqual(host.trace, [], 'an incomplete delay is not reported as completed');
+    assert.equal(board._externalClock, null);
+    assert.equal(board.powered, false);
+    assert.ok(board.getPinStates().every(pin => pin.mode === 'input'));
+});
+
+test('Stop-all from a solver observer releases a real BASIC write after the clock call unwinds', async t => {
+    const c = circuitFor(t);
+    let stopped = false;
+    const onChange = event => {
+        if (!stopped && event.type === 'pin' && event.detail?.mode === 'pushpull' && event.detail.driveHigh) {
+            stopped = true;
+            c.runtime.emit('PROJECT_STOP_ALL');
+        }
+    };
+    c.board.onChange(onChange);
+    t.after(() => c.board.offChange(onChange));
+    const f = runnerFor(t, undefined, {circuit: c.circuit});
+    const result = await f.runner.run('PROCpinMode(13,"output")\nPROCdigitalWrite(13,1)\nPRINT "late"\nEND\n');
+    assert.equal(stopped, true);
+    assert.equal(result.status, 'cancelled', JSON.stringify(result.error));
+    assert.equal(result.text, '');
+    assert.equal(c.board._externalClock, null);
+    assert.equal(c.board.powered, false);
+    assert.ok(c.board.getPinStates().every(pin => pin.mode === 'input'));
+    assert.equal(c.runtime.bwCrispBasicSimulation, undefined);
+    assert.equal(f.events.filter(event => event.type === 'result').length, 1);
+    assert.equal(f.runner.state, 'idle');
+});
+
+test('a foreign GPIO write cancels blocked BASIC and releases its other pins without overwriting the foreign pin', {timeout: 5000}, async t => {
+    const c = circuitFor(t);
+    let prompt;
+    const prompted = new Promise(resolve => { prompt = resolve; });
+    const f = runnerFor(t, event => { if (event.type === 'input') prompt(); }, {circuit: c.circuit});
+    const pending = f.runner.run('PROCpinMode(13,"output")\nPROCdigitalWrite(13,1)\nINPUT "" a$\nPRINT "late"\nEND\n',
+        {interactive: true});
+    await Promise.race([prompted, pending.then(result => { throw new Error(`Run stopped before input: ${JSON.stringify(result)}`); })]);
+    c.board.setPin('d2', 'pushpull', true);
+    const result = await pending;
+    assert.equal(result.status, 'cancelled', JSON.stringify(result.error));
+    assert.equal(result.text, '');
+    const pins = c.board.getPinStates();
+    assert.deepEqual(pins.find(pin => pin.pin === 'd2'), {pin: 'd2', mode: 'pushpull', driveHigh: true});
+    assert.deepEqual(pins.find(pin => pin.pin === 'd13'), {pin: 'd13', mode: 'input', driveHigh: false});
+    assert.equal(c.board._externalClock, null);
+    assert.equal(c.runtime.bwCrispBasicSimulation, undefined);
+    assert.equal(f.runner.state, 'idle');
 });

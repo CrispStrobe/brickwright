@@ -34,7 +34,7 @@ export default class CrispBasicEditorHarness extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            lang: 'basic', basicProfile: 'bbc', basicEngine: 'crispbasic',
+            lang: 'basic', basicProfile: 'bbc', basicEngine: 'crispbasic', basicConnectCircuit: false,
             basicFilename: props.filename || 'browser-editor.bas', basicOutputRunId: 0,
             basicInputMethod: null, basicInputValue: '', basicInputError: '', basicDiagnostic: null,
             basicWarnings: [], basicGenerationFailed: false,

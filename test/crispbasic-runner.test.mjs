@@ -210,3 +210,17 @@ test('an external view callback failure stops the active interpreter', async () 
     assert.match(result.error.message, /renderer failed/);
     assert.equal(f.calls.at(-1)[0], 'dispose');
 });
+
+test('null and unprintable callback failures still stop and clean up the runner', async () => {
+    for (const error of [null, Object.create(null)]) {
+        const f = fixture();
+        f.runner._options.onEvent = event => { if (event.type === 'view' && event.rawOutput) throw error; };
+        const pending = f.runner.run('PRINT "A"'); await f.entered.promise;
+        f.emit({type: 'output', bytes: Uint8Array.of(65)});
+        const result = await pending;
+        assert.equal(result.status, 'host-error');
+        assert.match(result.error.message, /View callback failed/);
+        assert.equal(f.runner.state, 'idle');
+        assert.equal(f.calls.at(-1)[0], 'dispose');
+    }
+});

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The staged interpreter, real editor methods/control JSX and real VduTerminal
 // run in Chromium. The surrounding workbench/VM is an intentionally small shell;
-// this does not claim a full production GUI bundle or circuit qualification.
+// this does not claim a full production GUI bundle or full circuit qualification.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
@@ -18,6 +18,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageRequire = createRequire(new URL('../packages/crisp-basic/package.json', import.meta.url));
 const rootRequire = createRequire(new URL('../package.json', import.meta.url));
 const gui = resolve(root, 'overlay/scratch-gui/src');
+const boardSource = dirname(rootRequire.resolve('bw-board/board.js'));
 const mime = new Map([['.js', 'text/javascript'], ['.mjs', 'text/javascript'], ['.wasm', 'application/wasm'], ['.json', 'application/json']]);
 let browser, server, origin;
 const dynamic = new Map();
@@ -34,7 +35,23 @@ before(async () => {
     dynamic.set('/terminal.js', (await transform(await readFile(resolve(gui,
         'components/tw-pseudocode/vdu-terminal.jsx'), 'utf8'),
     {loader: 'jsx', format: 'esm', target: 'es2020'})).code);
-    dynamic.set('/adapter.js', await readFile(resolve(gui, 'lib/crispbasic-runner.js')));
+    dynamic.set('/adapter.js', "export {createCrispBasicRunner} from '/test-gui/lib/crispbasic-runner.js';");
+    dynamic.set('/test/circuit-fixture.js', await readFile(resolve(root, 'scripts/lib/crispbasic-circuit-fixture.mjs')));
+    // Mount the production clock-owner handler against the small host shell.
+    // The solver, adapter and ownership event code are real; the surrounding
+    // React Circuit tab and its unrelated tools are outside this focused gate.
+    const circuitSource = await readFile(resolve(gui, 'components/tw-pseudocode/circuit-tab.jsx'), 'utf8');
+    const ownerStart = circuitSource.indexOf('        this._couplingHandler = event => {');
+    const ownerEnd = circuitSource.indexOf('        this._couplingOpen = ', ownerStart);
+    assert.ok(ownerStart >= 0 && ownerEnd > ownerStart, 'Circuit clock-owner harness boundary changed');
+    dynamic.set('/test/circuit-owner.js', `export function mountCircuitOwner(runtime) {
+        const host = {props: {vm: {runtime}}, state: {}, setState(patch, ready) {
+            Object.assign(this.state, patch); ready?.();
+        }};
+        (function () {${circuitSource.slice(ownerStart, ownerEnd)}}).call(host);
+        window.addEventListener('bw-circuit-clock-owner', host._couplingHandler);
+        return host;
+    }`);
     dynamic.set('/test/react.js', 'export default window.React;');
     dynamic.set('/test/react-dom-client.js', 'export const createRoot = window.ReactDOM.createRoot;');
     dynamic.set('/vendor/react.js', await readFile(resolve(dirname(rootRequire.resolve('react/package.json')), 'umd/react.production.min.js')));
@@ -43,10 +60,16 @@ before(async () => {
     const html = `<!doctype html><meta charset="utf-8"><base href="/workbench/">
 <title>Brickwright CrispBASIC integration verification</title>
 <script src="/vendor/react.js"></script><script src="/vendor/react-dom.js"></script>
-<script type="importmap">{"imports":{"react":"/test/react.js","react-dom/client":"/test/react-dom-client.js","bw-board/vdu-decoder.js":"/vendor/vdu-decoder.js"}}</script>
+<script type="importmap">{"imports":{"react":"/test/react.js","react-dom/client":"/test/react-dom-client.js","bw-board/vdu-decoder.js":"/vendor/vdu-decoder.js","bw-board/":"/vendor/bw-board/"}}</script>
 <main id="editor"></main><script type="module">
 import {mountCrispBasicEditor} from '/editor.js';
-window.unmountEditor = mountCrispBasicEditor(document.getElementById('editor'));
+import {createCrispBasicCircuitFixture} from '/test/circuit-fixture.js';
+import {mountCircuitOwner} from '/test/circuit-owner.js';
+window.circuitFixture = createCrispBasicCircuitFixture();
+circuitFixture.runtime.circuitBoard = null;
+window.circuitOwner = mountCircuitOwner(circuitFixture.runtime);
+window.installCircuitFixture = () => { circuitFixture.runtime.circuitBoard = circuitFixture.board; };
+window.unmountEditor = mountCrispBasicEditor(document.getElementById('editor'), {vm: {runtime: circuitFixture.runtime}});
 </script>`;
     server = createServer(async (request, response) => {
         try {
@@ -55,6 +78,16 @@ window.unmountEditor = mountCrispBasicEditor(document.getElementById('editor'));
             let bytes, type = 'text/javascript';
             if (pathname === '/workbench/') { bytes = html; type = 'text/html'; }
             else if (dynamic.has(pathname)) bytes = dynamic.get(pathname);
+            else if (pathname.startsWith('/test-gui/lib/') || pathname.startsWith('/vendor/bw-board/')) {
+                const isBoard = pathname.startsWith('/vendor/bw-board/');
+                const prefix = isBoard ? '/vendor/bw-board/' : '/test-gui/lib/';
+                const directory = isBoard ? boardSource : resolve(gui, 'lib');
+                const filename = resolve(directory, pathname.slice(prefix.length));
+                const rel = relative(directory, filename);
+                if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) { response.writeHead(403).end(); return; }
+                bytes = await readFile(filename);
+                type = mime.get(extname(filename)) || 'application/octet-stream';
+            }
             else if (pathname.startsWith('/workbench/static/crispbasic/')) {
                 const filename = resolve(CRISPBASIC_DESTINATION, pathname.slice('/workbench/static/crispbasic/'.length));
                 const rel = relative(CRISPBASIC_DESTINATION, filename);
@@ -225,4 +258,122 @@ test('unmount while awaiting input terminates the interpreter worker', {timeout:
     await page.waitForFunction(() => crispBasicEditor.state.basicInputMethod === 'line');
     await page.evaluate(() => window.unmountEditor());
     // pageFor's cleanup asserts browser-level worker ownership is empty.
+});
+
+test('Connect Circuit runs ordinary BASIC against the displayed board and releases it on completion', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    await page.evaluate(() => installCircuitFixture());
+    const checkbox = page.locator('[data-testid="bw-crispbasic-connect-circuit"]');
+    assert.equal(await checkbox.isChecked(), false);
+    await checkbox.check();
+    await page.locator('[data-testid="bw-crispbasic-source"]').fill(`PROCpinMode(13,"output")
+PROCdigitalWrite(13,1)
+PROCpinMode(2,"input-pullup")
+PRINT STR$(FNdigitalRead(2))
+PROCdelay(25)
+PRINT STR$(FNmillis)
+INPUT "" a$
+PRINT STR$(FNdigitalRead(2))
+END
+`);
+    await page.locator('[data-testid="bw-basic-run"]').click();
+    await page.waitForFunction(() => crispBasicEditor.state.basicInputMethod === 'line' ||
+        !crispBasicEditor.state.running);
+    const paused = await page.evaluate(() => ({
+        diagnostic: crispBasicEditor.state.basicDiagnostic,
+        waiting: crispBasicEditor.state.basicInputMethod,
+        currentMa: -circuitFixture.board.branchCurrent('led', 'anode') * 1000,
+        timeNs: circuitFixture.board.timeNs.toString(),
+        clockOwned: Boolean(circuitFixture.board._externalClock),
+        shownBoard: circuitOwner.state.board === circuitFixture.board
+    }));
+    assert.equal(paused.diagnostic, null);
+    assert.equal(paused.waiting, 'line');
+    assert.ok(paused.currentMa > 10 && paused.currentMa < 16, JSON.stringify(paused));
+    assert.equal(paused.timeNs, '25000000');
+    assert.equal(paused.clockOwned, true);
+    assert.equal(paused.shownBoard, true);
+    assert.equal(await checkbox.isDisabled(), true);
+    await page.evaluate(() => circuitFixture.board.setControl('button', 1));
+    await page.locator('[data-testid="bw-crispbasic-input"]').fill('continue');
+    await page.locator('[data-testid="bw-crispbasic-send"]').click();
+    await page.waitForFunction(() => !crispBasicEditor.state.running);
+    const completed = await page.evaluate(() => ({output: crispBasicEditor.state.output,
+        diagnostic: crispBasicEditor.state.basicDiagnostic,
+        released: circuitFixture.board._externalClock === null,
+        noOwner: !circuitFixture.runtime.bwCrispBasicSimulation,
+        inputOnly: circuitFixture.board.getPinStates().every(pin => pin.mode === 'input'),
+        power: circuitFixture.board.powered,
+        shownBoard: circuitOwner.state.board
+    }));
+    assert.deepEqual(completed, {output: '1\r\n25\r\n\r\n0\r\n', diagnostic: null,
+        released: true, noOwner: true, inputOnly: true, power: false, shownBoard: null});
+});
+
+test('Stop interrupts a solver delay without advancing or driving the circuit after cleanup', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    await page.evaluate(() => installCircuitFixture());
+    await page.locator('[data-testid="bw-crispbasic-connect-circuit"]').check();
+    await page.locator('[data-testid="bw-crispbasic-source"]').fill('PROCpinMode(13,"output")\nPROCdigitalWrite(13,1)\nPROCdelay(50000)\nPRINT "late"\nEND\n');
+    await page.locator('[data-testid="bw-basic-run"]').click();
+    await page.waitForFunction(() => circuitFixture.board.timeNs > 0n);
+    await page.locator('[data-testid="bw-crispbasic-stop"]').click();
+    await page.waitForFunction(() => !crispBasicEditor.state.running);
+    const stopped = await page.evaluate(() => ({time: circuitFixture.board.timeNs.toString(),
+        output: crispBasicEditor.state.output, lease: Boolean(circuitFixture.board._externalClock),
+        owner: Boolean(circuitFixture.runtime.bwCrispBasicSimulation),
+        inputs: circuitFixture.board.getPinStates().every(pin => pin.mode === 'input')}));
+    assert.ok(BigInt(stopped.time) > 0n && BigInt(stopped.time) < 50000000000n);
+    assert.equal(stopped.output, '');
+    assert.equal(stopped.lease, false);
+    assert.equal(stopped.owner, false);
+    assert.equal(stopped.inputs, true);
+    await delay(40);
+    assert.equal(await page.evaluate(() => circuitFixture.board.timeNs.toString()), stopped.time);
+    const next = await runSource(page, 'PRINT STR$(FNmillis)\nPROCdelay(3)\nPRINT STR$(FNmillis)\nEND\n');
+    assert.equal(next.output, '0\r\n3\r\n');
+    assert.equal(next.diagnostic, null);
+});
+
+test('a missing Circuit board is an explicit refusal and unchecked ordinary BASIC remains usable', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    const checkbox = page.locator('[data-testid="bw-crispbasic-connect-circuit"]');
+    await checkbox.check();
+    const refused = await runSource(page, 'PROCpinMode(13,"output")\nEND\n');
+    assert.ok(refused.diagnostic);
+    assert.match(refused.diagnostic.message, /circuit|board/i);
+    assert.equal(refused.output, '');
+    assert.equal(await page.evaluate(() => Boolean(circuitFixture.runtime.bwCrispBasicSimulation)), false);
+    await checkbox.uncheck();
+    const ordinary = await runSource(page, 'PRINT "ordinary"\nEND\n');
+    assert.equal(ordinary.output, 'ordinary\r\n');
+    assert.equal(ordinary.diagnostic, null);
+});
+
+test('replacing the active board cancels its BASIC run without changing the replacement board', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    await page.evaluate(() => installCircuitFixture());
+    await page.locator('[data-testid="bw-crispbasic-connect-circuit"]').check();
+    await page.locator('[data-testid="bw-crispbasic-source"]').fill('PROCpinMode(13,"output")\nPROCdigitalWrite(13,1)\nINPUT "" a$\nPRINT "late"\nEND\n');
+    await page.locator('[data-testid="bw-basic-run"]').click();
+    await page.waitForFunction(() => crispBasicEditor.state.basicInputMethod === 'line');
+    await page.evaluate(async () => {
+        const {createCrispBasicCircuitFixture} = await import('/test/circuit-fixture.js');
+        const replacement = createCrispBasicCircuitFixture().board;
+        replacement.setPower(true);
+        replacement.setPin('d13', 'pushpull', true);
+        window.replacementBoard = replacement;
+        circuitFixture.runtime.circuitBoard = replacement;
+        window.dispatchEvent(new CustomEvent('bw-board-ready', {detail: {board: replacement}}));
+    });
+    await page.waitForFunction(() => !crispBasicEditor.state.running);
+    const result = await page.evaluate(() => ({
+        output: crispBasicEditor.state.output,
+        oldLease: Boolean(circuitFixture.board._externalClock),
+        current: circuitFixture.runtime.circuitBoard === replacementBoard,
+        power: replacementBoard.powered, time: replacementBoard.timeNs.toString(),
+        drive: replacementBoard.getPinStates().find(pin => pin.pin === 'd13')
+    }));
+    assert.deepEqual(result, {output: '', oldLease: false, current: true,
+        power: true, time: '0', drive: {pin: 'd13', mode: 'pushpull', driveHigh: true}});
 });

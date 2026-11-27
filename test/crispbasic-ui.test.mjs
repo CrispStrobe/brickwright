@@ -4,6 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {EventEmitter} from 'node:events';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
 
 const editorSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
@@ -31,6 +32,7 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
     const calls = [];
     const highlights = [];
     let emit;
+    let runnerOptions;
     let created = 0;
     const runner = {
         async run(source, options) { calls.push(['run', source, options]); entered.resolve(); return completion.promise; },
@@ -50,6 +52,7 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
             basicZ80Numbering: line => `Z80 needs valid increasing numbered statements at editor line ${line}; regenerate or use CrispBASIC`,
             basicCrispCompleted: code => `completed:${code}`, basicCrispStopped: 'stopped',
             basicCrispStopping: 'stopping', basicCrispTimeout: 'timeout', basicCrispOutputLimit: 'output-limit',
+            basicCrispSimulationLimit: 'simulation-limit',
             basicCrispResetDone: 'reset', basicInputKeyError: 'one Latin-1 character'},
         setState(update) { const patch = typeof update === 'function' ? update(this.state) : update;
             if (patch) Object.assign(this.state, patch); },
@@ -57,11 +60,11 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
         activeCode() { return this.state.buffers[this.state.lang]; },
         async loadCrispBasicRunner() {
             if (loadGate) await loadGate.promise;
-            return {createCrispBasicRunner({onEvent}) { created++; emit = onEvent; return runner; }};
+            return {createCrispBasicRunner(options) { created++; runnerOptions = options; emit = options.onEvent; return runner; }};
         }
     });
     return {editor, runner, calls, highlights, entered, completion,
-        emit: event => emit(event), get created() { return created; }};
+        emit: event => emit(event), get created() { return created; }, get runnerOptions() { return runnerOptions; }};
 }
 const view = (output, inputMethod = null) => ({type: 'view', output, rawOutput: output, inputMethod, runId: 1});
 
@@ -72,6 +75,7 @@ test('BBC Run sends the exact edited source and filename to the interactive WASM
     const pending = f.editor.runBasic(); await f.entered.promise;
     assert.deepEqual(f.calls[0], ['run', source, {filename: 'lesson.bas', interactive: true, timeoutMs: 60000}]);
     assert.equal(f.editor.state.running, true);
+    assert.equal(f.runnerOptions.circuit, undefined, 'Circuit access remains opt-in');
     f.emit({...view('é\n'), rawOutput: '\x16\x01é\r\n'});
     assert.equal(f.editor.state.output, 'é\n');
     assert.equal(f.editor.state.basicRawOutput, '\x16\x01é\r\n');
@@ -80,6 +84,43 @@ test('BBC Run sends the exact edited source and filename to the interactive WASM
     assert.equal(f.editor.state.running, false);
     assert.equal(f.editor.state.crispBasicActive, false);
     assert.equal(f.calls.at(-1)[0], 'dispose');
+});
+
+test('Connect Circuit passes the actual runtime only when explicitly enabled', async () => {
+    const f = fixture(); f.editor.state.basicConnectCircuit = true;
+    const pending = f.editor.runBasic(); await f.entered.promise;
+    assert.deepEqual(f.runnerOptions.circuit, {runtime: f.editor.props.vm.runtime});
+    f.completion.resolve(done); await pending;
+});
+
+for (const name of ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED']) {
+    test(`${name} during the cold Circuit import revokes the old BASIC start`, async () => {
+        const gate = deferred(), f = fixture({loadGate: gate});
+        f.editor.state.basicConnectCircuit = true;
+        f.editor.props.vm.runtime = new EventEmitter();
+        const pending = f.editor.runBasic();
+        f.editor.props.vm.runtime.emit(name);
+        assert.equal(f.editor.state.status, 'stopped');
+        gate.resolve(); await pending;
+        assert.equal(f.created, 0);
+        assert.equal(f.editor.props.vm.runtime.eventNames().length, 0);
+    });
+}
+
+test('a successful external project replacement during Circuit loading cannot start on its replacement board', async () => {
+    const previous = globalThis.window;
+    globalThis.window = new EventTarget();
+    try {
+        const gate = deferred(), f = fixture({loadGate: gate});
+        f.editor.state.basicConnectCircuit = true;
+        const pending = f.editor.runBasic();
+        window.dispatchEvent(new CustomEvent('bw-project-bundle-loaded', {detail: {outcome: 'invalid'}}));
+        assert.equal(f.editor.state.running, true, 'refused loads preserve the current project');
+        window.dispatchEvent(new CustomEvent('bw-project-bundle-loaded', {detail: {outcome: 'loaded'}}));
+        gate.resolve(); await pending;
+        assert.equal(f.created, 0);
+        assert.equal(f.editor.state.status, 'stopped');
+    } finally { if (previous === undefined) delete globalThis.window; else globalThis.window = previous; }
 });
 
 test('the three 8086 BASIC routes retain their explicit selection', async () => {
@@ -366,7 +407,7 @@ test('source errors keep their supplied location without a duplicate prefix', as
     assert.equal(f.editor.state.running, false);
 });
 
-for (const status of ['timeout', 'output-limit']) {
+for (const status of ['timeout', 'output-limit', 'simulation-limit']) {
     test(`${status} remains distinct from successful completion`, async () => {
         const f = fixture(); const pending = f.editor.runBasic(); await f.entered.promise;
         f.completion.resolve({status}); await pending;

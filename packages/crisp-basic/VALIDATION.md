@@ -1,5 +1,114 @@
 # Validation records
 
+## Circuit board adapter milestone
+
+Version `0.1.0-dev.5`, recorded on 2026-11-27 on `feature/crispbasic`.
+The GUI-owned adapter and Code tab connection are specified in
+[BOARD-SIMULATION.md](BOARD-SIMULATION.md). The prior bridge-only milestone is
+retained below as historical evidence.
+
+**Local qualification: 403 tests passed, with zero failures or skips.**
+Full CI rebuilds and real Chromium qualification are pending for this revision;
+the browser assertions described below have been implemented and syntax-checked
+but are not claimed as locally executed browser evidence.
+
+### Implemented boundary
+
+The Code tab explicitly enables the connection with **Connect Circuit**. The
+run acquires the actual canvas board, maps one supported GPIO controller, drives
+and senses the pinned electrical solver and advances it through checked,
+cooperative `advanceToLive` batches. Run time is relative to the existing board
+clock; controls and electrical history are not reset. Output reads sense the
+electrical solution, including contention, rather than the logical latch.
+
+The GUI handoff and solver clock lease have separate ownership identities.
+Cancellation, completion, stale acknowledgements, board replacement, external
+pin takeover and exceptional cleanup are tested. Debugger/Pico startup
+reservations and retained-debugger mutation guards prevent competing execution.
+The existing CAD handoff now uses an owner identity and does not modify a board
+whose clock request was rejected or never acknowledged.
+
+The solver pin remains `cc18f3c8d84d68e008450e65ddf838b8ec03c7f7`. No interpreter
+C source, build input, upstream pin, toolchain pin or binary ABI changed. The
+JavaScript parent additionally recognizes adapter `solver-limit` as an
+uncatchable `simulation-limit` outcome.
+
+### Local results and provenance
+
+| Suite | Passed |
+| --- | ---: |
+| Source preparation, reference host and bridge protocol/lifecycle | 100 |
+| Actual WASM execution, restricted-host policy and simulation bridge | 147 |
+| GUI adapter, editor, assets, board host/session and generated-source integration | 126 |
+| Shared board ownership and existing CAD bridge/cancellation | 30 |
+| **Local total** | **403** |
+
+The 126 GUI/integration tests comprise 14 asset checks, 15 runner checks, 34
+editor/VDU checks, 18 actual-solver host checks, 29 circuit-session/ownership
+checks and 16 actual-WASM integration cases. The separate consumer group
+contains 25 CAD cancellation cases, one CAD bridge case and four existing
+one-board/run cases. These totals count each reported test once; the same
+tests will overlap the corresponding CI suites.
+
+The actual-WASM circuit cases run BASIC through the production GUI runner and
+the pinned solver. They verify an Uno LED carrying approximately 13 mA through
+a 220-ohm resistor, external-button sensing, an exact 25 ms delay, repeat-run
+clock origin and preserved controls, partial delay cancellation, parent-owned
+time and solver budgets, reentrant Stop-all during a pin write, and foreign-pin
+takeover during blocked BASIC input. Host tests separately cover Pico's 3.3 V
+drive on a 5 V bench and electrical output contention.
+
+This sparse workspace used Node 24.22.3. Emscripten, NASM and the actual local
+Chromium binary were unavailable. The browser attempt failed at its launch
+prerequisite; no local compilation, native execution or browser pass is claimed.
+Local WASM execution used the successful prior
+[CI artifact from `5be2b6971fc8`](https://github.com/CrispStrobe/brickwright/actions/runs/46063340172),
+verified against GitHub's archive SHA-256
+`7f86c28edd35030db496cddfd946e66421f1efadb5d8841c5702a119e25db7ab`.
+Packaging authenticated all current C/build inputs, upstream locks, generated
+JavaScript/WASM hashes, imports and notices. The unchanged WASM binary is
+215771 bytes, SHA-256
+`cc73c82adb438276eba4edbbea6519f2d6e2191dbafb2f2b7a79ef55c397e3ba`.
+All 20 browser payload assets and their manifest pass the staging check.
+
+The browser additions mount the real editor controls and the production
+Circuit tab clock-owner callback with the actual solver and WASM worker. Four
+new cases exercise connection/LED/button/time, Stop and reuse, absent-board
+refusal followed by plain BASIC, and replacement-board isolation. Whole editor
+JSX, the extracted harness/owner callback and the browser dependency graph pass
+esbuild checks. This remains focused integration qualification, not a complete
+production GUI bundle build, full VDU implementation, general electrical-model
+validation, other-browser qualification or physical-board test.
+
+Review found and fixed reentrant cancellation, swallowed cleanup failures,
+stale-owner release, asynchronous startup races and foreign GPIO takeover
+leaving unrelated BASIC outputs driven. A pre-existing one-board source
+assertion was updated to allow the debugger's existing optional immediate pause
+between `session.start()` and its clock-origin assignment; its executable clock
+regression also passes. Changed overlay/package source mirrors match and
+`git diff --check` passes.
+
+### Reproduction
+
+From the repository root, after preparing the documented dependencies and
+building/staging the WASM artifact:
+
+```sh
+npm --prefix packages/crisp-basic test
+npm --prefix packages/crisp-basic run test:wasm
+npm --prefix packages/crisp-basic run test:brickwright
+node --test test/circuit-cad-cancellation.test.mjs \
+  test/circuit-cad-bridge.test.mjs test/b8-one-board-per-run.test.mjs
+npm run package:crispbasic:check
+npm --prefix packages/crisp-basic run test:browser
+node scripts/verify-crispbasic-browser.mjs
+```
+
+The dedicated workflow additionally rebuilds both interpreter backends and
+runs the native and fixed-output parity suites. The authored
+[circuit blink example](examples/circuit-blink.bas) is intended for the Code tab
+with **Connect Circuit** enabled and an actual supported Uno/Nano circuit.
+
 ## Bounded BASIC simulation bridge milestone
 
 Version `0.1.0-dev.4`, recorded on 2026-11-27 on `feature/crispbasic`.

@@ -137,7 +137,8 @@ dynamic `EVAL`; injected raw internal tokens are rejected before its tokenizer.
 unavailable. The simulation library's explicit millisecond clock does not alter
 those semantics. Graphics statements can emit VDU bytes, but screen queries,
 sound, mouse input, host events and physical hardware operations remain
-unavailable. There is no native-backend bridge or automatic GUI/circuit wiring.
+unavailable. There is no native-backend bridge. The GUI's explicit **Connect
+Circuit** option uses the separate [board adapter](../BOARD-SIMULATION.md).
 
 The worker's WASM memory boundary isolates the embedding host. It does not
 guarantee that all possible BASIC programs are free of upstream interpreter

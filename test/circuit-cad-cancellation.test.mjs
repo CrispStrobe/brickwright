@@ -90,6 +90,18 @@ function fixture (t, {ready = false} = {}) {
     };
 }
 
+test('CAD refuses an active BASIC circuit lease before stopping or changing its board', async t => {
+    const f = fixture(t, {ready: true});
+    try {
+        f.runtime.bwCrispBasicSimulation = {board: f.board};
+        await assert.rejects(f.api.start(), /Stop the other simulator/);
+        assert.equal(f.owners.length, 0);
+        assert.equal(f.board.powered, true);
+        assert.equal(f.flags, 0);
+        assert.equal(f.runtime.bwCrispBasicSimulation.board, f.board);
+    } finally { delete f.runtime.bwCrispBasicSimulation; f.close(); }
+});
+
 test('progress events are throttled while synchronous status and Stop retain the latest readings', async t => {
     const f = fixture(t, {ready: true});
     try {
@@ -244,7 +256,7 @@ test('late owner callbacks from a cancelled start cannot change a restarted run'
         const oldOwner = f.owners[0];
         f.api.stop(); await nextTurn();
         assert.equal(first.settled, true);
-        assert.equal(f.board.powered, false);
+        assert.equal(f.board.powered, true, 'an unacknowledged request never owned the board power');
         assert.equal(f.deadlines.size, 0);
         const second = f.start(); await nextTurn();
         assert.equal(f.owners.length, 2);
@@ -289,9 +301,14 @@ test('a real Circuit readiness timeout still rejects and removes its listener', 
     } finally {f.close();}
 });
 
-for (const timedOut of [false, true]) test(`a real owner ${timedOut ? 'timeout' : 'rejection'} stays observable and cuts power`, async t => {
+for (const timedOut of [false, true]) test(`a real owner ${timedOut ? 'timeout' : 'rejection'} stays observable without changing unowned pins or power`, async t => {
     const f = fixture(t, {ready: true});
     try {
+        const effects = [];
+        f.board.getPinStates = () => [{pin: 'P1.0', mode: 'output'}];
+        f.board.setPin = (...args) => effects.push(['pin', ...args]);
+        const setPower = f.board.setPower.bind(f.board);
+        f.board.setPower = value => { effects.push(['power', value]); setPower(value); };
         const run = f.start(); await nextTurn();
         const error = new Error('designer refused ownership');
         if (timedOut) f.fireDeadline(10000); else f.owners[0].reject(error);
@@ -300,7 +317,8 @@ for (const timedOut of [false, true]) test(`a real owner ${timedOut ? 'timeout' 
         if (timedOut) assert.match(run.error?.message || '', /Open the Circuit tab/);
         else assert.equal(run.error, error);
         assert.equal(f.api.state().phase, 'error');
-        assert.equal(f.board.powered, false); assert.equal(f.deadlines.size, 0);
+        assert.equal(f.board.powered, true); assert.equal(f.deadlines.size, 0);
+        assert.deepEqual(effects, [], 'a rejected owner must not release another program’s output');
         f.owners[0].ready(); await nextTurn();
         assert.equal(f.api.state().phase, 'error'); assert.equal(f.flags, 0);
     } finally {f.close();}

@@ -8,7 +8,9 @@ export const SIMULATION_ERROR_CODES = Object.freeze([
     'invalid-pin', 'invalid-mode', 'invalid-level', 'invalid-time',
     'pin-not-output', 'floating-input', 'disposed', 'unavailable', 'invalid-operation'
 ]);
-export const SIMULATION_LIMIT_CODES = Object.freeze(['request-limit', 'trace-limit', 'input-limit', 'time-limit']);
+export const SIMULATION_LIMIT_CODES = Object.freeze([
+    'request-limit', 'trace-limit', 'input-limit', 'time-limit', 'solver-limit'
+]);
 
 const integer = (value, maximum = 0x7fffffff) => Number.isSafeInteger(value) && value >= 0 && value <= maximum;
 export const validRunId = value => Number.isSafeInteger(value) && value > 0;
