@@ -2311,3 +2311,26 @@ The real Brickwright SB3 write and load path preserved CAD document
 versions 41–47, including the byte representation of a version 47
 standard counterbored hole. Brickwright pins SDK `059c08a`.
 All 842 SDK file hashes and nine pin tests passed.
+
+### Upload only new motion trail vertices
+
+The viewport uploads appended trace vertices and reuses the buffered
+prefix when replay seeks backward. A new trail or the eviction of the
+oldest sample at the 2,000-sample cap rebuilds the buffer. Scenes without
+tracers skip the trace pose map and repeated viewport invalidation.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/8b784d7db79faefa6dd0cfc84afaf59d568f4add)
+
+In the existing Brickwright GUI host with shared Chromium, Atlas
+ran with a chassis tracer for 12.065 simulated seconds in both
+versions. Captured trace-buffer uploads fell from 18,336,000 bytes
+with SDK `059c08a` to 9,288 bytes with `8b784d7`. All 380 shared
+recorded path samples matched exactly. Atlas measured 0.691× and
+0.788× in the separate runs. Scout measured 1.001× over 12.130
+simulated seconds with the new SDK and no added tracer. Both
+robots passed Run, Stop, Reset, and repeat Run. Atlas also passed
+the restart after a gravity edit.
+
+All 37 focused CrispCAD tests passed, including trace append and
+replay, manufacturing, and the editor menu. Brickwright pins SDK
+`8b784d7`. All 842 SDK file hashes and nine pin tests passed.
+The real Brickwright SB3 path passed for CAD document versions 41–47.

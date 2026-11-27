@@ -1,7 +1,7 @@
 var fn = Object.defineProperty;
 var un = (e, t, n) => t in e ? fn(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
 var pe = (e, t, n) => un(e, typeof t != "symbol" ? t + "" : t, n);
-import { c as Wt, C as dn, s as hn, a as pn, t as _, E as mn, M as gn, b as yn, e as xn, d as dt, f as wn, g as ht, S as vn, h as Mn, i as bn, r as En, j as Sn, k as me, l as An, m as Tn, n as $n, o as Pn, p as In, q as Cn, u as _n, v as zn, w as pt, x as Nn, y as Bn, z as On, A as Fn, B as Rn, D as Qe, F as Ln, G as Dn, H as kn } from "../geometry.worker-BOWujeEv.js";
+import { c as Wt, C as dn, s as hn, a as pn, t as _, E as mn, M as gn, b as yn, e as xn, d as dt, f as wn, g as ht, S as vn, h as Mn, i as bn, r as En, j as Sn, k as me, l as An, m as Tn, n as $n, o as Pn, p as In, q as Cn, u as _n, v as zn, w as pt, x as Nn, y as Bn, z as On, A as Fn, B as Rn, D as Qe, F as Ln, G as Dn, H as kn } from "../geometry.worker-Diqo6bgU.js";
 var E = class extends Error {
   constructor(t, n, o) {
     super(n, o);
@@ -819,9 +819,9 @@ async function Io(e) {
   if (e.wasmBinary) return e.wasmBinary;
   const t = Po(), n = e.locateFile ? e.locateFile("smlibwasm.wasm", new URL(".", t).href) : t.href, o = !!globalThis.process?.versions?.node;
   if (n.startsWith("file:") || o && !/^[a-z]+:/i.test(n)) {
-    const { readFile: a } = await import("../geometry.worker-BOWujeEv.js").then(function(i) {
+    const { readFile: a } = await import("../geometry.worker-Diqo6bgU.js").then(function(i) {
       return i._;
-    }), { fileURLToPath: s } = await import("../geometry.worker-BOWujeEv.js").then(function(i) {
+    }), { fileURLToPath: s } = await import("../geometry.worker-Diqo6bgU.js").then(function(i) {
       return i._;
     });
     return a(n.startsWith("file:") ? s(n) : n);
