@@ -1947,3 +1947,30 @@ its test uses only drive motors. All sampled motion and electrical
 readings matched in both orders, and both robots restored their initial
 frames on warm restart. Overall worker timing varied under Mac load.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/64de0a51fa33d71d8d058f726bd77d4bb899f6be)
+
+Physics type checking and all 21 actuator, telemetry and gear-train
+tests passed across two runs. The Rover startup-torque case passed
+on an isolated retry after the initial deadline expired.
+
+### Package the native simulation optimizations for Brickwright
+
+The browser SDK from CrispCAD `64de0a5` includes native ray-query reuse,
+shared sensor poses and coordinates, indexed hinge and slider bindings,
+and shared servo angle samples. It was built from the locked exact
+kernel 0.1.7 dependency. All 842 manifest hashes matched the vendored
+copy. The standalone WASM bytes, Jolt code and immutable model source
+URLs match the previous SDK. Jolt's generated worker import names were
+updated.
+
+All 24 pin and fetch tests passed. The packaged exact worker loaded
+its WASM on demand and measured a 10 × 20 × 30 mm box at 6,000 mm³
+and 2,200 mm². Scout passed project selection, Run, motion, Stop, Reset
+and repeat Run in Chrome with the existing Brickwright host build
+`22a9fdd` and the current robot project.
+
+Atlas missed its +15° fork target with both the current pin `68666ce`
+and the candidate. At 3.03 simulated seconds, the complete CAD frame
+and electrical readings matched exactly, including the −53.2° fork
+tilt. A separate parity check verified matching frames and completed
+Atlas Stop, Reset and repeat Run on the candidate. Atlas fork control
+and sustained 1× production performance remain open.
