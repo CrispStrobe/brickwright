@@ -9,6 +9,7 @@ const browser = await engine.launch({headless: true,
     executablePath: engine === chromium ? process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH : undefined});
 try {
     const page = await browser.newPage({viewport: {width: 1260, height: 840}, locale: 'en-US', serviceWorkers: 'block'});
+    page.on('dialog', dialog => dialog.accept());
     await page.addInitScript(() => {
         Object.defineProperty(navigator, 'platform', {value: 'MacIntel'});
         window.__TAURI__ = {};
