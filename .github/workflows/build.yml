@@ -3687,6 +3687,16 @@ jobs:
         timeout-minutes: 3  # derived: p95 12 s × 3 → 3 min over 20 green runs to 36823340082; max 13 s in run 36375211475 (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: PROOF_URL=http://localhost:8617/ node scripts/verify-makecode.mjs
+      - name: Browser gate — Code runs a minimal Arcade project and reports unsupported blocks
+        id: bw_browser_code_arcade_run
+        timeout-minutes: 3  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: |
+          if [ ! -s packages/scratch-gui/build/static/makecode/arcade/target.json ]; then
+            echo "::warning::Skipping the Code Arcade browser check because the Arcade runtime is unavailable"
+            exit 0
+          fi
+          node scripts/verify-code-arcade-run.mjs http://127.0.0.1:8617/
 
       # Native CPX blocks must drive the same state in the pane and circuit face.
       # Keep this journey separate so its duration and failure receipt are visible.
