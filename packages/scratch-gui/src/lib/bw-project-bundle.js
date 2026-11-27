@@ -8,6 +8,7 @@ import {CAD_PROJECT_PATH, CAD_STORAGE_KEY, CAD_PROJECT_LIMIT, inspectCadText, re
 import {sandboxWorld, SANDBOX_STORAGE_KEY} from './spike-arena/arena-sandbox.js';
 import {simLabRecord, SIM_LAB_STORAGE_KEY, SIM_LAB_LIMIT} from './bw-sim/model/sim-lab-persist.js';
 import {simLabSaveFailure, refuseSimLabSave, clearSimLabSaveFailure} from './bw-sim/model/sim-lab-save-state.js';
+import {validateCodeDocumentRecord} from './code-source-document.js';
 /**
  * Carry the Circuit, Code and Widgets tabs (and the SPIKE arena sandbox and the
  * Sim Lab model) inside the .sb3, in ONE format.
@@ -79,9 +80,7 @@ const decodeSection = (name, value) => {
     if (limit && utf8Size(JSON.stringify(value)) > limit) {
         throw new Error(`${name} exceeds ${limit} bytes`);
     }
-    if (name === 'code' && (typeof value.lang !== 'string' || typeof value.code !== 'string')) {
-        throw new Error('code must contain string lang and code');
-    }
+    if (name === 'code') return validateCodeDocumentRecord(value);
     if (name === 'circuit' && !Array.isArray(value.parts)) {
         throw new Error('circuit must contain a parts array');
     }
@@ -390,17 +389,33 @@ const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip =
     // Widgets never persisted at all until this event existed — the panel
     // lives on vm.runtime and its listener writes `bw-ctl-widgets` here.
     const simLabSaveRefusals = [];
+    const codeSaveRefusals = [];
     try {
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('bw-project-bundle-collect', {detail: {
-                refuseSimLabSave: message => simLabSaveRefusals.push(String(message).slice(0, 512))
+                refuseSimLabSave: message => simLabSaveRefusals.push(String(message).slice(0, 512)),
+                refuseCodeSave: message => codeSaveRefusals.push(String(message).slice(0, 512))
             }}));
         }
     } catch (e) { /* unrelated listener failures keep the established save behavior */ }
     // An explicit history refusal must not turn the previous stored model into a successful save.
     const pendingSimLabFailure = simLabSaveFailure();
     if (pendingSimLabFailure || simLabSaveRefusals.length) throw new Error(pendingSimLabFailure || simLabSaveRefusals[0]);
+    const refuseCode = message => {
+        const error = new Error(`Code source was not saved: ${message}`);
+        error.code = 'BW_CODE_SAVE_REFUSED';
+        throw error;
+    };
+    // A live editor may have retained newer text after its storage/quota error.
+    // Refuse this save rather than attaching the previous stored source. The
+    // refusal belongs to this collection event, not a different loaded project.
+    if (codeSaveRefusals.length) refuseCode(codeSaveRefusals[0]);
     const state = collectState();
+    if (state['bw-code-autosave'] !== undefined) {
+        // Validate outside the archive fallback catch: malformed or unsupported
+        // Code must not become a successful .sb3 with its source omitted.
+        try { decodeStored('code', state['bw-code-autosave']); } catch (error) { refuseCode(error.message); }
+    }
     if (state[CAD_STORAGE_KEY]) inspectCadText(state[CAD_STORAGE_KEY]);
     if (Object.keys(state).length === 0 && !preservedBundle && !mutateZip) return blob;
     try {
