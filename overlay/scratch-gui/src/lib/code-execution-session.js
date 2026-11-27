@@ -5,6 +5,8 @@
 // boundary, not a security sandbox or an interpreter implementation.
 export const DEFAULT_CODE_TIMEOUT_MS = 4000;
 export const DEFAULT_CODE_OUTPUT_LIMIT = 65536;
+export const DEFAULT_CODE_INPUT_PROBE_INTERVAL_MS = 250;
+export const DEFAULT_CODE_INPUT_PROBE_TIMEOUT_MS = 1000;
 
 let nextRunId = 0;
 const defaultClock = {
@@ -38,12 +40,19 @@ const createBlobWorker = source => {
  * Call replyToInput(requestId, string) for the current request only.
  *
  * Wire protocol: every message carries runId. Host sends run/code/maxOutputChars
- * and input-reply/requestId/value. Worker sends out/text, done, error/text,
- * input/requestId/prompt, output-reset, or output-limit. Request IDs are distinct
+ * and input-reply/requestId/value. During input, input-ping/requestId/probeId
+ * requires a matching input-pong. Worker sends out/text, done, error/text,
+ * input/requestId/prompt/pauseBudget, input-state/requestId/pauseBudget,
+ * output-reset, or output-limit. Request IDs are distinct
  * short strings or non-negative safe integers. One input may be pending at a time.
  *
- * The execution timeout starts when code is dispatched, pauses for human input,
- * and resumes with the remaining budget. Output-reset clears visible output but
+ * The execution timeout starts when code is dispatched. Input pauses it unless
+ * pauseBudget is false (other owned work is still active); matching input-state
+ * messages may change that state. Resuming never replenishes the budget. A
+ * separate responsiveness probe remains active during input, so asking without
+ * awaiting, or a busy sibling task, cannot disable worker timeout protection.
+ * Human waiting can continue while the worker answers those probes.
+ * Output-reset clears visible output but
  * never replenishes the total accepted-output budget (UTF-16 code units).
  * Worker sources should also batch and bound output before posting messages.
  *
@@ -57,6 +66,8 @@ export const createCodeExecutionSession = ({
     timeoutMs = DEFAULT_CODE_TIMEOUT_MS,
     maxOutputChars = DEFAULT_CODE_OUTPUT_LIMIT,
     flushIntervalMs = 32,
+    inputProbeIntervalMs = DEFAULT_CODE_INPUT_PROBE_INTERVAL_MS,
+    inputProbeTimeoutMs = DEFAULT_CODE_INPUT_PROBE_TIMEOUT_MS,
     onOutput = () => {},
     onInput = () => {},
     createWorker = createBlobWorker,
@@ -70,6 +81,9 @@ export const createCodeExecutionSession = ({
     let settled = false;
     let executionTimer = null;
     let flushTimer = null;
+    let inputProbeTimer = null;
+    let pendingProbe = null;
+    let nextProbeId = 0;
     let budgetStarted = null;
     let remainingMs = timeoutMs;
     let output = '';
@@ -97,6 +111,9 @@ export const createCodeExecutionSession = ({
         }
     };
     const clearInput = () => {
+        if (inputProbeTimer !== null) clock.clearTimeout(inputProbeTimer);
+        inputProbeTimer = null;
+        pendingProbe = null;
         if (!pendingInput) return;
         pendingInput = null;
         // Cleanup cannot be prevented by a caller whose view has disappeared.
@@ -139,6 +156,7 @@ export const createCodeExecutionSession = ({
     };
     const armBudget = () => {
         if (settled) return false;
+        if (executionTimer !== null) return true;
         if (remainingMs <= 0) {
             finish('timeout');
             return false;
@@ -151,6 +169,35 @@ export const createCodeExecutionSession = ({
         clearTimer('execution');
         if (budgetStarted !== null) remainingMs -= Math.max(0, clock.now() - budgetStarted);
         budgetStarted = null;
+    };
+    const setInputBudget = paused => {
+        if (!paused) return armBudget();
+        pauseBudget();
+        if (remainingMs <= 0) {
+            finish('timeout');
+            return false;
+        }
+        return true;
+    };
+    const scheduleInputProbe = () => {
+        if (settled || !pendingInput || inputProbeTimer !== null) return;
+        inputProbeTimer = clock.setTimeout(() => {
+            inputProbeTimer = null;
+            if (settled || !pendingInput) return;
+            pendingProbe = {requestId: pendingInput.requestId, probeId: ++nextProbeId};
+            // Arm before dispatch: even a synchronous test transport may reply.
+            inputProbeTimer = clock.setTimeout(() => {
+                inputProbeTimer = null;
+                if (!settled && pendingInput && pendingProbe) {
+                    finish('timeout', {reason: 'input-unresponsive'});
+                }
+            }, inputProbeTimeoutMs);
+            try {
+                worker.postMessage({type: 'input-ping', runId: id, ...pendingProbe});
+            } catch (error) {
+                finish('error', {error: messageFor(error)});
+            }
+        }, inputProbeIntervalMs);
     };
     const failProtocol = text => finish('error', {error: text});
     const receive = event => {
@@ -191,16 +238,28 @@ export const createCodeExecutionSession = ({
                 data.requestId.length <= 128) ||
                 (Number.isSafeInteger(data.requestId) && data.requestId >= 0);
             if (!validId || typeof data.prompt !== 'string' || data.prompt.length > 4096 ||
-                pendingInput || inputIds.has(data.requestId) || inputIds.size >= 1000) {
+                pendingInput || inputIds.has(data.requestId) || inputIds.size >= 1000 ||
+                (data.pauseBudget !== undefined && typeof data.pauseBudget !== 'boolean')) {
                 return failProtocol('Invalid or overlapping worker input request.');
             }
-            pauseBudget();
-            if (remainingMs <= 0) return finish('timeout');
+            if (!setInputBudget(data.pauseBudget !== false)) return;
             inputIds.add(data.requestId);
             pendingInput = {runId: id, requestId: data.requestId, prompt: data.prompt};
             notifyOutput();
             if (settled) return;
+            scheduleInputProbe();
             try { onInput(pendingInput); } catch (error) { finish('error', {error: messageFor(error)}); }
+        } else if (data.type === 'input-state') {
+            if (!pendingInput || data.requestId !== pendingInput.requestId) return;
+            if (typeof data.pauseBudget !== 'boolean') return failProtocol('Invalid worker input state.');
+            setInputBudget(data.pauseBudget);
+        } else if (data.type === 'input-pong') {
+            if (!pendingInput || !pendingProbe || data.requestId !== pendingInput.requestId ||
+                data.requestId !== pendingProbe.requestId || data.probeId !== pendingProbe.probeId) return;
+            if (inputProbeTimer !== null) clock.clearTimeout(inputProbeTimer);
+            inputProbeTimer = null;
+            pendingProbe = null;
+            scheduleInputProbe();
         }
     };
     const replyToInput = (requestId, value) => {
@@ -234,7 +293,9 @@ export const createCodeExecutionSession = ({
         if (settled) return;
         if (typeof source !== 'string' || !Number.isFinite(timeoutMs) || timeoutMs <= 0 ||
             !Number.isSafeInteger(maxOutputChars) || maxOutputChars <= 0 ||
-            !Number.isFinite(flushIntervalMs) || flushIntervalMs < 0) {
+            !Number.isFinite(flushIntervalMs) || flushIntervalMs < 0 ||
+            !Number.isFinite(inputProbeIntervalMs) || inputProbeIntervalMs <= 0 ||
+            !Number.isFinite(inputProbeTimeoutMs) || inputProbeTimeoutMs <= 0) {
             finish('unavailable', {error: 'Invalid code execution session configuration.'});
             return;
         }

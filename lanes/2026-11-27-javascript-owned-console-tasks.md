@@ -1,6 +1,7 @@
 # Owned JavaScript console tasks — 2026-11-27
 
-Status: CLAIMED.
+Status: DONE — bounded implementation and local qualification; draft publication
+and hosted qualification remain pending. No runtime code has landed on main.
 
 Owner: Code execution continuation maintainer, continuing the repository owner's
 runtime/export request and PR #1855. Branches:
@@ -47,3 +48,27 @@ Supplier behavior must land and qualify upstream before normal consumer pin
 adoption. The existing gallery and HDD-control failures remain real landing
 blockers, already owned by PR #1846 and its source/controls claims. Do not waive
 or rerun unchanged failures.
+
+## Implementation and observed evidence
+
+The supplier adds opt-in `owned-console-v1` generation with scoped flag/procedure
+APIs and explicit console-subset admission. The consumer owns registered task
+lifetimes, per-task input/delays, failed-scope cleanup and an input responsiveness
+watchdog. `spawn` returns no join handle; sequential calls retain their task API.
+Unawaited owned resources, completed scopes and work continued under the same
+scope's pending input fail explicitly. The original generator/pin/UI selection
+remain unchanged in the consumer.
+
+- Consumer focused controls: **139/139 pass, no skips**.
+- Supplier owned-console/codegen/roundtrip controls: **193/193 pass, no skips**.
+- Existing source compatibility: **240/240 byte-identical generated outputs**.
+- [Actual production-worker/browser receipt](../scripts/probes/code-runtime/session-task-browser-results.json):
+  **38/38 pass, zero page errors**, including three actual generated programs.
+- Negative controls detect removed input-watchdog termination, removed registered
+  task waiting, and a missing generated procedure owner argument. The earlier emitter failed the new task
+  contract controls while preserving the ordinary default-generation control.
+
+The candidates remain unmerged and require hosted qualification plus coordinated
+supplier adoption. The initial remote PR #1855 has the separately owned gallery
+and HDD-control failures recorded in the runtime plan. No unchanged CI rerun,
+gate relaxation or pin advance is part of this continuation.

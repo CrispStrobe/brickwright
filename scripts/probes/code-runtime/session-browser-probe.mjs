@@ -5,8 +5,9 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
+import {execFileSync} from 'node:child_process';
 
 const args = Object.fromEntries(process.argv.slice(2).map(argument => {
     const value = argument.replace(/^--/, '');
@@ -20,6 +21,36 @@ const requireProbe = createRequire(path.join(dependencies, 'package.json'));
 const {chromium: launcher} = requireProbe('playwright-core');
 const chromiumModule = requireProbe('@sparticuz/chromium');
 const chromium = chromiumModule.default || chromiumModule;
+let generator = null;
+const generatedPrograms = {};
+if (args['generator-root']) {
+    const generatorRoot = path.resolve(args['generator-root']);
+    const generatorFile = path.join(generatorRoot, 'src/utils/sb3Creator.js');
+    const {default: SB3Creator} = await import(pathToFileURL(generatorFile).href);
+    const fixtures = {
+        concurrent: 'SPRITE Demo:\n  DEFINE later:\n    wait 0.08 seconds\n    say "later"\n  WHEN flag clicked:\n    say "first"\n    later\n    say "last"\n  WHEN flag clicked:\n    say "second"\n',
+        input: 'SPRITE Demo:\n  WHEN flag clicked:\n    ask "Name?" and wait\n    say answer\n',
+        stop: 'SPRITE Demo:\n  WHEN flag clicked:\n    say "ready"\n    wait 10 seconds\n    say "late"\n'
+    };
+    for (const [name, source] of Object.entries(fixtures)) {
+        const creator = new SB3Creator();
+        creator.parse(source);
+        const validation = creator.validate();
+        if (!validation.isValid || creator.warnings.length) throw new Error(`Invalid generated fixture ${name}: ${JSON.stringify({validation, warnings: creator.warnings})}`);
+        const code = creator.generateJavaScript(creator.project, {async: true, execution: 'owned-console-v1'});
+        if (!code.includes('codeRun.spawn')) throw new Error('The selected generator does not implement owned-console-v1.');
+        generatedPrograms[name] = {source, code,
+            sha256: crypto.createHash('sha256').update(code).digest('hex')};
+    }
+    generator = {
+        repository: 'CrispStrobe/sb3-creator',
+        head: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: generatorRoot, encoding: 'utf8'}).trim(),
+        sourceModified: !!execFileSync('git', ['diff', '--name-only', 'HEAD', '--', 'src/utils'], {cwd: generatorRoot, encoding: 'utf8'}).trim(),
+        sourceSha256: crypto.createHash('sha256').update(await fs.readFile(generatorFile)).digest('hex'),
+        execution: 'owned-console-v1',
+        programs: generatedPrograms
+    };
+}
 const files = {
     '/code-execution-session.js': path.join(appRoot, 'overlay/scratch-gui/src/lib/code-execution-session.js'),
     '/code-execution-workers.js': path.join(appRoot, 'overlay/scratch-gui/src/lib/code-execution-workers.js'),
@@ -47,7 +78,9 @@ const report = {
     schema: 1,
     createdAt: new Date().toISOString(),
     implementationClaim: 'e1ef0cb79343dd7c592e6b645bc9d93bdd873910',
-    scope: 'production session and console workers, static localhost harness; no React/UI, device, simulator, generated detached-task or platform-matrix qualification',
+    scope: 'production session and console workers including registered tasks; selected canonical generator when supplied; static localhost harness, no React/UI, device, simulator, game semantics or platform-matrix qualification',
+    generator,
+    probeSha256: crypto.createHash('sha256').update(await fs.readFile(fileURLToPath(import.meta.url))).digest('hex'),
     sourceHashes: Object.fromEntries(Object.entries(contents).map(([url, source]) => [url.slice(1), crypto.createHash('sha256').update(source).digest('hex')])),
     environment: {node: process.version, platform: process.platform, arch: process.arch,
         skulpt: requireProbe('skulpt/package.json').version,
@@ -61,7 +94,7 @@ try {
     const page = await browser.newPage();
     page.on('pageerror', error => pageErrors.push(String(error)));
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
-    const observed = await page.evaluate(async () => {
+    const observed = await page.evaluate(async ({generatedPrograms}) => {
         const {createCodeExecutionSession} = await import('/code-execution-session.js');
         const {JAVASCRIPT_WORKER_SOURCE, createPythonWorkerSource} = await import('/code-execution-workers.js');
         const [core, stdlib] = await Promise.all(['/skulpt.min.js', '/skulpt-stdlib.js'].map(url => fetch(url).then(response => response.text())));
@@ -86,6 +119,8 @@ try {
             session = createCodeExecutionSession({
                 workerSource: sources[engine], code,
                 timeoutMs: options.timeoutMs || 2500,
+                inputProbeIntervalMs: options.inputProbeIntervalMs || 50,
+                inputProbeTimeoutMs: options.inputProbeTimeoutMs || 250,
                 maxOutputChars: options.maxOutputChars || 65536,
                 flushIntervalMs: 10,
                 onOutput: (text, metadata) => {
@@ -98,7 +133,7 @@ try {
                     lastRequest = request;
                     if (options.stopOnInput) {
                         answerTimers.push(setTimeout(() => session.stop('probe-input-stop'), 30));
-                    } else {
+                    } else if (!options.noAnswer) {
                         const answerIndex = input.filter(Boolean).length - 1;
                         const answer = options.answers?.[answerIndex] ?? 'Ada';
                         answerTimers.push(setTimeout(() => session.replyToInput(request.requestId, answer), options.answerDelayMs || 20));
@@ -113,6 +148,7 @@ try {
                     worker.addEventListener('message', event => {
                         const message = event.data;
                         wire.push({type: message.type, runId: message.runId, requestId: message.requestId,
+                            pauseBudget: message.pauseBudget, probeId: message.probeId,
                             prompt: message.prompt, textLength: message.text?.length,
                             textPreview: message.text?.slice(0, 200), atMs: performance.now() - startedAt});
                     });
@@ -210,6 +246,133 @@ try {
             }
         });
 
+        await runCase('owned-concurrent-nested-tasks', 'javascript',
+            "codeRun.spawn(async task => { console.log('first'); await task.sleep(80); task.spawn(async child => { await child.sleep(30); console.log('nested'); }); console.log('parent'); }); codeRun.spawn(async task => { await task.sleep(20); console.log('second'); }); console.log('entry');", {
+            check: (r, expect) => {
+                expect(r.result.status === 'completed' && r.result.output === 'entry\nfirst\nsecond\nparent\nnested\n', 'all registered descendants complete before done');
+                expect(r.output.some(event => event.text === 'entry\nfirst\n'), 'registered work streams while active');
+            }
+        });
+        await runCase('owned-ignored-rejection-cancels-sibling', 'javascript',
+            "codeRun.spawn(async task => { await task.sleep(500); console.log('late'); }); codeRun.spawn(async task => { await task.sleep(20); throw new Error('owned-marker'); });", {
+            check: (r, expect) => {
+                expect(r.result.status === 'error' && r.result.error.includes('owned-marker'), 'ignored registered rejection fails the run');
+                expect(r.result.output === '', 'failed run does not wait for a sibling effect');
+            }
+        });
+        await runCase('owned-input-after-sibling-completion', 'javascript',
+            "codeRun.spawn(async task => console.log(await task.input('Name?'))); codeRun.spawn(async task => { await task.sleep(80); console.log('sibling'); });", {
+            timeoutMs: 500, answerDelayMs: 750,
+            check: (r, expect) => {
+                expect(r.result.status === 'completed' && r.result.output === 'sibling\nAda\n', 'remaining sole input owner may wait beyond budget');
+                expect(r.wire.some(event => event.type === 'input' && event.pauseBudget === false), 'initial input cannot suspend sibling budget');
+                expect(r.wire.some(event => event.type === 'input-state' && event.pauseBudget === true), 'sibling completion pauses the remaining budget');
+                expect(r.wire.some(event => event.type === 'input-pong'), 'waiting worker stays responsive to probes');
+            }
+        });
+        await runCase('unawaited-input-busy-loop-watchdog', 'javascript',
+            "input('Question?'); while (true) {}", {timeoutMs: 500, noAnswer: true,
+            check: (r, expect) => {
+                expect(r.result.status === 'timeout' && r.result.reason === 'input-unresponsive', 'input cannot disable every automatic timeout');
+                expect(r.input.at(-1) === null && r.parentHeartbeats > 0, 'watchdog clears input with responsive parent');
+            }
+        });
+        await runCase('owned-input-busy-sibling-budget', 'javascript',
+            "codeRun.spawn(async task => { await task.input('Question?'); }); codeRun.spawn(() => { while (true) {} });", {
+            timeoutMs: 300, inputProbeTimeoutMs: 1000, noAnswer: true,
+            check: (r, expect) => {
+                expect(r.result.status === 'timeout' && !r.result.reason, 'active execution budget ends busy sibling before input probe deadline');
+                expect(r.input.filter(Boolean).length === 1 && r.input.at(-1) === null, 'input belongs to the terminated run');
+            }
+        });
+        await runCase('owned-input-responsive-sibling-budget', 'javascript',
+            "codeRun.spawn(async task => { await task.input('Question?'); }); codeRun.spawn(async task => { while (true) await task.sleep(10); });", {
+            timeoutMs: 300, noAnswer: true,
+            check: (r, expect) => {
+                expect(r.result.status === 'timeout' && !r.result.reason, 'responsive siblings still consume execution budget during input');
+                expect(r.wire.some(event => event.type === 'input-pong'), 'timeout is not caused by an unresponsive worker');
+            }
+        });
+        await runCase('owned-stop-delay', 'javascript',
+            "codeRun.spawn(async task => { console.log('ready'); await task.sleep(5000); console.log('late'); });", {
+            stopOnOutput: true, check: (r, expect) => {
+                expect(r.result.status === 'stopped' && r.result.output === 'ready\n', 'Stop disposes registered delays');
+            }
+        });
+        await runCase('owned-stop-input', 'javascript',
+            "codeRun.spawn(async task => { await task.input('Question?'); console.log('late'); });", {
+            stopOnInput: true, check: (r, expect) => {
+                expect(r.result.status === 'stopped' && r.result.output === '' && r.input.at(-1) === null, 'Stop disposes owned input without continuing');
+            }
+        });
+        await runCase('owned-prompt-replay-refused', 'javascript',
+            "codeRun.spawn(async () => {}); prompt('No replay');", {check: (r, expect) => {
+                expect(r.result.status === 'error' && r.result.error.includes('cannot be mixed'), 'owned tasks refuse compatibility replay');
+                expect(r.input.length === 0 && !r.wire.some(event => event.type === 'output-reset'), 'no question or replay effects start');
+            }
+        });
+        await runCase('owned-task-flood', 'javascript',
+            "codeRun.spawn(() => { while (true) console.log('x'.repeat(100)); });", {maxOutputChars: 4096, check: (r, expect) => {
+                expect(r.result.status === 'output-limit' && r.result.output.length === 4096, 'registered task output is capped');
+            }
+        });
+        await runCase('owned-fresh-restart', 'javascript',
+            "codeRun.spawn(() => console.log('fresh'));", {check: (r, expect) => {
+                expect(r.result.status === 'completed' && r.result.output === 'fresh\n', 'owned run recovers after stop, timeout, rejection and flood');
+            }
+        });
+        for (const [name, orphan] of [
+            ['entry', "codeRun.input('Orphan?');"],
+            ['task', "codeRun.spawn(task => { task.input('Orphan?'); });"]
+        ]) {
+            await runCase(`owned-${name}-orphan-input`, 'javascript',
+                orphan + " codeRun.spawn(async task => { while (true) await task.sleep(10); });", {noAnswer: true,
+                check: (r, expect) => {
+                    expect(r.result.status === 'error' && r.result.error.includes('owning entry or task'), 'abandoned input cannot transfer to a sibling');
+                    expect(r.input.at(-1) === null && !r.wire.some(event => event.type === 'input-state' && event.pauseBudget === true), 'orphan input does not exempt the remaining task');
+                }
+            });
+        }
+        await runCase('owned-completed-scope-refuses-late-registration', 'javascript',
+            "let oldApi; codeRun.spawn(task => { oldApi = task; }); codeRun.spawn(async task => { await task.sleep(20); oldApi.spawn(() => console.log('late')); });", {
+            check: (r, expect) => {
+                expect(r.result.status === 'error' && r.result.error.includes('task has ended') && r.result.output === '', 'completed task API cannot register late effects');
+            }
+        });
+        await runCase('owned-unawaited-input-cannot-keep-working', 'javascript',
+            "codeRun.spawn(async task => { task.input('Unawaited'); while (true) await task.sleep(10); });", {noAnswer: true,
+            check: (r, expect) => {
+                expect(r.result.status === 'error' && r.result.error.includes('Await the pending input'), 'a waiting owner cannot acquire further owned work');
+                expect(r.input.at(-1) === null, 'invalid input owner is disposed');
+            }
+        });
+        await runCase('owned-pending-sleep-cannot-hide-behind-input', 'javascript',
+            "codeRun.spawn(async task => { task.sleep(1000); await task.input('Early input'); });", {noAnswer: true,
+            check: (r, expect) => {
+                expect(r.result.status === 'error' && r.result.error.includes('Await pending sleeps'), 'input requires preceding owned waits to finish');
+                expect(r.input.length === 0, 'invalid input is refused before a question is posted');
+            }
+        });
+
+        if (generatedPrograms.concurrent) {
+            await runCase('generated-concurrent-flags-and-procedure', 'javascript', generatedPrograms.concurrent.code, {
+                check: (r, expect) => {
+                    expect(r.result.status === 'completed' && r.result.output === 'first\nsecond\nlater\nlast\n', 'actual upstream generation preserves task/procedure completion');
+                }
+            });
+            await runCase('generated-async-input', 'javascript', generatedPrograms.input.code, {
+                timeoutMs: 500, answerDelayMs: 750, check: (r, expect) => {
+                    expect(r.result.status === 'completed' && r.result.output === 'Ada\n', 'actual generated input survives a long human wait');
+                    expect(r.input.filter(Boolean).length === 1 && !r.wire.some(event => event.type === 'output-reset'), 'generated ask is not compatibility replay');
+                }
+            });
+            await runCase('generated-stop-wait', 'javascript', generatedPrograms.stop.code, {
+                stopOnOutput: true, check: (r, expect) => {
+                    expect(r.result.status === 'stopped' && r.result.output === 'ready\n', 'Stop terminates actual generated delayed task');
+                }
+            });
+        }
+
         let resolveSource;
         let lazyWorkersCreated = 0;
         const lazySource = new Promise(resolve => { resolveSource = resolve; });
@@ -224,7 +387,7 @@ try {
         if (lazyWorkersCreated !== 0 || lazyResult.status !== 'stopped' || lazyResult.reason !== 'disposed') failures.push('lazy source resolution escaped cancellation');
         results.push({name: 'lazy-source-dispose', engine: 'host', result: lazyResult, lazyWorkersCreated, failures, pass: failures.length === 0});
         return {capabilities, results};
-    });
+    }, {generatedPrograms});
     Object.assign(report, observed);
 } catch (error) {
     report.fatalError = String(error.stack || error);
