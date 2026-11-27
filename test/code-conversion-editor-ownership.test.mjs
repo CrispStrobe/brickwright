@@ -4,6 +4,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
+import {createCodeDocument, addCodeProjection} from '../overlay/scratch-gui/src/lib/code-source-document.js';
 
 const importer = new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url);
 const original = readFileSync(importer, 'utf8');
@@ -18,12 +20,13 @@ const methods = extract('    async compile ({strict = false, pseudocode = null} 
     extract('    async loadAsmExample (id) {', '    openArtefactFile (file) {') +
     extract('    publishAppliedDevice (stc) {',
         '    // Real hardware, two minutes: generate MicroPython and push it to a');
-const Editor = new Function('TWO_WAY', 'DOS_LANG', 'codeArtworkMatches', 'captureCodeArtwork',
-    'classifyConversionWarnings', 'conversionFailure', 'LANG_LABEL', 'pickLocale', 'confirmAsync', 'DEVICE_BY_ID',
-    `return class {${methods}}`)(new Set(['pseudocode']), {}, () => false, () => null,
-    () => ({changed: [], unsupported: []}), error => ({message: error.message, issues: []}),
-    {pseudocode: 'Pseudo'}, () => 'en', async () => true,
-    {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}});
+const Editor = codeDocumentEditorClass(original, methods, {
+    TWO_WAY: new Set(['pseudocode']), DOS_LANG: {}, codeArtworkMatches: () => false, captureCodeArtwork: () => null,
+    classifyConversionWarnings: () => ({changed: [], unsupported: []}),
+    conversionFailure: error => ({message: error.message, issues: []}), pickLocale: () => 'en',
+    confirmAsync: async () => true,
+    DEVICE_BY_ID: {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}}
+});
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -86,7 +89,8 @@ function fixture (hold = null, failure = null) {
     };
     Object.assign(editor, {
         state: {lang: 'pseudocode', buffers: {pseudocode: 'DEVICE i8086', asm: 'old ASM'},
-            uploads: [], basicProfile: 'i8086', basicLineNumbers: false, importedPython: true},
+            uploads: [], basicProfile: 'i8086', basicLineNumbers: false, importedPython: true,
+            driverMode: 'shim', asyncMode: false, eventsMode: false, jsExecution: 'classic'},
         props: {locale: 'en', vm},
         L: {stCompiling: 'compiling', stLoaded: 'Blocks loaded.', stCOneWay: 'one-way language',
             stError: message => `error: ${message}`, stWarn: message => message,
@@ -97,7 +101,6 @@ function fixture (hold = null, failure = null) {
             done?.();
         },
         activeCode () { return this.state.buffers[this.state.lang] || ''; },
-        genOpts: () => ({}),
         canLiftAsm: () => false, loadCatalog () {}, _asmExamples: () => [example]
     });
     let libraries = 0;
@@ -129,6 +132,32 @@ test('explicit device-retarget source still compiles while ASM is selected', asy
     assert.equal(f.editor.state.lang, 'asm');
     assert.equal(f.editor.state.buffers.asm, '');
     assert.equal(f.editor.state.status, 'Blocks loaded.');
+    assert.equal(f.editor.state.codeDocument.lang, 'pseudocode');
+    assert.equal(f.editor.state.codeDocument.code, 'DEVICE i8086');
+    assert.equal(f.editor.state.codeDocument.target, 'i8086');
+    assert.equal(f.editor.state.codeDocument.selectedLang, 'asm');
+});
+
+test('To blocks from a generated view preserves its authored source, revision and target', async () => {
+    const f = fixture();
+    const authored = '# hand-maintained Python comment\nprint(42)\n';
+    let document = createCodeDocument({lang: 'python', code: authored, target: 'pico', runtime: 'pico-micropython',
+        generationOptions: f.editor.codeGenerationOptions()});
+    document = addCodeProjection(document, {lang: 'pseudocode', code: 'DEVICE pico\nSAY 42',
+        sourceRevision: document.revision, options: f.editor.genOpts('pseudocode'), runtime: null});
+    Object.assign(f.editor.state, f.editor.codeDocumentState(document));
+
+    await f.editor.compile();
+
+    assert.deepEqual(f.calls, ['load', 'refresh']);
+    assert.equal(f.editor.state.codeDocument.lang, 'python');
+    assert.equal(f.editor.state.codeDocument.code, authored);
+    assert.equal(f.editor.state.buffers.python, authored, 'Generated Python must not overwrite the author');
+    assert.equal(f.editor.state.codeDocument.revision, document.revision);
+    assert.equal(f.editor.state.codeDocument.target, 'pico');
+    assert.equal(f.editor.state.codeDocument.selectedLang, 'pseudocode');
+    assert.equal(f.editor.state.codeDocument.projections.pseudocode.sourceRevision, document.revision);
+    assert.equal(f.editor.state.conversionReport.preserved, true);
 });
 
 for (const boundary of ['load', 'refresh']) {

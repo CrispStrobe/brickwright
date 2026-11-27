@@ -86,6 +86,11 @@ import {confirmAsync, promptAsync} from '../../lib/native-dialog.js';
 import {mathWithRandom, runWithReplayedInput} from '../../lib/replay-input.js';
 import {createCodeExecutionSession} from '../../lib/code-execution-session.js';
 import {JAVASCRIPT_WORKER_SOURCE, createPythonWorkerSource} from '../../lib/code-execution-workers.js';
+import {
+    createCodeDocument, readCodeDocument, editCodeDocument, selectCodeDocumentLanguage,
+    addCodeProjection, restoreCodeDocumentState, serializeCodeDocument,
+    codeDocumentConversionRefusal, codeTargetFromSource, OWNED_CONSOLE_EXECUTION
+} from '../../lib/code-source-document.js';
 // F10: an imported MakeCode project's own files, kept in the .sb3 and marked stale once the program changes.
 import makeCodeOriginal from 'scratch-vm/src/serialization/bw-makecode-original.js';
 
@@ -263,6 +268,8 @@ const L10N = {
         stop: 'Stop',
         codeInput: 'Program input', codeInputSend: 'Send',
         codeConsolePython: 'Python console · Skulpt', codeConsoleJs: 'JavaScript console',
+        jsProgram: 'JavaScript program', jsClassic: 'Classic source', jsConsole: 'Console program',
+        jsConsoleHint: 'Console programs support input and waits. Keep editing and running this JavaScript; conversion back to blocks is unavailable.',
         codeStopped: 'Stopped.', codeNoOutput: '(no output)',
         codeTimeout: 'Stopped after 4 seconds of execution. Time spent waiting for input does not count.',
         codeOutputLimit: 'Stopped: the console output limit (65,536 characters) was reached.',
@@ -611,6 +618,8 @@ const L10N = {
         stop: 'Stopp',
         codeInput: 'Programmeingabe', codeInputSend: 'Senden',
         codeConsolePython: 'Python-Konsole · Skulpt', codeConsoleJs: 'JavaScript-Konsole',
+        jsProgram: 'JavaScript-Programm', jsClassic: 'Klassischer Quelltext', jsConsole: 'Konsolenprogramm',
+        jsConsoleHint: 'Konsolenprogramme unterstützen Eingaben und Wartezeiten. JavaScript kann bearbeitet und ausgeführt, aber nicht zurück in Blöcke umgewandelt werden.',
         codeStopped: 'Gestoppt.', codeNoOutput: '(keine Ausgabe)',
         codeTimeout: 'Nach 4 Sekunden Ausführung gestoppt. Wartezeit auf Eingaben zählt nicht mit.',
         codeOutputLimit: 'Gestoppt: Das Ausgabelimit der Konsole (65.536 Zeichen) wurde erreicht.',
@@ -956,7 +965,6 @@ const readExtraLangs = () => {
         return Array.isArray(saved) ? saved.filter(l => BW_OPTIONAL_LANGS.some(([id]) => id === l)) : [];
     } catch { return []; }
 };
-const BW_AUTOSAVE_MAX = 512 * 1024;   // localStorage is ~5MB total; don't hog it
 
 const LANG_LABEL = {pseudocode: 'Pseudocode', python: 'Python', javascript: 'JavaScript', c: 'C', basic: 'BASIC', asm: 'ASM', micropython: 'micro:bit', nqc: 'NQC', fe: 'fe (Lisp)', tcl: 'Tcl', forth: 'Forth'};
 
@@ -1241,7 +1249,8 @@ class PseudocodeImporter extends React.Component {
             codeSessionRunning: false, codeInput: null, codeInputValue: '', codeRunLabel: '',
             // Hardware-extension codegen options (see reference/runtime-drivers.md): the emitted
             // driver (shim / remote / on-brick), plus async/await and event-hat switches.
-            driverMode: 'shim', asyncMode: false, eventsMode: false,
+            driverMode: 'shim', asyncMode: false, eventsMode: false, jsExecution: 'classic',
+            codeDocument: null, codeTarget: null, codeRuntime: null,
             spikeUsbRoute: typeof navigator !== 'undefined' &&
                 (/iPad|iPhone|Android/i.test(navigator.userAgent) ||
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) ? 'bridge' : 'direct',
@@ -1331,10 +1340,7 @@ class PseudocodeImporter extends React.Component {
                 if (src) {
                     if (src !== this.state.buffers.pseudocode) {
                         this._publishControlsFor(src);
-                        this.setState(s => ({
-                            lang: 'pseudocode',
-                            buffers: {...s.buffers, pseudocode: src}
-                        }));
+                        this.setState(this.authoredCodeState('pseudocode', src));
                     }
                     delete vm.runtime.bwPseudocodeSource;
                     return true;
@@ -1354,11 +1360,12 @@ class PseudocodeImporter extends React.Component {
             const saved = this.readAutosave();
             if (saved) {
                 this._publishControlsFor(saved.code);
-                this.setState(st => ({
-                    lang: saved.lang,
-                    buffers: {...st.buffers, [saved.lang]: saved.code},
+                this.setState({
+                    ...this.codeDocumentState(saved),
                     status: this.L.restored(LANG_LABEL[saved.lang] || saved.lang)
-                }));
+                });
+            } else if (this._codeRestoreError) {
+                this.setState({status: this._codeRestoreError});
             }
         }
         // If a device is already set (e.g. from a loaded project), fetch the
@@ -1372,12 +1379,15 @@ class PseudocodeImporter extends React.Component {
         // buffer minus the last keystrokes — flush synchronously. LOADED: the
         // restored autosave is in localStorage but this mounted editor still
         // shows the old buffer; a loaded PROJECT wins over anything unsaved.
-        this._onBundleCollect = () => {
+        this._onBundleCollect = event => {
             if (this._autosaveTimer) {
                 clearTimeout(this._autosaveTimer);
                 this._autosaveTimer = null;
             }
-            this.writeAutosave();
+            if (!this.writeAutosave()) {
+                event?.detail?.refuseCodeSave?.(this._codeSaveError || this._codeRestoreError ||
+                    'Current Code source could not be saved.');
+            }
         };
         window.addEventListener('bw-project-bundle-collect', this._onBundleCollect);
 
@@ -1403,14 +1413,13 @@ class PseudocodeImporter extends React.Component {
             // An NQC example (the Robot Lab's RCX models) goes into the NQC buffer as text:
             // the pane compiles and downloads it itself.
             if (event.detail.lang === 'nqc') {
-                this.setState({lang: 'nqc', output: null, status: '', buffers: {...this.state.buffers, nqc: code}});
+                this.setState({...this.authoredCodeState('nqc', code), output: null, status: ''});
                 return;
             }
             this._animationImport = null;
             this._makeCodeRequest = null;
             this._codeArtwork = null;
-            this.setState({lang: 'pseudocode', output: null, status: '',
-                buffers: {...this.state.buffers, pseudocode: code}}, () => {
+            this.setState({...this.authoredCodeState('pseudocode', code), output: null, status: ''}, () => {
                 const complete = typeof event.detail.onComplete === 'function' ? event.detail.onComplete : () => {};
                 Promise.resolve(this.compile({strict: typeof event.detail.onComplete === 'function'}))
                     .then(() => complete({ok: true}), error => {
@@ -1473,21 +1482,26 @@ class PseudocodeImporter extends React.Component {
                 const reason = event.detail.reason || event.detail.report?.action || outcome;
                 return `Project blocks loaded; Brickwright state${version} was not applied: ${reason}`;
             };
+            if (refused) {
+                // A rejected sidecar must preserve the live document, including
+                // edits that have not reached the debounced autosave yet.
+                this.setState({status: refusal()});
+                return;
+            }
             const saved = this.readAutosave();
             if (saved) {
                 this._publishControlsFor(saved.code);
-                this.setState(st => ({
-                    lang: saved.lang,
-                    buffers: {...st.buffers, [saved.lang]: saved.code},
+                this.setState({
+                    ...this.codeDocumentState(saved),
                     status: refused
                         ? refusal()
                         : this.L.restored(LANG_LABEL[saved.lang] || saved.lang)
-                }));
+                });
             } else if (outcome === 'legacy' || outcome === 'loaded') {
+                this._codeRestoreError = null;
                 this.publishGameControls(null);
                 this.setState({
-                    lang: 'pseudocode',
-                    buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
+                    ...this.codeDocumentState(createCodeDocument()),
                     status: ''
                 });
             } else if (refused) {
@@ -1555,8 +1569,11 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentDidUpdate (prevProps, prevState) {
-        if (prevProps.vm !== this.props.vm) {
+        if (prevProps.vm !== this.props.vm || prevState.codeTarget !== this.state.codeTarget) {
             this.disposeCodeRun();
+            if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
+        }
+        if (prevProps.vm !== this.props.vm) {
             this.bindCodeStopRuntime();
         }
         if (prevProps.vm !== this.props.vm || prevState.lang !== this.state.lang ||
@@ -1575,7 +1592,7 @@ class PseudocodeImporter extends React.Component {
         // Debounced so a fast typist writes localStorage once per pause, not
         // once per keystroke. Watches the ACTIVE tab, both its language and
         // its text, so switching tabs re-saves under the new language.
-        if (prevState.lang !== this.state.lang ||
+        if (prevState.codeDocument !== this.state.codeDocument || prevState.lang !== this.state.lang ||
             prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang]) {
             if (this._autosaveTimer) clearTimeout(this._autosaveTimer);
             this._autosaveTimer = setTimeout(() => {
@@ -1589,25 +1606,28 @@ class PseudocodeImporter extends React.Component {
         try {
             const raw = localStorage.getItem(BW_AUTOSAVE_KEY);
             if (!raw) return null;
-            const v = JSON.parse(raw);
-            if (!v || !CODE_FILES[v.lang] || typeof v.code !== 'string' || !v.code.trim()) return null;
-            return v;
-        } catch { return null; }   // absent, unparseable, or a shape we no longer write
+            const document = readCodeDocument(JSON.parse(raw));
+            this._codeRestoreError = null;
+            return document;
+        } catch (error) {
+            this._codeRestoreError = `Could not restore Code: ${error.message}. The saved source is retained.`;
+            return null;
+        }
     }
 
     writeAutosave () {
-        const lang = this.state.lang;
-        const code = this.state.buffers[lang] || '';
+        // An unreadable/future record is retained until an explicit new edit or
+        // source load. Merely opening a tab must not overwrite it with emptiness.
+        if (this._codeRestoreError) return false;
         try {
-            if (!code.trim()) {
-                // Only drop the record if it is THIS tab's — emptying the C tab
-                // must not throw away saved pseudocode.
-                const cur = this.readAutosave();
-                if (cur && cur.lang === lang) localStorage.removeItem(BW_AUTOSAVE_KEY);
-            } else if (code.length <= BW_AUTOSAVE_MAX) {
-                localStorage.setItem(BW_AUTOSAVE_KEY, JSON.stringify({lang, code}));
-            }
-        } catch { /* private mode, or the quota is full: autosave is a courtesy */ }
+            localStorage.setItem(BW_AUTOSAVE_KEY, serializeCodeDocument(this.codeDocumentSnapshot()));
+            this._codeSaveError = null;
+            return true;
+        } catch (error) {
+            this._codeSaveError = `Code remains in the editor, but could not be saved: ${error.message}`;
+            if (!this._unmounted) this.setState({status: this._codeSaveError});
+            return false;
+        }
     }
 
     /** Which tab owns a filename, preferring the one already open (.py is shared). */
@@ -1647,15 +1667,15 @@ class PseudocodeImporter extends React.Component {
         }
         const reader = new FileReader();
         reader.onload = () => {
+            this._codeRestoreError = null;
             this._codeArtwork = null;
             this._animationImport = null;
             this._makeCodeRequest = null;
             this.setState(st => ({
-            lang, uploads: [],
+            ...this.codeDocumentState(createCodeDocument({lang, code: String(reader.result)})), uploads: [],
             // Same exclusivity the editor's own onChange uses: one authored
             // buffer at a time, so a stale translation of the PREVIOUS source
             // cannot sit in another tab pretending to match.
-            buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [lang]: String(reader.result)},
             asmMode: lang === 'asm' ? 'source' : st.asmMode,
             output: null,
             status: this.L.openDone(file.name, LANG_LABEL[lang] || lang)
@@ -1891,12 +1911,12 @@ class PseudocodeImporter extends React.Component {
         if (!example) return;
         const current = (this.state.buffers.asm || '').trim();
         if (current && !(await confirmAsync(this.L.asmExampleReplace))) return;
-        this.setState(state => ({
-            buffers: {...state.buffers, asm: example.source},
+        this.setState({
+            ...this.authoredCodeState('asm', example.source, this.currentDevice()),
             asmMode: 'source',
             status: this.L.asmExampleLoaded(
                 pickLocale(this.props.locale) === 'de' ? example.labelDe : example.label)
-        }));
+        });
     }
 
     makeCodeImportModule () {
@@ -2002,11 +2022,10 @@ class PseudocodeImporter extends React.Component {
         if (res.warnings?.length) status += ` · ${res.warnings.join(' · ')}`;
         if (res.dependencyMessages?.length) status += ` · ${res.dependencyMessages.join(' · ')}`;
         this.setState({
-            lang: res.lang,
+            ...this.authoredCodeState(res.lang, res.code, res.project.target),
             importedPython: res.kind === 'micropython',
             // Same exclusivity openCodeFile keeps: one authored buffer, so
             // no stale translation of a previous source can masquerade.
-            buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [res.lang]: res.code},
             // The game's artwork rides the same route as an SVG the user
             // drops in themselves: compile() applies `uploads` to the
             // sprites it just parsed, so the costumes land with the code.
@@ -2672,6 +2691,7 @@ class PseudocodeImporter extends React.Component {
     componentWillUnmount () {
         this._unmounted = true;
         this.disposeCodeRun();
+        if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
         window.removeEventListener('bw-stop-all', this._onStopCodeRun);
         if (this._codeStopRuntime) this._codeStopRuntime.removeListener('PROJECT_STOP_ALL', this._onStopCodeRun);
         this._codeStopRuntime = null;
@@ -2755,6 +2775,91 @@ class PseudocodeImporter extends React.Component {
         } catch (e) { /* a browser that refuses CustomEvent cannot be helped here */ }
     }
 
+    codeRuntimeFor (lang, target) {
+        if (lang === 'javascript') return 'javascript';
+        if (lang === 'python' || lang === 'micropython') return target === 'pico' ? 'pico-micropython' : 'skulpt';
+        return null;
+    }
+
+    codeGenerationOptions (state = this.state) {
+        return {driver: state.driverMode || 'shim', async: Boolean(state.asyncMode),
+            events: Boolean(state.eventsMode),
+            basicProfile: state.basicProfile || 'bbc', basicLineNumbers: state.basicLineNumbers !== false,
+            ...(state.jsExecution === OWNED_CONSOLE_EXECUTION ? {execution: OWNED_CONSOLE_EXECUTION} : {})};
+    }
+
+    /** Bridge older source-loading routes to the same authored-document owner. */
+    codeDocumentSnapshot (state = this.state) {
+        const lang = state.lang;
+        const code = state.buffers[lang] || '';
+        const document = state.codeDocument;
+        if (document) {
+            const expected = document.lang === lang ? document.code : document.projections[lang]?.code;
+            if (expected === code || (expected === undefined && !code)) {
+                return document.selectedLang === lang ? document : selectCodeDocumentLanguage(document, lang,
+                    {runtime: this.codeRuntimeFor(lang, document.target)});
+            }
+            return editCodeDocument(document, {lang, code,
+                runtime: this.codeRuntimeFor(lang, lang === 'pseudocode' ? codeTargetFromSource(lang, code) : document.target),
+                generationOptions: this.codeGenerationOptions(state)});
+        }
+        const target = codeTargetFromSource('pseudocode', state.buffers.pseudocode || '');
+        return createCodeDocument({lang, code, target, runtime: this.codeRuntimeFor(lang, target),
+            generationOptions: this.codeGenerationOptions(state)});
+    }
+
+    codeDocumentState (document) {
+        const options = document.generationOptions;
+        return {...restoreCodeDocumentState(document, Object.keys(LANG_LABEL)),
+            driverMode: options.driver || 'shim', asyncMode: Boolean(options.async), eventsMode: Boolean(options.events),
+            basicProfile: options.basicProfile || 'bbc', basicLineNumbers: options.basicLineNumbers !== false,
+            jsExecution: options.execution === OWNED_CONSOLE_EXECUTION || document.execution === OWNED_CONSOLE_EXECUTION ||
+                document.projections.javascript?.execution === OWNED_CONSOLE_EXECUTION ? OWNED_CONSOLE_EXECUTION : 'classic'};
+    }
+
+    /** An explicit file/example/import replaces the authored program, not a view. */
+    authoredCodeState (lang, code, target = undefined) {
+        this._codeRestoreError = null;
+        const resolvedTarget = target === undefined ? codeTargetFromSource(lang, code) : target;
+        return this.codeDocumentState(createCodeDocument({lang, code, target: resolvedTarget,
+            runtime: this.codeRuntimeFor(lang, resolvedTarget), generationOptions: this.codeGenerationOptions()}));
+    }
+
+    retargetCodeState (source, selectedLang = this.state.lang) {
+        const document = editCodeDocument(this.codeDocumentSnapshot(), {lang: 'pseudocode', code: source,
+            runtime: null, generationOptions: this.codeGenerationOptions()});
+        this._codeRestoreError = null;
+        return this.codeDocumentState(selectCodeDocumentLanguage(document, selectedLang,
+            {runtime: this.codeRuntimeFor(selectedLang, document.target)}));
+    }
+
+    /** Machine build output is a view of the captured editor revision. */
+    codeProjectionState (state, document, buffers, lang, code) {
+        if (state.buffers !== buffers || !code || document.lang === lang) return {};
+        const next = addCodeProjection(document, {lang, code, sourceRevision: document.revision,
+            options: this.genOpts(lang), runtime: this.codeRuntimeFor(lang, document.target)});
+        return this.codeDocumentState(selectCodeDocumentLanguage(next, state.lang,
+            {runtime: this.codeRuntimeFor(state.lang, document.target)}));
+    }
+
+    /** Keep generated buffers tied to the source and options that produced them. */
+    codeDocumentWithBuffers (buffers, sourceLang, selectedLang = this.state.lang, diagnostics = null,
+        authoredDocument = null) {
+        const code = buffers[sourceLang] || '';
+        const target = sourceLang === 'pseudocode' ? codeTargetFromSource(sourceLang, code) :
+            this.codeDocumentSnapshot().target;
+        let document = authoredDocument ? {...authoredDocument, projections: {}} :
+            createCodeDocument({lang: sourceLang, code, target,
+                runtime: this.codeRuntimeFor(sourceLang, target), generationOptions: this.codeGenerationOptions()});
+        for (const [lang, text] of Object.entries(buffers)) {
+            if (lang !== document.lang && text) document = addCodeProjection(document, {lang, code: text,
+                sourceRevision: document.revision, options: this.genOpts(lang), diagnostics,
+                runtime: this.codeRuntimeFor(lang, document.target)});
+        }
+        return selectCodeDocumentLanguage(document, selectedLang,
+            {runtime: this.codeRuntimeFor(selectedLang, document.target)});
+    }
+
     /** Show or hide the on-request tabs (fe, Tcl); remembered per browser. */
     activeCode () {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return this.state.asmListing;
@@ -2765,7 +2870,9 @@ class PseudocodeImporter extends React.Component {
     setActiveCode (text) {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
-        this.setState(s => ({buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [s.lang]: text}}));
+        this._codeRestoreError = null;
+        this.setState(state => this.codeDocumentState(editCodeDocument(this.codeDocumentSnapshot(state),
+            {lang: state.lang, code: text, generationOptions: this.codeGenerationOptions(state)})));
     }
 
     // Lazily import the compiler through the registering door, which injects this
@@ -2794,31 +2901,46 @@ class PseudocodeImporter extends React.Component {
     // source → pseudocode → parse() → project → generate(to). Returns {code} or {error}.
     async deriveBuffer (src, from, to) {
         try {
+            const refusal = codeDocumentConversionRefusal(this.state.codeDocument, from, src);
+            if (refusal) throw new Error(refusal);
             const SB3 = (await this.lib()).default;
             let pseudo = src;
-            if (from === 'c') pseudo = (await this.readC(src)).pseudocode;
-            else if (from === 'python') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(src).pseudocode;
-            else if (from === 'javascript') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(src).pseudocode;
-            else if (from === 'basic') pseudo = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src).pseudocode;
-            else if (DOS_LANG[from]) pseudo = (await DOS_LANG[from].load()).default(src).pseudocode;
+            let read = null;
+            if (from === 'c') read = await this.readC(src);
+            else if (from === 'python') read = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(src);
+            else if (from === 'javascript') read = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(src);
+            else if (from === 'basic') read = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
+            else if (DOS_LANG[from]) read = (await DOS_LANG[from].load()).default(src);
+            if (read) pseudo = read.pseudocode;
             const creator = new SB3();
             creator.parse(pseudo);
             const proj = creator.project;
             let code;
             if (to === 'pseudocode') code = new SB3().decompile(proj);
-            else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts());
+            else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts(to));
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
                 const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
-                code = r.ok ? r.basic : `REM === Cannot show as BASIC ===\n${r.reasons.map(s => 'REM ' + s).join('\n')}`;
+                if (!r.ok) throw new Error(r.reasons.join('; '));
+                code = r.basic;
             } else if (to === 'micropython') {
                 const r = new SB3().generateMicroPython(proj);
-                code = r.ok ? r.py : `# === Cannot generate MicroPython ===\n${r.reasons.map(s => '# ' + s).join('\n')}`;
+                if (!r.ok) throw new Error(r.reasons.join('; '));
+                code = r.py;
             } else if (DOS_LANG[to]) {
                 code = DOS_LANG[to].generate(await DOS_LANG[to].load(), proj);
-            } else code = new SB3().generateJavaScript(proj, this.genOpts());
-            return {code};
-        } catch (e) { return {error: e.message}; }
+            } else code = new SB3().generateJavaScript(proj, this.genOpts(to));
+            if (to === 'javascript' && this.state.jsExecution === OWNED_CONSOLE_EXECUTION &&
+                !/^\/\/ owned-console-v1:/m.test(code)) throw new Error('This compiler revision does not support console programs.');
+            const classified = classifyConversionWarnings([...(read?.warnings || []), ...(creator.warnings || [])]);
+            const diagnostics = {direction: `${LANG_LABEL[from] || from} → ${LANG_LABEL[to] || to}`,
+                preserved: true, changed: classified.changed, unsupported: [...classified.unsupported, ...(read?.unsupported || [])]};
+            return {code, diagnostics, options: this.genOpts(to)};
+        } catch (e) {
+            const failure = conversionFailure(e);
+            return {error: failure.message, diagnostics: {direction: `${LANG_LABEL[from] || from} → ${LANG_LABEL[to] || to}`,
+                preserved: false, changed: [], unsupported: failure.issues}};
+        }
     }
 
     /**
@@ -2889,6 +3011,7 @@ class PseudocodeImporter extends React.Component {
         this.leaveCp1();
         const from = this.state.lang;
         if (to === from) return;
+        const document = this.codeDocumentSnapshot();
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
         // listing belongs to the program as it is now, and the program may have
         // changed since the listing was built (To blocks, an edit in another
@@ -2899,19 +3022,27 @@ class PseudocodeImporter extends React.Component {
         // (verify-local-asm-listing, run 33984595568).
         if (to === 'asm') {
             if (this.state.asmMode === 'listing') { this.fetchAsmListing(); return; }
-            this.setState({lang: 'asm', output: null, status: ''});
+            this.setState({...this.codeDocumentState(selectCodeDocumentLanguage(document, 'asm')),
+                output: null, status: ''});
             return;
         }
-        const existing = this.state.buffers[to];
-        const src = this.state.buffers[from];
+        const projection = document.projections[to];
+        const existing = to === document.lang || (projection &&
+            JSON.stringify(projection.options) === JSON.stringify(this.genOpts(to)));
+        // A generated tab is a view of the authored document. Derive another
+        // view from that document instead of roundtripping generated async JS.
+        const src = document.code;
+        const sourceLang = document.lang;
         // Leaving the ASM tab is not a conversion: assembly is not a source the
         // other languages are derived from (deriveBuffer has no `asm` reader),
         // and deriving used to parse the assembly AS PSEUDOCODE — every line was
         // dropped and the tab filled with an empty program. Since D5 the parser
         // refuses a line it cannot read, so that became an error that kept the
         // learner on the ASM tab. Just switch.
-        if (from === 'asm' || (existing && existing.trim()) || !src || !src.trim()) {
-            this.setState({lang: to, output: null, status: '', emptyTabOffer: null});
+        if (from === 'asm' || existing || !src || !src.trim()) {
+            this.setState({...this.codeDocumentState(selectCodeDocumentLanguage(document, to,
+                {runtime: this.codeRuntimeFor(to, document.target)})),
+                output: null, status: '', emptyTabOffer: null});
             return;
         }
         const request = {};
@@ -2922,7 +3053,7 @@ class PseudocodeImporter extends React.Component {
         const ownsEditor = state => ownsRequest() && state.lang === from &&
             state.buffers === buffers && this.props.vm === vm;
         this.setState({busy: true, status: this.L.stConverting(to), emptyTabOffer: null});
-        this.deriveBuffer(src, from, to).then(({code, error}) => {
+        this.deriveBuffer(src, sourceLang, to).then(({code, error, diagnostics, options}) => {
             // A failed conversion keeps the source tab, and offers an explicit
             // way into the requested tab with an empty buffer instead of a dead end.
             if (!ownsRequest()) return;
@@ -2931,9 +3062,13 @@ class PseudocodeImporter extends React.Component {
                 // An edit/revert is a new revision even when its text matches.
                 // Only this request's busy state may outlive editor ownership.
                 if (!ownsEditor(state)) return {busy: false};
-                if (error) return {busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to};
-                return {lang: to, busy: false, output: null, status: '', emptyTabOffer: null,
-                    buffers: {...state.buffers, [to]: code}};
+                if (error) return {busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to,
+                    conversionReport: diagnostics || null};
+                const next = addCodeProjection(document, {lang: to, code, sourceRevision: document.revision,
+                    options: options || this.genOpts(to), diagnostics: diagnostics || null,
+                    runtime: this.codeRuntimeFor(to, document.target)});
+                return {...this.codeDocumentState(next), busy: false, output: null, status: '', emptyTabOffer: null,
+                    conversionReport: diagnostics || null};
             });
         });
     }
@@ -2941,8 +3076,14 @@ class PseudocodeImporter extends React.Component {
     openEmptyTab (to) {
         if (this.state.busy || this.state.emptyTabOffer !== to) return;
         // The source buffer is kept; only the requested tab opens, empty.
-        this.setState(s => ({lang: to, output: null, status: '', statusExpanded: false, emptyTabOffer: null,
-            buffers: {...s.buffers, [to]: ''}}));
+        this.setState(state => {
+            const document = this.codeDocumentSnapshot(state);
+            const projections = {...document.projections};
+            delete projections[to];
+            return {...this.codeDocumentState(selectCodeDocumentLanguage({...document, projections}, to,
+                {runtime: this.codeRuntimeFor(to, document.target)})),
+                output: null, status: '', statusExpanded: false, emptyTabOffer: null};
+        });
     }
 
     /** Simple hash for cache key — FNV-1a 32-bit on the source string. */
@@ -3173,6 +3314,8 @@ class PseudocodeImporter extends React.Component {
      */
     async runPseudocodeOn8086 () {
         const src = this.state.buffers.pseudocode || '';
+        const editorBuffers = this.state.buffers;
+        const sourceDocument = this.codeDocumentSnapshot();
         if (!src.trim()) {
             this.setState({status: this.L.run8086Empty});
             return;
@@ -3209,7 +3352,7 @@ class PseudocodeImporter extends React.Component {
         const warn = out.warnings.length ? this.L.asmWarnings(out.warnings) : '';
         this.setState(st => ({
             busy: false,
-            buffers: {...st.buffers, asm: out.asm},
+            ...this.codeProjectionState(st, sourceDocument, editorBuffers, 'asm', out.asm),
             status: this.L.run8086Built(out.bytes.length, blocks) + warn
         }));
     }
@@ -3288,6 +3431,8 @@ class PseudocodeImporter extends React.Component {
      */
     async runCOn8086 () {
         const source = this.state.buffers.c || '';
+        const editorBuffers = this.state.buffers;
+        const sourceDocument = this.codeDocumentSnapshot();
         if (!source.trim()) {
             this.setState({status: this.L.runC8086Empty});
             return;
@@ -3320,7 +3465,7 @@ class PseudocodeImporter extends React.Component {
         const warn = out.warnings.length ? this.L.asmWarnings(out.warnings) : '';
         this.setState(st => ({
             busy: false,
-            buffers: {...st.buffers, asm: out.asm || st.buffers.asm},
+            ...this.codeProjectionState(st, sourceDocument, editorBuffers, 'asm', out.asm),
             status: this.L.runC8086Built(out.bytes.length, routeName) + warn
         }));
     }
@@ -3411,7 +3556,7 @@ class PseudocodeImporter extends React.Component {
         const current = (this.state.buffers.c || '').trim();
         if (current && !(await confirmAsync(this.L.asmExampleReplace))) return;
         this.setState(state => ({
-            buffers: {...state.buffers, c: ex.source},
+            ...this.authoredCodeState('c', ex.source, this.currentDevice()),
             riscvCRoute: ex.route || state.riscvCRoute,
             riscvCanRetryServer: false,
             status: this.L.asmExampleLoaded(
@@ -3519,11 +3664,11 @@ class PseudocodeImporter extends React.Component {
         if (!ex) return;
         const current = (this.state.buffers.c || '').trim();
         if (current && !(await confirmAsync(this.L.asmExampleReplace))) return;
-        this.setState(state => ({
-            buffers: {...state.buffers, c: ex.source},
+        this.setState({
+            ...this.authoredCodeState('c', ex.source, this.currentDevice()),
             status: this.L.asmExampleLoaded(
                 pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label)
-        }));
+        });
     }
 
     /**
@@ -3535,6 +3680,8 @@ class PseudocodeImporter extends React.Component {
      */
     async runBasicOn8086 (code) {
         const source = code != null ? code : this.activeCode();
+        const editorBuffers = this.state.buffers;
+        const sourceDocument = this.codeDocumentSnapshot();
         if (!source.trim()) return;
         this.setState({busy: true, running: true, status: this.L.basic8086Building,
             output: null, basicRawOutput: '', basicIsBbc: false});
@@ -3558,7 +3705,7 @@ class PseudocodeImporter extends React.Component {
         const warn = out.warnings.length ? this.L.asmWarnings(out.warnings) : '';
         this.setState(st => ({
             busy: false, running: false,
-            buffers: {...st.buffers, asm: out.asm || st.buffers.asm},
+            ...this.codeProjectionState(st, sourceDocument, editorBuffers, 'asm', out.asm),
             status: this.L.runC8086Built(out.bytes.length, this.L.runC8086Route) + warn
         }));
     }
@@ -3574,6 +3721,8 @@ class PseudocodeImporter extends React.Component {
      */
     async runBasicOnRealDos (code) {
         const source = code != null ? code : this.activeCode();
+        const editorBuffers = this.state.buffers;
+        const sourceDocument = this.codeDocumentSnapshot();
         if (!source.trim()) return;
         this.setState({busy: true, running: true, status: this.L.basicRealDosBuilding,
             output: null, basicRawOutput: '', basicIsBbc: false});
@@ -3604,7 +3753,7 @@ class PseudocodeImporter extends React.Component {
         window.__bwPendingMedia = {type: 'asm', detail};
         window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
         this.setState(st => ({busy: false, running: false,
-            buffers: {...st.buffers, asm: out.asm || st.buffers.asm},
+            ...this.codeProjectionState(st, sourceDocument, editorBuffers, 'asm', out.asm),
             status: this.L.basicRealDosBooted(out.bytes.length)}));
     }
 
@@ -3835,8 +3984,11 @@ class PseudocodeImporter extends React.Component {
 
 
 
-    // Read the DEVICE id from the pseudocode buffer. Returns lowercase id or null.
+    // Target belongs to the authored document, including while its Pseudo view
+    // is absent after editing Python/JS. A legacy source loader is reconciled
+    // by codeDocumentSnapshot before it is saved or executed.
     currentDevice () {
+        if (this.state.codeDocument) return this.codeDocumentSnapshot().target;
         const src = this.state.buffers.pseudocode || '';
         const m = src.match(/^DEVICE\s+([\w-]+)/im);
         return m ? m[1].toLowerCase() : null;
@@ -3874,14 +4026,31 @@ class PseudocodeImporter extends React.Component {
             }
             return;
         }
+        // Selecting an execution target for authored text does not recompile
+        // an unrelated Pseudo projection or replace the visible source.
+        const document = this.codeDocumentSnapshot();
+        const request = {};
+        this._deviceRequest = request;
+        const buffers = this.state.buffers;
+        const vm = this.props.vm;
+        const ownsRequest = () => !this._unmounted && this._deviceRequest === request && this.props.vm === vm;
+        const ownsEditor = () => ownsRequest() && this.state.buffers === buffers;
+        if (document.lang !== 'pseudocode') {
+            if (deviceId && !DEVICE_BY_ID[deviceId]) return;
+            this._codeRestoreError = null;
+            this.setState({...this.codeDocumentState(editCodeDocument(document, {
+                lang: document.lang, code: document.code, target: deviceId || null,
+                runtime: this.codeRuntimeFor(document.lang, deviceId || null)
+            })), status: '', showCatalog: Boolean(deviceId)});
+            if (deviceId) this.loadCatalog();
+            return;
+        }
         if (!deviceId) {
             this.leaveCp1();
             // "no chips" — pure Scratch stage mode. Drop the DEVICE line and the
             // runtime device hints; "Load example…" goes back to the stage games.
-            this.setState(s => ({
-                showCatalog: false, status: '',
-                buffers: {...s.buffers, pseudocode: (s.buffers.pseudocode || '').replace(/^DEVICE\s+[\w-]+[^\n]*\n?/im, '')}
-            }));
+            this.setState({...this.retargetCodeState(document.code.replace(/^DEVICE\s+[\w-]+[^\n]*\n?/im, ''),
+                'pseudocode'), showCatalog: false, status: ''});
             this.publishAppliedDevice(null);
             return;
         }
@@ -3907,6 +4076,7 @@ class PseudocodeImporter extends React.Component {
         let canRetarget = false;
         if (hasPins) {
             SB3Creator = (await this.lib()).default;
+            if (!ownsEditor()) return;
             canRetarget = !!(SB3Creator.RETARGET_POOLS && SB3Creator.RETARGET_POOLS[deviceId]);
         }
 
@@ -3931,11 +4101,12 @@ class PseudocodeImporter extends React.Component {
                     // Clear it atomically with the retarget so an immediate
                     // tab switch derives the newly rewritten example instead
                     // of reusing a stale (or failed) prior build.
-                    buffers: {...this.state.buffers, pseudocode: result.pseudocode, micropython: ''},
+                    ...this.retargetCodeState(result.pseudocode),
                     status: result.warnings.length
                         ? `Retargeted to ${info.label}: ${result.warnings.join('; ')}`
                         : `Retargeted to ${info.label}.`
                 }, () => {
+                    if (!ownsRequest()) return;
                     // The switch must produce a RUNNABLE project and a
                     // matching bench, exactly like loading an example does —
                     // retargeting only the text left the VM and the Circuit
@@ -3958,6 +4129,7 @@ class PseudocodeImporter extends React.Component {
             const line = `DEVICE ${deviceId.toUpperCase()}`;
             let nextSource = '';
             await new Promise(resolve => this.setState(s => {
+                if (!ownsRequest()) return null;
                 const buf = s.buffers.pseudocode || '';
                 let next;
                 if (/^DEVICE\s+[\w-]+/im.test(buf)) {
@@ -3966,20 +4138,26 @@ class PseudocodeImporter extends React.Component {
                     next = line + '\n' + buf;
                 }
                 nextSource = next;
-                return { buffers: { ...s.buffers, pseudocode: next, micropython: '' } };
+                return this.retargetCodeState(next);
             }, resolve));
+            if (!ownsRequest()) return;
             // A sensor/display-only example has no PIN/PART declaration, but
             // it is still a runnable program. The old no-pins route rewrote
             // only the editor text, leaving the VM and generated MicroPython
             // on the previous device. Compile this route too, and await it so
             // the Calliope tab cannot open onto an empty/stale derivation.
             await this.compile({pseudocode: nextSource});
+            if (!ownsRequest()) return;
             if (['microbit', 'calliopemini'].includes(deviceId)) {
+                const sourceDocument = this.codeDocumentSnapshot();
+                const currentBuffers = this.state.buffers;
                 const generated = await this.deriveBuffer(nextSource, 'pseudocode', 'micropython');
                 if (!generated.error) {
-                    await new Promise(resolve => this.setState(s => ({
-                        buffers: {...s.buffers, micropython: generated.code}
-                    }), resolve));
+                    await new Promise(resolve => this.setState(s => ownsRequest() && s.buffers === currentBuffers ?
+                        this.codeDocumentState(selectCodeDocumentLanguage(addCodeProjection(sourceDocument, {
+                            lang: 'micropython', code: generated.code, sourceRevision: sourceDocument.revision,
+                            options: generated.options || this.genOpts('micropython'), diagnostics: generated.diagnostics || null
+                        }), s.lang, {runtime: this.codeRuntimeFor(s.lang, sourceDocument.target)})) : null, resolve));
                 }
             }
         }
@@ -4321,7 +4499,13 @@ class PseudocodeImporter extends React.Component {
     }
 
     // Hardware-extension codegen options passed to generatePython/generateJavaScript.
-    genOpts () { return {driver: this.state.driverMode, async: this.state.asyncMode, events: this.state.eventsMode}; }
+    genOpts (lang = this.state.lang) {
+        if (lang === 'javascript' && this.state.jsExecution === OWNED_CONSOLE_EXECUTION) {
+            return {driver: 'shim', async: true, events: false, execution: OWNED_CONSOLE_EXECUTION};
+        }
+        if (lang === 'basic') return {profile: this.state.basicProfile, lineNumbers: this.state.basicLineNumbers};
+        return {driver: this.state.driverMode, async: this.state.asyncMode, events: this.state.eventsMode};
+    }
 
     // Apply a codegen-option change and regenerate the active code view.
     setGenOpt (patch) {
@@ -4330,24 +4514,30 @@ class PseudocodeImporter extends React.Component {
         const lang = this.state.lang;
         const buffers = this.state.buffers;
         const vm = this.props.vm;
+        const document = this.codeDocumentSnapshot();
         const ownsRequest = () => !this._unmounted && this._deriveRequest === request;
         const ownsEditor = state => ownsRequest() && state.lang === lang &&
             state.buffers === buffers && this.props.vm === vm;
-        this.setState(state => ownsEditor(state) ? patch : null, () => {
+        this.setState(state => ownsEditor(state) ? {...patch, codeDocument: {...document,
+            generationOptions: this.codeGenerationOptions({...state, ...patch})}} : null, () => {
             if (!ownsRequest()) return;
-            const src = buffers.pseudocode;
-            if (!ownsEditor(this.state) || lang === 'pseudocode' || !src || !src.trim()) {
+            const src = document.code;
+            if (!ownsEditor(this.state) || lang === document.lang || !src || !src.trim()) {
                 this.setState(() => ownsRequest() ? {busy: false} : null);
                 return;
             }
             this.setState({busy: true, status: this.L.stRegen});
-            this.deriveBuffer(src, 'pseudocode', lang).then(({code, error}) => {
+            this.deriveBuffer(src, document.lang, lang).then(({code, error, diagnostics, options}) => {
                 if (!ownsRequest()) return;
                 this.setState(state => {
                     if (!ownsRequest()) return null;
                     if (!ownsEditor(state)) return {busy: false};
-                    if (error) return {busy: false, status: error};
-                    return {busy: false, status: '', output: null, buffers: {...state.buffers, [lang]: code}};
+                    if (error) return {busy: false, status: error, conversionReport: diagnostics || null};
+                    const next = addCodeProjection({...document, generationOptions: this.codeGenerationOptions(state)},
+                        {lang, code, sourceRevision: document.revision, options: options || this.genOpts(lang),
+                            diagnostics: diagnostics || null, runtime: this.codeRuntimeFor(lang, document.target)});
+                    return {...this.codeDocumentState(next), busy: false, status: '', output: null,
+                        conversionReport: diagnostics || null};
                 });
             });
         });
@@ -4466,6 +4656,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     stopCodeRun () {
+        if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
         if (this._codeSession) this._codeSession.stop();
     }
 
@@ -4494,18 +4685,25 @@ class PseudocodeImporter extends React.Component {
 
     // Console runs own their clicked source, lazy runtime load, worker and input.
     // A worker is a Stop/responsiveness boundary, not a complete security sandbox.
-    // Generated detached async IIFEs still need an upstream task-lifetime contract.
+    // Owned generated programs register their task lifetime with the worker.
     async run () {
         const lang = this.state.lang;
         this.disposeCodeRun();
+        const document = this.codeDocumentSnapshot();
+        const expectedRuntime = this.codeRuntimeFor(lang, document.target);
+        if (document.runtime && document.runtime !== expectedRuntime) {
+            this.setState({status: `The saved runtime ${document.runtime} is not available for this target. Source is preserved.`});
+            return;
+        }
         // Pico + Python: run in the SIMULATOR — boot MicroPython in rp2040js and
         // run the program live over the same createPicoRepl the silicon deploy
         // uses (N3c), instead of the in-page Skulpt console below.
         if ((lang === 'python' || lang === 'micropython') && this.currentDevice() === 'pico') {
-            return this.runPicoSim();
+            return this.runPicoSim(this.activeCode());
         }
         const code = this.activeCode();
-        const request = {vm: this.props.vm, lang, code};
+        const request = {vm: this.props.vm, lang, code, runtime: document.runtime,
+            target: document.target, sourceRevision: document.revision};
         this._codeRunRequest = request;
         const ownsRequest = () => !this._unmounted && this._codeRunRequest === request && this.props.vm === request.vm;
         const python = lang === 'python' || lang === 'micropython';
@@ -4513,6 +4711,7 @@ class PseudocodeImporter extends React.Component {
         // shared worker/board bridge. It has no worker Stop guarantee; do not
         // silently replace its working board access with an empty worker stub.
         const legacySimulator = lang === 'javascript' && this.state.driverMode === 'simulator' &&
+            !codeDocumentConversionRefusal(document, lang, code) &&
             /(^|[^.\w])prompt\s*\(/.test(code);
         this.setState(() => ownsRequest() ? {
             output: '', running: true, status: python ? this.L.stLoadingPy : '',
@@ -4567,40 +4766,56 @@ class PseudocodeImporter extends React.Component {
      * program, deployment protocol and reboot boundary the silicon path uses.
      * Refuses by name only when the firmware asset is absent.
      */
-    async runPicoSim () {
-        const src = this.state.buffers.pseudocode || '';
+    async runPicoSim (pythonSource = null) {
+        const src = typeof pythonSource === 'string' ? pythonSource : this.state.buffers.pseudocode || '';
         if (!src.trim()) return;
+        this.stopPicoSim();
+        const request = {};
+        this._picoSimRequest = request;
+        const vm = this.props.vm;
+        const target = this.currentDevice();
+        const ownsRequest = () => !this._unmounted && this._picoSimRequest === request &&
+            this.props.vm === vm && this.currentDevice() === target;
         this.setState({output: '', running: true, picoSimRunning: false, status: ''});
         try {
-            const SB3Creator = (await this.lib()).default;
-            const creator = new SB3Creator();
-            creator.parse(src);
-            const r = creator.generateMicroPython();
-            if (!r.ok) {
-                this.setState({running: false, status:
-                    this.L.deployPicoFail((r.reasons || []).join('; ') || 'not expressible in MicroPython')});
-                return;
+            let py = src;
+            if (typeof pythonSource !== 'string') {
+                const SB3Creator = (await this.lib()).default;
+                if (!ownsRequest()) return;
+                const creator = new SB3Creator();
+                creator.parse(src);
+                const r = creator.generateMicroPython();
+                if (!r.ok) {
+                    this.setState({running: false, status:
+                        this.L.deployPicoFail((r.reasons || []).join('; ') || 'not expressible in MicroPython')});
+                    return;
+                }
+                py = r.py;
             }
             const {startPicoSimRun} = await import(
                 /* webpackChunkName: "pico-sim-run" */ '../../lib/pico-sim-run.js');
             const {loadPicoFirmware} = await import('../../lib/pico-firmware.js');
+            if (!ownsRequest()) return;
             const fw = await loadPicoFirmware();
+            if (!ownsRequest()) return;
             if (!fw) {
                 this.setState({running: false, status: this.L.picoSimNoFirmware});
                 return;
             }
             const handle = await startPicoSimRun({
                 image: fw.image,
-                vm: this.props.vm,
+                vm,
                 stc: this.currentStc(),
-                py: r.py,
-                onStatus: s => this.setState({status: s}),
-                onError: e => this.setState({status:
-                    this.L.deployPicoFail(e && e.message ? e.message : String(e))})
+                py,
+                onStatus: s => { if (ownsRequest()) this.setState({status: s}); },
+                onError: e => { if (ownsRequest()) this.setState({status:
+                    this.L.deployPicoFail(e && e.message ? e.message : String(e))}); }
             });
+            if (!ownsRequest()) { handle.stop(); return; }
             this._picoSimStop = handle.stop;
             this.setState({picoSimRunning: true});
         } catch (e) {
+            if (!ownsRequest()) return;
             this._picoSimStop = null;
             this.setState({running: false, picoSimRunning: false, status:
                 this.L.deployPicoFail(e && e.message ? e.message : String(e))});
@@ -4610,11 +4825,12 @@ class PseudocodeImporter extends React.Component {
     /** Stop a live Pico simulator run: interrupt the program and tear the run
      *  down (the RUN board dies with it, the canvas rebinds to the designer). */
     stopPicoSim () {
+        this._picoSimRequest = null;
         if (this._picoSimStop) {
             try { this._picoSimStop(); } catch { /* teardown must not throw at the user */ }
             this._picoSimStop = null;
         }
-        this.setState({running: false, picoSimRunning: false, status: this.L.picoSimStopped});
+        if (!this._unmounted) this.setState({running: false, picoSimRunning: false, status: this.L.picoSimStopped});
     }
 
     // Flash the micro:bit simulator with the current MicroPython code.
@@ -5085,9 +5301,8 @@ class PseudocodeImporter extends React.Component {
             this._codeArtwork = null;
             this._animationImport = null;
             this._makeCodeRequest = null;
-            this.setState({busy: false, lang: 'pseudocode', output: null, uploads: [],
-                status: warnings.length ? warnings.join('; ') : '',
-                buffers: {pseudocode: src, python: '', javascript: '', c: '', basic: '', asm: '', micropython: ''}},
+            this.setState({...this.authoredCodeState('pseudocode', src), busy: false, output: null, uploads: [],
+                status: warnings.length ? warnings.join('; ') : ''},
             () => {
                 Promise.resolve(this.compile()).catch(e => this.setState(
                     {status: `Loaded, but building the project failed: ${e.message}`}));
@@ -5182,7 +5397,7 @@ class PseudocodeImporter extends React.Component {
         // example browser. Compile only after React has committed the new buffer.
         const apply = patch => new Promise(resolve => {
             if (this._unmounted || this._bundledExampleSelection !== request) { resolve(); return; }
-            this.setState(patch, () => {
+            this.setState({...patch, ...this.authoredCodeState('pseudocode', patch.buffers.pseudocode)}, () => {
                 if (this._unmounted || this._bundledExampleSelection !== request) { resolve(); return; }
                 Promise.resolve(this.compile()).then(() => {
                     if (patch.status && !this._unmounted && this._bundledExampleSelection === request) {
@@ -5290,13 +5505,21 @@ class PseudocodeImporter extends React.Component {
         if (this.state.conversionReport?.preserved) showCircuitDebugger();
     }
     async compile ({strict = false, pseudocode = null} = {}) {
+        const vm = this.props.vm;
         const conversionRequest = {};
         this._conversionRequest = conversionRequest;
         const buffersAtStart = this.state.buffers;
         const languageAtStart = this.state.lang;
+        let authoredDocument = this.codeDocumentSnapshot();
+        if (typeof pseudocode === 'string' &&
+            (authoredDocument.lang !== 'pseudocode' || authoredDocument.code !== pseudocode)) {
+            authoredDocument = editCodeDocument(authoredDocument, {lang: 'pseudocode', code: pseudocode,
+                runtime: null, generationOptions: this.codeGenerationOptions()});
+        }
         let ownedAnimation = this._animationImport;
         let ownedMakeCodeRequest = this._makeCodeRequest;
-        const ownsConversion = () => this._conversionRequest === conversionRequest;
+        const ownsConversion = () => !this._unmounted && this.props.vm === vm &&
+            this._conversionRequest === conversionRequest;
         // Buffers are immutable editor revisions. Equality of the source text
         // alone would allow an edit/revert to revive an older conversion.
         const ownsEditor = state => ownsConversion() &&
@@ -5317,6 +5540,8 @@ class PseudocodeImporter extends React.Component {
         const activeAtStart = this.activeCode();
         try {
             let source = typeof pseudocode === 'string' ? pseudocode : this.activeCode();
+            const refusal = codeDocumentConversionRefusal(this.state.codeDocument, lang, source);
+            if (refusal) throw new Error(refusal);
             let parseWarnings = [];
             if (lang === 'asm') {
                 const lift = (await import(/* webpackChunkName: "bw-asm-reader" */ '../../lib/bw-asm/asm-8086-to-pseudocode.js')).default;
@@ -5408,7 +5633,7 @@ class PseudocodeImporter extends React.Component {
                     throw new Error(artwork.reason || 'Artwork or the loaded project changed while preparing this conversion. Read From blocks again.');
                 }
             }
-            if (!ownsConversion() || this._makeCodeRequest !== ownedMakeCodeRequest) return;
+            if (!ownsEditor(this.state)) return;
             if (this.props.vm.runtime.getTargetForStage() !== stage || this._animationImport !== pending || this.state.uploads !== uploads ||
                 this.activeCode() !== activeAtStart) throw new Error('The code or loaded project changed while preparing this conversion. Try again.');
             // A request still preparing a new conversion does not revoke the
@@ -5418,6 +5643,7 @@ class PseudocodeImporter extends React.Component {
             await this.props.vm.loadProject(projectBytes);
             const loadedStage = this.props.vm.runtime.getTargetForStage();
             const ownsLoadedProject = () => this._conversionProjectLoad === conversionRequest &&
+                !this._unmounted && this.props.vm === vm &&
                 this.props.vm.runtime.getTargetForStage() === loadedStage;
             if (!ownsLoadedProject()) return;
             if (ownsEditor(this.state)) {
@@ -5431,7 +5657,6 @@ class PseudocodeImporter extends React.Component {
             this._codeArtwork = captureCodeArtwork(this.props.vm, creator.project, sourceDeclarations);
             // Auto-select the first sprite with scripts so the Blocks palette
             // shows meaningful blocks, not "Stage selected — no motion blocks".
-            const vm = this.props.vm;
             if (vm.runtime && vm.runtime.targets) {
                 const best = vm.runtime.targets.find(
                     t => !t.isStage && t.blocks.getScripts().length > 0
@@ -5509,8 +5734,9 @@ class PseudocodeImporter extends React.Component {
             const proj = creator.project;
             const nb = {...this.state.buffers};
             if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
-            if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts());
-            if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
+            if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts('python'));
+            if (lang !== 'javascript') nb.javascript = this.state.jsExecution === OWNED_CONSOLE_EXECUTION ? '' :
+                new SB3Creator().generateJavaScript(proj, this.genOpts('javascript'));
             nb.c = new SB3Creator().generateC(proj);
             {
                 const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
@@ -5531,7 +5757,8 @@ class PseudocodeImporter extends React.Component {
             if (missing.length) warns.push(`no sprite named: ${missing.join(', ')}`);
             const classified = classifyConversionWarnings(warns);
             publishEditor(state => ({
-                buffers: nb,
+                ...this.codeDocumentState(this.codeDocumentWithBuffers(nb, authoredDocument.lang, languageAtStart,
+                    {changed: classified.changed, unsupported: classified.unsupported}, authoredDocument)),
                 // This flag belongs to the admitted buffer regeneration too.
                 importedPython: false,
                 uploads: state.uploads.filter(upload => !appliedUploads.has(upload)),
@@ -5553,25 +5780,39 @@ class PseudocodeImporter extends React.Component {
     }
     // Read the running project into all languages at once.
     async fromBlocks () {
+        const request = {};
+        this._deriveRequest = request;
+        const vm = this.props.vm;
+        const lang = this.state.lang;
+        const previousBuffers = this.state.buffers;
+        const originalProject = vm.toJSON();
+        const ownsRequest = () => !this._unmounted && this._deriveRequest === request;
+        const ownsEditor = state => ownsRequest() && this.props.vm === vm && state.lang === lang &&
+            state.buffers === previousBuffers && vm.toJSON() === originalProject;
         this.setState({busy: true, status: this.L.stReading, conversionReport: null});
         try {
             const SB3Creator = (await this.lib()).default;
             const {assetLibraryRecords, withoutAssetLibraries} = await import('../../lib/bw-asset-library.js');
-            const savedProject = JSON.parse(this.props.vm.toJSON());
-            const project = withoutAssetLibraries(savedProject, assetLibraryRecords(this.props.vm, savedProject));
+            const savedProject = JSON.parse(originalProject);
+            const project = withoutAssetLibraries(savedProject, assetLibraryRecords(vm, savedProject));
             const basicResult = new SB3Creator().generateBASIC(project, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
             const mpResult = new SB3Creator().generateMicroPython(project);
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
-                python: new SB3Creator().generatePython(project, this.genOpts()),
-                javascript: new SB3Creator().generateJavaScript(project, this.genOpts()),
+                python: new SB3Creator().generatePython(project, this.genOpts('python')),
+                javascript: lang !== 'javascript' && this.state.jsExecution === OWNED_CONSOLE_EXECUTION ? '' :
+                    new SB3Creator().generateJavaScript(project, this.genOpts('javascript')),
                 c: new SB3Creator().generateC(project),
                 basic: basicResult.ok ? basicResult.basic : `REM === Cannot show as BASIC ===\n${basicResult.reasons.map(s => 'REM ' + s).join('\n')}`,
                 asm: '', // cleared — re-fetched on next ASM tab switch
                 micropython: mpResult.ok ? mpResult.py : `# === Cannot generate MicroPython ===\n${mpResult.reasons.map(s => '# ' + s).join('\n')}`,
-                ...(await dosLangBuffersFor(project, this.state.lang))
+                ...(await dosLangBuffersFor(project, lang))
             };
-            this.setState({importedPython: false});
+            if (lang === 'javascript' && this.state.jsExecution === OWNED_CONSOLE_EXECUTION &&
+                !/^\/\/ owned-console-v1:/m.test(buffers.javascript)) {
+                throw new Error('This compiler revision does not support console programs.');
+            }
+            if (!ownsEditor(this.state)) return;
             const baseline = new SB3Creator();
             baseline.parse(buffers.pseudocode);
             this._animationImport = null;
@@ -5581,8 +5822,11 @@ class PseudocodeImporter extends React.Component {
             // list each one: a count of column-0 comments reported "✓ OK" for them.
             const unsupportedDiagnostics = Array.from(buffers.pseudocode.matchAll(/^\s*# unsupported:\s*(.*)$/gm), match => match[1].trim());
             const unsupported = unsupportedDiagnostics.length;
-            this.setState({
-                buffers,
+            this._codeRestoreError = null;
+            this.setState(state => ownsEditor(state) ? {
+                ...this.codeDocumentState(this.codeDocumentWithBuffers(buffers, 'pseudocode', lang,
+                    {changed: [], unsupported: unsupportedDiagnostics})),
+                importedPython: false,
                 uploads: [], // the live project now owns its artwork; old import SVGs are stale
                 output: null,
                 status: unsupported ?
@@ -5590,14 +5834,15 @@ class PseudocodeImporter extends React.Component {
                     'Read the current project into all languages. Edit any of them, then “To blocks”.',
                 conversionReport: {direction: 'Blocks → Code', preserved: true, changed: [],
                     unsupported: unsupportedDiagnostics}
-            });
+            } : null);
         } catch (e) {
             const failure = conversionFailure(e);
-            this.setState({status: this.L.stError(failure.message), conversionReport: {
+            this.setState(state => ownsEditor(state) ? {status: this.L.stError(failure.message), conversionReport: {
                 direction: 'Blocks → Code', preserved: false, changed: [], unsupported: failure.issues
-            }});
+            }} : null);
+        } finally {
+            this.setState(() => ownsRequest() ? {busy: false} : null);
         }
-        this.setState({busy: false});
     }
 
     /** Imperative API: highlight a source line (1-based) in the editor.
@@ -6267,7 +6512,21 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.flashSwd}
                             </button>
                         ) : null}
-                        {this.state.lang !== 'pseudocode' && this.state.lang !== 'c' && /_[a-z]+\.|Driver/.test(this.activeCode()) ? (
+                        {this.state.lang === 'javascript' ? (
+                            <label title={this.L.jsConsoleHint} style={{fontSize: 13}}>
+                                {this.L.jsProgram}{' '}
+                                <select data-testid="bw-js-execution-target" aria-label={this.L.jsProgram}
+                                    value={this.state.jsExecution} disabled={this.state.busy}
+                                    onChange={e => this.setGenOpt({jsExecution: e.target.value})}
+                                    style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
+                                    <option value="classic">{this.L.jsClassic}</option>
+                                    <option value={OWNED_CONSOLE_EXECUTION}>{this.L.jsConsole}</option>
+                                </select>
+                            </label>
+                        ) : null}
+                        {this.state.lang !== 'pseudocode' && this.state.lang !== 'c' &&
+                         !(this.state.lang === 'javascript' && this.state.jsExecution === OWNED_CONSOLE_EXECUTION) &&
+                         /_[a-z]+\.|Driver/.test(this.activeCode()) ? (
                             <span style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8}}>
                                 <label title={this.L.driverTitle}>
                                     🔌{' '}
@@ -6287,6 +6546,11 @@ class PseudocodeImporter extends React.Component {
                                     <input type="checkbox" checked={this.state.eventsMode} disabled={this.state.busy}
                                         onChange={e => this.setGenOpt({eventsMode: e.target.checked})} /> {this.L.eventsLabel}
                                 </label>
+                            </span>
+                        ) : null}
+                        {codeDocumentConversionRefusal(this.state.codeDocument, this.state.lang, this.activeCode()) ? (
+                            <span data-testid="bw-code-conversion-limit" style={{fontSize: 12, color: '#475569'}}>
+                                {this.L.jsConsoleHint}
                             </span>
                         ) : null}
                         {(this.state.lang === 'python' || this.state.lang === 'javascript') && this.activeCode().trim() ? (
@@ -6684,7 +6948,7 @@ class PseudocodeImporter extends React.Component {
                     <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
                             {this.L.profile}
-                            <select value={this.state.basicProfile} onChange={e => this.setState({basicProfile: e.target.value, buffers: {...this.state.buffers, basic: ''}})}
+                            <select value={this.state.basicProfile} onChange={e => this.setGenOpt({basicProfile: e.target.value})}
                                 style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
                                 <option value="bbc">{'BBC BASIC'}</option>
                                 <option value="ms">{'6502 BASIC'}</option>
@@ -6696,7 +6960,7 @@ class PseudocodeImporter extends React.Component {
                         <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
                             <input type="checkbox" checked={this.state.basicLineNumbers}
                                 disabled={this.state.basicProfile === 'ms'}
-                                onChange={e => this.setState({basicLineNumbers: e.target.checked, buffers: {...this.state.buffers, basic: ''}})} />
+                                onChange={e => this.setGenOpt({basicLineNumbers: e.target.checked})} />
                             {this.L.lineNumbers}{' '}{this.state.basicProfile === 'ms' ? this.L.alwaysOn6502 : ''}
                         </label>
                     </div>
