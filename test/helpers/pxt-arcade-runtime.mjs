@@ -49,7 +49,7 @@ export function validatePxtActionGlobals(expected) {
     }
 }
 
-export async function runPxtArcade(source, {waitForGlobals = null, dependencies = {device: '*'}, inspectDisplay = false, waitForDisplay = false, buttonActions = null, recordSound = false, recordSongSound = false, waitForMain = true, fakeClock = false, inspectImageGlobals = [], observeEntropy = false, fixedEntropy = null, onCompilation = null, observeControlReset = false, inspectArrayReads = [], inspectStats = false, browser: sharedBrowser = null} = {}) {
+export async function runPxtArcade(source, {waitForGlobals = null, dependencies = {device: '*'}, inspectDisplay = false, waitForDisplay = false, buttonActions = null, recordSound = false, recordSongSound = false, waitForMain = true, fakeClock = false, inspectImageGlobals = [], observeEntropy = false, fixedEntropy = null, onCompilation = null, observeControlReset = false, inspectArrayReads = [], inspectStats = false, inspectArrayValues = [], browser: sharedBrowser = null} = {}) {
     if(fixedEntropy!==null && !(typeof fixedEntropy==='number' && fixedEntropy>=0 && fixedEntropy<1))throw new Error('Fixed entropy must be a number in [0, 1)');
     if(fixedEntropy!==null && observeEntropy)throw new Error('Fixed entropy replaces the platform draws that observation records');
     if (waitForDisplay && !inspectDisplay) throw new Error('Display readiness requires display inspection');
@@ -199,7 +199,7 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
                         return {x: rect.left + (rect.width - canvas.width * scale) / 2 + point.x * scale,
                             y: rect.top + (rect.height - canvas.height * scale) / 2 + point.y * scale};
                     }, action.displayClick);
-                    await page.mouse.click(position.x, position.y);
+                    await page.mouse.click(position.x, position.y, {delay: action.displayClick.hold || 0});
                 }
                 if(action.button!==undefined)await page.evaluate(({button,held})=>{
                     const board=window.__bwPxtRuntime.board;
@@ -272,9 +272,22 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
             } else await page.waitForFunction(baseline => window.__bwPxtDisplayObserver.updates > baseline,
                 displayBaseline, {timeout: 20000});
         }
-        const values=await page.evaluate(({inspectDisplay,recordSound,recordSongSound,waitForDisplay,displayBaseline,inspectImageGlobals,observeEntropy,fixedEntropy,observeControlReset,inspectArrayReads,inspectStats})=>{
+        const values=await page.evaluate(({inspectDisplay,recordSound,recordSongSound,waitForDisplay,displayBaseline,inspectImageGlobals,observeEntropy,fixedEntropy,observeControlReset,inspectArrayReads,inspectStats,inspectArrayValues})=>{
             const runtime=window.__bwPxtRuntime;
             const result=Object.fromEntries(Object.entries(runtime.globals).filter(([,v])=>v===null || ['number','string','boolean','undefined'].includes(typeof v)).map(([k,v])=>[k.replace(/___\d+$/,''),v]));
+            if (inspectArrayValues.length) {
+                result.$arrays = {};
+                for (const name of inspectArrayValues) {
+                    const matches = Object.entries(runtime.globals).filter(([key]) => key.replace(/___\d+$/, '') === name);
+                    const value = matches[0]?.[1];
+                    const entries = Array.isArray(value) ? value : value?.data;
+                    if (matches.length !== 1 || !Array.isArray(entries) || entries.some(entry =>
+                        entry !== null && !['number', 'string', 'boolean', 'undefined'].includes(typeof entry))) {
+                        throw new Error('Original PXT primitive Array global is unavailable: ' + name);
+                    }
+                    result.$arrays[name] = entries.slice();
+                }
+            }
             if(inspectImageGlobals.length){
                 result.$images={};
                 for(const name of inspectImageGlobals){
@@ -305,7 +318,7 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
                 owner.state.updateStats=owner.original;delete window.__bwPxtStats;
             }
             runtime.kill();runtime.board.kill();return result;
-        },{inspectDisplay,recordSound,recordSongSound,waitForDisplay,displayBaseline,inspectImageGlobals,observeEntropy,fixedEntropy,observeControlReset,inspectArrayReads,inspectStats});
+        },{inspectDisplay,recordSound,recordSongSound,waitForDisplay,displayBaseline,inspectImageGlobals,observeEntropy,fixedEntropy,observeControlReset,inspectArrayReads,inspectStats,inspectArrayValues});
         if(errors.length)throw new Error(JSON.stringify(errors));
         return values;
     } finally {

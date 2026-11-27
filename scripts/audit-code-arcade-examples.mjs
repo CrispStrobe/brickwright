@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import {createHash} from 'node:crypto';
-import {readFile, rename, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, rename, writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {chromium} from 'playwright';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
@@ -8,14 +9,17 @@ import vectorArt from '../overlay/scratch-gui/src/lib/sb3-creator-vector-art.js'
 import examples from '../overlay/scratch-gui/src/lib/sb3-creator-examples.js';
 import games from '../overlay/scratch-gui/src/lib/sb3-creator-game-examples.js';
 import {svgToPixels} from '../overlay/scratch-gui/src/lib/bw-makecode/pixel-image.js';
+import {makeCodeProjectFile} from '../overlay/scratch-gui/src/lib/bw-makecode/project-file.js';
 import {projectJsonToArcade} from '../overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js';
 import {compile} from './lib/pxt-node.mjs';
+import {arcadeExampleChecks} from './lib/arcade-example-checks.mjs';
 import {runPxtArcade} from '../test/helpers/pxt-arcade-runtime.mjs';
 
 const {values: options} = parseArgs({options: {
     only: {type: 'string', multiple: true},
     inventory: {type: 'boolean'},
     portable: {type: 'boolean'},
+    output: {type: 'string'},
     report: {type: 'string'},
     simulate: {type: 'boolean'}
 }});
@@ -50,14 +54,15 @@ const classify = ({source, catalogue: example}) => {
 };
 const results = [...entries.values()].filter(entry => !options.only || options.only.includes(entry.id))
     .map(entry => ({id: entry.id, scope: entry.scope, ...classify(entry)}));
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const provenance = {portable: Boolean(options.portable), simulate: Boolean(options.simulate), files: {}};
 for (const path of ['overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js',
     'overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js', 'overlay/scratch-gui/examples/index.json']) {
     const bytes = await readFile(new URL(`../${path}`, import.meta.url));
-    provenance.files[path] = createHash('sha256').update(bytes).digest('hex');
+    provenance.files[path] = sha256(bytes);
 }
 const publish = async () => {
-    const report = {provenance, results, counts: {}, scopes: {}};
+    const report = {schema: 'bw-arcade-code-examples-v1', provenance, results, counts: {}, scopes: {}};
     for (const {scope, outcome = 'pending', simulator} of results) {
         report.counts[outcome] = (report.counts[outcome] || 0) + 1;
         const section = report.scopes[scope] ||= {total: 0, simulatorRuns: 0, outcomes: {}};
@@ -95,6 +100,7 @@ const useBrowser = async operation => {
         }
     }
 };
+if (options.output && !options.inventory) await mkdir(options.output, {recursive: true});
 await publish();
 try {
     for (const row of results) {
@@ -109,6 +115,8 @@ try {
             const creator = new SB3Creator();
             creator.parse(source);
             row.sourceWarnings = creator.warnings;
+            row.opcodes = [...new Set(creator.project.targets.flatMap(target =>
+                Object.values(target.blocks || {}).map(block => block.opcode)))].sort();
             const assets = creator.assets;
             const rasters = new Map(await useBrowser((browser, canvas) => canvas.evaluate(async entries => Promise.all(entries.map(async ([key, svg]) => {
                 const image = new Image();
@@ -136,8 +144,9 @@ try {
                 raster.rgba = Buffer.from(raster.base64, 'base64');
                 delete raster.base64;
             }
+            const name = id.replace(/[^a-z0-9_-]/gi, '-');
             const output = projectJsonToArcade(JSON.stringify(creator.project), {
-                name: id.replace(/[^a-z0-9_-]/gi, '-'),
+                name,
                 browserPointer: !options.portable,
                 costumeSvg: (target, costume) => assets.get(costume.assetId)?.data || null,
                 costumeRgba: (target, costume) => rasters.get(costume.assetId) || null,
@@ -145,6 +154,14 @@ try {
             });
             row.unsupported = output.unsupported;
             row.warnings = output.warnings;
+            row.pxtSourceSha256 = sha256(JSON.stringify(Object.keys(output.files).sort()
+                .map(file => [file, output.files[file]])));
+            if (options.output) {
+                const bytes = makeCodeProjectFile(output.files, {name, target: 'arcade'});
+                const filename = `arcade-${name}.mkcd`;
+                await writeFile(join(options.output, filename), bytes);
+                row.project = {filename, sha256: sha256(bytes)};
+            }
             row.outcome = 'compiler failure';
             const recordCompilation = pxt => {
                 row.compiled = pxt.success;
@@ -155,26 +172,23 @@ try {
             if (!options.simulate) {
                 recordCompilation(await compile('arcade', output.files));
             } else {
+                const functional = options.portable && ['sigil_grid', 'vector_seven', 'canal_command'].includes(id) ?
+                    null : arcadeExampleChecks[id];
                 const sample = await useBrowser(browser => runPxtArcade(output.files, {
-                    browser,
-                    onCompilation: ({built}) => recordCompilation(built),
+                    browser, onCompilation: ({built}) => recordCompilation(built),
                     inspectDisplay: true, waitForDisplay: true, waitForMain: false,
-                    buttonActions: id === 'twinwall' ? {afterGlobals: {started: 1}, steps: [
-                        {keyDown: 'w', waitForGlobals: {ly: 135, ry: 0}},
-                        {keyUp: 'w'},
-                        {keyDown: 'ArrowDown', waitForGlobals: {ly: 135, ry: -135}},
-                        {keyUp: 'ArrowDown'}
-                    ]} : {steps: [{button: 5, held: true, delay: 1000}, {button: 5, held: false, delay: 80},
-                        {button: 4, held: true, delay: 80}, {button: 4, held: false, delay: 80}]}
+                    ...(functional?.options || {buttonActions: {steps: [
+                        {button: 5, held: true, delay: 1000}, {button: 5, held: false, delay: 80},
+                        {button: 4, held: true, delay: 80}, {button: 4, held: false, delay: 80}
+                    ]}})
                 }));
                 if (sample.$display.screen.length !== 160 * 120 || sample.$display.updatesAfterReady < 1) {
                     throw new Error('Arcade simulator did not present a complete native screen frame.');
                 }
-                row.simulator = {check: id === 'twinwall' ? 'independent paddle controls' : 'boot and input smoke test',
+                row.simulator = {check: functional?.name || 'boot and input smoke test',
                     screenPixels: sample.$display.screen.length,
                     colours: new Set(sample.$display.screen).size, displayUpdates: sample.$display.updatesAfterReady,
-                    ...(id === 'twinwall' ? {paddles: {left: sample.ly, right: sample.ry},
-                        monitors: Object.entries(sample).filter(([key]) => /^__bwMonitorVisible_*$/.test(key))} : {}),
+                    ...(functional ? functional.observe(sample) : {}),
                     ...(Object.hasOwn(sample, 'started') ? {started: sample.started} : {})};
             }
         } catch (error) {
