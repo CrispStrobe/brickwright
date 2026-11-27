@@ -268,7 +268,8 @@ const L10N = {
         stop: 'Stop',
         codeInput: 'Program input', codeInputSend: 'Send',
         codeConsolePython: 'Python console · Skulpt', codeConsoleJs: 'JavaScript console',
-        jsProgram: 'JavaScript program', jsClassic: 'Classic source', jsConsole: 'Console program',
+        jsProgram: 'JavaScript generation', jsClassic: 'Classic source', jsConsole: 'Console program',
+        jsGenerationHint: 'Choose the JavaScript generated from blocks or Pseudo. This setting preserves authored JavaScript.',
         jsConsoleHint: 'Console programs support input and waits. Keep editing and running this JavaScript; conversion back to blocks is unavailable.',
         codeStopped: 'Stopped.', codeNoOutput: '(no output)',
         codeTimeout: 'Stopped after 4 seconds of execution. Time spent waiting for input does not count.',
@@ -618,7 +619,8 @@ const L10N = {
         stop: 'Stopp',
         codeInput: 'Programmeingabe', codeInputSend: 'Senden',
         codeConsolePython: 'Python-Konsole · Skulpt', codeConsoleJs: 'JavaScript-Konsole',
-        jsProgram: 'JavaScript-Programm', jsClassic: 'Klassischer Quelltext', jsConsole: 'Konsolenprogramm',
+        jsProgram: 'JavaScript-Erzeugung', jsClassic: 'Klassischer Quelltext', jsConsole: 'Konsolenprogramm',
+        jsGenerationHint: 'Wählt die JavaScript-Erzeugung aus Blöcken oder Pseudo. Selbst bearbeitetes JavaScript bleibt erhalten.',
         jsConsoleHint: 'Konsolenprogramme unterstützen Eingaben und Wartezeiten. JavaScript kann bearbeitet und ausgeführt, aber nicht zurück in Blöcke umgewandelt werden.',
         codeStopped: 'Gestoppt.', codeNoOutput: '(keine Ausgabe)',
         codeTimeout: 'Nach 4 Sekunden Ausführung gestoppt. Wartezeit auf Eingaben zählt nicht mit.',
@@ -6199,6 +6201,8 @@ class PseudocodeImporter extends React.Component {
         const actionBtn = {...btn, padding: '5px 9px', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0};
         const sel = {padding: '6px 10px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'};
         const max = this.state.maximized;
+        const ownedConsoleSource = Boolean(codeDocumentConversionRefusal(
+            this.state.codeDocument, this.state.lang, this.activeCode()));
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
         const languageTabStyle = active => ({
             padding: '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
@@ -6524,7 +6528,7 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         ) : null}
                         {this.state.lang === 'javascript' ? (
-                            <label title={this.L.jsConsoleHint} style={{fontSize: 13}}>
+                            <label title={this.L.jsGenerationHint} style={{fontSize: 13}}>
                                 {this.L.jsProgram}{' '}
                                 <select data-testid="bw-js-execution-target" aria-label={this.L.jsProgram}
                                     value={this.state.jsExecution} disabled={this.state.busy}
@@ -6557,11 +6561,6 @@ class PseudocodeImporter extends React.Component {
                                     <input type="checkbox" checked={this.state.eventsMode} disabled={this.state.busy}
                                         onChange={e => this.setGenOpt({eventsMode: e.target.checked})} /> {this.L.eventsLabel}
                                 </label>
-                            </span>
-                        ) : null}
-                        {codeDocumentConversionRefusal(this.state.codeDocument, this.state.lang, this.activeCode()) ? (
-                            <span data-testid="bw-code-conversion-limit" style={{fontSize: 12, color: '#475569'}}>
-                                {this.L.jsConsoleHint}
                             </span>
                         ) : null}
                         {(this.state.lang === 'python' || this.state.lang === 'javascript') && this.activeCode().trim() ? (
@@ -6810,6 +6809,13 @@ class PseudocodeImporter extends React.Component {
                     <div ref={this.props.onCp1CodeSlot} data-cp1-language-pane
                         style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
                 ) : <React.Fragment>
+                {ownedConsoleSource ? (
+                    <div data-testid="bw-code-conversion-limit" role="status"
+                        style={{padding: '5px 10px', marginTop: 4, background: '#fff8e1', border: '1px solid #f0c36d',
+                            borderRadius: 6, color: '#5d4300', fontSize: 12, lineHeight: 1.4, flexShrink: 0}}>
+                        {this.L.jsConsoleHint}
+                    </div>
+                ) : null}
                 {/* Transient messages sit under the row, not in it: they can be long and expand. */}
                 {this.state.status || this.state.conversionReport ? (
                     <div data-testid="bw-code-notices" style={{display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'flex-start',
@@ -6895,7 +6901,7 @@ class PseudocodeImporter extends React.Component {
                     </div>
                 ) : null}
 
-                {this.state.showRepresentation && !max && (
+                {this.state.showRepresentation && !max && !ownedConsoleSource && (
                     <div data-testid="bw-representation-status" role="status"
                         style={{padding: '5px 10px', background: '#fff8e1', border: '1px solid #f0c36d',
                             borderRadius: '0 0 6px 6px', color: '#5d4300', fontSize: 11, lineHeight: 1.35,

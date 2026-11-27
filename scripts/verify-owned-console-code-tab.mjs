@@ -130,6 +130,9 @@ const report = {
     runs: [],
     workers: [],
     loadedScripts: [],
+    nonEmittedScriptResponses: [],
+    assetBindingScope: 'Every same-origin HTTP(S) script response is hashed against the emitted build inventory. ' +
+        'Dynamic Blob worker URLs are outside that inventory; their creation and closure are observed separately.',
     screenshots: [],
     errors: [],
     consoleErrors: []
@@ -327,13 +330,19 @@ try {
         if (response.request().resourceType() !== 'script') return;
         const site = new URL('.', base);
         const url = new URL(response.url());
+        if (!['http:', 'https:'].includes(url.protocol) || url.origin !== site.origin || !url.pathname.startsWith(site.pathname)) {
+            report.nonEmittedScriptResponses.push({url: response.url(), status: response.status(),
+                reason: url.protocol === 'blob:' ? 'Dynamic Blob URL; actual worker lifecycle is recorded separately.' :
+                    'Outside the same-origin emitted build asset inventory.'});
+            return;
+        }
         const observation = {url: response.url(), status: response.status()};
         report.loadedScripts.push(observation);
         scriptReads.push((async () => {
             try {
                 const bytes = await response.body();
                 Object.assign(observation, {sha256: sha256(bytes), bytes: bytes.length});
-                if (qualificationBytes && url.origin === site.origin && url.pathname.startsWith(site.pathname)) {
+                if (qualificationBytes) {
                     const relative = decodeURIComponent(url.pathname.slice(site.pathname.length));
                     observation.buildPath = relative;
                     assert.equal(observation.sha256, qualification.build.files[relative],
