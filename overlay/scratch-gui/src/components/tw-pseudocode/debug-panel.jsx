@@ -73,6 +73,7 @@ const L10N = {
         hddDownloadInitiated: 'HDD image and JSON downloads initiated; check browser downloads. This is not a guest flush.',
         stepHint: 'Run to the next block boundary',
         serialHint: 'type a line, Enter sends it',
+        basicStartupHint: 'Press Enter for the default',
         terminalHint: 'Click the terminal and type: every key goes straight to Linux. ' +
             'Ctrl-C interrupts, arrows recall history, Ctrl-Shift-V pastes. 80×24.',
         serialSend: 'Send this line to the machine (ends with CR)',
@@ -126,6 +127,7 @@ const L10N = {
         timeline: 'Timeline', timelineRefresh: 'Read events', timelineOlder: 'Older',
         timelineNewer: 'Newer', timelineLatest: 'Latest', timelineCheckpoint: 'Last checkpoint',
         timelineGoSelected: 'Go to selected',
+        history: 'History', target: 'Target', firmwareFile: 'Load firmware file',
         timelineGoSelectedHint: 'Restore and replay to the selected event boundary',
         actionActivity: 'Breakpoint actions', actionFailures: 'Failures',
         actionLog: 'Log', actionCounters: 'Counters', actionEvent: 'event'
@@ -138,6 +140,7 @@ const L10N = {
         error: 'Fehler',
         stepHint: 'Bis zur nächsten Blockgrenze laufen',
         serialHint: 'Zeile eingeben, Enter sendet',
+        basicStartupHint: 'Enter übernimmt den Standardwert',
         terminalHint: 'Ins Terminal klicken und tippen: jede Taste geht direkt an Linux. ' +
             'Strg-C bricht ab, Pfeiltasten holen frühere Befehle, Strg-Umschalt-V fügt ein. 80×24.',
         serialSend: 'Diese Zeile an die Maschine senden (endet mit CR)',
@@ -192,6 +195,7 @@ const L10N = {
         timeline: 'Zeitleiste', timelineRefresh: 'Ereignisse lesen', timelineOlder: 'Älter',
         timelineNewer: 'Neuer', timelineLatest: 'Neueste', timelineCheckpoint: 'Letzter Prüfpunkt',
         timelineGoSelected: 'Zur Auswahl springen',
+        history: 'Verlauf', target: 'Zielsystem', firmwareFile: 'Firmwaredatei laden',
         timelineGoSelectedHint: 'Bis zur ausgewählten Ereignisgrenze wiederherstellen und abspielen',
         actionActivity: 'Haltepunkt-Aktionen', actionFailures: 'Fehler',
         actionLog: 'Protokoll', actionCounters: 'Zähler', actionEvent: 'Ereignis'
@@ -363,6 +367,7 @@ class DebugPanel extends React.Component {
             this._bootMedia = detail.resumeCp1 ? this._suspendedCp1Media : null;
             this._suspendedCp1Media = null;
         }
+        if (detail.clearLoadedMedia) this._bootMedia = null;
         const hasBootMedia = !!this._bootMedia;
         const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
@@ -405,7 +410,7 @@ class DebugPanel extends React.Component {
         const {linuxInitrd} = e.detail || {};
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
-        const {nativeBlocks, machinePreset, i80386Media} = e.detail || {};
+        const {nativeBlocks, machinePreset, i80386Media, machineConfig6502} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -430,6 +435,7 @@ class DebugPanel extends React.Component {
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
             machinePreset: kind === 'i80386' ? machinePreset || null : null,
             i80386Media: kind === 'i80386' ? i80386Media || null : null,
+            machineConfig6502: kind === 'eater6502' ? machineConfig6502 || null : null,
             // HARDWARE THE PROGRAM ASKED FOR, and it has to be listed here
             // explicitly: this destructure is a fixed field list, so a new
             // field on the event is silently dropped unless it is named in
@@ -1403,6 +1409,9 @@ class DebugPanel extends React.Component {
         // input line rather than a dead one.
         const canSendSerial = !!(this.state.runner &&
             typeof this.state.runner.sendSerial === 'function');
+        const basicStartupPrompt = this.state.kind === 'eater6502' &&
+            /(?:MEMORY SIZE|WIDTH)\?\s*$/i.test((ui.serialOutput || []).slice(-2).join('\n'));
+
         const canSendBlinkenrocket = !!(this.state.runner &&
             typeof this.state.runner.sendBlinkenrocket === 'function');
         const recording = this.state.runner && this.state.runner.debugRecordingStatus();
@@ -1522,20 +1531,23 @@ class DebugPanel extends React.Component {
                         borderRadius: 6, padding: '6px 8px', color: '#cbd5e1'
                     }}>{this.tx('firmwareBareChip')}</div>
                 ) : null}
-                <div style={{display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap'}}>
+                <div data-debug-transport style={{display: 'flex', gap: 4, alignItems: 'center'}}>
                     <button
                         data-debug-run
                         style={running || busy ? OFF : {...BTN, borderColor: '#2ecc71', color: '#2ecc71'}}
                         disabled={running || busy}
                         onClick={this.onStart}
                         title={paused ? 'Resume' : 'Build, load and run'}
-                    >{'▶ '}{this.tx('run')}</button>
+                        aria-label={this.tx('run')}
+                    >{'▶'}</button>
 
                     <button
                         style={running ? BTN : OFF}
                         disabled={!running}
                         onClick={this.onPause}
-                    >{'⏸ '}{this.tx('pause')}</button>
+                        title={this.tx('pause')}
+                        aria-label={this.tx('pause')}
+                    >{'⏸'}</button>
 
                     <button
                         style={canStep && !busy ? BTN : OFF}
@@ -1543,120 +1555,23 @@ class DebugPanel extends React.Component {
                         onClick={this.onStep}
                         title={canStep ? this.tx('stepHint')
                             : 'This target cannot step one block'}
-                    >{'⏭ '}{this.tx('step')}</button>
-
-                    <button
-                        data-debug-reverse-step
-                        style={canReverse && !busy ? BTN : OFF}
-                        disabled={!canReverse || busy}
-                        onClick={this.onReverseStep}
-                        title={canReverse ? this.tx('reverseHint') : (reverse?.reason || this.tx('reverseHint'))}
-                    >{'⏮ '}{this.tx('reverseStep')}</button>
-
-                    <button
-                        data-debug-reverse-cycle
-                        style={canReverseCycle && !busy ? BTN : OFF}
-                        disabled={!canReverseCycle || busy}
-                        onClick={this.onReverseCycle}
-                        title={canReverseCycle ? this.tx('reverseCycleHint') : reverseCycle.reason}
-                    >{'↤ '}{this.tx('reverseCycle')}</button>
-
-                    <button
-                        data-debug-reverse-continue
-                        style={canReverseContinue && !busy ? BTN : OFF}
-                        disabled={!canReverseContinue || busy}
-                        onClick={this.onReverseContinue}
-                        title={canReverseContinue ? this.tx('reverseContinueHint') :
-                            (reverseContinue?.reason || this.tx('reverseContinueHint'))}
-                    >{'◀ '}{this.tx('reverseContinue')}</button>
+                        aria-label={this.tx('step')}
+                    >{'⏭'}</button>
 
                     <button
                         style={running || paused ? {...BTN, borderColor: '#c0392b', color: '#e74c3c'} : OFF}
                         disabled={!running && !paused}
                         onClick={this.onStop}
-                    >{'⏹ '}{this.tx('stop')}</button>
+                        title={this.tx('stop')}
+                        aria-label={this.tx('stop')}
+                    >{'⏹'}</button>
 
-                    {canDownloadHdd ? (
-                        <button
-                            data-debug-hdd-download
-                            style={paused && !this.state.hddDownloadBusy ? BTN : OFF}
-                            disabled={!paused || this.state.hddDownloadBusy}
-                            onClick={this.onHddDownload}
-                            title={this.tx('hddDownloadHint')}
-                        >{this.tx('hddDownload')}</button>
-                    ) : null}
-                    {this.state.hddDownloadStatus ? (
-                        <span data-debug-hdd-download-status role="status">{this.state.hddDownloadStatus}</span>
-                    ) : null}
-
-                    <button
-                        data-debug-record
-                        style={canCheckpoint ? (recording && recording.active ?
-                            {...BTN, borderColor: '#e74c3c', color: '#e74c3c'} : BTN) : OFF}
-                        disabled={!canCheckpoint}
-                        onClick={this.onRecord}
-                        title={canCheckpoint ? this.tx('record') : this.tx('recordUnsupported')}
-                    >{'● '}{recording && recording.active ? this.tx('recording') : this.tx('record')}</button>
-
-                    <button
-                        data-debug-checkpoint
-                        style={canCheckpoint && recording && recording.active ? BTN : OFF}
-                        disabled={!canCheckpoint || !recording || !recording.active}
-                        onClick={this.onCheckpoint}
-                    >{'◆ '}{this.tx('checkpoint')}</button>
-
-                    <button
-                        data-debug-restore
-                        style={canRestore && checkpoints.length ? BTN : OFF}
-                        disabled={!canRestore || !checkpoints.length}
-                        onClick={this.onRestoreLast}
-                    >{'↶ '}{this.tx('restore')}</button>
-                    {recordingRefusal ? (
-                        <span data-debug-recording-refusal role="status">{recordingRefusal}</span>
-                    ) : null}
-                    {reverseRefusal ? (
-                        <span data-debug-reverse-refusal role="status">{reverseRefusal}</span>
-                    ) : null}
-
-                    {/* The target picker. Everything else in this panel branches on
-                        capabilities(), never on which target is selected — §1 is
-                        explicit that an interface hiding the differences "produces a
-                        front end that lies to the user the moment it is pointed at
-                        real hardware". So this chooses; it does not adapt. */}
-                    {/* Arbitrary firmware: run YOUR .bin/.hex instead of the
-                        blocks. No symbols, so glow/yield-breakpoints disappear
-                        — pins, board, serial and stepping stay. */}
-                    <span style={{display: 'inline-flex', alignItems: 'center', gap: 4}}>
-                        <label style={{...BTN, padding: '3px 6px', cursor: 'pointer'}}
-                            title={'Load a firmware file (.bin for Pico/STM32, .hex/.ihx for 8051/AVR' +
-                                (this.state.kind === 'labwired' ? ', .elf or supported Cortex-M .uf2; ESP32-S3 merged .bin with the explicit ROM-boot target' : '') +
-                                ') and run it instead of the blocks'}>
-                            {'📂'}
-                            <input
-                                type="file"
-                                accept={s040Selected ? '.elf,.bin' : this.state.kind === 'labwired'
-                                    ? '.elf,.uf2,.bin,.hex,.ihx' : '.bin,.hex,.ihx'}
-                                style={{display: 'none'}}
-                                disabled={running || paused || busy}
-                                onChange={e => this.onFirmwareFile(e)}
-                            />
-                        </label>
-                        {this.state.firmwareName ? (
-                            <span data-firmware-chip style={{fontSize: 11, opacity: 0.9}}>
-                                {this.state.firmwareName}{' '}{this.tx(running ? 'firmwareRunning' : 'firmwareLoaded')}
-                                <button
-                                    data-firmware-back
-                                    style={{...BTN, padding: '0 6px', marginLeft: 6}}
-                                    title={this.tx('firmwareBackTitle')}
-                                    aria-label={this.tx('firmwareBackTitle')}
-                                    onClick={() => this.onFirmwareClear()}
-                                >{'⟲ '}{this.tx('firmwareBack')}</button>
-                            </span>
-                        ) : null}
-                    </span>
+                </div>
+                <div data-debug-target-controls style={{display: 'flex', gap: 4, alignItems: 'flex-start', minWidth: 0}}>
                     {this.state.kinds && this.state.kinds.length > 1 ? (
-                        <span style={{display: 'flex', flexWrap: 'wrap', minWidth: 0, alignItems: 'center', gap: 6}}>
+                        <span style={{display: 'flex', flexWrap: 'wrap', flex: '1 1 0', minWidth: 0, alignItems: 'center', gap: 6}}>
                             <select
+                                aria-label={this.tx('target')}
                                 value={this.state.kind}
                                 disabled={running || paused || busy}
                                 title={(this.state.kinds.find(k => k.kind === this.state.kind) || {}).description}
@@ -1672,7 +1587,7 @@ class DebugPanel extends React.Component {
                                     } catch { /* private mode */ }
                                     this.setState({kind});
                                 }}
-                                style={{...BTN, padding: '3px 6px'}}
+                                style={{...BTN, padding: '3px 6px', minWidth: 0, maxWidth: '100%'}}
                             >
                                 {this.state.kinds.map(k => (
                                     <option key={k.kind} value={k.kind}>{k.label}</option>
@@ -1690,7 +1605,7 @@ class DebugPanel extends React.Component {
                                         this.setState({labwiredChip: e.target.value, runner: null,
                                             ui: {phase: 'idle', message: ''}});
                                     }}
-                                    style={{...BTN, padding: '3px 6px'}}
+                                    style={{...BTN, padding: '3px 6px', minWidth: 0, maxWidth: '100%'}}
                                 >
                                     <option value="">{this.tx('labwiredChipProject')}</option>
                                     {this.state.labwiredChips.map(c => (
@@ -1707,7 +1622,7 @@ class DebugPanel extends React.Component {
                                             this._teardownRunner();
                                             this.setState({esp32S040McuId: e.target.value, runner: null,
                                                 ui: {phase: 'idle', message: ''}});
-                                        }} style={{...BTN, padding: '3px 6px'}}>
+                                        }} style={{...BTN, padding: '3px 6px', minWidth: 0, maxWidth: '100%'}}>
                                         <option value="">{String(this.props.locale || 'en').startsWith('de')
                                             ? 'Automatisch (eine Platine)' : 'Automatic (one board)'}</option>
                                         {s040Parts.map(id => <option key={id} value={id}>{id}</option>)}
@@ -1725,7 +1640,7 @@ class DebugPanel extends React.Component {
                                             this.setState({esp32s3Console: e.target.value, runner: null,
                                                 ui: {phase: 'idle', message: ''}});
                                         }}
-                                        style={{...BTN, padding: '3px 6px'}}
+                                        style={{...BTN, padding: '3px 6px', minWidth: 0, maxWidth: '100%'}}
                                     >
                                         <option value="uart0">{'UART0'}</option>
                                         <option value="usb_serial_jtag">{'USB Serial/JTAG'}</option>
@@ -1737,9 +1652,10 @@ class DebugPanel extends React.Component {
                     ) : null}
 
                     <span style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6}}>
-                        <label htmlFor="bw-debug-speed">{this.tx('speed')}</label>
                         <select
                             id="bw-debug-speed"
+                            aria-label={this.tx('speed')}
+                            title={this.tx('speed')}
                             defaultValue="1"
                             onChange={this.onSpeed}
                             style={{...BTN, padding: '3px 6px'}}
@@ -1750,7 +1666,168 @@ class DebugPanel extends React.Component {
                             <option value="4">{'4×'}</option>
                         </select>
                     </span>
+                    <span style={{display: 'inline-flex', alignItems: 'center', gap: 4}}>
+                        <button type="button" style={{...BTN, padding: '3px 6px'}}
+                            title={this.tx('firmwareFile')} aria-label={this.tx('firmwareFile')}
+                            disabled={running || paused || busy} onClick={() => this.firmwareInput.click()}>
+                            {'📂'}
+                        </button>
+                        <input
+                            ref={input => { this.firmwareInput = input; }}
+                            type="file"
+                            accept={s040Selected ? '.elf,.bin' : this.state.kind === 'labwired'
+                                ? '.elf,.uf2,.bin,.hex,.ihx' : '.bin,.hex,.ihx'}
+                            hidden
+                            disabled={running || paused || busy}
+                            onChange={e => this.onFirmwareFile(e)}
+                        />
+                    </span>
                 </div>
+                {this.state.firmwareName ? (
+                    <span data-firmware-chip style={{fontSize: 11, opacity: 0.9}}>
+                        {this.state.firmwareName}{' '}{this.tx(running ? 'firmwareRunning' : 'firmwareLoaded')}
+                        <button
+                            data-firmware-back
+                            style={{...BTN, padding: '0 6px', marginLeft: 6}}
+                            title={this.tx('firmwareBackTitle')}
+                            aria-label={this.tx('firmwareBackTitle')}
+                            onClick={() => this.onFirmwareClear()}
+                        >{'⟲ '}{this.tx('firmwareBack')}</button>
+                    </span>
+                ) : null}
+                {canDownloadHdd ? (
+                    <button
+                        data-debug-hdd-download
+                        style={paused && !this.state.hddDownloadBusy ? BTN : OFF}
+                        disabled={!paused || this.state.hddDownloadBusy}
+                        onClick={this.onHddDownload}
+                        title={this.tx('hddDownloadHint')}
+                    >{this.tx('hddDownload')}</button>
+                ) : null}
+                {this.state.hddDownloadStatus ? (
+                    <span data-debug-hdd-download-status role="status">{this.state.hddDownloadStatus}</span>
+                ) : null}
+
+                <details data-debug-history>
+                    <summary style={{...BTN, display: 'inline-block', padding: '4px 8px'}}
+                        aria-label={this.tx('history')}>
+                        {'› '}{this.tx('history')}{recording?.active ? ' ●' : ''}
+                    </summary>
+                    <div style={{display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6}}>
+                        <button
+                            data-debug-reverse-step
+                            style={canReverse && !busy ? BTN : OFF}
+                            disabled={!canReverse || busy}
+                            onClick={this.onReverseStep}
+                            title={canReverse ? this.tx('reverseHint') : (reverse?.reason || this.tx('reverseHint'))}
+                        >{'⏮ '}{this.tx('reverseStep')}</button>
+
+                        <button
+                            data-debug-reverse-cycle
+                            style={canReverseCycle && !busy ? BTN : OFF}
+                            disabled={!canReverseCycle || busy}
+                            onClick={this.onReverseCycle}
+                            title={canReverseCycle ? this.tx('reverseCycleHint') : reverseCycle.reason}
+                        >{'↤ '}{this.tx('reverseCycle')}</button>
+
+                        <button
+                            data-debug-reverse-continue
+                            style={canReverseContinue && !busy ? BTN : OFF}
+                            disabled={!canReverseContinue || busy}
+                            onClick={this.onReverseContinue}
+                            title={canReverseContinue ? this.tx('reverseContinueHint') :
+                                (reverseContinue?.reason || this.tx('reverseContinueHint'))}
+                        >{'◀ '}{this.tx('reverseContinue')}</button>
+
+                        <button
+                            data-debug-record
+                            style={canCheckpoint ? (recording && recording.active ?
+                                {...BTN, borderColor: '#e74c3c', color: '#e74c3c'} : BTN) : OFF}
+                            disabled={!canCheckpoint}
+                            onClick={this.onRecord}
+                            title={canCheckpoint ? this.tx('record') : this.tx('recordUnsupported')}
+                        >{'● '}{recording && recording.active ? this.tx('recording') : this.tx('record')}</button>
+
+                        <button
+                            data-debug-checkpoint
+                            style={canCheckpoint && recording && recording.active ? BTN : OFF}
+                            disabled={!canCheckpoint || !recording || !recording.active}
+                            onClick={this.onCheckpoint}
+                        >{'◆ '}{this.tx('checkpoint')}</button>
+
+                        <button
+                            data-debug-restore
+                            style={canRestore && checkpoints.length ? BTN : OFF}
+                            disabled={!canRestore || !checkpoints.length}
+                            onClick={this.onRestoreLast}
+                        >{'↶ '}{this.tx('restore')}</button>
+                        {recordingRefusal ? (
+                            <span data-debug-recording-refusal role="status">{recordingRefusal}</span>
+                        ) : null}
+                        {reverseRefusal ? (
+                            <span data-debug-reverse-refusal role="status">{reverseRefusal}</span>
+                        ) : null}
+
+                    </div>
+                    <div data-debug-history-annotations style={{display: 'flex', gap: 6, marginTop: 6,
+                        alignItems: 'center', flexWrap: 'wrap'}}>
+                        <button data-debug-add-bookmark style={timelineEvent ? BTN : OFF}
+                            disabled={!timelineEvent} onClick={() => this.onAddBookmark()}>{'🔖 Bookmark'}</button>
+                        <button data-debug-add-annotation style={timelineEvent ? BTN : OFF}
+                            disabled={!timelineEvent} onClick={() => this.onAddAnnotation()}>{'✎ Note'}</button>
+                        <button data-debug-compare-checkpoints style={checkpoints.length > 1 ? BTN : OFF}
+                            disabled={checkpoints.length < 2}
+                            onClick={() => this.onCompareCheckpoints()}>{'⇄ Compare checkpoints'}</button>
+                        <span data-debug-history-count>{`${historyEntries.length} saved`}</span>
+                        {historyStatus?.accepted === false ? <span role="status" data-debug-history-refusal>
+                            {historyStatus.reason || historyStatus.code}
+                        </span> : null}
+                        {historyStatus?.accepted && Object.hasOwn(historyStatus, 'identical') ?
+                            <span role="status" data-debug-checkpoint-comparison>
+                                {historyStatus.identical ? 'Checkpoints identical' :
+                                    `${historyStatus.differences.length} changed fields`}
+                            </span> : null}
+                    </div>
+
+                    <div data-debug-timeline-controls style={{display: 'flex', gap: 6, marginTop: 6,
+                        alignItems: 'center', flexWrap: 'wrap'}}>
+                        <span>{`${this.tx('timeline')}: ${timelineEvent ?
+                            `#${String(timelineEvent.seq)} ${timelineEvent.kind}${timelineEvent.phase ?
+                                `/${timelineEvent.phase}` : ''}` : '—'}`}</span>
+                        <button data-debug-timeline-refresh style={this.state.runner ? BTN : OFF}
+                            disabled={!this.state.runner} onClick={this.onTimelineRefresh}>
+                            {this.tx('timelineRefresh')}
+                        </button>
+                        <button data-debug-timeline-older style={canTimelineOlder ? BTN : OFF}
+                            disabled={!canTimelineOlder} onClick={this.onTimelineOlder}>
+                            {'← '}{this.tx('timelineOlder')}
+                        </button>
+                        <button data-debug-timeline-newer style={canTimelineNewer ? BTN : OFF}
+                            disabled={!canTimelineNewer} onClick={this.onTimelineNewer}>
+                            {this.tx('timelineNewer')}{' →'}
+                        </button>
+                        <button data-debug-timeline-latest style={timeline?.retained ? BTN : OFF}
+                            disabled={!timeline?.retained} onClick={this.onTimelineLatest}>
+                            {this.tx('timelineLatest')}
+                        </button>
+                        <button data-debug-timeline-checkpoint
+                            style={timeline?.retained && checkpoints.length ? BTN : OFF}
+                            disabled={!timeline?.retained || !checkpoints.length}
+                            onClick={this.onTimelineCheckpoint}>{this.tx('timelineCheckpoint')}</button>
+                        <button data-debug-timeline-go-selected
+                            style={canSeekSelected ? BTN : OFF}
+                            disabled={!canSeekSelected}
+                            title={selectedSeek?.reason || this.tx('timelineGoSelectedHint')}
+                            onClick={this.onTimelineGoSelected}>{this.tx('timelineGoSelected')}</button>
+                        {timelineRefusal ? <span role="status" data-debug-timeline-refusal>
+                            {timelineRefusal}
+                        </span> : null}
+                    </div>
+
+                    {!ui.breakpoints?.length ? (
+                        <p style={{margin: '6px 0 0'}}>{this.tx('noBps')}</p>
+                    ) : null}
+                </details>
 
                 {this.state.kind === 'labwired' && this.state.labwiredChip === 'software:samd51-no-asf-simulation' ?
                     <div data-samd-software-buttons style={{display: 'flex', gap: 4, flexWrap: 'wrap'}}>
@@ -1777,61 +1854,6 @@ class DebugPanel extends React.Component {
                         data-debug-chip-refusal data-debug-chip-refusal-part={r.part}
                         style={{color: '#92400e', fontSize: 12}}>{r.text}</div>)}
                 </div> : null}
-
-                <div data-debug-history-annotations style={{display: 'flex', gap: 6,
-                    alignItems: 'center', flexWrap: 'wrap'}}>
-                    <button data-debug-add-bookmark style={timelineEvent ? BTN : OFF}
-                        disabled={!timelineEvent} onClick={() => this.onAddBookmark()}>{'🔖 Bookmark'}</button>
-                    <button data-debug-add-annotation style={timelineEvent ? BTN : OFF}
-                        disabled={!timelineEvent} onClick={() => this.onAddAnnotation()}>{'✎ Note'}</button>
-                    <button data-debug-compare-checkpoints style={checkpoints.length > 1 ? BTN : OFF}
-                        disabled={checkpoints.length < 2}
-                        onClick={() => this.onCompareCheckpoints()}>{'⇄ Compare checkpoints'}</button>
-                    <span data-debug-history-count>{`${historyEntries.length} saved`}</span>
-                    {historyStatus?.accepted === false ? <span role="status" data-debug-history-refusal>
-                        {historyStatus.reason || historyStatus.code}
-                    </span> : null}
-                    {historyStatus?.accepted && Object.hasOwn(historyStatus, 'identical') ?
-                        <span role="status" data-debug-checkpoint-comparison>
-                            {historyStatus.identical ? 'Checkpoints identical' :
-                                `${historyStatus.differences.length} changed fields`}
-                        </span> : null}
-                </div>
-
-                <div data-debug-timeline-controls style={{display: 'flex', gap: 6,
-                    alignItems: 'center', flexWrap: 'wrap'}}>
-                    <span>{`${this.tx('timeline')}: ${timelineEvent ?
-                        `#${String(timelineEvent.seq)} ${timelineEvent.kind}${timelineEvent.phase ?
-                            `/${timelineEvent.phase}` : ''}` : '—'}`}</span>
-                    <button data-debug-timeline-refresh style={this.state.runner ? BTN : OFF}
-                        disabled={!this.state.runner} onClick={this.onTimelineRefresh}>
-                        {this.tx('timelineRefresh')}
-                    </button>
-                    <button data-debug-timeline-older style={canTimelineOlder ? BTN : OFF}
-                        disabled={!canTimelineOlder} onClick={this.onTimelineOlder}>
-                        {'← '}{this.tx('timelineOlder')}
-                    </button>
-                    <button data-debug-timeline-newer style={canTimelineNewer ? BTN : OFF}
-                        disabled={!canTimelineNewer} onClick={this.onTimelineNewer}>
-                        {this.tx('timelineNewer')}{' →'}
-                    </button>
-                    <button data-debug-timeline-latest style={timeline?.retained ? BTN : OFF}
-                        disabled={!timeline?.retained} onClick={this.onTimelineLatest}>
-                        {this.tx('timelineLatest')}
-                    </button>
-                    <button data-debug-timeline-checkpoint
-                        style={timeline?.retained && checkpoints.length ? BTN : OFF}
-                        disabled={!timeline?.retained || !checkpoints.length}
-                        onClick={this.onTimelineCheckpoint}>{this.tx('timelineCheckpoint')}</button>
-                    <button data-debug-timeline-go-selected
-                        style={canSeekSelected ? BTN : OFF}
-                        disabled={!canSeekSelected}
-                        title={selectedSeek?.reason || this.tx('timelineGoSelectedHint')}
-                        onClick={this.onTimelineGoSelected}>{this.tx('timelineGoSelected')}</button>
-                    {timelineRefusal ? <span role="status" data-debug-timeline-refusal>
-                        {timelineRefusal}
-                    </span> : null}
-                </div>
 
                 {this.state.runner ? <DebugSessionTransfer
                     disabled={running || busy}
@@ -2062,7 +2084,7 @@ class DebugPanel extends React.Component {
                     >{ui.imageProvenance.sentence}</div>
                 ) : null}
 
-                <div style={{display: 'flex', gap: 10, alignItems: 'baseline'}}>
+                <div data-debug-status style={{display: 'flex', gap: 6, alignItems: 'baseline', overflowWrap: 'anywhere'}}>
                     <strong style={{color: phase === 'error' ? '#e74c3c'
                         : running ? '#2ecc71' : paused ? '#f39c12' : '#7f8c8d'}}>
                         {this.tx(phase) || phase}
@@ -2077,15 +2099,11 @@ class DebugPanel extends React.Component {
                     with it. A mark on a block with no yield point is kept rather
                     than refused (block-menu.js), so it has to be VISIBLE — an
                     invisible mark that never fires is the worst of both. */}
-                <div style={{borderTop: '1px solid #2c3e50', paddingTop: 8}}>
-                    <div style={{color: '#7f8c8d', marginBottom: 4}}>
-                        {this.tx('bps')}
-                        {ui.breakpoints && ui.breakpoints.length
-                            ? ` (${ui.breakpoints.length})` : ''}
-                    </div>
-                    {!ui.breakpoints || !ui.breakpoints.length ? (
-                        <div style={{color: '#5d6d7e'}}>{this.tx('noBps')}</div>
-                    ) : (
+                {ui.breakpoints?.length ? (
+                    <div style={{borderTop: '1px solid #2c3e50', paddingTop: 8}}>
+                        <div style={{color: '#7f8c8d', marginBottom: 4}}>
+                            {this.tx('bps')}{` (${ui.breakpoints.length})`}
+                        </div>
                         <div style={{color: '#95a5a6'}}>
                             {ui.breakpoints.map(id => {
                                 const dead = (ui.unreachableBreakpoints || []).includes(id);
@@ -2121,8 +2139,8 @@ class DebugPanel extends React.Component {
                                 </div>
                             ) : null}
                         </div>
-                    )}
-                </div>
+                    </div>
+                ) : null}
 
                 {/* VDP screen — video output from machines with a TMS9918A.
                     Polls runner.video() per animation frame. Only renders
@@ -2259,7 +2277,7 @@ class DebugPanel extends React.Component {
                                         value={this.state.serialInput}
                                         onChange={this.onSerialInput}
                                         onKeyDown={this.onSerialKeyDown}
-                                        placeholder={this.tx('serialHint')}
+                                        placeholder={this.tx(basicStartupPrompt ? 'basicStartupHint' : 'serialHint')}
                                         aria-label={this.tx('serialSend')}
                                         style={{
                                             flex: '1 1 auto', minWidth: 0, padding: '4px 6px',

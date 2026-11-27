@@ -52,3 +52,17 @@ test('machine configuration source and shipped mirror stay identical', () => {
         readFileSync(new URL('../packages/scratch-gui/src/lib/bw-machines/machine-config.js', import.meta.url), 'utf8')
     );
 });
+
+test('a 6502 library ROM carries its declared memory and device map to the runner', async () => {
+    const machineConfig = {
+        clockHz: 2_000_000,
+        regions: [{kind: 'rom', start: 0x8000, end: 0xffff}],
+        chips: [{kind: 'vdp', name: 'video', at: 0x4000}]
+    };
+    let dispatched;
+    await runMachineConfig({machine: 'eater6502', machineConfig, slots: {rom: 'firmware.rom'}}, {
+        fetcher, dispatch: detail => {dispatched = detail;}
+    });
+    assert.equal(dispatched.kind, 'eater6502');
+    assert.deepEqual(dispatched.machineConfig6502, machineConfig);
+});

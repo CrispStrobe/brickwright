@@ -3050,12 +3050,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     }
 
     // ── 6502 machine bench ──────────────────────────────────────────────
-    // Boot precedence: a preset's own profile ('py65mon' — Tali Forth;
-    // 'eater' — MS BASIC on the default Eater map) wins, because those
-    // images were built for those maps and would run into open bus on
-    // anything else. Otherwise the wired-extractor config boots the
-    // user's own machine with the delivered image; with nothing at all,
-    // the default remains Tali Forth 2 on py65mon.
+    // 6502 media uses its library map, the extracted circuit, or the
+    // preset's default map. BASIC can use the extracted circuit when
+    // the serial ACIA is at its expected address.
     async function attachCp1() {
         const media = bootMedia || await loadCp1Monitor();
         const {createDebugTarget, createDebugSession} =
@@ -3082,6 +3079,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
 
         const targetOpts = {};
+        const declaredMachine = bootMedia?.machineConfig6502;
         let readyMsg;
         if (bootMedia) {
             setStatus('attaching', S('boot.media', {name: bootMedia.name || S('noun.image')}));
@@ -3091,7 +3089,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (bootMedia.profile === 'py65mon') {
                 targetOpts.py65mon = true;
                 readyMsg = S('ready.py65mon', {name: bootMedia.name || S('noun.image')});
-            } else if (machineConfig && bootMedia.profile !== 'eater') {
+            } else if (declaredMachine) {
+                targetOpts.config = {clockHz: 1_000_000, chips: [], ...declaredMachine};
+                readyMsg = S('ready.eater', {name: bootMedia.name || S('noun.image')});
+            } else if (machineConfig && (bootMedia.profile !== 'eater' ||
+                (machineConfig.chips || []).some(chip => chip.kind === 'acia' && chip.at === 0x5000))) {
                 targetOpts.config = benchConfig6502();
                 readyMsg = S('ready.extracted', {
                     name: bootMedia.name || S('noun.image'),
@@ -3113,7 +3115,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.tali');
         }
 
-        const db = designerBoard();
+        const db = declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
         if (db.board) {
             targetOpts.board = db.board;
             // Machine targets drive the designer's real board rather than a
