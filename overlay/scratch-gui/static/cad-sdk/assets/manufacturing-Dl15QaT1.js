@@ -1,5 +1,5 @@
-import { t as f } from "./geometry.worker-Diqo6bgU.js";
-import { c as be, T as ke, a as de } from "./printability-o_p7duG7.js";
+import { t as f } from "./geometry.worker-BDK-0LR6.js";
+import { c as be, T as ke, a as de } from "./printability-DJe_UDPa.js";
 const ye = 1, we = Object.freeze(["fdm", "cnc", "laser"]), $e = Object.freeze(["+x", "-x", "+y", "-y", "+z", "-z"]), ve = Object.freeze({
   process: "cnc",
   exact: !0,
@@ -580,5 +580,10 @@ function Ke(e, t = {}) {
 }
 export {
   ae as MAX_MANUFACTURING_FINDINGS,
-  Ke as checkManufacturing
+  Ie as buildExactModel,
+  Ke as checkManufacturing,
+  Fe as edgeBreaks,
+  pe as edgeMark,
+  Y as faceCentre,
+  H as faceMark
 };
