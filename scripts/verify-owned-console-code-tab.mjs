@@ -10,8 +10,8 @@
  * BW_BROWSER selects a Chromium executable. BW_BROWSER_RUNTIME_ROOT may point
  * at another installed runtime containing playwright and jszip. --out chooses
  * the JSON receipt; screenshots, saved projects and generated sources sit beside
- * it. --qualification-manifest binds an experimental supplier integration to
- * its committed consumer checkpoint, local sync patch and emitted asset hashes.
+ * it. --qualification-manifest binds either an experimental supplier integration
+ * or a clean committed-pin local build to its sources, mirrors and asset hashes.
  * BW_CHROMIUM_RUNTIME_ROOT optionally names an installed @sparticuz/chromium
  * runtime; web-security and forced SharedArrayBuffer overrides are removed.
  * This harness does not install dependencies, build, or change the app.
@@ -27,7 +27,8 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {openCodeActions} from './lib-code-actions.mjs';
-import {bindGuiHarnessGit} from './lib/gui-harness-source.mjs';
+import {verifyOwnedConsoleBundleSource, settleOwnedConsoleScriptReads,
+    assertOwnedConsoleLoadedScripts} from './lib/owned-console-bundle.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(scriptPath), '..');
@@ -59,23 +60,8 @@ const qualification = qualificationBytes ? JSON.parse(qualificationBytes) : {
 };
 let observedGit = null;
 if (qualificationBytes) {
-    assert.equal(qualification.schema, 'bw.owned-console-experimental-bundle.v1');
-    assert.equal(qualification.classification, 'experimental-candidate-bundle');
-    assert.equal(qualification.shippingEvidence, false, 'an experimental integration is not a shipping qualification');
-    const binding = bindGuiHarnessGit({root, executable: argument('--git-executable', process.env.BW_GUI_GIT_EXECUTABLE)});
-    assert.deepEqual(binding.tool, qualification.environment?.git,
-        'qualification preflight uses the exact Git executable recorded by the manifest producer');
-    observedGit = binding.tool;
-    const git = binding.run;
-    assert.equal(git(['rev-parse', 'HEAD']).trim(), qualification.consumer.commit);
-    const committedPins = JSON.parse(git(['show', 'HEAD:vendor-pins.json']));
-    const experimentalPins = JSON.parse(await fs.readFile(path.join(root, 'vendor-pins.json'), 'utf8'));
-    assert.equal(committedPins['sb3-creator'], qualification.supplier.shippingPin);
-    assert.equal(experimentalPins['sb3-creator'], qualification.supplier.candidateCommit);
-    assert.notEqual(qualification.supplier.candidateCommit, qualification.supplier.shippingPin);
-    assert.equal(sha256(git(['diff', '--no-ext-diff', '--binary', 'HEAD', '--'])), qualification.trackedPatchSha256,
-        'the experimental worktree still has exactly the recorded official-sync patch');
-    assert.match(qualification.build.files['index.html'] || '', /^[0-9a-f]{64}$/);
+    observedGit = await verifyOwnedConsoleBundleSource({root, qualification,
+        executable: argument('--git-executable', process.env.BW_GUI_GIT_EXECUTABLE)});
 }
 
 const concurrentPseudo = [
@@ -352,8 +338,8 @@ try {
                     const relative = decodeURIComponent(url.pathname.slice(site.pathname.length));
                     observation.buildPath = relative;
                     assert.equal(observation.sha256, qualification.build.files[relative],
-                        `loaded app script matches the experimental build: ${relative}`);
-                    observation.matchesExperimentalBuild = true;
+                        `loaded app script matches the recorded build: ${relative}`);
+                    observation.matchesQualifiedBuild = true;
                 }
             } catch (error) {
                 observation.error = error.message;
@@ -565,12 +551,9 @@ try {
     });
 
     await step('the complete rendered journey has no uncaught page errors', async () => {
-        await Promise.all(scriptReads);
+        await settleOwnedConsoleScriptReads(scriptReads);
         assert.deepEqual(report.errors, []);
-        assert(report.loadedScripts.length > 0, 'the real app loaded scripts');
-        assert.deepEqual(report.loadedScripts.filter(script => script.error), [], 'observed scripts retain readable matching bytes');
-        if (qualificationBytes) assert(report.loadedScripts.some(script => script.matchesExperimentalBuild),
-            'the running page loaded the manifest-bound experimental assets');
+        assertOwnedConsoleLoadedScripts(report.loadedScripts, {bound: Boolean(qualificationBytes)});
     });
     report.status = 'passed';
 } catch (error) {
@@ -587,6 +570,20 @@ try {
     }
 } finally {
     if (browser) await browser.close();
+    // Closing the browser ends response delivery. Admit the complete inventory,
+    // including responses received while the final UI check was settling.
+    if (report.status === 'passed') {
+        try {
+            await settleOwnedConsoleScriptReads(scriptReads);
+            assertOwnedConsoleLoadedScripts(report.loadedScripts, {bound: Boolean(qualificationBytes)});
+            report.finalAssetAdmission = {status: 'passed', scripts: report.loadedScripts.length};
+        } catch (error) {
+            report.status = 'failed';
+            report.failure = error.stack || String(error);
+            report.finalAssetAdmission = {status: 'failed', error: error.message};
+            console.error(`FAIL ${error.message}`);
+        }
+    }
     report.finishedAt = new Date().toISOString();
     await fs.writeFile(out, `${JSON.stringify(report, null, 2)}\n`);
     console.log(`${report.status.toUpperCase()} ${report.checks.filter(check => check.status === 'passed').length}/${report.checks.length} checks; ${out}`);

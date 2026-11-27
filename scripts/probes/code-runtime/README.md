@@ -394,3 +394,10 @@ with the current harness. See [the executable-authority repair](../../../docs/OW
 This receipt is explicitly `experimental-candidate-bundle` with
 `shippingEvidence: false`. It leaves the feature branch's supplier pin unchanged
 and does not replace upstream or deployed/native/platform qualification.
+
+After normal supplier adoption, `--source-mode committed-pin` plus an explicit
+`--expect-consumer` lets the same producer bind a clean committed-pin local
+build. This mode requires the exact committed supplier, no tracked patch, and
+complete source/mirror revalidation before browser launch. It still records
+`shippingEvidence: false` and does not emit the official hosted GUI manifest.
+See [the committed-pin qualification contract](../../../docs/OWNED-CONSOLE-COMMITTED-PIN-QUALIFICATION.md).

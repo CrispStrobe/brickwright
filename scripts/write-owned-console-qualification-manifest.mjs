@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Local candidate integration identity. Never emits the hosted GUI manifest.
+// Local experimental or committed-pin identity. Never emits the hosted GUI manifest.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {pathToFileURL} from 'node:url';
 import {bindGuiHarnessGit} from './lib/gui-harness-source.mjs';
+import {OWNED_CONSOLE_BUNDLE_MODES, recordOwnedConsoleSources} from './lib/owned-console-bundle.mjs';
 
 const arg = (name, fallback) => {
     const index = process.argv.indexOf(name);
@@ -14,13 +14,20 @@ const arg = (name, fallback) => {
     return process.argv[index + 1];
 };
 const supplierArgument = arg('--supplier');
-assert(supplierArgument, '--supplier requires an immutable candidate checkout');
+assert(supplierArgument, '--supplier requires an immutable supplier checkout');
+const mode = arg('--source-mode', 'experimental');
+assert(Object.hasOwn(OWNED_CONSOLE_BUNDLE_MODES, mode), '--source-mode is experimental or committed-pin');
 const root = path.resolve(arg('--consumer', process.cwd()));
 const supplier = path.resolve(supplierArgument);
 const site = path.resolve(root, arg('--build', 'packages/scratch-gui/build'));
-const out = path.resolve(arg('--out', path.join(root, 'scripts/probes/code-runtime/owned-code-tab/experimental-bundle.json')));
+const out = path.resolve(arg('--out', path.join(root, 'scripts/probes/code-runtime/owned-code-tab',
+    mode === 'committed-pin' ? 'committed-pin-bundle.json' : 'experimental-bundle.json')));
 const expectedSupplier = arg('--expect-supplier');
-assert.match(expectedSupplier || '', /^[0-9a-f]{40}$/, '--expect-supplier requires the reviewed full candidate SHA');
+assert.match(expectedSupplier || '', /^[0-9a-f]{40}$/, '--expect-supplier requires the reviewed full supplier SHA');
+const expectedConsumer = arg('--expect-consumer');
+if (mode === 'committed-pin' || expectedConsumer !== undefined) {
+    assert.match(expectedConsumer || '', /^[0-9a-f]{40}$/, '--expect-consumer requires the reviewed full consumer SHA');
+}
 const sha = value => crypto.createHash('sha256').update(value).digest('hex');
 const gitExecutable = arg('--git-executable', process.env.BW_GUI_GIT_EXECUTABLE);
 const consumerGit = bindGuiHarnessGit({root, executable: gitExecutable, maxBuffer: 128 * 1024 * 1024});
@@ -32,46 +39,24 @@ const git = (cwd, args) => {
 };
 const consumerCommit = git(root, ['rev-parse', 'HEAD']).trim();
 const supplierCommit = git(supplier, ['rev-parse', 'HEAD']).trim();
+if (expectedConsumer !== undefined) assert.equal(consumerCommit, expectedConsumer);
 assert.equal(supplierCommit, expectedSupplier);
 assert.equal(git(supplier, ['status', '--porcelain', '--untracked-files=no']).trim(), '', 'supplier checkout is immutable');
 const committedPins = JSON.parse(git(root, ['show', 'HEAD:vendor-pins.json']));
 const pins = JSON.parse(await fs.readFile(path.join(root, 'vendor-pins.json'), 'utf8'));
 assert.equal(pins['sb3-creator'], supplierCommit);
-assert.notEqual(committedPins['sb3-creator'], supplierCommit, 'this manifest is only for the isolated experimental bump');
+if (mode === 'committed-pin') {
+    assert.equal(git(root, ['status', '--porcelain', '--untracked-files=no']).trim(), '',
+        'committed-pin consumer tracked source must be clean');
+    assert.deepEqual(pins, committedPins, 'committed-pin working pins equal the reviewed commit');
+    assert.equal(committedPins['sb3-creator'], supplierCommit);
+} else {
+    assert.notEqual(committedPins['sb3-creator'], supplierCommit, 'experimental mode requires an isolated supplier bump');
+}
 assert.equal(pins['bw-board'], committedPins['bw-board']);
 assert.equal(pins['bw-circuit-ui'], committedPins['bw-circuit-ui']);
 
-const {SB3_CREATOR_FILES, applySb3CreatorRewrites} = await import(pathToFileURL(path.join(root,
-    'scripts/lib/vendor-rewrites.mjs')).href);
-const sourceFiles = {};
-for (const [local, upstream] of SB3_CREATOR_FILES) {
-    const expected = applySb3CreatorRewrites(await fs.readFile(path.join(supplier, upstream), 'utf8'));
-    for (const prefix of ['overlay/scratch-gui/src/lib/', 'packages/scratch-gui/src/lib/']) {
-        const relative = prefix + local;
-        const bytes = await fs.readFile(path.join(root, relative));
-        assert.equal(bytes.toString('utf8'), expected, `official rewritten supplier bytes and mirror: ${relative}`);
-        sourceFiles[relative] = sha(bytes);
-    }
-}
-for (const relative of [
-    'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',
-    'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',
-    'overlay/scratch-gui/src/lib/code-source-document.js',
-    'packages/scratch-gui/src/lib/code-source-document.js',
-    'overlay/scratch-gui/src/lib/code-execution-session.js',
-    'packages/scratch-gui/src/lib/code-execution-session.js',
-    'overlay/scratch-gui/src/lib/code-execution-workers.js',
-    'packages/scratch-gui/src/lib/code-execution-workers.js',
-    'overlay/scratch-gui/src/lib/bw-conversion-error.js',
-    'packages/scratch-gui/src/lib/bw-conversion-error.js',
-    'overlay/scratch-gui/src/lib/pico-sim-run.js',
-    'packages/scratch-gui/src/lib/pico-sim-run.js',
-    'scripts/sync-sb3creator.mjs', 'scripts/sync-examples.mjs',
-    'scripts/lib/vendor-rewrites.mjs', 'scripts/lib/gui-harness-source.mjs', 'scripts/verify-owned-console-code-tab.mjs',
-    'scripts/write-owned-console-qualification-manifest.mjs',
-    'vendor-pins.json', 'package.json', 'package-lock.json',
-    'packages/scratch-gui/package.json', 'packages/scratch-gui/package-lock.json'
-]) sourceFiles[relative] = sha(await fs.readFile(path.join(root, relative)));
+const sourceFiles = await recordOwnedConsoleSources({root, supplier});
 
 const files = {};
 const walk = async directory => {
@@ -87,27 +72,30 @@ await walk(site);
 assert.match(files['index.html'] || '', /^[0-9a-f]{64}$/);
 assert(Object.keys(files).length > 5, 'real built editor has emitted script assets');
 const patch = git(root, ['diff', '--no-ext-diff', '--binary', 'HEAD', '--']);
-assert(patch.trim(), 'the supplier candidate is a local patch over the shipping checkpoint');
+if (mode === 'committed-pin') assert.equal(patch, '', 'committed-pin qualification has no tracked patch');
+else assert(patch.trim(), 'the supplier candidate is a local patch over the shipping checkpoint');
 const manifest = {
-    schema: 'bw.owned-console-experimental-bundle.v1',
-    classification: 'experimental-candidate-bundle',
+    ...OWNED_CONSOLE_BUNDLE_MODES[mode],
     shippingEvidence: false,
     createdAt: new Date().toISOString(),
     consumer: {repository: 'CrispStrobe/brickwright', commit: consumerCommit},
-    supplier: {repository: 'CrispStrobe/sb3-creator', shippingPin: committedPins['sb3-creator'],
-        candidateCommit: supplierCommit, qualification: 'Candidate integration only; supplier RF release gate remains independent.'},
+    supplier: mode === 'committed-pin'
+        ? {repository: 'CrispStrobe/sb3-creator', commit: supplierCommit,
+            qualification: 'Local UI qualification on the committed supplier pin; hosted release evidence remains separate.'}
+        : {repository: 'CrispStrobe/sb3-creator', shippingPin: committedPins['sb3-creator'],
+            candidateCommit: supplierCommit, qualification: 'Candidate integration only; supplier release qualification remains independent.'},
     sync: {method: 'Official sync-sb3creator.mjs and sync-examples.mjs --dir with explicit --pin, followed by integrate.mjs',
         force: false, allowStale: false, compilerByteIdentity: true, compilerMirrorsIdentical: true},
     npmPins: {'bw-board': pins['bw-board'], 'bw-circuit-ui': pins['bw-circuit-ui']},
     trackedPatchSha256: sha(patch),
-    changedPaths: git(root, ['diff', '--name-only', 'HEAD', '--']).trim().split('\n'),
+    changedPaths: patch ? git(root, ['diff', '--name-only', 'HEAD', '--']).trim().split('\n') : [],
     sourceFiles,
-    build: {directory: 'packages/scratch-gui/build', files,
+    build: {directory: path.relative(root, site).split(path.sep).join('/') || '.', files,
         command: arg('--build-command', 'NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 npm run build')},
     environment: {node: process.version, platform: process.platform, arch: process.arch, git: consumerGit.tool}
 };
 await fs.mkdir(path.dirname(out), {recursive: true});
 await fs.writeFile(out, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(JSON.stringify({manifest: out, consumerCommit, supplierCommit,
-    shippingSupplierPin: committedPins['sb3-creator'], scripts: Object.keys(files).length - 1,
+    classification: manifest.classification, committedSupplierPin: committedPins['sb3-creator'], scripts: Object.keys(files).length - 1,
     sourceFiles: Object.keys(sourceFiles).length, shippingEvidence: false}, null, 2));
