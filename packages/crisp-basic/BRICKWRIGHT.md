@@ -28,7 +28,11 @@ a different interpreter.
 In the Code tab, select **BAS → BBC BASIC → CrispBASIC (browser)**. Generate
 source from blocks, open a `.bas` file, or edit the BASIC buffer, then choose
 **Run BASIC**. BBC generation starts with unnumbered source. The line-number
-option and explicitly numbered programs remain supported.
+option and explicitly numbered programs remain supported. The Z80 engine requires
+numbered source in increasing order. Unnumbered or mixed source is refused before
+loading its ROM, with the offending editor line and instructions to regenerate
+numbered BASIC or select CrispBASIC. Switching engines never silently rewrites
+the edited program.
 
 The generated source comes from the existing
 `generateBASIC(project, {profile: 'bbc', lineNumbers: false})` implementation.

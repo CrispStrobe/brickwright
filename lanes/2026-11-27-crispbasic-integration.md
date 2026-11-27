@@ -9,11 +9,15 @@
 - Delivery: generated/edited BBC source execution, interactive input, bounded
   worker lifecycle, partial VDU rendering, verified asset packaging and a
   deterministic logical-pin host contract with no BASIC/board bridge.
-- Local qualification: 54 new adapter/UI/packaging checks, 13 simulation-host
-  checks, 41 existing editor ownership checks, 46 related localization/mirror/CI
-  checks and 13 existing source-preparation checks passed. Full editor, renderer
-  and browser-harness JSX parsed. Real-runtime/browser gates are in the dedicated
-  workflow; inspect its result for this commit before claiming CI qualification.
+- Local qualification: 283 focused tests passed with zero failures/skips,
+  including rebuilt native/WASM engines, 56 adapter/UI/packaging checks,
+  13 simulation-host checks, nine generated-source/WASM checks and eight real
+  Chromium editor-control/renderer checks. Another 41 existing editor ownership
+  checks and 46 related localization/mirror/workflow checks passed. Full editor,
+  renderer and browser-harness JSX parsed; package mirrors match. See
+  `packages/crisp-basic/VALIDATION.md` for the environment, exact suite counts
+  and the separate broader gate-wiring audit failure. Inspect the branch's
+  Actions result before claiming CI qualification.
 
 The user requested continuation of branch-only incubation. This follows the
 existing CrispBASIC claim's explicit exception to merging claims to main. No

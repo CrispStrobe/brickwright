@@ -47,6 +47,7 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
             buffers: {basic: 'PRINT "hello"\n'}, running: false, basicResetting: false},
         props: {vm: {runtime: {}}},
         L: {basicCrispLoading: 'loading', basicCrispRunning: 'running', basicCrispError: 'error',
+            basicZ80Numbering: line => `Z80 needs valid increasing numbered statements at editor line ${line}; regenerate or use CrispBASIC`,
             basicCrispCompleted: code => `completed:${code}`, basicCrispStopped: 'stopped',
             basicCrispStopping: 'stopping', basicCrispTimeout: 'timeout', basicCrispOutputLimit: 'output-limit',
             basicCrispResetDone: 'reset', basicInputKeyError: 'one Latin-1 character'},
@@ -91,6 +92,66 @@ test('the three 8086 BASIC routes retain their explicit selection', async () => 
         assert.deepEqual(seen, [f.editor.state.buffers.basic]);
         assert.equal(f.created, 0);
     }
+});
+
+test('Z80 refuses unnumbered, mixed or malformed numbering before loading its ROM', async () => {
+    const originalFetch = globalThis.fetch;
+    let fetched = 0;
+    globalThis.fetch = async () => { fetched++; throw new Error('ROM fetch must not occur'); };
+    try {
+        for (const [source, line] of [
+            ['PRINT "unnumbered"\n', 1],
+            ['10 PRINT "mixed"\n\nEND\n', 3],
+            ['-10 PRINT "signed"\n', 1],
+            ['+10 PRINT "signed"\n', 1],
+            ['1.5 PRINT "fraction"\n', 1],
+            ['1e3 PRINT "exponent"\n', 1],
+            ['10 PRINT "first"\n10 END\n', 2],
+            ['20 PRINT "first"\n10 END\n', 2],
+            ['9007199254740992 PRINT "unsafe integer"\n', 1]
+        ]) {
+            const f = fixture();
+            f.editor.state.basicEngine = 'z80';
+            f.editor.state.basicLineNumbers = true; // The actual buffer decides, not this preference.
+            f.editor.state.buffers.basic = source;
+            await f.editor.runBasic();
+            assert.equal(f.created, 0);
+            assert.equal(f.editor.state.running, false);
+            assert.match(f.editor.state.status, new RegExp(`editor line ${line};`));
+            assert.equal(f.editor.state.buffers.basic, source);
+        }
+        assert.equal(fetched, 0);
+    } finally { globalThis.fetch = originalFetch; }
+});
+
+test('valid numbered source still routes to the selected Z80 runner without rewriting it', async () => {
+    const actual = between(editorSource, '    async runBasic () {', '    // Fetch examples/index.json once');
+    const importExpression = 'await import(/* webpackChunkName: "bw-board" */ \'bw-board/bbc-z80-runner.js\')';
+    assert.ok(actual.includes(importExpression));
+    const calls = [];
+    const loadZ80 = async () => ({BbcZ80Runner: class {
+        constructor({com}) { calls.push(['image', [...com]]); this.rawOutput = 'retro'; }
+        start(source) { calls.push(['start', source]); return this; }
+        pump() { return {done: true, reason: 'ok', output: 'retro'}; }
+    }});
+    const fetchRom = async url => {
+        calls.push(['fetch', url]);
+        return {ok: true, arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer};
+    };
+    const LegacyEditor = new Function('Editor', 'loadZ80', 'fetch', 'requestAnimationFrame',
+        `return class extends Editor {${actual.replace(importExpression, 'await loadZ80()')}}`)(
+        Editor, loadZ80, fetchRom, callback => callback());
+    const f = fixture(); Object.setPrototypeOf(f.editor, LegacyEditor.prototype);
+    const source = '0 REM first\r\n 10PRINT "retro"\r\n\r\n20 END\r\n';
+    f.editor.state.basicEngine = 'z80';
+    f.editor.state.basicLineNumbers = false;
+    f.editor.state.buffers.basic = source;
+    await f.editor.runBasic();
+    assert.equal(f.created, 0);
+    assert.deepEqual(calls, [['fetch', 'static/roms/bbcbasic.com'], ['image', [1, 2, 3]], ['start', source]]);
+    assert.equal(f.editor.state.output, 'retro');
+    assert.equal(f.editor.state.running, false);
+    assert.equal(f.editor.state.buffers.basic, source);
 });
 
 test('a generation refusal cannot execute its explanatory REM placeholder', async () => {

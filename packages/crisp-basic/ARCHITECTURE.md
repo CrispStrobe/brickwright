@@ -147,8 +147,9 @@ unsupported debugger operation must never silently run.
 Define ordinary BASIC procedures/functions, starting with `PROCpinMode`,
 `PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay`, and `FNmillis`. Make units,
 pin modes, range errors, deterministic simulation time, and unavailable
-features explicit. Implement a deterministic simulated host first and
-compare the same observable pin/timing traces on a PicoBB target.
+features explicit. The deterministic reference host now exists in
+`src/simulation-host.mjs`; connect it through the bounded request/reply bridge
+before comparing the same observable pin/timing traces on a PicoBB target.
 
 Do not reserve new language keywords or silently emit placeholder hardware
 operations. The existing non-6502 BASIC generator uses commented hardware

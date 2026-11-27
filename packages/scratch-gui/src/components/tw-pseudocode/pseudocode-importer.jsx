@@ -221,6 +221,7 @@ const L10N = {
         basicNoPrompt: 'BASIC did not reach its ready prompt — the ROM may not have loaded.',
         basicLoading: 'Loading BASIC machine…',
         basicEngine: 'Engine', basicCrispEngine: 'CrispBASIC (browser)', basicZ80Engine: 'BBC BASIC Z80 (retro)',
+        basicZ80Numbering: line => `BBC BASIC Z80 needs unique, increasing, unsigned whole-number line numbers on every statement (editor line ${line}). Enable Line numbers and regenerate the BASIC, or choose CrispBASIC.`,
         basicCrispLoading: 'Loading CrispBASIC…', basicCrispRunning: 'CrispBASIC is running.',
         basicCrispStopped: 'CrispBASIC stopped.', basicCrispStopping: 'Stopping CrispBASIC…',
         basicCrispReset: 'Reset', basicCrispResetDone: 'CrispBASIC reset.',
@@ -575,6 +576,7 @@ const L10N = {
         basicNoPrompt: 'BASIC hat seine Bereit-Eingabeaufforderung nicht erreicht — das ROM wurde möglicherweise nicht geladen.',
         basicLoading: 'BASIC-Maschine wird geladen…',
         basicEngine: 'Engine', basicCrispEngine: 'CrispBASIC (Browser)', basicZ80Engine: 'BBC BASIC Z80 (Retro)',
+        basicZ80Numbering: line => `BBC BASIC Z80 benötigt für jede Anweisung eindeutige, aufsteigende, ganzzahlige Zeilennummern ohne Vorzeichen (Editorzeile ${line}). Zeilennummern aktivieren und BASIC neu erzeugen oder CrispBASIC wählen.`,
         basicCrispLoading: 'CrispBASIC wird geladen…', basicCrispRunning: 'CrispBASIC läuft.',
         basicCrispStopped: 'CrispBASIC gestoppt.', basicCrispStopping: 'CrispBASIC wird gestoppt…',
         basicCrispReset: 'Zurücksetzen', basicCrispResetDone: 'CrispBASIC zurückgesetzt.',
@@ -5100,10 +5102,35 @@ class PseudocodeImporter extends React.Component {
         } catch (error) { this.setState({basicInputError: error.message}); }
     }
 
+    z80BasicNumberingIssue (code) {
+        let previous = -1;
+        const lines = code.split(/\r\n|\r|\n/);
+        for (let index = 0; index < lines.length; index++) {
+            if (!lines[index].trim()) continue;
+            const match = /^[ \t]*(\d+)(.*)$/.exec(lines[index]);
+            if (!match || /^\.|^[eE][+-]?\d/.test(match[2])) return index + 1;
+            const number = Number(match[1]);
+            if (!Number.isSafeInteger(number) || number <= previous) return index + 1;
+            previous = number;
+        }
+        return null;
+    }
+
     async runBasic () {
         const code = this.activeCode();
         if (!code.trim() || this.state.running || this.state.basicResetting || this.state.basicGenerationFailed) return;
         if (this.state.basicProfile === 'bbc' && this.state.basicEngine !== 'z80') return this.runCrispBasic(code);
+        if (this.state.basicProfile === 'bbc' && this.state.basicEngine === 'z80') {
+            // The retro runner types each line at a console prompt. An
+            // unnumbered statement would execute while loading, before RUN.
+            // Admit the authored text as-is; never silently number or sort it.
+            const line = this.z80BasicNumberingIssue(code);
+            if (line !== null) {
+                this.setState({status: this.L.basicZ80Numbering(line), basicDiagnostic: null,
+                    output: null, basicRawOutput: '', basicIsBbc: false});
+                return;
+            }
+        }
         // The 8086 profile compiles BASIC to a .COM and boots the DOS bench (the
         // C/asm-tab path), rather than running a 6502/Z80 ROM interpreter.
         if (this.state.basicProfile === 'i8086') return this.runBasicOn8086(code);

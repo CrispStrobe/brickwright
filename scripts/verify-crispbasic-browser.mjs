@@ -161,6 +161,24 @@ test('the input form resumes recursion and clears its waiting state', {timeout: 
     assert.equal(await page.evaluate(() => crispBasicEditor.state.basicInputMethod), null);
 });
 
+test('key input preserves Latin-1 and End input reaches BASIC error handling', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    await page.locator('[data-testid="bw-crispbasic-source"]').fill('a$=GET$\nPRINT a$\nEND\n');
+    await page.locator('[data-testid="bw-basic-run"]').click();
+    await page.waitForFunction(() => crispBasicEditor.state.basicInputMethod === 'key');
+    await page.locator('[data-testid="bw-crispbasic-input"]').fill('é');
+    await page.locator('[data-testid="bw-crispbasic-send"]').click();
+    await page.waitForFunction(() => !crispBasicEditor.state.running);
+    assert.equal(await page.evaluate(() => crispBasicEditor.state.output), 'é\r\n');
+    await page.locator('[data-testid="bw-crispbasic-source"]').fill('ON ERROR PRINT "closed":END\nINPUT "" a$\nEND\n');
+    await page.locator('[data-testid="bw-basic-run"]').click();
+    await page.waitForFunction(() => crispBasicEditor.state.basicInputMethod === 'line');
+    await page.locator('[data-testid="bw-crispbasic-end-input"]').click();
+    await page.waitForFunction(() => !crispBasicEditor.state.running);
+    assert.equal(await page.evaluate(() => crispBasicEditor.state.output), 'closed\r\n');
+    assert.equal(await page.evaluate(() => crispBasicEditor.state.basicDiagnostic), null);
+});
+
 test('Stop remains responsive during a tight C loop; Reset and the next run release the old worker', {timeout: 15000}, async t => {
     const {page} = await pageFor(t);
     await page.locator('[data-testid="bw-crispbasic-source"]').fill('REPEAT\nUNTIL FALSE\n');

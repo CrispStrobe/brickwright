@@ -29,7 +29,8 @@ npm run test:native
 ```
 
 No npm dependencies or root Brickwright installation are needed for the native
-CLI, either build, or the Node runtime tests. The builder
+CLI, either build, or the standalone Node engine tests. The separate
+Brickwright integration checks use the root generator/VDU dependencies. The builder
 fetches the exact upstream commit and verifies SHA-256 for every input file.
 Generated sources, objects, the native executable and build metadata stay in
 `.build/`. Use `CC` or `NASM` to select an installed compiler/assembler. An
