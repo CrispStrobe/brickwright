@@ -2258,3 +2258,29 @@ All 46 focused tests passed. The new bridge regression verifies
 that direct status reads stay current between notifications,
 readings stay aligned with the last completed batch while a tick
 is in flight, and Stop and Reset publish immediately.
+
+### Skip hidden Assembly Simulation control updates
+
+The CAD assembly panel refreshes its controls only when visible.
+Rendering, motion traces, and replay recording continue while it is
+hidden. Opening the panel shows the current pose, joint readings, and
+replay range immediately.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/babd27ae4f59b579ec3220bde9c0aed152894711)
+
+In the shared Chromium, Atlas produced 4,785 hidden-panel DOM
+mutations with SDK `02287df` and zero with `babd27a`. The full CAD
+snapshot and Circuit readings matched at 6.065 simulated seconds.
+Both runs passed one-click Run, Stop, Reset, repeat Run, and a restart
+after a gravity edit. Scout also passed the lifecycle checks and
+produced zero hidden-panel mutations. Atlas measured 0.814× with
+the previous SDK and 0.681× with the new one. Scout measured 1.003×
+with the new SDK. Sustained 1× across the full workload remains open.
+The live tests used the existing Brickwright browser host and the
+respective packaged SDKs.
+
+All 49 focused CrispCAD tests passed. The Brickwright SB3 check passed
+for CAD document versions 41–46, the exact kernel loaded and measured
+the smoke-test box in Chromium, and all 842 SDK file hashes and nine
+pin tests passed. The SDK build skips gzip size reporting and completed
+without the previous reporting-stage failure. Brickwright pins
+`babd27a`.
