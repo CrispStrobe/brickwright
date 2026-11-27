@@ -17,23 +17,33 @@ function run(t, code, options = {}) {
     const messages = [];
     const outputs = [];
     const inputs = [];
-    let thread;
-    let exited;
+    // Keep Node worker bootstrap out of the small execution budgets. Some
+    // tests deliberately measure the difference between 200ms and the input
+    // probe deadline on a busy test runner.
+    const thread = new Worker(`const {parentPort} = require('node:worker_threads');
+        globalThis.self = globalThis;
+        globalThis.postMessage = data => parentPort.postMessage(data);
+        parentPort.on('message', data => self.onmessage({data}));
+        ${JAVASCRIPT_WORKER_SOURCE}
+        parentPort.postMessage('fixture-ready');`, {eval: true, execArgv: []});
+    const initialized = new Promise((resolve, reject) => {
+        thread.once('message', message => {
+            if (message === 'fixture-ready') resolve(JAVASCRIPT_WORKER_SOURCE);
+            else reject(new Error('Unexpected worker initialization message'));
+        });
+        thread.once('error', reject);
+    });
+    const exited = new Promise(resolve => thread.once('exit', resolve));
     let terminated = 0;
     let released = 0;
     const session = createCodeExecutionSession({
-        workerSource: JAVASCRIPT_WORKER_SOURCE, code, timeoutMs: 2000,
+        workerSource: initialized, code, timeoutMs: 2000,
         inputProbeIntervalMs: 20, inputProbeTimeoutMs: 100, flushIntervalMs: 5,
         ...options,
         onOutput(text) { outputs.push(text); options.onOutput?.(text, session); },
         onInput(request) { inputs.push(request); options.onInput?.(request, session); },
         createWorker(source) {
-            thread = new Worker(`const {parentPort} = require('node:worker_threads');
-                globalThis.self = globalThis;
-                globalThis.postMessage = data => parentPort.postMessage(data);
-                parentPort.on('message', data => self.onmessage({data}));
-                ${source}`, {eval: true, execArgv: []});
-            exited = new Promise(resolve => thread.once('exit', resolve));
+            assert.equal(source, JAVASCRIPT_WORKER_SOURCE);
             const worker = {
                 postMessage: data => thread.postMessage(data),
                 terminate() { terminated++; return thread.terminate(); },
@@ -44,7 +54,7 @@ function run(t, code, options = {}) {
             return {worker, release() { released++; }};
         }
     });
-    t.after(async () => { session.dispose(); if (thread) await thread.terminate(); });
+    t.after(async () => { session.dispose(); await thread.terminate(); });
     return {
         session, messages, outputs, inputs,
         async result() {
@@ -201,7 +211,7 @@ test('registered tasks cannot mix with synchronous prompt replay in either order
     }
 });
 
-test('pending unawaited owned resources and invalid task operations fail visibly', {timeout: 5000}, async t => {
+test('pending unawaited owned resources and invalid task operations fail visibly', {timeout: 15000}, async t => {
     const cases = [
         ["codeRun.sleep(1000);", /Await input and codeRun.sleep/],
         ["codeRun.input('Unawaited');", /Await input and codeRun.sleep/],

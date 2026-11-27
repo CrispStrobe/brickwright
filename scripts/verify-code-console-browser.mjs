@@ -61,6 +61,20 @@ try {
     await output.getByText('Gear: 7', {exact: true}).waitFor();
     console.log('JavaScript awaits two separate input requests and completes.');
 
+    await typeIntoEditor(page, [
+        'codeRun.spawn(async task => {',
+        '    const name = await task.input("Name for the child task?");',
+        '    await task.sleep(20);',
+        '    console.log("Child: " + name);',
+        '});',
+        'console.log("Parent finished");'
+    ].join('\n'));
+    await run();
+    await output.filter({hasText: 'Parent finished'}).waitFor();
+    await enter('Name for the child task?', 'Ada');
+    await output.filter({hasText: 'Child: Ada'}).waitFor();
+    console.log('An owned JavaScript child remains live after its parent finishes and receives Code input.');
+
     await typeIntoEditor(page, 'console.log("Worker entered");\nawait new Promise(resolve => setTimeout(resolve, 50));\nwhile (true) {}');
     await run();
     await output.getByText('Worker entered', {exact: true}).waitFor();
