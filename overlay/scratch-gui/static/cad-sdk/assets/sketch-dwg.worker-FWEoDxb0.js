@@ -1,24 +1,24 @@
-var Zx = Object.defineProperty;
-var qx = (i, t, e) => t in i ? Zx(i, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : i[t] = e;
-var n = (i, t, e) => qx(i, typeof t != "symbol" ? t + "" : t, e);
+var Zv = Object.defineProperty;
+var qv = (i, t, e) => t in i ? Zv(i, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : i[t] = e;
+var n = (i, t, e) => qv(i, typeof t != "symbol" ? t + "" : t, e);
 var w;
 (function(i) {
   i[i.Unknown = -1] = "Unknown", i[i.MC0_0 = 0] = "MC0_0", i[i.AC1_2 = 1] = "AC1_2", i[i.AC1_4 = 2] = "AC1_4", i[i.AC1_50 = 3] = "AC1_50", i[i.AC2_10 = 4] = "AC2_10", i[i.AC1002 = 5] = "AC1002", i[i.AC1003 = 6] = "AC1003", i[i.AC1004 = 7] = "AC1004", i[i.AC1006 = 8] = "AC1006", i[i.AC1009 = 9] = "AC1009", i[i.AC1012 = 19] = "AC1012", i[i.AC1014 = 21] = "AC1014", i[i.AC1015 = 23] = "AC1015", i[i.AC1018 = 25] = "AC1018", i[i.AC1021 = 27] = "AC1021", i[i.AC1024 = 29] = "AC1024", i[i.AC1027 = 31] = "AC1027", i[i.AC1032 = 33] = "AC1032";
 })(w || (w = {}));
-var Kx = Object.defineProperty, Jx = (i, t) => Kx(i, "name", { value: t, configurable: !0 });
+var Kv = Object.defineProperty, Jv = (i, t) => Kv(i, "name", { value: t, configurable: !0 });
 const A = class A {
 };
-Jx(A, "DxfFileToken"), n(A, "acdsDataSection", "ACDSDATA"), n(A, "acdsRecord", "ACDSRECORD"), n(A, "acdsSchema", "ACDSSCHEMA"), n(A, "beginSection", "SECTION"), n(A, "blkRefObjectContextData", "ACDB_BLKREFOBJECTCONTEXTDATA_CLASS"), n(A, "blkRefToken", "{BLKREFS"), n(A, "block", "BLOCK"), n(A, "blocksSection", "BLOCKS"), n(A, "classEntry", "CLASS"), n(A, "classesSection", "CLASSES"), n(A, "customData", "CUSTOMDATA"), n(A, "dictionaryToken", "{ACAD_XDICTIONARY"), n(A, "endBlock", "ENDBLK"), n(A, "endOfFile", "EOF"), n(A, "endSection", "ENDSEC"), n(A, "endSequence", "SEQEND"), n(A, "endTable", "ENDTAB"), n(A, "entitiesSection", "ENTITIES"), n(A, "entity3DFace", "3DFACE"), n(A, "entity3DSolid", "3DSOLID"), n(A, "entityAecWall", "AEC_WALL"), n(A, "entityArc", "ARC"), n(A, "entityAttribute", "ATTRIB"), n(A, "entityAttributeDefinition", "ATTDEF"), n(A, "entityArcDimension", "ARC_DIMENSION"), n(A, "entityBody", "BODY"), n(A, "entityCircle", "CIRCLE"), n(A, "entityCoordinationModel", "COORDINATION MODEL"), n(A, "entityDimension", "DIMENSION"), n(A, "entityEllipse", "ELLIPSE"), n(A, "entityHatch", "HATCH"), n(A, "entityHelix", "HELIX"), n(A, "entityImage", "IMAGE"), n(A, "entityInsert", "INSERT"), n(A, "entityLeader", "LEADER"), n(A, "entityLight", "LIGHT"), n(A, "entityLine", "LINE"), n(A, "entityLwPolyline", "LWPOLYLINE"), n(A, "entityMesh", "MESH"), n(A, "entityMLine", "MLINE"), n(A, "entityMText", "MTEXT"), n(A, "entityMultiLeader", "MULTILEADER"), n(A, "entityOle2Frame", "OLE2FRAME"), n(A, "entityOleFrame", "OLEFRAME"), n(A, "entityPdfUnderlay", "PDFUNDERLAY"), n(A, "entityPoint", "POINT"), n(A, "entityPolyFaceMesh", "PFACE"), n(A, "entityPolyline", "POLYLINE"), n(A, "entityProxyEntity", "ACAD_PROXY_ENTITY"), n(A, "entityRay", "RAY"), n(A, "entityRegion", "REGION"), n(A, "entitySection", "SECTION"), n(A, "entitySeqend", "SEQEND"), n(A, "entityShape", "SHAPE"), n(A, "entitySolid", "SOLID"), n(A, "entitySpline", "SPLINE"), n(A, "entitySun", "SUN"), n(A, "entitySurface", "SURFACE"), n(A, "entityExtrudedSurface", "EXTRUDEDSURFACE"), n(A, "entityLoftedSurface", "LOFTEDSURFACE"), n(A, "entityNurbSurface", "NURBSURFACE"), n(A, "entityPlaneSurface", "PLANESURFACE"), n(A, "entityRevolvedSurface", "REVOLVEDSURFACE"), n(A, "entitySweptSurface", "SWEPTSURFACE"), n(A, "entityTable", "ACAD_TABLE"), n(A, "entityText", "TEXT"), n(A, "entityTolerance", "TOLERANCE"), n(A, "entityTrace", "TRACE"), n(A, "entityUnderlay", "UNDERLAY"), n(A, "entityVertex", "VERTEX"), n(A, "entityViewport", "VIEWPORT"), n(A, "entityWipeout", "WIPEOUT"), n(A, "entityXline", "XLINE"), n(A, "formattedTableDataColumn_BEGIN", "FORMATTEDTABLEDATACOLUMN_BEGIN"), n(A, "formattedTableDataColumn_END", "FORMATTEDTABLEDATACOLUMN_END"), n(A, "formattedTableDataRow_BEGIN", "FORMATTEDTABLEDATAROW_BEGIN"), n(A, "formattedTableDataRow_END", "FORMATTEDTABLEDATAROW_END"), n(A, "headerSection", "HEADER"), n(A, "linkedTableDataCell_BEGIN", "LINKEDTABLEDATACELL_BEGIN"), n(A, "linkedTableDataCell_END", "LINKEDTABLEDATACELL_END"), n(A, "linkedTableDataColumn_BEGIN", "LINKEDTABLEDATACOLUMN_BEGIN"), n(A, "linkedTableDataColumn_END", "LINKEDTABLEDATACOLUMN_END"), n(A, "linkedTableDataRow_BEGIN", "LINKEDTABLEDATAROW_BEGIN"), n(A, "linkedTableDataRow_END", "LINKEDTABLEDATAROW_END"), n(A, "mTextAttributeObjectContextData", "ACDB_MTEXTATTRIBUTEOBJECTCONTEXTDATA_CLASS"), n(A, "objectAecCleanupGroupDef", "AEC_CLEANUP_GROUP_DEF"), n(A, "objectAecWallStyle", "AEC_WALL_STYLE"), n(A, "objectBinRecord", "BINRECORD"), n(A, "objectBlockBasePointParameter", "BLOCKBASEPOINTPARAMETER"), n(A, "objectBlockAlignmentGrip", "BLOCKALIGNMENTGRIP"), n(A, "objectBlockAlignmentParameter", "BLOCKALIGNMENTPARAMETER"), n(A, "objectBlockArrayAction", "BLOCKARRAYACTION"), n(A, "objectBlockFlipAction", "BLOCKFLIPACTION"), n(A, "objectBlockFlipGrip", "BLOCKFLIPGRIP"), n(A, "objectBlockFlipParameter", "BLOCKFLIPPARAMETER"), n(A, "objectBlockGripLocationComponent", "BLOCKGRIPLOCATIONCOMPONENT"), n(A, "objectBlockLinearParameter", "BLOCKLINEARPARAMETER"), n(A, "objectBlockLinearGrip", "BLOCKLINEARGRIP"), n(A, "objectBlockLookupAction", "BLOCKLOOKUPACTION"), n(A, "objectBlockLookupGrip", "BLOCKLOOKUPGRIP"), n(A, "objectBlockLookupParameter", "BLOCKLOOKUPPARAMETER"), n(A, "objectBlockMoveAction", "BLOCKMOVEACTION"), n(A, "objectBlockPointParameter", "BLOCKPOINTPARAMETER"), n(A, "objectBlockPolarGrip", "BLOCKPOLARGRIP"), n(A, "objectBlockPolarParameter", "BLOCKPOLARPARAMETER"), n(A, "objectBlockPolarStretchAction", "BLOCKPOLARSTRETCHACTION"), n(A, "objectBlockRepresentationData", "ACDB_BLOCKREPRESENTATION_DATA"), n(A, "objectBlockRotateAction", "BLOCKROTATEACTION"), n(A, "objectBlockRotationGrip", "BLOCKROTATIONGRIP"), n(A, "objectBlockRotationParameter", "BLOCKROTATIONPARAMETER"), n(A, "objectBlockScaleAction", "BLOCKSCALEACTION"), n(A, "objectBlockStretchAction", "BLOCKSTRETCHACTION"), n(A, "objectBlockVisibilityGrip", "BLOCKVISIBILITYGRIP"), n(A, "objectBlockVisibilityParameter", "BLOCKVISIBILITYPARAMETER"), n(A, "objectBlockXYGrip", "BLOCKXYGRIP"), n(A, "objectBlockXYParameter", "BLOCKXYPARAMETER"), n(A, "objectDynamicBlockPurgePreventer", "ACDB_DYNAMICBLOCKPURGEPREVENTER_VERSION"), n(A, "objectCell", "CELL"), n(A, "objectCellStyleMap", "CELLSTYLEMAP"), n(A, "objectDBColor", "DBCOLOR"), n(A, "objectDictionary", "DICTIONARY"), n(A, "objectDictionaryVar", "DICTIONARYVAR"), n(A, "objectDictionaryWithDefault", "ACDBDICTIONARYWDFLT"), n(A, "objectDimensionAssociation", "DIMASSOC"), n(A, "objectEvalGraph", "ACAD_EVALUATION_GRAPH"), n(A, "objectField", "FIELD"), n(A, "objectFieldList", "FIELDLIST"), n(A, "objectGeoData", "GEODATA"), n(A, "objectGroup", "GROUP"), n(A, "objectImageDefinition", "IMAGEDEF"), n(A, "objectImageDefinitionReactor", "IMAGEDEF_REACTOR"), n(A, "objectLayout", "LAYOUT"), n(A, "objectMaterial", "MATERIAL"), n(A, "objectMLeaderContextData", "ACDB_MLEADEROBJECTCONTEXTDATA_CLASS"), n(A, "objectMLeaderStyle", "MLEADERSTYLE"), n(A, "objectMLineStyle", "MLINESTYLE"), n(A, "objectPdfDefinition", "PDFDEFINITION"), n(A, "objectPlaceholder", "ACDBPLACEHOLDER"), n(A, "objectPlotSettings", "PLOTSETTINGS"), n(A, "objectProxyObject", "ACAD_PROXY_OBJECT"), n(A, "objectRasterVariables", "RASTERVARIABLES"), n(A, "objectScale", "SCALE"), n(A, "objectSortEntsTable", "SORTENTSTABLE"), n(A, "objectSpatialFilter", "SPATIAL_FILTER"), n(A, "objectsSection", "OBJECTS"), n(A, "objectTableColumn", "COLUMN"), n(A, "objectTableColumnBegin", "TABLECOLUMN_BEGIN"), n(A, "objectTableColumnEnd", "TABLECOLUMN_END"), n(A, "objectTableContent", "TABLECONTENT"), n(A, "objectTableRow", "ROW"), n(A, "objectTableRowBegin", "TABLEROW_BEGIN"), n(A, "objectTableRowEnd", "TABLEROW_END"), n(A, "objectTableStyle", "TABLESTYLE"), n(A, "objectVisualStyle", "VISUALSTYLE"), n(A, "objectWipeoutVariables", "WIPEOUTVARIABLES"), n(A, "objectXRecord", "XRECORD"), n(A, "reactorsToken", "{ACAD_REACTORS"), n(A, "tableAppId", "APPID"), n(A, "tableBlockRecord", "BLOCK_RECORD"), n(A, "tableDimstyle", "DIMSTYLE"), n(A, "tableEntry", "TABLE"), n(A, "tableGroup", "GROUP"), n(A, "tableLayer", "LAYER"), n(A, "tableLinetype", "LTYPE"), n(A, "tablesSection", "TABLES"), n(A, "tableStyle", "STYLE"), n(A, "tableUcs", "UCS"), n(A, "tableView", "VIEW"), n(A, "tableVport", "VPORT"), n(A, "valueEnd", "ACVALUE_END");
+Jv(A, "DxfFileToken"), n(A, "acdsDataSection", "ACDSDATA"), n(A, "acdsRecord", "ACDSRECORD"), n(A, "acdsSchema", "ACDSSCHEMA"), n(A, "beginSection", "SECTION"), n(A, "blkRefObjectContextData", "ACDB_BLKREFOBJECTCONTEXTDATA_CLASS"), n(A, "blkRefToken", "{BLKREFS"), n(A, "block", "BLOCK"), n(A, "blocksSection", "BLOCKS"), n(A, "classEntry", "CLASS"), n(A, "classesSection", "CLASSES"), n(A, "customData", "CUSTOMDATA"), n(A, "dictionaryToken", "{ACAD_XDICTIONARY"), n(A, "endBlock", "ENDBLK"), n(A, "endOfFile", "EOF"), n(A, "endSection", "ENDSEC"), n(A, "endSequence", "SEQEND"), n(A, "endTable", "ENDTAB"), n(A, "entitiesSection", "ENTITIES"), n(A, "entity3DFace", "3DFACE"), n(A, "entity3DSolid", "3DSOLID"), n(A, "entityAecWall", "AEC_WALL"), n(A, "entityArc", "ARC"), n(A, "entityAttribute", "ATTRIB"), n(A, "entityAttributeDefinition", "ATTDEF"), n(A, "entityArcDimension", "ARC_DIMENSION"), n(A, "entityBody", "BODY"), n(A, "entityCircle", "CIRCLE"), n(A, "entityCoordinationModel", "COORDINATION MODEL"), n(A, "entityDimension", "DIMENSION"), n(A, "entityEllipse", "ELLIPSE"), n(A, "entityHatch", "HATCH"), n(A, "entityHelix", "HELIX"), n(A, "entityImage", "IMAGE"), n(A, "entityInsert", "INSERT"), n(A, "entityLeader", "LEADER"), n(A, "entityLight", "LIGHT"), n(A, "entityLine", "LINE"), n(A, "entityLwPolyline", "LWPOLYLINE"), n(A, "entityMesh", "MESH"), n(A, "entityMLine", "MLINE"), n(A, "entityMText", "MTEXT"), n(A, "entityMultiLeader", "MULTILEADER"), n(A, "entityOle2Frame", "OLE2FRAME"), n(A, "entityOleFrame", "OLEFRAME"), n(A, "entityPdfUnderlay", "PDFUNDERLAY"), n(A, "entityPoint", "POINT"), n(A, "entityPolyFaceMesh", "PFACE"), n(A, "entityPolyline", "POLYLINE"), n(A, "entityProxyEntity", "ACAD_PROXY_ENTITY"), n(A, "entityRay", "RAY"), n(A, "entityRegion", "REGION"), n(A, "entitySection", "SECTION"), n(A, "entitySeqend", "SEQEND"), n(A, "entityShape", "SHAPE"), n(A, "entitySolid", "SOLID"), n(A, "entitySpline", "SPLINE"), n(A, "entitySun", "SUN"), n(A, "entitySurface", "SURFACE"), n(A, "entityExtrudedSurface", "EXTRUDEDSURFACE"), n(A, "entityLoftedSurface", "LOFTEDSURFACE"), n(A, "entityNurbSurface", "NURBSURFACE"), n(A, "entityPlaneSurface", "PLANESURFACE"), n(A, "entityRevolvedSurface", "REVOLVEDSURFACE"), n(A, "entitySweptSurface", "SWEPTSURFACE"), n(A, "entityTable", "ACAD_TABLE"), n(A, "entityText", "TEXT"), n(A, "entityTolerance", "TOLERANCE"), n(A, "entityTrace", "TRACE"), n(A, "entityUnderlay", "UNDERLAY"), n(A, "entityVertex", "VERTEX"), n(A, "entityViewport", "VIEWPORT"), n(A, "entityWipeout", "WIPEOUT"), n(A, "entityXline", "XLINE"), n(A, "formattedTableDataColumn_BEGIN", "FORMATTEDTABLEDATACOLUMN_BEGIN"), n(A, "formattedTableDataColumn_END", "FORMATTEDTABLEDATACOLUMN_END"), n(A, "formattedTableDataRow_BEGIN", "FORMATTEDTABLEDATAROW_BEGIN"), n(A, "formattedTableDataRow_END", "FORMATTEDTABLEDATAROW_END"), n(A, "headerSection", "HEADER"), n(A, "linkedTableDataCell_BEGIN", "LINKEDTABLEDATACELL_BEGIN"), n(A, "linkedTableDataCell_END", "LINKEDTABLEDATACELL_END"), n(A, "linkedTableDataColumn_BEGIN", "LINKEDTABLEDATACOLUMN_BEGIN"), n(A, "linkedTableDataColumn_END", "LINKEDTABLEDATACOLUMN_END"), n(A, "linkedTableDataRow_BEGIN", "LINKEDTABLEDATAROW_BEGIN"), n(A, "linkedTableDataRow_END", "LINKEDTABLEDATAROW_END"), n(A, "mTextAttributeObjectContextData", "ACDB_MTEXTATTRIBUTEOBJECTCONTEXTDATA_CLASS"), n(A, "objectAecCleanupGroupDef", "AEC_CLEANUP_GROUP_DEF"), n(A, "objectAecWallStyle", "AEC_WALL_STYLE"), n(A, "objectBinRecord", "BINRECORD"), n(A, "objectBlockBasePointParameter", "BLOCKBASEPOINTPARAMETER"), n(A, "objectBlockAlignmentGrip", "BLOCKALIGNMENTGRIP"), n(A, "objectBlockAlignmentParameter", "BLOCKALIGNMENTPARAMETER"), n(A, "objectBlockArrayAction", "BLOCKARRAYACTION"), n(A, "objectBlockFlipAction", "BLOCKFLIPACTION"), n(A, "objectBlockFlipGrip", "BLOCKFLIPGRIP"), n(A, "objectBlockFlipParameter", "BLOCKFLIPPARAMETER"), n(A, "objectBlockGripLocationComponent", "BLOCKGRIPLOCATIONCOMPONENT"), n(A, "objectBlockLinearParameter", "BLOCKLINEARPARAMETER"), n(A, "objectBlockLinearGrip", "BLOCKLINEARGRIP"), n(A, "objectBlockLookupAction", "BLOCKLOOKUPACTION"), n(A, "objectBlockLookupGrip", "BLOCKLOOKUPGRIP"), n(A, "objectBlockLookupParameter", "BLOCKLOOKUPPARAMETER"), n(A, "objectBlockMoveAction", "BLOCKMOVEACTION"), n(A, "objectBlockPointParameter", "BLOCKPOINTPARAMETER"), n(A, "objectBlockPolarGrip", "BLOCKPOLARGRIP"), n(A, "objectBlockPolarParameter", "BLOCKPOLARPARAMETER"), n(A, "objectBlockPolarStretchAction", "BLOCKPOLARSTRETCHACTION"), n(A, "objectBlockRepresentationData", "ACDB_BLOCKREPRESENTATION_DATA"), n(A, "objectBlockRotateAction", "BLOCKROTATEACTION"), n(A, "objectBlockRotationGrip", "BLOCKROTATIONGRIP"), n(A, "objectBlockRotationParameter", "BLOCKROTATIONPARAMETER"), n(A, "objectBlockScaleAction", "BLOCKSCALEACTION"), n(A, "objectBlockStretchAction", "BLOCKSTRETCHACTION"), n(A, "objectBlockVisibilityGrip", "BLOCKVISIBILITYGRIP"), n(A, "objectBlockVisibilityParameter", "BLOCKVISIBILITYPARAMETER"), n(A, "objectBlockXYGrip", "BLOCKXYGRIP"), n(A, "objectBlockXYParameter", "BLOCKXYPARAMETER"), n(A, "objectDynamicBlockPurgePreventer", "ACDB_DYNAMICBLOCKPURGEPREVENTER_VERSION"), n(A, "objectCell", "CELL"), n(A, "objectCellStyleMap", "CELLSTYLEMAP"), n(A, "objectDBColor", "DBCOLOR"), n(A, "objectDictionary", "DICTIONARY"), n(A, "objectDictionaryVar", "DICTIONARYVAR"), n(A, "objectDictionaryWithDefault", "ACDBDICTIONARYWDFLT"), n(A, "objectDimensionAssociation", "DIMASSOC"), n(A, "objectEvalGraph", "ACAD_EVALUATION_GRAPH"), n(A, "objectField", "FIELD"), n(A, "objectFieldList", "FIELDLIST"), n(A, "objectGeoData", "GEODATA"), n(A, "objectGroup", "GROUP"), n(A, "objectImageDefinition", "IMAGEDEF"), n(A, "objectImageDefinitionReactor", "IMAGEDEF_REACTOR"), n(A, "objectLayout", "LAYOUT"), n(A, "objectMaterial", "MATERIAL"), n(A, "objectMLeaderContextData", "ACDB_MLEADEROBJECTCONTEXTDATA_CLASS"), n(A, "objectMLeaderStyle", "MLEADERSTYLE"), n(A, "objectMLineStyle", "MLINESTYLE"), n(A, "objectPdfDefinition", "PDFDEFINITION"), n(A, "objectPlaceholder", "ACDBPLACEHOLDER"), n(A, "objectPlotSettings", "PLOTSETTINGS"), n(A, "objectProxyObject", "ACAD_PROXY_OBJECT"), n(A, "objectRasterVariables", "RASTERVARIABLES"), n(A, "objectScale", "SCALE"), n(A, "objectSortEntsTable", "SORTENTSTABLE"), n(A, "objectSpatialFilter", "SPATIAL_FILTER"), n(A, "objectsSection", "OBJECTS"), n(A, "objectTableColumn", "COLUMN"), n(A, "objectTableColumnBegin", "TABLECOLUMN_BEGIN"), n(A, "objectTableColumnEnd", "TABLECOLUMN_END"), n(A, "objectTableContent", "TABLECONTENT"), n(A, "objectTableRow", "ROW"), n(A, "objectTableRowBegin", "TABLEROW_BEGIN"), n(A, "objectTableRowEnd", "TABLEROW_END"), n(A, "objectTableStyle", "TABLESTYLE"), n(A, "objectVisualStyle", "VISUALSTYLE"), n(A, "objectWipeoutVariables", "WIPEOUTVARIABLES"), n(A, "objectXRecord", "XRECORD"), n(A, "reactorsToken", "{ACAD_REACTORS"), n(A, "tableAppId", "APPID"), n(A, "tableBlockRecord", "BLOCK_RECORD"), n(A, "tableDimstyle", "DIMSTYLE"), n(A, "tableEntry", "TABLE"), n(A, "tableGroup", "GROUP"), n(A, "tableLayer", "LAYER"), n(A, "tableLinetype", "LTYPE"), n(A, "tablesSection", "TABLES"), n(A, "tableStyle", "STYLE"), n(A, "tableUcs", "UCS"), n(A, "tableView", "VIEW"), n(A, "tableVport", "VPORT"), n(A, "valueEnd", "ACVALUE_END");
 let f = A;
-var Qx = Object.defineProperty, eT = (i, t) => Qx(i, "name", { value: t, configurable: !0 });
+var Qv = Object.defineProperty, eT = (i, t) => Qv(i, "name", { value: t, configurable: !0 });
 const N = class N {
 };
 eT(N, "DxfSubclassMarker"), n(N, "surface", "AcDbSurface"), n(N, "extrudedSurface", "AcDbExtrudedSurface"), n(N, "loftedSurface", "AcDbLoftedSurface"), n(N, "nurbSurface", "AcDbNurbSurface"), n(N, "planeSurface", "AcDbPlaneSurface"), n(N, "revolvedSurface", "AcDbRevolvedSurface"), n(N, "sweptSurface", "AcDbSweptSurface"), n(N, "aecWall", "AecDbWall"), n(N, "aecDbWallStyle", "AecDbWallStyle"), n(N, "aecDbCleanupGroupDef", "AecDbCleanupGroupDef"), n(N, "binRecord", "BinRecord"), n(N, "applicationId", "AcDbRegAppTableRecord"), n(N, "acDbPlaceHolder", "AcDbPlaceHolder"), n(N, "alignedDimension", "AcDbAlignedDimension"), n(N, "angular2LineDimension", "AcDb2LineAngularDimension"), n(N, "angular3PointDimension", "AcDb3PointAngularDimension"), n(N, "arcDimension", "AcDbArcDimension"), n(N, "annotScaleObjectContextData", "AcDbAnnotScaleObjectContextData"), n(N, "arc", "AcDbArc"), n(N, "attribute", "AcDbAttribute"), n(N, "attributeDefinition", "AcDbAttributeDefinition"), n(N, "blkRefObjectContextData", "AcDbBlkRefObjectContextData"), n(N, "block1PtParameter", "AcDbBlock1PtParameter"), n(N, "block2PtParameter", "AcDbBlock2PtParameter"), n(N, "blockAction", "AcDbBlockAction"), n(N, "blockActionBasePt", "AcDbBlockActionWithBasePt"), n(N, "blockBasePointParameter", "AcDbBlockBasePointParameter"), n(N, "blockAlignmentGrip", "AcDbBlockAlignmentGrip"), n(N, "blockAlignmentParameter", "AcDbBlockAlignmentParameter"), n(N, "blockArrayAction", "AcDbBlockArrayAction"), n(N, "blockBegin", "AcDbBlockBegin"), n(N, "blockElement", "AcDbBlockElement"), n(N, "blockEnd", "AcDbBlockEnd"), n(N, "blockFlipAction", "AcDbBlockFlipAction"), n(N, "blockFlipGrip", "AcDbBlockFlipGrip"), n(N, "blockFlipParameter", "AcDbBlockFlipParameter"), n(N, "blockGrip", "AcDbBlockGrip"), n(N, "blockGripExpression", "AcDbBlockGripExpr"), n(N, "blockLinearParameter", "AcDbBlockLinearParameter"), n(N, "blockLinearGrip", "AcDbBlockLinearGrip"), n(N, "blockLookupAction", "AcDbBlockLookupAction"), n(N, "blockLookupGrip", "AcDbBlockLookUpGrip"), n(N, "blockLookupParameter", "AcDbBlockLookUpParameter"), n(N, "blockMoveAction", "AcDbBlockMoveAction"), n(N, "blockParameter", "AcDbBlockParameter"), n(N, "blockPointParameter", "AcDbBlockPointParameter"), n(N, "blockPolarGrip", "AcDbBlockPolarGrip"), n(N, "blockPolarParameter", "AcDbBlockPolarParameter"), n(N, "blockPolarStretchAction", "AcDbBlockPolarStretchAction"), n(N, "blockRecord", "AcDbBlockTableRecord"), n(N, "blockRepresentationData", "AcDbBlockRepresentationData"), n(N, "blockRotationAction", "AcDbBlockRotationAction"), n(N, "blockRotationGrip", "AcDbBlockRotationGrip"), n(N, "blockRotationParameter", "AcDbBlockRotationParameter"), n(N, "blockScaleAction", "AcDbBlockScaleAction"), n(N, "blockStretchAction", "AcDbBlockStretchAction"), n(N, "blockVisibilityGrip", "AcDbBlockVisibilityGrip"), n(N, "blockVisibilityParameter", "AcDbBlockVisibilityParameter"), n(N, "blockXYGrip", "AcDbBlockXYGrip"), n(N, "blockXYParameter", "AcDbBlockXYParameter"), n(N, "dynamicBlockPurgePreventer", "AcDbDynamicBlockPurgePreventer"), n(N, "cellStyleMap", "AcDbCellStyleMap"), n(N, "circle", "AcDbCircle"), n(N, "dbColor", "AcDbColor"), n(N, "diametricDimension", "AcDbDiametricDimension"), n(N, "dictionary", "AcDbDictionary"), n(N, "dictionaryVar", "AcDbDictionaryVar"), n(N, "dictionaryVariables", "DictionaryVariables"), n(N, "dictionaryWithDefault", "AcDbDictionaryWithDefault"), n(N, "dimension", "AcDbDimension"), n(N, "dimensionStyle", "AcDbDimStyleTableRecord"), n(N, "dimensionStyleTable", "AcDbDimStyleTable"), n(N, "dimensionAssociation", "AcDbDimAssoc"), n(N, "ellipse", "AcDbEllipse"), n(N, "entity", "AcDbEntity"), n(N, "evalGraph", "AcDbEvalGraph"), n(N, "evalGraphExpr", "AcDbEvalExpr"), n(N, "face3d", "AcDbFace"), n(N, "field", "AcDbField"), n(N, "fieldList", "AcDbFieldList"), n(N, "filter", "AcDbFilter"), n(N, "formattedTableData", "AcDbFormattedTableData"), n(N, "geoData", "AcDbGeoData"), n(N, "group", "AcDbGroup"), n(N, "hatch", "AcDbHatch"), n(N, "helix", "AcDbHelix"), n(N, "idSet", "AcDbIdSet"), n(N, "insert", "AcDbBlockReference"), n(N, "layer", "AcDbLayerTableRecord"), n(N, "layout", "AcDbLayout"), n(N, "leader", "AcDbLeader"), n(N, "line", "AcDbLine"), n(N, "linearDimension", "AcDbRotatedDimension"), n(N, "linetype", "AcDbLinetypeTableRecord"), n(N, "linkedData", "AcDbLinkedData"), n(N, "linkedTableData", "AcDbLinkedTableData"), n(N, "lwPolyline", "AcDbPolyline"), n(N, "material", "AcDbMaterial"), n(N, "mesh", "AcDbSubDMesh"), n(N, "mInsert", "AcDbMInsertBlock"), n(N, "mLeaderStyle", "AcDbMLeaderStyle"), n(N, "mLine", "AcDbMline"), n(N, "mLineStyle", "AcDbMlineStyle"), n(N, "modelerGeometry", "AcDbModelerGeometry"), n(N, "mText", "AcDbMText"), n(N, "mTextAttributeObjectContextData", "AcDbMTextAttributeObjectContextData"), n(N, "multiLeader", "AcDbMLeader"), n(N, "multiLeaderObjectContextData", "AcDbMLeaderObjectContextData"), n(N, "objectContextData", "AcDbObjectContextData"), n(N, "ole2Frame", "AcDbOle2Frame"), n(N, "ordinateDimension", "AcDbOrdinateDimension"), n(N, "pdfDefinition", "AcDbPdfDefinition"), n(N, "pdfReference", "AcDbPdfReference"), n(N, "plotSettings", "AcDbPlotSettings"), n(N, "point", "AcDbPoint"), n(N, "polyfaceMesh", "AcDbPolyFaceMesh"), n(N, "polyfaceMeshFace", "AcDbFaceRecord"), n(N, "polyfaceMeshVertex", "AcDbPolyFaceMeshVertex"), n(N, "polygonMesh", "AcDbPolygonMesh"), n(N, "polygonMeshVertex", "AcDbPolygonMeshVertex"), n(N, "polyline", "AcDb2dPolyline"), n(N, "polyline3d", "AcDb3dPolyline"), n(N, "polyline3dVertex", "AcDb3dPolylineVertex"), n(N, "polylineVertex", "AcDb2dVertex"), n(N, "proxyEntity", "AcDbProxyEntity"), n(N, "proxyObject", "AcDbProxyObject"), n(N, "radialDimension", "AcDbRadialDimension"), n(N, "rasterImage", "AcDbRasterImage"), n(N, "rasterImageDef", "AcDbRasterImageDef"), n(N, "rasterImageDefReactor", "AcDbRasterImageDefReactor"), n(N, "rasterVariables", "AcDbRasterVariables"), n(N, "ray", "AcDbRay"), n(N, "scale", "AcDbScale"), n(N, "shape", "AcDbShape"), n(N, "solid", "AcDbTrace"), n(N, "solid3D", "AcDb3dSolid"), n(N, "sortentsTable", "AcDbSortentsTable"), n(N, "spatialFilter", "AcDbSpatialFilter"), n(N, "spline", "AcDbSpline"), n(N, "table", "AcDbSymbolTable"), n(N, "tableContent", "AcDbTableContent"), n(N, "tableEntity", "AcDbTable"), n(N, "tableRecord", "AcDbSymbolTableRecord"), n(N, "tableStyle", "AcDbTableStyle"), n(N, "text", "AcDbText"), n(N, "textStyle", "AcDbTextStyleTableRecord"), n(N, "tolerance", "AcDbFcf"), n(N, "ucs", "AcDbUCSTableRecord"), n(N, "underlay", "AcDbUnderlayReference"), n(N, "underlayDefinition", "AcDbUnderlayDefinition"), n(N, "vertex", "AcDbVertex"), n(N, "view", "AcDbViewTableRecord"), n(N, "viewport", "AcDbViewport"), n(N, "visualStyle", "AcDbVisualStyle"), n(N, "vPort", "AcDbViewportTableRecord"), n(N, "wipeout", "AcDbWipeout"), n(N, "wipeoutVariables", "AcDbWipeoutVariables"), n(N, "xLine", "AcDbXline"), n(N, "xRecord", "AcDbXrecord");
 let p = N;
-var v;
+var x;
 (function(i) {
   i[i.UNLISTED = -999] = "UNLISTED", i[i.INVALID = -1] = "INVALID", i[i.UNDEFINED = 0] = "UNDEFINED", i[i.TEXT = 1] = "TEXT", i[i.ATTRIB = 2] = "ATTRIB", i[i.ATTDEF = 3] = "ATTDEF", i[i.BLOCK = 4] = "BLOCK", i[i.ENDBLK = 5] = "ENDBLK", i[i.SEQEND = 6] = "SEQEND", i[i.INSERT = 7] = "INSERT", i[i.MINSERT = 8] = "MINSERT", i[i.UNKNOW_9 = 9] = "UNKNOW_9", i[i.VERTEX_2D = 10] = "VERTEX_2D", i[i.VERTEX_3D = 11] = "VERTEX_3D", i[i.VERTEX_MESH = 12] = "VERTEX_MESH", i[i.VERTEX_PFACE = 13] = "VERTEX_PFACE", i[i.VERTEX_PFACE_FACE = 14] = "VERTEX_PFACE_FACE", i[i.POLYLINE_2D = 15] = "POLYLINE_2D", i[i.POLYLINE_3D = 16] = "POLYLINE_3D", i[i.ARC = 17] = "ARC", i[i.CIRCLE = 18] = "CIRCLE", i[i.LINE = 19] = "LINE", i[i.DIMENSION_ORDINATE = 20] = "DIMENSION_ORDINATE", i[i.DIMENSION_LINEAR = 21] = "DIMENSION_LINEAR", i[i.DIMENSION_ALIGNED = 22] = "DIMENSION_ALIGNED", i[i.DIMENSION_ANG_3_Pt = 23] = "DIMENSION_ANG_3_Pt", i[i.DIMENSION_ANG_2_Ln = 24] = "DIMENSION_ANG_2_Ln", i[i.DIMENSION_RADIUS = 25] = "DIMENSION_RADIUS", i[i.DIMENSION_DIAMETER = 26] = "DIMENSION_DIAMETER", i[i.POINT = 27] = "POINT", i[i.FACE3D = 28] = "FACE3D", i[i.POLYLINE_PFACE = 29] = "POLYLINE_PFACE", i[i.POLYLINE_MESH = 30] = "POLYLINE_MESH", i[i.SOLID = 31] = "SOLID", i[i.TRACE = 32] = "TRACE", i[i.SHAPE = 33] = "SHAPE", i[i.VIEWPORT = 34] = "VIEWPORT", i[i.ELLIPSE = 35] = "ELLIPSE", i[i.SPLINE = 36] = "SPLINE", i[i.REGION = 37] = "REGION", i[i.SOLID3D = 38] = "SOLID3D", i[i.BODY = 39] = "BODY", i[i.RAY = 40] = "RAY", i[i.XLINE = 41] = "XLINE", i[i.DICTIONARY = 42] = "DICTIONARY", i[i.OLEFRAME = 43] = "OLEFRAME", i[i.MTEXT = 44] = "MTEXT", i[i.LEADER = 45] = "LEADER", i[i.TOLERANCE = 46] = "TOLERANCE", i[i.MLINE = 47] = "MLINE", i[i.BLOCK_CONTROL_OBJ = 48] = "BLOCK_CONTROL_OBJ", i[i.BLOCK_HEADER = 49] = "BLOCK_HEADER", i[i.LAYER_CONTROL_OBJ = 50] = "LAYER_CONTROL_OBJ", i[i.LAYER = 51] = "LAYER", i[i.STYLE_CONTROL_OBJ = 52] = "STYLE_CONTROL_OBJ", i[i.STYLE = 53] = "STYLE", i[i.UNKNOW_36 = 54] = "UNKNOW_36", i[i.UNKNOW_37 = 55] = "UNKNOW_37", i[i.LTYPE_CONTROL_OBJ = 56] = "LTYPE_CONTROL_OBJ", i[i.LTYPE = 57] = "LTYPE", i[i.UNKNOW_3A = 58] = "UNKNOW_3A", i[i.UNKNOW_3B = 59] = "UNKNOW_3B", i[i.VIEW_CONTROL_OBJ = 60] = "VIEW_CONTROL_OBJ", i[i.VIEW = 61] = "VIEW", i[i.UCS_CONTROL_OBJ = 62] = "UCS_CONTROL_OBJ", i[i.UCS = 63] = "UCS", i[i.VPORT_CONTROL_OBJ = 64] = "VPORT_CONTROL_OBJ", i[i.VPORT = 65] = "VPORT", i[i.APPID_CONTROL_OBJ = 66] = "APPID_CONTROL_OBJ", i[i.APPID = 67] = "APPID", i[i.DIMSTYLE_CONTROL_OBJ = 68] = "DIMSTYLE_CONTROL_OBJ", i[i.DIMSTYLE = 69] = "DIMSTYLE", i[i.VP_ENT_HDR_CTRL_OBJ = 70] = "VP_ENT_HDR_CTRL_OBJ", i[i.VP_ENT_HDR = 71] = "VP_ENT_HDR", i[i.GROUP = 72] = "GROUP", i[i.MLINESTYLE = 73] = "MLINESTYLE", i[i.OLE2FRAME = 74] = "OLE2FRAME", i[i.DUMMY = 75] = "DUMMY", i[i.LONG_TRANSACTION = 76] = "LONG_TRANSACTION", i[i.LWPOLYLINE = 77] = "LWPOLYLINE", i[i.HATCH = 78] = "HATCH", i[i.XRECORD = 79] = "XRECORD", i[i.ACDBPLACEHOLDER = 80] = "ACDBPLACEHOLDER", i[i.VBA_PROJECT = 81] = "VBA_PROJECT", i[i.LAYOUT = 82] = "LAYOUT", i[i.ACAD_PROXY_ENTITY = 498] = "ACAD_PROXY_ENTITY", i[i.ACAD_PROXY_OBJECT = 499] = "ACAD_PROXY_OBJECT";
-})(v || (v = {}));
+})(x || (x = {}));
 var We;
 (function(i) {
   i[i.None = 0] = "None", i[i.Anonymous = 1] = "Anonymous", i[i.NonConstantAttributeDefinitions = 2] = "NonConstantAttributeDefinitions", i[i.XRef = 4] = "XRef", i[i.XRefOverlay = 8] = "XRefOverlay", i[i.XRefDependent = 16] = "XRefDependent", i[i.XRefResolved = 32] = "XRefResolved", i[i.Referenced = 64] = "Referenced";
@@ -576,7 +576,7 @@ pe({
   proxyFlags: $.None
 });
 const _T = $.EraseAllowed | $.CloningAllowed | $.DisablesProxyWarningDialog;
-function ve(i, t, e = 55) {
+function xe(i, t, e = 55) {
   pe({
     cppClassName: i,
     dwgVersion: w.AC1018,
@@ -586,37 +586,37 @@ function ve(i, t, e = 55) {
     proxyFlags: _T
   });
 }
-G_(ve, "defineDynamicBlockClass");
-ve(p.blockRepresentationData, f.objectBlockRepresentationData, 58);
-ve(p.dynamicBlockPurgePreventer, f.objectDynamicBlockPurgePreventer, 61);
-ve(p.blockAlignmentGrip, f.objectBlockAlignmentGrip);
-ve(p.blockAlignmentParameter, f.objectBlockAlignmentParameter);
-ve(p.blockArrayAction, f.objectBlockArrayAction);
-ve(p.blockBasePointParameter, f.objectBlockBasePointParameter);
-ve(p.blockFlipAction, f.objectBlockFlipAction);
-ve(p.blockFlipGrip, f.objectBlockFlipGrip);
-ve(p.blockFlipParameter, f.objectBlockFlipParameter);
-ve(p.blockGripExpression, f.objectBlockGripLocationComponent, 20);
-ve(p.blockLinearGrip, f.objectBlockLinearGrip);
-ve(p.blockLinearParameter, f.objectBlockLinearParameter);
-ve(p.blockLookupAction, f.objectBlockLookupAction);
-ve(p.blockLookupGrip, f.objectBlockLookupGrip);
-ve(p.blockLookupParameter, f.objectBlockLookupParameter);
-ve(p.blockMoveAction, f.objectBlockMoveAction);
-ve(p.blockPointParameter, f.objectBlockPointParameter);
-ve(p.blockPolarGrip, f.objectBlockPolarGrip);
-ve(p.blockPolarParameter, f.objectBlockPolarParameter);
-ve(p.blockPolarStretchAction, f.objectBlockPolarStretchAction);
-ve(p.blockRotationAction, f.objectBlockRotateAction);
-ve(p.blockRotationGrip, f.objectBlockRotationGrip);
-ve(p.blockRotationParameter, f.objectBlockRotationParameter);
-ve(p.blockScaleAction, f.objectBlockScaleAction);
-ve(p.blockStretchAction, f.objectBlockStretchAction);
-ve(p.blockVisibilityGrip, f.objectBlockVisibilityGrip);
-ve(p.blockVisibilityParameter, f.objectBlockVisibilityParameter);
-ve(p.blockXYGrip, f.objectBlockXYGrip);
-ve(p.blockXYParameter, f.objectBlockXYParameter);
-ve(p.evalGraph, f.objectEvalGraph);
+G_(xe, "defineDynamicBlockClass");
+xe(p.blockRepresentationData, f.objectBlockRepresentationData, 58);
+xe(p.dynamicBlockPurgePreventer, f.objectDynamicBlockPurgePreventer, 61);
+xe(p.blockAlignmentGrip, f.objectBlockAlignmentGrip);
+xe(p.blockAlignmentParameter, f.objectBlockAlignmentParameter);
+xe(p.blockArrayAction, f.objectBlockArrayAction);
+xe(p.blockBasePointParameter, f.objectBlockBasePointParameter);
+xe(p.blockFlipAction, f.objectBlockFlipAction);
+xe(p.blockFlipGrip, f.objectBlockFlipGrip);
+xe(p.blockFlipParameter, f.objectBlockFlipParameter);
+xe(p.blockGripExpression, f.objectBlockGripLocationComponent, 20);
+xe(p.blockLinearGrip, f.objectBlockLinearGrip);
+xe(p.blockLinearParameter, f.objectBlockLinearParameter);
+xe(p.blockLookupAction, f.objectBlockLookupAction);
+xe(p.blockLookupGrip, f.objectBlockLookupGrip);
+xe(p.blockLookupParameter, f.objectBlockLookupParameter);
+xe(p.blockMoveAction, f.objectBlockMoveAction);
+xe(p.blockPointParameter, f.objectBlockPointParameter);
+xe(p.blockPolarGrip, f.objectBlockPolarGrip);
+xe(p.blockPolarParameter, f.objectBlockPolarParameter);
+xe(p.blockPolarStretchAction, f.objectBlockPolarStretchAction);
+xe(p.blockRotationAction, f.objectBlockRotateAction);
+xe(p.blockRotationGrip, f.objectBlockRotationGrip);
+xe(p.blockRotationParameter, f.objectBlockRotationParameter);
+xe(p.blockScaleAction, f.objectBlockScaleAction);
+xe(p.blockStretchAction, f.objectBlockStretchAction);
+xe(p.blockVisibilityGrip, f.objectBlockVisibilityGrip);
+xe(p.blockVisibilityParameter, f.objectBlockVisibilityParameter);
+xe(p.blockXYGrip, f.objectBlockXYGrip);
+xe(p.blockXYParameter, f.objectBlockXYParameter);
+xe(p.evalGraph, f.objectEvalGraph);
 function QS(i) {
   const t = KS.get(i.toUpperCase());
   return t == null ? null : Object.assign(new wt(), t);
@@ -1156,7 +1156,7 @@ const hl = class hl {
 };
 ST(hl, "INamedCadObjectExtensions"), n(hl, "invalidCharacters", ["\\", "/", ":", "?", '"', "<", ">", "|", ";", ",", "=", "`"]);
 let Tf = hl;
-var vT = Object.defineProperty, xT = (i, t) => vT(i, "name", { value: t, configurable: !0 });
+var xT = Object.defineProperty, vT = (i, t) => xT(i, "name", { value: t, configurable: !0 });
 const Bm = class Bm extends Ie {
   constructor(e) {
     super();
@@ -1192,13 +1192,13 @@ const Bm = class Bm extends Ie {
     return `${this.objectName}:${this.name}`;
   }
 };
-xT(Bm, "TableEntry");
+vT(Bm, "TableEntry");
 let Dr = Bm;
 var $r;
 (function(i) {
   i[i.None = 0] = "None", i[i.RotationIsAbsolute = 1] = "RotationIsAbsolute", i[i.Text = 2] = "Text", i[i.Shape = 4] = "Shape";
 })($r || ($r = {}));
-var TT = Object.defineProperty, ev = (i, t) => TT(i, "name", { value: t, configurable: !0 });
+var TT = Object.defineProperty, ex = (i, t) => TT(i, "name", { value: t, configurable: !0 });
 const _u = class _u {
   constructor() {
     n(this, "length", 0);
@@ -1219,7 +1219,7 @@ const _u = class _u {
     return t.length = this.length, t.shapeFlags = this.shapeFlags, t.shapeNumber = this.shapeNumber, t.offset = { ...this.offset }, t.rotation = this.rotation, t.scale = this.scale, t.text = this.text, t.style = this.style, t.owner = null, t;
   }
 };
-ev(_u, "LineTypeSegment");
+ex(_u, "LineTypeSegment");
 let Pc = _u;
 const Wi = class Wi extends Dr {
   constructor(e) {
@@ -1247,7 +1247,7 @@ const Wi = class Wi extends Dr {
     return f.tableLinetype;
   }
   get objectType() {
-    return v.LTYPE;
+    return x.LTYPE;
   }
   get patternLength() {
     return this._segments.reduce((e, r) => e + Math.abs(r.length), 0);
@@ -1271,12 +1271,12 @@ const Wi = class Wi extends Dr {
     return e;
   }
 };
-ev(Wi, "LineType"), n(Wi, "byBlockName", "ByBlock"), n(Wi, "byLayerName", "ByLayer"), n(Wi, "continuousName", "Continuous");
+ex(Wi, "LineType"), n(Wi, "byBlockName", "ByBlock"), n(Wi, "byLayerName", "ByLayer"), n(Wi, "continuousName", "Continuous");
 let ie = Wi;
-var xt;
+var vt;
 (function(i) {
   i[i.None = 0] = "None", i[i.Frozen = 1] = "Frozen", i[i.FrozenNewViewports = 2] = "FrozenNewViewports", i[i.Locked = 4] = "Locked", i[i.XrefDependent = 16] = "XrefDependent", i[i.XrefResolved = 32] = "XrefResolved", i[i.Referenced = 64] = "Referenced";
-})(xt || (xt = {}));
+})(vt || (vt = {}));
 var DT = Object.defineProperty, AT = (i, t) => DT(i, "name", { value: t, configurable: !0 });
 const si = class si extends Dr {
   constructor(e) {
@@ -1320,7 +1320,7 @@ const si = class si extends Dr {
     return f.tableLayer;
   }
   get objectType() {
-    return v.LAYER;
+    return x.LAYER;
   }
   get plotFlag() {
     return this._name.toLowerCase() === si.defpointsName.toLowerCase() ? !1 : this._plotFlag;
@@ -1513,8 +1513,8 @@ let Me = (Qi = class {
     this.translation = t ?? new u(0, 0, 0), this.scale = e ?? new u(1, 1, 1), this.eulerRotation = r ?? new u(0, 0, 0);
   }
   get matrix() {
-    const t = new Fr(), e = this.scale.x, r = this.scale.y, s = this.scale.z, a = this.eulerRotation.x, o = this.eulerRotation.y, l = this.eulerRotation.z, c = Math.cos(a), h = Math.sin(a), d = Math.cos(o), _ = Math.sin(o), b = Math.cos(l), x = Math.sin(l);
-    return t.m00 = d * b * e, t.m01 = -(d * x) * r, t.m02 = _ * s, t.m10 = (c * x + b * h * _) * e, t.m11 = (c * b - h * _ * x) * r, t.m12 = -(d * h) * s, t.m20 = (h * x - c * b * _) * e, t.m21 = (b * h + c * _ * x) * r, t.m22 = c * d * s, t.m03 = this.translation.x, t.m13 = this.translation.y, t.m23 = this.translation.z, t;
+    const t = new Fr(), e = this.scale.x, r = this.scale.y, s = this.scale.z, a = this.eulerRotation.x, o = this.eulerRotation.y, l = this.eulerRotation.z, c = Math.cos(a), h = Math.sin(a), d = Math.cos(o), _ = Math.sin(o), b = Math.cos(l), v = Math.sin(l);
+    return t.m00 = d * b * e, t.m01 = -(d * v) * r, t.m02 = _ * s, t.m10 = (c * v + b * h * _) * e, t.m11 = (c * b - h * _ * v) * r, t.m12 = -(d * h) * s, t.m20 = (h * v - c * b * _) * e, t.m21 = (b * h + c * _ * v) * r, t.m22 = c * d * s, t.m03 = this.translation.x, t.m13 = this.translation.y, t.m23 = this.translation.z, t;
   }
   applyTransform(t) {
     const e = this.matrix;
@@ -1559,16 +1559,16 @@ const Sm = class Sm {
 };
 bt(Sm, "ProxyRawGeometry");
 let Cl = Sm;
-const vm = class vm {
+const xm = class xm {
   constructor() {
     n(this, "graphicsType", le.Extents);
     n(this, "min", new u());
     n(this, "max", new u());
   }
 };
-bt(vm, "ProxyExtents");
-let Ec = vm;
-const xm = class xm {
+bt(xm, "ProxyExtents");
+let Ec = xm;
+const vm = class vm {
   constructor() {
     n(this, "graphicsType", le.Circle);
     n(this, "center", new u());
@@ -1576,8 +1576,8 @@ const xm = class xm {
     n(this, "normal", new u(0, 0, 1));
   }
 };
-bt(xm, "ProxyCircle");
-let kc = xm;
+bt(vm, "ProxyCircle");
+let kc = vm;
 const Tm = class Tm {
   constructor() {
     n(this, "graphicsType", le.CirclePt3);
@@ -1702,11 +1702,11 @@ var Af;
 (function(i) {
   i[i.ByLayer = 0] = "ByLayer", i[i.ByBlock = 1] = "ByBlock", i[i.DictDefault = 2] = "DictDefault", i[i.PlotstyleById = 3] = "PlotstyleById";
 })(Af || (Af = {}));
-var VT = Object.defineProperty, tv = (i, t) => VT(i, "name", { value: t, configurable: !0 });
+var VT = Object.defineProperty, tx = (i, t) => VT(i, "name", { value: t, configurable: !0 });
 function Sc(i) {
   return i != null && typeof i == "object" && "blockEntity" in i;
 }
-tv(Sc, "isBlockRecordOwner");
+tx(Sc, "isBlockRecordOwner");
 const Vm = class Vm extends Ie {
   constructor() {
     super();
@@ -1831,7 +1831,7 @@ const Vm = class Vm extends Ie {
     return this.applyTransformToVector(e, r).normalize();
   }
 };
-tv(Vm, "Entity");
+tx(Vm, "Entity");
 let re = Vm;
 var MT = Object.defineProperty, HT = (i, t) => MT(i, "name", { value: t, configurable: !0 });
 const Mm = class Mm extends re {
@@ -1839,7 +1839,7 @@ const Mm = class Mm extends re {
     return f.endBlock;
   }
   get objectType() {
-    return v.ENDBLK;
+    return x.ENDBLK;
   }
   get subclassMarker() {
     return p.blockEnd;
@@ -1923,10 +1923,10 @@ const $m = class $m {
 };
 WT($m, "CadObjectCollection");
 let Uc = $m;
-var vl;
+var xl;
 (function(i) {
   i[i.None = 0] = "None", i[i.Backward = 2] = "Backward", i[i.UpsideDown = 4] = "UpsideDown";
-})(vl || (vl = {}));
+})(xl || (xl = {}));
 var Kn;
 (function(i) {
   i[i.None = 0] = "None", i[i.IsShape = 1] = "IsShape", i[i.VerticalText = 4] = "VerticalText", i[i.XrefDependent = 16] = "XrefDependent", i[i.XrefResolved = 32] = "XrefResolved", i[i.Referenced = 64] = "Referenced";
@@ -1945,11 +1945,11 @@ const $a = class $a extends Dr {
     n(this, "width", 1);
     n(this, "lastHeight", 0);
     n(this, "obliqueAngle", 0);
-    n(this, "mirrorFlag", vl.None);
+    n(this, "mirrorFlag", xl.None);
     n(this, "trueType", Bi.Regular);
   }
   get objectType() {
-    return v.STYLE;
+    return x.STYLE;
   }
   get objectName() {
     return f.tableStyle;
@@ -1994,7 +1994,7 @@ const Um = class Um extends re {
     n(this, "thickness", 0);
     n(this, "verticalAlignment", ci.Baseline);
     n(this, "widthFactor", 1);
-    n(this, "_mirror", vl.None);
+    n(this, "_mirror", xl.None);
     n(this, "_style", Ve.default);
     n(this, "_value", "");
     this.value = e;
@@ -2009,7 +2009,7 @@ const Um = class Um extends re {
     return f.entityText;
   }
   get objectType() {
-    return v.TEXT;
+    return x.TEXT;
   }
   get style() {
     return this._style;
@@ -2097,7 +2097,7 @@ const Wm = class Wm extends oo {
     e && this.matchAttributeProperties(e);
   }
   get objectType() {
-    return v.ATTDEF;
+    return x.ATTDEF;
   }
   get objectName() {
     return f.entityAttributeDefinition;
@@ -2207,7 +2207,7 @@ const Hn = class Hn extends re {
     return f.entityViewport;
   }
   get objectType() {
-    return v.VIEWPORT;
+    return x.VIEWPORT;
   }
   get representsPaper() {
     return this.id === Hn.paperViewId;
@@ -2285,7 +2285,7 @@ const Fm = class Fm extends Ie {
     this.onNameChanged?.call(this, this, new Nc(this._name, e)), this._name = e;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   clone() {
     const e = super.clone();
@@ -2322,7 +2322,7 @@ const Q = class Q extends ue {
     return f.objectDictionary;
   }
   get objectType() {
-    return v.DICTIONARY;
+    return x.DICTIONARY;
   }
   get subclassMarker() {
     return p.dictionary;
@@ -2428,7 +2428,7 @@ const gu = class gu extends ue {
     return f.objectEvalGraph;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.evalGraph;
@@ -2539,7 +2539,7 @@ const Xm = class Xm extends ue {
     return f.objectPlotSettings;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get printScale() {
     return this.numeratorScale / this.denominatorScale;
@@ -2605,7 +2605,7 @@ const Ua = class Ua extends Si {
     return f.objectLayout;
   }
   get objectType() {
-    return v.LAYOUT;
+    return x.LAYOUT;
   }
   get subclassMarker() {
     return p.layout;
@@ -2646,7 +2646,7 @@ const Ua = class Ua extends Si {
 };
 uD(Ua, "Layout"), n(Ua, "modelLayoutName", "Model"), n(Ua, "paperLayoutName", "Layout1");
 let $t = Ua;
-var fD = Object.defineProperty, rv = (i, t) => fD(i, "name", { value: t, configurable: !0 });
+var fD = Object.defineProperty, rx = (i, t) => fD(i, "name", { value: t, configurable: !0 });
 const Ym = class Ym {
   constructor(t, e) {
     n(this, "sortHandle", 0);
@@ -2660,7 +2660,7 @@ const Ym = class Ym {
     return this.sortHandle < t.sortHandle ? -1 : this.sortHandle > t.sortHandle ? 1 : 0;
   }
 };
-rv(Ym, "Sorter");
+rx(Ym, "Sorter");
 let Fc = Ym;
 const dl = class dl extends ue {
   constructor(e) {
@@ -2673,7 +2673,7 @@ const dl = class dl extends ue {
     return f.objectSortEntsTable;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.sortentsTable;
@@ -2726,8 +2726,8 @@ const dl = class dl extends ue {
     s ? s.sortHandle = r : this._sorters.push(new Fc(e, r));
   }
 };
-rv(dl, "SortEntitiesTable"), n(dl, "dictionaryEntryName", "ACAD_SORTENTS");
-let vi = dl;
+rx(dl, "SortEntitiesTable"), n(dl, "dictionaryEntryName", "ACAD_SORTENTS");
+let xi = dl;
 var Ze;
 (function(i) {
   i[i.Unitless = 0] = "Unitless", i[i.Inches = 1] = "Inches", i[i.Feet = 2] = "Feet", i[i.Miles = 3] = "Miles", i[i.Millimeters = 4] = "Millimeters", i[i.Centimeters = 5] = "Centimeters", i[i.Meters = 6] = "Meters", i[i.Kilometers = 7] = "Kilometers", i[i.Microinches = 8] = "Microinches", i[i.Mils = 9] = "Mils", i[i.Yards = 10] = "Yards", i[i.Angstroms = 11] = "Angstroms", i[i.Nanometers = 12] = "Nanometers", i[i.Microns = 13] = "Microns", i[i.Decimeters = 14] = "Decimeters", i[i.Decameters = 15] = "Decameters", i[i.Hectometers = 16] = "Hectometers", i[i.Gigameters = 17] = "Gigameters", i[i.AstronomicalUnits = 18] = "AstronomicalUnits", i[i.LightYears = 19] = "LightYears", i[i.Parsecs = 20] = "Parsecs", i[i.USSurveyFeet = 21] = "USSurveyFeet", i[i.USSurveyInches = 22] = "USSurveyInches", i[i.USSurveyYards = 23] = "USSurveyYards";
@@ -2760,7 +2760,7 @@ const ks = class ks extends Dr {
     return f.tableAppId;
   }
   get objectType() {
-    return v.APPID;
+    return x.APPID;
   }
   get subclassMarker() {
     return p.applicationId;
@@ -2851,10 +2851,10 @@ const Or = class Or extends Dr {
     return f.tableBlockRecord;
   }
   get objectType() {
-    return v.BLOCK_HEADER;
+    return x.BLOCK_HEADER;
   }
   get sortEntitiesTable() {
-    return this.xDictionary?.getEntry(vi.dictionaryEntryName) ?? null;
+    return this.xDictionary?.getEntry(xi.dictionaryEntryName) ?? null;
   }
   get source() {
     const r = this.extendedData.getExtendedDataByName().get(rt.blockRepBTag.toUpperCase())?.records.find((a) => a instanceof lo) ?? null;
@@ -2899,7 +2899,7 @@ const Or = class Or extends Dr {
   }
   createSortEntitiesTable() {
     let e = this.sortEntitiesTable;
-    return e != null || (this.xDictionary == null && (this.xDictionary = new Re()), e = new vi(this), this.xDictionary.addByKey(vi.dictionaryEntryName, e)), e;
+    return e != null || (this.xDictionary == null && (this.xDictionary = new Re()), e = new xi(this), this.xDictionary.addByKey(xi.dictionaryEntryName, e)), e;
   }
   getBoundingBox() {
     let e = null;
@@ -2930,10 +2930,10 @@ const Or = class Or extends Dr {
 CD(Or, "BlockRecord"), n(Or, "anonymousPrefix", "*A"), n(Or, "modelSpaceName", "*Model_Space"), n(Or, "paperSpaceName", "*Paper_Space");
 let te = Or;
 var BD = Object.defineProperty, SD = (i, t) => BD(i, "name", { value: t, configurable: !0 });
-const vD = new u(0, 0, 0), Km = class Km extends re {
+const xD = new u(0, 0, 0), Km = class Km extends re {
   constructor(e) {
     super();
-    n(this, "basePoint", vD);
+    n(this, "basePoint", xD);
     n(this, "comments", null);
     n(this, "flags", We.None);
     n(this, "isUnloaded", !1);
@@ -2953,7 +2953,7 @@ const vD = new u(0, 0, 0), Km = class Km extends re {
     return f.block;
   }
   get objectType() {
-    return v.BLOCK;
+    return x.BLOCK;
   }
   get subclassMarker() {
     return p.blockBegin;
@@ -2975,7 +2975,7 @@ const vD = new u(0, 0, 0), Km = class Km extends re {
 };
 SD(Km, "Block");
 let ea = Km;
-var xD = Object.defineProperty, TD = (i, t) => xD(i, "name", { value: t, configurable: !0 });
+var vD = Object.defineProperty, TD = (i, t) => vD(i, "name", { value: t, configurable: !0 });
 const Jm = class Jm extends re {
   constructor(e, r) {
     super();
@@ -2989,7 +2989,7 @@ const Jm = class Jm extends re {
     return f.entityCircle;
   }
   get objectType() {
-    return v.CIRCLE;
+    return x.CIRCLE;
   }
   get radius() {
     return this._radius;
@@ -3042,7 +3042,7 @@ const ul = class ul extends at {
     return f.entityArc;
   }
   get objectType() {
-    return v.ARC;
+    return x.ARC;
   }
   get subclassMarker() {
     return p.arc;
@@ -3112,7 +3112,7 @@ const Qm = class Qm extends re {
     return f.entityLine;
   }
   get objectType() {
-    return v.LINE;
+    return x.LINE;
   }
   get subclassMarker() {
     return p.line;
@@ -3130,11 +3130,11 @@ var ui;
 (function(i) {
   i[i.Default = 0] = "Default", i[i.Closed = 1] = "Closed", i[i.Plinegen = 128] = "Plinegen";
 })(ui || (ui = {}));
-var RD = Object.defineProperty, iv = (i, t) => RD(i, "name", { value: t, configurable: !0 });
-function vc(i) {
+var RD = Object.defineProperty, ix = (i, t) => RD(i, "name", { value: t, configurable: !0 });
+function xc(i) {
   return i.dimension === 3;
 }
-iv(vc, "isXYZ");
+ix(xc, "isXYZ");
 const ew = class ew {
   static explode(t) {
     const e = Array.from(t.vertices);
@@ -3179,30 +3179,30 @@ const ew = class ew {
     const h = this._toXY(e.location), d = this._toXY(r.location);
     if (h.x === d.x && h.y === d.y)
       return [l, c];
-    const { center: _, radius: b } = Xt.getCenter(h, d, a), x = Math.atan2(h.y - _.y, h.x - _.x);
+    const { center: _, radius: b } = Xt.getCenter(h, d, a), v = Math.atan2(h.y - _.y, h.x - _.x);
     let g = Math.atan2(d.y - _.y, d.x - _.x);
-    a > 0 && g < x ? g += Math.PI * 2 : a < 0 && g > x && (g -= Math.PI * 2);
-    const T = Math.max(2, Math.floor(s)), k = (g - x) / (T - 1), E = [];
+    a > 0 && g < v ? g += Math.PI * 2 : a < 0 && g > v && (g -= Math.PI * 2);
+    const T = Math.max(2, Math.floor(s)), k = (g - v) / (T - 1), E = [];
     for (let I = 0; I < T; I++) {
-      const V = x + k * I;
+      const V = v + k * I;
       E.push(new u(_.x + b * Math.cos(V), _.y + b * Math.sin(V), o));
     }
     return E[0] = l, E[E.length - 1] = c, E;
   }
   static _getElevation(t, e, r) {
-    return vc(e.location) ? e.location.z : vc(r.location) ? r.location.z : t.elevation;
+    return xc(e.location) ? e.location.z : xc(r.location) ? r.location.z : t.elevation;
   }
   static _toXY(t) {
     return new P(t.x, t.y);
   }
   static _toXYZ(t, e) {
     const r = t;
-    return new u(r.x, r.y, vc(t) ? t.z : e);
+    return new u(r.x, r.y, xc(t) ? t.z : e);
   }
 };
-iv(ew, "PolylineExtensions");
-let xl = ew;
-var ED = Object.defineProperty, sv = (i, t) => ED(i, "name", { value: t, configurable: !0 });
+ix(ew, "PolylineExtensions");
+let vl = ew;
+var ED = Object.defineProperty, sx = (i, t) => ED(i, "name", { value: t, configurable: !0 });
 const tw = class tw {
   constructor(t) {
     n(this, "location", new P(0, 0));
@@ -3218,7 +3218,7 @@ const tw = class tw {
     return new u(this.location.x, this.location.y, 0);
   }
 };
-sv(tw, "LwPolylineVertex");
+sx(tw, "LwPolylineVertex");
 let Tt = tw;
 const rw = class rw extends re {
   constructor(e) {
@@ -3247,7 +3247,7 @@ const rw = class rw extends re {
     return f.entityLwPolyline;
   }
   get objectType() {
-    return v.LWPOLYLINE;
+    return x.LWPOLYLINE;
   }
   get subclassMarker() {
     return p.lwPolyline;
@@ -3264,7 +3264,7 @@ const rw = class rw extends re {
     this.normal = this.applyTransformToVector(e, this.normal).normalize();
   }
   getPoints(e = 256) {
-    return xl.getPoints(this, e);
+    return vl.getPoints(this, e);
   }
   clone() {
     const e = super.clone();
@@ -3278,7 +3278,7 @@ const rw = class rw extends re {
     return e.length > 0 ? se.fromPoints(e) : null;
   }
 };
-sv(rw, "LwPolyline");
+sx(rw, "LwPolyline");
 let lr = rw;
 var kD = Object.defineProperty, LD = (i, t) => kD(i, "name", { value: t, configurable: !0 });
 const iw = class iw extends re {
@@ -3296,7 +3296,7 @@ const iw = class iw extends re {
     return f.entitySolid;
   }
   get objectType() {
-    return v.SOLID;
+    return x.SOLID;
   }
   get subclassMarker() {
     return p.solid;
@@ -3477,20 +3477,20 @@ const Qt = class Qt {
     const d = Math.floor(e / 100), _ = 2 - d + Math.floor(d / 4);
     let b;
     e < 0 ? b = Math.floor(365.25 * e - 0.75) : b = Math.floor(365.25 * e);
-    const x = Math.floor(30.6001 * (r + 1));
-    return _ + b + x + 1720995 + h;
+    const v = Math.floor(30.6001 * (r + 1));
+    return _ + b + v + 1720995 + h;
   }
   static fromJulianCalendar(t) {
     if (t < 1721426 || t > 5373484)
       throw new RangeError("The valid values range from 1721426 and 5373484.");
     const e = Math.floor(t);
     let r = t - e;
-    const s = Math.floor((e - 186721625e-2) / 36524.25), o = e + 1 + s - Math.floor(s / 4) + 1524, l = Math.floor((o - 122.1) / 365.25), c = Math.floor(365.25 * l), h = Math.floor((o - c) / 30.6001), d = h < 14 ? h - 1 : h - 13, _ = d > 2 ? l - 4716 : l - 4715, b = o - c - Math.floor(30.6001 * h), x = Math.floor(r * 24);
-    r -= x / 24;
+    const s = Math.floor((e - 186721625e-2) / 36524.25), o = e + 1 + s - Math.floor(s / 4) + 1524, l = Math.floor((o - 122.1) / 365.25), c = Math.floor(365.25 * l), h = Math.floor((o - c) / 30.6001), d = h < 14 ? h - 1 : h - 13, _ = d > 2 ? l - 4716 : l - 4715, b = o - c - Math.floor(30.6001 * h), v = Math.floor(r * 24);
+    r -= v / 24;
     const g = Math.floor(r * 1440);
     r -= g / 1440;
     const T = r * 86400, k = Math.floor(T), E = Math.floor((T - k) * 1e3);
-    return new Date(_, d - 1, b, x, g, k, E);
+    return new Date(_, d - 1, b, v, g, k, E);
   }
   static editingTime(t) {
     const e = Math.floor(t);
@@ -4032,7 +4032,7 @@ const $n = class $n extends Dr {
     return f.tableDimstyle;
   }
   get objectType() {
-    return v.DIMSTYLE;
+    return x.DIMSTYLE;
   }
   get prefix() {
     const { prefix: e } = this._getDimStylePrefixAndSuffix(this.postFix, "<", ">");
@@ -4132,7 +4132,7 @@ const nw = class nw extends Dr {
     n(this, "elevation", 0);
   }
   get objectType() {
-    return v.UCS;
+    return x.UCS;
   }
   get objectName() {
     return f.tableUcs;
@@ -14982,20 +14982,20 @@ function q_(i) {
   };
 }
 In(q_, "cloneClassMetadata");
-function nv() {
+function nx() {
   if (!ep) {
     for (const i of iA)
       Z_.set(i.typeName, q_(i));
     ep = !0;
   }
 }
-In(nv, "ensureInitialized");
+In(nx, "ensureInitialized");
 function nA() {
   ep = !1, Z_.clear();
 }
 In(nA, "clearMetadataCache");
 function ra(i) {
-  nv();
+  nx();
   const t = typeof i == "string" ? i : i.name, e = Z_.get(t);
   return e ? q_(e) : void 0;
 }
@@ -15008,13 +15008,13 @@ function J_(i) {
   return ra(i)?.systemVariables ?? [];
 }
 In(J_, "getSystemVariableMetadata");
-function av(i) {
+function ax(i) {
   const t = /* @__PURE__ */ new Map();
   for (const e of J_(i))
     t.set(e.name, Kc(e));
   return t;
 }
-In(av, "getSystemVariableMetadataMap");
+In(ax, "getSystemVariableMetadataMap");
 var aA = Object.defineProperty, oA = (i, t) => aA(i, "name", { value: t, configurable: !0 }), tp;
 (function(i) {
   i[i.Top = 0] = "Top", i[i.Middle = 1] = "Middle", i[i.Bottom = 2] = "Bottom";
@@ -15841,7 +15841,7 @@ const br = class br {
   static getHeaderMap() {
     if (!br._headerMapCache) {
       br._headerMapCache = /* @__PURE__ */ new Map();
-      for (const t of av(br).values())
+      for (const t of ax(br).values())
         br._headerMapCache.set(t.name, new Qf(t));
     }
     return new Map(br._headerMapCache);
@@ -15986,7 +15986,7 @@ const dw = class dw extends ue {
     return f.tableGroup;
   }
   get objectType() {
-    return v.GROUP;
+    return x.GROUP;
   }
   get subclassMarker() {
     return p.group;
@@ -16182,7 +16182,7 @@ const za = class za extends ue {
     return f.objectMaterial;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get specularColorFactor() {
     return this._specularColorFactor;
@@ -16197,14 +16197,14 @@ const za = class za extends ue {
   }
 };
 CA(za, "Material"), n(za, "byBlockName", "ByBlock"), n(za, "byLayerName", "ByLayer"), n(za, "globalName", "Global");
-let xi = za;
+let vi = za;
 var BA = Object.defineProperty, SA = (i, t) => BA(i, "name", { value: t, configurable: !0 });
 const pw = class pw extends hr {
   constructor(t) {
     super(t);
   }
   createDefaults() {
-    this._dictionary.tryAdd(new xi("Global")), this._dictionary.tryAdd(new xi("ByLayer")), this._dictionary.tryAdd(new xi("ByBlock"));
+    this._dictionary.tryAdd(new vi("Global")), this._dictionary.tryAdd(new vi("ByLayer")), this._dictionary.tryAdd(new vi("ByBlock"));
   }
 };
 SA(pw, "MaterialCollection");
@@ -16213,7 +16213,7 @@ var tt;
 (function(i) {
   i[i.None = 0] = "None", i[i.FillOn = 1] = "FillOn", i[i.DisplayJoints = 2] = "DisplayJoints", i[i.StartSquareCap = 16] = "StartSquareCap", i[i.StartInnerArcsCap = 32] = "StartInnerArcsCap", i[i.StartRoundCap = 64] = "StartRoundCap", i[i.EndSquareCap = 256] = "EndSquareCap", i[i.EndInnerArcsCap = 512] = "EndInnerArcsCap", i[i.EndRoundCap = 1024] = "EndRoundCap";
 })(tt || (tt = {}));
-var vA = Object.defineProperty, ov = (i, t) => vA(i, "name", { value: t, configurable: !0 });
+var xA = Object.defineProperty, ox = (i, t) => xA(i, "name", { value: t, configurable: !0 });
 const yu = class yu {
   constructor() {
     n(this, "color", O.byLayer);
@@ -16238,7 +16238,7 @@ const yu = class yu {
     this.owner?.document?.lineTypes?.removeReference(this._lineType?.name, this.owner), this._lineType = this._lineType?.clone() ?? null;
   }
 };
-ov(yu, "MLineStyleElement");
+ox(yu, "MLineStyleElement");
 let uo = yu;
 const Wa = class Wa extends ue {
   constructor(e) {
@@ -16265,7 +16265,7 @@ const Wa = class Wa extends ue {
     return f.objectMLineStyle;
   }
   get objectType() {
-    return v.MLINESTYLE;
+    return x.MLINESTYLE;
   }
   get subclassMarker() {
     return p.mLineStyle;
@@ -16296,9 +16296,9 @@ const Wa = class Wa extends ue {
     return e;
   }
 };
-ov(Wa, "MLineStyle"), n(Wa, "defaultName", "Standard");
+ox(Wa, "MLineStyle"), n(Wa, "defaultName", "Standard");
 let Ri = Wa;
-var xA = Object.defineProperty, TA = (i, t) => xA(i, "name", { value: t, configurable: !0 });
+var vA = Object.defineProperty, TA = (i, t) => vA(i, "name", { value: t, configurable: !0 });
 const _w = class _w extends hr {
   constructor(t) {
     super(t);
@@ -16328,7 +16328,7 @@ const mw = class mw extends oo {
     return f.entityAttribute;
   }
   get objectType() {
-    return v.ATTRIB;
+    return x.ATTRIB;
   }
   get subclassMarker() {
     return p.attribute;
@@ -16378,7 +16378,7 @@ const ww = class ww extends re {
     return f.entityInsert;
   }
   get objectType() {
-    return this.rowCount > 1 || this.columnCount > 1 ? v.MINSERT : v.INSERT;
+    return this.rowCount > 1 || this.columnCount > 1 ? x.MINSERT : x.INSERT;
   }
   get subclassMarker() {
     return this.isMultiple ? p.mInsert : p.insert;
@@ -16537,9 +16537,9 @@ const Bu = class Bu {
 };
 LA(Bu, "CadValue");
 let Di = Bu;
-var OA = Object.defineProperty, lv = (i, t) => OA(i, "name", { value: t, configurable: !0 });
+var OA = Object.defineProperty, lx = (i, t) => OA(i, "name", { value: t, configurable: !0 });
 function ft(i) {
-  const t = [], e = /* @__PURE__ */ lv((r) => {
+  const t = [], e = /* @__PURE__ */ lx((r) => {
     const s = /* @__PURE__ */ new Set();
     for (const a of r)
       if (a) {
@@ -16571,7 +16571,7 @@ function ft(i) {
     }
   });
 }
-lv(ft, "tableOwnedList");
+lx(ft, "tableOwnedList");
 var jA = Object.defineProperty, lt = (i, t) => jA(i, "name", { value: t, configurable: !0 });
 function fo(i) {
   return new u(i.x, i.y, i.z);
@@ -16661,18 +16661,18 @@ const Su = class Su {
 };
 lt(Su, "TableAttribute");
 let eh = Su;
-const vu = class vu {
+const xu = class xu {
   constructor() {
     n(this, "name", "");
     n(this, "value", new Di());
   }
   clone() {
-    return Object.assign(new vu(), this, { value: this.value.clone() });
+    return Object.assign(new xu(), this, { value: this.value.clone() });
   }
 };
-lt(vu, "CustomDataEntry");
-let wp = vu;
-const xu = class xu {
+lt(xu, "CustomDataEntry");
+let wp = xu;
+const vu = class vu {
   constructor() {
     n(this, "distanceTopLeft", new u(0, 0, 0));
     n(this, "distanceCenter", new u(0, 0, 0));
@@ -16683,11 +16683,11 @@ const xu = class xu {
     n(this, "flags", 0);
   }
   clone() {
-    return Object.assign(new xu(), this, { distanceTopLeft: fo(this.distanceTopLeft), distanceCenter: fo(this.distanceCenter) });
+    return Object.assign(new vu(), this, { distanceTopLeft: fo(this.distanceTopLeft), distanceCenter: fo(this.distanceCenter) });
   }
 };
-lt(xu, "CellContentGeometry");
-let bp = xu;
+lt(vu, "CellContentGeometry");
+let bp = vu;
 const Tu = class Tu {
   constructor() {
     n(this, "bottomRowIndex", 0);
@@ -17016,7 +17016,7 @@ const Sw = class Sw extends Zt {
     return f.entityTable;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get rows() {
     return this._content.rows;
@@ -17070,7 +17070,7 @@ let IA = (so = class extends Ie {
     return e.columns = ft(() => e), e.rows = ft(() => e), e.columns.push(...this.columns.map((r) => r.clone())), e.rows.push(...this.rows.map((r) => r.clone())), e.cellStyleOverride = this.cellStyleOverride.clone(), e.cellStyleOverride.owner = e, e.mergedCellRanges = this.mergedCellRanges.map((r) => r.clone()), e.fieldReferences = [], e.style = this.style?.clone() ?? null, e;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectTableContent;
@@ -17141,7 +17141,7 @@ const ni = class ni extends ue {
     return f.objectTableStyle;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.tableStyle;
@@ -17182,7 +17182,7 @@ const ni = class ni extends ue {
 MA(ni, "TableStyle"), n(ni, "defaultName", "Standard");
 let At = ni;
 var HA = Object.defineProperty, $A = (i, t) => HA(i, "name", { value: t, configurable: !0 });
-const vw = class vw extends hr {
+const xw = class xw extends hr {
   constructor(t) {
     super(t);
   }
@@ -17190,8 +17190,8 @@ const vw = class vw extends hr {
     this._dictionary.tryAdd(At.default_);
   }
 };
-$A(vw, "TableStyleCollection");
-let rh = vw;
+$A(xw, "TableStyleCollection");
+let rh = xw;
 var bo;
 (function(i) {
   i[i.Outside = 0] = "Outside", i[i.Inside = 1] = "Inside";
@@ -17205,7 +17205,7 @@ var qi;
   i[i.None = 0] = "None", i[i.ShowImage = 1] = "ShowImage", i[i.ShowNotAlignedImage = 2] = "ShowNotAlignedImage", i[i.UseClippingBoundary = 4] = "UseClippingBoundary", i[i.TransparencyIsOn = 8] = "TransparencyIsOn";
 })(qi || (qi = {}));
 var UA = Object.defineProperty, zA = (i, t) => UA(i, "name", { value: t, configurable: !0 });
-const xw = class xw extends re {
+const vw = class vw extends re {
   constructor() {
     super(...arguments);
     n(this, "classVersion", 0);
@@ -17292,15 +17292,15 @@ const xw = class xw extends re {
     r.item === this._definition && (this._definition = null);
   }
 };
-zA(xw, "CadWipeoutBase");
-let Al = xw;
+zA(vw, "CadWipeoutBase");
+let Al = vw;
 var WA = Object.defineProperty, FA = (i, t) => WA(i, "name", { value: t, configurable: !0 });
 const Tw = class Tw extends Al {
   get objectName() {
     return f.entityImage;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.rasterImage;
@@ -17327,7 +17327,7 @@ const Dw = class Dw extends ue {
     n(this, "image", null);
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectImageDefinitionReactor;
@@ -17440,7 +17440,7 @@ let Ar = Aw;
 var qA = Object.defineProperty, KA = (i, t) => qA(i, "name", { value: t, configurable: !0 });
 const Nw = class Nw extends Ar {
   get objectType() {
-    return v.APPID_CONTROL_OBJ;
+    return x.APPID_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableAppId;
@@ -17463,7 +17463,7 @@ const Pw = class Pw extends Ar {
     return null;
   }
   get objectType() {
-    return v.BLOCK_CONTROL_OBJ;
+    return x.BLOCK_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableBlockRecord;
@@ -17492,7 +17492,7 @@ let Ws = Pw;
 var eN = Object.defineProperty, tN = (i, t) => eN(i, "name", { value: t, configurable: !0 });
 const Rw = class Rw extends Ar {
   get objectType() {
-    return v.DIMSTYLE_CONTROL_OBJ;
+    return x.DIMSTYLE_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableDimstyle;
@@ -17512,7 +17512,7 @@ let ss = Rw;
 var rN = Object.defineProperty, iN = (i, t) => rN(i, "name", { value: t, configurable: !0 });
 const Ew = class Ew extends Ar {
   get objectType() {
-    return v.LAYER_CONTROL_OBJ;
+    return x.LAYER_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableLayer;
@@ -17535,7 +17535,7 @@ let Fs = Ew;
 var sN = Object.defineProperty, nN = (i, t) => sN(i, "name", { value: t, configurable: !0 });
 const kw = class kw extends Ar {
   get objectType() {
-    return v.LTYPE_CONTROL_OBJ;
+    return x.LTYPE_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableLinetype;
@@ -17567,7 +17567,7 @@ let Gs = kw;
 var aN = Object.defineProperty, oN = (i, t) => aN(i, "name", { value: t, configurable: !0 });
 const Lw = class Lw extends Ar {
   get objectType() {
-    return v.STYLE_CONTROL_OBJ;
+    return x.STYLE_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableStyle;
@@ -17587,7 +17587,7 @@ let Xs = Lw;
 var lN = Object.defineProperty, cN = (i, t) => lN(i, "name", { value: t, configurable: !0 });
 const Ow = class Ow extends Ar {
   get objectType() {
-    return v.UCS_CONTROL_OBJ;
+    return x.UCS_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableUcs;
@@ -17604,7 +17604,7 @@ let Ys = Ow;
 var hN = Object.defineProperty, dN = (i, t) => hN(i, "name", { value: t, configurable: !0 });
 const jw = class jw extends Ar {
   get objectType() {
-    return v.VP_ENT_HDR_CTRL_OBJ;
+    return x.VP_ENT_HDR_CTRL_OBJ;
   }
   get defaultEntries() {
     return [];
@@ -17618,7 +17618,7 @@ let go = jw;
 var uN = Object.defineProperty, fN = (i, t) => uN(i, "name", { value: t, configurable: !0 });
 const Iw = class Iw extends Ar {
   get objectType() {
-    return v.VIEW_CONTROL_OBJ;
+    return x.VIEW_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableView;
@@ -17696,7 +17696,7 @@ const Fa = class Fa extends Dr {
     n(this, "_direction", new u(0, 0, 1));
   }
   get objectType() {
-    return v.VPORT;
+    return x.VPORT;
   }
   get objectName() {
     return f.tableVport;
@@ -17723,7 +17723,7 @@ let zr = Fa;
 var mN = Object.defineProperty, wN = (i, t) => mN(i, "name", { value: t, configurable: !0 });
 const Vw = class Vw extends Ar {
   get objectType() {
-    return v.VPORT_CONTROL_OBJ;
+    return x.VPORT_CONTROL_OBJ;
   }
   get objectName() {
     return f.tableVport;
@@ -17929,16 +17929,16 @@ const Hw = class Hw {
 };
 SN(Hw, "AcdsRecord");
 let Pl = Hw;
-var vp;
+var xp;
 (function(i) {
   i[i.None = 0] = "None", i[i.Unknown1 = 1] = "Unknown1", i[i.NoType = 2] = "NoType", i[i.Unknown2 = 8] = "Unknown2";
-})(vp || (vp = {}));
-var vN = Object.defineProperty, xN = (i, t) => vN(i, "name", { value: t, configurable: !0 });
+})(xp || (xp = {}));
+var xN = Object.defineProperty, vN = (i, t) => xN(i, "name", { value: t, configurable: !0 });
 const Lu = class Lu {
   constructor() {
     n(this, "name", "");
     n(this, "nameIndex", 0);
-    n(this, "propertyFlags", vp.None);
+    n(this, "propertyFlags", xp.None);
     n(this, "propertyValueCount", 0);
     n(this, "type", null);
     n(this, "typeSize", 0);
@@ -17950,7 +17950,7 @@ const Lu = class Lu {
     return this.name;
   }
 };
-xN(Lu, "AcdsSchemaProperty"), n(Lu, "typeSizes", [0, 0, 2, 1, 2, 4, 8, 1, 2, 4, 8, 4, 8, 0, 0, 0]);
+vN(Lu, "AcdsSchemaProperty"), n(Lu, "typeSizes", [0, 0, 2, 1, 2, 4, 8, 1, 2, 4, 8, 4, 8, 0, 0, 0]);
 let nh = Lu;
 var TN = Object.defineProperty, DN = (i, t) => TN(i, "name", { value: t, configurable: !0 });
 const $w = class $w {
@@ -18033,7 +18033,7 @@ const zw = class zw {
   }
 };
 ah(zw, "ModelerGeometrySilhouette");
-let xp = zw;
+let vp = zw;
 const Ou = class Ou extends re {
   constructor() {
     super(...arguments);
@@ -18144,10 +18144,10 @@ function Dp(i) {
   return i != null && typeof i == "object" && "blockEntity" in i && i.blockEntity instanceof Ie && "blockEnd" in i && i.blockEnd instanceof Ie;
 }
 Wo(Dp, "hasBlockMarkers");
-function cv(i) {
+function cx(i) {
   return i != null && typeof i == "object" && "entities" in i && ch(i.entities) && lh(i.entities);
 }
-Wo(cv, "hasEntityCollection");
+Wo(cx, "hasEntityCollection");
 const Ww = class Ww {
   constructor(t, e = !0) {
     n(this, "appIds", null);
@@ -18345,7 +18345,7 @@ const Ww = class Ww {
     t instanceof Ie && t.document == null && this._addCadObject(t), this._registerBlockMarkers(t), this._wireEntityCollection(t);
   }
   _wireEntityCollection(t) {
-    if (!cv(t))
+    if (!cx(t))
       return;
     const e = t.entities;
     e.onAdd = this._onAdd.bind(this), e.onRemove = this._onRemove.bind(this);
@@ -18635,7 +18635,7 @@ const Qw = class Qw extends Np {
     return f.entityAecWall;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.aecWall;
@@ -18649,8 +18649,8 @@ const Qw = class Qw extends Np {
     const d = [];
     for (const _ of [this.startPoint, o])
       for (const b of [c, h])
-        for (const x of [this.baseHeight, this.baseHeight + this.height])
-          d.push(new u(_.x + l.x * b + r.x * x, _.y + l.y * b + r.y * x, _.z + l.z * b + r.z * x));
+        for (const v of [this.baseHeight, this.baseHeight + this.height])
+          d.push(new u(_.x + l.x * b + r.x * v, _.y + l.y * b + r.y * v, _.z + l.z * b + r.z * v));
     return se.fromPoints(d);
   }
   applyTransform(e) {
@@ -18678,7 +18678,7 @@ var Yr;
 var aP = Object.defineProperty, oP = (i, t) => aP(i, "name", { value: t, configurable: !0 });
 const eb = class eb extends ar {
   get objectType() {
-    return v.BODY;
+    return x.BODY;
   }
   get objectName() {
     return f.entityBody;
@@ -18851,7 +18851,7 @@ const St = class St {
 };
 cP(St, "TextProcessor");
 let Rp = St;
-var hP = Object.defineProperty, hv = (i, t) => hP(i, "name", { value: t, configurable: !0 });
+var hP = Object.defineProperty, hx = (i, t) => hP(i, "name", { value: t, configurable: !0 });
 const Iu = class Iu {
   constructor() {
     n(this, "columnType", ns.NoColumns);
@@ -18867,7 +18867,7 @@ const Iu = class Iu {
     return t.columnType = this.columnType, t.columnCount = this.columnCount, t.flowReversed = this.flowReversed, t.autoHeight = this.autoHeight, t.width = this.width, t.gutter = this.gutter, t.heights = [...this.heights], t;
   }
 };
-hv(Iu, "TextColumnData");
+hx(Iu, "TextColumnData");
 let Ep = Iu;
 const tb = class tb extends re {
   constructor(e = "") {
@@ -18907,7 +18907,7 @@ const tb = class tb extends re {
     return f.entityMText;
   }
   get objectType() {
-    return v.MTEXT;
+    return x.MTEXT;
   }
   get plainText() {
     return Rp.parse(this._value).result;
@@ -19006,7 +19006,7 @@ const tb = class tb extends re {
     super._tableOnRemove(e, r), r.item === this._style && (this._style = this.document.textStyles.get(Ve.defaultName));
   }
 };
-hv(tb, "MText");
+hx(tb, "MText");
 let dt = tb;
 var dP = Object.defineProperty, uP = (i, t) => dP(i, "name", { value: t, configurable: !0 });
 const rb = class rb extends re {
@@ -19022,7 +19022,7 @@ const rb = class rb extends re {
     return f.entityPoint;
   }
   get objectType() {
-    return v.POINT;
+    return x.POINT;
   }
   get subclassMarker() {
     return p.point;
@@ -19247,12 +19247,12 @@ const Vu = class Vu extends re {
 };
 pP(Vu, "Dimension");
 let Ae = Vu;
-var _P = Object.defineProperty, dv = (i, t) => _P(i, "name", { value: t, configurable: !0 });
+var _P = Object.defineProperty, dx = (i, t) => _P(i, "name", { value: t, configurable: !0 });
 function kp(i, t) {
   const e = i.x - t.x, r = i.y - t.y, s = i.z - t.z;
   return Math.sqrt(e * e + r * r + s * s);
 }
-dv(kp, "distanceFrom");
+dx(kp, "distanceFrom");
 const Mu = class Mu extends Ae {
   constructor(e, r) {
     super(Be.Aligned);
@@ -19268,7 +19268,7 @@ const Mu = class Mu extends Ae {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_ALIGNED;
+    return x.DIMENSION_ALIGNED;
   }
   get offset() {
     return kp(this.secondPoint, this.definitionPoint);
@@ -19295,7 +19295,7 @@ const Mu = class Mu extends Ae {
     this.populateBlock([[this.firstPoint, this.secondPoint]], [this.firstPoint, this.secondPoint, this.definitionPoint]);
   }
 };
-dv(Mu, "DimensionAligned");
+dx(Mu, "DimensionAligned");
 let sr = Mu;
 var mP = Object.defineProperty, wP = (i, t) => mP(i, "name", { value: t, configurable: !0 });
 const ib = class ib extends Ae {
@@ -19325,7 +19325,7 @@ const ib = class ib extends Ae {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_ANG_2_Ln;
+    return x.DIMENSION_ANG_2_Ln;
   }
   get offset() {
     const e = this.secondPoint.x - this.definitionPoint.x, r = this.secondPoint.y - this.definitionPoint.y, s = this.secondPoint.z - this.definitionPoint.z;
@@ -19365,7 +19365,7 @@ const sb = class sb extends Ae {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_ANG_3_Pt;
+    return x.DIMENSION_ANG_3_Pt;
   }
   get subclassMarker() {
     return p.angular3PointDimension;
@@ -19407,7 +19407,7 @@ const nb = class nb extends Ae {
     return f.entityArcDimension;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.arcDimension;
@@ -19422,15 +19422,15 @@ const nb = class nb extends Ae {
 CP(nb, "DimensionArc");
 let yr = nb;
 var BP = Object.defineProperty, Q_ = (i, t) => BP(i, "name", { value: t, configurable: !0 });
-function uv(i, t) {
+function ux(i, t) {
   const e = i.x - t.x, r = i.y - t.y, s = i.z - t.z;
   return Math.sqrt(e * e + r * r + s * s);
 }
-Q_(uv, "distanceFrom");
-function fv(i, t) {
+Q_(ux, "distanceFrom");
+function fx(i, t) {
   return new u((i.x + t.x) / 2, (i.y + t.y) / 2, (i.z + t.z) / 2);
 }
-Q_(fv, "mid");
+Q_(fx, "mid");
 const ab = class ab extends Ae {
   constructor() {
     super(Be.Diameter);
@@ -19438,16 +19438,16 @@ const ab = class ab extends Ae {
     n(this, "leaderLength", 0);
   }
   get center() {
-    return fv(this.angleVertex, this.definitionPoint);
+    return fx(this.angleVertex, this.definitionPoint);
   }
   get measurement() {
-    return uv(this.definitionPoint, this.angleVertex);
+    return ux(this.definitionPoint, this.angleVertex);
   }
   get objectName() {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_DIAMETER;
+    return x.DIMENSION_DIAMETER;
   }
   get subclassMarker() {
     return p.diametricDimension;
@@ -19464,7 +19464,7 @@ const ab = class ab extends Ae {
 };
 Q_(ab, "DimensionDiameter");
 let wi = ab;
-var SP = Object.defineProperty, vP = (i, t) => SP(i, "name", { value: t, configurable: !0 });
+var SP = Object.defineProperty, xP = (i, t) => SP(i, "name", { value: t, configurable: !0 });
 const ob = class ob extends sr {
   constructor() {
     super();
@@ -19482,7 +19482,7 @@ const ob = class ob extends sr {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_LINEAR;
+    return x.DIMENSION_LINEAR;
   }
   get offset() {
     return super.offset;
@@ -19499,9 +19499,9 @@ const ob = class ob extends sr {
     this.populateBlock([[this.firstPoint, r]], [this.firstPoint, this.secondPoint, this.definitionPoint]);
   }
 };
-vP(ob, "DimensionLinear");
+xP(ob, "DimensionLinear");
 let Cr = ob;
-var xP = Object.defineProperty, TP = (i, t) => xP(i, "name", { value: t, configurable: !0 });
+var vP = Object.defineProperty, TP = (i, t) => vP(i, "name", { value: t, configurable: !0 });
 const lb = class lb extends Ae {
   constructor() {
     super(Be.Ordinate);
@@ -19522,7 +19522,7 @@ const lb = class lb extends Ae {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_ORDINATE;
+    return x.DIMENSION_ORDINATE;
   }
   get subclassMarker() {
     return p.ordinateDimension;
@@ -19542,12 +19542,12 @@ const lb = class lb extends Ae {
 };
 TP(lb, "DimensionOrdinate");
 let bi = lb;
-var DP = Object.defineProperty, pv = (i, t) => DP(i, "name", { value: t, configurable: !0 });
-function _v(i, t) {
+var DP = Object.defineProperty, px = (i, t) => DP(i, "name", { value: t, configurable: !0 });
+function _x(i, t) {
   const e = i.x - t.x, r = i.y - t.y, s = i.z - t.z;
   return Math.sqrt(e * e + r * r + s * s);
 }
-pv(_v, "distanceFrom");
+px(_x, "distanceFrom");
 const cb = class cb extends Ae {
   constructor() {
     super(Be.Radius);
@@ -19555,13 +19555,13 @@ const cb = class cb extends Ae {
     n(this, "leaderLength", 0);
   }
   get measurement() {
-    return _v(this.definitionPoint, this.angleVertex);
+    return _x(this.definitionPoint, this.angleVertex);
   }
   get objectName() {
     return f.entityDimension;
   }
   get objectType() {
-    return v.DIMENSION_RADIUS;
+    return x.DIMENSION_RADIUS;
   }
   get subclassMarker() {
     return p.radialDimension;
@@ -19576,7 +19576,7 @@ const cb = class cb extends Ae {
     this.populateBlock([[this.angleVertex, this.definitionPoint]], [this.angleVertex, this.definitionPoint, this.insertionPoint, this.textMiddlePoint]);
   }
 };
-pv(cb, "DimensionRadius");
+px(cb, "DimensionRadius");
 let gi = cb;
 var AP = Object.defineProperty, NP = (i, t) => AP(i, "name", { value: t, configurable: !0 });
 const hb = class hb extends re {
@@ -19613,7 +19613,7 @@ const hb = class hb extends re {
     return f.entityEllipse;
   }
   get objectType() {
-    return v.ELLIPSE;
+    return x.ELLIPSE;
   }
   get radiusRatio() {
     return this._radiusRatio;
@@ -19688,7 +19688,7 @@ const db = class db extends re {
     n(this, "flags", fh.None);
   }
   get objectType() {
-    return v.FACE3D;
+    return x.FACE3D;
   }
   get objectName() {
     return f.entity3DFace;
@@ -19743,7 +19743,7 @@ const $u = class $u {
 };
 OP($u, "HatchGradientPattern");
 let Lp = $u;
-var jP = Object.defineProperty, mv = (i, t) => jP(i, "name", { value: t, configurable: !0 });
+var jP = Object.defineProperty, mx = (i, t) => jP(i, "name", { value: t, configurable: !0 });
 const Uu = class Uu {
   constructor() {
     n(this, "angle", 0);
@@ -19767,7 +19767,7 @@ const Uu = class Uu {
     return t.angle = this.angle, t.basePoint = new P(this.basePoint.x, this.basePoint.y), t.offset = new P(this.offset.x, this.offset.y), t.dashLengths = [...this.dashLengths], t;
   }
 };
-mv(Uu, "HatchPatternLine");
+mx(Uu, "HatchPatternLine");
 let _h = Uu;
 const pl = class pl {
   constructor(t) {
@@ -19793,7 +19793,7 @@ const pl = class pl {
     }
   }
 };
-mv(pl, "HatchPattern");
+mx(pl, "HatchPattern");
 let mh = pl;
 var Op;
 (function(i) {
@@ -19859,7 +19859,7 @@ const Ga = class Ga extends re {
     this.normal = this.applyTransformToVector(e, this.normal).normalize();
   }
   getPoints(e = 256) {
-    return xl.getPoints(this, e);
+    return vl.getPoints(this, e);
   }
   getBoundingBox() {
     const e = this.getPoints();
@@ -19877,7 +19877,7 @@ const Ga = class Ga extends re {
       thickness: 0,
       vertices: e
     };
-    for (const a of xl.explode(s))
+    for (const a of vl.explode(s))
       yield a;
   }
 };
@@ -19889,7 +19889,7 @@ const ub = class ub extends nn {
     return f.entityPolyline;
   }
   get objectType() {
-    return v.POLYLINE_2D;
+    return x.POLYLINE_2D;
   }
   get subclassMarker() {
     return p.polyline;
@@ -19900,10 +19900,10 @@ const ub = class ub extends nn {
 };
 HP(ub, "Polyline2D");
 let Vt = ub;
-var vt;
+var xt;
 (function(i) {
   i[i.None = 0] = "None", i[i.Closed = 1] = "Closed", i[i.Periodic = 2] = "Periodic", i[i.Rational = 4] = "Rational", i[i.Planar = 8] = "Planar", i[i.Linear = 16] = "Linear";
-})(vt || (vt = {}));
+})(xt || (xt = {}));
 var nr;
 (function(i) {
   i[i.None = 0] = "None", i[i.MethodFitPoints = 1] = "MethodFitPoints", i[i.CVFrameShow = 2] = "CVFrameShow", i[i.Closed = 4] = "Closed", i[i.UseKnotParameter = 8] = "UseKnotParameter";
@@ -19928,7 +19928,7 @@ const jr = class jr extends re {
     n(this, "normal", new u(0, 0, 1));
     n(this, "startTangent", new u(0, 0, 0));
     n(this, "weights", []);
-    n(this, "_flags", vt.None);
+    n(this, "_flags", xt.None);
     n(this, "_flags1", nr.None);
   }
   get flags() {
@@ -19948,22 +19948,22 @@ const jr = class jr extends re {
     return this.knots.length === e;
   }
   get isClosed() {
-    return (this._flags & vt.Closed) !== 0;
+    return (this._flags & xt.Closed) !== 0;
   }
   set isClosed(e) {
-    e ? (this._flags = this._flags | vt.Closed, this._flags1 = this._flags1 | nr.Closed) : (this._flags = this._flags & ~vt.Closed, this._flags1 = this._flags1 & ~nr.Closed);
+    e ? (this._flags = this._flags | xt.Closed, this._flags1 = this._flags1 | nr.Closed) : (this._flags = this._flags & ~xt.Closed, this._flags1 = this._flags1 & ~nr.Closed);
   }
   get isPeriodic() {
-    return (this._flags1 & nr.MethodFitPoints) !== 0 ? (this._flags1 & nr.Closed) !== 0 : (this._flags & vt.Periodic) !== 0;
+    return (this._flags1 & nr.MethodFitPoints) !== 0 ? (this._flags1 & nr.Closed) !== 0 : (this._flags & xt.Periodic) !== 0;
   }
   set isPeriodic(e) {
-    e ? this._flags = this._flags | vt.Periodic : this._flags = this._flags & ~vt.Periodic;
+    e ? this._flags = this._flags | xt.Periodic : this._flags = this._flags & ~xt.Periodic;
   }
   get objectName() {
     return f.entitySpline;
   }
   get objectType() {
-    return v.SPLINE;
+    return x.SPLINE;
   }
   get subclassMarker() {
     return p.spline;
@@ -20027,8 +20027,8 @@ const jr = class jr extends re {
   static _c(e, r, s, a, o) {
     let l = 0, c = 0, h = 0, d = 0;
     for (let b = 0; b < e.length; b++) {
-      const x = jr._computeNurb(s, b, a, o);
-      d += x * r[b], l += r[b] * x * e[b].x, c += r[b] * x * e[b].y, h += r[b] * x * e[b].z;
+      const v = jr._computeNurb(s, b, a, o);
+      d += v * r[b], l += r[b] * v * e[b].x, c += r[b] * v * e[b].y, h += r[b] * v * e[b].z;
     }
     if (Math.abs(d) < Number.EPSILON)
       return new u(0, 0, 0);
@@ -20132,7 +20132,7 @@ let Ii = fb;
 var FP = Object.defineProperty, GP = (i, t) => FP(i, "name", { value: t, configurable: !0 });
 const pb = class pb extends Ii {
   get objectType() {
-    return v.VERTEX_2D;
+    return x.VERTEX_2D;
   }
   get subclassMarker() {
     return p.polylineVertex;
@@ -20168,7 +20168,7 @@ const Ir = class Ir {
   }
 };
 YP(Ir, "MathHelper"), n(Ir, "epsilon", 1e-12), n(Ir, "pi", Math.PI), n(Ir, "halfPI", Math.PI / 2), n(Ir, "twoPI", Math.PI * 2);
-let ce = Ir;
+let he = Ir;
 var ZP = Object.defineProperty, dr = (i, t) => ZP(i, "name", { value: t, configurable: !0 });
 function So(i, t) {
   const e = i.applyTransform(new u(t.x, t.y, 0));
@@ -20417,10 +20417,10 @@ const zu = class zu {
   findIntersections(t, e, r = 256) {
     const s = [], a = /* @__PURE__ */ dr((o, l) => {
       const c = new P(l.x - o.x, l.y - o.y), h = e.cross(c);
-      if (Math.abs(h) <= ce.epsilon)
+      if (Math.abs(h) <= he.epsilon)
         return;
       const d = new P(o.x - t.x, o.y - t.y), _ = d.cross(c) / h, b = d.cross(e) / h;
-      b < -ce.epsilon || b > 1 + ce.epsilon || s.push(new P(t.x + e.x * _, t.y + e.y * _));
+      b < -he.epsilon || b > 1 + he.epsilon || s.push(new P(t.x + e.x * _, t.y + e.y * _));
     }, "addSegmentIntersection");
     for (const o of this.edges) {
       if (o instanceof ls) {
@@ -20488,7 +20488,7 @@ const Os = class Os extends re {
     return f.entityHatch;
   }
   get objectType() {
-    return v.HATCH;
+    return x.HATCH;
   }
   get patternAngle() {
     return this._patternAngle;
@@ -20538,15 +20538,15 @@ const Os = class Os extends re {
     ];
     for (const a of this.pattern.lines) {
       const o = a.direction.normalize();
-      if (o.getLength() <= ce.epsilon)
+      if (o.getLength() <= he.epsilon)
         continue;
       const l = new P(-o.y, o.x), c = s.map((g) => g.dot(l)), h = Math.min(...c), d = Math.max(...c), _ = a.basePoint.dot(l);
-      let b = 0, x = 0;
-      if (Math.abs(a.lineOffset) > ce.epsilon) {
+      let b = 0, v = 0;
+      if (Math.abs(a.lineOffset) > he.epsilon) {
         const g = (h - _) / a.lineOffset, T = (d - _) / a.lineOffset;
-        b = Math.floor(Math.min(g, T)) - 1, x = Math.ceil(Math.max(g, T)) + 1;
+        b = Math.floor(Math.min(g, T)) - 1, v = Math.ceil(Math.max(g, T)) + 1;
       }
-      for (let g = b; g <= x; g++) {
+      for (let g = b; g <= v; g++) {
         const T = new P(a.basePoint.x + a.offset.x * g, a.basePoint.y + a.offset.y * g), k = [];
         for (const I of this.paths)
           for (const V of I.findIntersections(T, o))
@@ -20554,7 +20554,7 @@ const Os = class Os extends re {
         const E = Os.mergeParameters(k);
         for (let I = 0; I + 1 < E.length; I++) {
           const V = E[I], U = E[I + 1];
-          if (U - V <= ce.epsilon)
+          if (U - V <= he.epsilon)
             continue;
           const M = Os.pointOnLine(T, o, (V + U) * 0.5);
           this.isPointInsideByParity(M) && e.push(...this.emitDashedSegment(T, o, V, U, a.dashLengths));
@@ -20567,7 +20567,7 @@ const Os = class Os extends re {
     const e = this.paths.map((r) => r.getBoundingBox()).filter((r) => r != null);
     return e.length === 0 ? null : se.fromPoints(e.flatMap((r) => [r.min, r.max]));
   }
-  static mergeParameters(e, r = ce.epsilon) {
+  static mergeParameters(e, r = he.epsilon) {
     const s = [...e].sort((o, l) => o - l), a = [];
     for (const o of s)
       a.length === 0 || Math.abs(o - a[a.length - 1]) > r ? a.push(o) : a[a.length - 1] = (a[a.length - 1] + o) * 0.5;
@@ -20584,24 +20584,24 @@ const Os = class Os extends re {
     if (o.length === 0)
       return [l(s, a)];
     const c = o.reduce((T, k) => T + Math.abs(k), 0);
-    if (c <= ce.epsilon)
+    if (c <= he.epsilon)
       return [];
     let h = s % c;
     h < 0 && (h += c);
     let d = 0, _ = 0;
-    for (; d < o.length && _ + Math.abs(o[d]) <= h + ce.epsilon; )
+    for (; d < o.length && _ + Math.abs(o[d]) <= h + he.epsilon; )
       _ += Math.abs(o[d]), d++;
     d >= o.length && (d = 0, _ = 0, h = 0);
     const b = [];
-    let x = s, g = Math.abs(o[d]) - (h - _);
-    for (; x < a - ce.epsilon; ) {
+    let v = s, g = Math.abs(o[d]) - (h - _);
+    for (; v < a - he.epsilon; ) {
       let T = 0;
-      for (; g <= ce.epsilon && T < o.length + 1; )
-        o[d] === 0 && b.push(l(x, x + ce.epsilon, !1)), d = (d + 1) % o.length, g = Math.abs(o[d]), T++;
-      if (g <= ce.epsilon)
+      for (; g <= he.epsilon && T < o.length + 1; )
+        o[d] === 0 && b.push(l(v, v + he.epsilon, !1)), d = (d + 1) % o.length, g = Math.abs(o[d]), T++;
+      if (g <= he.epsilon)
         break;
-      const k = Math.min(g, a - x);
-      o[d] > ce.epsilon && k > ce.epsilon && b.push(l(x, x + k)), x += k, g -= k, g <= ce.epsilon && (d = (d + 1) % o.length, g = Math.abs(o[d]));
+      const k = Math.min(g, a - v);
+      o[d] > he.epsilon && k > he.epsilon && b.push(l(v, v + k)), v += k, g -= k, g <= he.epsilon && (d = (d + 1) % o.length, g = Math.abs(o[d]));
     }
     return b;
   }
@@ -20609,16 +20609,16 @@ const Os = class Os extends re {
     const s = new P(e.x, e.y + r), a = [];
     for (const o of this.paths)
       for (const l of o.findIntersections(s, P.axisX))
-        l.x >= e.x - ce.epsilon && a.push(l.x);
+        l.x >= e.x - he.epsilon && a.push(l.x);
     return Os.mergeParameters(a).length % 2 === 1;
   }
 };
 dr(Os, "Hatch");
 let bs = Os;
-var vo;
+var xo;
 (function(i) {
   i[i.Opposite = 0] = "Opposite", i[i.Same = 1] = "Same";
-})(vo || (vo = {}));
+})(xo || (xo = {}));
 var gh;
 (function(i) {
   i[i.CreatedWithTextAnnotation = 0] = "CreatedWithTextAnnotation", i[i.CreatedWithToleranceAnnotation = 1] = "CreatedWithToleranceAnnotation", i[i.CreatedWithBlockReferenceAnnotation = 2] = "CreatedWithBlockReferenceAnnotation", i[i.CreatedWithoutAnnotation = 3] = "CreatedWithoutAnnotation";
@@ -20637,7 +20637,7 @@ const Cb = class Cb extends re {
     n(this, "associatedAnnotation", null);
     n(this, "blockOffset", new u(0, 0, 0));
     n(this, "creationType", gh.CreatedWithoutAnnotation);
-    n(this, "hookLineDirection", vo.Opposite);
+    n(this, "hookLineDirection", xo.Opposite);
     n(this, "horizontalDirection", new u(1, 0, 0));
     n(this, "normal", new u(0, 0, 1));
     n(this, "pathType", yh.StraightLineSegments);
@@ -20653,7 +20653,7 @@ const Cb = class Cb extends re {
     return f.entityLeader;
   }
   get objectType() {
-    return v.LEADER;
+    return x.LEADER;
   }
   get style() {
     return this._style;
@@ -20690,7 +20690,7 @@ const Cb = class Cb extends re {
 };
 JP(Cb, "Leader");
 let an = Cb;
-var QP = Object.defineProperty, wv = (i, t) => QP(i, "name", { value: t, configurable: !0 });
+var QP = Object.defineProperty, wx = (i, t) => QP(i, "name", { value: t, configurable: !0 });
 const Bb = class Bb {
   constructor(t, e, r) {
     n(this, "code");
@@ -20712,7 +20712,7 @@ const Bb = class Bb {
     return `${this.code}:${this.value}`;
   }
 };
-wv(Bb, "XRecordEntry");
+wx(Bb, "XRecordEntry");
 let Vp = Bb;
 const Sb = class Sb extends ue {
   constructor(e) {
@@ -20727,7 +20727,7 @@ const Sb = class Sb extends ue {
     return f.objectXRecord;
   }
   get objectType() {
-    return v.XRECORD;
+    return x.XRECORD;
   }
   get subclassMarker() {
     return p.xRecord;
@@ -20740,10 +20740,10 @@ const Sb = class Sb extends ue {
     this._entries = [];
   }
 };
-wv(Sb, "XRecord");
+wx(Sb, "XRecord");
 let Ut = Sb;
-var eR = Object.defineProperty, bv = (i, t) => eR(i, "name", { value: t, configurable: !0 });
-const vb = class vb {
+var eR = Object.defineProperty, bx = (i, t) => eR(i, "name", { value: t, configurable: !0 });
+const xb = class xb {
   constructor(t, e) {
     n(this, "start");
     n(this, "end");
@@ -20754,8 +20754,8 @@ const vb = class vb {
     return `${this.start}|${this.end}|${this.crease ?? ""}`;
   }
 };
-bv(vb, "MeshEdge");
-let Rl = vb;
+bx(xb, "MeshEdge");
+let Rl = xb;
 const Gi = class Gi extends re {
   constructor() {
     super(...arguments);
@@ -20770,7 +20770,7 @@ const Gi = class Gi extends re {
     return f.entityMesh;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.mesh;
@@ -20814,21 +20814,21 @@ const Gi = class Gi extends re {
     return this.vertices.length > 0 ? se.fromPoints(this.vertices) : null;
   }
 };
-bv(Gi, "Mesh"), n(Gi, "textureCoordsXRecordName", "ADSK_XREC_SUBDVERTEXTEXCOORDS");
+bx(Gi, "Mesh"), n(Gi, "textureCoordsXRecordName", "ADSK_XREC_SUBDVERTEXTEXCOORDS");
 let fa = Gi;
-var xo;
+var vo;
 (function(i) {
   i[i.None = 0] = "None", i[i.HasVertices = 1] = "HasVertices", i[i.Closed = 2] = "Closed", i[i.NoStartCaps = 4] = "NoStartCaps", i[i.NoEndCaps = 8] = "NoEndCaps";
-})(xo || (xo = {}));
+})(vo || (vo = {}));
 var Mp;
 (function(i) {
   i[i.Top = 0] = "Top", i[i.Zero = 1] = "Zero", i[i.Bottom = 2] = "Bottom";
 })(Mp || (Mp = {}));
 var tR = Object.defineProperty, Fo = (i, t) => tR(i, "name", { value: t, configurable: !0 });
-function gv(i, t) {
+function gx(i, t) {
   return i.applyTransform(t);
 }
-Fo(gv, "transformPoint");
+Fo(gx, "transformPoint");
 function Hp(i, t) {
   const e = i.applyTransform(u.zero), r = i.applyTransform(t);
   return new u(r.x - e.x, r.y - e.y, r.z - e.z);
@@ -20865,7 +20865,7 @@ const Fu = class Fu {
     if (!(t instanceof Me))
       return;
     const e = this.miter.getLength();
-    this.position = gv(t, this.position), this.direction = Hp(t, this.direction), this.miter = Hp(t, this.miter);
+    this.position = gx(t, this.position), this.direction = Hp(t, this.direction), this.miter = Hp(t, this.miter);
     const r = this.miter.getLength(), s = e > 0 ? r / e : em(t);
     for (const a of this.segments)
       a.applyScale(s);
@@ -20877,10 +20877,10 @@ const Fu = class Fu {
 };
 Fo(Fu, "MLineVertex");
 let Bh = Fu;
-const xb = class xb extends re {
+const vb = class vb extends re {
   constructor() {
     super(...arguments);
-    n(this, "flags", xo.HasVertices);
+    n(this, "flags", vo.HasVertices);
     n(this, "justification", Mp.Zero);
     n(this, "normal", new u(0, 0, 1));
     n(this, "scaleFactor", 1);
@@ -20892,7 +20892,7 @@ const xb = class xb extends re {
     return f.entityMLine;
   }
   get objectType() {
-    return v.MLINE;
+    return x.MLINE;
   }
   get style() {
     return this._style;
@@ -20928,8 +20928,8 @@ const xb = class xb extends re {
     this.document?.mLineStyles?.removeReference(this._style?.name, this), super.unassignDocument(), this._style = this._style?.clone() ?? null;
   }
 };
-Fo(xb, "MLine");
-let pa = xb;
+Fo(vb, "MLine");
+let pa = vb;
 var Sh;
 (function(i) {
   i[i.None = 0] = "None", i[i.Block = 1] = "Block", i[i.MText = 2] = "MText", i[i.Tolerance = 3] = "Tolerance";
@@ -20981,7 +20981,7 @@ const Xa = class Xa extends ue {
     return e.name = Xa.defaultName, e.paperUnits = 1, e.drawingUnits = 1, e.isUnitScale = !0, e;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectScale;
@@ -21042,7 +21042,7 @@ const Gu = class Gu {
   }
 };
 wc(Gu, "StartEndPointPair");
-let vh = Gu;
+let xh = Gu;
 const Xu = class Xu {
   constructor() {
     n(this, "segmentIndex", 0);
@@ -21087,7 +21087,7 @@ const Yu = class Yu {
   }
 };
 wc(Yu, "LeaderLine");
-let xh = Yu;
+let vh = Yu;
 const Zu = class Zu {
   constructor() {
     n(this, "breakStartEndPointsPairs", []);
@@ -21171,7 +21171,7 @@ const Ab = class Ab extends El {
     return f.objectMLeaderContextData;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.multiLeaderObjectContextData;
@@ -21287,7 +21287,7 @@ const Nb = class Nb extends re {
     return f.entityMultiLeader;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get style() {
     return this._style;
@@ -21305,20 +21305,20 @@ const Nb = class Nb extends re {
     this._textStyle = this.updateTableEntry(e, (r) => this._textStyle = r, this.document?.textStyles ?? null);
   }
   applyTransform(e) {
-    const r = this.getTransformAxisScale(e), s = r.x === 0 ? 1 : Math.abs(r.x), a = r.y === 0 ? 1 : Math.abs(r.y), o = r.z === 0 ? 1 : Math.abs(r.z), l = (s + a) / 2, c = /* @__PURE__ */ Ui((x) => this.applyTransformToPoint(e, x), "point"), h = /* @__PURE__ */ Ui((x) => this.applyTransformToVector(e, x), "vector"), d = /* @__PURE__ */ Ui((x) => {
-      const g = h(x);
+    const r = this.getTransformAxisScale(e), s = r.x === 0 ? 1 : Math.abs(r.x), a = r.y === 0 ? 1 : Math.abs(r.y), o = r.z === 0 ? 1 : Math.abs(r.z), l = (s + a) / 2, c = /* @__PURE__ */ Ui((v) => this.applyTransformToPoint(e, v), "point"), h = /* @__PURE__ */ Ui((v) => this.applyTransformToVector(e, v), "vector"), d = /* @__PURE__ */ Ui((v) => {
+      const g = h(v);
       return g.getLength() === 0 ? g : g.normalize();
-    }, "direction"), _ = /* @__PURE__ */ Ui((x) => {
-      x.startPoint = c(x.startPoint), x.endPoint = c(x.endPoint);
+    }, "direction"), _ = /* @__PURE__ */ Ui((v) => {
+      v.startPoint = c(v.startPoint), v.endPoint = c(v.endPoint);
     }, "transformPair");
     this.arrowheadSize *= l, this.landingDistance *= l, this.scaleFactor *= l, this.blockContentScale = new u(this.blockContentScale.x * s, this.blockContentScale.y * a, this.blockContentScale.z * o), e instanceof Me && (this.blockContentRotation += e.eulerRotation.z, this.textAngle += e.eulerRotation.z);
     const b = this.contextData;
-    b.basePoint = c(b.basePoint), b.contentBasePoint = c(b.contentBasePoint), b.textLocation = c(b.textLocation), b.blockContentLocation = c(b.blockContentLocation), b.baseDirection = d(b.baseDirection), b.baseVertical = d(b.baseVertical), b.direction = d(b.direction), b.blockContentNormal = d(b.blockContentNormal), b.textNormal = d(b.textNormal), b.arrowheadSize *= l, b.boundaryWidth *= s, b.boundaryHeight *= a, b.columnGutter *= s, b.columnWidth *= s, b.columnSizes = b.columnSizes.map((x) => x * s), b.landingGap *= l, b.scaleFactor *= l, b.textHeight *= a, b.blockContentScale = new u(b.blockContentScale.x * s, b.blockContentScale.y * a, b.blockContentScale.z * o), e instanceof Me && (b.blockContentRotation += e.eulerRotation.z, b.textRotation += e.eulerRotation.z);
-    for (const x of b.leaderRoots) {
-      x.connectionPoint = c(x.connectionPoint), x.direction = d(x.direction), x.landingDistance *= l;
-      for (const g of x.breakStartEndPointsPairs)
+    b.basePoint = c(b.basePoint), b.contentBasePoint = c(b.contentBasePoint), b.textLocation = c(b.textLocation), b.blockContentLocation = c(b.blockContentLocation), b.baseDirection = d(b.baseDirection), b.baseVertical = d(b.baseVertical), b.direction = d(b.direction), b.blockContentNormal = d(b.blockContentNormal), b.textNormal = d(b.textNormal), b.arrowheadSize *= l, b.boundaryWidth *= s, b.boundaryHeight *= a, b.columnGutter *= s, b.columnWidth *= s, b.columnSizes = b.columnSizes.map((v) => v * s), b.landingGap *= l, b.scaleFactor *= l, b.textHeight *= a, b.blockContentScale = new u(b.blockContentScale.x * s, b.blockContentScale.y * a, b.blockContentScale.z * o), e instanceof Me && (b.blockContentRotation += e.eulerRotation.z, b.textRotation += e.eulerRotation.z);
+    for (const v of b.leaderRoots) {
+      v.connectionPoint = c(v.connectionPoint), v.direction = d(v.direction), v.landingDistance *= l;
+      for (const g of v.breakStartEndPointsPairs)
         _(g);
-      for (const g of x.lines) {
+      for (const g of v.lines) {
         g.points = g.points.map(c), g.arrowheadSize *= l;
         for (const T of g.breakInfoEntries)
           for (const k of T.startEndPoints)
@@ -21383,7 +21383,7 @@ const Pb = class Pb extends re {
     return f.entityOle2Frame;
   }
   get objectType() {
-    return v.OLE2FRAME;
+    return x.OLE2FRAME;
   }
   get subclassMarker() {
     return p.ole2Frame;
@@ -21497,7 +21497,7 @@ const Eb = class Eb extends Kp {
     return f.entityPdfUnderlay;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   constructor(t) {
     super(t);
@@ -21521,7 +21521,7 @@ const kb = class kb extends nn {
     return f.entityPolyline;
   }
   get objectType() {
-    return v.POLYLINE_PFACE;
+    return x.POLYLINE_PFACE;
   }
   get subclassMarker() {
     return p.polyfaceMesh;
@@ -21555,7 +21555,7 @@ const Lb = class Lb extends nn {
     return f.entityPolyline;
   }
   get objectType() {
-    return v.POLYLINE_MESH;
+    return x.POLYLINE_MESH;
   }
   get subclassMarker() {
     return p.polygonMesh;
@@ -21565,11 +21565,11 @@ const Lb = class Lb extends nn {
   }
 };
 gR(Lb, "PolygonMesh");
-let vr = Lb;
+let xr = Lb;
 var yR = Object.defineProperty, CR = (i, t) => yR(i, "name", { value: t, configurable: !0 });
 const Ob = class Ob extends Ii {
   get objectType() {
-    return v.VERTEX_MESH;
+    return x.VERTEX_MESH;
   }
   get subclassMarker() {
     return p.polygonMeshVertex;
@@ -21583,7 +21583,7 @@ let Yn = Ob;
 var BR = Object.defineProperty, SR = (i, t) => BR(i, "name", { value: t, configurable: !0 });
 const jb = class jb extends Ii {
   get objectType() {
-    return v.VERTEX_3D;
+    return x.VERTEX_3D;
   }
   get subclassMarker() {
     return p.polyline3dVertex;
@@ -21594,7 +21594,7 @@ const jb = class jb extends Ii {
 };
 SR(jb, "Vertex3D");
 let hs = jb;
-var vR = Object.defineProperty, xR = (i, t) => vR(i, "name", { value: t, configurable: !0 });
+var xR = Object.defineProperty, vR = (i, t) => xR(i, "name", { value: t, configurable: !0 });
 const Ib = class Ib extends nn {
   get flags() {
     return super.flags | or.Polyline3D;
@@ -21606,7 +21606,7 @@ const Ib = class Ib extends nn {
     return f.entityPolyline;
   }
   get objectType() {
-    return v.POLYLINE_3D;
+    return x.POLYLINE_3D;
   }
   get subclassMarker() {
     return p.polyline3d;
@@ -21618,8 +21618,8 @@ const Ib = class Ib extends nn {
     return super.getBoundingBox();
   }
 };
-xR(Ib, "Polyline3D");
-let xr = Ib;
+vR(Ib, "Polyline3D");
+let vr = Ib;
 var TR = Object.defineProperty, DR = (i, t) => TR(i, "name", { value: t, configurable: !0 });
 const Vb = class Vb extends Error {
   constructor(t) {
@@ -21638,12 +21638,12 @@ const Mb = class Mb extends Error {
 };
 NR(Mb, "DwgException");
 let Dh = Mb;
-var PR = Object.defineProperty, yv = (i, t) => PR(i, "name", { value: t, configurable: !0 });
-const Cv = /* @__PURE__ */ new Map();
+var PR = Object.defineProperty, yx = (i, t) => PR(i, "name", { value: t, configurable: !0 });
+const Cx = /* @__PURE__ */ new Map();
 function Go(i, t) {
-  Cv.set(i, t);
+  Cx.set(i, t);
 }
-yv(Go, "registerStreamReader");
+yx(Go, "registerStreamReader");
 const Hb = class Hb {
   constructor(t, e) {
     n(this, "bitShift", 0);
@@ -21700,7 +21700,7 @@ const Hb = class Hb {
       default:
         throw new zt();
     }
-    const o = Cv.get(a);
+    const o = Cx.get(a);
     if (!o)
       throw new Error(`DwgStreamReader factory for ${a} not registered. Import DwgStreamReaderFactory first.`);
     const l = new o(e, s);
@@ -22173,7 +22173,7 @@ const Hb = class Hb {
     }
   }
 };
-yv(Hb, "DwgStreamReaderBase");
+yx(Hb, "DwgStreamReaderBase");
 let mt = Hb;
 var RR = Object.defineProperty, ER = (i, t) => RR(i, "name", { value: t, configurable: !0 });
 const $b = class $b extends mt {
@@ -22301,7 +22301,7 @@ var y;
   i[i.Undefined = 0] = "Undefined", i[i.SoftOwnership = 2] = "SoftOwnership", i[i.HardOwnership = 3] = "HardOwnership", i[i.SoftPointer = 4] = "SoftPointer", i[i.HardPointer = 5] = "HardPointer";
 })(y || (y = {}));
 var $R = Object.defineProperty, Qr = (i, t) => $R(i, "name", { value: t, configurable: !0 });
-const UR = "ANSI_1252", zR = "windows-1252", xc = 63, WR = /* @__PURE__ */ new Set([
+const UR = "ANSI_1252", zR = "windows-1252", vc = 63, WR = /* @__PURE__ */ new Set([
   "ascii",
   "ibm866",
   "iso-8859-1",
@@ -22356,16 +22356,16 @@ const UR = "ANSI_1252", zR = "windows-1252", xc = 63, WR = /* @__PURE__ */ new S
   [382, 158],
   [376, 159]
 ]);
-function Bv(i) {
+function Bx(i) {
   const t = i?.trim();
   return t || UR;
 }
-Qr(Bv, "getDocumentCodePageName");
+Qr(Bx, "getDocumentCodePageName");
 function ds(i) {
-  const t = Av(i);
+  const t = Ax(i);
   if (t)
     return t;
-  switch (Dv(i)) {
+  switch (Dx(i)) {
     case R.Usascii:
       return "ascii";
     case R.Iso88591:
@@ -22435,7 +22435,7 @@ function ds(i) {
 Qr(ds, "getDecoderEncodingLabel");
 function Ot(i, t) {
   const e = i ?? "", r = ds(t);
-  return r === "utf-8" ? new TextEncoder().encode(e) : r === "utf-16le" ? tm(e) : WR.has(r) ? Sv(e, r) : Tv(e);
+  return r === "utf-8" ? new TextEncoder().encode(e) : r === "utf-16le" ? tm(e) : WR.has(r) ? Sx(e, r) : Tx(e);
 }
 Qr(Ot, "encodeCadString");
 function Ki(i, t) {
@@ -22451,20 +22451,20 @@ function tm(i) {
   return e;
 }
 Qr(tm, "encodeUtf16Le");
-function Sv(i, t) {
-  const e = vv(t), r = new Uint8Array(i.length);
+function Sx(i, t) {
+  const e = xx(t), r = new Uint8Array(i.length);
   for (let s = 0; s < i.length; s++) {
     const a = i.charAt(s), o = e.get(a);
     if (o !== void 0) {
       r[s] = o;
       continue;
     }
-    r[s] = xv(a, t);
+    r[s] = vx(a, t);
   }
   return r;
 }
-Qr(Sv, "encodeSingleByte");
-function vv(i) {
+Qr(Sx, "encodeSingleByte");
+function xx(i) {
   const t = dS.get(i);
   if (t)
     return t;
@@ -22479,26 +22479,26 @@ function vv(i) {
   }
   return dS.set(i, e), e;
 }
-Qr(vv, "getSingleByteEncoderMap");
-function xv(i, t) {
-  const e = i.codePointAt(0) ?? xc;
-  return t === "ascii" ? e <= 127 ? e : xc : e <= 255 ? e : FR.get(e) ?? xc;
+Qr(xx, "getSingleByteEncoderMap");
+function vx(i, t) {
+  const e = i.codePointAt(0) ?? vc;
+  return t === "ascii" ? e <= 127 ? e : vc : e <= 255 ? e : FR.get(e) ?? vc;
 }
-Qr(xv, "getSingleByteFallbackByte");
-function Tv(i) {
+Qr(vx, "getSingleByteFallbackByte");
+function Tx(i) {
   const t = new Uint8Array(i.length);
   for (let e = 0; e < i.length; e++) {
     const r = i.charCodeAt(e);
-    t[e] = r <= 127 ? r : xc;
+    t[e] = r <= 127 ? r : vc;
   }
   return t;
 }
-Qr(Tv, "encodeAsciiCompatible");
-function Dv(i) {
+Qr(Tx, "encodeAsciiCompatible");
+function Dx(i) {
   return typeof i == "number" ? i : typeof i != "string" || !i.trim() ? R.Windows1252 : Ee.getCodePage(i.trim());
 }
-Qr(Dv, "resolveCodePage");
-function Av(i) {
+Qr(Dx, "resolveCodePage");
+function Ax(i) {
   if (typeof i != "string")
     return null;
   switch (i.trim().toLowerCase()) {
@@ -22623,15 +22623,15 @@ function Av(i) {
       return null;
   }
 }
-Qr(Av, "normalizeExplicitEncodingLabel");
+Qr(Ax, "normalizeExplicitEncodingLabel");
 var GR = Object.defineProperty, rm = (i, t) => GR(i, "name", { value: t, configurable: !0 });
-const Qp = /* @__PURE__ */ new Map(), Nv = /* @__PURE__ */ new Map();
+const Qp = /* @__PURE__ */ new Map(), Nx = /* @__PURE__ */ new Map();
 function Xo(i, t) {
   Qp.set(i, t);
 }
 rm(Xo, "registerStreamWriter");
 function im(i, t) {
-  Nv.set(i, t);
+  Nx.set(i, t);
 }
 rm(im, "registerMergedWriter");
 const Gb = class Gb {
@@ -22748,7 +22748,7 @@ const Gb = class Gb {
         o = "Merged";
         break;
     }
-    const l = Nv.get(o);
+    const l = Nx.get(o);
     if (!l)
       throw new Error(`Merged writer factory for ${o} not registered. Import DwgStreamWriterFactory first.`);
     if (o === "MergedAC14") {
@@ -23335,7 +23335,7 @@ const eg = class eg extends re {
     return f.entityProxyEntity;
   }
   get objectType() {
-    return v.ACAD_PROXY_ENTITY;
+    return x.ACAD_PROXY_ENTITY;
   }
   get subclassMarker() {
     return p.proxyEntity;
@@ -23368,7 +23368,7 @@ const tg = class tg extends re {
     return f.entityRay;
   }
   get objectType() {
-    return v.RAY;
+    return x.RAY;
   }
   get subclassMarker() {
     return p.ray;
@@ -23387,7 +23387,7 @@ let ba = tg;
 var d3 = Object.defineProperty, u3 = (i, t) => d3(i, "name", { value: t, configurable: !0 });
 const rg = class rg extends ar {
   get objectType() {
-    return v.REGION;
+    return x.REGION;
   }
   get objectName() {
     return f.entityRegion;
@@ -23413,7 +23413,7 @@ const ig = class ig extends ar {
     return p.surface;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
 };
 p3(ig, "Surface");
@@ -23478,7 +23478,7 @@ const og = class og extends ur {
 };
 B3(og, "PlaneSurface");
 let Vl = og;
-var S3 = Object.defineProperty, v3 = (i, t) => S3(i, "name", { value: t, configurable: !0 });
+var S3 = Object.defineProperty, x3 = (i, t) => S3(i, "name", { value: t, configurable: !0 });
 const lg = class lg extends ur {
   getDxfClass() {
     const t = new wt();
@@ -23491,9 +23491,9 @@ const lg = class lg extends ur {
     return p.revolvedSurface;
   }
 };
-v3(lg, "RevolvedSurface");
+x3(lg, "RevolvedSurface");
 let Ml = lg;
-var x3 = Object.defineProperty, T3 = (i, t) => x3(i, "name", { value: t, configurable: !0 });
+var v3 = Object.defineProperty, T3 = (i, t) => v3(i, "name", { value: t, configurable: !0 });
 const cg = class cg extends ur {
   getDxfClass() {
     const t = new wt();
@@ -23511,7 +23511,7 @@ let Hl = cg;
 var D3 = Object.defineProperty, A3 = (i, t) => D3(i, "name", { value: t, configurable: !0 });
 const hg = class hg extends re {
   get objectType() {
-    return v.SEQEND;
+    return x.SEQEND;
   }
   get objectName() {
     return f.entitySeqend;
@@ -23551,7 +23551,7 @@ const dg = class dg extends re {
     e && (this.shapeStyle = e);
   }
   get objectType() {
-    return v.SHAPE;
+    return x.SHAPE;
   }
   get objectName() {
     return f.entityShape;
@@ -23603,7 +23603,7 @@ let hn = dg;
 var R3 = Object.defineProperty, E3 = (i, t) => R3(i, "name", { value: t, configurable: !0 });
 const ug = class ug extends ar {
   get objectType() {
-    return v.SOLID3D;
+    return x.SOLID3D;
   }
   get objectName() {
     return f.entity3DSolid;
@@ -23628,7 +23628,7 @@ const fg = class fg extends re {
     return f.entityTolerance;
   }
   get objectType() {
-    return v.TOLERANCE;
+    return x.TOLERANCE;
   }
   get style() {
     return this._style;
@@ -23677,7 +23677,7 @@ const pg = class pg extends re {
     r ? (this._objectName = r.dxfName || "", this._subclassMarker = r.cppClassName || "") : (this._objectName = "", this._subclassMarker = "");
   }
   get objectType() {
-    return v.UNDEFINED;
+    return x.UNDEFINED;
   }
   get objectName() {
     return this._objectName;
@@ -23696,7 +23696,7 @@ let gs = pg;
 var I3 = Object.defineProperty, V3 = (i, t) => I3(i, "name", { value: t, configurable: !0 });
 const _g = class _g extends Ii {
   get objectType() {
-    return v.VERTEX_PFACE;
+    return x.VERTEX_PFACE;
   }
   get subclassMarker() {
     return p.polyfaceMeshVertex;
@@ -23714,7 +23714,7 @@ const mg = class mg extends Ii {
     n(this, "index4", 0);
   }
   get objectType() {
-    return v.VERTEX_PFACE_FACE;
+    return x.VERTEX_PFACE_FACE;
   }
   get subclassMarker() {
     return p.polyfaceMeshFace;
@@ -23735,7 +23735,7 @@ var fS;
 var $3 = Object.defineProperty, U3 = (i, t) => $3(i, "name", { value: t, configurable: !0 });
 const wg = class wg extends Al {
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.entityWipeout;
@@ -23760,7 +23760,7 @@ const bg = class bg extends re {
     return f.entityXline;
   }
   get objectType() {
-    return v.XLINE;
+    return x.XLINE;
   }
   get subclassMarker() {
     return p.xLine;
@@ -23876,14 +23876,14 @@ const Ku = class Ku {
 rE(Ku, "LittleEndianConverter");
 let Ma = Ku;
 var iE = Object.defineProperty, sE = (i, t) => iE(i, "name", { value: t, configurable: !0 });
-const vg = class vg extends ue {
+const xg = class xg extends ue {
   constructor(e) {
     super();
     n(this, "dxfClass");
     this.dxfClass = e instanceof wt ? e : e?.result ?? null;
   }
   get objectType() {
-    return v.UNDEFINED;
+    return x.UNDEFINED;
   }
   get objectName() {
     return this.dxfClass ? this.dxfClass.dxfName : "UNKNOWN";
@@ -23892,13 +23892,13 @@ const vg = class vg extends ue {
     return this.dxfClass ? this.dxfClass.cppClassName : p.entity;
   }
 };
-sE(vg, "UnknownNonGraphicalObject");
-let un = vg;
+sE(xg, "UnknownNonGraphicalObject");
+let un = xg;
 var nE = Object.defineProperty, aE = (i, t) => nE(i, "name", { value: t, configurable: !0 }), D;
 (function(i) {
   i[i.NotImplemented = -1] = "NotImplemented", i[i.None = 0] = "None", i[i.NotSupported = 1] = "NotSupported", i[i.Warning = 2] = "Warning", i[i.Error = 3] = "Error";
 })(D || (D = {}));
-const xg = class xg {
+const vg = class vg {
   constructor(t, e = D.None, r = null) {
     n(this, "message");
     n(this, "notificationType");
@@ -23906,9 +23906,9 @@ const xg = class xg {
     this.message = t, this.notificationType = e, this.exception = r;
   }
 };
-aE(xg, "NotificationEventArgs");
-let Vi = xg;
-var oE = Object.defineProperty, Pv = (i, t) => oE(i, "name", { value: t, configurable: !0 }), jh;
+aE(vg, "NotificationEventArgs");
+let Vi = vg;
+var oE = Object.defineProperty, Px = (i, t) => oE(i, "name", { value: t, configurable: !0 }), jh;
 (function(i) {
   i[i.Read = 0] = "Read", i[i.Build = 1] = "Build";
 })(jh || (jh = {}));
@@ -23919,7 +23919,7 @@ const Tg = class Tg {
     this.handle = t.handle, this.type = t.objectName;
   }
 };
-Pv(Tg, "CadObjectData");
+Px(Tg, "CadObjectData");
 let i0 = Tg;
 const Dg = class Dg {
   constructor(t, e) {
@@ -23928,7 +23928,7 @@ const Dg = class Dg {
     this.stage = t, this.current = e;
   }
 };
-Pv(Dg, "ProgressEventArgs");
+Px(Dg, "ProgressEventArgs");
 let s0 = Dg;
 var lE = Object.defineProperty, cE = (i, t) => lE(i, "name", { value: t, configurable: !0 });
 const Ag = class Ag {
@@ -24290,14 +24290,14 @@ const kg = class kg extends pn {
 };
 SE(kg, "DwgFileHeaderAC18");
 let Ao = kg;
-var vE = Object.defineProperty, xE = (i, t) => vE(i, "name", { value: t, configurable: !0 });
+var xE = Object.defineProperty, vE = (i, t) => xE(i, "name", { value: t, configurable: !0 });
 const Lg = class Lg extends Ao {
   constructor(e) {
     super(e);
     n(this, "compressedMetadata");
   }
 };
-xE(Lg, "DwgFileHeaderAC21");
+vE(Lg, "DwgFileHeaderAC21");
 let Mh = Lg;
 Do.registerFactory((i) => {
   switch (i) {
@@ -25673,10 +25673,10 @@ const Fg = class Fg extends Qe {
     (this.r2010Plus && e > 3 || this.r2018Plus) && this._reader.readRawLong();
     const o = this._reader.positionInBits();
     if (this.r2007Plus) {
-      const b = this._reader.readRawLong(), x = o + b - 1, g = mt.getStreamHandler(this._version, new Uint8Array(this._reader.stream));
-      g.setPositionByFlag(x);
+      const b = this._reader.readRawLong(), v = o + b - 1, g = mt.getStreamHandler(this._version, new Uint8Array(this._reader.stream));
+      g.setPositionByFlag(v);
       const T = mt.getStreamHandler(this._version, new Uint8Array(this._reader.stream));
-      T.setPositionInBits(x + 1), this._reader = new No(this._reader, g, T);
+      T.setPositionInBits(v + 1), this._reader = new No(this._reader, g, T);
     }
     this.r2013Plus && (this._header.requiredVersions = this._reader.readBitLongLong()), this._reader.readBitDouble(), this._reader.readBitDouble(), this._reader.readBitDouble(), this._reader.readBitDouble(), this._reader.readVariableText(), this._reader.readVariableText(), this._reader.readVariableText(), this._reader.readVariableText(), this._reader.readBitLong(), this._reader.readBitLong(), this.r13_14Only && this._reader.readBitShort(), this.r2004Pre && this._reader.handleReference(), this._header.associatedDimensions = this._reader.readBit(), this._header.updateDimensionsWhileDragging = this._reader.readBit(), this.r13_14Only && (this._header.dimsav = this._reader.readBit() ? 1 : 0), this._header.polylineLineTypeGeneration = this._reader.readBit(), this._header.orthoMode = this._reader.readBit(), this._header.regenerationMode = this._reader.readBit() ? 1 : 0, this._header.fillMode = this._reader.readBit(), this._header.quickTextMode = this._reader.readBit(), this._header.paperSpaceLineTypeScaling = this._reader.readBit() ? ho.Normal : ho.Viewport, this._header.limitCheckingOn = this._reader.readBit(), this.r13_14Only && (this._header.blipMode = this._reader.readBit()), this.r2004Plus && this._reader.readBit(), this._header.userTimer = this._reader.readBit(), this._header.sketchPolylineType = this._reader.readBit() ? 1 : 0, this._header.angularDirection = this._reader.readBitAsShort(), this._header.showSplineControlPoints = this._reader.readBit(), this.r13_14Only && (this._reader.readBit(), this._reader.readBit()), this._header.mirrorText = this._reader.readBit(), this._header.worldView = this._reader.readBit(), this.r13_14Only && this._reader.readBit(), this._header.showModelSpace = this._reader.readBit(), this._header.paperSpaceLimitsChecking = this._reader.readBit(), this._header.retainXRefDependentVisibilitySettings = this._reader.readBit(), this.r13_14Only && this._reader.readBit(), this._header.displaySilhouetteCurves = this._reader.readBit(), this._header.createEllipseAsPolyline = this._reader.readBit(), this._header.proxyGraphics = this._reader.readBitShortAsBool(), this.r13_14Only && this._reader.readBitShort(), this._header.spatialIndexMaxTreeDepth = this._reader.readBitShort(), this._header.linearUnitFormat = this._reader.readBitShort();
     const l = this._reader.readBitShort();
@@ -25690,8 +25690,8 @@ const Fg = class Fg extends Qe {
     const _ = this._reader.readBitDouble();
     if (_ > 0 && _ <= 10 && (this._header.facetResolution = _), this._header.currentMultilineScale = this._reader.readBitDouble(), this._header.currentEntityLinetypeScale = this._reader.readBitDouble(), this._header.menuFileName = this._reader.readVariableText(), this._header.createDateTime = this._reader.readDateTime(), this._header.updateDateTime = this._reader.readDateTime(), this.r2004Plus && (this._reader.readBitLong(), this._reader.readBitLong(), this._reader.readBitLong()), this._header.totalEditingTime = this._reader.readTimeSpan(), this._header.userElapsedTimeSpan = this._reader.readTimeSpan(), this._header.currentEntityColor = this._reader.readCmColor(), this._header.handleSeed = r.handleReference(), s.clayer = this._reader.handleReference(), s.textstyle = this._reader.handleReference(), s.celtype = this._reader.handleReference(), this.r2007Plus && (s.cmaterial = this._reader.handleReference()), s.dimstyle = this._reader.handleReference(), s.cmlstyle = this._reader.handleReference(), this.r2000Plus && (this._header.viewportDefaultViewScaleFactor = this._reader.readBitDouble()), this._header.paperSpaceInsertionBase = this._reader.read3BitDouble(), this._header.paperSpaceExtMin = this._reader.read3BitDouble(), this._header.paperSpaceExtMax = this._reader.read3BitDouble(), this._header.paperSpaceLimitsMin = this._reader.read2RawDouble(), this._header.paperSpaceLimitsMax = this._reader.read2RawDouble(), this._header.paperSpaceElevation = this._reader.readBitDouble(), this._header.paperSpaceUcs.origin = this._reader.read3BitDouble(), this._header.paperSpaceXAxis = this._reader.read3BitDouble(), this._header.paperSpaceYAxis = this._reader.read3BitDouble(), s.ucsname_pspace = this._reader.handleReference(), this.r2000Plus && (s.pucsorthoref = this._reader.handleReference(), this._reader.readBitShort(), s.pucsbase = this._reader.handleReference(), this._header.paperSpaceOrthographicTopDOrigin = this._reader.read3BitDouble(), this._header.paperSpaceOrthographicBottomDOrigin = this._reader.read3BitDouble(), this._header.paperSpaceOrthographicLeftDOrigin = this._reader.read3BitDouble(), this._header.paperSpaceOrthographicRightDOrigin = this._reader.read3BitDouble(), this._header.paperSpaceOrthographicFrontDOrigin = this._reader.read3BitDouble(), this._header.paperSpaceOrthographicBackDOrigin = this._reader.read3BitDouble()), this._header.modelSpaceInsertionBase = this._reader.read3BitDouble(), this._header.modelSpaceExtMin = this._reader.read3BitDouble(), this._header.modelSpaceExtMax = this._reader.read3BitDouble(), this._header.modelSpaceLimitsMin = this._reader.read2RawDouble(), this._header.modelSpaceLimitsMax = this._reader.read2RawDouble(), this._header.elevation = this._reader.readBitDouble(), this._header.modelSpaceOrigin = this._reader.read3BitDouble(), this._header.modelSpaceXAxis = this._reader.read3BitDouble(), this._header.modelSpaceYAxis = this._reader.read3BitDouble(), s.ucsname_mspace = this._reader.handleReference(), this.r2000Plus && (s.ucsorthoref = this._reader.handleReference(), this._reader.readBitShort(), s.ucsbase = this._reader.handleReference(), this._header.modelSpaceOrthographicTopDOrigin = this._reader.read3BitDouble(), this._header.modelSpaceOrthographicBottomDOrigin = this._reader.read3BitDouble(), this._header.modelSpaceOrthographicLeftDOrigin = this._reader.read3BitDouble(), this._header.modelSpaceOrthographicRightDOrigin = this._reader.read3BitDouble(), this._header.modelSpaceOrthographicFrontDOrigin = this._reader.read3BitDouble(), this._header.modelSpaceOrthographicBackDOrigin = this._reader.read3BitDouble(), this._header.dimensionPostFix = this._reader.readVariableText(), this._header.dimensionAlternateDimensioningSuffix = this._reader.readVariableText()), this.r13_14Only && (this._header.dimensionGenerateTolerances = this._reader.readBit(), this._header.dimensionLimitsGeneration = this._reader.readBit(), this._header.dimensionTextInsideHorizontal = this._reader.readBit(), this._header.dimensionTextOutsideHorizontal = this._reader.readBit(), this._header.dimensionSuppressFirstExtensionLine = this._reader.readBit(), this._header.dimensionSuppressSecondExtensionLine = this._reader.readBit(), this._header.dimensionAlternateUnitDimensioning = this._reader.readBit(), this._header.dimensionTextOutsideExtensions = this._reader.readBit(), this._header.dimensionSeparateArrowBlocks = this._reader.readBit(), this._header.dimensionTextInsideExtensions = this._reader.readBit(), this._header.dimensionSuppressOutsideExtensions = this._reader.readBit(), this._header.dimensionAlternateUnitDecimalPlaces = this._reader.readRawChar(), this._header.dimensionZeroHandling = this._reader.readRawChar(), this._header.dimensionSuppressFirstDimensionLine = this._reader.readBit(), this._header.dimensionSuppressSecondDimensionLine = this._reader.readBit(), this._header.dimensionToleranceAlignment = this._reader.readRawChar(), this._header.dimensionTextHorizontalAlignment = this._reader.readRawChar(), this._header.dimensionFit = this._reader.readRawChar(), this._header.dimensionCursorUpdate = this._reader.readBit(), this._header.dimensionToleranceZeroHandling = this._reader.readRawChar(), this._header.dimensionAlternateUnitZeroHandling = this._reader.readRawChar(), this._header.dimensionAlternateUnitToleranceZeroHandling = this._reader.readRawChar(), this._header.dimensionTextVerticalAlignment = this._reader.readRawChar(), this._header.dimensionUnit = this._reader.readBitShort(), this._header.dimensionAngularDimensionDecimalPlaces = this._reader.readBitShort(), this._header.dimensionDecimalPlaces = this._reader.readBitShort(), this._header.dimensionToleranceDecimalPlaces = this._reader.readBitShort(), this._header.dimensionAlternateUnitFormat = this._reader.readBitShort(), this._header.dimensionAlternateUnitToleranceDecimalPlaces = this._reader.readBitShort(), s.dimtxsty = this._reader.handleReference()), this._header.dimensionScaleFactor = this._reader.readBitDouble(), this._header.dimensionArrowSize = this._reader.readBitDouble(), this._header.dimensionExtensionLineOffset = this._reader.readBitDouble(), this._header.dimensionLineIncrement = this._reader.readBitDouble(), this._header.dimensionExtensionLineExtension = this._reader.readBitDouble(), this._header.dimensionRounding = this._reader.readBitDouble(), this._header.dimensionLineExtension = this._reader.readBitDouble(), this._header.dimensionPlusTolerance = this._reader.readBitDouble(), this._header.dimensionMinusTolerance = this._reader.readBitDouble(), this.r2007Plus) {
       this._header.dimensionFixedExtensionLineLength = this._reader.readBitDouble();
-      const b = this._reader.readBitDouble(), x = Math.round(b * 1e6) / 1e6, g = 5 * Math.PI / 180;
-      x > g && x < Math.PI / 2 && (this._header.dimensionJoggedRadiusDimensionTransverseSegmentAngle = b), this._header.dimensionTextBackgroundFillMode = this._reader.readBitShort(), this._header.dimensionTextBackgroundColor = this._reader.readCmColor();
+      const b = this._reader.readBitDouble(), v = Math.round(b * 1e6) / 1e6, g = 5 * Math.PI / 180;
+      v > g && v < Math.PI / 2 && (this._header.dimensionJoggedRadiusDimensionTransverseSegmentAngle = b), this._header.dimensionTextBackgroundFillMode = this._reader.readBitShort(), this._header.dimensionTextBackgroundColor = this._reader.readCmColor();
     }
     if (this.r2000Plus && (this._header.dimensionGenerateTolerances = this._reader.readBit(), this._header.dimensionLimitsGeneration = this._reader.readBit(), this._header.dimensionTextInsideHorizontal = this._reader.readBit(), this._header.dimensionTextOutsideHorizontal = this._reader.readBit(), this._header.dimensionSuppressFirstExtensionLine = this._reader.readBit(), this._header.dimensionSuppressSecondExtensionLine = this._reader.readBit(), this._header.dimensionTextVerticalAlignment = this._reader.readBitShort(), this._header.dimensionZeroHandling = this._reader.readBitShort(), this._header.dimensionAngularZeroHandling = this._reader.readBitShort()), this.r2007Plus && (this._header.dimensionArcLengthSymbolPosition = this._reader.readBitShort()), this._header.dimensionTextHeight = this._reader.readBitDouble(), this._header.dimensionCenterMarkSize = this._reader.readBitDouble(), this._header.dimensionTickSize = this._reader.readBitDouble(), this._header.dimensionAlternateUnitScaleFactor = this._reader.readBitDouble(), this._header.dimensionLinearScaleFactor = this._reader.readBitDouble(), this._header.dimensionTextVerticalPosition = this._reader.readBitDouble(), this._header.dimensionToleranceScaleFactor = this._reader.readBitDouble(), this._header.dimensionLineGap = this._reader.readBitDouble(), this.r13_14Only && (this._header.dimensionPostFix = this._reader.readVariableText(), this._header.dimensionAlternateDimensioningSuffix = this._reader.readVariableText(), this._header.dimensionBlockName = this._reader.readVariableText(), this._header.dimensionBlockNameFirst = this._reader.readVariableText(), this._header.dimensionBlockNameSecond = this._reader.readVariableText()), this.r2000Plus && (this._header.dimensionAlternateUnitRounding = this._reader.readBitDouble(), this._header.dimensionAlternateUnitDimensioning = this._reader.readBit(), this._header.dimensionAlternateUnitDecimalPlaces = this._reader.readBitShort() & 255, this._header.dimensionTextOutsideExtensions = this._reader.readBit(), this._header.dimensionSeparateArrowBlocks = this._reader.readBit(), this._header.dimensionTextInsideExtensions = this._reader.readBit(), this._header.dimensionSuppressOutsideExtensions = this._reader.readBit()), this._header.dimensionLineColor = this._reader.readCmColor(), this._header.dimensionExtensionLineColor = this._reader.readCmColor(), this._header.dimensionTextColor = this._reader.readCmColor(), this.r2000Plus && (this._header.dimensionAngularDimensionDecimalPlaces = this._reader.readBitShort(), this._header.dimensionDecimalPlaces = this._reader.readBitShort(), this._header.dimensionToleranceDecimalPlaces = this._reader.readBitShort(), this._header.dimensionAlternateUnitFormat = this._reader.readBitShort(), this._header.dimensionAlternateUnitToleranceDecimalPlaces = this._reader.readBitShort(), this._header.dimensionAngularUnit = this._reader.readBitShort(), this._header.dimensionFractionFormat = this._reader.readBitShort(), this._header.dimensionLinearUnitFormat = this._reader.readBitShort(), this._header.dimensionDecimalSeparator = String.fromCharCode(this._reader.readBitShort()), this._header.dimensionTextMovement = this._reader.readBitShort(), this._header.dimensionTextHorizontalAlignment = this._reader.readBitShort() & 255, this._header.dimensionSuppressFirstDimensionLine = this._reader.readBit(), this._header.dimensionSuppressSecondDimensionLine = this._reader.readBit(), this._header.dimensionToleranceAlignment = this._reader.readBitShort() & 255, this._header.dimensionToleranceZeroHandling = this._reader.readBitShort() & 255, this._header.dimensionAlternateUnitZeroHandling = this._reader.readBitShort() & 255, this._header.dimensionAlternateUnitToleranceZeroHandling = this._reader.readBitShort() & 255, this._header.dimensionCursorUpdate = this._reader.readBit(), this._header.dimensionDimensionTextArrowFit = this._reader.readBitShort()), this.r2007Plus && (this._header.dimensionIsExtensionLineLengthFixed = this._reader.readBit()), this.r2010Plus && (this._header.dimensionTextDirection = this._reader.readBit() ? 1 : 0, this._header.dimensionAltMzf = this._reader.readBitDouble(), this._header.dimensionAltMzs = this._reader.readVariableText(), this._header.dimensionFit = this._reader.readBitDouble(), this._header.dimensionMzs = this._reader.readVariableText()), this.r2000Plus && (s.dimtxsty = this._reader.handleReference(), s.dimldrblk = this._reader.handleReference(), s.dimblk = this._reader.handleReference(), s.dimblk1 = this._reader.handleReference(), s.dimblk2 = this._reader.handleReference()), this.r2007Plus && (s.dimltype = this._reader.handleReference(), s.dimltex1 = this._reader.handleReference(), s.dimltex2 = this._reader.handleReference()), this.r2000Plus && (this._header.dimensionLineWeight = this._reader.readBitShort(), this._header.extensionLineWeight = this._reader.readBitShort()), s.block_control_object = this._reader.handleReference(), s.layer_control_object = this._reader.handleReference(), s.style_control_object = this._reader.handleReference(), s.linetype_control_object = this._reader.handleReference(), s.view_control_object = this._reader.handleReference(), s.ucs_control_object = this._reader.handleReference(), s.vport_control_object = this._reader.handleReference(), s.appid_control_object = this._reader.handleReference(), s.dimstyle_control_object = this._reader.handleReference(), this.r13_15Only && (s.viewport_entity_header_control_object = this._reader.handleReference()), s.dictionary_acad_group = this._reader.handleReference(), s.dictionary_acad_mlinestyle = this._reader.handleReference(), s.dictionary_named_objects = this._reader.handleReference(), this.r2000Plus && (this._header.stackedTextAlignment = this._reader.readBitShort(), this._header.stackedTextSizePercentage = this._reader.readBitShort(), this._header.hyperLinkBase = this._reader.readVariableText(), this._header.styleSheetName = this._reader.readVariableText(), s.dictionary_layouts = this._reader.handleReference(), s.dictionary_plotsettings = this._reader.handleReference(), s.dictionary_plotstyles = this._reader.handleReference()), this.r2004Plus && (s.dictionary_materials = this._reader.handleReference(), s.dictionary_colors = this._reader.handleReference()), this.r2007Plus && (s.dictionary_visualstyle = this._reader.handleReference(), this.r2013Plus && (s.dictionary_visualstyle = this._reader.handleReference())), this.r2000Plus) {
       const b = this._reader.readBitLong();
@@ -25740,12 +25740,12 @@ const Gg = class Gg extends ue {
 t2(Gg, "ProxyObject");
 let _n = Gg;
 var r2 = Object.defineProperty, Yo = (i, t) => r2(i, "name", { value: t, configurable: !0 });
-const Rv = 16777216, Ev = 33554432;
+const Rx = 16777216, Ex = 33554432;
 function sm(i) {
-  const t = Lv(i.trueType);
-  if (t === 0 || i.isShapeFile || jv(i.filename))
+  const t = Lx(i.trueType);
+  if (t === 0 || i.isShapeFile || jx(i.filename))
     return i.extendedData;
-  const e = Iv(i.filename);
+  const e = Ix(i.filename);
   if (!e)
     return i.extendedData;
   let r = null;
@@ -25764,7 +25764,7 @@ function sm(i) {
   return o[0] instanceof Xr && o[1] instanceof Li ? o.splice(0, 2, l, c) : o.unshift(l, c), a.set(s, new ps(o)), a;
 }
 Yo(sm, "getTextStyleExtendedDataForWrite");
-function kv(i) {
+function kx(i) {
   const t = i.extendedData.tryGetByName(rt.defaultName);
   if (!t.found)
     return;
@@ -25772,31 +25772,31 @@ function kv(i) {
   for (let r = 0; r < e.length - 1; r++) {
     const s = e[r], a = e[r + 1];
     if (s instanceof Xr && a instanceof Li) {
-      i.trueType = Ov(a.value);
+      i.trueType = Ox(a.value);
       return;
     }
   }
 }
-Yo(kv, "applyTextStyleTrueTypeFromExtendedData");
-function Lv(i) {
+Yo(kx, "applyTextStyleTrueTypeFromExtendedData");
+function Lx(i) {
   let t = 0;
-  return (i & Bi.Italic) !== 0 && (t |= Rv), (i & Bi.Bold) !== 0 && (t |= Ev), t;
+  return (i & Bi.Italic) !== 0 && (t |= Rx), (i & Bi.Bold) !== 0 && (t |= Ex), t;
 }
-Yo(Lv, "toExtendedFontFlags");
-function Ov(i) {
+Yo(Lx, "toExtendedFontFlags");
+function Ox(i) {
   let t = Bi.Regular;
-  return (i & Rv) !== 0 && (t |= Bi.Italic), (i & Ev) !== 0 && (t |= Bi.Bold), t;
+  return (i & Rx) !== 0 && (t |= Bi.Italic), (i & Ex) !== 0 && (t |= Bi.Bold), t;
 }
-Yo(Ov, "fromExtendedFontFlags");
-function jv(i) {
+Yo(Ox, "fromExtendedFontFlags");
+function jx(i) {
   return i.trim().toLowerCase().endsWith(".shx");
 }
-Yo(jv, "isShxFont");
-function Iv(i) {
+Yo(jx, "isShxFont");
+function Ix(i) {
   const t = i.trim().replace(/\\/g, "/").split("/").pop() ?? "", e = t.lastIndexOf(".");
   return e > 0 ? t.slice(0, e) : t;
 }
-Yo(Iv, "getFontFamily");
+Yo(Ix, "getFontFamily");
 var i2 = Object.defineProperty, bS = (i, t) => i2(i, "name", { value: t, configurable: !0 });
 const Xg = class Xg {
   constructor(t) {
@@ -25833,7 +25833,7 @@ const Xg = class Xg {
       o ? this.cadObject.extendedData.set(o, new ps(a)) : t.notify(`AppId in extended data with handle ${s} not found`, D.Warning);
     }
     const r = this.cadObject;
-    r instanceof Ve && kv(r);
+    r instanceof Ve && kx(r);
   }
   *getEntitiesCollection(t, e, r) {
     const s = /* @__PURE__ */ bS((l) => {
@@ -25869,7 +25869,7 @@ const Yg = class Yg extends mn {
 };
 n2(Yg, "CadTemplateT");
 let qe = Yg;
-var a2 = Object.defineProperty, Vv = (i, t) => a2(i, "name", { value: t, configurable: !0 });
+var a2 = Object.defineProperty, Vx = (i, t) => a2(i, "name", { value: t, configurable: !0 });
 const Zg = class Zg {
   constructor(t) {
     n(this, "data");
@@ -25900,7 +25900,7 @@ const Zg = class Zg {
     return this.position += t, e;
   }
 };
-Vv(Zg, "LittleEndianReader");
+Vx(Zg, "LittleEndianReader");
 let zh = Zg;
 const qg = class qg {
   static readGeometries(t) {
@@ -26017,9 +26017,9 @@ const qg = class qg {
     return new Fr(e);
   }
 };
-Vv(qg, "ProxyGeometryReader");
+Vx(qg, "ProxyGeometryReader");
 let h0 = qg;
-var o2 = Object.defineProperty, Mv = (i, t) => o2(i, "name", { value: t, configurable: !0 });
+var o2 = Object.defineProperty, Mx = (i, t) => o2(i, "name", { value: t, configurable: !0 });
 const Kg = class Kg extends qe {
   constructor(e) {
     super(e);
@@ -26065,14 +26065,14 @@ const Kg = class Kg extends qe {
     this.proxyGraphics != null && !e.ignoreProxyGraphics && this.cadObject.proxyGeometries.push(...h0.readGeometries(this.proxyGraphics));
   }
 };
-Mv(Kg, "CadEntityTemplate");
+Mx(Kg, "CadEntityTemplate");
 let F = Kg;
 const Jg = class Jg extends F {
   constructor(t) {
     super(t);
   }
 };
-Mv(Jg, "CadEntityTemplateT");
+Mx(Jg, "CadEntityTemplateT");
 let qr = Jg;
 var l2 = Object.defineProperty, c2 = (i, t) => l2(i, "name", { value: t, configurable: !0 });
 const Qg = class Qg extends qe {
@@ -26184,7 +26184,7 @@ const iy = class iy extends kt {
 };
 w2(iy, "CadBlockCtrlObjectTemplate");
 let Wh = iy;
-var b2 = Object.defineProperty, Hv = (i, t) => b2(i, "name", { value: t, configurable: !0 });
+var b2 = Object.defineProperty, Hx = (i, t) => b2(i, "name", { value: t, configurable: !0 });
 const sy = class sy extends F {
   constructor(e) {
     super(e ?? new zl());
@@ -26214,11 +26214,11 @@ const sy = class sy extends F {
     this.cadObject = e;
   }
 };
-Hv(sy, "CadDimensionTemplate");
+Hx(sy, "CadDimensionTemplate");
 let gr = sy;
 const ny = class ny extends Ae {
   get objectType() {
-    return v.INVALID;
+    return x.INVALID;
   }
   get measurement() {
     return 0;
@@ -26230,7 +26230,7 @@ const ny = class ny extends Ae {
     super(Be.Linear);
   }
 };
-Hv(ny, "DimensionPlaceholder");
+Hx(ny, "DimensionPlaceholder");
 let zl = ny;
 var g2 = Object.defineProperty, y2 = (i, t) => g2(i, "name", { value: t, configurable: !0 });
 const ay = class ay extends qt {
@@ -26273,7 +26273,7 @@ const ay = class ay extends qt {
 };
 y2(ay, "CadDimensionStyleTemplate");
 let Fh = ay;
-var C2 = Object.defineProperty, $v = (i, t) => C2(i, "name", { value: t, configurable: !0 });
+var C2 = Object.defineProperty, $x = (i, t) => C2(i, "name", { value: t, configurable: !0 });
 const oy = class oy extends qr {
   constructor(e) {
     super(e ?? new bs());
@@ -26287,7 +26287,7 @@ const oy = class oy extends qr {
       this.cadObject.paths.push(r.path), r.build(e);
   }
 };
-$v(oy, "CadHatchTemplate");
+$x(oy, "CadHatchTemplate");
 let bn = oy;
 (function(i) {
   const e = class e {
@@ -26302,7 +26302,7 @@ let bn = oy;
       }
     }
   };
-  $v(e, "CadBoundaryPathTemplate");
+  $x(e, "CadBoundaryPathTemplate");
   let t = e;
   i.CadBoundaryPathTemplate = t;
 })(bn || (bn = {}));
@@ -26340,7 +26340,7 @@ const ly = class ly extends F {
 };
 S2(ly, "CadInsertTemplate");
 let gn = ly;
-var v2 = Object.defineProperty, x2 = (i, t) => v2(i, "name", { value: t, configurable: !0 });
+var x2 = Object.defineProperty, v2 = (i, t) => x2(i, "name", { value: t, configurable: !0 });
 const cy = class cy extends qt {
   constructor(e) {
     super(e ?? new Je());
@@ -26357,7 +26357,7 @@ const cy = class cy extends qt {
     r ? this.cadObject.lineType = r : e.notify(`Linetype with handle ${this.lineTypeHandle} could not be found for layer ${this.cadObject.name}`, D.Warning);
   }
 };
-x2(cy, "CadLayerTemplate");
+v2(cy, "CadLayerTemplate");
 let Gh = cy;
 var T2 = Object.defineProperty, D2 = (i, t) => T2(i, "name", { value: t, configurable: !0 });
 const hy = class hy extends qe {
@@ -26405,7 +26405,7 @@ const dy = class dy extends qr {
 };
 N2(dy, "CadLeaderTemplate");
 let Yh = dy;
-var P2 = Object.defineProperty, Uv = (i, t) => P2(i, "name", { value: t, configurable: !0 });
+var P2 = Object.defineProperty, Ux = (i, t) => P2(i, "name", { value: t, configurable: !0 });
 const uy = class uy extends qt {
   constructor(e) {
     super(e ?? new ie());
@@ -26419,7 +26419,7 @@ const uy = class uy extends qt {
       r.build(e), this.cadObject.addSegment(r.segment);
   }
 };
-Uv(uy, "CadLineTypeTemplate");
+Ux(uy, "CadLineTypeTemplate");
 let yn = uy;
 (function(i) {
   const e = class e {
@@ -26432,7 +26432,7 @@ let yn = uy;
       a && (this.segment.style = a);
     }
   };
-  Uv(e, "SegmentTemplate");
+  Ux(e, "SegmentTemplate");
   let t = e;
   i.SegmentTemplate = t;
 })(yn || (yn = {}));
@@ -26450,7 +26450,7 @@ const fy = class fy extends ye {
 };
 E2(fy, "CadAnnotScaleObjectContextDataTemplate");
 let ya = fy;
-var k2 = Object.defineProperty, zv = (i, t) => k2(i, "name", { value: t, configurable: !0 });
+var k2 = Object.defineProperty, zx = (i, t) => k2(i, "name", { value: t, configurable: !0 });
 const py = class py extends ya {
   constructor(e) {
     super(e);
@@ -26468,7 +26468,7 @@ const py = class py extends ya {
       o.build(e);
   }
 };
-zv(py, "CadMLeaderAnnotContextTemplate");
+zx(py, "CadMLeaderAnnotContextTemplate");
 let Cn = py;
 (function(i) {
   const e = class e {
@@ -26476,7 +26476,7 @@ let Cn = py;
       n(this, "arrowSymbolHandle", null);
       n(this, "leaderLine");
       n(this, "lineTypeHandle", null);
-      this.leaderLine = s ?? new xh();
+      this.leaderLine = s ?? new vh();
     }
     build(s) {
       const a = s.tryGetCadObject(this.lineTypeHandle);
@@ -26485,7 +26485,7 @@ let Cn = py;
       o && (this.leaderLine.arrowhead = o);
     }
   };
-  zv(e, "LeaderLineTemplate");
+  zx(e, "LeaderLineTemplate");
   let t = e;
   i.LeaderLineTemplate = t;
 })(Cn || (Cn = {}));
@@ -26525,8 +26525,8 @@ const _y = class _y extends qr {
         r.arrowhead ?? (r.arrowhead = b);
         continue;
       }
-      const x = h.find((g) => g.arrowhead == null);
-      x != null ? x.arrowhead = b : r.arrowhead ?? (r.arrowhead = b);
+      const v = h.find((g) => g.arrowhead == null);
+      v != null ? v.arrowhead = b : r.arrowhead ?? (r.arrowhead = b);
     }
     for (const d of r.blockAttributes) {
       const _ = this.blockAttributeHandles.get(d);
@@ -26646,7 +26646,7 @@ const Za = class Za extends ue {
     return f.objectMLeaderStyle;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.mLeaderStyle;
@@ -26747,7 +26747,7 @@ const wy = class wy extends qr {
 };
 $2(wy, "CadMLineTemplate");
 let Kh = wy;
-var U2 = Object.defineProperty, Wv = (i, t) => U2(i, "name", { value: t, configurable: !0 });
+var U2 = Object.defineProperty, Wx = (i, t) => U2(i, "name", { value: t, configurable: !0 });
 const by = class by extends qe {
   constructor(e) {
     super(e ?? new Ri());
@@ -26759,7 +26759,7 @@ const by = class by extends qe {
       r.build(e);
   }
 };
-Wv(by, "CadMLineStyleTemplate");
+Wx(by, "CadMLineStyleTemplate");
 let Bn = by;
 (function(i) {
   const e = class e {
@@ -26795,14 +26795,14 @@ let Bn = by;
           }
     }
   };
-  Wv(e, "ElementTemplate");
+  Wx(e, "ElementTemplate");
   let t = e;
   i.ElementTemplate = t;
 })(Bn || (Bn = {}));
 var z2 = Object.defineProperty, W2 = (i, t) => z2(i, "name", { value: t, configurable: !0 });
 const gy = class gy extends qe {
   constructor(t) {
-    super(t ?? new xi());
+    super(t ?? new vi());
   }
   _build(t) {
     super._build(t);
@@ -26855,7 +26855,7 @@ const Cy = class Cy extends qr {
 };
 Y2(Cy, "CadOle2FrameTemplate");
 let ed = Cy;
-var Z2 = Object.defineProperty, Fv = (i, t) => Z2(i, "name", { value: t, configurable: !0 });
+var Z2 = Object.defineProperty, Fx = (i, t) => Z2(i, "name", { value: t, configurable: !0 });
 const By = class By extends F {
   constructor(e) {
     super(e || new f0());
@@ -26872,13 +26872,13 @@ const By = class By extends F {
     if (s instanceof Vt)
       for (const a of r)
         s.vertices.push(a), a.owner = s;
-    else if (s instanceof xr)
+    else if (s instanceof vr)
       for (const a of r)
         s.vertices.push(a), a.owner = s;
     else if (s instanceof ut)
       for (const a of r)
         this._addPolyfaceMeshVertex(e, s, a);
-    else if (s instanceof vr)
+    else if (s instanceof xr)
       for (const a of r)
         s.vertices.push(a), a.owner = s;
     else
@@ -26905,7 +26905,7 @@ const By = class By extends F {
   }
   setSeqend(e, r) {
     const s = this.cadObject;
-    r.owner = s, s instanceof Vt || s instanceof xr || s instanceof ut || s instanceof vr ? s.vertices.seqend = r : e.notify(`Unknown polyline type ${this.cadObject.subclassMarker}`, D.Warning);
+    r.owner = s, s instanceof Vt || s instanceof vr || s instanceof ut || s instanceof xr ? s.vertices.seqend = r : e.notify(`Unknown polyline type ${this.cadObject.subclassMarker}`, D.Warning);
   }
   _buildPolyfaceMesh(e, r) {
     for (const s of this.ownedObjectsHandlers) {
@@ -26917,11 +26917,11 @@ const By = class By extends F {
     s instanceof Js ? (r.vertices.push(s), s.owner = r) : s instanceof yi ? (r.faces.push(s), s.owner = r) : s instanceof st ? (r.vertices.seqend = s, s.owner = r) : e.notify(`Unidentified type for PolyfaceMesh ${s.constructor.name}`);
   }
 };
-Fv(By, "CadPolyLineTemplate");
+Fx(By, "CadPolyLineTemplate");
 let Ci = By;
 const Sy = class Sy extends nn {
   get objectType() {
-    return v.INVALID;
+    return x.INVALID;
   }
   get subclassMarker() {
     return "PolyLinePlaceholder";
@@ -26930,18 +26930,18 @@ const Sy = class Sy extends nn {
     return null;
   }
 };
-Fv(Sy, "PolyLinePlaceholder");
+Fx(Sy, "PolyLinePlaceholder");
 let f0 = Sy;
 var q2 = Object.defineProperty, K2 = (i, t) => q2(i, "name", { value: t, configurable: !0 });
-const vy = class vy extends qe {
+const xy = class xy extends qe {
   constructor(t) {
     super(t);
   }
 };
-K2(vy, "CadPlotSettingsTemplate");
-let p0 = vy;
+K2(xy, "CadPlotSettingsTemplate");
+let p0 = xy;
 var J2 = Object.defineProperty, Q2 = (i, t) => J2(i, "name", { value: t, configurable: !0 });
-const xy = class xy extends F {
+const vy = class vy extends F {
   constructor(e) {
     super(e);
     n(this, "shapeIndex", null);
@@ -26954,8 +26954,8 @@ const xy = class xy extends F {
     s && (s.isShapeFile ? r.shapeStyle = s : e.notify(`Shape style ${this.shapeFileHandle} | ${this.shapeFileName} not found`, D.Warning));
   }
 };
-Q2(xy, "CadShapeTemplate");
-let td = xy;
+Q2(vy, "CadShapeTemplate");
+let td = vy;
 var ek = Object.defineProperty, tk = (i, t) => ek(i, "name", { value: t, configurable: !0 });
 const Ty = class Ty extends qr {
   constructor(e) {
@@ -27048,7 +27048,7 @@ const Ey = class Ey extends Dr {
     n(this, "ucsOrthographicType", tn.None);
   }
   get objectType() {
-    return v.VIEW;
+    return x.VIEW;
   }
   get objectName() {
     return f.tableView;
@@ -27178,7 +27178,7 @@ const Vy = class Vy extends F {
 };
 Sk(Vy, "CadWipeoutBaseTemplate");
 let Wl = Vy;
-var vk = Object.defineProperty, xk = (i, t) => vk(i, "name", { value: t, configurable: !0 });
+var xk = Object.defineProperty, vk = (i, t) => xk(i, "name", { value: t, configurable: !0 });
 const My = class My extends qe {
   constructor(e) {
     super(e ?? new Re());
@@ -27205,7 +27205,7 @@ const My = class My extends qe {
     }
   }
 };
-xk(My, "CadDictionaryTemplate");
+vk(My, "CadDictionaryTemplate");
 let Fl = My;
 var Tk = Object.defineProperty, Dk = (i, t) => Tk(i, "name", { value: t, configurable: !0 });
 const Hy = class Hy extends Re {
@@ -27218,7 +27218,7 @@ const Hy = class Hy extends Re {
     return f.objectDictionaryWithDefault;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.dictionaryWithDefault;
@@ -27301,7 +27301,7 @@ const Wy = class Wy extends ue {
     n(this, "faces", []);
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectGeoData;
@@ -27367,7 +27367,7 @@ let fd = Gy;
 var Ok = Object.defineProperty, jk = (i, t) => Ok(i, "name", { value: t, configurable: !0 });
 const Xy = class Xy extends qe {
   constructor(e) {
-    super(e ?? new vi());
+    super(e ?? new xi());
     n(this, "blockOwnerHandle", null);
     n(this, "values", []);
   }
@@ -27566,20 +27566,20 @@ const t1 = class t1 extends mn {
 };
 $k(t1, "CadXRecordTemplate");
 let gd = t1;
-var Uk = Object.defineProperty, Gv = (i, t) => Uk(i, "name", { value: t, configurable: !0 });
+var Uk = Object.defineProperty, Gx = (i, t) => Uk(i, "name", { value: t, configurable: !0 });
 const r1 = class r1 extends ye {
   constructor(t) {
     super(t);
   }
 };
-Gv(r1, "CadUnknownNonGraphicalObjectTemplate");
+Gx(r1, "CadUnknownNonGraphicalObjectTemplate");
 let yd = r1;
 const i1 = class i1 extends F {
   constructor(t) {
     super(t);
   }
 };
-Gv(i1, "CadUnknownEntityTemplate");
+Gx(i1, "CadUnknownEntityTemplate");
 let Cd = i1;
 var zk = Object.defineProperty, Wk = (i, t) => zk(i, "name", { value: t, configurable: !0 });
 const s1 = class s1 extends F {
@@ -27611,7 +27611,7 @@ var Sd;
 (function(i) {
   i[i.Unknown = 0] = "Unknown", i[i.Edge = 1] = "Edge", i[i.Face = 2] = "Face";
 })(Sd || (Sd = {}));
-var Fk = Object.defineProperty, Xv = (i, t) => Fk(i, "name", { value: t, configurable: !0 });
+var Fk = Object.defineProperty, Xx = (i, t) => Fk(i, "name", { value: t, configurable: !0 });
 const n1 = class n1 {
   constructor() {
     n(this, "geometryParameter", 0);
@@ -27630,7 +27630,7 @@ const n1 = class n1 {
     n(this, "lastPointRef", null);
   }
 };
-Xv(n1, "OsnapPointRef");
+Xx(n1, "OsnapPointRef");
 let Vs = n1;
 const tf = class tf extends ue {
   constructor() {
@@ -27648,15 +27648,15 @@ const tf = class tf extends ue {
     return f.objectDimensionAssociation;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.dimensionAssociation;
   }
 };
-Xv(tf, "DimensionAssociation"), n(tf, "osnapPointRefClassName", "AcDbOsnapPointRef");
+Xx(tf, "DimensionAssociation"), n(tf, "osnapPointRefClassName", "AcDbOsnapPointRef");
 let Tr = tf;
-var Gk = Object.defineProperty, Yv = (i, t) => Gk(i, "name", { value: t, configurable: !0 });
+var Gk = Object.defineProperty, Yx = (i, t) => Gk(i, "name", { value: t, configurable: !0 });
 const a1 = class a1 extends qe {
   constructor(e) {
     super(e ?? new Tr());
@@ -27672,8 +27672,8 @@ const a1 = class a1 extends qe {
     r && (this.cadObject.dimension = r), this.firstPointRef !== null && (this.cadObject.firstPointRef = this.firstPointRef.osnapPointRef, this.firstPointRef.build(e)), this.secondPointRef !== null && (this.cadObject.secondPointRef = this.secondPointRef.osnapPointRef, this.secondPointRef.build(e)), this.thirdPointRef !== null && (this.cadObject.thirdPointRef = this.thirdPointRef.osnapPointRef, this.thirdPointRef.build(e)), this.fourthPointRef !== null && (this.cadObject.fourthPointRef = this.fourthPointRef.osnapPointRef, this.fourthPointRef.build(e));
   }
 };
-Yv(a1, "CadDimensionAssociationTemplate");
-let vn = a1;
+Yx(a1, "CadDimensionAssociationTemplate");
+let xn = a1;
 (function(i) {
   const e = class e {
     constructor(s) {
@@ -27690,11 +27690,11 @@ let vn = a1;
       a && (this.osnapPointRef.geometry = a);
     }
   };
-  Yv(e, "OsnapPointRefTemplate");
+  Yx(e, "OsnapPointRefTemplate");
   let t = e;
   i.OsnapPointRefTemplate = t;
-})(vn || (vn = {}));
-var Xk = Object.defineProperty, Zv = (i, t) => Xk(i, "name", { value: t, configurable: !0 });
+})(xn || (xn = {}));
+var Xk = Object.defineProperty, Zx = (i, t) => Xk(i, "name", { value: t, configurable: !0 });
 const o1 = class o1 extends qe {
   constructor(e) {
     super(e ?? new Ur());
@@ -27706,8 +27706,8 @@ const o1 = class o1 extends qe {
       r.build(e), this.cadObject.nodes.push(r.node);
   }
 };
-Zv(o1, "CadEvaluationGraphTemplate");
-let xn = o1;
+Zx(o1, "CadEvaluationGraphTemplate");
+let vn = o1;
 (function(i) {
   const e = class e {
     constructor() {
@@ -27719,10 +27719,10 @@ let xn = o1;
       a ? this.node.expression = a : s.notify(`Evaluation graph couldn't find the EvaluationExpression with handle ${this.expressionHandle}`, D.Warning);
     }
   };
-  Zv(e, "GraphNodeTemplate");
+  Zx(e, "GraphNodeTemplate");
   let t = e;
   i.GraphNodeTemplate = t;
-})(xn || (xn = {}));
+})(vn || (vn = {}));
 var Yk = Object.defineProperty, Zk = (i, t) => Yk(i, "name", { value: t, configurable: !0 });
 const l1 = class l1 extends qe {
   constructor(t) {
@@ -27730,9 +27730,9 @@ const l1 = class l1 extends qe {
   }
 };
 Zk(l1, "CadEvaluationExpressionTemplate");
-let vd = l1;
+let xd = l1;
 var qk = Object.defineProperty, Kk = (i, t) => qk(i, "name", { value: t, configurable: !0 });
-const c1 = class c1 extends vd {
+const c1 = class c1 extends xd {
   get blockElement() {
     return this.cadObject;
   }
@@ -27782,9 +27782,9 @@ const u1 = class u1 extends Xl {
   }
 };
 iL(u1, "CadBlockParameterTemplate");
-let xd = u1;
+let vd = u1;
 var sL = Object.defineProperty, nL = (i, t) => sL(i, "name", { value: t, configurable: !0 });
-const f1 = class f1 extends xd {
+const f1 = class f1 extends vd {
   get block2PtParameter() {
     return this.cadObject;
   }
@@ -27814,7 +27814,7 @@ const _1 = class _1 extends Ie {
     n(this, "value99", 0);
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.evalGraphExpr;
@@ -27901,17 +27901,17 @@ const g1 = class g1 extends Yl {
 };
 wL(g1, "Block2PtParameter");
 let ys = g1;
-var bL = Object.defineProperty, gL = (i, t) => bL(i, "name", { value: t, configurable: !0 }), v0;
+var bL = Object.defineProperty, gL = (i, t) => bL(i, "name", { value: t, configurable: !0 }), x0;
 (function(i) {
   i[i.None = 1] = "None", i[i.Unknown = 2] = "Unknown", i[i.Increment = 4] = "Increment", i[i.List = 8] = "List";
-})(v0 || (v0 = {}));
+})(x0 || (x0 = {}));
 const y1 = class y1 {
   constructor() {
     n(this, "allowedValues", []);
     n(this, "increment", 0);
     n(this, "maximum", 0);
     n(this, "minimum", 0);
-    n(this, "type", v0.None);
+    n(this, "type", x0.None);
   }
 };
 gL(y1, "ParameterValueSet");
@@ -27961,7 +27961,7 @@ const B1 = class B1 extends Ms {
 };
 SL(B1, "CadBlockRotationParameterTemplate");
 let Td = B1;
-var vL = Object.defineProperty, xL = (i, t) => vL(i, "name", { value: t, configurable: !0 });
+var xL = Object.defineProperty, vL = (i, t) => xL(i, "name", { value: t, configurable: !0 });
 const S1 = class S1 extends Yl {
   constructor() {
     super(...arguments);
@@ -27982,9 +27982,9 @@ const S1 = class S1 extends Yl {
     this.value93 = e;
   }
 };
-xL(S1, "Block1PtParameter");
+vL(S1, "Block1PtParameter");
 let Ba = S1;
-var TL = Object.defineProperty, qv = (i, t) => TL(i, "name", { value: t, configurable: !0 });
+var TL = Object.defineProperty, qx = (i, t) => TL(i, "name", { value: t, configurable: !0 });
 const rf = class rf {
   constructor() {
     n(this, "name", "");
@@ -27996,9 +27996,9 @@ const rf = class rf {
     return t.name = this.name, t.entities = this.entities.map((e) => e.clone()), t.expressions = this.expressions.map((e) => e.clone()), t;
   }
 };
-qv(rf, "BlockVisibilityState");
+qx(rf, "BlockVisibilityState");
 let Dd = rf;
-const v1 = class v1 extends Ba {
+const x1 = class x1 extends Ba {
   constructor() {
     super(...arguments);
     n(this, "description", "");
@@ -28035,10 +28035,10 @@ const v1 = class v1 extends Ba {
     return e;
   }
 };
-qv(v1, "BlockVisibilityParameter");
-let Lo = v1;
+qx(x1, "BlockVisibilityParameter");
+let Lo = x1;
 var DL = Object.defineProperty, AL = (i, t) => DL(i, "name", { value: t, configurable: !0 });
-const x1 = class x1 extends xd {
+const v1 = class v1 extends vd {
   get block1PtParameter() {
     return this.cadObject;
   }
@@ -28046,9 +28046,9 @@ const x1 = class x1 extends xd {
     super(t);
   }
 };
-AL(x1, "CadBlock1PtParameterTemplate");
-let ro = x1;
-var NL = Object.defineProperty, Kv = (i, t) => NL(i, "name", { value: t, configurable: !0 });
+AL(v1, "CadBlock1PtParameterTemplate");
+let ro = v1;
+var NL = Object.defineProperty, Kx = (i, t) => NL(i, "name", { value: t, configurable: !0 });
 const T1 = class T1 extends ro {
   constructor(e) {
     super(e ?? new Lo());
@@ -28066,7 +28066,7 @@ const T1 = class T1 extends ro {
       s.build(e, this.entityHandles), r.addState(s.state);
   }
 };
-Kv(T1, "CadBlockVisibilityParameterTemplate");
+Kx(T1, "CadBlockVisibilityParameterTemplate");
 let Tn = T1;
 (function(i) {
   const e = class e {
@@ -28087,7 +28087,7 @@ let Tn = T1;
       }
     }
   };
-  Kv(e, "StateTemplate");
+  Kx(e, "StateTemplate");
   let t = e;
   i.StateTemplate = t;
 })(Tn || (Tn = {}));
@@ -28311,7 +28311,7 @@ const H1 = class H1 extends Ro {
 n4(H1, "BlockGripExpression");
 let Zl = H1;
 var a4 = Object.defineProperty, o4 = (i, t) => a4(i, "name", { value: t, configurable: !0 });
-const $1 = class $1 extends vd {
+const $1 = class $1 extends xd {
   constructor(t) {
     super(t ?? new Zl());
   }
@@ -28392,7 +28392,7 @@ const F1 = class F1 extends F {
   }
 };
 _4(F1, "CadWallTemplate");
-let x0 = F1;
+let v0 = F1;
 var m4 = Object.defineProperty, w4 = (i, t) => m4(i, "name", { value: t, configurable: !0 });
 const G1 = class G1 extends Dr {
   constructor() {
@@ -28407,7 +28407,7 @@ const G1 = class G1 extends Dr {
     e === "" ? this._name = e : super.name = e;
   }
   get objectType() {
-    return v.VP_ENT_HDR;
+    return x.VP_ENT_HDR;
   }
 };
 w4(G1, "ViewportEntityHeader");
@@ -28424,7 +28424,7 @@ const Un = class Un extends ue {
     return f.objectDictionaryVar;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.dictionaryVariables;
@@ -28448,7 +28448,7 @@ const X1 = class X1 extends ue {
     n(this, "units", T0.None);
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectImageDefinition;
@@ -28481,7 +28481,7 @@ const Y1 = class Y1 extends ue {
 };
 S4(Y1, "RasterVariables");
 let An = Y1;
-var v4 = Object.defineProperty, x4 = (i, t) => v4(i, "name", { value: t, configurable: !0 });
+var x4 = Object.defineProperty, v4 = (i, t) => x4(i, "name", { value: t, configurable: !0 });
 const Z1 = class Z1 extends ue {
   constructor() {
     super(...arguments);
@@ -28491,13 +28491,13 @@ const Z1 = class Z1 extends ue {
     return f.objectWipeoutVariables;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.wipeoutVariables;
   }
 };
-x4(Z1, "WipeoutVariables");
+v4(Z1, "WipeoutVariables");
 let Nn = Z1;
 var T4 = Object.defineProperty, bc = (i, t) => T4(i, "name", { value: t, configurable: !0 });
 const Ha = [
@@ -28529,7 +28529,7 @@ const Ha = [
   ["displaySettings", "BL"],
   ["brightness", "BD"],
   ["shadowType", "BL"]
-], Jv = [
+], Jx = [
   "B",
   "B",
   "B",
@@ -28629,31 +28629,31 @@ function am() {
   ];
 }
 bc(am, "legacyFields");
-function Qv(i, t, e) {
+function Qx(i, t, e) {
   e.description = i.readVariableText(), e.type = i.readBitLong();
   const r = t >= w.AC1024;
   r && (e.dwgLightingModel = i.readBitShort(), e.internalFlag = i.readBit());
   for (const [s, [a, o]] of (r ? Ha : am()).entries())
     Reflect.set(e, a, A0(i, o)), r && (e.dwgPropertyOperations[s] = i.readBitShort());
-  r || (t >= w.AC1021 && (e.dwgLegacyUnknown = i.readBitDouble()), e.internalFlag = i.readBit()), t >= w.AC1027 && (e.dwgExtendedProperties = Jv.map((s) => ({
+  r || (t >= w.AC1021 && (e.dwgLegacyUnknown = i.readBitDouble()), e.internalFlag = i.readBit()), t >= w.AC1027 && (e.dwgExtendedProperties = Jx.map((s) => ({
     value: A0(i, s),
     operation: i.readBitShort()
   })));
 }
-bc(Qv, "readDwgVisualStyle");
-function ex(i, t, e) {
+bc(Qx, "readDwgVisualStyle");
+function ev(i, t, e) {
   i.writeVariableText(e.description), i.writeBitLong(e.type);
   const r = t >= w.AC1024;
   r && (i.writeBitShort(e.dwgLightingModel), i.writeBit(e.internalFlag));
   for (const [s, [a, o]] of (r ? Ha : am()).entries())
     N0(i, o, Reflect.get(e, a)), r && i.writeBitShort(e.dwgPropertyOperations[s] ?? 1);
   if (r || (t >= w.AC1021 && i.writeBitDouble(e.dwgLegacyUnknown), i.writeBit(e.internalFlag)), t >= w.AC1027)
-    for (const [s, a] of Jv.entries()) {
+    for (const [s, a] of Jx.entries()) {
       const o = e.dwgExtendedProperties[s], l = a === "B" ? !1 : a === "TV" ? "" : a === "CMC" ? O.byLayer : 0;
       N0(i, a, o?.value ?? l), i.writeBitShort(o?.operation ?? 1);
     }
 }
-bc(ex, "writeDwgVisualStyle");
+bc(ev, "writeDwgVisualStyle");
 var P0;
 (function(i) {
   i[i.NoEdges = 0] = "NoEdges", i[i.Isolines = 1] = "Isolines", i[i.FacetEdges = 2] = "FacetEdges";
@@ -28734,7 +28734,7 @@ const sf = class sf extends ue {
     return f.objectVisualStyle;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.visualStyle;
@@ -28753,7 +28753,7 @@ const q1 = class q1 extends ue {
     n(this, "file", "");
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.underlayDefinition;
@@ -28778,11 +28778,11 @@ const K1 = class K1 extends O0 {
   }
 };
 E4(K1, "PdfUnderlayDefinition");
-let va = K1;
+let xa = K1;
 var k4 = Object.defineProperty, L4 = (i, t) => k4(i, "name", { value: t, configurable: !0 });
 const J1 = class J1 extends ue {
   get objectType() {
-    return v.ACDBPLACEHOLDER;
+    return x.ACDBPLACEHOLDER;
   }
   get objectName() {
     return f.objectPlaceholder;
@@ -28792,7 +28792,7 @@ const J1 = class J1 extends ue {
   }
 };
 L4(J1, "AcdbPlaceHolder");
-let xa = J1;
+let va = J1;
 var O4 = Object.defineProperty, j4 = (i, t) => O4(i, "name", { value: t, configurable: !0 });
 const Q1 = class Q1 extends ue {
   constructor(e, r) {
@@ -28824,7 +28824,7 @@ let Ta = Q1;
 var I4 = Object.defineProperty, V4 = (i, t) => I4(i, "name", { value: t, configurable: !0 });
 const nf = class nf extends ue {
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.filter;
@@ -28856,7 +28856,7 @@ const af = class af extends j0 {
     return f.objectSpatialFilter;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.spatialFilter;
@@ -29055,7 +29055,7 @@ const cC = class cC extends Wd {
 };
 aO(cC, "BlockStretchAction");
 let ec = cC;
-var oO = Object.defineProperty, tx = (i, t) => oO(i, "name", { value: t, configurable: !0 });
+var oO = Object.defineProperty, tv = (i, t) => oO(i, "name", { value: t, configurable: !0 });
 const hC = class hC {
   constructor() {
     n(this, "connectionName", "");
@@ -29068,7 +29068,7 @@ const hC = class hC {
     n(this, "valueType", 0);
   }
 };
-tx(hC, "BlockLookupActionColumnData");
+tv(hC, "BlockLookupActionColumnData");
 let I0 = hC;
 const dC = class dC extends Bs {
   constructor() {
@@ -29083,7 +29083,7 @@ const dC = class dC extends Bs {
     return p.blockLookupAction;
   }
 };
-tx(dC, "BlockLookupAction");
+tv(dC, "BlockLookupAction");
 let tc = dC;
 var lO = Object.defineProperty, cO = (i, t) => lO(i, "name", { value: t, configurable: !0 });
 const uC = class uC extends Jr {
@@ -29223,7 +29223,7 @@ const gC = class gC extends Bs {
 };
 SO(gC, "BlockArrayAction");
 let ac = gC;
-var vO = Object.defineProperty, xO = (i, t) => vO(i, "name", { value: t, configurable: !0 });
+var xO = Object.defineProperty, vO = (i, t) => xO(i, "name", { value: t, configurable: !0 });
 const yC = class yC extends Ba {
   constructor() {
     super(...arguments);
@@ -29237,7 +29237,7 @@ const yC = class yC extends Ba {
     return p.blockBasePointParameter;
   }
 };
-xO(yC, "BlockBasePointParameter");
+vO(yC, "BlockBasePointParameter");
 let Xd = yC;
 var TO = Object.defineProperty, DO = (i, t) => TO(i, "name", { value: t, configurable: !0 });
 const CC = class CC extends ys {
@@ -29249,7 +29249,7 @@ const CC = class CC extends ys {
     n(this, "valueSet", new Cs());
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectBlockLinearParameter;
@@ -29313,17 +29313,17 @@ const SC = class SC {
 RO(SC, "StretchEntityBind");
 let V0 = SC;
 var EO = Object.defineProperty, kO = (i, t) => EO(i, "name", { value: t, configurable: !0 });
-const vC = class vC {
+const xC = class xC {
   constructor(t = 0, e = []) {
     n(this, "nodeId");
     n(this, "pointIndexes");
     this.nodeId = t, this.pointIndexes = e;
   }
 };
-kO(vC, "StretchNode");
-let M0 = vC;
+kO(xC, "StretchNode");
+let M0 = xC;
 var LO = Object.defineProperty, OO = (i, t) => LO(i, "name", { value: t, configurable: !0 });
-const xC = class xC extends ue {
+const vC = class vC extends ue {
   constructor() {
     super(...arguments);
     n(this, "block", null);
@@ -29335,14 +29335,14 @@ const xC = class xC extends ue {
     return f.objectDynamicBlockPurgePreventer;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.dynamicBlockPurgePreventer;
   }
 };
-OO(xC, "DynamicBlockPurgePreventer");
-let Ss = xC;
+OO(vC, "DynamicBlockPurgePreventer");
+let Ss = vC;
 var jO = Object.defineProperty, IO = (i, t) => jO(i, "name", { value: t, configurable: !0 });
 const TC = class TC extends El {
   constructor() {
@@ -29452,7 +29452,7 @@ const NC = class NC extends ue {
     return f.objectFieldList;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get subclassMarker() {
     return p.fieldList;
@@ -29473,7 +29473,7 @@ const PC = class PC extends ue {
     n(this, "rawData", null);
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectAecCleanupGroupDef;
@@ -29493,7 +29493,7 @@ const RC = class RC extends ue {
     n(this, "rawData", null);
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectAecWallStyle;
@@ -29512,7 +29512,7 @@ const EC = class EC extends ue {
     n(this, "binaryData", new Uint8Array(0));
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectBinRecord;
@@ -29637,7 +29637,7 @@ const Xi = class Xi extends Qe {
     }
   }
   _getEntityType(e) {
-    let r = v.INVALID;
+    let r = x.INVALID;
     if (this._crcReader.position = e, this._size = this._crcReader.readModularShort(), this._size <= 0)
       return r;
     const s = this._size << 3;
@@ -29782,241 +29782,241 @@ const Xi = class Xi extends Qe {
   _readObject(e) {
     let r = null;
     switch (e) {
-      case v.TEXT:
+      case x.TEXT:
         r = this._readText();
         break;
-      case v.ATTRIB:
+      case x.ATTRIB:
         r = this._readAttribute();
         break;
-      case v.ATTDEF:
+      case x.ATTDEF:
         r = this._readAttributeDefinition();
         break;
-      case v.BLOCK:
+      case x.BLOCK:
         r = this._readBlock();
         break;
-      case v.ENDBLK:
+      case x.ENDBLK:
         r = this._readEndBlock();
         break;
-      case v.SEQEND:
+      case x.SEQEND:
         r = this._readSeqend();
         break;
-      case v.INSERT:
+      case x.INSERT:
         r = this._readInsert();
         break;
-      case v.MINSERT:
+      case x.MINSERT:
         r = this._readMInsert();
         break;
-      case v.VERTEX_2D:
+      case x.VERTEX_2D:
         r = this._readVertex2D();
         break;
-      case v.VERTEX_3D:
+      case x.VERTEX_3D:
         r = this._readVertex3D(new hs());
         break;
-      case v.VERTEX_PFACE:
+      case x.VERTEX_PFACE:
         r = this._readVertex3D(new Js());
         break;
-      case v.VERTEX_MESH:
+      case x.VERTEX_MESH:
         r = this._readVertex3D(new Yn());
         break;
-      case v.VERTEX_PFACE_FACE:
+      case x.VERTEX_PFACE_FACE:
         r = this._readPfaceVertex();
         break;
-      case v.POLYLINE_2D:
+      case x.POLYLINE_2D:
         r = this._readPolyline2D();
         break;
-      case v.POLYLINE_3D:
+      case x.POLYLINE_3D:
         r = this._readPolyline3D();
         break;
-      case v.ARC:
+      case x.ARC:
         r = this._readArc();
         break;
-      case v.CIRCLE:
+      case x.CIRCLE:
         r = this._readCircle();
         break;
-      case v.LINE:
+      case x.LINE:
         r = this._readLine();
         break;
-      case v.DIMENSION_ORDINATE:
+      case x.DIMENSION_ORDINATE:
         r = this._readDimOrdinate();
         break;
-      case v.DIMENSION_LINEAR:
+      case x.DIMENSION_LINEAR:
         r = this._readDimLinear();
         break;
-      case v.DIMENSION_ALIGNED:
+      case x.DIMENSION_ALIGNED:
         r = this._readDimAligned();
         break;
-      case v.DIMENSION_ANG_3_Pt:
+      case x.DIMENSION_ANG_3_Pt:
         r = this._readDimAngular3pt();
         break;
-      case v.DIMENSION_ANG_2_Ln:
+      case x.DIMENSION_ANG_2_Ln:
         r = this._readDimLine2pt();
         break;
-      case v.DIMENSION_RADIUS:
+      case x.DIMENSION_RADIUS:
         r = this._readDimRadius();
         break;
-      case v.DIMENSION_DIAMETER:
+      case x.DIMENSION_DIAMETER:
         r = this._readDimDiameter();
         break;
-      case v.POINT:
+      case x.POINT:
         r = this._readPoint();
         break;
-      case v.FACE3D:
+      case x.FACE3D:
         r = this._read3dFace();
         break;
-      case v.POLYLINE_PFACE:
+      case x.POLYLINE_PFACE:
         r = this._readPolyfaceMesh();
         break;
-      case v.POLYLINE_MESH:
+      case x.POLYLINE_MESH:
         r = this._readPolylineMesh();
         break;
-      case v.SOLID:
-      case v.TRACE:
+      case x.SOLID:
+      case x.TRACE:
         r = this._readSolid();
         break;
-      case v.SHAPE:
+      case x.SHAPE:
         r = this._readShape();
         break;
-      case v.VIEWPORT:
+      case x.VIEWPORT:
         r = this._readViewport();
         break;
-      case v.ELLIPSE:
+      case x.ELLIPSE:
         r = this._readEllipse();
         break;
-      case v.SPLINE:
+      case x.SPLINE:
         r = this._readSpline();
         break;
-      case v.REGION:
+      case x.REGION:
         r = this._readModelerGeometry(new F(new cn()));
         break;
-      case v.SOLID3D:
+      case x.SOLID3D:
         r = this._readSolid3D();
         break;
-      case v.BODY:
+      case x.BODY:
         r = this._readModelerGeometry(new F(new sn()));
         break;
-      case v.RAY:
+      case x.RAY:
         r = this._readRay();
         break;
-      case v.XLINE:
+      case x.XLINE:
         r = this._readXLine();
         break;
-      case v.DICTIONARY:
+      case x.DICTIONARY:
         r = this._readDictionary();
         break;
-      case v.MTEXT:
+      case x.MTEXT:
         r = this._readMText();
         break;
-      case v.LEADER:
+      case x.LEADER:
         r = this._readLeader();
         break;
-      case v.TOLERANCE:
+      case x.TOLERANCE:
         r = this._readTolerance();
         break;
-      case v.MLINE:
+      case x.MLINE:
         r = this._readMLine();
         break;
-      case v.BLOCK_CONTROL_OBJ:
+      case x.BLOCK_CONTROL_OBJ:
         r = this._readBlockControlObject(), this._builder.blockRecords = r.cadObject;
         break;
-      case v.BLOCK_HEADER:
+      case x.BLOCK_HEADER:
         r = this._readBlockHeader();
         break;
-      case v.LAYER_CONTROL_OBJ:
+      case x.LAYER_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new Fs()), this._builder.layers = r.cadObject;
         break;
-      case v.LAYER:
+      case x.LAYER:
         r = this._readLayer();
         break;
-      case v.STYLE_CONTROL_OBJ:
+      case x.STYLE_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new Xs()), this._builder.textStyles = r.cadObject;
         break;
-      case v.STYLE:
+      case x.STYLE:
         r = this._readTextStyle();
         break;
-      case v.LTYPE_CONTROL_OBJ:
+      case x.LTYPE_CONTROL_OBJ:
         r = this._readLTypeControlObject(), this._builder.lineTypesTable = r.cadObject;
         break;
-      case v.LTYPE:
+      case x.LTYPE:
         r = this._readLType();
         break;
-      case v.VIEW_CONTROL_OBJ:
+      case x.VIEW_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new Zs()), this._builder.views = r.cadObject;
         break;
-      case v.VIEW:
+      case x.VIEW:
         r = this._readView();
         break;
-      case v.UCS_CONTROL_OBJ:
+      case x.UCS_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new Ys()), this._builder.ucSs = r.cadObject;
         break;
-      case v.UCS:
+      case x.UCS:
         r = this._readUcs();
         break;
-      case v.VPORT_CONTROL_OBJ:
+      case x.VPORT_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new qs()), this._builder.vPorts = r.cadObject;
         break;
-      case v.VPORT:
+      case x.VPORT:
         r = this._readVPort();
         break;
-      case v.APPID_CONTROL_OBJ:
+      case x.APPID_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new zs()), this._builder.appIds = r.cadObject;
         break;
-      case v.APPID:
+      case x.APPID:
         r = this._readAppId();
         break;
-      case v.DIMSTYLE_CONTROL_OBJ:
+      case x.DIMSTYLE_CONTROL_OBJ:
         r = this._readDocumentTableGeneric(new ss()), this._builder.dimensionStyles = r.cadObject;
         break;
-      case v.DIMSTYLE:
+      case x.DIMSTYLE:
         r = this._readDimStyle();
         break;
-      case v.VP_ENT_HDR_CTRL_OBJ:
+      case x.VP_ENT_HDR_CTRL_OBJ:
         r = this._readViewportEntityControl(), this._builder.documentToBuild.vEntityControl = r.cadObject;
         break;
-      case v.VP_ENT_HDR:
+      case x.VP_ENT_HDR:
         r = this._readViewportEntityHeader();
         break;
-      case v.GROUP:
+      case x.GROUP:
         r = this._readGroup();
         break;
-      case v.MLINESTYLE:
+      case x.MLINESTYLE:
         r = this._readMLineStyle();
         break;
-      case v.LWPOLYLINE:
+      case x.LWPOLYLINE:
         r = this._readLWPolyline();
         break;
-      case v.HATCH:
+      case x.HATCH:
         r = this._readHatch();
         break;
-      case v.XRECORD:
+      case x.XRECORD:
         r = this._readXRecord();
         break;
-      case v.ACDBPLACEHOLDER:
+      case x.ACDBPLACEHOLDER:
         r = this._readPlaceHolder();
         break;
-      case v.LAYOUT:
+      case x.LAYOUT:
         r = this._readLayout();
         break;
-      case v.ACAD_PROXY_ENTITY:
+      case x.ACAD_PROXY_ENTITY:
         r = this._readProxyEntity();
         break;
-      case v.ACAD_PROXY_OBJECT:
+      case x.ACAD_PROXY_OBJECT:
         r = this._readProxyObject();
         break;
-      case v.OLE2FRAME:
+      case x.OLE2FRAME:
         r = this._readOle2Frame();
         break;
-      case v.OLEFRAME:
-      case v.DUMMY:
+      case x.OLEFRAME:
+      case x.DUMMY:
         return r = this._readUnknownEntity(null), this._builder.notify(`Unlisted object with DXF name ${e} has been read as an UnknownEntity`, D.Warning), r;
-      case v.VBA_PROJECT:
-      case v.LONG_TRANSACTION:
+      case x.VBA_PROJECT:
+      case x.LONG_TRANSACTION:
         return r = this._readUnknownNonGraphicalObject(null), this._builder.notify(`Unlisted object with DXF name ${e} has been read as an UnknownNonGraphicalObject`, D.Warning), r;
-      case v.UNDEFINED:
-      case v.UNKNOW_3A:
-      case v.UNKNOW_3B:
-      case v.UNKNOW_36:
-      case v.UNKNOW_37:
-      case v.UNKNOW_9:
+      case x.UNDEFINED:
+      case x.UNKNOW_3A:
+      case x.UNKNOW_3B:
+      case x.UNKNOW_36:
+      case x.UNKNOW_37:
+      case x.UNKNOW_9:
         break;
       default:
         return this._readUnlistedType(e);
@@ -30297,13 +30297,13 @@ const Xi = class Xi extends Qe {
     const e = new Xt(), r = new F(e);
     this._readCommonEntityData(r), e.center = this._objectReader.read3BitDouble();
     const s = this._objectReader.readBitDouble();
-    return e.radius = s <= 0 ? ce.epsilon : s, e.thickness = this._objectReader.readBitThickness(), e.normal = this._objectReader.readBitExtrusion(), e.startAngle = this._objectReader.readBitDouble(), e.endAngle = this._objectReader.readBitDouble(), r;
+    return e.radius = s <= 0 ? he.epsilon : s, e.thickness = this._objectReader.readBitThickness(), e.normal = this._objectReader.readBitExtrusion(), e.startAngle = this._objectReader.readBitDouble(), e.endAngle = this._objectReader.readBitDouble(), r;
   }
   _readCircle() {
     const e = new at(), r = new F(e);
     this._readCommonEntityData(r), e.center = this._objectReader.read3BitDouble();
     const s = this._objectReader.readBitDouble();
-    return e.radius = s <= 0 ? ce.epsilon : s, e.thickness = this._objectReader.readBitThickness(), e.normal = this._objectReader.readBitExtrusion(), r;
+    return e.radius = s <= 0 ? he.epsilon : s, e.thickness = this._objectReader.readBitThickness(), e.normal = this._objectReader.readBitExtrusion(), r;
   }
   _readLine() {
     const e = new Yt(), r = new F(e);
@@ -30322,7 +30322,7 @@ const Xi = class Xi extends Qe {
     const e = new Oi(), r = new F(e);
     this._readCommonEntityData(r), e.center = this._objectReader.read3BitDouble(), e.majorAxisEndPoint = this._objectReader.read3BitDouble(), e.normal = this._objectReader.read3BitDouble();
     const s = this._objectReader.readBitDouble();
-    return e.radiusRatio = s <= 0 ? ce.epsilon : Math.min(s, 1), e.startParameter = this._objectReader.readBitDouble(), e.endParameter = this._objectReader.readBitDouble(), r;
+    return e.radiusRatio = s <= 0 ? he.epsilon : Math.min(s, 1), e.startParameter = this._objectReader.readBitDouble(), e.endParameter = this._objectReader.readBitDouble(), r;
   }
   _readRay() {
     const e = new ba(), r = new F(e);
@@ -30362,7 +30362,7 @@ const Xi = class Xi extends Qe {
     return this._readCommonEntityData(r), this.r13_14Only && (this._objectReader.readBitShort(), this._objectReader.readBitDouble(), this._objectReader.readBitDouble()), e.insertionPoint = this._objectReader.read3BitDouble(), e.direction = this._objectReader.read3BitDouble(), e.normal = this._objectReader.read3BitDouble(), e.text = this._textReader.readVariableText(), r.dimensionStyleHandle = this._handleReference(), r;
   }
   _readPlaceHolder() {
-    const e = new ye(new xa());
+    const e = new ye(new va());
     return this._readCommonNonEntityData(e), e;
   }
   _readUnknownEntity(e) {
@@ -30437,9 +30437,9 @@ const Xi = class Xi extends Qe {
     const e = new Je(), r = new Gh(e);
     this._readCommonNonEntityData(r);
     const s = this._textReader.readVariableText();
-    if (s && s.trim().length > 0 && (e.name = s), this._readXrefDependantBit(r.cadObject), this.r13_14Only && (this._objectReader.readBit() && (e.flags |= xt.Frozen), e.isOn = !this._objectReader.readBit(), this._objectReader.readBit() && (e.flags |= xt.FrozenNewViewports), this._objectReader.readBit() && (e.flags |= xt.Locked)), this.r2000Plus) {
+    if (s && s.trim().length > 0 && (e.name = s), this._readXrefDependantBit(r.cadObject), this.r13_14Only && (this._objectReader.readBit() && (e.flags |= vt.Frozen), e.isOn = !this._objectReader.readBit(), this._objectReader.readBit() && (e.flags |= vt.FrozenNewViewports), this._objectReader.readBit() && (e.flags |= vt.Locked)), this.r2000Plus) {
       const o = this._objectReader.readBitShort();
-      (o & 1) > 0 && (e.flags |= xt.Frozen), e.isOn = (o & 2) === 0, (o & 4) > 0 && (e.flags |= xt.FrozenNewViewports), (o & 8) > 0 && (e.flags |= xt.Locked), e.plotFlag = (o & 16) > 0;
+      (o & 1) > 0 && (e.flags |= vt.Frozen), e.isOn = (o & 2) === 0, (o & 4) > 0 && (e.flags |= vt.FrozenNewViewports), (o & 8) > 0 && (e.flags |= vt.Locked), e.plotFlag = (o & 16) > 0;
       const l = (o & 992) >> 5;
       e.lineWeight = Ee.toValue(l);
     }
@@ -30654,7 +30654,7 @@ const Xi = class Xi extends Qe {
     return this._version >= w.AC1012 && this._version <= w.AC1015 && (r.firstVertexHandle = this._handleReference(), r.lastVertexHandle = this._handleReference()), r.seqendHandle = this._handleReference(), r;
   }
   _readPolyline3D() {
-    const e = new xr(), r = new Ci(e);
+    const e = new vr(), r = new Ci(e);
     this._readCommonEntityData(r);
     const s = this._objectReader.readByte(), a = (s & 1) > 0, o = (s & 2) > 0;
     if (a ? e.smoothSurface = da.Quadratic : o && (e.smoothSurface = da.Cubic), (a || o) && (e.flags |= or.SplineFit), e.flags |= or.Polyline3D, (this._objectReader.readByte() & 1) > 0 && (e.flags |= or.ClosedPolylineOrClosedPolygonMeshInM), this.r2004Plus) {
@@ -30674,7 +30674,7 @@ const Xi = class Xi extends Qe {
     return this.r13_15Only && (e.firstVertexHandle = this._handleReference(), e.lastVertexHandle = this._handleReference()), e.seqendHandle = this._handleReference(), e;
   }
   _readPolylineMesh() {
-    const e = new vr(), r = new Ci(e);
+    const e = new xr(), r = new Ci(e);
     if (this._readCommonEntityData(r), e.flags = this._objectReader.readBitShort(), e.smoothSurface = this._objectReader.readBitShort(), e.mVertexCount = this._objectReader.readBitShort(), e.nVertexCount = this._objectReader.readBitShort(), e.mSmoothSurfaceDensity = this._objectReader.readBitShort(), e.nSmoothSurfaceDensity = this._objectReader.readBitShort(), this.r13_15Only && (r.firstVertexHandle = this._handleReference(), r.lastVertexHandle = this._handleReference()), this.r2004Plus) {
       const s = this._objectReader.readBitLong();
       for (let a = 0; a < s; a++)
@@ -30728,7 +30728,7 @@ const Xi = class Xi extends Qe {
     let a = 0, o = 0, l = 0, c = !1;
     switch (s) {
       case 1:
-        this._objectReader.readBit() && (e.flags |= vt.Rational), this._objectReader.readBit() && (e.flags |= vt.Closed), this._objectReader.readBit() && (e.flags |= vt.Periodic), e.knotTolerance = this._objectReader.readBitDouble(), e.controlPointTolerance = this._objectReader.readBitDouble(), o = this._objectReader.readBitLong(), l = this._objectReader.readBitLong(), c = this._objectReader.readBit();
+        this._objectReader.readBit() && (e.flags |= xt.Rational), this._objectReader.readBit() && (e.flags |= xt.Closed), this._objectReader.readBit() && (e.flags |= xt.Periodic), e.knotTolerance = this._objectReader.readBitDouble(), e.controlPointTolerance = this._objectReader.readBitDouble(), o = this._objectReader.readBitLong(), l = this._objectReader.readBitLong(), c = this._objectReader.readBit();
         break;
       case 2:
         e.fitTolerance = this._objectReader.readBitDouble(), e.startTangent = this._objectReader.read3BitDouble(), e.endTangent = this._objectReader.read3BitDouble(), a = this._objectReader.readBitLong();
@@ -30832,8 +30832,8 @@ const Xi = class Xi extends Qe {
       if (c.path.flags = h, h & Yr.Derived && (a = !0), h & Yr.Polyline) {
         const _ = new hi(), b = this._objectReader.readBit();
         _.isClosed = this._objectReader.readBit();
-        const x = this._objectReader.readBitLong();
-        for (let g = 0; g < x; ++g) {
+        const v = this._objectReader.readBitLong();
+        for (let g = 0; g < v; ++g) {
           const T = this._objectReader.read2RawDouble();
           let k = 0;
           b && (k = this._objectReader.readBitDouble()), _.vertices.push(new u(T.x, T.y, k));
@@ -30927,7 +30927,7 @@ const Xi = class Xi extends Qe {
       }
       const o = this._mergedReaders.readBitLong();
       for (let l = 0; l < o; l++) {
-        const c = new xp();
+        const c = new vp();
         if (c.viewportId = this.r2010Plus ? this._mergedReaders.readBitLongLong() : this._mergedReaders.readBitLong(), c.viewportTarget = this._mergedReaders.read3BitDouble(), c.viewportDirectionFromTarget = this._mergedReaders.read3BitDouble(), c.viewportUpDirection = this._mergedReaders.read3BitDouble(), c.viewportPerspective = this._mergedReaders.readBit(), this._mergedReaders.readBit()) {
           const h = this._mergedReaders.readBitLong();
           for (let d = 0; d < h; d++) {
@@ -31066,7 +31066,7 @@ const Xi = class Xi extends Qe {
   }
   // ==================== PDF UNDERLAY ====================
   _readPdfDefinition() {
-    const e = new va(), r = new ye(e);
+    const e = new xa(), r = new ye(e);
     return this._readCommonNonEntityData(r), e.file = this._objectReader.readVariableText(), e.page = this._objectReader.readVariableText(), r;
   }
   _readPdfUnderlay() {
@@ -31190,7 +31190,7 @@ const Xi = class Xi extends Qe {
     return r;
   }
   _readSortentsTable() {
-    const e = new vi(), r = new pd(e);
+    const e = new xi(), r = new pd(e);
     this._readCommonNonEntityData(r), r.blockOwnerHandle = this._handleReference();
     const s = this._mergedReaders.readBitLong();
     for (let a = 0; a < s; a++) {
@@ -31259,7 +31259,7 @@ const Xi = class Xi extends Qe {
     const s = this._objectReader.readBitLong();
     for (let a = 0; a < s; a++)
       e.vertices.push(this._objectReader.read3BitDouble());
-    return this._objectReader.read3BitDouble(), e.normal = this._objectReader.read3BitDouble(), e.horizontalDirection = this._objectReader.read3BitDouble(), e.blockOffset = this._objectReader.read3BitDouble(), this._version >= w.AC1014 && (e.annotationOffset = this._objectReader.read3BitDouble()), this.r13_14Only && (e.style.dimensionLineGap = this._objectReader.readBitDouble()), this._version <= w.AC1021 && (e.textHeight = this._objectReader.readBitDouble(), e.textWidth = this._objectReader.readBitDouble()), e.hookLineDirection = this._objectReader.readBit() ? vo.Same : vo.Opposite, e.arrowHeadEnabled = this._objectReader.readBit(), this.r13_14Only && (this._objectReader.readBitShort(), r.dimasz = this._objectReader.readBitDouble(), this._objectReader.readBit(), this._objectReader.readBit(), this._objectReader.readBitShort(), this._objectReader.readBitShort(), this._objectReader.readBit(), this._objectReader.readBit()), this.r2000Plus && (this._objectReader.readBitShort(), this._objectReader.readBit(), this._objectReader.readBit()), r.annotationHandle = this._handleReference(), r.dimstyleHandle = this._handleReference(), r;
+    return this._objectReader.read3BitDouble(), e.normal = this._objectReader.read3BitDouble(), e.horizontalDirection = this._objectReader.read3BitDouble(), e.blockOffset = this._objectReader.read3BitDouble(), this._version >= w.AC1014 && (e.annotationOffset = this._objectReader.read3BitDouble()), this.r13_14Only && (e.style.dimensionLineGap = this._objectReader.readBitDouble()), this._version <= w.AC1021 && (e.textHeight = this._objectReader.readBitDouble(), e.textWidth = this._objectReader.readBitDouble()), e.hookLineDirection = this._objectReader.readBit() ? xo.Same : xo.Opposite, e.arrowHeadEnabled = this._objectReader.readBit(), this.r13_14Only && (this._objectReader.readBitShort(), r.dimasz = this._objectReader.readBitDouble(), this._objectReader.readBit(), this._objectReader.readBit(), this._objectReader.readBitShort(), this._objectReader.readBitShort(), this._objectReader.readBit(), this._objectReader.readBit()), this.r2000Plus && (this._objectReader.readBitShort(), this._objectReader.readBit(), this._objectReader.readBit()), r.annotationHandle = this._handleReference(), r.dimstyleHandle = this._handleReference(), r;
   }
   _readMultiLeader() {
     const e = new _a(), r = new Zh(e);
@@ -31298,8 +31298,8 @@ const Xi = class Xi extends Qe {
       e.wordBreak = this._objectReader.readBit(), this._objectReader.readBit();
     } else if (e.hasContentsBlock = this._objectReader.readBit()) {
       r.blockRecordHandle = this._handleReference(), e.blockContentNormal = this._objectReader.read3BitDouble(), e.blockContentLocation = this._objectReader.read3BitDouble(), e.blockContentScale = this._objectReader.read3BitDouble(), e.blockContentRotation = this._objectReader.readBitDouble(), e.blockContentColor = this._mergedReaders.readCmColor();
-      const a = this._objectReader.readBitDouble(), o = this._objectReader.readBitDouble(), l = this._objectReader.readBitDouble(), c = this._objectReader.readBitDouble(), h = this._objectReader.readBitDouble(), d = this._objectReader.readBitDouble(), _ = this._objectReader.readBitDouble(), b = this._objectReader.readBitDouble(), x = this._objectReader.readBitDouble(), g = this._objectReader.readBitDouble(), T = this._objectReader.readBitDouble(), k = this._objectReader.readBitDouble(), E = this._objectReader.readBitDouble(), I = this._objectReader.readBitDouble(), V = this._objectReader.readBitDouble(), U = this._objectReader.readBitDouble(), M = Fr.identity();
-      M.m00 = a, M.m10 = o, M.m20 = l, M.m30 = c, M.m01 = h, M.m11 = d, M.m21 = _, M.m31 = b, M.m02 = x, M.m12 = g, M.m22 = T, M.m32 = k, M.m03 = E, M.m13 = I, M.m23 = V, M.m33 = U, e.transformationMatrix = M;
+      const a = this._objectReader.readBitDouble(), o = this._objectReader.readBitDouble(), l = this._objectReader.readBitDouble(), c = this._objectReader.readBitDouble(), h = this._objectReader.readBitDouble(), d = this._objectReader.readBitDouble(), _ = this._objectReader.readBitDouble(), b = this._objectReader.readBitDouble(), v = this._objectReader.readBitDouble(), g = this._objectReader.readBitDouble(), T = this._objectReader.readBitDouble(), k = this._objectReader.readBitDouble(), E = this._objectReader.readBitDouble(), I = this._objectReader.readBitDouble(), V = this._objectReader.readBitDouble(), U = this._objectReader.readBitDouble(), M = Fr.identity();
+      M.m00 = a, M.m10 = o, M.m20 = l, M.m30 = c, M.m01 = h, M.m11 = d, M.m21 = _, M.m31 = b, M.m02 = v, M.m12 = g, M.m22 = T, M.m32 = k, M.m03 = E, M.m13 = I, M.m23 = V, M.m33 = U, e.transformationMatrix = M;
     }
     return e.basePoint = this._objectReader.read3BitDouble(), e.baseDirection = this._objectReader.read3BitDouble(), e.baseVertical = this._objectReader.read3BitDouble(), e.normalReversed = this._objectReader.readBit(), this.r2010Plus && (e.textTopAttachment = this._objectReader.readBitShort(), e.textBottomAttachment = this._objectReader.readBitShort()), e;
   }
@@ -31308,7 +31308,7 @@ const Xi = class Xi extends Qe {
     return this._readCommonNonEntityData(r), this.r2010Plus && this._objectReader.readBitShort(), e.contentType = this._objectReader.readBitShort(), e.multiLeaderDrawOrder = this._objectReader.readBitShort(), e.leaderDrawOrder = this._objectReader.readBitShort(), e.maxLeaderSegmentsPoints = this._objectReader.readBitLong(), e.firstSegmentAngleConstraint = this._objectReader.readBitDouble(), e.secondSegmentAngleConstraint = this._objectReader.readBitDouble(), e.pathType = this._objectReader.readBitShort(), e.lineColor = this._mergedReaders.readCmColor(), r.leaderLineTypeHandle = this._handleReference(), e.leaderLineWeight = this._objectReader.readBitLong(), e.enableLanding = this._objectReader.readBit(), e.landingGap = this._objectReader.readBitDouble(), e.enableDogleg = this._objectReader.readBit(), e.landingDistance = this._objectReader.readBitDouble(), e.description = this._mergedReaders.readVariableText(), r.arrowheadHandle = this._handleReference(), e.arrowheadSize = this._objectReader.readBitDouble(), e.defaultTextContents = this._mergedReaders.readVariableText(), r.mTextStyleHandle = this._handleReference(), e.textLeftAttachment = this._objectReader.readBitShort(), e.textRightAttachment = this._objectReader.readBitShort(), e.textAngle = this._objectReader.readBitShort(), e.textAlignment = this._objectReader.readBitShort(), e.textColor = this._mergedReaders.readCmColor(), e.textHeight = this._objectReader.readBitDouble(), e.textFrame = this._objectReader.readBit(), e.textAlignAlwaysLeft = this._objectReader.readBit(), e.alignSpace = this._objectReader.readBitDouble(), r.blockContentHandle = this._handleReference(), e.blockContentColor = this._mergedReaders.readCmColor(), e.blockContentScale = this._objectReader.read3BitDouble(), e.enableBlockContentScale = this._objectReader.readBit(), e.blockContentRotation = this._objectReader.readBitDouble(), e.enableBlockContentRotation = this._objectReader.readBit(), e.blockContentConnection = this._objectReader.readBitShort(), e.scaleFactor = this._objectReader.readBitDouble(), e.overwritePropertyValue = this._objectReader.readBit(), e.isAnnotative = this._objectReader.readBit(), e.breakGapSize = this._objectReader.readBitDouble(), this.r2010Plus && (e.textAttachmentDirection = this._objectReader.readBitShort(), e.textBottomAttachment = this._objectReader.readBitShort(), e.textTopAttachment = this._objectReader.readBitShort()), this.r2013Plus && (e.unknownFlag298 = this._objectReader.readBit()), r;
   }
   _readMaterial() {
-    const e = new xi(), r = new Jh(e);
+    const e = new vi(), r = new Jh(e);
     if (this._readCommonNonEntityData(r), e.name = this._mergedReaders.readVariableText(), e.description = this._mergedReaders.readVariableText(), e.ambientColorMethod = this._mergedReaders.readByte(), e.ambientColorFactor = this._mergedReaders.readBitDouble(), e.ambientColorMethod === rs.Override) {
       const s = this._mergedReaders.readBitLong() >>> 0, a = Ma.getBytes32(s);
       e.ambientColor = new O(a[2], a[1], a[0]);
@@ -31337,7 +31337,7 @@ const Xi = class Xi extends Qe {
   }
   _readMLine() {
     const e = new pa(), r = new Kh(e);
-    this._readCommonEntityData(r), e.scaleFactor = this._objectReader.readBitDouble(), e.justification = this._objectReader.readByte(), e.startPoint = this._objectReader.read3BitDouble(), e.normal = this._objectReader.read3BitDouble(), e.flags |= this._objectReader.readBitShort() === 3 ? xo.Closed : xo.HasVertices;
+    this._readCommonEntityData(r), e.scaleFactor = this._objectReader.readBitDouble(), e.justification = this._objectReader.readByte(), e.startPoint = this._objectReader.read3BitDouble(), e.normal = this._objectReader.read3BitDouble(), e.flags |= this._objectReader.readBitShort() === 3 ? vo.Closed : vo.HasVertices;
     const s = this._objectReader.readByte(), a = this._objectReader.readBitShort();
     for (let o = 0; o < a; o++) {
       const l = new Bh();
@@ -31409,7 +31409,7 @@ const Xi = class Xi extends Qe {
   }
   _readVisualStyle() {
     const e = new Sa(), r = new ye(e);
-    return this._readCommonNonEntityData(r), Qv(this._mergedReaders, this._version, e), r;
+    return this._readCommonNonEntityData(r), Qx(this._mergedReaders, this._version, e), r;
   }
   _readPlotSettingsEntity() {
     const e = new Si(), r = new p0(e);
@@ -31424,11 +31424,11 @@ const Xi = class Xi extends Qe {
     r.left = this._objectReader.readBitDouble(), r.bottom = this._objectReader.readBitDouble(), r.right = this._objectReader.readBitDouble(), r.top = this._objectReader.readBitDouble(), e.unprintableMargin = r, e.paperWidth = this._objectReader.readBitDouble(), e.paperHeight = this._objectReader.readBitDouble(), e.paperSize = this._textReader.readVariableText(), e.plotOriginX = this._objectReader.readBitDouble(), e.plotOriginY = this._objectReader.readBitDouble(), e.paperUnits = this._objectReader.readBitShort(), e.paperRotation = this._objectReader.readBitShort(), e.plotType = this._objectReader.readBitShort(), e.windowLowerLeftX = this._objectReader.readBitDouble(), e.windowLowerLeftY = this._objectReader.readBitDouble(), e.windowUpperLeftX = this._objectReader.readBitDouble(), e.windowUpperLeftY = this._objectReader.readBitDouble(), this._version >= w.AC1012 && this._version <= w.AC1015 && (e.plotViewName = this._textReader.readVariableText()), e.numeratorScale = this._objectReader.readBitDouble(), e.denominatorScale = this._objectReader.readBitDouble(), e.styleSheet = this._textReader.readVariableText(), e.scaledFit = this._objectReader.readBitShort(), e.standardScale = this._objectReader.readBitDouble(), e.paperImageOrigin = this._objectReader.read2BitDouble(), this.r2004Plus && (e.shadePlotMode = this._objectReader.readBitShort(), e.shadePlotResolutionMode = this._objectReader.readBitShort(), e.shadePlotDPI = this._objectReader.readBitShort(), this._handleReference()), this.r2007Plus && this._handleReference();
   }
   _readEvaluationGraph() {
-    const e = new Ur(), r = new xn(e);
+    const e = new Ur(), r = new vn(e);
     this._readCommonNonEntityData(r), e.value96 = this._objectReader.readBitLong(), e.value97 = this._objectReader.readBitLong();
     const s = this._objectReader.readBitLong();
     for (let o = 0; o < s; o++) {
-      const l = new xn.GraphNodeTemplate(), c = l.node;
+      const l = new vn.GraphNodeTemplate(), c = l.node;
       r.nodeTemplates.push(l), c.index = this._objectReader.readBitLong(), c.flags = this._objectReader.readBitLong(), c.nextNodeIndex = this._objectReader.readBitLong(), l.expressionHandle = this._handleReference(), c.data1 = this._objectReader.readBitLong(), c.data2 = this._objectReader.readBitLong(), c.data3 = this._objectReader.readBitLong(), c.data4 = this._objectReader.readBitLong();
     }
     const a = this._objectReader.readBitLong();
@@ -31447,13 +31447,13 @@ const Xi = class Xi extends Qe {
     return e.normal = this._mergedReaders.read3BitDouble(), e.origin = this._mergedReaders.read3BitDouble(), e.displayBoundary = this._mergedReaders.readBitShort() !== 0, e.clipFrontPlane = this._mergedReaders.readBitShort() !== 0, e.clipFrontPlane && (e.frontDistance = this._mergedReaders.readBitDouble()), e.clipBackPlane = this._mergedReaders.readBitShort() !== 0, e.clipBackPlane && (e.backDistance = this._mergedReaders.readBitDouble()), e.inverseInsertTransform = this._read4x3Matrix(), e.insertTransform = this._read4x3Matrix(), r;
   }
   _readDimensionAssociation() {
-    const e = new Tr(), r = new vn(e);
+    const e = new Tr(), r = new xn(e);
     return this._readCommonNonEntityData(r), r.dimensionHandle = this._handleReference(), e.associativityFlags = this._mergedReaders.readBitLong(), e.isTransSpace = this._mergedReaders.readBit(), e.rotatedDimensionType = this._mergedReaders.readByte(), (e.associativityFlags & it.FirstPointReference) !== 0 && (r.firstPointRef = this._readOsnapPointRef()), (e.associativityFlags & it.SecondPointReference) !== 0 && (r.secondPointRef = this._readOsnapPointRef()), (e.associativityFlags & it.ThirdPointReference) !== 0 && (r.thirdPointRef = this._readOsnapPointRef()), (e.associativityFlags & it.FourthPointReference) !== 0 && (r.fourthPointRef = this._readOsnapPointRef()), r;
   }
   _readOsnapPointRef(e = 0) {
     if (e > 16)
       throw new Error("Excessive nested dimension point references.");
-    const r = new Vs(), s = new vn.OsnapPointRefTemplate(r);
+    const r = new Vs(), s = new xn.OsnapPointRefTemplate(r);
     this._mergedReaders.readVariableText(), r.objectOsnapType = this._mergedReaders.readByte();
     const a = this._mergedReaders, o = a.readBitLong();
     for (let l = 0; l < o; l++)
@@ -31655,7 +31655,7 @@ const Xi = class Xi extends Qe {
     return r;
   }
   _readAecWall() {
-    const e = new dh(), r = new x0(e);
+    const e = new dh(), r = new v0(e);
     this._readCommonEntityData(r), this.r2000Plus && (e.version = this._mergedReaders.readBitLong()), r.binRecordHandle = this._handleReference(), r.styleHandle = this._handleReference(), r.cleanupGroupHandle = this._handleReference();
     const s = this._objectReader.positionInBits(), o = this._handlesReader.positionInBits() - s;
     if (o > 0) {
@@ -31864,7 +31864,7 @@ const Xi = class Xi extends Qe {
     r.version = this._objectReader.readBitShort(), r.hasFileToExtensionDictionary = this._objectReader.readBit(), r.default = this._objectReader.readBit();
   }
   _readLeaderLine(e) {
-    const r = new xh(), s = new Cn.LeaderLineTemplate(r);
+    const r = new vh(), s = new Cn.LeaderLineTemplate(r);
     e.leaderLineTemplates.push(s);
     const a = this._objectReader.readBitLong();
     for (let l = 0; l < a; l++)
@@ -31875,7 +31875,7 @@ const Xi = class Xi extends Qe {
       c.segmentIndex = this._objectReader.readBitLong();
       const h = this._objectReader.readBitLong();
       for (let d = 0; d < h; d++)
-        c.startEndPoints.push(new vh(this._objectReader.read3BitDouble(), this._objectReader.read3BitDouble()));
+        c.startEndPoints.push(new xh(this._objectReader.read3BitDouble(), this._objectReader.read3BitDouble()));
       r.breakInfoEntries.push(c);
     }
     return r.index = this._objectReader.readBitLong(), this.r2010Plus && (r.pathType = this._objectReader.readBitShort(), r.lineColor = this._mergedReaders.readCmColor(), s.lineTypeHandle = this._handleReference(), r.lineWeight = this._objectReader.readBitLong(), r.arrowheadSize = this._objectReader.readBitDouble(), s.arrowSymbolHandle = this._handleReference(), r.overrideFlags = this._objectReader.readBitLong()), r;
@@ -31885,7 +31885,7 @@ const Xi = class Xi extends Qe {
     r.contentValid = this._objectReader.readBit(), r.unknown = this._objectReader.readBit(), r.connectionPoint = this._objectReader.read3BitDouble(), r.direction = this._objectReader.read3BitDouble();
     const s = this._objectReader.readBitLong();
     for (let o = 0; o < s; o++)
-      r.breakStartEndPointsPairs.push(new vh(this._objectReader.read3BitDouble(), this._objectReader.read3BitDouble()));
+      r.breakStartEndPointsPairs.push(new xh(this._objectReader.read3BitDouble(), this._objectReader.read3BitDouble()));
     r.leaderIndex = this._objectReader.readBitLong(), r.landingDistance = this._objectReader.readBitDouble();
     const a = this._objectReader.readBitLong();
     for (let o = 0; o < a; o++)
@@ -32034,28 +32034,28 @@ const Xi = class Xi extends Qe {
     r.propertyOverrideFlags = this._mergedReaders.readBitLong(), r.propertyFlags = this._mergedReaders.readBitLong(), r.valueDataType = this._mergedReaders.readBitLong(), r.valueUnitType = this._mergedReaders.readBitLong(), r.valueFormatString = this._mergedReaders.readVariableText(), r.rotation = this._mergedReaders.readBitDouble(), r.scale = this._mergedReaders.readBitDouble(), r.alignment = this._mergedReaders.readBitLong(), r.color = this._mergedReaders.readCmColor(this.r2004Pre), e.textStyleHandle = this._handleReference(), e instanceof Ht && (e.textStyleHandle = e.textStyleHandle), r.textHeight = this._mergedReaders.readBitDouble();
   }
   _readTableContent(e, r) {
-    const s = this._mergedReaders, a = /* @__PURE__ */ Ea((x, g, T) => {
+    const s = this._mergedReaders, a = /* @__PURE__ */ Ea((v, g, T) => {
       r.componentTemplates.push({ build: /* @__PURE__ */ Ea((k) => {
-        Reflect.set(x, g, k.tryGetCadObject(T));
+        Reflect.set(v, g, k.tryGetCadObject(T));
       }, "build") });
-    }, "bind"), o = /* @__PURE__ */ Ea((x) => {
+    }, "bind"), o = /* @__PURE__ */ Ea((v) => {
       const g = s.readBitLong();
       for (let T = 0; T < g; T++) {
         const k = new wp();
-        k.name = s.readVariableText(), r.componentTemplates.push(this._readCadValue(k.value)), x.push(k);
+        k.name = s.readVariableText(), r.componentTemplates.push(this._readCadValue(k.value)), v.push(k);
       }
-    }, "customData"), l = /* @__PURE__ */ Ea((x) => {
-      const g = new Ht(x);
+    }, "customData"), l = /* @__PURE__ */ Ea((v) => {
+      const g = new Ht(v);
       this._readCellStyle(g), r.componentTemplates.push(g);
     }, "cellStyle");
     e.name = s.readVariableText(), e.description = s.readVariableText();
     const c = s.readBitLong();
-    for (let x = 0; x < c; x++) {
+    for (let v = 0; v < c; v++) {
       const g = new _o();
       g.name = s.readVariableText(), g.customData = s.readBitLong(), o(g.customDataCollection), l(g.cellStyleOverride), g.styleId = s.readBitLong(), g.width = s.readBitDouble(), e.columns.push(g);
     }
     const h = s.readBitLong();
-    for (let x = 0; x < h; x++) {
+    for (let v = 0; v < h; v++) {
       const g = new mo(), T = s.readBitLong();
       for (let k = 0; k < T; k++) {
         const E = new po();
@@ -32090,16 +32090,16 @@ const Xi = class Xi extends Qe {
       g.customData = s.readBitLong(), o(g.customDataCollection), l(g.cellStyleOverride), g.styleId = s.readBitLong(), g.height = s.readBitDouble(), e.rows.push(g);
     }
     const d = s.readBitLong(), _ = [];
-    for (let x = 0; x < d; x++)
+    for (let v = 0; v < d; v++)
       _.push(this._handleReference());
-    r.componentTemplates.push({ build: /* @__PURE__ */ Ea((x) => {
+    r.componentTemplates.push({ build: /* @__PURE__ */ Ea((v) => {
       for (const g of _) {
-        const T = x.tryGetCadObject(g);
+        const T = v.tryGetCadObject(g);
         T && e.fieldReferences.push(T);
       }
     }, "build") }), l(e.cellStyleOverride);
     const b = s.readBitLong();
-    for (let x = 0; x < b; x++) {
+    for (let v = 0; v < b; v++) {
       const g = new Wn();
       g.topRowIndex = s.readBitLong(), g.leftColumnIndex = s.readBitLong(), g.bottomRowIndex = s.readBitLong(), g.rightColumnIndex = s.readBitLong(), e.mergedCellRanges.push(g);
     }
@@ -32464,9 +32464,9 @@ const zC = class zC extends Qe {
       for (const _ of this._schemaIndex.schemaPointers.filter((b) => b.segmentIndex === a.segmentIndex)) {
         const b = new Nl();
         b.index = _.index, b.name = this._schemaIndex.names[_.index] ?? "";
-        const x = this._ushort();
-        this._requireBytes(x * 8);
-        for (let T = 0; T < x; T++)
+        const v = this._ushort();
+        this._requireBytes(v * 8);
+        for (let T = 0; T < v; T++)
           b.indices.push(this._ulong());
         const g = this._ushort();
         for (let T = 0; T < g; T++)
@@ -32523,10 +32523,10 @@ const zC = class zC extends Qe {
         let b = a.segmentSize - a.objectDataAlignmentOffset * 16;
         for (const T of c)
           T.localOffset > _.localOffset && (b = Math.min(b, T.localOffset));
-        const x = b - _.localOffset;
+        const v = b - _.localOffset;
         this._seek(h + _.localOffset);
         const g = this._uint();
-        if (g + 4 <= x)
+        if (g + 4 <= v)
           this._storeData(e, _.entry.schemaIndex, _.handle, this._bytes(g));
         else if (g === 3138415537) {
           const T = this._ulong(), k = this._uint();
@@ -32612,12 +32612,12 @@ const pt = class pt {
       const _ = d - c, b = Math.min(h, c);
       for (let k = 0; k < b; k++)
         o[k] = r[_ + k];
-      let x = h, g = d;
-      for (; x > 0; ) {
-        const k = Math.min(x, c);
+      let v = h, g = d;
+      for (; v > 0; ) {
+        const k = Math.min(v, c);
         for (let E = 0; E < k; E++)
           r[g + E] = o[E];
-        g += k, x -= c;
+        g += k, v -= c;
       }
       a = d + h;
       let T = l & 3;
@@ -32666,7 +32666,7 @@ const pt = class pt {
 };
 Bj(pt, "DwgLZ77AC18Decompressor"), n(pt, "_lastSrcPos", 0);
 let rl = pt;
-var Sj = Object.defineProperty, vj = (i, t) => Sj(i, "name", { value: t, configurable: !0 });
+var Sj = Object.defineProperty, xj = (i, t) => Sj(i, "name", { value: t, configurable: !0 });
 const S = class S {
   static decompress(t, e, r, s) {
     S._m_sourceOffset = 0, S._m_length = 0, S._m_sourceIndex = e, S._m_opCode = t[S._m_sourceIndex];
@@ -32739,7 +32739,7 @@ const S = class S {
     S._copy8b(t, e + 8, r, s), S._copy8b(t, e, r, s + 8);
   }
 };
-vj(S, "DwgLZ77AC21Decompressor"), n(S, "_m_sourceOffset", 0), n(S, "_m_length", 0), n(S, "_m_sourceIndex", 0), n(S, "_m_opCode", 0), n(S, "_m_copyMethods", [
+xj(S, "DwgLZ77AC21Decompressor"), n(S, "_m_sourceOffset", 0), n(S, "_m_length", 0), n(S, "_m_sourceIndex", 0), n(S, "_m_opCode", 0), n(S, "_m_copyMethods", [
   null,
   (t, e, r, s) => {
     S._copy1b(t, e, r, s);
@@ -32836,7 +32836,7 @@ vj(S, "DwgLZ77AC21Decompressor"), n(S, "_m_sourceOffset", 0), n(S, "_m_length", 
   }
 ]);
 let il = S;
-var xj = Object.defineProperty, Tj = (i, t) => xj(i, "name", { value: t, configurable: !0 });
+var vj = Object.defineProperty, Tj = (i, t) => vj(i, "name", { value: t, configurable: !0 });
 const WC = class WC {
   constructor(t, e) {
     n(this, "onNotification", null);
@@ -32853,7 +32853,7 @@ const WC = class WC {
     this._encoding = this.getListedEncoding(this._document.header.codePage);
   }
   getListedEncoding(t) {
-    return Bv(t);
+    return Bx(t);
   }
   triggerNotification(t, e, r) {
     typeof t == "string" ? this.onNotification?.(this, new Vi(t, e, r ?? null)) : this.onNotification?.(t, e);
@@ -32967,7 +32967,7 @@ const GC = class GC {
         const a = r.dxfProperties.get(s);
         if ((a.referenceType & It.Optional) !== 0 && !this.writeOptional)
           return;
-        (a.referenceType & It.IsAngle) !== 0 && (e = ce.radToDeg(e));
+        (a.referenceType & It.IsAngle) !== 0 && (e = he.radToDeg(e));
       }
       if (this.writeDxfCode(s), typeof e == "string") {
         const a = e.replace(/\^/g, "^ ").replace(/\n/g, "^J").replace(/\r/g, "^M").replace(/\t/g, "^I");
@@ -33205,7 +33205,7 @@ jj(_l, "DxfBinaryWriter"), n(_l, "sentinelBytes", new Uint8Array([
   0
 ]));
 let q0 = _l;
-var Ij = Object.defineProperty, rx = (i, t) => Ij(i, "name", { value: t, configurable: !0 });
+var Ij = Object.defineProperty, rv = (i, t) => Ij(i, "name", { value: t, configurable: !0 });
 const YC = class YC {
   constructor() {
     n(this, "chunks", []);
@@ -33237,7 +33237,7 @@ const YC = class YC {
     return t;
   }
 };
-rx(YC, "BinaryWriter");
+rv(YC, "BinaryWriter");
 let Qd = YC;
 const ZC = class ZC {
   static writeGeometries(t) {
@@ -33289,7 +33289,7 @@ const ZC = class ZC {
     return e.result();
   }
 };
-rx(ZC, "ProxyGeometryWriter");
+rv(ZC, "ProxyGeometryWriter");
 let eu = ZC;
 var Vj = Object.defineProperty, CS = (i, t) => Vj(i, "name", { value: t, configurable: !0 });
 const qC = class qC {
@@ -33424,7 +33424,7 @@ const qC = class qC {
     }
     this._writer.write(B.Start, t.objectName), this.writeCommonObjectData(t), this.writeCommonEntityData(t);
     const r = Wt.create(t.constructor.name);
-    t instanceof Xt ? this._writeArc(t, r) : t instanceof at ? this._writeCircle(t, r) : t instanceof Cr ? this._writeDimension(t, r) : t instanceof sr ? this._writeDimension(t, r) : t instanceof gi ? this._writeDimension(t, r) : t instanceof wi ? this._writeDimension(t, r) : t instanceof _i ? this._writeDimension(t, r) : t instanceof mi ? this._writeDimension(t, r) : t instanceof bi ? this._writeDimension(t, r) : t instanceof Oi ? this._writeEllipse(t, r) : t instanceof ha ? this._writeFace3D(t, r) : t instanceof bs ? this._writeHatch(t, r) : t instanceof Zt ? this._writeInsert(t, r) : t instanceof an ? this._writeLeader(t, r) : t instanceof Yt ? this._writeLine(t, r) : t instanceof lr ? this._writeLwPolyline(t, r) : t instanceof fa ? this._writeMesh(t, r) : t instanceof pa ? this._writeMLine(t, r) : t instanceof dt ? this._writeMText(t, r) : t instanceof _a ? this._writeMultiLeader(t, r) : t instanceof ma ? this._writeOle2Frame(t, r) : t instanceof wa ? this._writePdfUnderlay(t, r) : t instanceof ws ? this._writePoint(t, r) : t instanceof Vt ? this._writePolyline(t, r) : t instanceof xr ? this._writePolyline(t, r) : t instanceof ut ? this._writePolyline(t, r) : t instanceof vr ? this._writePolyline(t, r) : t instanceof ba ? this._writeRay(t, r) : t instanceof hn ? this._writeShape(t, r) : t instanceof ln ? this._writeProxyEntity(t) : t instanceof cn || t instanceof us || t instanceof sn ? this._writeModelerGeometry(t) : t instanceof Pi ? this._writeSolid(t, r) : t instanceof ji ? this._writeSpline(t, r) : t instanceof oo ? this._writeAttributeBase(t, r) : t instanceof Sr ? this._writeTextEntity(t, r) : t instanceof dn ? this._writeTolerance(t, r) : t instanceof Gr ? this._writeViewport(t, r) : t instanceof ga ? this._writeXLine(t, r) : t instanceof sa || t instanceof To ? this._writeCadImage(t, r) : t instanceof st || this.notify(`Entity not implemented: ${t.constructor.name}`, D.NotImplemented), this.writeExtendedData(t.extendedData);
+    t instanceof Xt ? this._writeArc(t, r) : t instanceof at ? this._writeCircle(t, r) : t instanceof Cr ? this._writeDimension(t, r) : t instanceof sr ? this._writeDimension(t, r) : t instanceof gi ? this._writeDimension(t, r) : t instanceof wi ? this._writeDimension(t, r) : t instanceof _i ? this._writeDimension(t, r) : t instanceof mi ? this._writeDimension(t, r) : t instanceof bi ? this._writeDimension(t, r) : t instanceof Oi ? this._writeEllipse(t, r) : t instanceof ha ? this._writeFace3D(t, r) : t instanceof bs ? this._writeHatch(t, r) : t instanceof Zt ? this._writeInsert(t, r) : t instanceof an ? this._writeLeader(t, r) : t instanceof Yt ? this._writeLine(t, r) : t instanceof lr ? this._writeLwPolyline(t, r) : t instanceof fa ? this._writeMesh(t, r) : t instanceof pa ? this._writeMLine(t, r) : t instanceof dt ? this._writeMText(t, r) : t instanceof _a ? this._writeMultiLeader(t, r) : t instanceof ma ? this._writeOle2Frame(t, r) : t instanceof wa ? this._writePdfUnderlay(t, r) : t instanceof ws ? this._writePoint(t, r) : t instanceof Vt ? this._writePolyline(t, r) : t instanceof vr ? this._writePolyline(t, r) : t instanceof ut ? this._writePolyline(t, r) : t instanceof xr ? this._writePolyline(t, r) : t instanceof ba ? this._writeRay(t, r) : t instanceof hn ? this._writeShape(t, r) : t instanceof ln ? this._writeProxyEntity(t) : t instanceof cn || t instanceof us || t instanceof sn ? this._writeModelerGeometry(t) : t instanceof Pi ? this._writeSolid(t, r) : t instanceof ji ? this._writeSpline(t, r) : t instanceof oo ? this._writeAttributeBase(t, r) : t instanceof Sr ? this._writeTextEntity(t, r) : t instanceof dn ? this._writeTolerance(t, r) : t instanceof Gr ? this._writeViewport(t, r) : t instanceof ga ? this._writeXLine(t, r) : t instanceof sa || t instanceof To ? this._writeCadImage(t, r) : t instanceof st || this.notify(`Entity not implemented: ${t.constructor.name}`, D.NotImplemented), this.writeExtendedData(t.extendedData);
   }
   _isEntitySupported(t) {
     return this.version < w.AC1014 && (t instanceof sn || t instanceof cn || t instanceof us) ? !1 : this.version <= w.AC1009 && ![
@@ -33525,7 +33525,7 @@ const qC = class qC {
     if (this._writer.write(75, t.style, r), this._writer.write(76, t.patternType, r), !t.isSolid && t.pattern?.lines.length > 0) {
       this._writer.write(52, t.patternAngle, r), this._writer.write(41, t.patternScale, r), this._writer.write(77, t.isDouble ? 1 : 0, r), this._writer.write(78, t.pattern.lines.length);
       for (const s of t.pattern.lines) {
-        this._writer.write(53, ce.radToDeg(s.angle)), this._writer.write(43, s.basePoint.x), this._writer.write(44, s.basePoint.y), this._writer.write(45, s.offset.x), this._writer.write(46, s.offset.y), this._writer.write(79, s.dashLengths.length);
+        this._writer.write(53, he.radToDeg(s.angle)), this._writer.write(43, s.basePoint.x), this._writer.write(44, s.basePoint.y), this._writer.write(45, s.offset.x), this._writer.write(46, s.offset.y), this._writer.write(79, s.dashLengths.length);
         for (const a of s.dashLengths)
           this._writer.write(49, a);
       }
@@ -33561,11 +33561,11 @@ const qC = class qC {
   }
   _writeHatchBoundaryAngles(t, e) {
     const r = /* @__PURE__ */ CS((o) => {
-      const l = ce.radToDeg(o) % 360;
+      const l = he.radToDeg(o) % 360;
       return Object.is(l, -0) ? 0 : l;
     }, "normalizeDegrees");
     let s = r(t), a = r(e);
-    if (Math.abs(Math.abs(e - t) - ce.twoPI) < ce.epsilon) {
+    if (Math.abs(Math.abs(e - t) - he.twoPI) < he.epsilon) {
       const o = e > t ? 360 : -360;
       Math.abs(s + o) > 360 && (s -= o), a = s + o;
     }
@@ -33695,7 +33695,7 @@ const qC = class qC {
     this._writer.write(B.Subclass, p.point), this._writer.writeVector(10, t.location, r), this._writer.write(39, t.thickness, r), this._writer.writeVector(210, t.normal, r), this._writer.write(50, t.rotation, r);
   }
   _writePolyline(t, e) {
-    this._writer.write(B.Subclass, t.subclassMarker), this._writer.write(66, 1), this._writer.write(70, t.flags), this._writer.writeVector(10, new u(0, 0, t.elevation)), this._writer.write(39, t.thickness), this._writer.write(40, t.startWidth), this._writer.write(41, t.endWidth), this._writer.writeVector(210, t.normal), t instanceof vr ? (this._writer.write(71, t.mVertexCount), this._writer.write(72, t.nVertexCount), this._writer.write(73, t.mSmoothSurfaceDensity), this._writer.write(74, t.nSmoothSurfaceDensity), this._writer.write(75, t.smoothSurface)) : t instanceof ut && (this._writer.write(71, t.vertices.length), this._writer.write(72, t.faces.length));
+    this._writer.write(B.Subclass, t.subclassMarker), this._writer.write(66, 1), this._writer.write(70, t.flags), this._writer.writeVector(10, new u(0, 0, t.elevation)), this._writer.write(39, t.thickness), this._writer.write(40, t.startWidth), this._writer.write(41, t.endWidth), this._writer.writeVector(210, t.normal), t instanceof xr ? (this._writer.write(71, t.mVertexCount), this._writer.write(72, t.nVertexCount), this._writer.write(73, t.mSmoothSurfaceDensity), this._writer.write(74, t.nSmoothSurfaceDensity), this._writer.write(75, t.smoothSurface)) : t instanceof ut && (this._writer.write(71, t.vertices.length), this._writer.write(72, t.faces.length));
     for (const r of t.vertices)
       r instanceof Ii && this._writeVertex(r, e);
     if (t instanceof ut)
@@ -33782,9 +33782,9 @@ const qC = class qC {
   }
 };
 CS(qC, "DxfSectionWriterBase");
-let vs = qC;
+let xs = qC;
 var Mj = Object.defineProperty, Hj = (i, t) => Mj(i, "name", { value: t, configurable: !0 });
-const ml = class ml extends vs {
+const ml = class ml extends xs {
   get sectionName() {
     return f.headerSection;
   }
@@ -33835,7 +33835,7 @@ n(ml, "r12Variables", new Set(`
   `.trim().split(/\s+/)));
 let K0 = ml;
 var $j = Object.defineProperty, Uj = (i, t) => $j(i, "name", { value: t, configurable: !0 });
-const KC = class KC extends vs {
+const KC = class KC extends xs {
   get sectionName() {
     return f.classesSection;
   }
@@ -33852,7 +33852,7 @@ const KC = class KC extends vs {
 Uj(KC, "DxfClassesSectionWriter");
 let J0 = KC;
 var zj = Object.defineProperty, Wj = (i, t) => zj(i, "name", { value: t, configurable: !0 });
-const JC = class JC extends vs {
+const JC = class JC extends xs {
   get sectionName() {
     return f.tablesSection;
   }
@@ -33892,7 +33892,7 @@ const JC = class JC extends vs {
   _writeLineType(t, e) {
     this._writer.write(3, t.description, e), this._writer.write(72, t.alignment, e), this._writer.write(73, t.segments.length, e), this._writer.write(40, t.patternLength);
     for (const r of t.segments)
-      this._writer.write(49, r.length), this._writer.write(74, r.shapeFlags), r.shapeFlags !== $r.None && ((r.shapeFlags & $r.Shape) !== 0 && this._writer.write(75, r.shapeNumber), (r.shapeFlags & $r.Text) !== 0 && this._writer.write(75, 0), r.style === null ? this._writer.write(340, 0) : this._writer.write(340, r.style.handle), this._writer.write(46, r.scale), this._writer.write(50, ce.radToDeg(r.rotation)), this._writer.write(44, r.offset.x), this._writer.write(45, r.offset.y), this._writer.write(9, r.text));
+      this._writer.write(49, r.length), this._writer.write(74, r.shapeFlags), r.shapeFlags !== $r.None && ((r.shapeFlags & $r.Shape) !== 0 && this._writer.write(75, r.shapeNumber), (r.shapeFlags & $r.Text) !== 0 && this._writer.write(75, 0), r.style === null ? this._writer.write(340, 0) : this._writer.write(340, r.style.handle), this._writer.write(46, r.scale), this._writer.write(50, he.radToDeg(r.rotation)), this._writer.write(44, r.offset.x), this._writer.write(45, r.offset.y), this._writer.write(9, r.text));
   }
   _writeTextStyle(t, e) {
     t.filename && this._writer.write(3, t.filename, e), t.bigFontFilename && this._writer.write(4, t.bigFontFilename), this._writer.write(40, t.height, e), this._writer.write(41, t.width, e), this._writer.write(42, t.lastHeight, e), this._writer.write(50, t.obliqueAngle, e), this._writer.write(71, t.mirrorFlag, e);
@@ -33910,7 +33910,7 @@ const JC = class JC extends vs {
 Wj(JC, "DxfTablesSectionWriter");
 let Q0 = JC;
 var Fj = Object.defineProperty, Gj = (i, t) => Fj(i, "name", { value: t, configurable: !0 });
-const QC = class QC extends vs {
+const QC = class QC extends xs {
   get sectionName() {
     return f.blocksSection;
   }
@@ -33946,7 +33946,7 @@ const QC = class QC extends vs {
 Gj(QC, "DxfBlocksSectionWriter");
 let e_ = QC;
 var Xj = Object.defineProperty, Yj = (i, t) => Xj(i, "name", { value: t, configurable: !0 });
-const eB = class eB extends vs {
+const eB = class eB extends xs {
   get sectionName() {
     return f.entitiesSection;
   }
@@ -33999,7 +33999,7 @@ const tB = class tB extends ue {
 qj(tB, "CellStyleMap");
 let Da = tB;
 var Kj = Object.defineProperty, Jj = (i, t) => Kj(i, "name", { value: t, configurable: !0 });
-const rB = class rB extends vs {
+const rB = class rB extends xs {
   constructor(e, r, s, a) {
     super(e, r, s, a);
     n(this, "_writtenHandles", /* @__PURE__ */ new Set());
@@ -34052,13 +34052,13 @@ const rB = class rB extends vs {
         break;
     }
     if (e.hostBlock !== null && this._writer.write(330, e.hostBlock.handle, r), this._writer.write(70, e.coordinatesType, r), this.version <= w.AC1021) {
-      this._writer.write(40, e.referencePoint.y, r), this._writer.write(41, e.referencePoint.x, r), this._writer.write(42, e.referencePoint.z, r), this._writer.write(91, e.horizontalUnits, r), this._writer.writeVector(10, e.designPoint, r), this._writer.writeVector(11, u.zero, r), this._writer.writeVector(210, e.upDirection, r), this._writer.write(52, ce.radToDeg(Math.PI / 2 - e.northDirection.getAngle()), r), this._writer.write(43, 1, r), this._writer.write(44, 1, r), this._writer.write(45, 1, r), this._writer.write(301, e.coordinateSystemDefinition, r), this._writer.write(302, e.geoRssTag, r), this._writer.write(46, e.userSpecifiedScaleFactor, r), this._writer.write(303, "", r), this._writer.write(304, "", r), this._writer.write(305, e.observationFromTag, r), this._writer.write(306, e.observationToTag, r), this._writer.write(307, e.observationCoverageTag, r), this._writer.write(93, e.points.length, r);
+      this._writer.write(40, e.referencePoint.y, r), this._writer.write(41, e.referencePoint.x, r), this._writer.write(42, e.referencePoint.z, r), this._writer.write(91, e.horizontalUnits, r), this._writer.writeVector(10, e.designPoint, r), this._writer.writeVector(11, u.zero, r), this._writer.writeVector(210, e.upDirection, r), this._writer.write(52, he.radToDeg(Math.PI / 2 - e.northDirection.getAngle()), r), this._writer.write(43, 1, r), this._writer.write(44, 1, r), this._writer.write(45, 1, r), this._writer.write(301, e.coordinateSystemDefinition, r), this._writer.write(302, e.geoRssTag, r), this._writer.write(46, e.userSpecifiedScaleFactor, r), this._writer.write(303, "", r), this._writer.write(304, "", r), this._writer.write(305, e.observationFromTag, r), this._writer.write(306, e.observationToTag, r), this._writer.write(307, e.observationCoverageTag, r), this._writer.write(93, e.points.length, r);
       for (const s of e.points)
         this._writer.writeVector(12, s.source, r), this._writer.writeVector(13, s.destination, r);
       this._writer.write(96, e.faces.length, r);
       for (const s of e.faces)
         this._writer.write(97, s.index1, r), this._writer.write(98, s.index2, r), this._writer.write(99, s.index3, r);
-      this._writer.write(3, "CIVIL3D_DATA_BEGIN", r), this._writer.write(292, !1, r), this._writer.writeVector(14, new P(e.referencePoint.x, e.referencePoint.y), r), this._writer.writeVector(15, new P(e.referencePoint.x, e.referencePoint.y), r), this._writer.write(93, 0, r), this._writer.write(94, 0, r), this._writer.write(293, !1, r), this._writer.writeVector(16, P.zero, r), this._writer.writeVector(17, P.zero, r), this._writer.write(54, ce.radToDeg(Math.PI / 2 - e.northDirection.getAngle()), r), this._writer.write(140, Math.PI / 2 - e.northDirection.getAngle(), r), this._writer.write(95, e.scaleEstimationMethod, r), this._writer.write(141, e.userSpecifiedScaleFactor, r), this._writer.write(294, e.enableSeaLevelCorrection, r), this._writer.write(142, e.seaLevelElevation, r), this._writer.write(143, e.coordinateProjectionRadius, r), this._writer.write(4, "CIVIL3D_DATA_END", r);
+      this._writer.write(3, "CIVIL3D_DATA_BEGIN", r), this._writer.write(292, !1, r), this._writer.writeVector(14, new P(e.referencePoint.x, e.referencePoint.y), r), this._writer.writeVector(15, new P(e.referencePoint.x, e.referencePoint.y), r), this._writer.write(93, 0, r), this._writer.write(94, 0, r), this._writer.write(293, !1, r), this._writer.writeVector(16, P.zero, r), this._writer.writeVector(17, P.zero, r), this._writer.write(54, he.radToDeg(Math.PI / 2 - e.northDirection.getAngle()), r), this._writer.write(140, Math.PI / 2 - e.northDirection.getAngle(), r), this._writer.write(95, e.scaleEstimationMethod, r), this._writer.write(141, e.userSpecifiedScaleFactor, r), this._writer.write(294, e.enableSeaLevelCorrection, r), this._writer.write(142, e.seaLevelElevation, r), this._writer.write(143, e.coordinateProjectionRadius, r), this._writer.write(4, "CIVIL3D_DATA_END", r);
     } else {
       this._writer.writeVector(10, e.designPoint, r), this._writer.writeVector(11, e.referencePoint, r), this._writer.write(40, e.verticalUnitScale, r), this._writer.write(91, e.horizontalUnits, r), this._writer.write(41, e.verticalUnitScale, r), this._writer.write(92, e.verticalUnits, r), this._writer.writeVector(210, e.upDirection, r), this._writer.writeVector(12, e.northDirection, r), this._writer.write(95, e.scaleEstimationMethod, r), this._writer.write(141, e.userSpecifiedScaleFactor, r), this._writer.write(294, e.enableSeaLevelCorrection, r), this._writer.write(142, e.seaLevelElevation, r), this._writer.write(143, e.coordinateProjectionRadius, r), this.writeLongTextValue(301, 303, e.coordinateSystemDefinition), this._writer.write(302, e.geoRssTag, r), this._writer.write(305, e.observationFromTag, r), this._writer.write(306, e.observationToTag, r), this._writer.write(307, e.observationCoverageTag, r), this._writer.write(93, e.points.length, r);
       for (const s of e.points)
@@ -34099,7 +34099,7 @@ const rB = class rB extends vs {
       this.notify(`Invalid object ${e.constructor.name}: ${r.join(" ")}`, D.Warning);
       return;
     }
-    if (this._writer.write(B.Start, e.objectName), this.writeCommonObjectData(e), e instanceof xa) {
+    if (this._writer.write(B.Start, e.objectName), this.writeCommonObjectData(e), e instanceof va) {
       this._writeAcdbPlaceHolder(e);
       return;
     } else if (e instanceof Rn)
@@ -34138,7 +34138,7 @@ const rB = class rB extends vs {
       this.writeMultiLeaderStyle(e);
     else if (e instanceof Si)
       this.writePlotSettings(e);
-    else if (e instanceof va)
+    else if (e instanceof xa)
       this.writePdfUnderlayDefinition(e);
     else if (e instanceof An)
       this.writeRasterVariables(e);
@@ -34146,7 +34146,7 @@ const rB = class rB extends vs {
       this.writeScale(e);
     else if (e instanceof Pn)
       this._writeSpatialFilter(e);
-    else if (e instanceof vi)
+    else if (e instanceof xi)
       this._writeSortentsTable(e);
     else if (e instanceof At)
       this._writeTableStyle(e);
@@ -34250,7 +34250,7 @@ const rB = class rB extends vs {
       }
   }
   _isObjectSupported(e) {
-    return e instanceof un || !this.configuration.writeDynamicBlockData && (e instanceof Ur || e instanceof Ni || e instanceof Ss) ? !1 : e instanceof lc || e instanceof oc || e instanceof cc || e instanceof Tr || e instanceof xi || e instanceof on || e instanceof Sa || e instanceof _n ? (this.notify(`Object not implemented : ${e.constructor.name}`, D.NotImplemented), !1) : !0;
+    return e instanceof un || !this.configuration.writeDynamicBlockData && (e instanceof Ur || e instanceof Ni || e instanceof Ss) ? !1 : e instanceof lc || e instanceof oc || e instanceof cc || e instanceof Tr || e instanceof vi || e instanceof on || e instanceof Sa || e instanceof _n ? (this.notify(`Object not implemented : ${e.constructor.name}`, D.NotImplemented), !1) : !0;
   }
   _writeAcdbPlaceHolder(e) {
   }
@@ -34268,7 +34268,7 @@ const rB = class rB extends vs {
   _writeCellStyleMap(e) {
     this._writer.write(100, e.subclassMarker), this._writer.write(90, e.cellStyles.length);
     for (const r of e.cellStyles)
-      this._writer.write(300, "CELLSTYLE"), this._writer.write(1, "TABLEFORMAT_BEGIN"), this._writer.write(90, r.cellStyleType), this._writer.write(170, r.cellAlignment), this._writer.write(91, r.styleClass), this._writer.write(92, r.tableCellStylePropertyFlags), this._writer.write(62, r.textColor.index), this._writer.write(300, "CONTENTFORMAT"), this._writer.write(1, "CONTENTFORMAT_BEGIN"), this._writer.write(90, r.propertyFlags), this._writer.write(91, r.propertyOverrideFlags), this._writer.write(92, r.valueDataType), this._writer.write(93, r.valueUnitType), this._writer.write(300, r.valueFormatString), this._writer.write(40, ce.radToDeg(r.rotation)), this._writer.write(140, r.textHeight), this._writer.write(94, r.alignment), this._writer.write(62, r.color.index), r.textStyle && this._writer.write(340, r.textStyle.handle), this._writer.write(144, r.scale), this._writer.write(309, "CONTENTFORMAT_END"), this._writer.write(171, r.marginOverrideFlags), this._writer.write(309, "TABLEFORMAT_END"), this._writer.write(1, "CELLSTYLE_BEGIN"), this._writer.write(90, r.id), this._writer.write(91, r.styleClass), this._writer.write(300, r.name), this._writer.write(309, "CELLSTYLE_END");
+      this._writer.write(300, "CELLSTYLE"), this._writer.write(1, "TABLEFORMAT_BEGIN"), this._writer.write(90, r.cellStyleType), this._writer.write(170, r.cellAlignment), this._writer.write(91, r.styleClass), this._writer.write(92, r.tableCellStylePropertyFlags), this._writer.write(62, r.textColor.index), this._writer.write(300, "CONTENTFORMAT"), this._writer.write(1, "CONTENTFORMAT_BEGIN"), this._writer.write(90, r.propertyFlags), this._writer.write(91, r.propertyOverrideFlags), this._writer.write(92, r.valueDataType), this._writer.write(93, r.valueUnitType), this._writer.write(300, r.valueFormatString), this._writer.write(40, he.radToDeg(r.rotation)), this._writer.write(140, r.textHeight), this._writer.write(94, r.alignment), this._writer.write(62, r.color.index), r.textStyle && this._writer.write(340, r.textStyle.handle), this._writer.write(144, r.scale), this._writer.write(309, "CONTENTFORMAT_END"), this._writer.write(171, r.marginOverrideFlags), this._writer.write(309, "TABLEFORMAT_END"), this._writer.write(1, "CELLSTYLE_BEGIN"), this._writer.write(90, r.id), this._writer.write(91, r.styleClass), this._writer.write(300, r.name), this._writer.write(309, "CELLSTYLE_END");
   }
   _writeTableStyle(e) {
     const r = z.create(At);
@@ -34352,7 +34352,7 @@ const rB = class rB extends vs {
 Jj(rB, "DxfObjectsSectionWriter");
 let r_ = rB;
 var Qj = Object.defineProperty, e5 = (i, t) => Qj(i, "name", { value: t, configurable: !0 });
-const iB = class iB extends vs {
+const iB = class iB extends xs {
   constructor(e, r, s, a, o) {
     super(r, s, a, o);
     n(this, "storage");
@@ -34559,7 +34559,7 @@ const oB = class oB extends Uh {
 };
 n5(oB, "DxfReaderConfiguration");
 let ru = oB;
-var a5 = Object.defineProperty, ix = (i, t) => a5(i, "name", { value: t, configurable: !0 });
+var a5 = Object.defineProperty, iv = (i, t) => a5(i, "name", { value: t, configurable: !0 });
 const cf = class cf extends F {
   get vertex() {
     return this.cadObject;
@@ -34573,18 +34573,18 @@ const cf = class cf extends F {
     t.location = e.location, t.startWidth = e.startWidth, t.endWidth = e.endWidth, t.bulge = e.bulge, t.flags = e.flags, t.curveTangent = e.curveTangent, t.id = e.id, this.cadObject = t;
   }
 };
-ix(cf, "CadVertexTemplate");
+iv(cf, "CadVertexTemplate");
 let qn = cf;
 (function(i) {
   const e = class e extends Ii {
     get objectType() {
-      return v.INVALID;
+      return x.INVALID;
     }
     get subclassMarker() {
       return p.polylineVertex;
     }
   };
-  ix(e, "VertexPlaceholder");
+  iv(e, "VertexPlaceholder");
   let t = e;
   i.VertexPlaceholder = t;
 })(qn || (qn = {}));
@@ -34849,7 +34849,7 @@ const lB = class lB {
   _readEllipse(t, e) {
     if (this._reader.code === 40) {
       const r = this._reader.valueAsDouble;
-      return t.cadObject.radiusRatio = r <= 0 ? ce.epsilon : Math.min(r, 1), !0;
+      return t.cadObject.radiusRatio = r <= 0 ? he.epsilon : Math.min(r, 1), !0;
     }
     return this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(p.ellipse));
   }
@@ -34857,7 +34857,7 @@ const lB = class lB {
     const s = t.cadObject;
     if (this._reader.code === 40) {
       const a = this._reader.valueAsDouble;
-      return a <= 0 ? s.radius = ce.epsilon : s.radius = a, !0;
+      return a <= 0 ? s.radius = he.epsilon : s.radius = a, !0;
     } else
       return this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(p.circle));
   }
@@ -35277,7 +35277,7 @@ const lB = class lB {
     if (this._builder.version === w.Unknown || this._builder.version === w.AC1009)
       return this._readLegacyPolyline();
     const t = new Ci();
-    if (this.readEntityCodes(t, this._readPolylineCodes.bind(this), re), t.cadObject.objectType === v.INVALID)
+    if (this.readEntityCodes(t, this._readPolylineCodes.bind(this), re), t.cadObject.objectType === x.INVALID)
       return this._builder.notify(`[${f.entityPolyline}] Subclass not found, entity discarded`, D.Warning), null;
     for (; this._reader.code === 0 && this._reader.valueAsString === f.entityVertex; ) {
       const e = this.readEntityCodes(new qn(), this._readVertex.bind(this), re);
@@ -35293,7 +35293,7 @@ const lB = class lB {
     let t = new Vt();
     const e = new Ci(t);
     for (this.readEntityCodes(e, this._readPolylineCodes.bind(this), Vt), t = e.cadObject; this._reader.code === 0 && this._reader.valueAsString === f.entityVertex; ) {
-      let r = t instanceof xr ? new hs() : t instanceof vr ? new Yn() : t instanceof ut ? new yi() : new Ai();
+      let r = t instanceof vr ? new hs() : t instanceof xr ? new Yn() : t instanceof ut ? new yi() : new Ai();
       const s = new qn(r);
       this.readEntityCodes(s, this._readVertex.bind(this), r.constructor), t instanceof ut && (r.flags & 64) !== 0 && (r = Object.assign(new Js(), r), s.setVertexObject(r)), s.vertex.handle === 0 ? (r.owner = t, t instanceof ut && r instanceof yi ? t.faces.push(r) : t.vertices.push(r)) : (e.ownedObjectsHandlers.add(s.vertex.handle), this._builder.addTemplate(s));
     }
@@ -35308,7 +35308,7 @@ const lB = class lB {
     switch (this._reader.code) {
       case 70:
         if (this._builder.version === w.AC1009 || this._builder.version === w.Unknown) {
-          const a = this._reader.valueAsInt, o = (a & 64) !== 0 ? new ut() : (a & 16) !== 0 ? new vr() : (a & 8) !== 0 ? new xr() : new Vt();
+          const a = this._reader.valueAsInt, o = (a & 64) !== 0 ? new ut() : (a & 16) !== 0 ? new xr() : (a & 8) !== 0 ? new vr() : new Vt();
           return Object.assign(o, s.cadObject), o.flags = a, s.setPolyLineObject(o), e.subClasses.set(o.subclassMarker, z.create(o.constructor)), !0;
         }
         return this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(s.cadObject.subclassMarker));
@@ -35321,11 +35321,11 @@ const lB = class lB {
           case p.polyline:
             return s.setPolyLineObject(new Vt()), e.subClasses.set(p.polyline, z.create(Vt)), !0;
           case p.polyline3d:
-            return s.setPolyLineObject(new xr()), e.subClasses.set(p.polyline3d, z.create(xr)), !0;
+            return s.setPolyLineObject(new vr()), e.subClasses.set(p.polyline3d, z.create(vr)), !0;
           case p.polyfaceMesh:
             return s.setPolyLineObject(new ut()), e.subClasses.set(p.polyfaceMesh, z.create(ut)), !0;
           case p.polygonMesh:
-            return s.setPolyLineObject(new vr()), e.subClasses.set(p.polygonMesh, z.create(vr)), !0;
+            return s.setPolyLineObject(new xr()), e.subClasses.set(p.polygonMesh, z.create(xr)), !0;
           default:
             return !1;
         }
@@ -35967,10 +35967,10 @@ ${l}` : l), !0;
               e.radius = this._reader.valueAsDouble;
               break;
             case 50:
-              e.startAngle = ce.degToRad(this._reader.valueAsDouble);
+              e.startAngle = he.degToRad(this._reader.valueAsDouble);
               break;
             case 51:
-              e.endAngle = ce.degToRad(this._reader.valueAsDouble);
+              e.endAngle = he.degToRad(this._reader.valueAsDouble);
               break;
             case 73:
               e.counterClockWise = this._reader.valueAsBool;
@@ -36001,10 +36001,10 @@ ${l}` : l), !0;
               e.minorToMajorRatio = this._reader.valueAsDouble;
               break;
             case 50:
-              e.startAngle = ce.degToRad(this._reader.valueAsDouble);
+              e.startAngle = he.degToRad(this._reader.valueAsDouble);
               break;
             case 51:
-              e.endAngle = ce.degToRad(this._reader.valueAsDouble);
+              e.endAngle = he.degToRad(this._reader.valueAsDouble);
               break;
             case 73:
               e.counterClockWise = this._reader.valueAsBool;
@@ -36125,7 +36125,7 @@ ${l}` : l), !0;
         if ((r.referenceType & It.Handle) !== 0 || (r.referenceType & It.Name) !== 0)
           return !1;
         let s = this._reader.value;
-        return (r.referenceType & It.IsAngle) !== 0 && (s = ce.degToRad(s)), r.setValue(this._reader.code, t, s), !0;
+        return (r.referenceType & It.IsAngle) !== 0 && (s = he.degToRad(s)), r.setValue(this._reader.code, t, s), !0;
       }
     } catch (r) {
       if (this._builder.configuration.failsafe)
@@ -36368,7 +36368,7 @@ const dB = class dB {
     return Number(this.value);
   }
   get valueAsAngle() {
-    return ce.degToRad(Number(this.value));
+    return he.degToRad(Number(this.value));
   }
   get valueAsHandle() {
     return Number(this.value);
@@ -36783,7 +36783,7 @@ const pB = class pB extends Aa {
         try {
           r.scaleFactor = this._reader.valueAsDouble;
         } catch (s) {
-          r.scaleFactor = ce.epsilon, this._builder.notify(`[${r.subclassMarker}] Assignation error for scaleFactor.`, D.Warning, s instanceof Error ? s : null);
+          r.scaleFactor = he.epsilon, this._builder.notify(`[${r.subclassMarker}] Assignation error for scaleFactor.`, D.Warning, s instanceof Error ? s : null);
         }
         return !0;
       case 41:
@@ -37053,16 +37053,16 @@ const pB = class pB extends Aa {
 };
 B5(pB, "DxfTablesSectionReader");
 let su = pB;
-var S5 = Object.defineProperty, v5 = (i, t) => S5(i, "name", { value: t, configurable: !0 });
+var S5 = Object.defineProperty, x5 = (i, t) => S5(i, "name", { value: t, configurable: !0 });
 const _B = class _B extends F {
   constructor(e) {
     super(e);
     n(this, "ownedObjectsHandlers", /* @__PURE__ */ new Set());
   }
 };
-v5(_B, "CadBlockEntityTemplate");
+x5(_B, "CadBlockEntityTemplate");
 let h_ = _B;
-var x5 = Object.defineProperty, T5 = (i, t) => x5(i, "name", { value: t, configurable: !0 });
+var v5 = Object.defineProperty, T5 = (i, t) => v5(i, "name", { value: t, configurable: !0 });
 const mB = class mB extends Aa {
   constructor(t, e) {
     super(t, e);
@@ -37221,7 +37221,7 @@ const CB = class CB extends __ {
     return e.style = this.style?.clone() ?? null, e.styleOverride = this.styleOverride instanceof At ? this.styleOverride.clone() : null, e;
   }
   get objectType() {
-    return v.UNLISTED;
+    return x.UNLISTED;
   }
   get objectName() {
     return f.objectTableContent;
@@ -37264,16 +37264,16 @@ const SB = class SB extends ye {
 O5(SB, "CadSpatialFilterTemplate");
 let w_ = SB;
 var j5 = Object.defineProperty, I5 = (i, t) => j5(i, "name", { value: t, configurable: !0 });
-const vB = class vB extends mn {
+const xB = class xB extends mn {
   constructor(e) {
     super(e ?? new _n());
     n(this, "entries", []);
   }
 };
-I5(vB, "CadProxyObjectTemplate");
-let b_ = vB;
+I5(xB, "CadProxyObjectTemplate");
+let b_ = xB;
 var V5 = Object.defineProperty, M5 = (i, t) => V5(i, "name", { value: t, configurable: !0 });
-const xB = class xB extends mn {
+const vB = class vB extends mn {
   constructor() {
     super(new Da());
     n(this, "styles", []);
@@ -37288,8 +37288,8 @@ const xB = class xB extends mn {
       r.build(e);
   }
 };
-M5(xB, "CadCellStyleMapTemplate");
-let g_ = xB;
+M5(vB, "CadCellStyleMapTemplate");
+let g_ = vB;
 var H5 = Object.defineProperty, BS = (i, t) => H5(i, "name", { value: t, configurable: !0 });
 const TB = class TB extends Aa {
   constructor(t, e) {
@@ -37316,11 +37316,11 @@ const TB = class TB extends Aa {
       case f.mTextAttributeObjectContextData:
         return this.readObjectCodes(new ya(new En()), this._readAnnotScaleObjectContextData.bind(this), En);
       case f.objectPlaceholder:
-        return this.readObjectCodes(new ye(new xa()), this._readObjectSubclassMap.bind(this), xa);
+        return this.readObjectCodes(new ye(new va()), this._readObjectSubclassMap.bind(this), va);
       case f.objectDBColor:
         return this.readObjectCodes(new ye(new Ta()), this._readBookColor.bind(this), Ta);
       case f.objectDimensionAssociation:
-        return this.readObjectCodes(new vn(), this._readDimensionAssociation.bind(this), Tr);
+        return this.readObjectCodes(new xn(), this._readDimensionAssociation.bind(this), Tr);
       case f.objectDictionary:
         return this.readObjectCodes(new Fl(), this._readDictionary.bind(this), Re);
       case f.objectDictionaryWithDefault:
@@ -37330,13 +37330,13 @@ const TB = class TB extends Aa {
       case f.objectPlotSettings:
         return this.readObjectCodes(new ye(new Si()), this._readPlotSettings.bind(this), Si);
       case f.objectEvalGraph:
-        return this.readObjectCodes(new xn(), this._readEvaluationGraph.bind(this), Ur);
+        return this.readObjectCodes(new vn(), this._readEvaluationGraph.bind(this), Ur);
       case f.objectImageDefinition:
         return this.readObjectCodes(new ye(new Dn()), this._readObjectSubclassMap.bind(this), Dn);
       case f.objectDictionaryVar:
         return this.readObjectCodes(new ye(new jt()), this._readObjectSubclassMap.bind(this), jt);
       case f.objectPdfDefinition:
-        return this.readObjectCodes(new ye(new va()), this._readObjectSubclassMap.bind(this), va);
+        return this.readObjectCodes(new ye(new xa()), this._readObjectSubclassMap.bind(this), xa);
       case f.objectSortEntsTable:
         return this._readSortentsTable();
       case f.objectImageDefinitionReactor:
@@ -37352,7 +37352,7 @@ const TB = class TB extends Aa {
       case f.objectGeoData:
         return this.readObjectCodes(new ud(), this._readGeoData.bind(this), Sn);
       case f.objectMaterial:
-        return this.readObjectCodes(new Jh(), this._readMaterial.bind(this), xi);
+        return this.readObjectCodes(new Jh(), this._readMaterial.bind(this), vi);
       case f.objectScale:
         return this.readObjectCodes(new ye(new Zr()), this._readScale.bind(this), Zr);
       case f.objectCellStyleMap:
@@ -37553,7 +37553,7 @@ const TB = class TB extends Aa {
     switch (this._reader.code) {
       case 91:
         for (; this._reader.code === 91; ) {
-          const a = new xn.GraphNodeTemplate(), o = a.node;
+          const a = new vn.GraphNodeTemplate(), o = a.node;
           o.index = this._reader.valueAsInt, this._reader.expectedCode(93), o.flags = this._reader.valueAsInt, this._reader.expectedCode(95), o.nextNodeIndex = this._reader.valueAsInt, this._reader.expectedCode(360), a.expressionHandle = this._reader.valueAsHandle, this._reader.expectedCode(92), o.data1 = this._reader.valueAsInt, this._reader.expectedCode(92), o.data2 = this._reader.valueAsInt, this._reader.expectedCode(92), o.data3 = this._reader.valueAsInt, this._reader.expectedCode(92), o.data4 = this._reader.valueAsInt, this._reader.readNext(), r.nodeTemplates.push(a);
         }
         return this.lockPointer = !0, !0;
@@ -38633,7 +38633,7 @@ const TB = class TB extends Aa {
     }
   }
   _readOsnapPointRef(t) {
-    const e = new vn.OsnapPointRefTemplate(t);
+    const e = new xn.OsnapPointRefTemplate(t);
     this._reader.readNext();
     let r = !1;
     for (; !r; ) {
@@ -38705,7 +38705,7 @@ const TB = class TB extends Aa {
     return this._reader.code === 340 ? (r.defaultEntryHandle = this._reader.valueAsHandle, !0) : this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(p.dictionaryWithDefault)) ? !0 : this._readDictionary(t, e);
   }
   _readSortentsTable() {
-    const t = new vi(), e = new pd(t);
+    const t = new xi(), e = new pd(t);
     this._reader.readNext(), this.readCommonObjectData(e), this._reader.readNext();
     let r = { item1: null, item2: null };
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38963,10 +38963,10 @@ const zn = class zn extends Vh {
 U5(zn, "DxfReader");
 let au = zn;
 var z5 = Object.defineProperty, W5 = (i, t) => z5(i, "name", { value: t, configurable: !0 });
-function sx() {
+function sv() {
   return Uint8Array.from("4143313030390000000000000103000500cd0000cf060000cf060000430c00000000004000000000000000802d00000000000f0700002900010000000e080000c6000100000057080000bf00010000002f0700009900000000003d0900000000000000000000000000000000000000000000000000000000408cb5781daf1544408cb5781daf1544408cb5781daf1544408cb5781daf15c4408cb5781daf15c4408cb5781daf15c4000000000000000000000000000000000000000000002840000000000000224000000000000000000000000000000000000000000000000000000000000024400000000000000000e03f000000000000e03f0000000000000000000000000000000000000000000000000000000001000000000000002440000000000000244000000100010000000200000000000000f03f9a9999999999c93f9a9999999999a93f00000f0000000000000000000100cc0b00000000000000000000020004000000000000000000000000000000000000009a9999999999b93f0000000000000000000000000000250001002e0000000000000000000000000000000000000000f03f0ad7a3703d0ac73f000000000000b03f52b81e85eb51d83f0ad7a3703d0ac73f000000000000000000000000000000000ad7a3703d0ac73f0ad7a3703d0ab73f00000000000000000000010100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000001ff7f958e2500c0cbb602958e25008bcfb6020000000000000000000000000100000001000100000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002010100000000000000000000000000000000000000000000000000000000000000006666666666663940000000000000f03f08000000010001000000000000000000000000000000000000006d00000000005d0900001e00000000000000000000000000000000000000000000000000000000000000f03f000000000000000000000000000000000000000000000000000000000000f03f00000000000000000000000000000000000000000000000000000000000000000000000000004940000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001008a0000000000000006000600060006000600fd00010000007d090000000006000300ffff2500010000009a0a0000000005000100440101000000df0a00000000000000000000000000030046000000000000001c007efd5742000000000000f03f000000000000f03f000000000000f03f6d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f000000000000000000000000000000000000000000000000000000000000f03f000000000000000000000000000000000000000000000000000000000000f03f0000000000000000ffff010000000000408cb5781daf1544408cb5781daf1544408cb5781daf1544408cb5781daf15c4408cb5781daf15c4408cb5781daf15c400000000000000000000000000000000000000000000284000000000000022400000000000000000000000000000000000000000000000002b0000000000430c000040000ad7a3703d0ab73f00000000000000000100217bc46e6854f86e3330633ec1852adc94013b9197ab0791cccf9cc13e7ad5236bfedbefb3f0c73e6da6c9b6245c4c6f32cb24104c0f38c192593649dba3b390cd340ec4646fbb1dd38b0049c2ef18ea6ffb536fe535e3426aeae9e9b3eb31e77750c13caa5668f4b41e4b74f408424dbfa500434f4e54494e554f555300000000000000000000000000000000000000000000ffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000167f13b9b9044e22c74ffb63d10e7159004e23ec182439f617750abc76696000618003000000000000000000000000000000000000000000000000000000000000000ffff07000000af421dc13e7dbc609e88af54389969fff9e7ac901aca1cbd951516164c14ce1888af005354414e44415244000000000000000000000000000000000000000000000000ffff0000000000000000000000000000f03f0000000000000000009a9999999999c93f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002d893ec355a9970b4be1b48b0bf7bdb2405a604afa3d8490cc5befe7d6a57f1e61cd9fb505c27b6f33a41018295a80e19e32f6ed44612adce47b4eb92bbb6660638d0912bb9ed5231b84b146d444999f9c72e125c25036686c0c3bd35d56c1791c3a002a41435449564500000000000000000000000000000000000000000000000000ffff00000000000000000000000000000000000000000000f03f000000000000f03f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f0000000000000000000000000000244000000000000000000000000000000000000000000000f03f00000000000049400000000000000000000000000000000000006400010003000000010000000000000000000000000000000000000000000000000000000000000000000000e03f000000000000e03f0000000000002440000000000000244039271eda3dafc99793f3c42ca2a93e86e3c5b4183e42c99fffe5b6e2cbb375c3c3b0004143414400000000000000000000000000000000000000000000000000000000ffff0ad14be7c1bd3660001a491d344c8a3c3c4fe0ca367ccee7586f2b7d745505f1447f005354414e44415244000000000000000000000000000000000000000000000000ffff000000000000f03f0ad7a3703d0ac73f000000000000e43f0000000000000e40000000000000f43f00000000000000000000000000000000000000000000000000000000000000000ad7a3703d0ac73f0ad7a3703d0ab73f00000000000000006666666666663940000000000000f03f000000000000000000000000000001080003000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f000000000000e43fc6241f35c9833118a790d4828baafa0ebb80722b7dec3e8c886c7a720afdc86c84268dd48213c1737793858df50237937bd9d5f9d3bb0aa969a6cd1c87c7ee804b172a062c44f556965932e37838117fb4e8298dd149a9731fea99de32f94d0ae01910008a00cf060000cf060000430c0000630c000001008a000000000000000a0001002d000000000000000200bf00010000000000030029000100000000000500c6000100000000000600990000000000000007006d000000000000000800fd00010000000000090025000100000000000a0044010100000000000b002b00000000000000730c00001256d6722eb6568ce0156621cd06b2f51fe6".match(/../g), (t) => parseInt(t, 16));
 }
-W5(sx, "r12Template");
+W5(sv, "r12Template");
 var F5 = Object.defineProperty, tr = (i, t) => F5(i, "name", { value: t, configurable: !0 });
 const Cf = {
   LINE: 1,
@@ -39009,7 +39009,7 @@ const Cf = {
   ["$LTSCALE", 306, [40], "double"],
   ["$TEXTSIZE", 314, [40], "double"],
   ["$TRACEWID", 322, [40], "double"]
-], vS = /* @__PURE__ */ new WeakMap(), me = /* @__PURE__ */ tr((i, t, e = "") => i.find((r) => r[0] === t)?.[1] ?? e, "value"), ka = /* @__PURE__ */ tr((i, t, e = 0) => Number(me(i, t, String(e))), "number"), Bf = /* @__PURE__ */ tr((i) => {
+], xS = /* @__PURE__ */ new WeakMap(), me = /* @__PURE__ */ tr((i, t, e = "") => i.find((r) => r[0] === t)?.[1] ?? e, "value"), ka = /* @__PURE__ */ tr((i, t, e = 0) => Number(me(i, t, String(e))), "number"), Bf = /* @__PURE__ */ tr((i) => {
   const t = new Uint8Array(i.reduce((r, s) => r + s.length, 0));
   let e = 0;
   for (const r of i)
@@ -39110,13 +39110,13 @@ const AB = class AB {
     }
   }
   geometry(t, e, r, s, a, o) {
-    const l = /* @__PURE__ */ tr((_, b = "double", x) => this.field(e, r, s, _, b, x), "field"), c = /* @__PURE__ */ tr((_, b = 2) => {
-      for (let x = 0; x < b; x++)
-        l(_ + 10 * x);
-    }, "point"), h = /* @__PURE__ */ tr((_, b, x = "double", g) => {
-      !s && e.some((T) => T[0] === b) && (a |= _), a & _ && l(b, x, g);
+    const l = /* @__PURE__ */ tr((_, b = "double", v) => this.field(e, r, s, _, b, v), "field"), c = /* @__PURE__ */ tr((_, b = 2) => {
+      for (let v = 0; v < b; v++)
+        l(_ + 10 * v);
+    }, "point"), h = /* @__PURE__ */ tr((_, b, v = "double", g) => {
+      !s && e.some((T) => T[0] === b) && (a |= _), a & _ && l(b, v, g);
     }, "optional"), d = /* @__PURE__ */ tr((_) => {
-      !s && [210, 220, 230].some((b) => e.some((x) => x[0] === b)) && (a |= _), a & _ && c(210, 3);
+      !s && [210, 220, 230].some((b) => e.some((v) => v[0] === b)) && (a |= _), a & _ && c(210, 3);
     }, "extrusion");
     switch (t) {
       case "LINE":
@@ -39232,15 +39232,15 @@ const AB = class AB {
       }
       const _ = [[0, d]], b = new Es(c.subarray(0, -2), this.encoding);
       b.position = 8;
-      const x = c[1], g = o.getUint16(6, !0);
+      const v = c[1], g = o.getUint16(6, !0);
       _.push([8, me(this.tables.get("LAYER")?.[o.getUint16(4, !0)] ?? [], 2, "0")]);
       try {
         let T = 0;
-        if (x & 64 && (T = Number(b.read("byte")), _.push([67, "1"])), T & 2) {
+        if (v & 64 && (T = Number(b.read("byte")), _.push([67, "1"])), T & 2) {
           const k = Number(b.read("short"));
           b.position += k, r("R12 extended entity data is not retained.");
         }
-        if (x & 1 && this.field(_, b, !0, 62, "byte"), x & 2 && this.field(_, b, !0, 6, "short", "LTYPE"), x & 4 && !["LINE", "POINT", "3DFACE"].includes(d) && this.field(_, b, !0, 30, "double"), x & 8 && this.field(_, b, !0, 39, "double"), x & 32) {
+        if (v & 1 && this.field(_, b, !0, 62, "byte"), v & 2 && this.field(_, b, !0, 6, "short", "LTYPE"), v & 4 && !["LINE", "POINT", "3DFACE"].includes(d) && this.field(_, b, !0, 30, "double"), v & 8 && this.field(_, b, !0, 39, "double"), v & 32) {
           const k = Number(b.read("byte"));
           let E = "";
           for (let I = 0; I < k; I++)
@@ -39249,7 +39249,7 @@ const AB = class AB {
         }
         if (T & 4 && b.read("short"), d === "POLYLINE" && g & 32768)
           throw new Error("R12 overflow polylines are unsupported.");
-        if (this.geometry(d, _, b, !0, g, x), b.position > c.length - 2)
+        if (this.geometry(d, _, b, !0, g, v), b.position > c.length - 2)
           throw new Error("Truncated R12 " + d + " record.");
         s.push(_);
       } catch (T) {
@@ -39327,10 +39327,10 @@ const AB = class AB {
     for (const [g, T] of this.tables)
       ["LAYER", "LTYPE", "STYLE", "APPID"].includes(g) && b.push([0, "TABLE"], [2, g], [70, String(T.length)], ...T.filter((k) => me(k, 2)).flat(), [0, "ENDTAB"]);
     b.push([0, "ENDSEC"], [0, "SECTION"], [2, "BLOCKS"], ..._.flat(), [0, "ENDSEC"], [0, "SECTION"], [2, "ENTITIES"], ...c.flat(), [0, "ENDSEC"], [0, "EOF"]);
-    const x = au.readFromStream(Ot(b.map(([g, T]) => g + `
+    const v = au.readFromStream(Ot(b.map(([g, T]) => g + `
 ` + T + `
 `).join(""), this.encoding));
-    return x.header.version = w.AC1009, vS.set(x, t.slice(0, l)), x;
+    return v.header.version = w.AC1009, xS.set(v, t.slice(0, l)), v;
   }
   write(t, e) {
     const r = [];
@@ -39350,7 +39350,7 @@ const AB = class AB {
     }
     const d = l.get("BLOCKS") ?? [], _ = d.filter((J) => me(J, 0) === "BLOCK");
     this.tables.set("BLOCK", _), this.tables.set("LTYPE", (this.tables.get("LTYPE") ?? []).filter((J) => !["BYLAYER", "BYBLOCK"].includes(me(J, 2).toUpperCase())));
-    const b = sx(), x = new DataView(b.buffer), g = b.slice(0, 1743), T = new DataView(g.buffer), k = vS.get(t);
+    const b = sv(), v = new DataView(b.buffer), g = b.slice(0, 1743), T = new DataView(g.buffer), k = xS.get(t);
     k && g.set(k), T.setUint16(17, 205, !0), T.setUint32(20, g.length, !0);
     const E = a.find((J) => me(J, 0) === "SECTION" && me(J, 2) === "HEADER") ?? [];
     for (const [J, Te, Fe, Rr] of SS) {
@@ -39373,11 +39373,11 @@ const AB = class AB {
     this.patchSequenceAddresses(M, G, g.length);
     const we = Bf(G);
     U(we), T.setUint32(24, V, !0), U(b.subarray(1743, 1759));
-    const L = Object.entries(Cc).sort((J, Te) => x.getUint32(J[1] + 6, !0) - x.getUint32(Te[1] + 6, !0)), j = [];
+    const L = Object.entries(Cc).sort((J, Te) => v.getUint32(J[1] + 6, !0) - v.getUint32(Te[1] + 6, !0)), j = [];
     for (const J of d)
       me(J, 0) === "BLOCK" && this.blockOffsets.push(j.reduce((Te, Fe) => Te + Fe.length, 0)), j.push(this.encode(J));
     for (const [J, Te] of L) {
-      const Fe = x.getUint32(Te + 6, !0), Rr = x.getUint16(Te, !0), yt = x.getUint16(Te + 2, !0);
+      const Fe = v.getUint32(Te + 6, !0), Rr = v.getUint16(Te, !0), yt = v.getUint16(Te + 2, !0);
       U(b.subarray(Fe - 16, Fe)), T.setUint32(Te + 6, V, !0);
       const Nt = this.tables.get(J);
       if (Nt && ["BLOCK", "LAYER", "STYLE", "LTYPE", "APPID"].includes(J)) {
@@ -39407,20 +39407,20 @@ const AB = class AB {
         U(b.subarray(Fe, Fe + Rr * yt));
       U(b.subarray(Fe + Rr * yt, Fe + Rr * yt + 16));
     }
-    const X = x.getUint32(28, !0);
+    const X = v.getUint32(28, !0);
     U(b.subarray(X - 16, X)), T.setUint32(28, V, !0), this.patchSequenceAddresses(d, j, V);
     const de = Bf(j);
     U(de), T.setUint32(32, 1073741824 + de.length, !0), U(b.subarray(X, X + 16));
     const Pe = b.length - 170;
     U(b.subarray(X + 16, Pe)), T.setUint32(36, V - 16, !0);
-    const xe = V, Ne = b.slice(Pe), et = new DataView(Ne.buffer);
+    const ve = V, Ne = b.slice(Pe), et = new DataView(Ne.buffer);
     T.setBigUint64(1262, BigInt(this.nextHandle), !0), et.setBigUint64(38, BigInt(this.nextHandle), !0), et.setUint32(20, g.length, !0), et.setUint32(24, g.length + we.length, !0), et.setUint32(28, T.getUint32(28, !0), !0), et.setUint32(32, T.getUint32(36, !0), !0);
     const Mn = ["BLOCK", "LTYPE", "LAYER", "STYLE", "VIEW", "UCS", "VPORT", "APPID", "DIMSTYLE", "VX"];
     for (let J = 0; J < Mn.length; J++) {
       const Te = Cc[Mn[J]], Fe = 48 + J * 10;
       et.setUint16(Fe + 2, T.getUint16(Te, !0), !0), et.setUint16(Fe + 4, T.getUint16(Te + 2, !0), !0), et.setUint32(Fe + 6, T.getUint32(Te + 6, !0), !0);
     }
-    return et.setUint32(Ne.length - 22, xe, !0), et.setUint16(Ne.length - 18, rr.applyCrc8(49345, Ne.subarray(16, Ne.length - 18)), !0), T.setUint16(1725, rr.applyCrc8(49345, g.subarray(0, 1725)), !0), U(Ne), Bf(I);
+    return et.setUint32(Ne.length - 22, ve, !0), et.setUint16(Ne.length - 18, rr.applyCrc8(49345, Ne.subarray(16, Ne.length - 18)), !0), T.setUint16(1725, rr.applyCrc8(49345, g.subarray(0, 1725)), !0), U(Ne), Bf(I);
   }
 };
 tr(AB, "DwgR12Codec");
@@ -39637,11 +39637,11 @@ const bl = class bl extends Vh {
     const _ = r.readRawLong();
     r.readRawLong(), r.readRawLong(), r.readRawLong();
     const b = rl.decompress(r.stream, r.position, _);
-    let x = 256, g = 0;
+    let v = 256, g = 0;
     const T = new DataView(b.buffer, b.byteOffset, b.byteLength);
     for (; g < b.length; ) {
       const L = new er();
-      L.number = T.getInt32(g, !0), g += 4, L.size = T.getInt32(g, !0), g += 4, L.number >= 0 ? (L.seeker = x, e.records.set(L.number, L)) : g += 16, x += L.size;
+      L.number = T.getInt32(g, !0), g += 4, L.size = T.getInt32(g, !0), g += 4, L.number >= 0 ? (L.seeker = v, e.records.set(L.number, L)) : g += 16, v += L.size;
     }
     r.position = e.records.get(e.sectionMapId).seeker, r.readRawLong();
     const k = r.readRawLong();
@@ -39666,12 +39666,12 @@ const bl = class bl extends Vh {
       j.compressedSize = M(), j.pageCount = U(), j.decompressedSize = U(), U(), j.compressedCode = U(), j.sectionId = U(), j.encrypted = U(), j.name = G(64);
       let X = 0;
       for (let Pe = 0; Pe < j.pageCount; ++Pe) {
-        const xe = new di();
-        for (xe.pageNumber = U(), xe.compressedSize = U(), xe.offset = M(); X < xe.offset; ) {
+        const ve = new di();
+        for (ve.pageNumber = U(), ve.compressedSize = U(), ve.offset = M(); X < ve.offset; ) {
           const Ne = new di();
           Ne.isEmpty = !0, Ne.offset = X, Ne.compressedSize = 0, Ne.decompressedSize = j.decompressedSize, j.localSections.push(Ne), X += j.decompressedSize;
         }
-        xe.decompressedSize = j.decompressedSize, xe.seeker = e.records.get(xe.pageNumber)?.seeker ?? 0, j.localSections.push(xe), X += xe.decompressedSize;
+        ve.decompressedSize = j.decompressedSize, ve.seeker = e.records.get(ve.pageNumber)?.seeker ?? 0, j.localSections.push(ve), X += ve.decompressedSize;
       }
       if (j.decompressedSize <= 0)
         throw new Error("Invalid DWG section page size");
@@ -39700,12 +39700,12 @@ const bl = class bl extends Vh {
       return d += 8, G * 4294967296 + M;
     }, "readBufULong");
     e.compressedMetadata = new n0(), e.compressedMetadata.headerSize = _(), e.compressedMetadata.fileSize = _(), e.compressedMetadata.pagesMapCrcCompressed = _(), e.compressedMetadata.pagesMapCorrectionFactor = _(), e.compressedMetadata.pagesMapCrcSeed = _(), e.compressedMetadata.map2Offset = _(), e.compressedMetadata.map2Id = _(), e.compressedMetadata.pagesMapOffset = _(), e.compressedMetadata.pagesMapId = _(), e.compressedMetadata.header2offset = _(), e.compressedMetadata.pagesMapSizeCompressed = _(), e.compressedMetadata.pagesMapSizeUncompressed = _(), e.compressedMetadata.pagesAmount = _(), e.compressedMetadata.pagesMaxId = _(), e.compressedMetadata.unknow0x20 = _(), e.compressedMetadata.unknow0x40 = _(), e.compressedMetadata.pagesMapCrcUncompressed = _(), e.compressedMetadata.unknown0xF800 = _(), e.compressedMetadata.unknown4 = _(), e.compressedMetadata.unknown1 = _(), e.compressedMetadata.sectionsAmount = _(), e.compressedMetadata.sectionsMapCrcUncompressed = _(), e.compressedMetadata.sectionsMapSizeCompressed = _(), e.compressedMetadata.sectionsMap2Id = _(), e.compressedMetadata.sectionsMapId = _(), e.compressedMetadata.sectionsMapSizeUncompressed = _(), e.compressedMetadata.sectionsMapCrcCompressed = _(), e.compressedMetadata.sectionsMapCorrectionFactor = _(), e.compressedMetadata.sectionsMapCrcSeed = _(), e.compressedMetadata.streamVersion = _(), e.compressedMetadata.crcSeed = _(), e.compressedMetadata.crcSeedEncoded = _(), e.compressedMetadata.randomSeed = _(), e.compressedMetadata.headerCRC64 = _();
-    const b = this._getPageBuffer(e.compressedMetadata.pagesMapOffset, e.compressedMetadata.pagesMapSizeCompressed, e.compressedMetadata.pagesMapSizeUncompressed, e.compressedMetadata.pagesMapCorrectionFactor, 239, this._fileBytes), x = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    const b = this._getPageBuffer(e.compressedMetadata.pagesMapOffset, e.compressedMetadata.pagesMapSizeCompressed, e.compressedMetadata.pagesMapSizeUncompressed, e.compressedMetadata.pagesMapCorrectionFactor, 239, this._fileBytes), v = new DataView(b.buffer, b.byteOffset, b.byteLength);
     let g = 0, T = 0;
     for (; g < b.length; ) {
-      const M = this._readInt64View(x, g);
+      const M = this._readInt64View(v, g);
       g += 8;
-      const G = Math.abs(this._readInt64View(x, g));
+      const G = Math.abs(this._readInt64View(v, g));
       g += 8, e.records.set(G, new er(G, T, M)), T += M;
     }
     const k = this._getPageBuffer(e.records.get(e.compressedMetadata.sectionsMapId).seeker, e.compressedMetadata.sectionsMapSizeCompressed, e.compressedMetadata.sectionsMapSizeUncompressed, e.compressedMetadata.sectionsMapCorrectionFactor, 239, this._fileBytes), E = new DataView(k.buffer, k.byteOffset, k.byteLength);
@@ -39800,8 +39800,8 @@ const bl = class bl extends Vh {
         if (s.encoding === 4) {
           let b = c.compressedSize + 7;
           b = b & 4294967288;
-          const x = Math.floor((b + 251 - 1) / 251), g = new Uint8Array(x * 251);
-          this._reedSolomonDecoding(_, g, x, 251), _ = g;
+          const v = Math.floor((b + 251 - 1) / 251), g = new Uint8Array(v * 251);
+          this._reedSolomonDecoding(_, g, v, 251), _ = g;
         }
         if (c.compressedSize !== c.decompressedSize) {
           const b = new Uint8Array(c.decompressedSize);
@@ -39815,8 +39815,8 @@ const bl = class bl extends Vh {
   _getPageBuffer(e, r, s, a, o, l) {
     let c = r + 7;
     c = c & 4294967288;
-    const h = c * a, d = Math.floor((h + o - 1) / o), _ = d * 255, b = new Uint8Array(_), x = 1152 + e;
-    b.set(l.subarray(x, x + _));
+    const h = c * a, d = Math.floor((h + o - 1) / o), _ = d * 255, b = new Uint8Array(_), v = 1152 + e;
+    b.set(l.subarray(v, v + _));
     const g = new Uint8Array(h);
     this._reedSolomonDecoding(b, g, d, o);
     const T = new Uint8Array(s);
@@ -39873,7 +39873,7 @@ const hf = class hf {
   }
 };
 Y5(hf, "CadReader");
-let xS = hf;
+let vS = hf;
 var Z5 = Object.defineProperty, q5 = (i, t) => Z5(i, "name", { value: t, configurable: !0 });
 const Ka = class Ka {
   constructor(t, e) {
@@ -40100,7 +40100,7 @@ const EB = class EB extends Qe {
   }
 };
 aI(EB, "DwgClassesWriter");
-let v_ = EB;
+let x_ = EB;
 var oI = Object.defineProperty, lI = (i, t) => oI(i, "name", { value: t, configurable: !0 });
 const kB = class kB {
   constructor(t, e, r, s) {
@@ -40258,7 +40258,7 @@ const gl = class gl extends pc {
   }
 };
 hI(gl, "DwgFileHeaderWriterAC15"), n(gl, "_nRecords", 6);
-let x_ = gl;
+let v_ = gl;
 var dI = Object.defineProperty, uI = (i, t) => dI(i, "name", { value: t, configurable: !0 });
 const LB = class LB {
   constructor() {
@@ -40437,8 +40437,8 @@ const OB = class OB extends pc {
       r(h), r(0);
     }, "writeInt64"), a = /* @__PURE__ */ La((h, d = 0, _) => {
       const b = _ ?? h.length;
-      for (let x = 0; x < b; x++)
-        e.push(h[d + x]);
+      for (let v = 0; v < b; v++)
+        e.push(h[d + v]);
     }, "writeBytes");
     r(this._descriptors.size), r(2), r(29696), r(0), r(this._descriptors.size);
     for (const h of this._descriptors.values()) {
@@ -40446,8 +40446,8 @@ const OB = class OB extends pc {
       const d = new Uint8Array(64);
       if (h.name) {
         const _ = new TextEncoder().encode(h.name), b = Math.min(_.length, d.length);
-        for (let x = 0; x < b; x++)
-          d[x] = _[x];
+        for (let v = 0; v < b; v++)
+          d[v] = _[v];
       }
       a(d);
       for (const _ of h.localSections)
@@ -40569,7 +40569,7 @@ const _I = [
           d(t[k + V]);
         k += I, E -= I;
       }
-    }, "literals"), x = /* @__PURE__ */ Oa((k, E, I) => {
+    }, "literals"), v = /* @__PURE__ */ Oa((k, E, I) => {
       const V = k - 1;
       (E < 15 || E === 15 && I !== 0) && k < 513 ? (d(E << 4 | V & 15), d(V >> 1 & 248)) : E <= 18 && k < 8193 ? (d(E - 3 | 16), d(V), d(V >> 5 & 248)) : E <= 50 && k < 4097 ? (d(I === 0 ? E - 3 | 240 : E - 3 & 15), d(V), d(E + 13 << 3 & 128 | V >> 5 & 120)) : E <= 255 ? (d(E & 7 | 32), d(k), d(k >> 8), d(E & 248)) : (d(E & 7 | 40), d(V), d(V >> 8), d(E - 256 >> 3), d(E - 256 >> 8 & 248));
     }, "match"), g = /* @__PURE__ */ Oa((k) => ((t[k] | t[k + 1] << 8 | t[k + 2] << 16) & 131071) << 2, "hash");
@@ -40607,7 +40607,7 @@ const _I = [
         l++, T++;
         continue;
       }
-      T && (_(T), b(l - T, T)), x(I, E, T), l += E, T = 0;
+      T && (_(T), b(l - T, T)), v(I, E, T), l += E, T = 0;
     }
     T += a - l, T && (_(T), b(a - T, T)), s.push(h);
   }
@@ -40615,12 +40615,12 @@ const _I = [
 Oa(jB, "DwgLZ77AC21Compressor");
 let D_ = jB;
 var mI = Object.defineProperty, Ds = (i, t) => mI(i, "name", { value: t, configurable: !0 });
-const en = 0xffffffffffffffffn, nx = [], ax = [];
+const en = 0xffffffffffffffffn, nv = [], av = [];
 for (let i = 0; i < 256; i++) {
   let t = BigInt(i) << 56n, e = BigInt(i);
   for (let r = 0; r < 8; r++)
     t = (t << 1n ^ (t >> 63n ? 0x42f0e1eba9ea3693n : 0n)) & en, e = e >> 1n ^ (e & 1n ? 0x95ac9329ac4bc9b5n : 0n);
-  nx.push(t), ax.push(e);
+  nv.push(t), av.push(e);
 }
 function zi(i, t = !1) {
   let e = BigInt(i) * 0x343fdn + 0x269ec3n & en;
@@ -40641,7 +40641,7 @@ Ds(cm, "r2007Order");
 function Er(i, t, e = !1) {
   let r = t & en;
   for (const s of cm(i))
-    r = e ? ax[Number((r ^ BigInt(s)) & 255n)] ^ r >> 8n : (nx[Number(r >> 56n ^ BigInt(s))] ^ r << 8n) & en;
+    r = e ? av[Number((r ^ BigInt(s)) & 255n)] ^ r >> 8n : (nv[Number(r >> 56n ^ BigInt(s))] ^ r << 8n) & en;
   return e ? r : ~r & en;
 }
 Ds(Er, "r2007Crc");
@@ -40650,11 +40650,11 @@ function ri(i) {
   return i.forEach((r, s) => e.setBigUint64(s * 8, BigInt(r) & en, !0)), t;
 }
 Ds(ri, "r2007Words");
-function ox(i, t) {
+function ov(i, t) {
   const e = t & 31n;
   return e ? (i << e | i >> 64n - e) & en : i;
 }
-Ds(ox, "r2007Rotate");
+Ds(ov, "r2007Rotate");
 const IB = class IB {
   constructor() {
     n(this, "table", new Uint32Array(624));
@@ -40687,8 +40687,8 @@ function Tc(i, t, e = !0) {
   let c = [1];
   for (let d = 1; d <= s; d++) {
     const _ = new Array(c.length + 1).fill(0);
-    c.forEach((b, x) => {
-      _[x] ^= b, _[x + 1] ^= l(b, a[d]);
+    c.forEach((b, v) => {
+      _[v] ^= b, _[v + 1] ^= l(b, a[d]);
     }), c = _;
   }
   const h = new Uint8Array(r * 255);
@@ -40702,17 +40702,17 @@ function Tc(i, t, e = !0) {
       for (let k = 1; k <= s; k++)
         b[g + k] ^= l(T, c[k]);
     }
-    const x = new Uint8Array(255);
-    x.set(_), x.set(b.subarray(t).reverse(), t);
+    const v = new Uint8Array(255);
+    v.set(_), v.set(b.subarray(t).reverse(), t);
     for (let g = 0; g < 255; g++) {
       const T = e ? g * r + d : g < t ? d * t + g : r * t + d * s + g - t;
-      h[T] = x[g];
+      h[T] = v[g];
     }
   }
   return h;
 }
 Ds(Tc, "r2007ReedSolomon");
-function lx(i) {
+function lv(i) {
   const t = BigInt(i.length) * 0x343fdn + 0x269ec3n;
   let e = Number(t & 65535n), r = Number(t >> 16n & 65535n);
   const s = cm(i);
@@ -40723,7 +40723,7 @@ function lx(i) {
   }
   return (r << 16 | e) >>> 0;
 }
-Ds(lx, "r2007Checksum");
+Ds(lv, "r2007Checksum");
 var wI = Object.defineProperty, Dc = (i, t) => wI(i, "name", { value: t, configurable: !0 });
 const Bc = /* @__PURE__ */ Dc((i, t) => Math.ceil(i / t) * t, "align"), VB = class VB extends pc {
   constructor(e, r, s) {
@@ -40791,28 +40791,28 @@ const Bc = /* @__PURE__ */ Dc((i, t) => Math.ceil(i / t) * t, "align"), VB = cla
           be.id,
           pr.length,
           ei.length,
-          lx(pr),
+          lv(pr),
           Er(ei, zi(ei.length), !0)
         ]));
     }
     const b = new Uint8Array(_.reduce((ae, oe) => ae + oe.length, 0));
-    let x = 0;
+    let v = 0;
     for (const ae of _)
-      b.set(ae, x), x += ae.length;
+      b.set(ae, v), v += ae.length;
     const g = s(b), T = r(g.bytes), k = r(g.bytes), E = ri(e.flatMap((ae) => [ae.bytes.length, ae.id])), I = s(E);
     l.bytes = c.bytes = I.bytes;
     const V = /* @__PURE__ */ new Map();
-    x = 0;
+    v = 0;
     for (const ae of e)
-      V.set(ae.id, x), x += ae.bytes.length;
-    const U = new A_(), M = U.encodeZero(), G = U.encodeZero(), we = U.next(), L = U.next(), j = U.encodeZero(), X = ox, de = [X(we, L)];
+      V.set(ae.id, v), v += ae.bytes.length;
+    const U = new A_(), M = U.encodeZero(), G = U.encodeZero(), we = U.next(), L = U.next(), j = U.encodeZero(), X = ov, de = [X(we, L)];
     for (de.push(X(de[0], de[0]), X(L, X(de[0], de[0]))), de.push(X(de[2], de[2]), X(we, X(de[2], de[2]))); de.length < 8; )
       de.push(X(de[de.length - 1], de[de.length - 1]));
-    const Pe = Er(ri(de), ~L), xe = [X(we, L)];
-    xe.push(X(Pe, xe[0])), xe.push(X(L, xe[1])), xe.push(X(Pe, xe[2])), xe.push(X(we, xe[3])), xe.push(X(Pe, xe[4])), xe.push(X(L, xe[5])), xe.push(X(xe[6], xe[6]));
-    const Ne = ri([Pe, Er(ri(xe), ~we, !0), we, L, j]), et = ri([
+    const Pe = Er(ri(de), ~L), ve = [X(we, L)];
+    ve.push(X(Pe, ve[0])), ve.push(X(L, ve[1])), ve.push(X(Pe, ve[2])), ve.push(X(we, ve[3])), ve.push(X(Pe, ve[4])), ve.push(X(L, ve[5])), ve.push(X(ve[6], ve[6]));
+    const Ne = ri([Pe, Er(ri(ve), ~we, !0), we, L, j]), et = ri([
       112,
-      1152 + x + 1024,
+      1152 + v + 1024,
       Er(E, zi(E.length), !0),
       I.factor,
       G,
@@ -40820,7 +40820,7 @@ const Bc = /* @__PURE__ */ Dc((i, t) => Math.ceil(i / t) * t, "align"), VB = cla
       c.id,
       0,
       l.id,
-      x,
+      v,
       E.length,
       E.length,
       e.length,
@@ -40890,13 +40890,13 @@ const MB = class MB extends Qe {
     for (const [c, h] of this._handleMap) {
       let d = c - a;
       const _ = h + e;
-      let b = _ - o, x = this._modularShortToValue(d, r), g = this._signedModularShortToValue(b, s);
-      if (this._buffer.length - l + (x + g) > 2032) {
+      let b = _ - o, v = this._modularShortToValue(d, r), g = this._signedModularShortToValue(b, s);
+      if (this._buffer.length - l + (v + g) > 2032) {
         if (this._processPosition(l), a = 0, o = 0, l = this._buffer.length, this._buffer.push(0), this._buffer.push(0), a = 0, o = 0, d = c - a, d === 0)
           throw new Error("Handle offset is zero");
-        b = _ - o, x = this._modularShortToValue(d, r), g = this._signedModularShortToValue(b, s);
+        b = _ - o, v = this._modularShortToValue(d, r), g = this._signedModularShortToValue(b, s);
       }
-      for (let T = 0; T < x; T++)
+      for (let T = 0; T < v; T++)
         this._buffer.push(r[T]);
       for (let T = 0; T < g; T++)
         this._buffer.push(s[T]);
@@ -41122,9 +41122,9 @@ const $B = class $B extends Qe {
     this._writeCommonEntityData(e), this._registerObject(e);
   }
   _writeLayer(e) {
-    if (this._writeCommonNonEntityData(e), this._writer.writeVariableText(e.name), this._writeXrefDependantBit(e), this.r13_14Only && (this._writer.writeBit((e.flags & xt.Frozen) !== 0), this._writer.writeBit(!e.isOn), this._writer.writeBit((e.flags & xt.FrozenNewViewports) !== 0), this._writer.writeBit((e.flags & xt.Locked) !== 0)), this.r2000Plus) {
+    if (this._writeCommonNonEntityData(e), this._writer.writeVariableText(e.name), this._writeXrefDependantBit(e), this.r13_14Only && (this._writer.writeBit((e.flags & vt.Frozen) !== 0), this._writer.writeBit(!e.isOn), this._writer.writeBit((e.flags & vt.FrozenNewViewports) !== 0), this._writer.writeBit((e.flags & vt.Locked) !== 0)), this.r2000Plus) {
       let r = Ee.toIndex(e.lineWeight) << 5;
-      (e.flags & xt.Frozen) !== 0 && (r |= 1), e.isOn || (r |= 2), (e.flags & xt.Frozen) !== 0 && (r |= 4), (e.flags & xt.Locked) !== 0 && (r |= 8), e.plotFlag && (r |= 16), this._writer.writeBitShort(r);
+      (e.flags & vt.Frozen) !== 0 && (r |= 1), e.isOn || (r |= 2), (e.flags & vt.Frozen) !== 0 && (r |= 4), (e.flags & vt.Locked) !== 0 && (r |= 8), e.plotFlag && (r |= 16), this._writer.writeBitShort(r);
     }
     this._writer.writeCmColor(e.color), this._writer.handleReferenceTyped(y.HardPointer, null), this.r2000Plus && this._writer.handleReferenceTyped(y.HardPointer, 0), this.r2007Plus && this._writer.handleReferenceTyped(y.HardPointer, 0), this._writer.handleReferenceTyped(y.HardPointer, e.lineType.handle), this.r2013Plus && this._writer.handleReferenceTyped(y.HardPointer, 0), this._registerObject(e);
   }
@@ -41219,7 +41219,7 @@ const $B = class $B extends Qe {
   }
   _writeCommonData(e) {
     switch (this._writer.resetStream(), this._msmainPos = 0, e.objectType) {
-      case v.LAYOUT:
+      case x.LAYOUT:
         if (this.r2004Pre) {
           const s = this._document.classes.tryGetByName(e.objectName);
           if (s.found && s.result)
@@ -41232,7 +41232,7 @@ const $B = class $B extends Qe {
         }
         this._writer.writeObjectType(e.objectType);
         break;
-      case v.UNLISTED:
+      case x.UNLISTED:
         {
           const s = this._document.classes.tryGetByName(e.objectName);
           if (s.found && s.result)
@@ -41243,8 +41243,8 @@ const $B = class $B extends Qe {
           }
         }
         break;
-      case v.INVALID:
-      case v.UNDEFINED:
+      case x.INVALID:
+      case x.UNDEFINED:
         this.notify(`CadObject type: ${e.objectType} fullname: ${e.constructor.name}`, D.NotImplemented);
         return;
       default:
@@ -41441,9 +41441,9 @@ const $B = class $B extends Qe {
       this._writePolyfaceMesh(e), s.push(...e.vertices, ...e.faces), a = e.vertices.seqend;
     else if (e instanceof Vt)
       this._writePolyline2D(e), s.push(...e.vertices), a = e.vertices.seqend;
-    else if (e instanceof xr)
-      this._writePolyline3D(e), s.push(...e.vertices), a = e.vertices.seqend;
     else if (e instanceof vr)
+      this._writePolyline3D(e), s.push(...e.vertices), a = e.vertices.seqend;
+    else if (e instanceof xr)
       this._writePolygonMesh(e), s.push(...e.vertices), a = e.vertices.seqend;
     else if (e instanceof ba)
       this._writeRay(e);
@@ -41584,7 +41584,7 @@ const $B = class $B extends Qe {
     this._writer.writeBitLong(0);
   }
   _writeMLine(e) {
-    this._writer.writeBitDouble(e.scaleFactor), this._writer.writeByte(e.justification), this._writer.write3BitDouble(e.startPoint), this._writer.write3BitDouble(e.normal), this._writer.writeBitShort((e.flags & xo.Closed) !== 0 ? 3 : 1);
+    this._writer.writeBitDouble(e.scaleFactor), this._writer.writeByte(e.justification), this._writer.write3BitDouble(e.startPoint), this._writer.write3BitDouble(e.normal), this._writer.writeBitShort((e.flags & vo.Closed) !== 0 ? 3 : 1);
     let r = 0;
     e.vertices.length > 0 && (r = e.vertices[0].segments.length), this._writer.writeByte(r), this._writer.writeBitShort(e.vertices.length);
     for (const s of e.vertices) {
@@ -41684,7 +41684,7 @@ const $B = class $B extends Qe {
     this._writer.writeBit(!1), this._writer.writeBitShort(e.creationType), this._writer.writeBitShort(e.pathType), this._writer.writeBitLong(e.vertices.length);
     for (const r of e.vertices)
       this._writer.write3BitDouble(r);
-    this._writer.write3BitDouble(e.vertices.length > 0 ? e.vertices[0] : u.zero), this._writer.write3BitDouble(e.normal), this._writer.write3BitDouble(e.horizontalDirection), this._writer.write3BitDouble(e.blockOffset), this._version >= w.AC1014 && this._writer.write3BitDouble(e.annotationOffset), this.r13_14Only && this._writer.writeBitDouble(e.style.dimensionLineGap), this._version <= w.AC1021 && (this._writer.writeBitDouble(e.textHeight), this._writer.writeBitDouble(e.textWidth)), this._writer.writeBit(e.hookLineDirection === vo.Same), this._writer.writeBit(e.arrowHeadEnabled), this.r13_14Only && (this._writer.writeBitShort(0), this._writer.writeBitDouble(e.style.arrowSize * e.style.scaleFactor), this._writer.writeBit(!1), this._writer.writeBit(!1), this._writer.writeBitShort(0), this._writer.writeBitShort(0), this._writer.writeBit(!1), this._writer.writeBit(!1)), this.r2000Plus && (this._writer.writeBitShort(0), this._writer.writeBit(!1), this._writer.writeBit(!1)), this._writer.handleReferenceTyped(y.HardPointer, null), this._writer.handleReferenceTyped(y.HardPointer, e.style);
+    this._writer.write3BitDouble(e.vertices.length > 0 ? e.vertices[0] : u.zero), this._writer.write3BitDouble(e.normal), this._writer.write3BitDouble(e.horizontalDirection), this._writer.write3BitDouble(e.blockOffset), this._version >= w.AC1014 && this._writer.write3BitDouble(e.annotationOffset), this.r13_14Only && this._writer.writeBitDouble(e.style.dimensionLineGap), this._version <= w.AC1021 && (this._writer.writeBitDouble(e.textHeight), this._writer.writeBitDouble(e.textWidth)), this._writer.writeBit(e.hookLineDirection === xo.Same), this._writer.writeBit(e.arrowHeadEnabled), this.r13_14Only && (this._writer.writeBitShort(0), this._writer.writeBitDouble(e.style.arrowSize * e.style.scaleFactor), this._writer.writeBit(!1), this._writer.writeBit(!1), this._writer.writeBitShort(0), this._writer.writeBitShort(0), this._writer.writeBit(!1), this._writer.writeBit(!1)), this.r2000Plus && (this._writer.writeBitShort(0), this._writer.writeBit(!1), this._writer.writeBit(!1)), this._writer.handleReferenceTyped(y.HardPointer, null), this._writer.handleReferenceTyped(y.HardPointer, e.style);
   }
   _writeOle2Frame(e) {
     this._writer.writeBitShort(e.version), this.r2000Plus && this._writer.writeBitShort(0), this._writer.writeBitLong(e.binaryData.length), this._writer.writeBytes(e.binaryData), this.r2000Plus && this._writer.writeByte(3);
@@ -41965,7 +41965,7 @@ const $B = class $B extends Qe {
     const s = e.weights.length > 0;
     switch (r) {
       case 1:
-        this._writer.writeBit((e.flags & vt.Rational) !== 0), this._writer.writeBit((e.flags & vt.Closed) !== 0), this._writer.writeBit((e.flags & vt.Periodic) !== 0), this._writer.writeBitDouble(e.knotTolerance), this._writer.writeBitDouble(e.controlPointTolerance), this._writer.writeBitLong(e.knots.length), this._writer.writeBitLong(e.controlPoints.length), this._writer.writeBit(s);
+        this._writer.writeBit((e.flags & xt.Rational) !== 0), this._writer.writeBit((e.flags & xt.Closed) !== 0), this._writer.writeBit((e.flags & xt.Periodic) !== 0), this._writer.writeBitDouble(e.knotTolerance), this._writer.writeBitDouble(e.controlPointTolerance), this._writer.writeBitLong(e.knots.length), this._writer.writeBitLong(e.controlPoints.length), this._writer.writeBit(s);
         for (const a of e.knots)
           this._writer.writeBitDouble(a);
         for (let a = 0; a < e.controlPoints.length; a++)
@@ -41986,7 +41986,7 @@ const $B = class $B extends Qe {
       this._writer.writeBitDouble(e.insertPoint.z), this._writer.writeRawDouble(e.insertPoint.x), this._writer.writeRawDouble(e.insertPoint.y), this._writer.writeRawDouble(e.alignmentPoint.x), this._writer.writeRawDouble(e.alignmentPoint.y), this._writer.write3BitDouble(e.normal), this._writer.writeBitDouble(e.thickness), this._writer.writeBitDouble(e.obliqueAngle), this._writer.writeBitDouble(e.rotation), this._writer.writeBitDouble(e.height), this._writer.writeBitDouble(e.widthFactor), this._writer.writeVariableText(e.value), this._writer.writeBitShort(e.mirror), this._writer.writeBitShort(e.horizontalAlignment), this._writer.writeBitShort(e.verticalAlignment);
     else {
       let r = 0;
-      e.insertPoint.z === 0 && (r |= 1), u.equals(e.alignmentPoint, u.zero) && (r |= 2), e.obliqueAngle === 0 && (r |= 4), e.rotation === 0 && (r |= 8), e.widthFactor === 1 && (r |= 16), e.mirror === vl.None && (r |= 32), e.horizontalAlignment === Vr.Left && (r |= 64), e.verticalAlignment === ci.Baseline && (r |= 128), this._writer.writeByte(r), (r & 1) === 0 && this._writer.writeRawDouble(e.insertPoint.z), this._writer.writeRawDouble(e.insertPoint.x), this._writer.writeRawDouble(e.insertPoint.y), (r & 2) === 0 && (this._writer.writeBitDoubleWithDefault(e.alignmentPoint.x, e.insertPoint.x), this._writer.writeBitDoubleWithDefault(e.alignmentPoint.y, e.insertPoint.y)), this._writer.writeBitExtrusion(e.normal), this._writer.writeBitThickness(e.thickness), (r & 4) === 0 && this._writer.writeRawDouble(e.obliqueAngle), (r & 8) === 0 && this._writer.writeRawDouble(e.rotation), this._writer.writeRawDouble(e.height), (r & 16) === 0 && this._writer.writeRawDouble(e.widthFactor), this._writer.writeVariableText(e.value), (r & 32) === 0 && this._writer.writeBitShort(e.mirror), (r & 64) === 0 && this._writer.writeBitShort(e.horizontalAlignment), (r & 128) === 0 && this._writer.writeBitShort(e.verticalAlignment);
+      e.insertPoint.z === 0 && (r |= 1), u.equals(e.alignmentPoint, u.zero) && (r |= 2), e.obliqueAngle === 0 && (r |= 4), e.rotation === 0 && (r |= 8), e.widthFactor === 1 && (r |= 16), e.mirror === xl.None && (r |= 32), e.horizontalAlignment === Vr.Left && (r |= 64), e.verticalAlignment === ci.Baseline && (r |= 128), this._writer.writeByte(r), (r & 1) === 0 && this._writer.writeRawDouble(e.insertPoint.z), this._writer.writeRawDouble(e.insertPoint.x), this._writer.writeRawDouble(e.insertPoint.y), (r & 2) === 0 && (this._writer.writeBitDoubleWithDefault(e.alignmentPoint.x, e.insertPoint.x), this._writer.writeBitDoubleWithDefault(e.alignmentPoint.y, e.insertPoint.y)), this._writer.writeBitExtrusion(e.normal), this._writer.writeBitThickness(e.thickness), (r & 4) === 0 && this._writer.writeRawDouble(e.obliqueAngle), (r & 8) === 0 && this._writer.writeRawDouble(e.rotation), this._writer.writeRawDouble(e.height), (r & 16) === 0 && this._writer.writeRawDouble(e.widthFactor), this._writer.writeVariableText(e.value), (r & 32) === 0 && this._writer.writeBitShort(e.mirror), (r & 64) === 0 && this._writer.writeBitShort(e.horizontalAlignment), (r & 128) === 0 && this._writer.writeBitShort(e.verticalAlignment);
     }
     this._writer.handleReferenceTyped(y.HardPointer, e.style);
   }
@@ -42066,7 +42066,7 @@ const $B = class $B extends Qe {
       a && this.notify(`Object type not implemented ${e.constructor.name}`, D.NotImplemented);
       return;
     }
-    if (this._writeCommonNonEntityData(e), e instanceof xa)
+    if (this._writeCommonNonEntityData(e), e instanceof va)
       this._writeAcdbPlaceHolder(e);
     else if (e instanceof Ta)
       this._writeBookColor(e);
@@ -42092,7 +42092,7 @@ const $B = class $B extends Qe {
       this._writer.writeBitShort(e.version), this._writer.handleReferenceTyped(y.HardPointer, e.block ?? e.blockHandle);
     else if (e instanceof At)
       this._writeTableStyle(e);
-    else if (e instanceof xi)
+    else if (e instanceof vi)
       this._writeMaterial(e);
     else if (e instanceof Sa)
       this._writeVisualStyle(e);
@@ -42120,7 +42120,7 @@ const $B = class $B extends Qe {
       this._writeMultiLeaderStyle(e);
     else if (e instanceof on)
       this._writeMultiLeaderAnnotContext(e);
-    else if (e instanceof va)
+    else if (e instanceof xa)
       this._writePdfDefinition(e);
     else if (e instanceof Si)
       this._writePlotSettings(e);
@@ -42130,7 +42130,7 @@ const $B = class $B extends Qe {
       this._writeWipeoutVariables(e);
     else if (e instanceof Zr)
       this._writeScale(e);
-    else if (e instanceof vi)
+    else if (e instanceof xi)
       this._writeSortEntitiesTable(e);
     else if (e instanceof Pn)
       this._writeSpatialFilter(e);
@@ -42239,7 +42239,7 @@ const $B = class $B extends Qe {
       this._writer.writeBitLong(s.index), this._writer.writeBitLong(s.flags), this._writer.writeBitLong(s.trackedCount), this._writer.writeBitLong(s.fromNodeIndex), this._writer.writeBitLong(s.toNodeIndex), this._writer.writeBitLong(s.data1), this._writer.writeBitLong(s.data2), this._writer.writeBitLong(s.data3), this._writer.writeBitLong(s.data4), this._writer.writeBitLong(s.data5);
   }
   _writeVisualStyle(e) {
-    ex(this._writer, this._version, e);
+    ev(this._writer, this._version, e);
   }
   _writeTableStyle(e) {
     const r = [...e.xDictionary ?? []].find((h) => h instanceof Da)?.cellStyles ?? [], s = /* @__PURE__ */ $i((h, d, _) => r.find((b) => b.name.toLowerCase() === h) ?? r.find((b) => !b.name && b.id === d) ?? _, "mappedStyle"), a = s("_title", 1, e.titleCellStyle), o = s("_header", 2, e.headerCellStyle), l = s("_data", 3, e.dataCellStyle), c = s("table", 4, e.tableCellStyle);
@@ -42247,8 +42247,8 @@ const $B = class $B extends Qe {
       const h = e.xDictionary?.getEntry("ACAD_XREC_ROUNDTRIP");
       if (h instanceof Ut && h.entries.some((d) => d.code === 102 && d.value === "ACAD_ROUNDTRIP_PRE2007_TABLESTYLE"))
         for (const [d, _] of [e.dataCellStyle, e.titleCellStyle, e.headerCellStyle].entries()) {
-          const b = h.entries.find((T) => T.code === 90 + d * 2)?.value, x = h.entries.find((T) => T.code === 91 + d * 2)?.value, g = h.entries.find((T) => T.code === 1 + d)?.value;
-          typeof b == "number" && (_.valueDataType = b), typeof x == "number" && (_.valueUnitType = x), typeof g == "string" && (_.valueFormatString = g);
+          const b = h.entries.find((T) => T.code === 90 + d * 2)?.value, v = h.entries.find((T) => T.code === 91 + d * 2)?.value, g = h.entries.find((T) => T.code === 1 + d)?.value;
+          typeof b == "number" && (_.valueDataType = b), typeof v == "number" && (_.valueUnitType = v), typeof g == "string" && (_.valueFormatString = g);
         }
     }
     if (this.r2010Plus) {
@@ -42744,7 +42744,7 @@ const $B = class $B extends Qe {
 };
 $i($B, "DwgObjectWriter");
 let E_ = $B;
-var SI = Object.defineProperty, vI = (i, t) => SI(i, "name", { value: t, configurable: !0 });
+var SI = Object.defineProperty, xI = (i, t) => SI(i, "name", { value: t, configurable: !0 });
 const UB = class UB extends Qe {
   constructor(e, r) {
     super(e);
@@ -42774,9 +42774,9 @@ const UB = class UB extends Qe {
     this._swriter.writeRawLong(o), this._swriter.writeRawLong(e.rawImage.length), this._swriter.writeBytes(e.rawHeader), this._swriter.writeBytes(e.rawImage), this._swriter.writeBytes(this._endSentinel);
   }
 };
-vI(UB, "DwgPreviewWriter");
+xI(UB, "DwgPreviewWriter");
 let k_ = UB;
-var xI = Object.defineProperty, TI = (i, t) => xI(i, "name", { value: t, configurable: !0 });
+var vI = Object.defineProperty, TI = (i, t) => vI(i, "name", { value: t, configurable: !0 });
 const zB = class zB extends Qe {
   constructor(e, r, s) {
     super(e);
@@ -42871,8 +42871,8 @@ const GB = class GB {
       }));
       return { entity: L, pages: X, size: j ? 36 + j * 8 : 4 + L.binaryData.length };
     }), a = [], o = /* @__PURE__ */ j_((L, j, X = 0, de = 0, Pe = !1) => {
-      const xe = Math.ceil((48 + j.bytes.length) / 64) * 64, Ne = new ii();
-      Ne.uint16(54700), Ne.append(new TextEncoder().encode(L)), Ne.uint32(a.length), Ne.uint32(Pe ? 1 : 0), Ne.uint32(xe), Ne.uint32(0), Ne.uint32(1), Ne.uint32(0), Ne.uint32(X), Ne.uint32(de), Ne.append(new Uint8Array(8).fill(85)), Ne.append(j.bytes), Ne.align(64, 112), a.push(Ne.bytes);
+      const ve = Math.ceil((48 + j.bytes.length) / 64) * 64, Ne = new ii();
+      Ne.uint16(54700), Ne.append(new TextEncoder().encode(L)), Ne.uint32(a.length), Ne.uint32(Pe ? 1 : 0), Ne.uint32(ve), Ne.uint32(0), Ne.uint32(1), Ne.uint32(0), Ne.uint32(X), Ne.uint32(de), Ne.append(new Uint8Array(8).fill(85)), Ne.append(j.bytes), Ne.align(64, 112), a.push(Ne.bytes);
     }, "segment"), l = new ii();
     for (let L = 0; L < r; L++)
       l.uint64(0), l.uint32(0);
@@ -42902,7 +42902,7 @@ const GB = class GB {
     for (const L of h)
       c.text(L);
     o("schidx", c, b), d.align(16);
-    const x = (48 + d.bytes.length) / 16;
+    const v = (48 + d.bytes.length) / 16;
     d.uint32(6);
     for (const L of [
       "AcDbDs::ID",
@@ -42913,7 +42913,7 @@ const GB = class GB {
       "AcDbDs::HandleAttribute"
     ])
       d.text(L);
-    o("schdat", d, x);
+    o("schdat", d, v);
     const g = new ii();
     g.uint32(t.length), g.uint32(0);
     for (let L = 0; L < t.length; L++)
@@ -43034,7 +43034,7 @@ const yl = class yl extends dc {
       case w.AC1012:
       case w.AC1014:
       case w.AC1015:
-        this._fileHeaderWriter = new x_(e, this._encoding, this._document);
+        this._fileHeaderWriter = new v_(e, this._encoding, this._document);
         break;
       case w.AC1018:
         this._fileHeaderWriter = new cu(e, this._encoding, this._document);
@@ -43058,7 +43058,7 @@ const yl = class yl extends dc {
     this._fileHeaderWriter.addSection(H.header, s, !0);
   }
   _writeClasses() {
-    const e = new Uint8Array(0), r = new v_(e, this._document, this._encoding);
+    const e = new Uint8Array(0), r = new x_(e, this._document, this._encoding);
     r.write();
     const s = new Uint8Array(r.startWriterStream).slice(0, r.bytesWritten);
     this._fileHeaderWriter.addSection(H.classes, s, !0);
@@ -43290,7 +43290,7 @@ const ai = class ai {
 };
 II(ai, "SvgConverter");
 let W = ai;
-var VI = Object.defineProperty, cx = (i, t) => VI(i, "name", { value: t, configurable: !0 });
+var VI = Object.defineProperty, cv = (i, t) => VI(i, "name", { value: t, configurable: !0 });
 const YB = class YB {
   constructor(t, e, r) {
     n(this, "translation", new u(0, 0, 0));
@@ -43303,7 +43303,7 @@ const YB = class YB {
     return new u(t.x + this.translation.x, t.y + this.translation.y, t.z + this.translation.z);
   }
 };
-cx(YB, "Transform");
+cv(YB, "Transform");
 let nl = YB;
 const ZB = class ZB {
   constructor(t, e, r) {
@@ -43430,7 +43430,7 @@ const ZB = class ZB {
     return t.index === 7 && e ? t = 0.2126 * e.r + 0.7152 * e.g + 0.0722 * e.b > 127 ? O.black : O.default : this.layout !== null && t.equals(O.default) && (t = O.black), `rgb(${t.r},${t.g},${t.b})`;
   }
   _isVisible(t) {
-    return !t.isInvisible && t.layer.isOn && !(t.layer.layerFlags & xt.Frozen) && !(t instanceof Sr && !t.value.trim()) && !(t instanceof dt && !t.plainText.trim());
+    return !t.isInvisible && t.layer.isOn && !(t.layer.layerFlags & vt.Frozen) && !(t instanceof Sr && !t.value.trim()) && !(t instanceof dt && !t.plainText.trim());
   }
   _circleOcs(t) {
     const e = t.normal.getLength() ? t.normal.normalize() : u.axisZ;
@@ -43449,8 +43449,8 @@ const ZB = class ZB {
       if (!(d instanceof re) || !this._isVisible(d))
         continue;
       const _ = d instanceof at ? this._circleWorldPoints(d) : null, b = _?.length ? {
-        min: new u(Math.min(..._.map((x) => x.x)), Math.min(..._.map((x) => x.y)), Math.min(..._.map((x) => x.z))),
-        max: new u(Math.max(..._.map((x) => x.x)), Math.max(..._.map((x) => x.y)), Math.max(..._.map((x) => x.z)))
+        min: new u(Math.min(..._.map((v) => v.x)), Math.min(..._.map((v) => v.y)), Math.min(..._.map((v) => v.z))),
+        max: new u(Math.max(..._.map((v) => v.x)), Math.max(..._.map((v) => v.y)), Math.max(..._.map((v) => v.z)))
       } : this._normalizeBoundingBox(d instanceof Zt ? this._getInsertBoundingBox(d) : d.getBoundingBox());
       b && (e = Math.min(e, b.min.x), r = Math.min(r, b.min.y), s = Math.min(s, b.min.z), a = Math.max(a, b.max.x), o = Math.max(o, b.max.y), l = Math.max(l, b.max.z));
     }
@@ -43602,7 +43602,7 @@ const ZB = class ZB {
     this.writeStartElement("g");
     const r = t.isSolid ? null : this._writePattern(t), s = [];
     for (const a of t.paths) {
-      const o = a.getPoints ? a.getPoints(this.configuration.arcPoints) : [], l = new xr(o);
+      const o = a.getPoints ? a.getPoints(this.configuration.arcPoints) : [], l = new vr(o);
       s.push(l);
     }
     this.writeStartElement("path"), this._writeEntityHeader(t, e, !1), this.writeAttributeString("d", this._createPath(...s)), this.writeAttributeString("fill", r === null ? this._colorSvg(t.getActiveColor()) : `url(#${r})`), this.writeEndElement(), this.writeEndElement();
@@ -43781,7 +43781,7 @@ const ZB = class ZB {
     a && this.writeAttributeString(t, a);
   }
 };
-cx(ZB, "SvgXmlWriter");
+cv(ZB, "SvgXmlWriter");
 let _c = ZB;
 var MI = Object.defineProperty, HI = (i, t) => MI(i, "name", { value: t, configurable: !0 });
 const qB = class qB extends _c {
@@ -43940,7 +43940,7 @@ var IS;
 (function(i) {
   i[i.None = 0] = "None", i[i.PathType = 1] = "PathType", i[i.LineColor = 2] = "LineColor", i[i.LineType = 4] = "LineType", i[i.LineWeight = 8] = "LineWeight", i[i.ArrowheadSize = 16] = "ArrowheadSize", i[i.Arrowhead = 32] = "Arrowhead";
 })(IS || (IS = {}));
-var QI = Object.defineProperty, hx = (i, t) => QI(i, "name", { value: t, configurable: !0 });
+var QI = Object.defineProperty, hv = (i, t) => QI(i, "name", { value: t, configurable: !0 });
 const Ja = class Ja {
   constructor(t) {
     n(this, "cache", /* @__PURE__ */ new Map());
@@ -43969,7 +43969,7 @@ const Ja = class Ja {
     return r;
   }
 };
-hx(Ja, "PropertyExpression");
+hv(Ja, "PropertyExpression");
 let hu = Ja;
 (function(i) {
   const e = class e {
@@ -43980,7 +43980,7 @@ let hu = Ja;
       n(this, "propertyName", "");
     }
   };
-  hx(e, "Prop");
+  hv(e, "Prop");
   let t = e;
   i.Prop = t;
 })(hu || (hu = {}));
@@ -44024,17 +44024,17 @@ function e6(i) {
     c.notificationType === D.NotImplemented && c.message.startsWith("Object not implemented : ") || t(c);
   }), s.join("");
 }
-var t6 = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], dx = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], r6 = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", ux = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", Sf = {
+var t6 = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], dv = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], r6 = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", uv = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", Sf = {
   3: "abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile",
   5: "class enum extends super const export import",
   6: "enum",
   strict: "implements interface let package private protected public static yield",
   strictBind: "eval arguments"
-}, vf = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", i6 = {
-  5: vf,
-  "5module": vf + " export import",
-  6: vf + " const class extends export import super"
-}, fx = /^in(stanceof)?$/, s6 = new RegExp("[" + ux + "]"), n6 = new RegExp("[" + ux + r6 + "]");
+}, xf = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", i6 = {
+  5: xf,
+  "5module": xf + " export import",
+  6: xf + " const class extends export import super"
+}, fv = /^in(stanceof)?$/, s6 = new RegExp("[" + uv + "]"), n6 = new RegExp("[" + uv + r6 + "]");
 function $_(i, t) {
   for (var e = 65536, r = 0; r < t.length; r += 2) {
     if (e += t[r], e > i)
@@ -44045,10 +44045,10 @@ function $_(i, t) {
   return !1;
 }
 function Mi(i, t) {
-  return i < 65 ? i === 36 : i < 91 ? !0 : i < 97 ? i === 95 : i < 123 ? !0 : i <= 65535 ? i >= 170 && s6.test(String.fromCharCode(i)) : t === !1 ? !1 : $_(i, dx);
+  return i < 65 ? i === 36 : i < 91 ? !0 : i < 97 ? i === 95 : i < 123 ? !0 : i <= 65535 ? i >= 170 && s6.test(String.fromCharCode(i)) : t === !1 ? !1 : $_(i, dv);
 }
 function jn(i, t) {
-  return i < 48 ? i === 36 : i < 58 ? !0 : i < 65 ? !1 : i < 91 ? !0 : i < 97 ? i === 95 : i < 123 ? !0 : i <= 65535 ? i >= 170 && n6.test(String.fromCharCode(i)) : t === !1 ? !1 : $_(i, dx) || $_(i, t6);
+  return i < 48 ? i === 36 : i < 58 ? !0 : i < 65 ? !1 : i < 91 ? !0 : i < 97 ? i === 95 : i < 123 ? !0 : i <= 65535 ? i >= 170 && n6.test(String.fromCharCode(i)) : t === !1 ? !1 : $_(i, dv) || $_(i, t6);
 }
 var Ce = function(t, e) {
   e === void 0 && (e = {}), this.label = t, this.keyword = e.keyword, this.beforeExpr = !!e.beforeExpr, this.startsExpr = !!e.startsExpr, this.isLoop = !!e.isLoop, this.isAssign = !!e.isAssign, this.prefix = !!e.prefix, this.postfix = !!e.postfix, this.binop = e.binop || null, this.updateContext = null;
@@ -44157,7 +44157,7 @@ var m = {
 function qo(i) {
   return i === 10 || i === 13 || i === 8232 || i === 8233;
 }
-function px(i, t, e) {
+function pv(i, t, e) {
   e === void 0 && (e = i.length);
   for (var r = t; r < e; r++) {
     var s = i.charCodeAt(r);
@@ -44166,7 +44166,7 @@ function px(i, t, e) {
   }
   return -1;
 }
-var _x = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, nt = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, mx = Object.prototype, o6 = mx.hasOwnProperty, l6 = mx.toString, Ko = Object.hasOwn || (function(i, t) {
+var _v = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, nt = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, mv = Object.prototype, o6 = mv.hasOwnProperty, l6 = mv.toString, Ko = Object.hasOwn || (function(i, t) {
   return o6.call(i, t);
 }), US = Array.isArray || (function(i) {
   return l6.call(i) === "[object Array]";
@@ -44174,7 +44174,7 @@ var _x = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, nt = /(?:\s|\/\/.*|\/\
 function Hs(i) {
   return zS[i] || (zS[i] = new RegExp("^(?:" + i.replace(/ /g, "|") + ")$"));
 }
-function xs(i) {
+function vs(i) {
   return i <= 65535 ? String.fromCharCode(i) : (i -= 65536, String.fromCharCode((i >> 10) + 55296, (i & 1023) + 56320));
 }
 var c6 = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/, mc = function(t, e) {
@@ -44186,9 +44186,9 @@ mc.prototype.offset = function(t) {
 var uf = function(t, e, r) {
   this.start = e, this.end = r, t.sourceFile !== null && (this.source = t.sourceFile);
 };
-function wx(i, t) {
+function wv(i, t) {
   for (var e = 1, r = 0; ; ) {
-    var s = px(i, r, t);
+    var s = pv(i, r, t);
     if (s < 0)
       return new mc(e, t - r);
     ++e, r = s;
@@ -44320,11 +44320,11 @@ function d6(i, t) {
     i.locations && (c.loc = new uf(this, o, l)), i.ranges && (c.range = [s, a]), t.push(c);
   };
 }
-var Na = 1, Pa = 2, dm = 4, bx = 8, um = 16, gx = 32, ff = 64, yx = 128, Ra = 256, gc = 512, Cx = 1024, pf = Na | Pa | Ra;
+var Na = 1, Pa = 2, dm = 4, bv = 8, um = 16, gv = 32, ff = 64, yv = 128, Ra = 256, gc = 512, Cv = 1024, pf = Na | Pa | Ra;
 function fm(i, t) {
-  return Pa | (i ? dm : 0) | (t ? bx : 0);
+  return Pa | (i ? dm : 0) | (t ? bv : 0);
 }
-var du = 0, pm = 1, As = 2, Bx = 3, Sx = 4, vx = 5, ot = function(t, e, r) {
+var du = 0, pm = 1, As = 2, Bv = 3, Sv = 4, xv = 5, ot = function(t, e, r) {
   this.options = t = h6(t), this.sourceFile = t.sourceFile, this.keywords = Hs(i6[t.ecmaVersion >= 6 ? 6 : t.sourceType === "module" ? "5module" : 5]);
   var s = "";
   t.allowReserved !== !0 && (s = Sf[t.ecmaVersion >= 6 ? 6 : t.ecmaVersion === 5 ? 5 : 3], t.sourceType === "module" && (s += " await")), this.reservedWords = Hs(s);
@@ -44344,7 +44344,7 @@ Nr.inFunction.get = function() {
   return (this.currentVarScope().flags & Pa) > 0;
 };
 Nr.inGenerator.get = function() {
-  return (this.currentVarScope().flags & bx) > 0;
+  return (this.currentVarScope().flags & bv) > 0;
 };
 Nr.inAsync.get = function() {
   return (this.currentVarScope().flags & dm) > 0;
@@ -44367,7 +44367,7 @@ Nr.allowSuper.get = function() {
   return (t & ff) > 0 || this.options.allowSuperOutsideMethod;
 };
 Nr.allowDirectSuper.get = function() {
-  return (this.currentThisScope().flags & yx) > 0;
+  return (this.currentThisScope().flags & yv) > 0;
 };
 Nr.treatFunctionsAsVar.get = function() {
   return this.treatFunctionsAsVarInScope(this.currentScope());
@@ -44382,7 +44382,7 @@ Nr.allowNewDotTarget.get = function() {
 };
 Nr.allowUsing.get = function() {
   var i = this.currentScope(), t = i.flags;
-  return !(t & Cx || !this.inModule && t & Na);
+  return !(t & Cv || !this.inModule && t & Na);
 };
 Nr.inClassStaticBlock.get = function() {
   return (this.currentVarScope().flags & Ra) > 0;
@@ -44521,7 +44521,7 @@ Z.isLet = function(i) {
     if (r === 92)
       return !0;
     var a = this.input.slice(s, e);
-    if (!fx.test(a))
+    if (!fv.test(a))
       return !0;
   }
   return !1;
@@ -44559,7 +44559,7 @@ Z.isUsingKeyword = function(i, t) {
   if (l === 92)
     return !0;
   var h = this.input.slice(c, r);
-  if (fx.test(h))
+  if (fv.test(h))
     return !1;
   if (t && !i && h === "of") {
     nt.lastIndex = r;
@@ -44684,7 +44684,7 @@ Z.parseReturnStatement = function(i) {
   return this.allowReturn || this.raise(this.start, "'return' outside of function"), this.next(), this.eat(m.semi) || this.insertSemicolon() ? i.argument = null : (i.argument = this.parseExpression(), this.semicolon()), this.finishNode(i, "ReturnStatement");
 };
 Z.parseSwitchStatement = function(i) {
-  this.next(), i.discriminant = this.parseParenExpression(), i.cases = [], this.expect(m.braceL), this.labels.push(f6), this.enterScope(Cx);
+  this.next(), i.discriminant = this.parseParenExpression(), i.cases = [], this.expect(m.braceL), this.labels.push(f6), this.enterScope(Cv);
   for (var t, e = !1; this.type !== m.braceR; )
     if (this.type === m._case || this.type === m._default) {
       var r = this.type === m._case;
@@ -44699,7 +44699,7 @@ Z.parseThrowStatement = function(i) {
 var p6 = [];
 Z.parseCatchClauseParam = function() {
   var i = this.parseBindingAtom(), t = i.type === "Identifier";
-  return this.enterScope(t ? gx : 0), this.checkLValPattern(i, t ? Sx : As), this.expect(m.parenR), i;
+  return this.enterScope(t ? gv : 0), this.checkLValPattern(i, t ? Sv : As), this.expect(m.parenR), i;
 };
 Z.parseTryStatement = function(i) {
   if (this.next(), i.block = this.parseBlock(), i.handler = null, this.type === m._catch) {
@@ -44765,9 +44765,9 @@ Z.parseVar = function(i, t, e, r) {
 Z.parseVarId = function(i, t) {
   i.id = t === "using" || t === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(i.id, t === "var" ? pm : As, !1);
 };
-var al = 1, z_ = 2, xx = 4;
+var al = 1, z_ = 2, vv = 4;
 Z.parseFunction = function(i, t, e, r, s) {
-  this.initFunction(i), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !r) && (this.type === m.star && t & z_ && this.unexpected(), i.generator = this.eat(m.star)), this.options.ecmaVersion >= 8 && (i.async = !!r), t & al && (i.id = t & xx && this.type !== m.name ? null : this.parseIdent(), i.id && !(t & z_) && this.checkLValSimple(i.id, this.strict || i.generator || i.async ? this.treatFunctionsAsVar ? pm : As : Bx));
+  this.initFunction(i), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !r) && (this.type === m.star && t & z_ && this.unexpected(), i.generator = this.eat(m.star)), this.options.ecmaVersion >= 8 && (i.async = !!r), t & al && (i.id = t & vv && this.type !== m.name ? null : this.parseIdent(), i.id && !(t & z_) && this.checkLValSimple(i.id, this.strict || i.generator || i.async ? this.treatFunctionsAsVar ? pm : As : Bv));
   var a = this.yieldPos, o = this.awaitPos, l = this.awaitIdentPos;
   return this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(fm(i.async, i.generator)), t & al || (i.id = this.type === m.name ? this.parseIdent() : null), this.parseFunctionParams(i), this.parseFunctionBody(i, e, !1, s), this.yieldPos = a, this.awaitPos = o, this.awaitIdentPos = l, this.finishNode(i, t & al ? "FunctionDeclaration" : "FunctionExpression");
 };
@@ -44886,7 +44886,7 @@ Z.parseExportDefaultDeclaration = function() {
   var i;
   if (this.type === m._function || (i = this.isAsyncFunction())) {
     var t = this.startNode();
-    return this.next(), i && this.next(), this.parseFunction(t, al | xx, !1, i);
+    return this.next(), i && this.next(), this.parseFunction(t, al | vv, !1, i);
   } else if (this.type === m._class) {
     var e = this.startNode();
     return this.parseClass(e, "nullableID");
@@ -45117,7 +45117,7 @@ Pr.checkLValSimple = function(i, t, e) {
   var r = t !== du;
   switch (i.type) {
     case "Identifier":
-      this.strict && this.reservedWordsStrictBind.test(i.name) && this.raiseRecoverable(i.start, (r ? "Binding " : "Assigning to ") + i.name + " in strict mode"), r && (t === As && i.name === "let" && this.raiseRecoverable(i.start, "let is disallowed as a lexically bound name"), e && (Ko(e, i.name) && this.raiseRecoverable(i.start, "Argument name clash"), e[i.name] = !0), t !== vx && this.declareName(i.name, t, i.start));
+      this.strict && this.reservedWordsStrictBind.test(i.name) && this.raiseRecoverable(i.start, (r ? "Binding " : "Assigning to ") + i.name + " in strict mode"), r && (t === As && i.name === "let" && this.raiseRecoverable(i.start, "let is disallowed as a lexically bound name"), e && (Ko(e, i.name) && this.raiseRecoverable(i.start, "Argument name clash"), e[i.name] = !0), t !== xv && this.declareName(i.name, t, i.start));
       break;
     case "ChainExpression":
       this.raiseRecoverable(i.start, "Optional chaining cannot appear in left-hand side");
@@ -45346,7 +45346,7 @@ ne.parseMaybeUnary = function(i, t, e, r) {
     o = this.parseAwait(r), t = !0;
   else if (this.type.prefix) {
     var l = this.startNode(), c = this.type === m.incDec;
-    l.operator = this.value, l.prefix = !0, this.next(), l.argument = this.parseMaybeUnary(null, !0, c, r), this.checkExpressionErrors(i, !0), c ? this.checkLValSimple(l.argument) : this.strict && l.operator === "delete" && Tx(l.argument) ? this.raiseRecoverable(l.start, "Deleting local variable in strict mode") : l.operator === "delete" && W_(l.argument) ? this.raiseRecoverable(l.start, "Private fields can not be deleted") : t = !0, o = this.finishNode(l, c ? "UpdateExpression" : "UnaryExpression");
+    l.operator = this.value, l.prefix = !0, this.next(), l.argument = this.parseMaybeUnary(null, !0, c, r), this.checkExpressionErrors(i, !0), c ? this.checkLValSimple(l.argument) : this.strict && l.operator === "delete" && Tv(l.argument) ? this.raiseRecoverable(l.start, "Deleting local variable in strict mode") : l.operator === "delete" && W_(l.argument) ? this.raiseRecoverable(l.start, "Private fields can not be deleted") : t = !0, o = this.finishNode(l, c ? "UpdateExpression" : "UnaryExpression");
   } else if (!t && this.type === m.privateId)
     (r || this.privateNameStack.length === 0) && this.options.checkPrivateFields && this.unexpected(), o = this.parsePrivateIdent(), this.type !== m._in && this.unexpected();
   else {
@@ -45365,8 +45365,8 @@ ne.parseMaybeUnary = function(i, t, e, r) {
   else
     return o;
 };
-function Tx(i) {
-  return i.type === "Identifier" || i.type === "ParenthesizedExpression" && Tx(i.expression);
+function Tv(i) {
+  return i.type === "Identifier" || i.type === "ParenthesizedExpression" && Tv(i.expression);
 }
 function W_(i) {
   return i.type === "MemberExpression" && i.property.type === "PrivateIdentifier" || i.type === "ChainExpression" && W_(i.expression) || i.type === "ParenthesizedExpression" && W_(i.expression);
@@ -45405,12 +45405,12 @@ ne.parseSubscript = function(i, t, e, r, s, a, o) {
     var d = this.startNodeAt(t, e);
     d.object = i, h ? (d.property = this.parseExpression(), this.expect(m.bracketR)) : this.type === m.privateId && i.type !== "Super" ? d.property = this.parsePrivateIdent() : d.property = this.parseIdent(this.options.allowReserved !== "never"), d.computed = !!h, l && (d.optional = c), i = this.finishNode(d, "MemberExpression");
   } else if (!r && this.eat(m.parenL)) {
-    var _ = new _f(), b = this.yieldPos, x = this.awaitPos, g = this.awaitIdentPos;
+    var _ = new _f(), b = this.yieldPos, v = this.awaitPos, g = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
     var T = this.parseExprList(m.parenR, this.options.ecmaVersion >= 8, !1, _);
     if (s && !c && this.shouldParseAsyncArrow())
-      return this.checkPatternErrors(_, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = b, this.awaitPos = x, this.awaitIdentPos = g, this.parseSubscriptAsyncArrow(t, e, T, o);
-    this.checkExpressionErrors(_, !0), this.yieldPos = b || this.yieldPos, this.awaitPos = x || this.awaitPos, this.awaitIdentPos = g || this.awaitIdentPos;
+      return this.checkPatternErrors(_, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = b, this.awaitPos = v, this.awaitIdentPos = g, this.parseSubscriptAsyncArrow(t, e, T, o);
+    this.checkExpressionErrors(_, !0), this.yieldPos = b || this.yieldPos, this.awaitPos = v || this.awaitPos, this.awaitIdentPos = g || this.awaitIdentPos;
     var k = this.startNodeAt(t, e);
     k.callee = i, k.arguments = T, l && (k.optional = c), i = this.finishNode(k, "CallExpression");
   } else if (this.type === m.backQuote) {
@@ -45513,7 +45513,7 @@ ne.parseParenAndDistinguishExpression = function(i, t) {
   var e = this.start, r = this.startLoc, s, a = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var o = this.start, l = this.startLoc, c = [], h = !0, d = !1, _ = new _f(), b = this.yieldPos, x = this.awaitPos, g;
+    var o = this.start, l = this.startLoc, c = [], h = !0, d = !1, _ = new _f(), b = this.yieldPos, v = this.awaitPos, g;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== m.parenR; )
       if (h ? h = !1 : this.expect(m.comma), a && this.afterTrailingComma(m.parenR, !0)) {
         d = !0;
@@ -45528,8 +45528,8 @@ ne.parseParenAndDistinguishExpression = function(i, t) {
         c.push(this.parseMaybeAssign(!1, _, this.parseParenItem));
     var T = this.lastTokEnd, k = this.lastTokEndLoc;
     if (this.expect(m.parenR), i && this.shouldParseArrow(c) && this.eat(m.arrow))
-      return this.checkPatternErrors(_, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = b, this.awaitPos = x, this.parseParenArrowList(e, r, c, t);
-    (!c.length || d) && this.unexpected(this.lastTokStart), g && this.unexpected(g), this.checkExpressionErrors(_, !0), this.yieldPos = b || this.yieldPos, this.awaitPos = x || this.awaitPos, c.length > 1 ? (s = this.startNodeAt(o, l), s.expressions = c, this.finishNodeAt(s, "SequenceExpression", T, k)) : s = c[0];
+      return this.checkPatternErrors(_, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = b, this.awaitPos = v, this.parseParenArrowList(e, r, c, t);
+    (!c.length || d) && this.unexpected(this.lastTokStart), g && this.unexpected(g), this.checkExpressionErrors(_, !0), this.yieldPos = b || this.yieldPos, this.awaitPos = v || this.awaitPos, c.length > 1 ? (s = this.startNodeAt(o, l), s.expressions = c, this.finishNodeAt(s, "SequenceExpression", T, k)) : s = c[0];
   } else
     s = this.parseParenExpression();
   if (this.options.preserveParens) {
@@ -45629,7 +45629,7 @@ ne.initFunction = function(i) {
 };
 ne.parseMethod = function(i, t, e) {
   var r = this.startNode(), s = this.yieldPos, a = this.awaitPos, o = this.awaitIdentPos;
-  return this.initFunction(r), this.options.ecmaVersion >= 6 && (r.generator = i), this.options.ecmaVersion >= 8 && (r.async = !!t), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(fm(t, r.generator) | ff | (e ? yx : 0)), this.expect(m.parenL), r.params = this.parseBindingList(m.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(r, !1, !0, !1), this.yieldPos = s, this.awaitPos = a, this.awaitIdentPos = o, this.finishNode(r, "FunctionExpression");
+  return this.initFunction(r), this.options.ecmaVersion >= 6 && (r.generator = i), this.options.ecmaVersion >= 8 && (r.async = !!t), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(fm(t, r.generator) | ff | (e ? yv : 0)), this.expect(m.parenL), r.params = this.parseBindingList(m.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(r, !1, !0, !1), this.yieldPos = s, this.awaitPos = a, this.awaitIdentPos = o, this.finishNode(r, "FunctionExpression");
 };
 ne.parseArrowExpression = function(i, t, e, r) {
   var s = this.yieldPos, a = this.awaitPos, o = this.awaitIdentPos;
@@ -45643,7 +45643,7 @@ ne.parseFunctionBody = function(i, t, e, r) {
     var l = this.options.ecmaVersion >= 7 && !this.isSimpleParamList(i.params);
     (!a || l) && (o = this.strictDirective(this.end), o && l && this.raiseRecoverable(i.start, "Illegal 'use strict' directive in function with non-simple parameter list"));
     var c = this.labels;
-    this.labels = [], o && (this.strict = !0), this.checkParams(i, !a && !o && !t && !e && this.isSimpleParamList(i.params)), this.strict && i.id && this.checkLValSimple(i.id, vx), i.body = this.parseBlock(!1, void 0, o && !a), i.expression = !1, this.adaptDirectivePrologue(i.body.body), this.labels = c;
+    this.labels = [], o && (this.strict = !0), this.checkParams(i, !a && !o && !t && !e && this.isSimpleParamList(i.params)), this.strict && i.id && this.checkLValSimple(i.id, xv), i.body = this.parseBlock(!1, void 0, o && !a), i.expression = !1, this.adaptDirectivePrologue(i.body.body), this.labels = c;
   }
   this.exitScope();
 };
@@ -45703,7 +45703,7 @@ ne.parseAwait = function(i) {
 };
 var fu = ot.prototype;
 fu.raise = function(i, t) {
-  var e = wx(this.input, i);
+  var e = wv(this.input, i);
   t += " (" + e.line + ":" + e.column + ")", this.sourceFile && (t += " in " + this.sourceFile);
   var r = new SyntaxError(t);
   throw r.pos = i, r.loc = e, r.raisedAt = this.pos, r;
@@ -45730,16 +45730,16 @@ Vn.declareName = function(i, t, e) {
   if (t === As) {
     var s = this.currentScope();
     r = s.lexical.indexOf(i) > -1 || s.functions.indexOf(i) > -1 || s.var.indexOf(i) > -1, s.lexical.push(i), this.inModule && s.flags & Na && delete this.undefinedExports[i];
-  } else if (t === Sx) {
+  } else if (t === Sv) {
     var a = this.currentScope();
     a.lexical.push(i);
-  } else if (t === Bx) {
+  } else if (t === Bv) {
     var o = this.currentScope();
     this.treatFunctionsAsVar ? r = o.lexical.indexOf(i) > -1 : r = o.lexical.indexOf(i) > -1 || o.var.indexOf(i) > -1, o.functions.push(i);
   } else
     for (var l = this.scopeStack.length - 1; l >= 0; --l) {
       var c = this.scopeStack[l];
-      if (c.lexical.indexOf(i) > -1 && !(c.flags & gx && c.lexical[0] === i) || !this.treatFunctionsAsVarInScope(c) && c.functions.indexOf(i) > -1) {
+      if (c.lexical.indexOf(i) > -1 && !(c.flags & gv && c.lexical[0] === i) || !this.treatFunctionsAsVarInScope(c) && c.functions.indexOf(i) > -1) {
         r = !0;
         break;
       }
@@ -45777,14 +45777,14 @@ yc.startNode = function() {
 yc.startNodeAt = function(i, t) {
   return new mf(this, i, t);
 };
-function Dx(i, t, e, r) {
+function Dv(i, t, e, r) {
   return i.type = t, i.end = e, this.options.locations && (i.loc.end = r), this.options.ranges && (i.range[1] = e), i;
 }
 yc.finishNode = function(i, t) {
-  return Dx.call(this, i, t, this.lastTokEnd, this.lastTokEndLoc);
+  return Dv.call(this, i, t, this.lastTokEnd, this.lastTokEndLoc);
 };
 yc.finishNodeAt = function(i, t, e, r) {
-  return Dx.call(this, i, t, e, r);
+  return Dv.call(this, i, t, e, r);
 };
 yc.copyNode = function(i) {
   var t = new mf(this, i.start, this.startLoc);
@@ -45792,12 +45792,12 @@ yc.copyNode = function(i) {
     t[e] = i[e];
   return t;
 };
-var b6 = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", Ax = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", Nx = Ax + " Extended_Pictographic", Px = Nx, Rx = Px + " EBase EComp EMod EPres ExtPict", Ex = Rx, g6 = Ex, y6 = {
-  9: Ax,
-  10: Nx,
-  11: Px,
-  12: Rx,
-  13: Ex,
+var b6 = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", Av = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", Nv = Av + " Extended_Pictographic", Pv = Nv, Rv = Pv + " EBase EComp EMod EPres ExtPict", Ev = Rv, g6 = Ev, y6 = {
+  9: Av,
+  10: Nv,
+  11: Pv,
+  12: Rv,
+  13: Ev,
   14: g6
 }, C6 = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", B6 = {
   9: "",
@@ -45806,28 +45806,28 @@ var b6 = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: "",
   13: "",
   14: C6
-}, FS = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", kx = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Lx = kx + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Ox = Lx + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", jx = Ox + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Ix = jx + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", S6 = Ix + " " + b6, v6 = {
-  9: kx,
-  10: Lx,
-  11: Ox,
-  12: jx,
-  13: Ix,
+}, FS = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", kv = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Lv = kv + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Ov = Lv + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", jv = Ov + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Iv = jv + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", S6 = Iv + " " + b6, x6 = {
+  9: kv,
+  10: Lv,
+  11: Ov,
+  12: jv,
+  13: Iv,
   14: S6
-}, Vx = {};
-function x6(i) {
-  var t = Vx[i] = {
+}, Vv = {};
+function v6(i) {
+  var t = Vv[i] = {
     binary: Hs(y6[i] + " " + FS),
     binaryOfStrings: Hs(B6[i]),
     nonBinary: {
       General_Category: Hs(FS),
-      Script: Hs(v6[i])
+      Script: Hs(x6[i])
     }
   };
   t.nonBinary.Script_Extensions = t.nonBinary.Script, t.nonBinary.gc = t.nonBinary.General_Category, t.nonBinary.sc = t.nonBinary.Script, t.nonBinary.scx = t.nonBinary.Script_Extensions;
 }
-for (var xf = 0, GS = [9, 10, 11, 12, 13, 14]; xf < GS.length; xf += 1) {
-  var T6 = GS[xf];
-  x6(T6);
+for (var vf = 0, GS = [9, 10, 11, 12, 13, 14]; vf < GS.length; vf += 1) {
+  var T6 = GS[vf];
+  v6(T6);
 }
 var Y = ot.prototype, pu = function(t, e) {
   this.parent = t, this.base = e || this;
@@ -45843,7 +45843,7 @@ pu.prototype.sibling = function() {
   return new pu(this.parent, this.base);
 };
 var Hi = function(t) {
-  this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = Vx[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
+  this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = Vv[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
 };
 Hi.prototype.reset = function(t, e, r) {
   var s = r.indexOf("v") !== -1, a = r.indexOf("u") !== -1;
@@ -46109,7 +46109,7 @@ Y.regexp_eatCapturingGroup = function(i) {
 };
 Y.regexp_eatModifiers = function(i) {
   for (var t = "", e = 0; (e = i.current()) !== -1 && A6(e); )
-    t += xs(e), i.advance();
+    t += vs(e), i.advance();
   return t;
 };
 function A6(i) {
@@ -46126,13 +46126,13 @@ Y.regexp_eatInvalidBracedQuantifier = function(i) {
 };
 Y.regexp_eatSyntaxCharacter = function(i) {
   var t = i.current();
-  return Mx(t) ? (i.lastIntValue = t, i.advance(), !0) : !1;
+  return Mv(t) ? (i.lastIntValue = t, i.advance(), !0) : !1;
 };
-function Mx(i) {
+function Mv(i) {
   return i === 36 || i >= 40 && i <= 43 || i === 46 || i === 63 || i >= 91 && i <= 94 || i >= 123 && i <= 125;
 }
 Y.regexp_eatPatternCharacters = function(i) {
-  for (var t = i.pos, e = 0; (e = i.current()) !== -1 && !Mx(e); )
+  for (var t = i.pos, e = 0; (e = i.current()) !== -1 && !Mv(e); )
     i.advance();
   return i.pos !== t;
 };
@@ -46174,8 +46174,8 @@ Y.regexp_eatGroupName = function(i) {
 };
 Y.regexp_eatRegExpIdentifierName = function(i) {
   if (i.lastStringValue = "", this.regexp_eatRegExpIdentifierStart(i)) {
-    for (i.lastStringValue += xs(i.lastIntValue); this.regexp_eatRegExpIdentifierPart(i); )
-      i.lastStringValue += xs(i.lastIntValue);
+    for (i.lastStringValue += vs(i.lastIntValue); this.regexp_eatRegExpIdentifierPart(i); )
+      i.lastStringValue += vs(i.lastIntValue);
     return !0;
   }
   return !1;
@@ -46244,9 +46244,9 @@ Y.regexp_eatControlEscape = function(i) {
 };
 Y.regexp_eatControlLetter = function(i) {
   var t = i.current();
-  return Hx(t) ? (i.lastIntValue = t % 32, i.advance(), !0) : !1;
+  return Hv(t) ? (i.lastIntValue = t % 32, i.advance(), !0) : !1;
 };
-function Hx(i) {
+function Hv(i) {
   return i >= 65 && i <= 90 || i >= 97 && i <= 122;
 }
 Y.regexp_eatRegExpUnicodeEscapeSequence = function(i, t) {
@@ -46310,7 +46310,7 @@ Y.regexp_eatDecimalEscape = function(i) {
   }
   return !1;
 };
-var $x = 0, Ts = 1, Br = 2;
+var $v = 0, Ts = 1, Br = 2;
 Y.regexp_eatCharacterClassEscape = function(i) {
   var t = i.current();
   if (E6(t))
@@ -46329,7 +46329,7 @@ Y.regexp_eatCharacterClassEscape = function(i) {
       return e && r === Br && i.raise("Invalid property name"), r;
     i.raise("Invalid property name");
   }
-  return $x;
+  return $v;
 };
 function E6(i) {
   return i === 100 || i === 68 || i === 115 || i === 83 || i === 119 || i === 87;
@@ -46350,7 +46350,7 @@ Y.regexp_eatUnicodePropertyValueExpression = function(i) {
     var s = i.lastStringValue;
     return this.regexp_validateUnicodePropertyNameOrValue(i, s);
   }
-  return $x;
+  return $v;
 };
 Y.regexp_validateUnicodePropertyNameAndValue = function(i, t, e) {
   Ko(i.unicodeProperties.nonBinary, t) || i.raise("Invalid property name"), i.unicodeProperties.nonBinary[t].test(e) || i.raise("Invalid property value");
@@ -46364,21 +46364,21 @@ Y.regexp_validateUnicodePropertyNameOrValue = function(i, t) {
 };
 Y.regexp_eatUnicodePropertyName = function(i) {
   var t = 0;
-  for (i.lastStringValue = ""; Ux(t = i.current()); )
-    i.lastStringValue += xs(t), i.advance();
+  for (i.lastStringValue = ""; Uv(t = i.current()); )
+    i.lastStringValue += vs(t), i.advance();
   return i.lastStringValue !== "";
 };
-function Ux(i) {
-  return Hx(i) || i === 95;
+function Uv(i) {
+  return Hv(i) || i === 95;
 }
 Y.regexp_eatUnicodePropertyValue = function(i) {
   var t = 0;
   for (i.lastStringValue = ""; k6(t = i.current()); )
-    i.lastStringValue += xs(t), i.advance();
+    i.lastStringValue += vs(t), i.advance();
   return i.lastStringValue !== "";
 };
 function k6(i) {
-  return Ux(i) || wf(i);
+  return Uv(i) || wf(i);
 }
 Y.regexp_eatLoneUnicodePropertyNameOrValue = function(i) {
   return this.regexp_eatUnicodePropertyValue(i);
@@ -46424,7 +46424,7 @@ Y.regexp_eatClassAtom = function(i) {
       return !0;
     if (i.switchU) {
       var e = i.current();
-      (e === 99 || Fx(e)) && i.raise("Invalid class escape"), i.raise("Invalid escape");
+      (e === 99 || Fv(e)) && i.raise("Invalid class escape"), i.raise("Invalid escape");
     }
     i.pos = t;
   }
@@ -46619,14 +46619,14 @@ function wf(i) {
 }
 Y.regexp_eatHexDigits = function(i) {
   var t = i.pos, e = 0;
-  for (i.lastIntValue = 0; zx(e = i.current()); )
-    i.lastIntValue = 16 * i.lastIntValue + Wx(e), i.advance();
+  for (i.lastIntValue = 0; zv(e = i.current()); )
+    i.lastIntValue = 16 * i.lastIntValue + Wv(e), i.advance();
   return i.pos !== t;
 };
-function zx(i) {
+function zv(i) {
   return i >= 48 && i <= 57 || i >= 65 && i <= 70 || i >= 97 && i <= 102;
 }
-function Wx(i) {
+function Wv(i) {
   return i >= 65 && i <= 70 ? 10 + (i - 65) : i >= 97 && i <= 102 ? 10 + (i - 97) : i - 48;
 }
 Y.regexp_eatLegacyOctalEscapeSequence = function(i) {
@@ -46643,9 +46643,9 @@ Y.regexp_eatLegacyOctalEscapeSequence = function(i) {
 };
 Y.regexp_eatOctalDigit = function(i) {
   var t = i.current();
-  return Fx(t) ? (i.lastIntValue = t - 48, i.advance(), !0) : (i.lastIntValue = 0, !1);
+  return Fv(t) ? (i.lastIntValue = t - 48, i.advance(), !0) : (i.lastIntValue = 0, !1);
 };
-function Fx(i) {
+function Fv(i) {
   return i >= 48 && i <= 55;
 }
 Y.regexp_eatFixedHexDigits = function(i, t) {
@@ -46653,9 +46653,9 @@ Y.regexp_eatFixedHexDigits = function(i, t) {
   i.lastIntValue = 0;
   for (var r = 0; r < t; ++r) {
     var s = i.current();
-    if (!zx(s))
+    if (!zv(s))
       return i.pos = e, !1;
-    i.lastIntValue = 16 * i.lastIntValue + Wx(s), i.advance();
+    i.lastIntValue = 16 * i.lastIntValue + Wv(s), i.advance();
   }
   return !0;
 };
@@ -46704,7 +46704,7 @@ fe.fullCharCodeAtPos = function() {
 fe.skipBlockComment = function() {
   var i = this.options.onComment && this.curPosition(), t = this.pos, e = this.input.indexOf("*/", this.pos += 2);
   if (e === -1 && this.raise(this.pos - 2, "Unterminated comment"), this.pos = e + 2, this.options.locations)
-    for (var r = void 0, s = t; (r = px(this.input, s, this.pos)) > -1; )
+    for (var r = void 0, s = t; (r = pv(this.input, s, this.pos)) > -1; )
       ++this.curLine, s = this.lineStart = r;
   this.options.onComment && this.options.onComment(
     !0,
@@ -46755,7 +46755,7 @@ fe.skipSpace = function() {
         }
         break;
       default:
-        if (i > 8 && i < 14 || i >= 5760 && _x.test(String.fromCharCode(i)))
+        if (i > 8 && i < 14 || i >= 5760 && _v.test(String.fromCharCode(i)))
           ++this.pos;
         else
           break e;
@@ -46834,7 +46834,7 @@ fe.readToken_numberSign = function() {
   var i = this.options.ecmaVersion, t = 35;
   if (i >= 13 && (++this.pos, t = this.fullCharCodeAtPos(), Mi(t, !0) || t === 92))
     return this.finishToken(m.privateId, this.readWord1());
-  this.raise(this.pos, "Unexpected character '" + xs(t) + "'");
+  this.raise(this.pos, "Unexpected character '" + vs(t) + "'");
 };
 fe.getTokenFromCode = function(i) {
   switch (i) {
@@ -46921,7 +46921,7 @@ fe.getTokenFromCode = function(i) {
     case 35:
       return this.readToken_numberSign();
   }
-  this.raise(this.pos, "Unexpected character '" + xs(i) + "'");
+  this.raise(this.pos, "Unexpected character '" + vs(i) + "'");
 };
 fe.finishOp = function(i, t) {
   var e = this.input.slice(this.pos, this.pos + t);
@@ -46973,14 +46973,14 @@ fe.readInt = function(i, t, e) {
 function I6(i, t) {
   return t ? parseInt(i, 8) : parseFloat(i.replace(/_/g, ""));
 }
-function Gx(i) {
+function Gv(i) {
   return typeof BigInt != "function" ? null : BigInt(i.replace(/_/g, ""));
 }
 fe.readRadixNumber = function(i) {
   var t = this.pos;
   this.pos += 2;
   var e = this.readInt(i);
-  return e == null && this.raise(this.start + 2, "Expected number in radix " + i), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (e = Gx(this.input.slice(t, this.pos)), ++this.pos) : Mi(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(m.num, e);
+  return e == null && this.raise(this.start + 2, "Expected number in radix " + i), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (e = Gv(this.input.slice(t, this.pos)), ++this.pos) : Mi(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(m.num, e);
 };
 fe.readNumber = function(i) {
   var t = this.pos;
@@ -46989,7 +46989,7 @@ fe.readNumber = function(i) {
   e && this.strict && this.raise(t, "Invalid number");
   var r = this.input.charCodeAt(this.pos);
   if (!e && !i && this.options.ecmaVersion >= 11 && r === 110) {
-    var s = Gx(this.input.slice(t, this.pos));
+    var s = Gv(this.input.slice(t, this.pos));
     return ++this.pos, Mi(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(m.num, s);
   }
   e && /[89]/.test(this.input.slice(t, this.pos)) && (e = !1), r === 46 && !e && (++this.pos, this.readInt(10), r = this.input.charCodeAt(this.pos)), (r === 69 || r === 101) && !e && (r = this.input.charCodeAt(++this.pos), (r === 43 || r === 45) && ++this.pos, this.readInt(10) === null && this.raise(t, "Invalid number")), Mi(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number");
@@ -47016,13 +47016,13 @@ fe.readString = function(i) {
   }
   return t += this.input.slice(e, this.pos++), this.finishToken(m.string, t);
 };
-var Xx = {};
+var Xv = {};
 fe.tryReadTemplateToken = function() {
   this.inTemplateElement = !0;
   try {
     this.readTmplToken();
   } catch (i) {
-    if (i === Xx)
+    if (i === Xv)
       this.readInvalidTemplateToken();
     else
       throw i;
@@ -47031,7 +47031,7 @@ fe.tryReadTemplateToken = function() {
 };
 fe.invalidStringToken = function(i, t) {
   if (this.inTemplateElement && this.options.ecmaVersion >= 9)
-    throw Xx;
+    throw Xv;
   this.raise(i, t);
 };
 fe.readTmplToken = function() {
@@ -47098,7 +47098,7 @@ fe.readEscapedChar = function(i) {
       return String.fromCharCode(this.readHexChar(2));
     // 'x'
     case 117:
-      return xs(this.readCodePoint());
+      return vs(this.readCodePoint());
     // 'u'
     case 116:
       return "	";
@@ -47155,7 +47155,7 @@ fe.readWord1 = function() {
       var a = this.pos;
       this.input.charCodeAt(++this.pos) !== 117 && this.invalidStringToken(this.pos, "Expecting Unicode escape sequence \\uXXXX"), ++this.pos;
       var o = this.readCodePoint();
-      (t ? Mi : jn)(o, r) || this.invalidStringToken(a, "Invalid Unicode escape"), i += xs(o), e = this.pos;
+      (t ? Mi : jn)(o, r) || this.invalidStringToken(a, "Invalid Unicode escape"), i += vs(o), e = this.pos;
     } else
       break;
     t = !1;
@@ -47173,7 +47173,7 @@ ot.acorn = {
   defaultOptions: U_,
   Position: mc,
   SourceLocation: uf,
-  getLineInfo: wx,
+  getLineInfo: wv,
   Node: mf,
   TokenType: Ce,
   tokTypes: m,
@@ -47186,7 +47186,7 @@ ot.acorn = {
   isNewLine: qo,
   lineBreak: Kt,
   lineBreakG: a6,
-  nonASCIIwhitespace: _x
+  nonASCIIwhitespace: _v
 };
 function M6(i, t) {
   const e = i[0]?.[0], r = t ? i : i.slice(0, -1);
@@ -47259,34 +47259,36 @@ jscad primitives booleans transforms extrusions hulls geometries geom2 geom3 cub
   const t = i.map((l) => l[0]), e = i.map((l) => l[1]), r = Math.max(...t) - Math.min(...t), s = Math.max(...e) - Math.min(...e), a = (Math.max(...e) + Math.min(...e)) / 2, o = Math.max(r, s);
   return i.map(([l, c]) => [l / o, (c - a) / o]).reverse();
 })();
-const he = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => he(i, "point", { optional: !0, plane: "XY" }), XS = [
-  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [he("command", "command", { optional: !0 })], headless: !0 },
+const ce = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => ce(i, "point", { optional: !0, plane: "XY" }), XS = [
+  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [ce("command", "command", { optional: !0 })], headless: !0 },
   { name: "list", aliases: ["ls"], description: "List objects and sketches", usage: "list", category: "terminal", editsModel: !1, arguments: [], headless: !0 },
   { name: "clear", aliases: ["cls"], description: "Clear the terminal transcript", usage: "clear", category: "terminal", editsModel: !1, arguments: [] },
-  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [he("name", "alias", { optional: !0 }), he("command", "command", { optional: !0 })] },
-  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [he("name", "alias")] },
+  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [ce("name", "alias", { optional: !0 }), ce("command", "command", { optional: !0 })] },
+  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [ce("name", "alias")] },
   { name: "repeat", aliases: [], description: "Repeat the last command or script", usage: "repeat", category: "terminal", editsModel: !0, arguments: [] },
-  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [he("size", "vector", { min: 0.01, max: 1e5 }), he("center", "point", { optional: !0 })], headless: !0 },
-  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [he("radius", "number", { min: 0.01, max: 5e4 }), he("center", "point", { optional: !0 })], headless: !0 },
-  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [he("radius", "number", { min: 0.01, max: 5e4 }), he("height", "number", { min: 0.01, max: 1e5 }), he("center", "point", { optional: !0 })], headless: !0 },
+  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [ce("size", "vector", { min: 0.01, max: 1e5 }), ce("center", "point", { optional: !0 })], headless: !0 },
+  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [ce("radius", "number", { min: 0.01, max: 5e4 }), ce("center", "point", { optional: !0 })], headless: !0 },
+  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [ce("radius", "number", { min: 0.01, max: 5e4 }), ce("height", "number", { min: 0.01, max: 1e5 }), ce("center", "point", { optional: !0 })], headless: !0 },
   { name: "line", aliases: ["l"], description: "Draw an XY sketch line", usage: "line [start] [end]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("start"), optional: !1 }, { ...Qo("end"), optional: !1 }], headless: !0 },
   { name: "rectangle", aliases: ["rect"], description: "Draw an XY sketch rectangle", usage: "rectangle [corner] [opposite]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("corner"), optional: !1 }, { ...Qo("opposite"), optional: !1 }], headless: !0 },
-  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("center"), optional: !1 }, he("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [he("sketch", "sketch"), he("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [he("base", "point", { optional: !0 }), he("destination", "point")], headless: !0 },
-  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [he("degrees", "vector")], headless: !0 },
-  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [he("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
-  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("center"), optional: !1 }, ce("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [ce("sketch", "sketch"), ce("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [ce("base", "point", { optional: !0 }), ce("destination", "point")], headless: !0 },
+  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [ce("degrees", "vector")], headless: !0 },
+  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [ce("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
+  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [ce("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
   { name: "code", aliases: ["script"], description: "Open the persistent code workspace", usage: "code", category: "panel", editsModel: !1, arguments: [] },
-  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [he("record", "json")], headless: !0 },
-  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [he("format", "keyword", { optional: !0, values: ["step"] }), he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [he("mode", "keyword", { values: ["exact"] }), he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [he("radius", "number", { min: 0.01, max: 1e4 }), he("targets", "bodies", { optional: !0, repeated: !0 }), he("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [he("distance", "number", { min: 0.01, max: 1e4 }), he("targets", "bodies", { optional: !0, repeated: !0 }), he("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [he("thickness", "number", { min: 0.01, max: 1e4 }), he("targets", "bodies", { optional: !0, repeated: !0 }), he("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [he("mode", "keyword", { values: ["exact"] }), he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "upgrade-lofts", aliases: [], description: "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step", usage: 'upgrade-lofts [all|"name"|id ...]', category: "edit", editsModel: !0, arguments: [he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [he("action", "keyword", { optional: !0, values: ["export"] }), he("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
+  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [ce("record", "json")], headless: !0 },
+  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [ce("format", "keyword", { optional: !0, values: ["step"] }), ce("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "import", aliases: [], description: "Import a STEP file as exact bodies with the B-rep kernel", usage: "import step [file]", category: "exchange", editsModel: !0, arguments: [ce("format", "keyword", { values: ["step"] }), ce("file", "file", { optional: !0 })], headless: !0, kernel: "exact" },
+  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [ce("mode", "keyword", { values: ["exact"] }), ce("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "edges", aliases: [], description: "List the exact B-rep edges of bodies, numbered for fillet and chamfer", usage: 'edges ["name"|id ...]', category: "analysis", editsModel: !1, arguments: [ce("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>] | fillet <radius> "name"|id edges <number|reference> ...', category: "feature", editsModel: !0, arguments: [ce("radius", "number", { min: 0.01, max: 1e4 }), ce("targets", "bodies", { optional: !0, repeated: !0 }), ce("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>] | chamfer <distance> "name"|id edges <number|reference> ...', category: "feature", editsModel: !0, arguments: [ce("distance", "number", { min: 0.01, max: 1e4 }), ce("targets", "bodies", { optional: !0, repeated: !0 }), ce("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [ce("thickness", "number", { min: 0.01, max: 1e4 }), ce("targets", "bodies", { optional: !0, repeated: !0 }), ce("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [ce("mode", "keyword", { values: ["exact"] }), ce("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "upgrade-lofts", aliases: [], description: "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step", usage: 'upgrade-lofts [all|"name"|id ...]', category: "edit", editsModel: !0, arguments: [ce("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [ce("action", "keyword", { optional: !0, values: ["export"] }), ce("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
 ], F_ = [
   { command: "shapes", label: "Find a shape", alias: "shape browser primitives" },
   { command: "model-library", label: "Model library", alias: "parts catalog" },
@@ -47297,6 +47299,7 @@ const he = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => he(i, "po
   { command: "edit-mirror", label: "Edit mirror", requires: "canEditMirror" },
   { command: "pattern", label: "Pattern body", alias: "linear circular repeat bolt circle", requires: "canWrapBody" },
   { command: "edit-pattern", label: "Edit pattern", requires: "canEditPattern" },
+  { command: "import-step", label: "Import STEP as exact bodies", alias: "step stp B-rep exact import" },
   { command: "exact-feature", label: "Fillet, chamfer or shell", alias: "round bevel hollow exact B-rep", requires: "canWrapBody" },
   { command: "parameters", label: "Parameters", alias: "named dimensions formulas" },
   { command: "code", label: "Code an object", alias: "CAD Script" },
@@ -47335,10 +47338,10 @@ const he = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => he(i, "po
   { command: "properties", label: "Properties" },
   { command: "readout", label: "Show on-canvas parameters", alias: "transform values XYZ" },
   { command: "export", label: "Export geometry", alias: "STL 3MF", requires: "canExport" }
-], H6 = { undo: ["u"], redo: ["re"], delete: ["erase", "del"], duplicate: ["dup"], fit: ["zoom"], union: ["join"] }, $6 = { undo: "history", redo: "history", copy: "edit", cut: "edit", paste: "edit", duplicate: "edit", delete: "edit", drop: "transform", union: "boolean", subtract: "boolean", intersect: "boolean", "select-all": "selection", deselect: "selection", fit: "view", home: "view", top: "view", front: "view", right: "view", back: "view", left: "view", bottom: "view", projection: "view", workplane: "view" }, U6 = /* @__PURE__ */ new Set(["undo", "redo", "duplicate", "delete", "union", "subtract", "intersect", "select-all", "deselect"]), z6 = /* @__PURE__ */ new Set(["undo", "redo", "cut", "paste", "duplicate", "delete", "drop", "union", "subtract", "intersect"]), W6 = /* @__PURE__ */ new Set(["terminal", "code-workspace"]), Yx = (i) => {
+], H6 = { undo: ["u"], redo: ["re"], delete: ["erase", "del"], duplicate: ["dup"], fit: ["zoom"], union: ["join"] }, $6 = { undo: "history", redo: "history", copy: "edit", cut: "edit", paste: "edit", duplicate: "edit", delete: "edit", drop: "transform", union: "boolean", subtract: "boolean", intersect: "boolean", "select-all": "selection", deselect: "selection", fit: "view", home: "view", top: "view", front: "view", right: "view", back: "view", left: "view", bottom: "view", projection: "view", workplane: "view" }, U6 = /* @__PURE__ */ new Set(["undo", "redo", "duplicate", "delete", "union", "subtract", "intersect", "select-all", "deselect"]), z6 = /* @__PURE__ */ new Set(["undo", "redo", "cut", "paste", "duplicate", "delete", "drop", "union", "subtract", "intersect"]), W6 = /* @__PURE__ */ new Set(["terminal", "code-workspace"]), Yv = (i) => {
   Object.freeze(i);
   for (const t of Object.values(i))
-    t && typeof t == "object" && !Object.isFrozen(t) && Yx(t);
+    t && typeof t == "object" && !Object.isFrozen(t) && Yv(t);
   return i;
 }, YS = (i) => {
   const t = F_.findIndex((r) => r.command === i);
@@ -47347,7 +47350,7 @@ const he = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => he(i, "po
   const e = F_[t];
   return { label: e.label, order: t, ...e.alias ? { keywords: e.alias } : {}, ...e.requires ? { requires: e.requires } : {} };
 };
-Yx([
+Yv([
   ...XS.map(({ headless: i, ...t }) => {
     const e = YS(t.name);
     return { ...t, headless: !!i, terminal: !0, editorBridge: !1, ...e ? { palette: e } : {} };
@@ -47366,15 +47369,15 @@ function F6({ layers: i, entities: t }) {
   for (const { name: d, style: _ } of i) {
     const b = d === "0" ? a.get("0") : new Je(d);
     if (_ && (b.color = _.trueColor === void 0 ? new O(Math.abs(_.color ?? 7)) : O.fromTrueColor(_.trueColor), b.isOn = (_.color ?? 7) > 0, _.flags !== void 0 && (b.layerFlags = _.flags), _.plot !== void 0 && (b.plotFlag = _.plot), _.lineweight !== void 0 && (b.lineWeight = _.lineweight), _.linetype)) {
-      const x = _.linetype.name.toUpperCase();
-      let g = c.get(x);
+      const v = _.linetype.name.toUpperCase();
+      let g = c.get(v);
       if (!g) {
         g = new ie(_.linetype.name);
         for (const T of _.linetype.pattern) {
           const k = new Pc();
           k.length = T, g.addSegment(k);
         }
-        o.add(g), c.set(x, g);
+        o.add(g), c.set(v, g);
       }
       b.lineType = g;
     }
@@ -47387,11 +47390,11 @@ function F6({ layers: i, entities: t }) {
       g.center = new u(...d.center, 0), g.radius = d.radius, g.layer = _, s.entities.add(g);
       continue;
     }
-    const b = d.widths ? M6(d.widths, d.closed) : void 0, x = new lr(d.points.map(([g, T], k) => {
+    const b = d.widths ? M6(d.widths, d.closed) : void 0, v = new lr(d.points.map(([g, T], k) => {
       const E = new Tt(new P(g, T));
       return E.bulge = d.bulges?.[k] ?? 0, d.widths && !b && ([E.startWidth, E.endWidth] = d.widths[k]), E;
     }));
-    x.isClosed = d.closed, b && (x.constantWidth = b), x.layer = _, s.entities.add(x);
+    v.isClosed = d.closed, b && (v.constantWidth = b), v.layer = _, s.entities.add(v);
   }
   const h = V_.writeToBuffer(e, null, (d, _) => {
     if (_.notificationType === D.Error || _.notificationType === D.NotSupported || _.notificationType === D.NotImplemented)

@@ -2196,3 +2196,42 @@ served locally passed one-click Run, Stop, Reset, and repeat Run on
 both projects. Atlas also reused its worker after a gravity edit and
 reached 45.65 mm of lift and 14.98° of tilt. Sustained playback on the
 shared Mac measured 0.499× for Atlas and 0.665× for Scout.
+
+### Batch the CAD cable harness
+
+CrispCAD submits the visible harness as one indexed mesh. Vertex
+colors preserve the conductor colors. Cables with missing attachment
+bodies are excluded until their anchors return. Moving cables update
+the affected vertex buffers.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/afb2984bbef61009913fcaeba9f53283ff7a65cb)
+
+In a 100-frame Chrome replay, harness draws went from 33 to one for
+Atlas and from 21 to one for Scout. Total viewport draw calls fell
+from 10,400 to 7,200 for Atlas and from 8,574 to 6,574 for Scout. Both
+comparison orders matched every body transform and the sampled
+conductor positions, normals, and colors. CPU time for frame
+submission across 100 frames, using three replays per version:
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 288.7 → 228.5 ms | 271.4 → 222.6 ms |
+| Scout | 227.5 → 219.1 ms | 261.8 → 221.4 ms |
+
+Both robots also drew 100 frames in live Chrome runs driven by 600
+circuit and mechanical ticks. The harnesses and chassis moved, and
+parking restored the authored scene. Sustained 1× playback remains open.
+
+The TypeScript build and all four wiring tests passed. The
+attachment-body test passed on an isolated retry after its first run
+exceeded the deadline. The refreshed CrispCAD source also passed 31
+exact STEP import and edge-reference tests.
+
+Brickwright pins SDK `afb2984`. Vite wrote the bundle before the
+process was killed during its gzip size report. The packager then
+validated the emitted SDK, all 842 files matched their manifest
+hashes, and all nine pin tests passed. Chrome loaded the packaged
+exact kernel and measured the test box at 6,000 mm³ and 2,200 mm².
+With the packaged bw.11 SIMD engine in the existing Brickwright
+browser host, Atlas and Scout passed one-click Run, Stop, Reset,
+and repeat Run. Atlas also reused its worker after a gravity edit.
+Sustained playback measured 0.570× for Atlas and 0.848× for Scout.
