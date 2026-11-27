@@ -2,6 +2,7 @@ import {makeT} from '../bw-i18n.js';
 import {activateConfig} from './activate.js';
 import {fromMediaManifest} from './importers.js';
 import {validateMachineConfig} from './machine-config.js';
+import {PICOBB_FLASH} from './pico-basic-flash.js';
 
 const mediaInfo = makeT({
     en: {sieve: 'CP/M Sieve', forthCpm: 'zForth on CP/M',
@@ -46,7 +47,7 @@ export const libraryMedia = [
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
         revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf',
-        flashHash: 'f0acd59bfd93182c2dcde4af65d36f3d20cf2e8eecc6c6ec760c1ac9654264d8'},
+        flashHash: PICOBB_FLASH.sha256},
     {id: 'piccolobasic-rp2040', title: 'PiccoloBASIC (UART)', machine: 'rp2040js', license: 'BSD-3-Clause',
         licenseFile: 'LICENSE', revision: 'a5a7e3c24658ef98675835faa3cc31222787814f'},
     {id: 'stefan-basic-rp2040', title: 'Stefan’s BASIC (UART)', machine: 'rp2040js',

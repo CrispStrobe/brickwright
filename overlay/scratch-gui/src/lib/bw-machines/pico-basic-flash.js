@@ -3,6 +3,13 @@ const sector = 4096;
 const maxSavedBytes = 512 * 1024;
 const projectStorage = new WeakMap();
 
+// The reviewed PicoBB UF2 includes an empty LittleFS image after the executable.
+export const PICOBB_FLASH = Object.freeze({
+    sha256: 'f0acd59bfd93182c2dcde4af65d36f3d20cf2e8eecc6c6ec760c1ac9654264d8',
+    offset: 0x50000,
+    length: 0x20000
+});
+
 export function picoFlashStorageFor (partition, sha256) {
     if (partition == null) return null;
     const {offset, length} = partition;
@@ -14,6 +21,8 @@ export function picoFlashStorageFor (partition, sha256) {
 }
 
 const keyFor = ({sha256, offset, length}) => `${sha256}:${offset}:${length}`;
+const picoBBKey = keyFor(PICOBB_FLASH);
+const sameBytes = (bytes, baseline) => bytes.every((byte, i) => byte === baseline[i]);
 
 // A re-run within a project loads a fresh CPU and the reviewed firmware.
 // Copy only its declared filesystem partition, never the executable flash.
@@ -21,7 +30,10 @@ export function mountPicoFlashStorage (project, flash, imageLength, partition, o
     if (!project || !partition) return null;
     const layout = picoFlashStorageFor(partition, partition.sha256);
     const {offset, length} = layout;
-    if (offset < imageLength || offset + length > flash.length) {
+    const key = keyFor(layout);
+    const end = offset + length;
+    const seeded = key === picoBBKey && imageLength === end;
+    if ((!seeded && offset < imageLength) || end > flash.length) {
         throw new Error('Pico flash storage overlaps the firmware or lies outside flash.');
     }
     let entries = projectStorage.get(project);
@@ -29,17 +41,17 @@ export function mountPicoFlashStorage (project, flash, imageLength, partition, o
         entries = new Map();
         projectStorage.set(project, entries);
     }
-    const key = keyFor(layout);
-    const bytes = flash.subarray(offset, offset + length);
+    const bytes = flash.subarray(offset, end);
+    const initial = bytes.slice();
     const previous = entries.get(key);
     if (previous) bytes.set(previous.bytes);
-    const entry = {layout, bytes};
+    const entry = {layout, bytes, initial};
     entries.set(key, entry);
-    let last = bytes.slice();
+    let last = previous ? bytes.slice() : initial;
     let nextCheck = 0;
     const check = () => {
         if (projectStorage.get(project) !== entries || entries.get(key) !== entry) return;
-        if (bytes.some((byte, index) => byte !== last[index])) {
+        if (!sameBytes(bytes, last)) {
             last = bytes.slice();
             onChange?.();
         }
@@ -61,8 +73,8 @@ export function mountPicoFlashStorage (project, flash, imageLength, partition, o
 export function capturePicoFlashProject (project) {
     const partitions = [];
     let total = 0;
-    for (const {layout, bytes} of projectStorage.get(project)?.values() || []) {
-        if (bytes.every(byte => byte === 0xff)) continue;
+    for (const {layout, bytes, initial} of projectStorage.get(project)?.values() || []) {
+        if (initial && sameBytes(bytes, initial)) continue;
         total += bytes.length;
         if (total > maxSavedBytes) throw new Error('Pico flash storage exceeds 512 KiB per project.');
         const chunks = [];

@@ -110,8 +110,10 @@ firmware and can replace the running interpreter's in-memory listing using a
 3.3 V USB-to-UART adapter. Controller stays connected for input and Ctrl+C.
 The first connection waits for the selected firmware banner and prompt, so
 reset the Pico after choosing the adapter. The BOOTSEL image contains the
-interpreter. Stefan’s BASIC provides 128 KiB of LittleFS for named files.
-Use `SAVE "demo.bas"`, `CATALOG`, and `LOAD "demo.bas"` in Controller.
+interpreter. PicoBB and Stefan’s BASIC each provide 128 KiB of LittleFS for
+named files. PicoBB starts from a preformatted empty filesystem.
+Use `SAVE "demo.bas"` and `LOAD "demo.bas"` in Controller. Stefan’s BASIC
+lists the files with `CATALOG`.
 A simulated rerun preserves that partition. Project files and project history
 carry the filesystem data, keyed to the exact firmware and partition layout.
 Reopen the project or restore its autosave after restarting Brickwright.

@@ -145,8 +145,9 @@ try {
     const projectFile = await readFile(await (await download).path());
     const archived = await JSZip.loadAsync(projectFile);
     const state = JSON.parse(await archived.file('brickwright/state.json').async('text')).state;
-    assert.equal(state.picoFlash.partitions.length, 1);
-    assert.equal(state.picoFlash.partitions[0].length, 128 * 1024);
+    const stefanPartitions = state.picoFlash.partitions.filter(partition => partition.offset === 0x1df000);
+    assert.equal(stefanPartitions.length, 1);
+    assert.equal(stefanPartitions[0].length, 128 * 1024);
 
     await page.getByRole('button', {name: 'History', exact: true}).click();
     await page.getByTestId('bw-history-tab-autosave').click();

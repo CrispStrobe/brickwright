@@ -20,6 +20,7 @@ import {readFileSync, existsSync} from 'node:fs';
 import {newMachineConfig, validateMachineConfig, MACHINE_KINDS} from
     '../overlay/scratch-gui/src/lib/bw-machines/machine-config.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
+import {PICOBB_FLASH} from '../overlay/scratch-gui/src/lib/bw-machines/pico-basic-flash.js';
 
 test('an rp2040js + flash-slot config validates and activates to the rp2040js uf2 boot', async () => {
     assert.ok(MACHINE_KINDS.includes('rp2040js'), 'rp2040js is a known machine kind');
@@ -88,6 +89,19 @@ test('Pico media hands a pinned sector-aligned storage partition to the runner',
         dispatch () {}
     });
     assert.deepEqual(result.detail.picoFlashStorage, {...flashStorage, sha256});
+});
+
+test('only the pinned PicoBB console image supplies the preformatted flash partition', async () => {
+    const boot = sha256 => runMachineConfig(newMachineConfig({
+        executionMode: 'functional', machine: 'rp2040js',
+        slots: {flash: {url: 'bbcbasic_console_pico_filesystem.uf2', sha256}},
+        provenance: {program: {startKey: '\r'}}
+    }), {fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}), dispatch () {}});
+    const {detail} = await boot(PICOBB_FLASH.sha256);
+    assert.deepEqual(detail.picoFlashStorage, PICOBB_FLASH);
+    assert.equal(detail.picoWakeOnPrompt, true);
+    const unrecognized = await boot('f'.repeat(64));
+    assert.equal(unrecognized.detail.picoFlashStorage, undefined);
 });
 
 const picoUf2 = process.env.PICOBB_UF2;

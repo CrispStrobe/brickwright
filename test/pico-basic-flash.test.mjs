@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
 import {attachBrickwrightState, BUNDLE_PATH, inspectBrickwrightState, parseBundleDocument} from '../overlay/scratch-gui/src/lib/bw-project-bundle.js';
-import {capturePicoFlashProject, mountPicoFlashStorage, picoFlashStorageFor, restorePicoFlashProject} from '../overlay/scratch-gui/src/lib/bw-machines/pico-basic-flash.js';
+import {capturePicoFlashProject, mountPicoFlashStorage, PICOBB_FLASH, picoFlashStorageFor, restorePicoFlashProject} from '../overlay/scratch-gui/src/lib/bw-machines/pico-basic-flash.js';
 
 const hash = 'a'.repeat(64);
 const layout = picoFlashStorageFor({offset: 0x1df000, length: 0x20000}, hash);
@@ -105,4 +105,30 @@ test('project inspection refuses truncated, duplicate, and oversized flash parti
     assert.equal(inspect([partition, partition]).outcome, 'invalid');
     assert.match(inspect(Array.from({length: 5}, (_, index) => ({...partition, sha256: `${index}`.repeat(64)}))).reason,
         /exceeds 512 KiB/);
+});
+
+
+test('only the reviewed PicoBB seed may overlap its own flash image', () => {
+    const stage = {};
+    const flash = emptyFlash();
+    const {offset, length} = PICOBB_FLASH;
+    const imageLength = offset + length;
+    flash[offset] = 9;
+    const device = mountPicoFlashStorage(stage, flash, imageLength, PICOBB_FLASH);
+    assert.equal(capturePicoFlashProject(stage), undefined, 'the untouched seed is supplied by firmware');
+    flash[offset] = 0xff;
+    const saved = capturePicoFlashProject(stage);
+    assert.equal(saved.partitions.length, 1, 'a user-erased seed is a real change');
+    device.dispose();
+
+    const next = emptyFlash();
+    next[offset - 1] = 17;
+    next[offset] = 9;
+    mountPicoFlashStorage(stage, next, imageLength, PICOBB_FLASH);
+    assert.equal(next[offset - 1], 17);
+    assert.equal(next[offset], 0xff);
+    assert.equal(next[imageLength], 0xff);
+    assert.throws(() => mountPicoFlashStorage({}, flash, imageLength, {...PICOBB_FLASH, sha256: hash}), /overlaps/);
+    assert.throws(() => mountPicoFlashStorage({}, flash, imageLength, {...PICOBB_FLASH, offset: offset - 4096}), /overlaps/);
+    assert.throws(() => mountPicoFlashStorage({}, flash, imageLength + 1, PICOBB_FLASH), /overlaps/);
 });

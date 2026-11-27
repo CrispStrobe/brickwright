@@ -6425,11 +6425,16 @@ class PseudocodeImporter extends React.Component {
             stefan: local('Use line numbers for jumps and answer INPUT in Controller. SAVE, CATALOG and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
                 'Für Sprünge Zeilennummern verwenden und INPUT im Controller beantworten. SAVE, CATALOG und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.')
         };
-        const note = standalone ? notes[standalone.dialect] + ' ' + local(
+        const basicProfile = lang === 'basic' && this.selectedBasicProfile();
+        const languageNote = standalone ? notes[standalone.dialect] + ' ' + local(
             'Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',
             'BASIC ausführen sendet den Quelltext an die UART-Konsole des Pico. Für diesen Dialekt ist keine Blockumwandlung verfügbar.'
         ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
-        const picoHardwareHelp = lang === 'basic' && this.selectedBasicProfile()?.media && local(
+        const note = basicProfile?.id === 'pico-bbcbasic' ? languageNote + ' ' + local(
+            'SAVE and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
+            'SAVE und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.'
+        ) : languageNote;
+        const picoHardwareHelp = basicProfile?.media && local(
             'Download the UF2 and copy it to RPI-RP2 in BOOTSEL mode. Connect a 3.3 V USB-to-UART adapter with TX to GP1, RX to GP0 and GND to GND. Choose Replace Pico listing and run, select the adapter, then reset the Pico when prompted. This replaces the listing in memory. Use Controller for input and Ctrl+C.',
             'UF2 herunterladen und im BOOTSEL-Modus nach RPI-RP2 kopieren. Einen 3,3-V-USB-UART-Adapter anschließen (TX an GP1, RX an GP0 und GND an GND). Programm auf Pico ersetzen und ausführen wählen, den Adapter auswählen und den Pico bei Aufforderung zurücksetzen. Das Programm im Speicher wird ersetzt. Eingabe und Strg+C erfolgen im Controller.'
         );
