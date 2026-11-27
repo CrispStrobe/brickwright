@@ -6,7 +6,8 @@ const basicProfiles = [
     {id: 'i8086', device: 'i8086', dialect: 'ms'},
     {id: 'i8086-dos', device: 'i8086', dialect: 'ms'},
     {id: 'i8086-ubasic', device: 'i8086', dialect: 'ms'},
-    {id: 'pico-bbcbasic', device: 'pico', dialect: 'bbc'}
+    {id: 'pico-bbcbasic', device: 'pico', dialect: 'bbc', media: 'picobb-rp2040'},
+    {id: 'pico-piccolo', device: 'pico', dialect: 'piccolo', media: 'piccolobasic-rp2040'}
 ];
 
 export const basicProfilesFor = device => basicProfiles.filter(profile => device ? profile.device === device : profile.device !== 'pico');

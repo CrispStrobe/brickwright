@@ -243,8 +243,13 @@ export async function activateConfig(config, opts = {}) {
         if (files.length) bootMedia.dosFiles = new Map(files);
     }
 
-    if (cfg.machine === 'rp2040js' && bootSlotId === 'flash' && cfg.provenance?.program?.startKey === '\r') {
-        bootMedia.picoWakeOnPrompt = true;
+    if (cfg.machine === 'rp2040js' && bootSlotId === 'flash') {
+        if (cfg.provenance?.program?.basicConsole === 'piccolo') {
+            bootMedia.picoBasicConsole = 'piccolo';
+        } else if (cfg.provenance?.program?.startKey === '\r') {
+            bootMedia.picoWakeOnPrompt = true;
+            bootMedia.picoBasicConsole = 'bbc';
+        }
     }
     const warnings = [];
 

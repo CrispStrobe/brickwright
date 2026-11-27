@@ -44,6 +44,32 @@ test('an rp2040js + flash-slot config validates and activates to the rp2040js uf
     assert.equal(events.length, 1);
 });
 
+test('Pico BASIC source is dispatched using the selected firmware dialect', async () => {
+    const events = [];
+    const opts = {
+        fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}),
+        dispatch: detail => events.push(detail),
+        picoBasicSource: 'print 6*7'
+    };
+    const config = program => newMachineConfig({
+        executionMode: 'functional', machine: 'rp2040js', slots: {flash: 'console.uf2'},
+        provenance: {program}
+    });
+
+    await runMachineConfig(config({basicConsole: 'piccolo'}), opts);
+    assert.equal(events[0].picoBasicConsole, 'piccolo');
+    assert.equal(events[0].picoWakeOnPrompt, undefined);
+    assert.deepEqual(events[0].picoBasicCommands, ['print 6*7', 'RUN']);
+
+    await runMachineConfig(config({startKey: '\r'}), opts);
+    assert.equal(events[1].picoBasicConsole, 'bbc');
+    assert.equal(events[1].picoWakeOnPrompt, true);
+    assert.deepEqual(events[1].picoBasicCommands, ['10 print 6*7', 'RUN']);
+
+    await assert.rejects(runMachineConfig(config({}), opts), /compatible Pico UART firmware/);
+    assert.equal(events.length, 2);
+});
+
 const picoUf2 = process.env.PICOBB_UF2;
 const havePico = picoUf2 && existsSync(picoUf2);
 

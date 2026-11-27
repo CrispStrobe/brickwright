@@ -30,6 +30,8 @@ test('BASIC profiles respect the selected machine and retain a compatible prefer
     assert.equal(basicProfileFor('pico', 'ms').id, 'pico-bbcbasic');
     assert.equal(basicProfileFor(null, 'pico-bbcbasic').id, 'bbc');
     assert.equal(basicProfileFor('pico', 'ms').dialect, 'bbc');
+    assert.deepEqual(basicProfilesFor('pico').map(profile => profile.id), ['pico-bbcbasic', 'pico-piccolo']);
+    assert.equal(basicProfileFor('pico', 'pico-piccolo').media, 'piccolobasic-rp2040');
     assert.equal(codeLanguageAvailable('basic', 'pico', {remoteImages: false}), false);
     assert.equal(basicProfileFor('stm32f030', 'ms'), undefined);
     assert.equal(codeLanguageAvailable('tcl', 'riscv32', {riscvHosted: false}), false);
@@ -50,4 +52,12 @@ test('machine filtering keeps authored drafts and lets stale generated views reg
     const buffers = {javascript: 'authored JS', python: 'new generated Python'};
     assert.deepEqual(hiddenCodeDrafts(authored, buffers, 'eater6502', 'pseudocode'), {javascript: 'authored JS'});
     assert.deepEqual(hiddenCodeDrafts(authored, buffers, null, 'pseudocode'), {});
+});
+
+test('PiccoloBASIC receives unnumbered lowercase source and keeps labels and string case', () => {
+    assert.deepEqual(picoBasicCommands('entry:\r\nlet a=40\nprint "Keep Case ";a+2', 'piccolo'),
+        ['entry:', 'let a=40', 'print "Keep Case ";a+2', 'RUN']);
+    assert.throws(() => picoBasicCommands('10 print 42', 'piccolo'), /unnumbered/);
+    assert.throws(() => picoBasicCommands('print 42\nNEW', 'piccolo'), /Remove RUN/);
+    assert.throws(() => picoBasicCommands('rem filler\n'.repeat(400), 'piccolo'), /4095 ASCII/);
 });

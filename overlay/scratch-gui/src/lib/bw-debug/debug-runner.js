@@ -2153,6 +2153,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (/^\x1b\[\d+;\d+R$/.test(reply)) input.write(new TextEncoder().encode(reply));
         });
         const commands = bootMedia.picoBasicCommands || [];
+        const banner = bootMedia.picoBasicConsole === 'piccolo' ? 'PiccoloBASIC UART' : 'BBC BASIC for Pico Console';
         const encoder = new TextEncoder();
         let nextCommand = 0;
         let sawBanner = false;
@@ -2175,7 +2176,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             const ch = String.fromCharCode(byte);
             if (wakeOnPrompt || (commands.length && !sawBanner)) {
                 if (ch === '\n') {
-                    if (lineBuf.includes('BBC BASIC for Pico Console')) sawBanner = true;
+                    if (lineBuf.includes(banner)) sawBanner = true;
                     if (wakeOnPrompt && lineBuf.trim() === 'Waiting for connection') {
                         wakeOnPrompt = false;
                         feedByte(13);

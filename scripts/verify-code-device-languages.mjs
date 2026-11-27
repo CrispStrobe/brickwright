@@ -45,7 +45,7 @@ try {
     assert.deepEqual(await profiles(), ['bbc']);
     await target('pico');
     await hasTabs(pseudo, py, c, bas, asm);
-    assert.deepEqual(await profiles(), ['pico-bbcbasic']);
+    assert.deepEqual(await profiles(), ['pico-bbcbasic', 'pico-piccolo']);
 
     await openCodeActions(page);
     const menu = page.getByTestId('bw-code-actions-menu');
@@ -64,12 +64,46 @@ try {
     await page.locator('[class*="green-flag_green-flag"]:visible').first().click();
     await rows.getByText(/^PICO-FLAG\s+42$/).waitFor({timeout: 120000});
 
+    const profile = page.getByTestId('bw-basic-profile');
+    await profile.selectOption('pico-piccolo');
+    await typeIntoEditor(page, 'let a=40\nprint "PICCOLO-GUI ";a+2\nend');
+    await openCodeActions(page);
+    assert.ok(await menu.getByRole('button', {name: /to blocks/i}).isDisabled());
+    assert.ok(await menu.getByRole('button', {name: /from blocks/i}).isDisabled());
+    await page.getByTestId('bw-basic-run-menu').click();
+    await rows.getByText('PiccoloBASIC UART', {exact: true}).waitFor();
+    await rows.getByText(/^PICCOLO-GUI\s+42$/).waitFor({timeout: 120000});
+
+    await profile.selectOption('pico-bbcbasic');
+    await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('PRINT "PICO-FLAG ";6*7', {exact: true}).waitFor();
+    await profile.selectOption('pico-piccolo');
+    await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('let a=40', {exact: true}).waitFor();
+
+    await profile.selectOption('pico-bbcbasic');
     await target('');
     await tab(js).click();
     await page.waitForFunction(() =>
         document.querySelector('.cm-content')?.cmTile.root.view.state.doc.toString() === 'console.log("Preserved draft");');
+    await openCodeActions(page);
+    await page.getByTestId('bw-device-select-menu').selectOption('__manage__');
+    await menu.waitFor({state: 'hidden'});
+    const manager = page.getByTestId('bw-machine-manager');
+    await manager.getByRole('searchbox', {name: 'Search firmware'}).fill('PiccoloBASIC');
+    await manager.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
+    await manager.waitFor({state: 'hidden'});
+    await rows.getByText('PiccoloBASIC UART', {exact: true}).waitFor();
+    await tab(bas).click();
+    assert.equal(await profile.inputValue(), 'pico-piccolo');
+    await page.waitForFunction(() => {
+        const saved = JSON.parse(localStorage.getItem('bw-code-autosave') || 'null');
+        return saved?.profile === 'pico-piccolo' && saved.code.includes('PICCOLO-GUI');
+    });
+    await page.reload({waitUntil: 'domcontentloaded'});
+    await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('let a=40', {exact: true}).waitFor();
+    assert.equal(await profile.inputValue(), 'pico-piccolo');
     assert.deepEqual(errors, []);
-    console.log('Code tabs, overflow, retained draft, four BASIC profile sets, and real PicoBB UART execution passed.');
+    console.log('Code tabs, overflow, retained draft, four BASIC profile sets, and both real Pico UART interpreters passed.');
 } finally {
     await browser.close();
 }

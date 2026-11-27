@@ -1358,6 +1358,8 @@ class PseudocodeImporter extends React.Component {
         this.leaveCardiac();
         this.leaveCp1();
         this.setState(state => ({
+            ...(selection.picoBasicConsole === 'piccolo' ? {basicProfile: 'pico-piccolo'} :
+                selection.picoBasicConsole === 'bbc' ? {basicProfile: 'pico-bbcbasic'} : {}),
             asmRunDevice: null, libraryProgram: null, libraryTarget: device === 'i80386' ? device : null,
             kim1Active: false, microtronicActive: false, langMenuOpen: false,
             buffers: {...state.buffers, pseudocode: (device === 'i80386' ? '' : `DEVICE ${device.toUpperCase()}\n`) +
@@ -1500,7 +1502,7 @@ class PseudocodeImporter extends React.Component {
                 this._publishControlsFor(saved.code);
                 this.setState(st => ({
                     lang: saved.lang,
-                    buffers: {...st.buffers, [saved.lang]: saved.code},
+                    ...this.restoreCodeBuffer(st, saved),
                     status: this.L.restored(LANG_LABEL[saved.lang] || saved.lang)
                 }));
             }
@@ -1622,7 +1624,7 @@ class PseudocodeImporter extends React.Component {
                 this._publishControlsFor(saved.code);
                 this.setState(st => ({
                     lang: saved.lang,
-                    buffers: {...st.buffers, [saved.lang]: saved.code},
+                    ...this.restoreCodeBuffer(st, saved),
                     status: refused
                         ? refusal()
                         : this.L.restored(LANG_LABEL[saved.lang] || saved.lang)
@@ -1716,7 +1718,8 @@ class PseudocodeImporter extends React.Component {
             prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang]) this.invalidateArcadeReport();
         if (prevProps.isVisible !== this.props.isVisible || prevState.busy !== this.state.busy ||
             prevState.revealed !== this.state.revealed || prevState.buffers !== this.state.buffers ||
-            prevState.lang !== this.state.lang || prevState.asmMode !== this.state.asmMode) notifyEditorMenuActions();
+            prevState.lang !== this.state.lang || prevState.basicProfile !== this.state.basicProfile ||
+            prevState.asmMode !== this.state.asmMode) notifyEditorMenuActions();
         if (prevProps.isVisible !== this.props.isVisible) {
             this.setMaximizedChrome(this.props.isVisible !== false && this.state.maximized);
         }
@@ -1731,8 +1734,9 @@ class PseudocodeImporter extends React.Component {
         // Debounced so a fast typist writes localStorage once per pause, not
         // once per keystroke. Watches the ACTIVE tab, both its language and
         // its text, so switching tabs re-saves under the new language.
-        if (prevState.lang !== this.state.lang ||
-            prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang]) {
+        if (prevState.lang !== this.state.lang || prevState.basicProfile !== this.state.basicProfile ||
+            prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang] ||
+            (this.state.lang === 'basic' && this.isPiccoloEditor() && prevState.buffers.piccolo !== this.state.buffers.piccolo)) {
             if (this._autosaveTimer) clearTimeout(this._autosaveTimer);
             this._autosaveTimer = setTimeout(() => {
                 this._autosaveTimer = null;
@@ -1751,17 +1755,27 @@ class PseudocodeImporter extends React.Component {
         } catch { return null; }   // absent, unparseable, or a shape we no longer write
     }
 
+    restoreCodeBuffer (state, saved) {
+        if (saved.lang === 'basic' && saved.profile === 'pico-piccolo' && remoteMachineImagesAllowed()) {
+            return {basicProfile: saved.profile, libraryTarget: null, buffers: {...state.buffers,
+                piccolo: saved.code, pseudocode: 'DEVICE PICO\n' +
+                    (state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}};
+        }
+        return {buffers: {...state.buffers, [saved.lang]: saved.code}};
+    }
+
     writeAutosave () {
         const lang = this.state.lang;
-        const code = this.state.buffers[lang] || '';
+        const profile = lang === 'basic' && this.isPiccoloEditor() ? 'pico-piccolo' : undefined;
+        const code = this.state.buffers[profile ? 'piccolo' : lang] || '';
         try {
             if (!code.trim()) {
                 // Only drop the record if it is THIS tab's — emptying the C tab
                 // must not throw away saved pseudocode.
                 const cur = this.readAutosave();
-                if (cur && cur.lang === lang) localStorage.removeItem(BW_AUTOSAVE_KEY);
+                if (cur && cur.lang === lang && cur.profile === profile) localStorage.removeItem(BW_AUTOSAVE_KEY);
             } else if (code.length <= BW_AUTOSAVE_MAX) {
-                localStorage.setItem(BW_AUTOSAVE_KEY, JSON.stringify({lang, code}));
+                localStorage.setItem(BW_AUTOSAVE_KEY, JSON.stringify({lang, code, profile}));
             }
         } catch { /* private mode, or the quota is full: autosave is a courtesy */ }
     }
@@ -1806,6 +1820,11 @@ class PseudocodeImporter extends React.Component {
             this._codeArtwork = null;
             this._animationImport = null;
             this._makeCodeRequest = null;
+            if (lang === 'basic' && this.selectedBasicProfile()?.id === 'pico-piccolo') {
+                this.setState(st => ({lang, output: null, buffers: {...st.buffers, piccolo: String(reader.result)},
+                    status: this.L.openDone(file.name, LANG_LABEL[lang])}));
+                return;
+            }
             this.setState(st => ({
             lang, uploads: [],
             // Same exclusivity the editor's own onChange uses: one authored
@@ -2262,7 +2281,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     canCompileToBlocks () {
-        return !this.state.busy && !!this.activeCode().trim() &&
+        return !this.state.busy && (this.state.lang !== 'basic' || !this.isPiccoloEditor()) && !!this.activeCode().trim() &&
             (TWO_WAY.has(this.state.lang) || this.canLiftAsm());
     }
 
@@ -2276,7 +2295,7 @@ class PseudocodeImporter extends React.Component {
             // Match the toolbar: saving a snapshot is allowed while compiling.
             save: {label:'Save code as…',location:'file',enabled: true, run: this.saveCodeFile},
             'to-blocks': {label:'Convert code to blocks',location:'edit',enabled: this.canCompileToBlocks(), run: this.compile},
-            'from-blocks': {label:'Generate code from blocks',location:'edit',enabled: !this.state.busy, run: this.fromBlocks}
+            'from-blocks': {label:'Generate code from blocks',location:'edit',enabled: !this.state.busy && (this.state.lang !== 'basic' || !this.isPiccoloEditor()), run: this.fromBlocks}
         };
     }
 
@@ -2929,6 +2948,7 @@ class PseudocodeImporter extends React.Component {
 
     /** Show or hide the on-request tabs (fe, Tcl); remembered per browser. */
     activeCode () {
+        if (this.state.lang === 'basic' && this.isPiccoloEditor()) return this.state.buffers.piccolo || '';
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return this.state.asmListing;
         // A tab with no buffer yet (fe and Tcl were missing from the initial set and
         // crashed the editor when opened on an empty project) reads as empty.
@@ -2937,8 +2957,12 @@ class PseudocodeImporter extends React.Component {
     setActiveCode (text) {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
+        if (this.state.lang === 'basic' && this.isPiccoloEditor()) {
+            this.setState(state => ({buffers: {...state.buffers, piccolo: text}}));
+            return;
+        }
         this.setState(s => {
-            const independent = {asm: s.buffers.asm ?? '', nqc: s.buffers.nqc ?? ''};
+            const independent = {asm: s.buffers.asm ?? '', nqc: s.buffers.nqc ?? '', piccolo: s.buffers.piccolo ?? ''};
             if (Object.hasOwn(independent, s.lang)) return {buffers: {...s.buffers, [s.lang]: text}};
             const device = s.buffers.pseudocode?.match(/^DEVICE\s+([\w-]+)[^\n]*/im);
             const nextDevice = s.lang === 'pseudocode' ? text.match(/^DEVICE\s+([\w-]+)/im) : device;
@@ -3001,7 +3025,7 @@ class PseudocodeImporter extends React.Component {
             else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts());
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
-                const r = new SB3().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect || 'bbc', lineNumbers: this.state.basicLineNumbers});
+                const r = new SB3().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
                 code = r.ok ? r.basic : `REM === Cannot show as BASIC ===\n${r.reasons.map(s => 'REM ' + s).join('\n')}`;
             } else if (to === 'micropython') {
                 const r = new SB3().generateMicroPython(proj);
@@ -3124,6 +3148,11 @@ class PseudocodeImporter extends React.Component {
         this.setState({kim1Active: false, microtronicActive: false});
         const from = this.state.lang;
         if (to === from) return;
+        const piccolo = this.state.basicProfile === 'pico-piccolo' && this.currentDevice() === 'pico';
+        if (to === 'basic' && piccolo) {
+            this.setState({lang: 'basic', output: null, status: '', emptyTabOffer: null});
+            return;
+        }
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
         // listing belongs to the program as it is now, and the program may have
         // changed since the listing was built (To blocks, an edit in another
@@ -3141,7 +3170,7 @@ class PseudocodeImporter extends React.Component {
         const src = this.state.buffers[from];
         // ASM source and NQC are edited independently. MicroPython has a
         // generated preview, but switching away does not reparse it as Pseudocode.
-        const independent = !TWO_WAY.has(from) || to === 'nqc';
+        const independent = !TWO_WAY.has(from) || to === 'nqc' || (from === 'basic' && piccolo);
         const hasSource = (buffer, language) => Boolean(buffer && (language === 'pseudocode' ?
             buffer.replace(/^DEVICE\s+[^\n]*(?:\n|$)/im, '') : buffer).trim());
         if (independent || hasSource(existing, to) || !hasSource(src, from)) {
@@ -4285,6 +4314,7 @@ class PseudocodeImporter extends React.Component {
         if (this.state.libraryProgram && deviceId !== '__manage__') this.setState({libraryProgram: null});
         if (deviceId === 'kosmos-cp1') return this.openCp1Language();
         if (deviceId === '__manage__') {
+            this.setState({actionsOpen: false});
             // The "Manage machines…" entry is a command, not a device: open the
             // library modal (gui.jsx owns it) and leave the current device as-is,
             // so the controlled <select> snaps back to the real selection.
@@ -5362,16 +5392,21 @@ class PseudocodeImporter extends React.Component {
         return basicProfileFor(this.codeDevice(), this.state.basicProfile);
     }
 
-    async runPicoBasic (source) {
+    isPiccoloEditor () {
+        return this.state.lang === 'basic' && this.state.basicProfile === 'pico-piccolo' && this.currentDevice() === 'pico';
+    }
+
+    async runPicoBasic (source, profile) {
         if (!remoteMachineImagesAllowed()) {
             this.setState({status: 'Remote machine images are disabled in this build.'});
             return;
         }
-        const media = libraryMedia.find(entry => entry.id === 'picobb-rp2040');
+        const media = libraryMedia.find(entry => entry.id === profile.media);
         this.setState({busy: true, status: this.L.basicLoading, output: null, basicRawOutput: '', basicIsBbc: false});
         try {
             const config = await openLibraryMedia(media);
-            if (this._unmounted || this.currentDevice() !== 'pico' || this.state.lang !== 'basic') return;
+            if (this._unmounted || this.currentDevice() !== 'pico' || this.state.lang !== 'basic' ||
+                this.selectedBasicProfile()?.id !== profile.id) return;
             await runMachineConfig(config, {picoBasicSource: source});
             if (!this._unmounted) this.setState({status: ''});
         } catch (error) {
@@ -5382,7 +5417,8 @@ class PseudocodeImporter extends React.Component {
     }
 
     async runBasic () {
-        const profile = this.selectedBasicProfile()?.id;
+        const selection = this.selectedBasicProfile();
+        const profile = selection?.id;
         if (!profile || this.state.busy || this.state.running) return;
         const code = this.activeCode();
         if (!code.trim()) {
@@ -5399,7 +5435,7 @@ class PseudocodeImporter extends React.Component {
         // The libre DOS-native interpreter path: uBASIC.EXE runs the program on
         // the 8086 DOS bench (the language itself runs on the machine).
         if (profile === 'i8086-ubasic') return this.runBasicOnDosInterp(code);
-        if (profile === 'pico-bbcbasic') return this.runPicoBasic(code);
+        if (selection.media) return this.runPicoBasic(code, selection);
         this.setState({output: '', running: true, status: this.L.basicLoading, basicRawOutput: '', basicIsBbc: false});
         try {
             const isBbc = profile === 'bbc';
@@ -5746,6 +5782,7 @@ class PseudocodeImporter extends React.Component {
         if (this.state.conversionReport?.preserved) showCircuitDebugger();
     }
     async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {
+        if (pseudocode == null && this.state.lang === 'basic' && this.isPiccoloEditor()) return;
         const conversionRequest = {};
         this._conversionRequest = conversionRequest;
         const buffersAtStart = this.state.buffers;
@@ -5972,7 +6009,7 @@ class PseudocodeImporter extends React.Component {
             if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
             if (lang !== 'c') nb.c = new SB3Creator().generateC(proj);
             if (lang !== 'basic') {
-                const br = new SB3Creator().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect || 'bbc', lineNumbers: this.state.basicLineNumbers});
+                const br = new SB3Creator().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
             }
             // fe and Tcl are NOT regenerated here: their generators load lazily, and
@@ -6011,13 +6048,14 @@ class PseudocodeImporter extends React.Component {
     }
     // Read the running project into all languages at once.
     async fromBlocks () {
+        if (this.state.lang === 'basic' && this.isPiccoloEditor()) return;
         this.setState({busy: true, status: this.L.stReading, conversionReport: null});
         try {
             const SB3Creator = (await this.lib()).default;
             const {assetLibraryRecords, withoutAssetLibraries} = await import('../../lib/bw-asset-library.js');
             const savedProject = JSON.parse(this.props.vm.toJSON());
             const project = withoutAssetLibraries(savedProject, assetLibraryRecords(this.props.vm, savedProject));
-            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.selectedBasicProfile()?.dialect || 'bbc', lineNumbers: this.state.basicLineNumbers});
+            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
             const mpResult = new SB3Creator().generateMicroPython(project);
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
@@ -6027,6 +6065,7 @@ class PseudocodeImporter extends React.Component {
                 basic: basicResult.ok ? basicResult.basic : `REM === Cannot show as BASIC ===\n${basicResult.reasons.map(s => 'REM ' + s).join('\n')}`,
                 asm: this.state.buffers.asm ?? '',
                 nqc: this.state.buffers.nqc ?? '',
+                piccolo: this.state.buffers.piccolo ?? '',
                 micropython: mpResult.ok ? mpResult.py : `# === Cannot generate MicroPython ===\n${mpResult.reasons.map(s => '# ' + s).join('\n')}`,
                 ...(await dosLangBuffersFor(project, this.state.lang))
             };
@@ -6240,8 +6279,12 @@ class PseudocodeImporter extends React.Component {
         const latestReport = codeNotices.find(notice => notice.report);
         const device = this.currentDevice();
         const summary = !machine && device && matrixSummary(lang, device, locale);
-        const note = {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
-        const sections = lang === 'pseudocode' ? SYNTAX : SUPPORTED[lang];
+        const piccolo = this.isPiccoloEditor();
+        const note = piccolo ? local(
+            'PiccoloBASIC uses unnumbered source, lowercase keywords and labels. Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',
+            'PiccoloBASIC verwendet Quelltext ohne Zeilennummern, kleingeschriebene Schlüsselwörter und Sprungmarken. BASIC ausführen sendet den Quelltext an die UART-Konsole des Pico. Für diesen Dialekt ist keine Blockumwandlung verfügbar.'
+        ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
+        const sections = piccolo ? null : lang === 'pseudocode' ? SYNTAX : SUPPORTED[lang];
         const closeStyle = {...toolStyles(false).button, fontSize: 18, lineHeight: 1};
         const lane = {background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6, padding: '5px 8px'};
 
@@ -6659,13 +6702,13 @@ class PseudocodeImporter extends React.Component {
                             style={actionBtn}>
                             {menu ? <><Icon name="to-blocks" />{this.L.toBlocks.replace('⇦ ', '')}</> : <span aria-hidden="true">⇦ ▣</span>}
                         </button>
-                        <button onClick={this.fromBlocks} disabled={this.state.busy}
+                        <button onClick={this.fromBlocks} disabled={this.state.busy || this.isPiccoloEditor()}
                             aria-label={this.L.fromBlocks}
                             title={this.L.fromBlocksTitle}
                             style={{...actionBtn, background: 'linear-gradient(135deg,#a55b80,#8e4a6c)'}}>
                             {menu ? <><Icon name="from-blocks" />{this.L.fromBlocks.replace(' ⇨', '')}</> : <span aria-hidden="true">▣ ⇨</span>}
                         </button>
-                        {this.currentDevice() === 'pico' ? (
+                        {this.currentDevice() === 'pico' && !this.isPiccoloEditor() ? (
                             <button onClick={this.deployToPico} disabled={this.state.busy}
                                 data-testid={menu ? "bw-deploy-pico-menu" : "bw-deploy-pico"}
                                 title={this.L.deployPicoTitle}
@@ -7084,7 +7127,8 @@ class PseudocodeImporter extends React.Component {
         const languageAvailable = lang => !machine && this.allowsCodeLanguage(lang);
         const basicProfile = this.selectedBasicProfile();
         const basicProfileLabels = {bbc: 'BBC BASIC (Z80)', ms: '6502 BASIC', i8086: '8086 BASIC (native)',
-            'i8086-dos': '8086 BASIC (MS-DOS 2.0)', 'i8086-ubasic': 'uBASIC (DOS)', 'pico-bbcbasic': 'PicoBB BBC BASIC'};
+            'i8086-dos': '8086 BASIC (MS-DOS 2.0)', 'i8086-ubasic': 'uBASIC (DOS)', 'pico-bbcbasic': 'PicoBB BBC BASIC',
+            'pico-piccolo': 'PiccoloBASIC'};
         const renderLanguages = menu => (
             <React.Fragment>
                     {[['pseudocode', '🧩 Pseudo'], ['python', '🐍 Py'], ['javascript', '🟨 JS'], ['c', '🔧 C'], ['basic', '📺 BAS'], ['asm', '🔩 ASM'],
@@ -7245,12 +7289,12 @@ class PseudocodeImporter extends React.Component {
                                     <option key={id} value={id}>{basicProfileLabels[id]}</option>)}
                             </select>
                         </label>
-                        <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
+                        {!this.isPiccoloEditor() && <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
                             <input type="checkbox" checked={this.state.basicLineNumbers}
                                 disabled={basicProfile.id === 'ms'}
                                 onChange={e => this.setState({basicLineNumbers: e.target.checked, buffers: {...this.state.buffers, basic: ''}})} />
                             {this.L.lineNumbers}{' '}{basicProfile.id === 'ms' ? this.L.alwaysOn6502 : ''}
-                        </label>
+                        </label>}
                     </div>
                 )}
                 {this.state.lang === 'asm' && !max && (

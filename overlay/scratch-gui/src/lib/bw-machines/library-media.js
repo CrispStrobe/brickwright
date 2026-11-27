@@ -44,7 +44,9 @@ export const libraryMedia = [
     ...ackSamples,
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
-        revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf'}
+        revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf'},
+    {id: 'piccolobasic-rp2040', title: 'PiccoloBASIC (UART)', machine: 'rp2040js', license: 'BSD-3-Clause',
+        licenseFile: 'LICENSE', revision: 'a5a7e3c24658ef98675835faa3cc31222787814f'}
 ];
 
 export async function readMediaManifest (url) {

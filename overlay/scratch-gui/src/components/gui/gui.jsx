@@ -1008,7 +1008,7 @@ const GUIComponent = props => {
                         window.dispatchEvent(new CustomEvent('bw-library-code', {detail: program}));
                         props.onActivateTab(CODE_TAB_INDEX);
                     } else if (started?.detail?.kind) {
-                        const selection = {kind: started.detail.kind};
+                        const selection = {kind: started.detail.kind, picoBasicConsole: started.detail.picoBasicConsole};
                         delete vm.runtime.bwLibraryCode;
                         vm.runtime.bwLibraryMachineSelection = selection;
                         window.dispatchEvent(new CustomEvent('bw-code-machine-selected', {detail: selection}));

@@ -46,7 +46,6 @@ export async function runMachineConfig(config, opts = {}) {
             globalThis.dispatchEvent(new globalThis.CustomEvent('bw-machine-media-load', {detail}));
         };
 
-    const basicCommands = opts.picoBasicSource == null ? null : picoBasicCommands(opts.picoBasicSource);
     const activated = await activateConfig(config, {
         fetcher: opts.fetcher || defaultImageFetcher
     });
@@ -79,11 +78,12 @@ export async function runMachineConfig(config, opts = {}) {
     }
     if (bm.spectrum) detail.spectrum = bm.spectrum;
     if (bm.picoWakeOnPrompt) detail.picoWakeOnPrompt = true;
-    if (basicCommands) {
-        if (!detail.picoWakeOnPrompt || detail.kind !== 'rp2040js' || bm.slot !== 'flash') {
-            throw new Error('BASIC source needs the PicoBB UART firmware.');
+    if (bm.picoBasicConsole) detail.picoBasicConsole = bm.picoBasicConsole;
+    if (opts.picoBasicSource != null) {
+        if (!bm.picoBasicConsole || detail.kind !== 'rp2040js' || bm.slot !== 'flash') {
+            throw new Error('BASIC source needs compatible Pico UART firmware.');
         }
-        detail.picoBasicCommands = basicCommands;
+        detail.picoBasicCommands = picoBasicCommands(opts.picoBasicSource, bm.picoBasicConsole);
     }
     if (bm.dosFastStart) detail.dosFastStart = true;
     if (bm.x86Variant) detail.x86Variant = bm.x86Variant;
