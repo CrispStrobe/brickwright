@@ -190,6 +190,8 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
                     await input.fill(String(action.text));
                 }
                 if (action.key !== undefined) await page.keyboard.press(action.key);
+                if (action.keyDown !== undefined) await page.keyboard.down(action.keyDown);
+                if (action.keyUp !== undefined) await page.keyboard.up(action.keyUp);
                 if(action.button!==undefined)await page.evaluate(({button,held})=>{
                     const board=window.__bwPxtRuntime.board;
                     if(typeof board.setButton!=='function')throw new Error('Original PXT board button input unavailable');
