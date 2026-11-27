@@ -1,3 +1,40 @@
+# Boolean-value console-worker receipt — 2026-11-27
+
+This documentary record preserves the complete original **39/39 passing** worker
+receipt, recorded at `2026-11-27T08:58:14.383Z`, with zero page errors. It exercises
+the production session and console workers and registered tasks in a static
+localhost harness. The supplier was experimental candidate
+[`cbdf179160a3f3054872d045503659967bd1b72e`](https://github.com/CrispStrobe/sb3-creator/commit/cbdf179160a3f3054872d045503659967bd1b72e),
+which was not the shipping dependency pin. The recorded implementation claim is
+`e1ef0cb79343dd7c592e6b645bc9d93bdd873910`.
+
+The receipt includes four canonical generated programs, their source hashes, the
+actual Boolean-value SB3 graph and its transformation, runtime source hashes,
+environment information, all 39 observations and the complete summary. This is
+historical candidate integration evidence. It does not qualify the rendered
+editor, Scratch game semantics, device or simulator behavior, other browsers,
+native platforms or a current shipping dependency.
+
+See [the probe instructions](../scripts/probes/code-runtime/README.md#boolean-value-successor-and-default-factory-under-csp)
+for reproduction and [the implementation record](CODE-RUNTIME-AND-GAME-EXPORT.md#821-boolean-values-and-default-worker-loading-qualification)
+for the related generator correction. The later rendered-editor evidence is
+preserved separately in [its receipt](OWNED-CONSOLE-CODE-TAB-RECEIPT-2026-11-27.md).
+
+## Original bytes and archival role
+
+The payload below is the byte-identical contents of the former
+`scripts/probes/code-runtime/session-console-values-browser-results.json`:
+**122,743 bytes**, SHA-256
+`7fefc5441fae0dddf91ccb2177e99fe77e8ec01fe7c054f89d5a7601816ce971`.
+It includes its original final newline. No fields, timestamps, recorded paths,
+source identities, generated programs, observations or hashes were rewritten or
+reserialized. It is retained as documentary history because its supplier
+candidate was never a shipping pin; the current shipping-pin scanner continues
+to reject such identities on code and generated-current surfaces.
+
+## Complete receipt
+
+```json
 {
   "schema": 1,
   "createdAt": "2026-11-27T08:58:14.383Z",
@@ -2598,3 +2635,4 @@
     "failed": []
   }
 }
+```

@@ -24,6 +24,7 @@ import {fileURLToPath} from 'node:url';
 
 import {IMPORT_ACCEPT} from '../overlay/scratch-gui/src/lib/bw-makecode/accept.js';
 import {balancedFrom, balancedAfter, scopeAfter} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass, codeDocumentLabels} from './helpers/code-document-editor.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const IMPORTER = resolve(here, '../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx');
@@ -185,12 +186,20 @@ test('every buffer set carries every language', () => {
     // moment the micro:bit tab started reading it to decide whether to
     // show itself, loading any example crashed the pane. The unit tests
     // saw nothing; a browser gate caught it.
-    const languages = ['pseudocode', 'python', 'javascript', 'c', 'basic', 'asm', 'micropython'];
-    const literals = source.match(/buffers: \{pseudocode:[^}]*\}/g) || [];
-    assert.ok(literals.length >= 5, `expected the buffer literals, found ${literals.length}`);
-    for (const literal of literals) {
-        const missing = languages.filter(lang => !literal.includes(`${lang}:`));
-        assert.deepEqual(missing, [], `a buffer literal omits ${missing.join(', ')}: ${literal.slice(0, 90)}`);
+    // Source replacement now goes through the shared document adapter. Execute
+    // that boundary for each language instead of counting deleted literals.
+    assert.match(scopeAfter(source, 'codeDocumentState (document)'),
+        /restoreCodeDocumentState\(document, Object\.keys\(LANG_LABEL\)\)/);
+    const Editor = codeDocumentEditorClass(source, '');
+    const editor = Object.assign(new Editor(), {state: {}});
+    const languages = Object.keys(codeDocumentLabels).sort();
+    for (const lang of languages) {
+        const code = `authored ${lang} source`;
+        const state = editor.authoredCodeState(lang, code);
+        assert.deepEqual(Object.keys(state.buffers).sort(), languages, `${lang}: all registered buffers exist`);
+        assert.equal(state.codeDocument.lang, lang);
+        assert.equal(state.codeDocument.code, code);
+        for (const key of languages) assert.equal(state.buffers[key], key === lang ? code : '', `${lang}: ${key}`);
     }
 });
 

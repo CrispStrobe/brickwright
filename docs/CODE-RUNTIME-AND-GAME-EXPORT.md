@@ -668,7 +668,7 @@ after correction. The focused suite now passes **201/201**, no skips, including
 to the original baseline; **84/84** additional outputs from 14 Boolean graphs
 under six legacy options match `c7584fd0`, including reused generator instances.
 
-The [39-case successor receipt](../scripts/probes/code-runtime/session-console-values-browser-results.json)
+The [39-case successor receipt](CODE-CONSOLE-VALUES-WORKER-RECEIPT-2026-11-27.md)
 executes the published supplier and passes with zero page errors. Its fourth
 canonical generated program places an actual SB3 comparison reporter in a say
 value socket and requires `true`, preserving the graph, transform description,

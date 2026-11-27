@@ -195,3 +195,35 @@ identities. The gallery and pin consistency gates must also pass. Implementation
 checkpoints on the existing feature branches preserve the work while these
 dependencies remain open. No failed gate is treated as green, and no worker,
 desktop-Chromium or method test establishes other browser/native/mobile support.
+
+## Subsequent qualification repairs
+
+The owner authorized continuing through the concrete remaining failures under
+[the qualification-repair claim](../lanes/2026-11-27-code-integration-qualification-repairs.md).
+Both feature candidates first incorporated the newer canonical mains. The
+consumer then reused PR #1846's exact live-current-pin updates and regenerated
+the required report, controller-bundle and ROM/static provenance through their
+official tools. The rebuilt BIOS, seven demo ROMs, retained static assets and
+controller source reproduce their existing bytes; only their current source
+identities change. Sealed historical constants and admission digests remain
+historical.
+
+The strict full-history pin suite now passes **46/46** with all three supplier
+histories available: 14,245 judged files, 133 receipts, zero unreadable files
+and zero stale findings. The connected package/provenance controls pass
+**113/113**. These supersede the earlier seven local current-pin failures as
+bounded repair evidence, while full hosted qualification remains separate.
+
+The earlier 39-case worker receipt named an experimental supplier commit in a
+current shipping-pin file role. Its complete 122,743-byte JSON is now preserved
+byte-for-byte in [a documentary receipt](CODE-CONSOLE-VALUES-WORKER-RECEIPT-2026-11-27.md),
+SHA-256 `7fefc5441fae0dddf91ccb2177e99fe77e8ec01fe7c054f89d5a7601816ce971`.
+No pin-scanner exemption or historical requalification was introduced.
+
+Another **70/70** selected controls cover corrected editor/lifecycle fixtures:
+actual menu adapters, camera-listener disposal, CP1 hooks used by the ESP32
+runner, debugger pane context and the reviewed parsed start-method boundaries.
+**23/23** further local controls cover every Code document language buffer,
+compact accessible mode buttons, and classification of the generated
+gzip-compressed Robot Lab LDraw archive as binary. These are separate selected
+sets; remaining failures and the RF investigation are still open.

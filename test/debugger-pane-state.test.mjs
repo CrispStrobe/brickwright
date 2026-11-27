@@ -76,7 +76,7 @@ function fixture ({dock, storage = storageWith({'bw-debug-dock': dock}), visible
         createElement: () => ({dataset: {}, style: {}})};
     const ReactDOM = {createPortal: (children, container, key) => ({portal: true, children, container, key})};
     const Panel = () => null;
-    const CircuitTab = buildCircuit({React, ReactDOM, document, localStorage: storage, DebugPanel: Panel,
+    const CircuitTab = buildCircuit({React, ReactDOM, document, window: {}, localStorage: storage, DebugPanel: Panel,
         loadBenchTemperature: () => 25, getReactPerformanceProbe: () => null,
         profileReactSubtree: (_react, _name, element) => element, pt: (_locale, key) => key,
         advanceDebugPhase, shouldRefreshDesignerDebugState, applyBenchTemperature});
@@ -441,8 +441,8 @@ test('restoring the original dock refusals or removing stage ownership fails the
                 const {host} = fixture({dock: 'controller', buildCircuit});
                 assert.equal(host._stagePortalOn(), false);
             }],
-        ['controller split dropped (I3/I4 regression)', 'this.state.debugDock === \'controller\' &&',
-            'false &&', buildCircuit => {
+        ['controller split dropped (I3/I4 regression)', 'return this.state.debugDock === \'controller\' &&',
+            'return false &&', buildCircuit => {
                 const {host} = fixture({dock: 'controller', buildCircuit});
                 host.state.machineBooted = true;
                 assert.equal(host._stagePortalOn(), true);

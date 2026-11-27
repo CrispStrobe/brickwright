@@ -67,6 +67,12 @@ const runnerFunctions = names => names.map(name => {
     assert.ok(declaration, `missing actual runner function ${name}`);
     return withTestImports(declaration);
 }).join('\n');
+const runnerBindings = names => names.map(name => {
+    const declaration = runnerDeclaration.body.body.find(node => node.type === 'VariableDeclaration' &&
+        node.declarations.some(binding => binding.id.name === name));
+    assert.ok(declaration, `missing actual runner binding ${name}`);
+    return withTestImports(declaration);
+}).join('\n');
 const runnerObject = runnerDeclaration.body.body.filter(node => node.type === 'VariableDeclaration')
     .flatMap(node => node.declarations).find(node => node.id.name === 'runner').init;
 const runnerMethods = names => names.map(name => {
@@ -291,6 +297,7 @@ function runnerLifecycle ({pauseAt, firmware = {name: 'test.bin', bytes: Uint8Ar
         const esp32S040McuId = null, esp32s3Console = 'uart0';
         let board = null, target = null, session = null, symbols = null, destroyed = false;
         let releaseEsp32S040Target = null;
+        ${runnerBindings(['cp1LessonBatch', 'cp2Recording', 'cancelCp2Recording', 'unsubscribeCp1Lessons'])}
         let engineNotes = [], serialLines = [], variableTable = [], pinTable = [], status = {};
         let hddSnapshotOwner = {}, serialTerminal, serialEsc, terminalOutput, linuxProgressWatch;
         let imageProvenance, boardBaseNs, reverseCursor, blockOf, yieldOf;
@@ -309,7 +316,7 @@ function runnerLifecycle ({pauseAt, firmware = {name: 'test.bin', bytes: Uint8Ar
         const S = value => value;
         class CustomEvent {constructor(type) {this.type = type;}}
         ${runnerFunctions(['attach', 'attachLabwiredTarget', 'attachEsp32S040', 'esp32S3BootOptions',
-        'finishLabwiredAttach', 'builtFromUserFirmware', 'setStatus', 'emit'])}
+        'finishLabwiredAttach', 'builtFromUserFirmware', 'setStatus', 'publishCp1Observations', 'emit'])}
         const runner = {${runnerMethods(['start', 'stop', 'destroy'])}, variables: () => []};
         return {runner, board: () => board, state: () => status};
     `)({vm, counts, phases, window, userFirmware: firmware, labwiredChip: selection},
@@ -566,11 +573,17 @@ test('the checked host source connects exact owner, input and live video and rel
         node.expression.callee.object.type === 'ThisExpression' &&
         node.expression.callee.property.name === 'releaseEsp32S040Input');
     assert.ok(releaseIndex >= 0, 'unmount unconditionally releases the S040 owner');
-    assert.ok(statements.slice(0, releaseIndex).every(node => node.type === 'ExpressionStatement' &&
-        node.expression.type === 'CallExpression' && node.expression.callee.type === 'MemberExpression' &&
-        node.expression.callee.object.name === 'window' &&
-        node.expression.callee.property.name === 'removeEventListener'),
-    'only window listener detachment may precede owner release; other cleanup follows it');
+    assert.ok(statements.slice(0, releaseIndex).every(node => {
+        if (node.type !== 'ExpressionStatement') return false;
+        const expression = node.expression;
+        // Gallery invalidation only fences a pending promise; it cannot call
+        // the runner or release the target before the final accepted touch-up.
+        if (expression.type === 'AssignmentExpression' && expression.operator === '=' &&
+            expression.left.type === 'MemberExpression' && expression.left.object.type === 'ThisExpression' &&
+            expression.left.property.name === 'galleryArtworkRequest' && expression.right.type === 'NullLiteral') return true;
+        return expression.type === 'CallExpression' && expression.callee.type === 'MemberExpression' &&
+            expression.callee.object.name === 'window' && expression.callee.property.name === 'removeEventListener';
+    }), 'only gallery request invalidation and window listener detachment may precede owner release; other cleanup follows it');
     assert.doesNotMatch(circuitSource, /data-no-code-indicator/);
     assert.match(panelSource, /esp32S040McuId: this\.state\.esp32S040McuId \|\| null/);
     assert.match(panelSource, /data-esp32s040-part/);

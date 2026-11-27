@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {balancedAfter, scopeAfter} from './helpers/js-scope.mjs';
+import {balancedAfter, balancedFrom, scopeAfter} from './helpers/js-scope.mjs';
 import {TOOLBAR_TEXT} from '../overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-toolbar-text.js';
 import {registerEditorMenuActions, getEditorMenuItems, runEditorMenuAction}
     from '../overlay/scratch-gui/src/lib/editor-menu-actions.js';
@@ -14,6 +14,10 @@ const TEXT = new Function(`return ${balancedAfter(source, 'const TEXT =', '{', '
 const formats = new Function(`return ${balancedAfter(source, 'const SAVE_FORMATS =', '[', ']')}`)();
 const method = (signature, args = '', extra = {}) => new Function(...Object.keys(extra),
     `return function(${args}) ${scopeAfter(source, signature)}`)(...Object.values(extra));
+const toolbarRunSignature = '    async runFromToolbar ({loadExample = false} = {})';
+assert.ok(source.includes(toolbarRunSignature), 'the real toolbar run entry must be present');
+// Skip the destructured argument before matching the method's body braces.
+const toolbarRunBody = balancedFrom(source, source.indexOf(toolbarRunSignature) + toolbarRunSignature.length, '{', '}');
 
 function fixture (locale = 'en') {
     const calls = [];
@@ -34,6 +38,7 @@ function fixture (locale = 'en') {
         'copy', 'paste', 'selectAll', 'undo', 'redo', 'setMode', 'turn', 'fitSelection', 'mirror', 'hideSelection',
         'isolate', 'showAll', 'setPick', 'view'].map(key => [key, (...args) => calls.push([key, ...args])]));
     for (const name of ['run', 'pause', 'reset', 'saveAs']) host[name] = (...args) => calls.push([name, ...args]);
+    host.runFromToolbar = new Function(`return async function({loadExample = false} = {}) ${toolbarRunBody}`)();
     host.camera3d = method('    camera3d ()');
     host.actions = method('    actions ()', '', {toolStyles: () => ({}), measurementWords: () => ({title: 'Measurements'})});
     host.toolbarGroups = method('    toolbarGroups ()');

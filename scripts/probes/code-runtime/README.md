@@ -306,9 +306,9 @@ retaining the shipping pin until upstream qualification.
 
 ### Boolean-value successor and default factory under CSP
 
-`session-console-values-browser-results.json` preserves a **39/39 passing**
+The [complete worker receipt](../../../docs/CODE-CONSOLE-VALUES-WORKER-RECEIPT-2026-11-27.md) preserves a **39/39 passing**
 successor to the task receipt, with zero page errors. It executes supplier
-`cbdf179160a3f3054872d045503659967bd1b72e`, including a fourth canonical program
+`cbdf1791`, including a fourth canonical program
 whose comparison reporter occupies an ordinary `say` value socket. The receipt
 stores the actual SB3 graph and its transformation from the readable source seed;
 the required output is `true`, while the former emitter produced `undefined`.
@@ -368,7 +368,7 @@ it does not replace the VM, worker implementation or editor state.
 
 The [full rendered receipt](../../../docs/OWNED-CONSOLE-CODE-TAB-RECEIPT-2026-11-27.md)
 records **12/12 passed** against that checkpoint with official experimental
-supplier `4994e2c77143c7bee9eb8b76706ffae3321743a0`. It retains all screenshots,
+supplier `4994e2c7`. It retains all screenshots,
 authored/generated programs, the two SB3 archives, complete result data and an
 emitted-asset manifest. The [integration report](../../../docs/CODE-DOCUMENT-INTEGRATION-2026-11-27.md)
 records the 214 focused controls, additional local fixtures and remaining

@@ -71,7 +71,10 @@ export const BINARY_BY_ROLE = {
     // `.io` (BrickLink Studio) and `.lxf` (LEGO Digital Designer) joined 2026-10-18 with
     // test/fixtures/bw-sim/interop/: both formats ARE ZIP archives (model.ldr / IMAGE100.LXFML
     // inside), so their NUL bytes are the ZIP format, as for .sb3.
-    archive: ['zip', 'sb3', 'sb2', 'sprite3', 'sprite2', 'gz', 'tgz', 'io', 'lxf'],
+    // Robot Lab's .pack is gzip-compressed LDraw JSON, produced and verified
+    // with gzipSync/gunzipSync by scripts/pack-robot-build-ldraw.mjs. Its NULs
+    // belong to that binary archive, just as they do in the .gz role above.
+    archive: ['zip', 'sb3', 'sb2', 'sprite3', 'sprite2', 'gz', 'tgz', 'io', 'lxf', 'pack'],
     object: ['lib', 'o', 'a'],
     // Typefaces. A font is binary by role in the same way a ROM is: the bytes
     // ARE the artefact. Added 2026-09-07 with the vendored replacement for the
