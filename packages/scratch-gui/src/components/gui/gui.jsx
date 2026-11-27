@@ -994,7 +994,7 @@ const GUIComponent = props => {
     }, []);
     const machineManagerModal = showMachines ? (
         <React.Suspense fallback={null}>
-            <MachineManager store={getMachineStore()} locale={props.locale} preferredMachine={showMachines.kind}
+            <MachineManager store={getMachineStore()} locale={props.intl.locale} preferredMachine={showMachines.kind}
                 onRun={async (cfg, opts) => {
                     const code = opts?.code;
                     const run = (source = code?.text) => runMachineConfig(cfg, code?.dosSourceName ? {

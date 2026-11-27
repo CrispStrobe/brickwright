@@ -62,6 +62,32 @@ try {
         }
     }
 
+    const german = await freshProject();
+    try {
+        await german.getByTestId('bw-settings-menu-trigger').click();
+        await german.getByText('Preferences', {exact: true}).click();
+        await german.getByLabel('Language', {exact: true}).selectOption('de');
+        await german.waitForFunction(() => window.__brickwrightStore?.getState().locales?.locale === 'de');
+        await german.evaluate(() => window.dispatchEvent(new CustomEvent('bw-open-machine-manager')));
+        const dialog = german.getByTestId('bw-machine-manager');
+        const machine = dialog.getByRole('combobox', {name: 'Zielsystem'});
+        await machine.selectOption('i80386');
+        await dialog.getByText('Lokales DOS-Paket (unkomprimiertes ZIP)', {exact: true}).waitFor();
+        await machine.selectOption('i8086');
+        const pascal = dialog.locator('[data-machine-media="ack-pascal"]');
+        await pascal.getByTestId('bw-mm-item-info').click();
+        await pascal.getByText(/Gibt zuerst die Primzahlen aus/).waitFor();
+        const licence = await pascal.getByRole('link', {name: 'BSD-3-Clause'}).getAttribute('href');
+        assert.match(licence, /\/[a-f0-9]{40}\/projects\/ack\/COPYING\.ACK$/);
+        await pascal.getByRole('button', {name: 'Starten', exact: true}).click();
+        const terminal = german.locator('[data-bw-stage-dock="controller"]');
+        await terminal.getByText(/Primes up to 50:/).waitFor();
+        await terminal.getByRole('button', {name: 'Vollbild', exact: true}).waitFor();
+        console.log('German app settings localize Machines and Controller in an English browser.');
+    } finally {
+        await german.close();
+    }
+
     const forth = await freshProject();
     await openFromFile(forth, 'i8086');
     await forth.getByRole('searchbox', {name: 'Search firmware'}).fill('zForth (DOS)');
