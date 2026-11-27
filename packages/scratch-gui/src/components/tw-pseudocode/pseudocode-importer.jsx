@@ -6422,8 +6422,8 @@ class PseudocodeImporter extends React.Component {
         const notes = {
             piccolo: local('PiccoloBASIC uses unnumbered source, lowercase keywords and labels.',
                 'PiccoloBASIC verwendet Quelltext ohne Zeilennummern, kleingeschriebene Schlüsselwörter und Sprungmarken.'),
-            stefan: local('Use line numbers for jumps and answer INPUT in Controller. SAVE, CATALOG and LOAD use LittleFS. Files survive reruns in this project session.',
-                'Für Sprünge Zeilennummern verwenden und INPUT im Controller beantworten. SAVE, CATALOG und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts in dieser Projektsitzung erhalten.')
+            stefan: local('Use line numbers for jumps and answer INPUT in Controller. SAVE, CATALOG and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
+                'Für Sprünge Zeilennummern verwenden und INPUT im Controller beantworten. SAVE, CATALOG und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.')
         };
         const note = standalone ? notes[standalone.dialect] + ' ' + local(
             'Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',

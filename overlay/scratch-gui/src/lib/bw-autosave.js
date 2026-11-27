@@ -259,12 +259,14 @@ const projectTitle = () => {
  */
 export const saveNow = async (reason = 'manual') => {
     if (!vmRef || status.saving) return false;
+    const project = vmRef.runtime?.getTargetForStage?.();
     const settings = readSettings();
     status = {...status, saving: true};
     emit();
     try {
         let blob = await vmRef.saveProjectSb3();
-        blob = await attachBrickwrightState(blob, {mutateZip: zip => writeArtworkToZip(zip, vmRef)});
+        blob = await attachBrickwrightState(blob, {project,
+            mutateZip: zip => writeArtworkToZip(zip, vmRef)});
         const digest = await digestOf(blob);
         dirty = false;
         if (digest === lastDigest && reason !== 'manual') {

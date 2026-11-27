@@ -2141,9 +2141,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const adapter = createRp2040jsAdapter({ clockHz, vcc: 3.3 });
         adapter.attachBoard(board);
         adapter.bootFromFlash(flash);
-        const saveFlashStorage = mountPicoFlashStorage(vm?.runtime?.getTargetForStage?.(),
-            adapter.rp2040.flash, flash.length, bootMedia.picoFlashStorage);
-
+        const project = vm?.runtime?.getTargetForStage?.();
+        const flashStorage = mountPicoFlashStorage(project, adapter.rp2040.flash, flash.length,
+            bootMedia.picoFlashStorage, () => {
+                if (vm.runtime.getTargetForStage() === project) vm.runtime.emitProjectChanged?.();
+            });
 
         const uart = adapter.rp2040.uart[0];
         const feedByte = byte => uart.feedByte(byte & 0xff);
@@ -2169,7 +2171,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             }
         }));
         disposeTerminal = () => {
-            saveFlashStorage?.();
+            flashStorage?.dispose();
             unsubscribeCursor();
             cursor.dispose();
         };
@@ -2198,6 +2200,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         terminalFrame = () => {
             output.deliver();
             input.flush();
+            flashStorage?.tick(performance.now());
         };
 
         setValueResolver((blockId) => runner.valuesAtBlock(blockId));

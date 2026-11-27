@@ -150,7 +150,8 @@ const captureRemote = async (name = selected) => {
 const serializeProject = async () => {
     const current = vm();
     if (!current) throw new Error('Project is not ready');
-    const blob = await attachBrickwrightState(await current.saveProjectSb3());
+    const project = current.runtime?.getTargetForStage?.();
+    const blob = await attachBrickwrightState(await current.saveProjectSb3(), {project});
     if (blob.size > MAX_PROJECT_BYTES) throw new Error('Project exceeds the 12 MB peer transfer limit');
     const bytes = new Uint8Array(await blob.arrayBuffer());
     return {name: title().slice(0, 100), sb3: bytesToBase64(bytes)};

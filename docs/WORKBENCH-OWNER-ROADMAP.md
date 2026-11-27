@@ -188,3 +188,5 @@ The combined JSON ledger and individual raw receipts are in `artifacts/circuit-f
 - Stefan’s BASIC supports LittleFS save, catalog, reload, and simulated
   reruns. The firmware initializes erased flash and keeps a nonblank
   unmountable partition intact until an explicit format.
+- A saved Brickwright project and its history carry the simulated Pico flash
+  filesystem. Restoring a project gives its Stage the saved disk data.

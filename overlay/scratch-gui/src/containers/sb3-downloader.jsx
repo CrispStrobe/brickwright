@@ -37,6 +37,7 @@ class SB3Downloader extends React.Component {
         ]);
     }
     downloadProject (mode) {
+        const project = this.props.vm?.runtime?.getTargetForStage?.();
         const documentMode = (mode === 'save' || mode === 'saveAs') && this.props.format === 'sb3' ?
             mode : null;
         // EVERY step here can fail, and until 2026-08-24 none of them reported it.
@@ -56,6 +57,7 @@ class SB3Downloader extends React.Component {
             // It returns the original blob if anything goes wrong: saving the
             // Scratch half beats saving nothing.
             .then(content => attachBrickwrightState(content, {
+                project,
                 mutateZip: zip => writeArtworkToZip(zip, this.props.vm)
             }))
             .then(content => (this.props.format === 'lms' ?

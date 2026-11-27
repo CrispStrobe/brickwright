@@ -112,8 +112,9 @@ The first connection waits for the selected firmware banner and prompt, so
 reset the Pico after choosing the adapter. The BOOTSEL image contains the
 interpreter. Stefan’s BASIC provides 128 KiB of LittleFS for named files.
 Use `SAVE "demo.bas"`, `CATALOG`, and `LOAD "demo.bas"` in Controller.
-A simulated rerun preserves that partition in the current project session.
-Closing or reloading the app starts a new simulation session.
+A simulated rerun preserves that partition. Project files and project history
+carry the filesystem data, keyed to the exact firmware and partition layout.
+Reopen the project or restore its autosave after restarting Brickwright.
 
 The browser test uses a scripted serial adapter. The host protocol proof drives
 the three pinned UF2s in the RP2040 emulator. Physical UART and native desktop

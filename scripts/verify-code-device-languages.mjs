@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import JSZip from 'jszip';
 import {chromium} from 'playwright';
 import {closeCodeActions, openCodeActions} from './lib-code-actions.mjs';
 import {typeIntoEditor} from './lib/type-into-editor.mjs';
@@ -7,7 +9,7 @@ import {typeIntoEditor} from './lib/type-into-editor.mjs';
 const url = process.argv[2];
 assert.ok(url, 'Pass the URL of the assembled Brickwright frontend');
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
-const page = await browser.newPage({viewport: {width: 1800, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
+const page = await browser.newPage({viewport: {width: 1800, height: 1000}, locale: 'en-US', acceptDownloads: true, serviceWorkers: 'block'});
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
@@ -137,12 +139,61 @@ try {
         const saved = JSON.parse(localStorage.getItem('bw-code-autosave') || 'null');
         return saved?.profile === 'pico-stefan' && saved.code.includes('10 INPUT A');
     });
+    await page.getByText('File', {exact: true}).click();
+    const download = page.waitForEvent('download');
+    await page.getByText('Save to your computer', {exact: true}).click();
+    const projectFile = await readFile(await (await download).path());
+    const archived = await JSZip.loadAsync(projectFile);
+    const state = JSON.parse(await archived.file('brickwright/state.json').async('text')).state;
+    assert.equal(state.picoFlash.partitions.length, 1);
+    assert.equal(state.picoFlash.partitions[0].length, 128 * 1024);
+
+    await page.getByRole('button', {name: 'History', exact: true}).click();
+    await page.getByTestId('bw-history-tab-autosave').click();
+    await page.getByTestId('bw-autosave-save-now').click();
+    const manualVersion = page.getByTestId('bw-autosave-versions').locator(':scope > div')
+        .filter({hasText: / · manual/}).first();
+    const versionDownload = page.waitForEvent('download');
+    await manualVersion.getByRole('button', {name: 'Download', exact: true}).click();
+    const version = await JSZip.loadAsync(await readFile(await (await versionDownload).path()));
+    assert.deepEqual(JSON.parse(await version.file('brickwright/state.json').async('text')).state.picoFlash,
+        state.picoFlash);
+    await page.getByTestId('bw-history-close').click();
+
+    const reopened = await browser.newPage({viewport: {width: 1800, height: 1000}, locale: 'en-US',
+        serviceWorkers: 'block'});
+    reopened.on('pageerror', error => errors.push(error.message));
+    await reopened.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
+    await reopened.goto(url, {waitUntil: 'domcontentloaded'});
+    await reopened.getByText('File', {exact: true}).click();
+    await reopened.getByText('Load from your computer', {exact: true}).click();
+    await reopened.locator('body > input[type="file"][accept*=".sb3"]').setInputFiles({
+        name: 'pico-storage.sb3', mimeType: 'application/x.scratch.sb3', buffer: projectFile
+    });
+    await reopened.getByRole('tab', {name: 'Code', exact: true}).click();
+    await reopened.getByTestId('bw-code-editor').locator('.cm-content').getByText('10 INPUT A', {exact: true}).waitFor();
+    assert.equal(await reopened.getByTestId('bw-basic-profile').inputValue(), 'pico-stefan');
+    await openCodeActions(reopened);
+    await reopened.getByTestId('bw-basic-run-menu').click();
+    const reopenedTerminal = reopened.getByTestId('bw-picobb-terminal');
+    const reopenedRows = reopenedTerminal.locator('.xterm-rows');
+    await reopenedRows.getByText('?', {exact: true}).waitFor({timeout: 120000});
+    await reopenedTerminal.locator('textarea').focus();
+    for (const input of ['0', 'NEW', 'LOAD "session.bas"', 'RUN']) {
+        await reopened.keyboard.type(input);
+        await reopened.keyboard.press('Enter');
+        if (input === '0') await reopenedRows.getByText('0', {exact: true}).waitFor();
+        else await reopenedRows.getByText(`> ${input}`, {exact: true}).last().waitFor();
+    }
+    await reopenedRows.getByText('STEFAN-SESSION-FILE', {exact: true}).waitFor();
+    await reopened.close();
+
     await page.reload({waitUntil: 'domcontentloaded'});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
     await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('10 INPUT A', {exact: true}).waitFor();
     assert.equal(await profile.inputValue(), 'pico-stefan');
     assert.deepEqual(errors, []);
-    console.log('Code tabs, overflow, retained draft, four BASIC profile sets, and three real Pico UART interpreters passed.');
+    console.log('Code tabs, overflow, retained draft, four BASIC profile sets, three Pico UART interpreters, and Pico storage in a reopened SB3 passed.');
 } catch (error) {
     const terminal = page.getByTestId('bw-picobb-terminal').locator('.xterm-rows');
     if (await terminal.count()) console.error(await terminal.innerText());
