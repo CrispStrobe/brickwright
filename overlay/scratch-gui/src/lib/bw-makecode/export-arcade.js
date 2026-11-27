@@ -1425,6 +1425,23 @@ class ArcadeEmitter {
                 this.legacyValueHelpers.set(key,{name,source});
                 return name;
             }
+            if (op === 'getCell' || op === 'setCell') {
+                params += ', rowInput: any, columnInput: any';
+                const index = 'const row = +rowInput; const column = +columnInput';
+                const valid = 'array && row >= 0 && column >= 0 && Math.floor(row) === row && Math.floor(column) === column';
+                if (op === 'getCell') {
+                    body = `${index}
+    return ${valid} && Array.isArray(array[row]) ?
+        ${this.namedOperationHelper('get')}(<any[]>array[row], column) : ""`;
+                } else {
+                    params += ', value: any';
+                    body = `${index}
+    if (${valid}) {
+        if (!array[row]) array[row] = []
+        if (Array.isArray(array[row])) (<any[]>array[row])[column] = ${parse()}(value)
+    }`;
+                }
+            }
             if(op==='pop')body='if (array) {\n        if (array.length) return array.pop()\n    }\n    return ""';
             if(op==='indexOf'){params+=', value: any';body=`return array ? array.indexOf(${parse()}(value)) : -1`;}
             if(op==='contains') {
@@ -1448,7 +1465,7 @@ class ArcadeEmitter {
         ${op==='insert'?`array.insertAt(position, ${parse()}(value))`:'if (position < array.length) array.removeAt(position)'}
     }`;
             }
-            const type=op==='contains'?'boolean':op==='indexOf'?'number':['get','pop'].includes(op)?'any':'void';
+            const type=op==='contains'?'boolean':op==='indexOf'?'number':['get','pop','getCell'].includes(op)?'any':'void';
             this.legacyValueHelpers.set(key,{name,source:`function ${name}(${params}): ${type} {
     ${body}
 }`});
@@ -1766,7 +1783,7 @@ class ArcadeEmitter {
     }
     isBoolean (b) {
         return !!b && ['arrays_valueTruthy','arrays_valueCompare','arrays_referenceRemove','arrays_referenceTruthy', 'arrays_contains', 'operator_and', 'operator_or', 'operator_not', 'operator_gt', 'operator_lt', 'operator_equals',
-            'sensing_touchingobject', 'sensing_keypressed', 'sensing_mousedown', 'data_listcontainsitem',
+            'sensing_touchingobject', 'sensing_keypressed', 'sensing_mousedown', 'data_listcontainsitem', 'planetemaths_multiple',
             'arcade_percentChance','arcade_settingsExists', 'arcade_spriteDataReadBoolean', 'arcade_bufferIsReadOnly', 'arcade_bufferEquals', 'arcade_spriteOverlaps', 'arcade_imagesOverlap', 'arcade_tileIs', 'arcade_tilemapIsWall', 'arcade_spriteTileKindAt', 'arcade_imageEquals', 'arcade_tileIsWall', 'arcade_isHittingTile', 'arcade_hasLife', 'arcade_hasPlayerScore', 'arcade_characterMatchesRule'].includes(b.opcode);
     }
 
@@ -1962,6 +1979,25 @@ class ArcadeEmitter {
         case 'arrays_parseLegacyValue': return this.legacyArrayInput(b);
         case 'arrays_jsonValue': return `${this.legacyValueHelper('json')}(${this.arrayValue(b,'VALUE')})`;
         case 'arrays_length': {const array=this.namedArray(b);return `(${array} ? ${array}.length : 0)`;}
+        case 'planetemaths_nombre_pi': return 'Math.PI';
+        case 'planetemaths_nombre_e': return 'Math.E';
+        case 'planetemaths_factorial':
+            return this.use('scratchFactorial', `_scratchFactorial(${v('NUM1')})`);
+        case 'planetemaths_sommechiffres':
+            return this.use('scratchDigitSum', `_scratchDigitSum(${v('NUM1')})`);
+        case 'planetemaths_multiple': {
+            const mode = this.literalInput(b, 'choix1') || this.menuField(b, 'choix1', 'choix1') || 'multiple';
+            if (mode === 'diviseur') return this.use('scratchMultiple', `_scratchMultiple(${v('NUM2')}, ${v('NUM1')})`);
+            if (mode === 'multiple') return this.use('scratchMultiple', `_scratchMultiple(${v('NUM1')}, ${v('NUM2')})`);
+            this.note('Planète Maths divisor test needs a fixed operation');
+            return 'false';
+        }
+        case 'arrays_get2D':
+            return `${this.namedOperationHelper('getCell')}(${this.namedArray(b)}, ${this.arrayValue(b, 'ROW')}, ${this.arrayValue(b, 'COL')})`;
+        case 'arrays_sum':
+            return this.use('namedArraySum', `_namedArraySum(${this.namedArray(b)})`);
+        case 'arrays_max':
+            return this.use('namedArrayMax', `_namedArrayMax(${this.namedArray(b)})`);
         case 'arrays_get': {
             const name=this.literalInput(b,'NAME');
             if(name!==null){
@@ -2788,9 +2824,10 @@ class ArcadeEmitter {
             const name = this.lookupVar(this.field(b, 'VARIABLE'));
             const valueBlock = this.block(typeof b.inputs?.VALUE?.[1] === 'string' ? b.inputs.VALUE[1] : null);
             const scratchAnswer = valueBlock?.opcode === 'sensing_answer';
+            const mixedReporter = ['planetemaths_factorial', 'planetemaths_sommechiffres', 'arrays_get2D'].includes(valueBlock?.opcode);
             if (!this.arcadeValues) {
                 const val = v('VALUE');
-                this.assign(name, val, scratchAnswer ? 'string' : null);
+                this.assign(name, val, scratchAnswer ? 'string' : mixedReporter ? 'any' : null);
                 push(`${name} = ${val}`);
                 return;
             }
@@ -2810,7 +2847,7 @@ class ArcadeEmitter {
                     this.imageVariableIds.has(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]) ||
                     (valueBlock?.opcode === 'arcade_callFunction' && this.imageReturnFunctions.has(`${this.target.isStage?'':this.target.name}:${this.literalInput(valueBlock,'NAME')}`));
                 if (image) this.imageVars.add(name);
-                this.assign(name, val, arrayType || (image ? 'image' : scratchAnswer ? 'string' : boolean ? 'boolean' : this.primitiveVariableTypes.get(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]) || null));
+                this.assign(name, val, arrayType || (image ? 'image' : scratchAnswer ? 'string' : mixedReporter ? 'any' : boolean ? 'boolean' : this.primitiveVariableTypes.get(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]) || null));
             }
             push(`${name} = ${val}`);
             if (['arcade_spawnSprite', 'arcade_spawnImageSprite'].includes(valueBlock?.opcode)) {
@@ -3305,6 +3342,12 @@ class ArcadeEmitter {
             push(`${owner}.${mode === 'legacy' ? 'say' : 'sayText'}(${args.join(', ')})`);
             return;
         }
+        case 'arrays_createRange':
+            push(this.use('namedArrayRange', `${this.namedArray(b)} = _namedArrayRange(${this.arrayValue(b, 'START')}, ${this.arrayValue(b, 'END')})`));
+            return;
+        case 'arrays_set2D':
+            push(`${this.namedOperationHelper('setCell')}(${this.namedArray(b)}, ${this.arrayValue(b, 'ROW')}, ${this.arrayValue(b, 'COL')}, ${this.arrayValue(b, 'VALUE')})`);
+            return;
         case 'arrays_createEmpty': push(`${this.namedArray(b)} = []`);return;
         case 'arrays_create1D':
         case 'arrays_create2D': {
