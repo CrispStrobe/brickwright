@@ -353,3 +353,36 @@ The application, proof scripts and fixtures were unchanged. The
 source/build/runtime identities, complete command outputs and retained
 diagnostics. These two local passes do not qualify the other browser proofs or
 the later supplier adoption.
+
+### Latest-main compatibility and continuing supplier qualification
+
+Main subsequently advanced to `b2912f4a081cf0bf0721b29f781e065429e5741c` with
+CrispCAD SDK `02287df`. It is incorporated in feature merge `32a7b117` without
+conflicts or changes to the incoming source. The new SDK preserves the generic
+STEP reference-import contract and adds a separate exact-body route. The two
+existing browser proofs retain all their original assertions.
+
+Two current DWG reproduction identities needed updating after that merge. The
+new admitted worker reproduces the original fixture bytes in two fresh codec
+contexts; all four fixture/admission controls pass with the existing negatives.
+The three-file repair is published at `dd65496e`. A fresh build of that exact
+clean commit preserves all 842 SDK file digests and all 22 robot projects, and
+both unchanged DWG/STEP browser journeys pass again. The
+[current-SDK receipt](CAD-BROWSER-CURRENT-SDK-RECEIPT-2026-11-27.md) is separate
+from the byte-identical earlier receipt.
+
+Supplier qualification remains open. At original supplier candidate `8c9a7aac`,
+the settled direct-conversion scenario passed in hosted CI in 435.96 seconds;
+all seven r7mix scenarios and all eleven WebGL tests passed. A different shard
+required adjacent evidence for fifteen new numerical bounds. Supplier
+checkpoint `8f3763a6` adds only those comments: executable AST and token streams
+are identical, all eight selected controls pass, and the ratchet ceiling and
+retained measurements are unchanged.
+
+Another hosted shard then reported the Meissner squegging scenario's existing
+quiet-between-bursts assertion failing. The untouched scenario reproduces the
+failure at Board `b47e7e0` and passes at the older `de8083c` pin. Its circuit,
+sampling and independent fine-step behavior are under investigation; no
+expectation has been replaced. Any additional physical repair must be qualified
+before supplier landing and exact-pin consumer adoption. Neither the successful
+receiver scenario nor the CAD receipts close that remaining supplier gate.
