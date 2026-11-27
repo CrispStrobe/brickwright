@@ -50,7 +50,7 @@
     "base64-loader": "^1.0.0",
     "bowser": "^1.9.4",
     "bw-board": "github:CrispStrobe/bw-board#d21d6d8b819263eb08231134b7556efa82289a90",
-    "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#21a54233b7e190253d6c71cd696a87f0f06e848f",
+    "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#d9e0982aa186bb1d75406367e7e57803c03fd8ad",
     "cat-blocks": "npm:scratch-blocks@0.1.0-prerelease.20220318143026",
     "classnames": "^2.2.6",
     "codemirror": "^6.0.1",
