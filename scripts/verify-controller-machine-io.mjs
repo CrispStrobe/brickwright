@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+import {openCodeInfo} from './lib-code-actions.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {typeIntoEditor} from './lib/type-into-editor.mjs';
@@ -84,7 +85,9 @@ try {
     await page.evaluate(() => { window.editedSieveTarget = window.__benchTarget; });
     await typeIntoEditor(page, 'void main(void) { syntax error; }');
     await page.getByTitle('Go', {exact: true}).click();
+    await openCodeInfo(page);
     await read('[data-testid="bw-code-status"]', /main\.c:1/);
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     assert.ok(await page.evaluate(() => window.__benchTarget === window.editedSieveTarget),
         'A failed build preserves the running CP/M guest');
     await serial(/47 53 59/);

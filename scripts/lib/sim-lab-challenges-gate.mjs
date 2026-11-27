@@ -42,7 +42,7 @@ const checks = async (page, {shotsDir}) => {
     await page.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.modelFile === 'wall-stopper.ldr' &&
         window.__bwSimLab._pane.session, null, {timeout: 60000});
 
-    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'), null, {timeout: 60000});
+    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'), null, {timeout: 60000});
     await page.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.session?.mat === 'wall', null, {timeout: 60000});
 
     // 1. The list, and a challenge on the mat the robot is on.
@@ -97,7 +97,7 @@ const checks = async (page, {shotsDir}) => {
     await page.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.modelFile === 'drawing-robot.ldr' &&
         window.__bwSimLab._pane.session, null, {timeout: 60000});
 
-    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'), null, {timeout: 60000});
+    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'), null, {timeout: 60000});
     await tool(page, 'challenges');
     await panel.waitFor();
     await page.getByTestId('bw-sim-lab-challenge-start-draw-square').click();

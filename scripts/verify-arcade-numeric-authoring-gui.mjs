@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import JSZip from 'jszip';
-import {openCodeActions, closeCodeActions as closeSharedCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, closeCodeActions as closeSharedCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {waitForArcadeStageFrame} from './lib/arcade-stage-frame.mjs';
 import {inspectGuiHarnessSource} from './lib/gui-harness-source.mjs';
 import {inspectGuiArtifactResponse} from './lib/gui-artifact-response.mjs';
@@ -226,8 +226,9 @@ const closeCodeActions = async () => {
 const openFile = async file => {
     await codeTab(); await openCodeActions(page);
     await page.getByTestId('bw-open-file').locator('input[type=file]').setInputFiles(file);
-    await page.getByText(/Imported the Arcade game/).first().waitFor({timeout: 60000});
+    await (await openCodeInfo(page)).getByTestId('bw-code-status').filter({hasText: /Imported the Arcade game/}).waitFor({timeout: 60000});
     assert.doesNotMatch(await page.getByTestId('bw-code-status').innerText(), /unsupported|not translated|could not|partial/i);
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     assert.doesNotMatch(await readCode(), /# unsupported:/);
 };
 const fieldInfo = spec => page.evaluate(({opcode, input, value}) => {
@@ -581,7 +582,7 @@ try {
     await openCodeActions(page);
     const [partialDownload] = await Promise.all([page.waitForEvent('download'), page.getByTestId('bw-makecode-arcade-export').click()]);
     const partialPath = path.join(out, 'numeric-authoring-refusal.mkcd');await partialDownload.saveAs(partialPath);await closeCodeActions();
-    const panel = page.getByTestId('bw-conversion-report');await panel.waitFor({state: 'visible'});
+    const panel = (await openCodeInfo(page)).getByTestId('bw-conversion-report');await panel.waitFor({state: 'visible'});
     const unsupported = page.getByTestId('bw-conversion-unsupported');await unsupported.waitFor({state: 'visible'});
     // An unproved `+` operand (music tempo here) exports through the runtime-dispatch helper
     // rather than refusing (owner decision 2026-10-30); the report therefore lists nothing.
@@ -607,9 +608,9 @@ try {
     await openCodeActions(page);
     const [cleanDownload] = await Promise.all([page.waitForEvent('download'), page.getByTestId('bw-makecode-arcade-export').click()]);
     await cleanDownload.saveAs(path.join(out, 'numeric-authoring-clean-after-refusal.mkcd'));await closeCodeActions();
-    await page.getByTestId('bw-conversion-report').waitFor({state: 'visible'});
+    await (await openCodeInfo(page)).getByTestId('bw-conversion-report').waitFor({state: 'visible'});
     const cleanUnsupported = page.getByTestId('bw-conversion-unsupported');
-    if (!await cleanUnsupported.isVisible()) await page.getByTestId('bw-conversion-report').locator('div').first().click();
+    if (!await cleanUnsupported.isVisible()) await page.getByTestId('bw-conversion-report').locator('summary').click();
     await cleanUnsupported.waitFor({state: 'visible'});
     assert.equal(await page.getByTestId('bw-conversion-refusal-details').count(), 0);
     const cleanUnsupportedText = await cleanUnsupported.innerText();
@@ -646,7 +647,7 @@ try {
     report.status = 'passed';
 } catch (error) {
     report.status = 'failed'; report.failure = String(error.stack || error);
-    if (page) { report.failureSample = await observe().catch(e => ({error: String(e)})); report.importObservation = await page.evaluate(() => ({status: document.querySelector('[data-testid="bw-code-status"]')?.innerText ?? null, code: document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.cmTile?.root?.view?.state?.doc?.toString() ?? null, stageId: window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime?.getTargetForStage()?.id ?? null})).catch(e => ({error: String(e)})); report.body = (await page.evaluate(() => document.body?.innerText || '').catch(e => `Body observation failed: ${String(e)}`)).slice(-14000); await page.screenshot({path: path.join(out, 'failure.png')}).catch(() => {}); }
+    if (page) { report.failureSample = await observe().catch(e => ({error: String(e)})); report.importObservation = await page.evaluate(() => ({status: document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus ?? null, code: document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.cmTile?.root?.view?.state?.doc?.toString() ?? null, stageId: window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime?.getTargetForStage()?.id ?? null})).catch(e => ({error: String(e)})); report.body = (await page.evaluate(() => document.body?.innerText || '').catch(e => `Body observation failed: ${String(e)}`)).slice(-14000); await page.screenshot({path: path.join(out, 'failure.png')}).catch(() => {}); }
     throw error;
 } finally {
     await Promise.allSettled(bodyChecks); await writeFile(path.join(out, 'current.json'), JSON.stringify(report, null, 2) + '\n'); await browser.close();

@@ -178,7 +178,7 @@ try {
 
     await page.getByTestId('bw-asm-assemble').click();
     await page.waitForFunction(() => /Assembled \d+ bytes in this browser.*booting the 8086 bench/.test(
-        document.querySelector('[data-testid="bw-code-status"]')?.textContent || ''),
+        document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || ''),
     null, {timeout: 30000});
     record('the ASM button reports the local route and boots the 8086 bench', true);
 

@@ -119,7 +119,7 @@ try {
     await page.waitForFunction(() => {
         const targets = window.__vm?.runtime?.targets || [];
         return targets.some(t => !t.isStage && t.blocks.getScripts().length > 0) &&
-            document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.');
+            document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.');
     }, null, {timeout: 60000});
     const expectedSprites = [...source.matchAll(/^\s*SPRITE\s+([^\s:]+)/gm)].map(m => m[1]);
     const loadedSprites = await page.evaluate(() => window.__vm.runtime.targets

@@ -22,7 +22,7 @@ try {
     await page.getByRole('tab', {name: /^(Robots|Robot Lab)$/}).click();
     await page.waitForFunction(() => window.__bwSimLab?.status === 'ready', null, {timeout: 90000});
     await hiddenStageBubble(page);
-    assert.equal(await page.getByTestId('bw-code-status').count(), 0, 'Code has not mounted');
+    assert.equal(await page.getByTestId('bw-code-editor').count(), 0, 'Code has not mounted');
     let previousScripts = [];
     for (const id of ['pendulum-array', 'clutch-bench']) {
         await page.getByTestId('bw-sim-lab-examples').click();
@@ -34,7 +34,7 @@ try {
         await page.waitForFunction(({id, previousScripts}) => {
             const vm = window.__brickwrightStore?.getState()?.scratchGui?.vm;
             return window.__bwSimLab._pane.state.shipped === `${id}.ldr` &&
-                document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.') &&
+                document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.') &&
                 vm?.runtime.targets.some(t => t.blocks.getScripts().some(script => !previousScripts.includes(script))) &&
                 window.__bwSimLab._pane.spikeLoaded();
         }, {id, previousScripts}, {timeout: 30000});
@@ -52,7 +52,7 @@ try {
     mkdirSync('artifacts/atlas-switchback', {recursive: true});
     await page.screenshot({path: 'artifacts/atlas-switchback/robot-example-auto-blocks.png'});
 } catch (error) {
-    console.log(await page.evaluate(() => ({status: document.querySelector('[data-testid="bw-code-status"]')?.textContent,
+    console.log(await page.evaluate(() => ({status: document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus,
         code: document.querySelector('.cm-content')?.textContent?.slice(0, 300),
         importerError: document.querySelector('[data-pseudocode-importer-load-error]')?.textContent,
         scripts: window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime?.targets.map(t => t.blocks.getScripts()),

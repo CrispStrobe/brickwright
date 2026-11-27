@@ -54,7 +54,7 @@ try {
         code: 'DEVICE SPIKE\nWHEN flag clicked:\n  set movement motors A B\n  move forward 1 cm\n', source: 'spike-browser-proof'
     }})));
     await page.getByTestId('bw-open-spike-arena').waitFor({timeout: 60000});
-    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
         null, {timeout: 60000});
     await page.getByTestId('bw-open-spike-arena').click();
     await page.getByTestId('bw-spike-simulator').waitFor();
@@ -66,7 +66,7 @@ try {
     // Clear its completion notice so only the reference solution can satisfy this wait.
     await page.getByTestId('bw-dismiss-code-status').click();
     await page.getByTestId('bw-spike-arena-load-solution').click();
-    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+    await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
         null, {timeout: 60000});
     assert.equal(await page.evaluate(() => window.__bwSpikeArena?._pane.spikeLoaded()), true);
     await page.getByTestId('bw-spike-arena-start').click();

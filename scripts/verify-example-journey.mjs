@@ -276,8 +276,7 @@ try {
     // importer's own catalogue recorded which example was open.
     await device.selectOption('stc89c52rc');
     const status = await page.waitForFunction(() => {
-        const el = document.querySelector('[data-testid="bw-code-status"]');
-        const text = (el && el.textContent) || '';
+        const text = document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || '';
         return /cannot retarget|not available|Cannot/i.test(text) ? text : false;
     }, null, {timeout: 20000}).then(handle => handle.jsonValue()).catch(() => '');
     check('choosing a device the example has no circuit for is REFUSED by name',

@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import JSZip from 'jszip';
-import {openCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {waitForArcadeStageFrame} from './lib/arcade-stage-frame.mjs';
 import {inspectGuiHarnessSource} from './lib/gui-harness-source.mjs';
 import {inspectGuiArtifactResponse} from './lib/gui-artifact-response.mjs';
@@ -89,8 +89,9 @@ const apply = async () => {
 const openFile = async file => {
     await codeTab(); await openCodeActions(page);
     await page.getByTestId('bw-open-file').locator('input[type=file]').setInputFiles(file);
-    await page.getByText(/Imported the Arcade game/).first().waitFor({timeout: 60000});
+    await (await openCodeInfo(page)).getByTestId('bw-code-status').filter({hasText: /Imported the Arcade game/}).waitFor({timeout: 60000});
     assert.doesNotMatch(await page.getByTestId('bw-code-status').innerText(), /unsupported|not translated|could not|partial/i);
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     assert.doesNotMatch(await readCode(), /# unsupported:/);
 };
 const fieldInfo = spec => page.evaluate(({opcode, input, value}) => {

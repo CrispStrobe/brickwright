@@ -211,7 +211,7 @@ try {
                 .waitFor({state: 'attached', timeout: 30000});
         } catch (cause) {
             const state = await page.evaluate(() => ({
-                codeStatus: document.querySelector('[data-testid="bw-code-status"]')?.textContent || '',
+                codeStatus: document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || '',
                 debugPhase: document.querySelector('[data-debug-panel]')?.getAttribute('data-debug-phase') || '',
                 device: document.querySelector('[data-testid="bw-device-select"]')?.value || '',
                 assembleDisabled: document.querySelector('[data-testid="bw-asm-assemble"]')?.disabled ?? null,

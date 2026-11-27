@@ -7102,7 +7102,8 @@ class PseudocodeImporter extends React.Component {
                 </ScrollRow>
         );
         return (
-            <div style={{...wrap, position: 'relative'}} data-testid="bw-code-editor">
+            <div style={{...wrap, position: 'relative'}} data-testid="bw-code-editor"
+                data-code-operation-status={this.state.status || undefined}>
                 {usesMacDevicePicker && this.renderMacDevicePicker()}
                 {max ? <details data-code-max-tools style={{position: 'absolute', top: 8, left: 16, right: 52,
                     zIndex: 20, pointerEvents: 'none'}} onKeyDown={event => {

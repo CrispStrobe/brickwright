@@ -10,7 +10,7 @@ const workflow = readFileSync(path.join(root, '.github/workflows/build.yml'), 'u
 test('the 8086 browser proof closes the local assembly, display, key and port journey', () => {
     for (const evidence of [
         "selectOption('i8086')", "selectOption('keys')", "selectOption('pins')",
-        'bw-asm-assemble', 'bw-code-status', 'in this browser', 'data-vdp-screen', 'bw-serial-input',
+        'bw-asm-assemble', 'codeOperationStatus', 'in this browser', 'data-vdp-screen', 'bw-serial-input',
         '/Z\\s+5A/', 'bw-led-ppi1-a-7', 'bw-switch-ppi1-c-0',
         'hostedCompilerRequests.length === 0'
     ]) assert.ok(proof.includes(evidence), `missing browser evidence: ${evidence}`);
@@ -21,7 +21,7 @@ test('the 8086 browser proof closes the local assembly, display, key and port jo
         'the production journey must wait on conditions, never elapsed guesses');
     const importer = readFileSync(path.join(root,
         'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
-    assert.match(importer, /data-testid="bw-code-status"/,
+    assert.match(importer, /data-code-operation-status=/,
         'the asynchronous assembly verdict needs a stable production selector');
     assert.match(importer, /__bwPendingMedia = \{type: 'asm', detail\}/,
         'assembling before the lazy Circuit tab mounts must not lose the image');

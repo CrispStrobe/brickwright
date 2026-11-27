@@ -19,6 +19,7 @@
  *  Skips (exit 0) when there is no local build. Never starts a browser it cannot
  *  drive.
  */
+import {openCodeInfo} from './lib-code-actions.mjs';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
@@ -142,7 +143,7 @@ try {
         const enabled = await waitFor(() => flashBtn.isEnabled().catch(() => false), v => v === true, 60000);
         if (enabled !== true) throw new Error('generated MicroPython never enabled the WebUSB flash control');
         await flashBtn.click();
-        const status = page.locator('[data-testid="bw-code-status"]').first();
+        const status = (await openCodeInfo(page)).getByTestId('bw-code-status');
         // The device-first handler maps a rejected requestDevice straight to the
         // by-name refusal — no firmware picker, no throw.
         const text = await waitFor(
