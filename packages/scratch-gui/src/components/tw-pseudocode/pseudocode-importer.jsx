@@ -2939,7 +2939,9 @@ class PseudocodeImporter extends React.Component {
         } catch (e) {
             const failure = conversionFailure(e);
             return {error: failure.message, diagnostics: {direction: `${LANG_LABEL[from] || from} → ${LANG_LABEL[to] || to}`,
-                preserved: false, changed: [], unsupported: failure.issues}};
+                preserved: false, changed: [], unsupported: failure.issues,
+                ...(failure.diagnostics ? {diagnostics: failure.diagnostics, sourceSpan: failure.sourceSpan,
+                    code: failure.code} : {})}};
         }
     }
 
@@ -4772,6 +4774,8 @@ class PseudocodeImporter extends React.Component {
         this.stopPicoSim();
         const request = {};
         this._picoSimRequest = request;
+        const controller = new AbortController();
+        this._picoSimAbort = controller;
         const vm = this.props.vm;
         const target = this.currentDevice();
         const ownsRequest = () => !this._unmounted && this._picoSimRequest === request &&
@@ -4807,6 +4811,7 @@ class PseudocodeImporter extends React.Component {
                 vm,
                 stc: this.currentStc(),
                 py,
+                signal: controller.signal,
                 onStatus: s => { if (ownsRequest()) this.setState({status: s}); },
                 onError: e => { if (ownsRequest()) this.setState({status:
                     this.L.deployPicoFail(e && e.message ? e.message : String(e))}); }
@@ -4826,6 +4831,10 @@ class PseudocodeImporter extends React.Component {
      *  down (the RUN board dies with it, the canvas rebinds to the designer). */
     stopPicoSim () {
         this._picoSimRequest = null;
+        if (this._picoSimAbort) {
+            this._picoSimAbort.abort();
+            this._picoSimAbort = null;
+        }
         if (this._picoSimStop) {
             try { this._picoSimStop(); } catch { /* teardown must not throw at the user */ }
             this._picoSimStop = null;
@@ -5770,7 +5779,9 @@ class PseudocodeImporter extends React.Component {
             const failure = conversionFailure(e);
             publishEditor({status: this.L.stError(failure.message), conversionReport: {
                 direction: `${LANG_LABEL[lang] || lang} → Blocks`, preserved: false,
-                changed: [], unsupported: failure.issues
+                changed: [], unsupported: failure.issues,
+                ...(failure.diagnostics ? {diagnostics: failure.diagnostics, sourceSpan: failure.sourceSpan,
+                    code: failure.code} : {})
             }});
             if (strict) throw e;
         } finally {

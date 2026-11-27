@@ -5,16 +5,24 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {captureCodeArtwork, codeArtworkMatches} from '../overlay/scratch-gui/src/lib/bw-code-artwork.js';
-import {balancedFrom, scopeAfter} from './helpers/js-scope.mjs';
+import {scopeAfter} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass, codeEditorMethod} from './helpers/code-document-editor.mjs';
+import {createCodeDocument, addCodeProjection, selectCodeDocumentLanguage} from '../overlay/scratch-gui/src/lib/code-source-document.js';
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-const signature = 'async compile ({strict = false, pseudocode = null} = {}) {';
-const compileBody = balancedFrom(source, source.indexOf(signature) + signature.length - 1, '{', '}');
-const publishBody = scopeAfter(source, 'publishAppliedDevice (stc) {');
+const methods = ['async compile ({strict = false, pseudocode = null} = {}) {',
+    'publishAppliedDevice (stc) {', 'async setDevice (deviceId) {']
+    .map(signature => codeEditorMethod(source, signature)).join('\n');
 const devices = {arcade: {core: 'arcade'}, microbit: {core: 'microbit'}, calliopemini: {core: 'microbit'}, uno: {core: 'avr'}};
 const Event = class { constructor (type, options) { this.type = type; this.detail = options.detail; } };
 const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, loadError, deferred = false, setStc = true, deferredRefresh = false, refreshError} = {}) => {
     const events = [], calls = [];
     const window = {dispatchEvent: event => events.push(event)};
+    const Editor = codeDocumentEditorClass(source, methods, {
+        DEVICE_BY_ID: devices, window, CustomEvent: Event, TWO_WAY: new Set(['pseudocode']),
+        classifyConversionWarnings: () => ({changed: [], unsupported: []}),
+        LANG_LABEL: {pseudocode: 'Pseudocode', micropython: 'MicroPython', javascript: 'JavaScript', asm: 'ASM'},
+        codeArtworkMatches, captureCodeArtwork, conversionFailure, DOS_LANG: {}, resolveExampleBench: () => null
+    });
     let finishLoad;
     const pendingLoad = new Promise(resolve => { finishLoad = resolve; });
     let finishRefresh;
@@ -35,27 +43,25 @@ const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, load
         generateBASIC () { return {ok: true, basic: ''}; }
         generateMicroPython () { return {ok: true, py: ''}; }
     }
-    const component = {props: {vm}, state: {lang, buffers: {pseudocode: program, micropython: 'from microbit import *'},
-        uploads: [], basicProfile: 'ms', basicLineNumbers: false},
+    const component = Object.assign(new Editor(), {props: {vm}, state: {lang,
+        buffers: {pseudocode: program, micropython: 'from microbit import *'},
+        uploads: [], basicProfile: 'ms', basicLineNumbers: false,
+        driverMode: 'shim', asyncMode: false, eventsMode: false, jsExecution: 'classic'},
         L: {stCompiling: 'compiling', stLoaded: 'loaded', stError: error => error},
         setState (patch, done) { Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch); done?.(); },
         activeCode () { return this.state.buffers[this.state.lang]; }, canLiftAsm: () => false, loadCatalog () {},
         deriveBuffer: async source => ({code: source}),
-        lib: async () => ({default: Creator}), genOpts: () => ({})};
-    component.publishAppliedDevice = new Function('DEVICE_BY_ID', 'window', 'CustomEvent',
-        `return function (stc) ${publishBody}`)(devices, window, Event);
-    // DOS_LANG / generateDosLangs: the fe and Tcl tabs, which compile() also
-    // regenerates; none here (stubs keep the sandbox to the names it gives).
-    component.compile = new Function('TWO_WAY', 'classifyConversionWarnings', 'LANG_LABEL', 'window', 'codeArtworkMatches', 'captureCodeArtwork', 'conversionFailure',
-        'DOS_LANG', 'generateDosLangs',
-        `return async function ({strict = false, pseudocode = null} = {}) ${compileBody}`)(new Set(['pseudocode']),
-        () => ({changed: [], unsupported: []}), {pseudocode: 'Pseudocode'}, window, codeArtworkMatches, captureCodeArtwork, conversionFailure,
-        {}, async () => ({}));
+        lib: async () => ({default: Creator})});
+    let document = createCodeDocument({lang: 'pseudocode', code: program,
+        generationOptions: component.codeGenerationOptions()});
+    if (lang !== 'pseudocode' && component.state.buffers[lang]) {
+        document = addCodeProjection(document, {lang, code: component.state.buffers[lang],
+            sourceRevision: document.revision, options: component.genOpts(lang)});
+    }
+    Object.assign(component.state, component.codeDocumentState(selectCodeDocumentLanguage(document, lang)));
     Creator.RETARGET_POOLS = {calliopemini: {}};
     Creator.retargetPseudocode = (text, device) => ({ok: true, warnings: [],
         pseudocode: text.replace(/^DEVICE\s+\S+/im, `DEVICE ${device.toUpperCase()}`)});
-    component.setDevice = new Function('DEVICE_BY_ID', 'resolveExampleBench', 'window',
-        `return async function (deviceId) ${scopeAfter(source, 'async setDevice (deviceId) {')}`)(devices, () => null, window);
     return {component, runtime, events, calls, finishLoad, finishRefresh};
 };
 

@@ -12,6 +12,8 @@
  * the JSON receipt; screenshots, saved projects and generated sources sit beside
  * it. --qualification-manifest binds an experimental supplier integration to
  * its committed consumer checkpoint, local sync patch and emitted asset hashes.
+ * BW_CHROMIUM_RUNTIME_ROOT optionally names an installed @sparticuz/chromium
+ * runtime; web-security and forced SharedArrayBuffer overrides are removed.
  * This harness does not install dependencies, build, or change the app.
  *
  * All editor changes, generation, execution and project Save/Open use visible
@@ -25,6 +27,7 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
+import {openCodeActions} from './lib-code-actions.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(scriptPath), '..');
@@ -103,6 +106,7 @@ const authoredJavaScript = [
     ''
 ].join('\n');
 const authoredOutput = 'saved-before\nsaved-after\n';
+const authoredPython = '# Ordinary Python remains executable source.\nprint(7 // 2)\n';
 
 await fs.mkdir(artifacts, {recursive: true});
 const fixtureBytes = await fs.readFile(fixturePath);
@@ -152,9 +156,14 @@ const langTab = label => page.getByTestId('bw-lang-row').getByRole('button', {na
 const editorText = () => codeEditor().evaluate(element => element.cmTile.root.view.state.doc.toString());
 const outputText = () => page.getByTestId('bw-code-output').textContent();
 const targetSelect = () => page.getByTestId('bw-js-execution-target');
-const idle = () => page.waitForFunction(() =>
-    document.querySelector('[data-testid="bw-code-action-row"] button') &&
-    !document.querySelector('[data-testid="bw-lang-row"] button[disabled]'), null, {timeout: 30000});
+const idle = () => page.waitForFunction(() => {
+    // The merged toolbar also contains legitimately disabled conversion and
+    // scroll buttons. Only the language controls expose the importer's busy
+    // state; an empty source must still count as an idle, editable document.
+    const languages = [...document.querySelectorAll('[data-testid="bw-lang-row"] button')]
+        .filter(button => ['🧩 Pseudo', '🐍 Py', '🟨 JS'].includes(button.textContent.trim()));
+    return languages.length === 3 && languages.every(button => !button.disabled);
+}, null, {timeout: 30000});
 const openCode = async () => {
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
     await codeEditor().waitFor({state: 'visible', timeout: 30000});
@@ -286,9 +295,29 @@ const assertAuthoredRecord = record => {
 };
 
 try {
-    browser = await chromium.launch({headless: true,
-        ...(process.env.BW_BROWSER ? {executablePath: process.env.BW_BROWSER} : {})});
+    const launchOptions = {headless: true, args: ['--enable-automation'],
+        ...(process.env.BW_BROWSER ? {executablePath: process.env.BW_BROWSER} : {})};
+    if (process.env.BW_CHROMIUM_RUNTIME_ROOT) {
+        const runtime = path.resolve(process.env.BW_CHROMIUM_RUNTIME_ROOT);
+        const requireChromium = createRequire(path.join(runtime, 'package.json'));
+        const imported = requireChromium('@sparticuz/chromium');
+        const distribution = imported.default || imported;
+        const excluded = arg => /disable-web-security|SharedArrayBuffer|sharedarraybuffer/.test(arg);
+        launchOptions.executablePath = process.env.BW_BROWSER || await distribution.executablePath();
+        launchOptions.args = [...new Set([...distribution.args.filter(arg => !excluded(arg)), '--enable-automation'])];
+        report.environment.chromiumDistribution = {
+            package: '@sparticuz/chromium',
+            version: JSON.parse(await fs.readFile(path.join(runtime, 'node_modules/@sparticuz/chromium/package.json'), 'utf8')).version,
+            excludedArgs: distribution.args.filter(excluded)
+        };
+    }
+    report.environment.suppliedBrowserArgs = launchOptions.args || [];
+    report.environment.browserExecutable = launchOptions.executablePath || 'Playwright-managed Chromium';
+    browser = await chromium.launch(launchOptions);
     report.environment.browser = browser.version();
+    const browserSession = await browser.newBrowserCDPSession();
+    report.environment.browserCommandLine = (await browserSession.send('Browser.getBrowserCommandLine')).arguments;
+    await browserSession.detach();
     page = await browser.newPage({viewport: {width: 1440, height: 1000}, locale: 'en-US', acceptDownloads: true});
     page.setDefaultTimeout(30000);
     page.on('dialog', dialog => dialog.accept());
@@ -330,6 +359,10 @@ try {
         assert(response && response.ok(), 'the actual app entry document loads');
         report.entryDocumentSha256 = sha256(await response.body());
         if (qualificationBytes) assert.equal(report.entryDocumentSha256, qualification.build.files['index.html']);
+        report.environment.pageCapabilities = await page.evaluate(() => ({
+            crossOriginIsolated,
+            sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined'
+        }));
         await openCode();
         assert.equal(await codeEditor().getAttribute('contenteditable'), 'true');
         assert(Array.isArray(await vmGraph()), 'the full editor VM is present');
@@ -488,6 +521,32 @@ try {
         return {authoredSourceSha256: sha256(authoredJavaScript)};
     });
 
+    await step('fresh authored Python refuses lossy block conversion by line and still runs in Skulpt', async () => {
+        const file = path.join(artifacts, 'authored-floor-division.py');
+        await fs.writeFile(file, authoredPython);
+        await openCodeActions(page);
+        await page.getByTestId('bw-open-file').locator('input[type="file"]').setInputFiles(file);
+        await waitEditorText(authoredPython);
+        assert.equal(await langTab('🐍 Py').getAttribute('aria-pressed'), 'true');
+        const graph = await vmGraph();
+        await page.getByRole('button', {name: '⇦ To blocks', exact: true}).click();
+        await idle();
+        const status = await page.getByTestId('bw-code-status').innerText();
+        assert.match(status, /floor division|\/\/|unsupported|cannot|not supported|refus/i);
+        assert.match(status, /line\s*2\b|\bL2\b|\b2:\d+/i, 'the refusal identifies the original authored line');
+        assert.equal(await editorText(), authoredPython);
+        assert.deepEqual(await vmGraph(), graph, 'refused Python conversion preserves the VM graph');
+        await screenshot('08-python-conversion-refusal');
+        const run = await newRun('authored-python-floor-division');
+        await finishRun(run, '3\n');
+        assert.equal(await editorText(), authoredPython, 'running Python preserves authored source');
+        assert.deepEqual(await vmGraph(), graph);
+        report.sources.authoredPython = {file: path.basename(file), sha256: sha256(authoredPython),
+            bytes: Buffer.byteLength(authoredPython)};
+        await screenshot('09-python-runs');
+        return {refusal: status, output: run.output};
+    });
+
     await step('the complete rendered journey has no uncaught page errors', async () => {
         await Promise.all(scriptReads);
         assert.deepEqual(report.errors, []);
@@ -502,10 +561,11 @@ try {
     report.failure = error.stack || String(error);
     console.error(`FAIL ${error.message}`);
     if (page) {
-        report.failureView = await Promise.allSettled([
-            editorText(), outputText(), page.getByTestId('bw-code-status').textContent()
-        ]).then(results => Object.fromEntries(results.map((result, index) =>
-            [['source', 'output', 'status'][index], result.status === 'fulfilled' ? result.value : result.reason.message])));
+        report.failureView = await page.evaluate(() => ({
+            source: document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.cmTile?.root?.view?.state.doc.toString() ?? null,
+            output: document.querySelector('[data-testid="bw-code-output"]')?.textContent ?? null,
+            status: document.querySelector('[data-testid="bw-code-status"]')?.textContent ?? null
+        })).catch(error => ({unavailable: error.message}));
         await screenshot('failure').catch(() => {});
     }
 } finally {

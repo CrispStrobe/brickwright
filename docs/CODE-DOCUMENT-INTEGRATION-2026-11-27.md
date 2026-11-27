@@ -1,0 +1,155 @@
+# Code documents and owned console integration — 2026-11-27
+
+Status: implementation candidate; normal supplier adoption and main landing are
+blocked by the existing qualification dependencies recorded below.
+
+This is the next bounded milestone in
+[the runtime plan](CODE-RUNTIME-AND-GAME-EXPORT.md#83-authored-documents-and-actual-code-tab-integration),
+continuing [Brickwright #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
+and [sb3-creator #246](https://github.com/CrispStrobe/sb3-creator/pull/246).
+The owner authorized implementation, incremental remote checkpoints and qualified
+merges. The feature was refreshed with current main before implementation and
+again with the later CAD update `d1e76cc60244ef8814d33e147e39ce4c58749dbc`.
+
+## Source and execution contract
+
+`code-source-document.js` owns a version-1 record in the existing Code autosave
+and `brickwright/state.json` Code section. There is one authored document, with
+independent selected-view state and disposable generated projections:
+
+| Field | Meaning |
+| --- | --- |
+| `lang`, `code` | Exact authored language and text; older readers recover these fields |
+| `revision` | Authored revision, incremented even by an edit followed by undo |
+| `selectedLang` | Visible language without changing authorship |
+| `target`, `runtime` | Persisted device and selected execution engine |
+| `generationOptions` | Driver/async/events, console contract and BASIC generation settings |
+| `execution` | Authored JavaScript's owned-console contract, when applicable |
+| `projections` | Generated text, originating revision/options, diagnostics and execution contract |
+
+Tab derivations start from the authored source. A stale asynchronous derivation,
+changed VM, edit/revert or displaced request cannot publish into a newer editor.
+To blocks preserves the exact author even when invoked from a generated view;
+its final admission check runs before project mutation. From blocks reads the
+actual SB3 graph and retains the canonical Boolean-value lowering.
+
+Editing a generated view makes that text the new authored source and clears
+stale projections. Loading an explicit file, catalog item or starter program
+creates a fresh document. This includes ASM/C starters: their old Pseudo text
+belongs to the previous program, while the deliberately selected device is
+preserved independently. Generated assembly from a machine build remains a
+revision-bound view, and does not replace authored assembly.
+
+Empty programs persist. Legacy records retain their archive shape and migrate
+when read by the editor. Unsupported versions are refused without overwriting
+their stored bytes. In-memory editing accepts text beyond the persistence budget;
+the 512-KiB UTF-8 envelope limit is enforced at read/save boundaries. Save flushes
+the live editor and refuses the archive if that flush fails, preventing an old
+localStorage record from silently accompanying newer blocks. Refused sidecars
+preserve live edits that have not reached the debounce timer yet.
+
+JavaScript offers **Classic source** and **Console program**. The latter requests
+the existing `owned-console-v1` generator contract: shim driver, async tasks and
+the admitted console subset. A supplier revision that ignores that contract
+produces an explicit refusal. The generated header and durable provenance both
+identify the contract; deleting the header after editing does not enable an
+unsupported reverse conversion. The existing worker owns input, delay, Stop,
+output and completion. This does not implement Scratch game scheduling or a
+simulator/game bridge.
+
+Pico Python/MicroPython Run forwards the exact visible text to the existing
+firmware deployment route. Its optional AbortSignal cancels lazy imports, boot,
+deployment and a running simulator. Cleanup removes only its own board and
+observation object. Stop, a replacement target/VM, unmount and rerun revoke the
+old owner. Generic Python remains Skulpt. These ownership controls do not claim
+new firmware, GPIO or physical-device qualification.
+
+## Python conversion integrity
+
+Supplier checkpoint
+[`4994e2c7`](https://github.com/CrispStrobe/sb3-creator/commit/4994e2c77143c7bee9eb8b76706ffae3321743a0)
+refuses generic Python floor division, unsupported augmented assignments and
+`break`/`continue` before producing pseudocode. It retains one-based, end-exclusive
+statement spans and individual diagnostic codes. It does not pretend that
+ordinary division, addition or omitted control flow preserves these operations.
+Supported `+=`/`-=` and independent specialized readers retain their existing
+behavior. See the supplier's
+[conversion semantics record](https://github.com/CrispStrobe/sb3-creator/blob/4994e2c77143c7bee9eb8b76706ffae3321743a0/docs/PYTHON-CONVERSION-SEMANTICS.md).
+
+The consumer formats each location for the existing visible conversion report
+and retains the structured codes/spans. A failed conversion leaves its source
+and loaded project intact; that Python may still run in its selected runtime.
+
+## Behavioral evidence
+
+The focused consumer set passes **214/214**, with zero skips/failures, on Node
+24.22.3. It covers worker sessions/tasks, authored document and bundle behavior,
+conversion/editor ownership, specialized caller controls, Pico startup ownership,
+exact visible Pico source, and per-statement Python diagnostics. The supplier's
+focused converter/generator set passes **217/217**; its independent reader and
+specialized-route controls pass **177/177**. These are selected behavioral sets,
+not a claim that every hosted repository gate passes.
+
+Reproduce the focused consumer set with the normal workspace dependencies:
+
+```sh
+node --test --test-timeout=5000 \
+  test/code-execution-session.test.mjs test/code-javascript-tasks.test.mjs \
+  test/code-runtime-source-ownership.test.mjs \
+  test/code-tab-empty-target-after-failed-conversion.test.mjs \
+  test/code-conversion-editor-ownership.test.mjs test/code-tab-run-via-blocks.test.mjs \
+  test/spike-code-caller-ownership.test.mjs test/code-document-editor-integration.test.mjs \
+  test/code-source-document.test.mjs test/code-source-document-bundle.test.mjs \
+  test/pico-sim-run-ownership.test.mjs test/pico-sim-run.test.mjs \
+  test/pico-sim-epoch.test.mjs test/code-pico-source-ownership.test.mjs \
+  test/python-conversion-diagnostics.test.mjs
+```
+
+The real-editor harness is `scripts/verify-owned-console-code-tab.mjs`. It uses
+visible CodeMirror edits, generation controls, the production worker, and actual
+File Save/Open. It observes the VM and editor without replacing workers or
+calling component setters. Its candidate bundle is built in a separate detached
+worktree through the official compiler/gallery sync and normal GUI build. The
+shipping feature retains its existing supplier pin.
+
+`scripts/write-owned-console-qualification-manifest.mjs` binds that experiment
+to the immutable supplier, consumer checkpoint, exact local sync patch, canonical
+rewritten compiler bytes/mirrors and emitted JS/index hashes. The browser checks
+the hashes of loaded assets and records its actual command line/capabilities.
+The manifest deliberately says `shippingEvidence: false`; it does not fabricate
+a hosted build receipt. The rendered-browser result is recorded separately when
+the final candidate run completes.
+
+## Reused prerequisite and remaining landing dependencies
+
+The five-file HDD identity repair is reused from the exact first-parent subset
+of Microtronic PR #1846 commit
+[`ad492c7a`](https://github.com/CrispStrobe/brickwright/commit/ad492c7ac87d2ca393e0da9ceed4d96a3da16563).
+Ownership remains with
+[its existing lane](../lanes/2026-11-25-microtronic-host-ci-controls.md).
+The subset changes no workflow, dependency pin, runtime, firmware fixture or
+original historical digest. It exactly inverts four reviewed repository-identity
+guards for historical comparisons while requiring repository ID `1291854269`
+in the live workflow. Wrong IDs, obsolete name guards, displaced/duplicated
+predicates and unrelated drift still refuse.
+
+The complete HDD control file passes **29/29**, and the five connected identity,
+fixture-stage and policy/negative controls pass **5/5**. The broader connected
+pin/download/projection run is **96 passed, 7 failed, 0 skipped**: all seven are
+pre-existing current-pin consistency failures in unchanged files, not a passing
+qualification. Its scan reads 14,224 files and reports 79 stale occurrences in
+26 files. Reusing the HDD repair does not repair this separate pin drift.
+
+The supplier's existing RF mixer scenario remains a real upstream blocker. A
+read-only reproduction at its exact Board/CUI pins measured 1170.56856 Hz versus
+the existing 5830 ±600-Hz expectation. Board #779/#780 were examined; the pinned
+and #780 traces were identical for all 300 retained samples. No tolerance,
+expected frequency or physics fixture was changed. The RF owner still needs a
+settled oscillator/audio explanation and a qualified correction.
+
+Normal adoption remains ordered: qualify and land the supplier upstream, then
+move the consumer's exact pin through official sync and regenerate its dependent
+identities. The gallery and pin consistency gates must also pass. Implementation
+checkpoints on the existing feature branches preserve the work while these
+dependencies remain open. No failed gate is treated as green, and no worker,
+desktop-Chromium or method test establishes other browser/native/mobile support.
