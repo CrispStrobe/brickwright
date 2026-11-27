@@ -105,7 +105,7 @@ export default [
         featured: true
     }, {
         name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Formen' : 'CAD shapes', extensionId: 'cadshapes', iconURL: 'static/extension-posters/cad-shapes.webp',
-        insetIconURL: 'static/extension-posters/cad-cube.svg',
+        insetIconURL: 'static/extension-posters/cad-shapes-mark.svg',
         description: browserLocale().toLowerCase().startsWith('de')
             ? 'Baue 3D-Modelle mit Blöcken. Das Modell erscheint neben den Blöcken und aktualisiert sich bei jeder Änderung; Export nach OpenSCAD und JSCAD.'
             : 'Build 3D models from blocks. The model shows beside your blocks and updates as you edit; exports to OpenSCAD and JSCAD.',
