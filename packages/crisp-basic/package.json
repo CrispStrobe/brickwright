@@ -1,0 +1,22 @@
+{
+  "name": "@crispstrobe/crispbasic",
+  "version": "0.1.0-dev.1",
+  "private": true,
+  "description": "CrispBASIC: a portable BBC BASIC-compatible runtime, starting with a native headless backend.",
+  "type": "module",
+  "license": "BSD-3-Clause",
+  "engines": { "node": ">=22" },
+  "exports": {
+    ".": "./index.mjs",
+    "./native": "./src/native-session.mjs",
+    "./source": "./src/source.mjs"
+  },
+  "bin": { "crispbasic": "./bin/crispbasic.mjs" },
+  "scripts": {
+    "build:native": "node scripts/build-native.mjs",
+    "test": "node --test tests/source.test.mjs",
+    "test:native": "node --test tests/runtime.test.mjs tests/cli.test.mjs",
+    "test:all": "npm test && npm run test:native",
+    "start": "node bin/crispbasic.mjs"
+  }
+}

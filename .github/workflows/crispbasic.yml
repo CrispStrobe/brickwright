@@ -1,0 +1,41 @@
+name: CrispBASIC native runtime
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'packages/crisp-basic/**'
+      - '.github/workflows/crispbasic.yml'
+  pull_request:
+    paths:
+      - 'packages/crisp-basic/**'
+      - '.github/workflows/crispbasic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}${{ !(github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request')) && format('-isolated-{0}', github.run_id) || '' }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request') }}
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: packages/crisp-basic
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install native build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential nasm
+      - name: Check source preparation
+        run: npm test
+      - name: Build the pinned headless core
+        run: npm run build:native
+      - name: Run real native runtime and CLI tests
+        run: npm run test:native
+      - name: Run the standalone example
+        run: node bin/crispbasic.mjs examples/structured.bas --json
