@@ -1,0 +1,63 @@
+{
+  "schema": "bw-arcade-code-examples-v1",
+  "provenance": {
+    "portable": false,
+    "simulate": true,
+    "files": {
+      "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "a028970aee163bc15503c9b4d5be00bd9add40cc41e64910cd5fc4908cca4de7",
+      "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+      "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+    }
+  },
+  "results": [
+    {
+      "id": "art",
+      "scope": "Code menu",
+      "device": null,
+      "sourceWarnings": [],
+      "opcodes": [
+        "control_repeat",
+        "event_whenflagclicked",
+        "event_whenkeypressed",
+        "looks_hide",
+        "motion_gotoxy",
+        "motion_movesteps",
+        "motion_turnleft",
+        "pen_changePenColorParamBy",
+        "pen_clear",
+        "pen_menu_colorParam",
+        "pen_penDown",
+        "pen_setPenColorToColor",
+        "pen_setPenSizeTo"
+      ],
+      "unsupported": [],
+      "warnings": [
+        "Scratch pen hue is quantized to the Arcade palette.",
+        "Arcade keyboard controls keep the Scratch keys. Physical controllers use the assigned Arcade buttons.",
+        "Pen: costume \"costume1\" converted to palette pixels"
+      ],
+      "pxtSourceSha256": "8d4759eeed471206033293ebc30950b415df2afb7bda7753f187fe587e766d0e",
+      "outcome": "compiled",
+      "compiled": true,
+      "diagnostics": [],
+      "simulator": {
+        "check": "boot and input smoke test",
+        "screenPixels": 19200,
+        "colours": 6,
+        "displayUpdates": 9
+      }
+    }
+  ],
+  "counts": {
+    "compiled": 1
+  },
+  "scopes": {
+    "Code menu": {
+      "total": 1,
+      "simulatorRuns": 1,
+      "outcomes": {
+        "compiled": 1
+      }
+    }
+  }
+}
