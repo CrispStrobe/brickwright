@@ -99,6 +99,62 @@ function _othersStopped (s: Sprite, t: number): boolean {
     }
     return false
 }`},
+    scratchDecimal: {deps: [], ts: `function _scratchDecimal (value: any): number {
+    const n = +value
+    return isNaN(n) ? 0 : n
+}`},
+    scratchFactorial: {deps: ['scratchDecimal'], ts: `function _scratchFactorial (input: any): any {
+    const n = _scratchDecimal(input)
+    if (n < 0 || Math.floor(n) !== n) return ""
+    if (n > 170) return Infinity
+    let result = 1
+    for (let factor = 2; factor <= n; factor++) result *= factor
+    return result
+}`},
+    scratchDigitSum: {deps: ['scratchDecimal'], ts: `function _scratchDigitSum (input: any): any {
+    let n = Math.abs(_scratchDecimal(input))
+    if (n - n !== 0 || Math.floor(n) !== n) return ""
+    let result = 0
+    while (n > 0) {
+        result += n % 10
+        n = Math.floor(n / 10)
+    }
+    return result
+}`},
+    scratchMultiple: {deps: ['scratchDecimal'], ts: `function _scratchMultiple (left: any, right: any): boolean {
+    const a = _scratchDecimal(left)
+    const b = _scratchDecimal(right)
+    return a - a === 0 && b - b === 0 && Math.floor(a) === a && Math.floor(b) === b && b !== 0 && a % b === 0
+}`},
+    namedArrayRange: {deps: [], ts: `function _namedArrayRange (start: any, end: any): number[] {
+    let value = +start
+    const last = +end
+    const values: number[] = []
+    if (value - value !== 0 || last - last !== 0) return values
+    while (value <= last) {
+        values.push(value)
+        if (value + 1 === value) break
+        value++
+    }
+    return values
+}`},
+    namedArraySum: {deps: [], ts: `function _namedArraySum (values: any[]): number {
+    if (!values) return 0
+    let result = 0
+    for (const value of values) {
+        result += Array.isArray(value) ? _namedArraySum(<any[]>value) : +(value || 0)
+    }
+    return result
+}`},
+    namedArrayMax: {deps: [], ts: `function _namedArrayMax (values: any[]): number {
+    if (!values) return 0
+    let result = -Infinity
+    for (const value of values) {
+        const item = Array.isArray(value) ? _namedArrayMax(<any[]>value) : +value
+        result = Math.max(result, item)
+    }
+    return result
+}`},
     scratchPose: {deps: [], ts: `function _scratchDirection (s: Sprite): number {
     const d = s.data["_bwScratchDirection"]
     return d === undefined ? 90 : d
