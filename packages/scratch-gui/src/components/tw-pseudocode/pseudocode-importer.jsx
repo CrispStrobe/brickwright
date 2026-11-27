@@ -186,7 +186,7 @@ const L10N = {
         saveEmpty: 'Nothing to save — this tab is empty.',
         restored: t => `Restored your unsaved ${t}.`,
         loadCatalogTitle: 'Load a catalog example for this device',
-        noChips: 'no chips (Scratch stage)',
+        noChips: 'Scratch stage',
         searchExamples: 'Search examples…',
         catalogLoading: 'Loading example catalog…',
         catalogEmpty: 'No catalog examples for this device.',
@@ -530,7 +530,7 @@ const L10N = {
         saveEmpty: 'Nichts zu speichern — dieser Tab ist leer.',
         restored: t => `Nicht gespeicherter ${t} wiederhergestellt.`,
         loadCatalogTitle: 'Ein Katalog-Beispiel für dieses Gerät laden',
-        noChips: 'ohne Chip (Scratch-Bühne)',
+        noChips: 'Scratch-Bühne',
         searchExamples: 'Beispiele suchen…',
         catalogLoading: 'Beispiel-Katalog wird geladen…',
         catalogEmpty: 'Keine Katalog-Beispiele für dieses Gerät.',
@@ -793,44 +793,44 @@ const GROUPS = [
         // are not finished games and therefore do not belong in this gallery.
         // A game enters here only after an authored-art, onboarding, objective,
         // feedback, touch-control and live-VM audit.
-        ['g2048', '✨ Nova Grid — polished'],
-        ['sigil_grid', '☀️ Sigil Grid — solo / duo'],
-        ['vector_seven', '🏓 Vector Seven — first to 7'],
-        ['reactor_ricochet', '⚡ Reactor Ricochet — clear 20 cells'],
-        ['flux_vault', '🔷 Flux Vault — 3 puzzle chambers'],
-        ['neon_circuit', '💡 Neon Circuit — darken 3 boards'],
-        ['canal_command', '🚢 Canal Command — lift 4 boats'],
-        ['sky_skim', '🪽 Skyline Swoop — polished'],
-        ['missile_ballet', '✈️ Contrail Panic — polished'],
-        ['orbit_ward', '🛡️ Aegis Arc — polished'],
-        ['chroma_code', '💎 Prism Lock — polished'],
-        ['fusion_foundry', '☄️ Core Cascade — polished'],
-        ['rooftop_relay', '🏃 Neon Relay — polished'],
-        ['twinwall', '🪩 Rift Rally — polished'],
-        ['turbo_chicane', '🏁 Slipstream Circuit — polished'],
-        ['abyss_rescue', '🤿 Abyss Lift — polished'],
-        ['specter_sweep', '🔮 Wardlight — polished'],
-        ['moonlight_heist', '🐭 Pantry Prowl — polished'],
-        ['cloud_court', '🏐 Nimbus Volley — polished'],
-        ['ember_dojo', '⚔️ Ember Parry — polished'],
-        ['lockstep_lagoon', '🌊 Tidegate Rush — polished'],
-        ['rink_riot', '🏒 Blue-Line Breaker — polished'],
-        ['rim_reactor', '🏀 Orbit Hoops — polished'],
-        ['comet_cup', '☄️ Comet Strikers — polished'],
-        ['trench_signal', '🛸 Echo Trench — polished'],
-        ['whisker_switch', '🐭 Whisker Relay — polished'],
-        ['spiral_circuit', '🌀 Helix Rush — polished'],
-        ['lilyway_rescue', '🐸 Moonbank Hop — polished'],
-        ['rotor_rogue', '🏍️ Crosswind Courier — polished'],
-        ['prism_spire', '🏗️ Lumen Stack — polished'],
-        ['shard_sheriff', '🩸 Plasma Posse — polished'],
-        ['halo_foundry', '🛡️ Halo Lockdown — polished'],
-        ['corridor_kestrel', '🛸 Carrier Kestrel — polished'],
-        ['thunder_volley', '⚡ Skycourt Surge — polished'],
-        ['cascade_pair', '🌈 Chromafall Reactor — polished'],
-        ['mooncoil_odyssey', '🌙 Cratercoil — polished'],
-        ['cinder_thrust', '🚀 Magma Lift — polished'],
-        ['triple_bingo', '🎲 Triple Bingo — 3 players, one screen']
+        ['g2048', '✨ Nova Grid'],
+        ['sigil_grid', '☀️ Sigil Grid'],
+        ['vector_seven', '🏓 Vector Seven'],
+        ['reactor_ricochet', '⚡ Reactor Ricochet'],
+        ['flux_vault', '🔷 Flux Vault'],
+        ['neon_circuit', '💡 Neon Circuit'],
+        ['canal_command', '🚢 Canal Command'],
+        ['sky_skim', '🪽 Skyline Swoop'],
+        ['missile_ballet', '✈️ Contrail Panic'],
+        ['orbit_ward', '🛡️ Aegis Arc'],
+        ['chroma_code', '💎 Prism Lock'],
+        ['fusion_foundry', '☄️ Core Cascade'],
+        ['rooftop_relay', '🏃 Neon Relay'],
+        ['twinwall', '🪩 Rift Rally'],
+        ['turbo_chicane', '🏁 Slipstream Circuit'],
+        ['abyss_rescue', '🤿 Abyss Lift'],
+        ['specter_sweep', '🔮 Wardlight'],
+        ['moonlight_heist', '🐭 Pantry Prowl'],
+        ['cloud_court', '🏐 Nimbus Volley'],
+        ['ember_dojo', '⚔️ Ember Parry'],
+        ['lockstep_lagoon', '🌊 Tidegate Rush'],
+        ['rink_riot', '🏒 Blue-Line Breaker'],
+        ['rim_reactor', '🏀 Orbit Hoops'],
+        ['comet_cup', '☄️ Comet Strikers'],
+        ['trench_signal', '🛸 Echo Trench'],
+        ['whisker_switch', '🐭 Whisker Relay'],
+        ['spiral_circuit', '🌀 Helix Rush'],
+        ['lilyway_rescue', '🐸 Moonbank Hop'],
+        ['rotor_rogue', '🏍️ Crosswind Courier'],
+        ['prism_spire', '🏗️ Lumen Stack'],
+        ['shard_sheriff', '🩸 Plasma Posse'],
+        ['halo_foundry', '🛡️ Halo Lockdown'],
+        ['corridor_kestrel', '🛸 Carrier Kestrel'],
+        ['thunder_volley', '⚡ Skycourt Surge'],
+        ['cascade_pair', '🌈 Chromafall Reactor'],
+        ['mooncoil_odyssey', '🌙 Cratercoil'],
+        ['cinder_thrust', '🚀 Magma Lift'],
+        ['triple_bingo', '🎲 Triple Bingo']
     ]},
     {label: 'Demos', items: [
         ['game', '🎯 Complete Game'], ['art', '🎨 Digital Art'], ['physics', '⚡ Physics Demo'],
@@ -6068,8 +6068,9 @@ class PseudocodeImporter extends React.Component {
             this.setDevice(id);
         };
         const item = (id, label) => <button type="button" key={id || 'none'} role="menuitemradio"
-            aria-checked={id === current} data-device-option={id}
-            style={{...toolStyles(false).button, textAlign: 'left', justifyContent: 'flex-start', width: '100%'}}
+            aria-checked={id === current} data-device-option={id} title={label}
+            style={{...toolStyles(false).button, display: 'block', textAlign: 'left', width: '100%',
+                overflow: 'hidden', textOverflow: 'ellipsis'}}
             onClick={() => choose(id)}>{label}</button>;
         const heading = {display: 'block', padding: '5px 8px 2px', fontSize: 11, color: '#64748b'};
         return createPortal(<dialog ref={element => {this.macDeviceDialog = element;}}
@@ -6080,12 +6081,11 @@ class PseudocodeImporter extends React.Component {
                 <strong>{pickLocale(this.props.locale) === 'de' ? 'Zielsystem' : 'Machine'}</strong>
                 <button type="button" style={toolStyles(false).button} aria-label="Close" onClick={close}>×</button>
             </div>
-            <button type="button" style={{...toolStyles(false).button, width: '100%'}}
-                onClick={() => choose('__manage__')}>Manage machines…</button>
+            <button type="button" style={{...toolStyles(false).button, justifyContent: 'flex-start', width: '100%'}}
+                onClick={() => choose('__manage__')}>{pickLocale(this.props.locale) === 'de' ? 'Maschinen verwalten…' : 'Manage machines…'}</button>
             {item('', this.L.noChips)}
             <strong style={heading}>Intel 8049</strong>
-            <button type="button" style={{...toolStyles(false).button, width: '100%'}}
-                onClick={() => choose('kosmos-cp1')}>Kosmos CP1</button>
+            {item('kosmos-cp1', 'Kosmos CP1')}
             {DEVICE_GROUPS.map(group => <React.Fragment key={group.label}>
                 <strong style={heading}>{group.label}</strong>
                 {group.devices.map(device => item(device.id, device.label))}
@@ -6106,6 +6106,32 @@ class PseudocodeImporter extends React.Component {
                 button={<button type="button" data-testid="bw-code-actions-trigger" style={toolStyles(false).button}
                     title={L10N[pickLocale(this.props.locale)].fileMenuTitle}
                     aria-label={this.L.fileMenuTitle}><Icon name="more" /></button>}>
+                {!machine && (
+                    <div data-code-menu-group role="group" aria-label={this.L.actionExamples}>
+                    {this.currentDevice() ? this.renderCatalogControl(item) :
+                        this.state.bundledExamplesStatus === 'error' ? (
+                            <button type="button" onClick={this._loadBundledExamples} data-overflow-action style={item}
+                                title={this.L.loadExampleTitle} data-testid="bw-load-example-retry">
+                                {this.L.examplesRetry}
+                            </button>
+                        ) : this.state.bundledExamplesStatus !== 'ready' ? (
+                            <span style={{...item, cursor: 'wait', color: '#64748b'}} aria-live="polite"
+                                data-testid="bw-load-example-loading">{this.L.examplesLoading}</span>
+                        ) : (
+                        <select defaultValue="" onChange={e => { this.setState({actionsOpen: false}); this.loadExample(e.target.value); }}
+                            style={{...item, border: 'none'}} title={this.L.loadExampleTitle}
+                            data-testid="bw-load-example">
+                            <option value="" disabled>{this.L.loadExample}</option>
+                            {GROUPS.map(g => (
+                                <optgroup key={g.label} label={g.label}>
+                                    {g.items.filter(([k]) => examples[k]).map(([k, label]) =>
+                                        <option key={k} value={k}>{label}</option>)}
+                                </optgroup>
+                            ))}
+                        </select>
+                    )}
+                    </div>
+                )}
                 {this.state.actionsOpen && <>
                     <div data-code-menu-group data-code-overflow-controls>
                         {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
@@ -6201,29 +6227,7 @@ class PseudocodeImporter extends React.Component {
                         title={this.L.arcExportTitle} disabled={this.state.busy}
                         data-testid="bw-makecode-arcade-export"><Icon name="save" />{this.L.arcExport.replace(/^⬆\s*/, '')}</button>
                     </div>
-                    <div data-code-menu-group role="group" aria-label={this.L.actionExamples}>
-                    {this.currentDevice() ? this.renderCatalogControl(item) :
-                        this.state.bundledExamplesStatus === 'error' ? (
-                            <button type="button" onClick={this._loadBundledExamples} data-overflow-action style={item}
-                                title={this.L.loadExampleTitle} data-testid="bw-load-example-retry">
-                                {this.L.examplesRetry}
-                            </button>
-                        ) : this.state.bundledExamplesStatus !== 'ready' ? (
-                            <span style={{...item, cursor: 'wait', color: '#64748b'}} aria-live="polite"
-                                data-testid="bw-load-example-loading">{this.L.examplesLoading}</span>
-                        ) : (
-                        <select defaultValue="" onChange={e => { this.setState({actionsOpen: false}); this.loadExample(e.target.value); }}
-                            style={{...item, border: 'none'}} title={this.L.loadExampleTitle}
-                            data-testid="bw-load-example">
-                            <option value="" disabled>{this.L.loadExample}</option>
-                            {GROUPS.map(g => (
-                                <optgroup key={g.label} label={g.label}>
-                                    {g.items.filter(([k]) => examples[k]).map(([k, label]) =>
-                                        <option key={k} value={k}>{label}</option>)}
-                                </optgroup>
-                            ))}
-                        </select>
-                    )}
+                    <div data-code-menu-group role="group" aria-label={this.L.reference}>
                     <button type="button" onClick={() => this.setState(s => ({showRef: !s.showRef}))}
                         data-overflow-action style={item} title={this.L.referenceTitle(this.state.lang)}><Icon name="instructions" />{this.L.reference}</button>
                     <button type="button" onClick={() => this.setState(s => ({showArt: !s.showArt}))}
@@ -6790,7 +6794,8 @@ class PseudocodeImporter extends React.Component {
                         {usesMacDevicePicker ? <button type="button" aria-haspopup="dialog"
                             aria-label={this.L.deviceTitle} title={this.L.deviceTitle}
                             data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
-                            style={{...csel, alignSelf: 'center', cursor: 'pointer'}}
+                            style={{...csel, alignSelf: 'center', cursor: 'pointer', whiteSpace: 'nowrap',
+                                minWidth: 0, flexShrink: menu ? 1 : 0, overflow: 'hidden', textOverflow: 'ellipsis'}}
                             onClick={() => this.setState({actionsOpen: false}, () => {
                                 const dialog = this.macDeviceDialog;
                                 if (dialog && !dialog.open) {
@@ -6801,7 +6806,8 @@ class PseudocodeImporter extends React.Component {
                             {DEVICE_BY_ID[codeDevice]?.label || this.L.noChips} ▾
                         </button> : (
                         <select value={codeDevice || ''} onChange={e => this.setDevice(e.target.value)}
-                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
+                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0, whiteSpace: 'nowrap',
+                                flexShrink: menu ? 1 : 0}} title={this.L.deviceTitle}
                             data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
                             <option value="">{this.L.noChips}</option>
                             <optgroup label="Intel 8049">

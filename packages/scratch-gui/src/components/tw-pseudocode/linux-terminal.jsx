@@ -102,6 +102,11 @@ class LinuxTerminal extends React.Component {
             linkHandler: {activate: openTerminalLink}
         });
         this.term = term;
+        if (terminal.kind === 'pico') {
+            // The runner already answered cursor queries, including ones in
+            // the replay log. Suppress the duplicate CPR on the visible face.
+            term.parser.registerCsiHandler({final: 'n'}, params => params.length === 1 && params[0] === 6);
+        }
         const send = bytes => terminal.send(bytes);
         term.attachCustomKeyEventHandler(ev => {
             const bytes = keyToBytes(ev, {applicationCursor: term.modes.applicationCursorKeysMode});

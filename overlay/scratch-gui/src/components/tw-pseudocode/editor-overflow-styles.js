@@ -72,6 +72,11 @@ ${rows}:disabled {
     padding-top: 3px;
     border-top: 1px solid #e2e8f0;
 }
+[data-editor-overflow] [data-code-menu-group] :is([data-overflow-action], button, select) {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 [data-code-menu-group] > :is(label, details) {
     min-width: 0;
 }

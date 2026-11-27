@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
-import {chromium} from 'playwright';
+import {chromium, webkit} from 'playwright';
 
 const url = process.argv[2];
 assert.ok(url, 'Pass the URL of the assembled Brickwright frontend');
-const browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
+const engine = process.env.BW_BROWSER_ENGINE === 'webkit' ? webkit : chromium;
+const browser = await engine.launch({headless: true,
+    executablePath: engine === chromium ? process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH : undefined});
 const page = await browser.newPage({viewport: {width: 1440, height: 900}, locale: 'en-US', serviceWorkers: 'block'});
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
@@ -59,8 +61,9 @@ try {
 
     const terminal = page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-picobb-terminal');
     const rows = terminal.locator('.xterm-rows');
-    await rows.getByText(/BBC BASIC for Pico Console/).waitFor();
-    assert.doesNotMatch(await rows.innerText(), /Corrupted dir pair|Unable to locate LittleFS|Unable to format/);
+    await rows.getByText(/^BBC BASIC for Pico Console/).waitFor();
+    await rows.getByText(/^LittleFS image v2\.1, Size = 128KB, Origin = 0x10050000$/).waitFor();
+    assert.doesNotMatch(await rows.innerText(), /Corrupted dir pair|Unable to locate LittleFS|Unable to format|^\s*L\s*$/m);
     const input = terminal.locator('textarea');
     const send = async command => {
         await input.focus();
@@ -78,6 +81,8 @@ try {
     const bounds = await terminal.boundingBox();
     assert.ok(bounds.width >= 1420, JSON.stringify(bounds));
     await page.getByTestId('bw-machine-fullscreen').click();
+    await send('PRINT 9*7');
+    await rows.getByText(/^\s*63\s*$/, {exact: true}).waitFor();
     assert.deepEqual(errors, []);
     console.log('CPU groups filter correctly, and PicoBB mounts LittleFS and runs a saved program from the Controller terminal.');
 } finally {

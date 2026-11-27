@@ -41,7 +41,7 @@ import {
     setCondition, conditionOf, allConditions
 } from './breakpoints.js';
 import { parseCondition } from './condition.js';
-import {createLinuxConsole} from './linux-console.js';
+import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.js';
 import {createReadyGatedInput} from './ready-gated-input.js';
 import {createTerminalOutput} from './terminal-output.js';
 import {createEngineeringInputRoute} from './engineering-input-route.js';
@@ -899,6 +899,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let terminalOutput = null;
     /** Per-frame boot-progress hook for the Linux lesson, or null. */
     let terminalFrame = null;
+    let disposeTerminal = null;
     /**
      * Set by destroy(). A runner destroyed while its start() is still awaiting
      * attach() must not come back to life when attach resolves: before this,
@@ -1612,6 +1613,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         serialTerminal = false;
         serialEsc = 0;
         terminalOutput = null;
+        disposeTerminal?.();
+        disposeTerminal = null;
         delete runner.terminal;
         terminalFrame = null;
         const device = String(built?.device || projectStc(null)?.device || '').toLowerCase();
@@ -2093,13 +2096,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             { createDebugSession, BoardImpl, inferNetlist },
             { createRp2040jsAdapter },
             { parseUF2, FLASH_BASE },
-            { createRp2040jsDebugTarget }
+            { createRp2040jsDebugTarget },
+            { Terminal }
         ] = await Promise.all([
             import(/* webpackChunkName: "bw-board" */ 'bw-board'),
             import(/* webpackChunkName: "bw-board" */ 'bw-board/rp2040js-adapter.js'),
             import(/* webpackChunkName: "bw-board" */ 'bw-board/uf2.js'),
-            import(/* webpackChunkName: "bw-board" */ 'bw-board/rp2040js-debug.js')
+            import(/* webpackChunkName: "bw-board" */ 'bw-board/rp2040js-debug.js'),
+            import(/* webpackChunkName: "bw-xterm" */ '@xterm/xterm')
         ]);
+        if (destroyed) return null;
 
         // Flatten the UF2 to a flat flash image (byte 0 at FLASH_BASE). Refuse
         // by name on a bad image rather than booting an empty flash into a NOP
@@ -2139,8 +2145,18 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const output = createTerminalOutput();
         const input = createReadyGatedInput({isReady: () => true, send: feedByte,
             canAccept: () => uart.rxFIFO.empty, burst: 32});
-        const cursorQuery = '\x1b[6n';
-        let escape = '';
+        // PicoBB probes for the current position, then the right edge, and
+        // restores the position it was given. Keep the parser alive offscreen
+        // so queries work with the Controller hidden or after it remounts.
+        const cursor = new Terminal({cols: TERMINAL_COLS, rows: TERMINAL_ROWS, scrollback: 0});
+        cursor.onData(reply => {
+            if (/^\x1b\[\d+;\d+R$/.test(reply)) input.write(new TextEncoder().encode(reply));
+        });
+        const unsubscribeCursor = output.subscribe(bytes => cursor.write(bytes));
+        disposeTerminal = () => {
+            unsubscribeCursor();
+            cursor.dispose();
+        };
         let lineBuf = '';
         let wakeOnPrompt = bootMedia.picoWakeOnPrompt === true;
 
@@ -2155,26 +2171,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     lineBuf = '';
                 } else if (ch !== '\r') lineBuf = (lineBuf + ch).slice(-64);
             }
-            if (!escape && byte !== 0x1b) {
-                output.push(byte);
-                return;
-            }
-            escape += ch;
-            if (cursorQuery.startsWith(escape) && escape !== cursorQuery) return;
-            // Answer the size query before the Controller has mounted. Keep
-            // the answered query out of replay so xterm cannot answer twice.
-            if (escape === cursorQuery) {
-                for (const c of '\x1b[24;80R') feedByte(c.charCodeAt(0));
-            } else {
-                for (const c of escape) output.push(c.charCodeAt(0));
-            }
-            escape = '';
+            output.push(byte);
         });
 
         runner.sendSerial = data => input.write(typeof data === 'number' ? [data] :
             typeof data === 'string' ? new TextEncoder().encode(data) : data);
-        runner.terminal = {id: `pico-uart-${++picoTerminalSequence}`, kind: 'pico', rows: 24, cols: 80,
-            subscribe: output.subscribe, send: input.write};
+        runner.terminal = {id: `pico-uart-${++picoTerminalSequence}`, kind: 'pico',
+            rows: TERMINAL_ROWS, cols: TERMINAL_COLS, subscribe: output.subscribe, send: input.write};
         terminalFrame = () => {
             output.deliver();
             input.flush();
@@ -5799,6 +5802,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             hddSnapshotOwner = {};
             i8086ExecutionResult = null;
             destroyed = true;
+            disposeTerminal?.();
+            disposeTerminal = null;
+            terminalFrame = null;
             if (!preserveRuntime) {setValueResolver(null);
                 if (vm && vm.runtime) delete vm.runtime._bwDebugVariables;}
             unschedule();
