@@ -419,3 +419,21 @@ expected file. The current and original shard-3 file lists are identical. All
 including actual undeclared-package and undeclared-test refusals. This replay
 explains the old failure; a fresh hosted run remains necessary for the current
 consumer candidate.
+
+The first newly enrolled CAD browser shards also exposed a live runner-receipt
+identity refusal. `audit-job-steps.mjs` still required the pre-rename
+`CrispStrobe/brickwright-lite` repository and workflow prefix, although the
+current hosted checkout is `CrispStrobe/brickwright`. The live reader now admits
+the two documented workbench names only with stable GitHub repository ID
+`1291854269`, independently confirmed by the repository API. The workflow prefix
+must match the actual admitted name. The separate Legacy application ID
+`881088189`, a missing ID, foreign owners and both mixed-name workflow headers
+remain refused.
+
+All 41 runner audit controls pass with zero skips, including both valid names
+and six hostile headers through the genuine CLI. Existing source/shard mapping,
+Git-byte binding, row completeness and earlier gate failures remain enforced;
+historical receipt schemas and recorded names are unchanged. The same hosted
+CAD jobs reported two real browser failures after touch gestures, in outline
+constraints and DXF regions. Fixing the receipt identity does not clear those
+application journeys; they remain under investigation.

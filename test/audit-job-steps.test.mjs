@@ -313,9 +313,10 @@ const RUNNER_SCRIPT = path.join(RUNNER_ROOT, 'scripts/audit-job-steps.mjs');
 const runnerHash = (raw, kind = 'sha256') => createHash(kind).update(raw).digest('hex');
 const runnerBlob = text => runnerHash(Buffer.concat([Buffer.from('blob '+Buffer.byteLength(text)+'\0'), Buffer.from(text)]), 'sha1');
 const runnerEnvironment = (shard, head = 'a'.repeat(40), workspace = RUNNER_ROOT) => ({
-    GITHUB_REPOSITORY: 'CrispStrobe/brickwright-lite', GITHUB_RUN_ID: '40113882924', GITHUB_RUN_ATTEMPT: '1',
+    GITHUB_REPOSITORY: 'CrispStrobe/brickwright', GITHUB_REPOSITORY_ID: '1291854269',
+    GITHUB_RUN_ID: '40113882924', GITHUB_RUN_ATTEMPT: '1',
     GITHUB_JOB: 'browser', BW_JOB_NAME: 'browser ('+shard+')', GITHUB_SHA: head,
-    GITHUB_WORKFLOW_SHA: 'b'.repeat(40), GITHUB_WORKFLOW_REF: 'CrispStrobe/brickwright-lite/.github/workflows/build.yml@refs/pull/900/merge',
+    GITHUB_WORKFLOW_SHA: 'b'.repeat(40), GITHUB_WORKFLOW_REF: 'CrispStrobe/brickwright/.github/workflows/build.yml@refs/pull/900/merge',
     GITHUB_WORKSPACE: workspace, GH_TOKEN: 'authored-private-token-fixture',
     UNRELATED_STEP_OUTPUT: 'authored-private-output-fixture'
 });
@@ -398,6 +399,42 @@ test('runner: every current shard traverses actual workflow expressions, checked
         assert.notEqual(receipt.identity.executingWorkflowSha, receipt.identity.checkoutHead, 'executing W is recorded separately');
         assert.ok(Buffer.byteLength(wire) < RUNNER_INPUT_CAP && Buffer.byteLength(result.stdout) <= RUNNER_RECEIPT_CAP);
         assert.doesNotMatch(result.stdout, /authored-private|outputs|GH_TOKEN|GITHUB_WORKSPACE/);
+    }
+});
+
+test('runner: live repository rename binds the stable ID and the matching workflow through the real CLI', () => {
+    const fixture = getRunnerFixture(), shard = 'lightcad1';
+    const base = runnerEnvironment(shard, fixture.head, fixture.directory);
+    const context = runnerContext(RUNNER_WORKFLOW, shard);
+    const workflowRef = repository => repository+'/.github/workflows/build.yml@refs/pull/900/merge';
+    for (const repository of ['CrispStrobe/brickwright', 'CrispStrobe/brickwright-lite']) {
+        const env = {...base, GITHUB_REPOSITORY: repository, GITHUB_WORKFLOW_REF: workflowRef(repository)};
+        const result = runnerCLI(shard, renderRunnerContext(RUNNER_WORKFLOW, context, env, shard), env);
+        assert.equal(result.status, 0, repository+': '+result.stderr);
+        const receipt = receiptFrom(result);
+        assert.equal(receipt.complete, true);
+        assert.equal(receipt.allAssignedGatesSucceeded, true);
+        assert.equal(receipt.identity.repository, repository);
+        assert.equal(receipt.identity.workflowRef, workflowRef(repository));
+    }
+    const repositoryRefusal = 'current runner repository/job/shard identity';
+    const workflowRefusal = 'current checked source/workflow identity';
+    for (const [label, changes, reason] of [
+        ['missing repository ID', {GITHUB_REPOSITORY_ID: undefined}, repositoryRefusal],
+        ['legacy application ID', {GITHUB_REPOSITORY_ID: '881088189'}, repositoryRefusal],
+        ['foreign owner', {GITHUB_REPOSITORY: 'other/brickwright', GITHUB_WORKFLOW_REF: workflowRef('other/brickwright')}, repositoryRefusal],
+        ['legacy application name', {GITHUB_REPOSITORY: 'CrispStrobe/brickwright-legacy', GITHUB_WORKFLOW_REF: workflowRef('CrispStrobe/brickwright-legacy')}, repositoryRefusal],
+        ['current name with historical workflow', {GITHUB_WORKFLOW_REF: workflowRef('CrispStrobe/brickwright-lite')}, workflowRefusal],
+        ['historical name with current workflow', {GITHUB_REPOSITORY: 'CrispStrobe/brickwright-lite'}, workflowRefusal]
+    ]) {
+        const env = {...base, ...changes};
+        // Render a self-consistent hostile header: the authority guard, not a
+        // stale wire/header mismatch, must refuse each invalid identity.
+        const result = runnerCLI(shard, renderRunnerContext(RUNNER_WORKFLOW, context, env, shard), env);
+        assert.equal(result.status, 1, label);
+        const refusal = receiptFrom({...result, stdout: result.stderr});
+        assert.equal(refusal.complete, false, label);
+        assert.equal(refusal.firstFailure.reason, reason, label);
     }
 });
 
