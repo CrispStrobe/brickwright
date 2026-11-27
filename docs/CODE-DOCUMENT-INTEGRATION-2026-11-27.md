@@ -343,3 +343,13 @@ for official compiler/gallery sync and dependent identity regeneration; build
 the resulting clean committed consumer; obtain a new bound Code-tab receipt
 and applicable hosted qualification; then merge the consumer. The earlier
 experimental receipt keeps its original source/build identities throughout.
+
+The two newly enrolled CAD fixture journeys subsequently passed against a fresh
+CAD-enabled diagnostic build of `10fd4689f0addcb63acba6a3e92d108449470525`:
+actual DWG import/export/reimport and project restoration, and STEP import of
+eight colored reference bodies with print exclusion and project restoration.
+The application, proof scripts and fixtures were unchanged. The
+[CAD browser receipt](CAD-BROWSER-FIXTURE-RECEIPT-2026-11-27.md) records their
+source/build/runtime identities, complete command outputs and retained
+diagnostics. These two local passes do not qualify the other browser proofs or
+the later supplier adoption.
