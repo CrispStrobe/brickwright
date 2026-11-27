@@ -16,10 +16,10 @@ const vaultSteps = vaultSolutions.flatMap((solution, chamber) =>
 
 const lockSteps = [];
 for (let boat = 1; boat <= 4; boat++) {
-    if (boat > 1) lockSteps.push(click(80.5, 111.5));
-    lockSteps.push(click(33.5, 111.5, 100));
-    lockSteps.push(click(80.5, 111.5, 750));
-    lockSteps.push(click(127.5, 111.5, 100, {boats: boat}));
+    if (boat > 1) lockSteps.push(click(80.5, 111.5, 0, {water: 0}));
+    lockSteps.push(click(33.5, 111.5, 0, {lowerGate: 0, boatZone: 1}));
+    lockSteps.push(click(80.5, 111.5, 0, {water: 1}));
+    lockSteps.push(click(127.5, 111.5, 0, {boats: boat, upperGate: 0, boatZone: boat === 4 ? 2 : 0}));
 }
 
 export const arcadeExampleChecks = {
