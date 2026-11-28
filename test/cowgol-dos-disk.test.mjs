@@ -40,7 +40,7 @@ test('the MS-DOS base contract matches its shipped asset and provenance', () => 
         'one cluster must remain available for AUTOEXEC.BAT');
 });
 
-test('MS-DOS disk activation preserves CPU, disk and Controller choices without a 386 alias', async () => {
+test('MS-DOS disk activation preserves CPU, disk and Controller choices through each actual CPU', async () => {
     for (const variant of COWGOL_DOS_DISK_VARIANTS) for (const display of [false, true]) {
         const config = cowgolDosDiskConfig({variant, display});
         assert.deepEqual(validateMachineConfig(config), {ok: true, errors: []});
@@ -48,7 +48,11 @@ test('MS-DOS disk activation preserves CPU, disk and Controller choices without 
             assert.equal(ref.url, 'local-media:cowgol-dos.img');
             return {bytes: base};
         }, dispatch () {}});
-        assert.equal(detail.kind, 'i8086');
+        assert.equal(detail.kind, variant === '80386' ? 'i80386' : 'i8086');
+        if (variant === '80386') {
+            assert.equal(config.machineConfig, 'dos-boot');
+            assert.equal(detail.machinePreset, 'dos-boot');
+        }
         assert.equal(detail.profile, 'dos');
         assert.equal(detail.slotId, 'disk');
         assert.equal(detail.x86Variant, variant);
@@ -57,8 +61,8 @@ test('MS-DOS disk activation preserves CPU, disk and Controller choices without 
         assert.equal(detail.widgets.length, display ? 1 : 0);
         if (display) assert.deepEqual(detail.widgets[0].config, {width: 720, height: 400});
     }
-    for (const variant of ['80386', 'i8086', '8088', null, 8086]) {
-        assert.throws(() => cowgolDosDiskConfig({variant}), /explicit 8086, 80186 or 80286/);
+    for (const variant of ['80486', 'i8086', '8088', null, 8086]) {
+        assert.throws(() => cowgolDosDiskConfig({variant}), /explicit 8086, 80186, 80286 or 80386/);
     }
     for (const display of [1, null, 'yes']) assert.throws(() => cowgolDosDiskConfig({display}), /Boolean/);
 });

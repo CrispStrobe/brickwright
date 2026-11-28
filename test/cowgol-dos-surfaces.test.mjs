@@ -140,7 +140,7 @@ test('full Cowgol uses the selected real DOS CPU and exact bytes on console and 
 });
 
 test('full and checked Cowgol boot the prepared MS-DOS disk on each qualified CPU and display', async () => {
-    for (const lang of ['cowgol', 'pseudocode']) for (const variant of ['8086', '80186', '80286']) {
+    for (const lang of ['cowgol', 'pseudocode']) for (const variant of COWGOL_DOS_VARIANTS) {
         for (const surface of ['dos-system', 'dos-system-display']) {
             const f = fixture({lang, images: true});
             if (lang === 'cowgol') await f.editor.compileCowgolSource('dos', true, {surface, variant});
@@ -151,7 +151,8 @@ test('full and checked Cowgol boot the prepared MS-DOS disk on each qualified CP
             assert.ok(f.prepared[0].signal instanceof AbortSignal);
             assert.equal(f.dispatched.length, 1, f.editor.state.status);
             const detail = f.dispatched[0];
-            assert.equal(detail.kind, 'i8086');
+            assert.equal(detail.kind, variant === '80386' ? 'i80386' : 'i8086');
+            if (variant === '80386') assert.equal(detail.machinePreset, 'dos-boot');
             assert.equal(detail.slotId, 'disk');
             assert.equal(detail.profile, 'dos');
             assert.equal(detail.dosVariant, variant);
@@ -166,7 +167,7 @@ test('full and checked Cowgol boot the prepared MS-DOS disk on each qualified CP
 test('OS image policy, unsupported CPU and disk preparation failure cannot launch a stale or foreign disk', async () => {
     for (const lang of ['cowgol', 'pseudocode']) for (const images of [false, true]) {
         const f = fixture({lang, images});
-        const variant = images ? '80386' : '8086';
+        const variant = images ? '80486' : '80386';
         if (lang === 'cowgol') await f.editor.compileCowgolSource('dos', true, {surface: 'dos-system', variant});
         else await f.editor.runViaCowgolOnDevice({surface: 'dos-system', variant});
         assert.equal(f.built.length, 0);
@@ -203,6 +204,25 @@ test('a selected 80386 defaults to the separate 386 DOS machine for full and che
         assert.equal(f.dispatched[0].machinePreset, 'dos-service');
         assert.equal(f.dispatched[0].dosVariant, '80386');
         assert.deepEqual(f.dispatched[0].bytes, f.bytes);
+        if (lang === 'pseudocode') {
+            assert.deepEqual(f.imports, [{strict: true, targetDevice: 'i80386', cowgolTarget: 'dos'}]);
+            assert.match(f.built[0].code, /bw_checked_add/);
+        } else assert.equal(f.built[0].code, f.code);
+    }
+});
+
+test('selected I80386 full and checked source retain the CPU through default disk boot', async () => {
+    for (const lang of ['cowgol', 'pseudocode']) for (const surface of ['dos-system', 'dos-system-display']) {
+        const f = fixture({lang, images: true, selectedDevice: 'i80386'});
+        if (lang === 'cowgol') await f.editor.compileCowgolSource('dos', true, {surface});
+        else await f.editor.runViaCowgolOnDevice({surface});
+        assert.equal(f.built.length, 1, f.editor.state.status);
+        assert.equal(f.prepared.length, 1);
+        assert.equal(f.dispatched.length, 1, f.editor.state.status);
+        assert.equal(f.dispatched[0].kind, 'i80386');
+        assert.equal(f.dispatched[0].machinePreset, 'dos-boot');
+        assert.equal(f.dispatched[0].dosVariant, '80386');
+        assert.deepEqual(f.dispatched[0].bytes, f.diskBytes);
         if (lang === 'pseudocode') {
             assert.deepEqual(f.imports, [{strict: true, targetDevice: 'i80386', cowgolTarget: 'dos'}]);
             assert.match(f.built[0].code, /bw_checked_add/);
@@ -253,9 +273,9 @@ for (const phase of ['compiler-module', 'network', 'media']) {
 
 for (const phase of ['compiler-module', 'network', 'disk', 'media']) {
     test(`booted MS-DOS launch revokes source and image ownership during ${phase}`, async () => {
-        for (const [reason, change] of Object.entries({...revoke, policy: f => f.refuseImages()})) {
+        for (const variant of ['80186', '80386']) for (const [reason, change] of Object.entries({...revoke, policy: f => f.refuseImages()})) {
             const f = fixture({hold: phase, images: true});
-            const pending = f.editor.compileCowgolSource('dos', true, {surface: 'dos-system-display', variant: '80186'});
+            const pending = f.editor.compileCowgolSource('dos', true, {surface: 'dos-system-display', variant});
             await f.entered.promise;
             change(f); f.release.resolve(); await pending;
             assert.equal(f.dispatched.length, 0, reason);

@@ -6,7 +6,7 @@ Owner: ChatGPT, at the repository owner's request. Base: `b474327531ab9133f27c69
 
 Scope: Cowgol Code-tab language, + menu, source import/export and recovery, supported pseudocode/Blocks conversion, canvas/circuit bridge, truthful machine capabilities and compilation routing. Owning sibling boundaries: `sb3-creator` converters, `stc-compiler` compiler service, and `CrispStrobe/cowgol` compiler/runtime improvements. Examine `feature/crispbasic` for established integration patterns without replacing that work.
 
-Delivery: the owner explicitly requests incremental saves to remote feature branches. This lane therefore stays on feature branches; it does not merge a claim or implementation into main. Upstream source identity, pin provenance, tracked mirrors and focused behavioral verification remain required.
+Delivery: the owner requests incremental saves to remote feature branches and now explicitly requests an attempt to merge the completed integration into each repository's default branch. This continuation supersedes the earlier feature-only delivery direction below. Follow the dependency order, preserve intervening main work, and use normal protected-branch PR merges after qualification. Upstream source identity, pin provenance, tracked mirrors and focused behavioral verification remain required. The expanded scope is claimed in `lanes/2026-11-28-cowgol-platforms.md`.
 
 Qualification: bidirectional conversion tests (including unsupported syntax), language/menu/recovery/routing tests, compiler smoke tests where toolchains are available, and generated capability/provenance checks. Native machine support is distinguished from conversion through an existing target backend.
 

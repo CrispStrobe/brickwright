@@ -2,7 +2,7 @@
  * The existing machine supplies BIOS services; IO.SYS, MSDOS.SYS and
  * COMMAND.COM execute from the shipped FAT12 disk and own DOS interrupts.
  */
-export const COWGOL_DOS_DISK_VARIANTS = Object.freeze(['8086', '80186', '80286']);
+export const COWGOL_DOS_DISK_VARIANTS = Object.freeze(['8086', '80186', '80286', '80386']);
 export const COWGOL_DOS_BASE_IMAGE = Object.freeze({
     url: 'static/dos/msdos200-base.img', bytes: 368640,
     sha256: '5fbbe5e86fb845cff120ae8d17a01904c0db9d0b6103ce382b31130bd3eadd39'
@@ -64,12 +64,13 @@ export async function prepareCowgolDosDisk (exeBytes, {
  */
 export function cowgolDosDiskConfig ({variant = '8086', display = false} = {}) {
     if (!COWGOL_DOS_DISK_VARIANTS.includes(variant) || typeof display !== 'boolean') {
-        throw new Error('Cowgol MS-DOS boot needs an explicit 8086, 80186 or 80286 CPU and a Boolean display choice.');
+        throw new Error('Cowgol MS-DOS boot needs an explicit 8086, 80186, 80286 or 80386 CPU and a Boolean display choice.');
     }
     return {
         id: `cowgol-msdos200-${variant}${display ? '-display' : ''}`,
         title: `Cowgol — MS-DOS 2.0 ${variant}${display ? ' / text display' : ''}`,
         machine: `i${variant}`, executionMode: 'functional', cpu: {variant},
+        ...(variant === '80386' ? {machineConfig: 'dos-boot'} : {}),
         slots: {disk: {url: 'local-media:cowgol-dos.img'}}, bootOrder: ['disk'],
         widgets: display ? [{name: 'MS-DOS text display', type: 'simplevga', source: 'video',
             config: {width: 720, height: 400}}] : [],

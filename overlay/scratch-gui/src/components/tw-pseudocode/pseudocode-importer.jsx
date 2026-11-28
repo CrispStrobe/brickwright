@@ -6080,10 +6080,6 @@ class PseudocodeImporter extends React.Component {
             this.setState({status: this.L.stError('Select a qualified DOS CPU: 8086, 80186, 80286 or 80386.')});
             return;
         }
-        if (dosSystem && (variant === '80386' || (variant === undefined && device === 'i80386'))) {
-            this.setState({status: this.L.stError('MS-DOS 2.0 disk boot supports 8086, 80186 and 80286. Select one of these CPUs.')});
-            return;
-        }
         if (surface !== 'bench' && !(dosSystem ? target === 'dos' && remoteMachineImagesAllowed() : surface === 'dos-display' ? target === 'dos' :
             ['cpm-system', 'cpm-vdp'].includes(surface) && target === 'z80-cpm' && remoteMachineImagesAllowed())) return;
         const request = {};
@@ -7679,7 +7675,7 @@ class PseudocodeImporter extends React.Component {
                                         {this.L.cowgolRunBlocksDosVariantDisplay(variant)}
                                     </button>
                                 </React.Fragment>)}
-                                {remoteMachineImagesAllowed() && ['8086', '80186', '80286'].map(variant => <React.Fragment key={`disk-${variant}`}>
+                                {remoteMachineImagesAllowed() && ['8086', '80186', '80286', '80386'].map(variant => <React.Fragment key={`disk-${variant}`}>
                                     <button type="button" onClick={() => this.runViaCowgolOnDevice({surface: 'dos-system', variant})}
                                         disabled={this.state.running || this.state.busy}
                                         title={this.L.cowgolRunDosSystemTitle}
@@ -7766,7 +7762,7 @@ class PseudocodeImporter extends React.Component {
                                                 {this.L.cowgolRunDosVariantDisplay(variant)}
                                             </button>
                                         </React.Fragment>)}
-                                        {remoteMachineImagesAllowed() && ['8086', '80186', '80286'].map(variant => <React.Fragment key={`disk-${variant}`}>
+                                        {remoteMachineImagesAllowed() && ['8086', '80186', '80286', '80386'].map(variant => <React.Fragment key={`disk-${variant}`}>
                                             <button type="button" onClick={() => this.compileCowgolSource('dos', true, {surface: 'dos-system', variant})}
                                                 disabled={this.state.running || this.state.busy}
                                                 title={this.L.cowgolRunDosSystemTitle}
