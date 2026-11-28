@@ -37,3 +37,14 @@ The other ten EVENT-AS-STATE suspects are inherited from current main `ccc5c6405
 
 
 The [inherited gate-shape review](../docs/receipts/2026-11-28-cowgol-inherited-gate-shapes.json) preserves the exact source comparisons, canonical scanner reproduction, limits and additional masked findings. It changes no verifier or audit budget.
+
+
+## Consolidated review of the parallel qualification work
+
+The consolidated candidate preserves the 32 documented local scopes and leaves the other 24 browser programs as explicit coverage failures. The complete 56-entry source inventory is historical evidence, not a blanket admission list; each admitted scope must match the exact independently preserved wiring audit. Source hashes, prerequisites and pending PR ownership do not grant execution credit.
+
+An independent review of the ten inherited visibility suspects examined their actual downstream assertions. The reported waits synchronize persistent controls before compiler-output, image/pixel, CPU/RAM, electrical-state, request-inventory or camera-state checks. Site-specific audit comments name those existing witnesses; executable AST identity was verified for every changed verifier. The historical untriaged receipt above keeps its original scope. This later source triage changes no audit budget or runtime assertion and adds no browser execution receipt.
+
+The established bounded direct-child recognizer and the explicit CLI switch from the preceding checkpoint remain authoritative, with their existing executable, argument, shell, cwd, prototype and mutation controls. The extra experimental execution interpreter and its private fixtures are removed from this candidate; their saved commits remain in history. The documented-scope test reads the three referenced documents, preserving the governed build triggers. The independent direct-child and promisified-call tests remain intact.
+
+PR #1865 remains the single main-branch integration proposal. The one-use canonical evidence job runs on `feat/cowgol-platforms-qualified-20261128` at the same consolidated source commit; generated documents cannot be published as a qualified tree while the 24 unresolved gates fail. Normal enabled final-head checks and exact-tree workflow removal remain required before landing.

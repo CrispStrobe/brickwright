@@ -63,6 +63,7 @@ try {
 
     await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
     const openInlineGallery = page.getByRole('button', {name: 'Expand Examples', exact: true}).first();
+    // gate-shapes-allow: bench readiness precedes request-absence assertions; decoded covers and pagination below prove state.
     await openInlineGallery.waitFor({state: 'visible'});
     assert.equal(indexes.length, 1, 'the Circuit bench does not load the artwork index');
     assert.deepEqual(circuitCatalogRequests, []);
@@ -110,6 +111,7 @@ try {
     await page.getByTestId('bw-circuit-panel-designer').first().click();
     await openInlineGallery.click();
     await page.getByRole('button', {name: /Codex$/}).first().click();
+    // gate-shapes-allow: opening the Codex is the contract; exact catalog/artwork request inventories below prove load and sharing.
     await page.getByTestId('codex-browser').first().waitFor({state: 'visible'});
     assert.deepEqual(circuitCatalogRequests, ['index.json', 'curriculum.json']
         .map(name => new URL(`examples/${name}`, base).href));

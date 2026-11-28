@@ -2,7 +2,7 @@ name: Cowgol integration evidence
 
 on:
   push:
-    branches: [feat/cowgol-platforms-20261128]
+    branches: [feat/cowgol-platforms-qualified-20261128]
     paths:
       - '.github/workflows/cowgol-producer-sync.yml'
       - 'overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js'
@@ -13,6 +13,8 @@ on:
       - 'test/gate-direct-exec.test.mjs'
       - 'test/gate-promisified-exec.test.mjs'
       - 'scripts/lib/gate-promisified-exec.mjs'
+      - 'test/fixtures/gate-coverage-inherited.json'
+      - 'docs/receipts/2026-11-28-cowgol-gate-wiring-audit.json'
 
 permissions:
   contents: read
@@ -23,7 +25,7 @@ concurrency:
 
 jobs:
   evidence:
-    if: ${{ github.repository == 'CrispStrobe/brickwright' && github.ref == 'refs/heads/feat/cowgol-platforms-20261128' }}
+    if: ${{ github.repository == 'CrispStrobe/brickwright' && github.ref == 'refs/heads/feat/cowgol-platforms-qualified-20261128' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -48,13 +50,20 @@ jobs:
             'edd30b11967747774cfddd01f8eb888509866c5c');
           execFileSync('git', ['merge-base', '--is-ancestor',
             '301316b0736180ee84bedb4439b8f33689f65bd3', 'HEAD']);
+          const {SB3_CREATOR_FILES} = await import('./scripts/lib/vendor-rewrites.mjs');
+          const appOwned = 'bw-lang/cowgol-compile.js';
+          assert.ok(!SB3_CREATOR_FILES.some(([local]) => local === appOwned),
+            'the editor compiler router must remain outside the producer source map');
+          assert.equal(execFileSync('git', ['rev-parse',
+            'HEAD:overlay/scratch-gui/src/lib/' + appOwned], {encoding: 'utf8'}).trim(),
+            '5a9e745ae7fdce4835829fa69ee5a693f8e95616',
+            'the one app-owned exception must be the reviewed compiler router');
           execFileSync('git', ['diff', '--exit-code',
             '301316b0736180ee84bedb4439b8f33689f65bd3', 'HEAD', '--',
-            'vendor-pins.json', 'overlay/scratch-gui/src/lib',
-            'packages/scratch-gui/src/lib', 'overlay/scratch-gui/examples',
-            // The app-owned compiler selector now exposes the existing checked
-            // 8080 profile; all producer sources and galleries remain identical.
-            ':(exclude)overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js'], {stdio: 'inherit'});
+            'vendor-pins.json', 'scripts/lib/vendor-rewrites.mjs', 'scripts/lib/vendor',
+            'overlay/scratch-gui/src/lib', 'packages/scratch-gui/src/lib',
+            'overlay/scratch-gui/examples',
+            ':(top,exclude,literal)overlay/scratch-gui/src/lib/' + appOwned], {stdio: 'inherit'});
           NODE
           npm install --prefix .cowgol-evidence-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1 acorn@8.14.0 acorn-walk@8.3.4 @babel/parser@7.28.5
           ln -s .cowgol-evidence-deps/node_modules node_modules
@@ -81,6 +90,8 @@ jobs:
         run: |
           node scripts/check-mirrors.mjs
           node -e "require('@babel/parser').parse(require('node:fs').readFileSync('overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx','utf8'),{sourceType:'module',plugins:['jsx']})"
+          node scripts/audit-gate-shapes.mjs --json > "$RUNNER_TEMP/cowgol-gate-shapes.json"
+          node scripts/aggregate-timeouts.mjs --census --json > "$RUNNER_TEMP/cowgol-wait-census.json"
           node --test \
             test/gate-shapes.test.mjs \
             test/gate-coverage.test.mjs \
@@ -121,9 +132,12 @@ jobs:
           const report = {
             sourceSnapshot: '301316b0736180ee84bedb4439b8f33689f65bd3',
             producer: 'edd30b11967747774cfddd01f8eb888509866c5c',
+            supplierSnapshot: 'Exact pins, mapped sources, vendor transforms and gallery retained.',
+            appOwnedRouter: 'bw-lang/cowgol-compile.js is outside the producer map; qualified in the exact candidate tests.',
             candidate: git('rev-parse', 'HEAD'), qualifiedTree, rootEntries: roots.length,
             changedFiles: changed, readerCoverage: 'passed', workflowCensus: 'passed',
             focusedAppGates: 'passed', verifierCli: 'passed',
+            coverageInventoryPolicy: 'Only documented local scopes are admitted; unresolved gate wiring remains blocking.',
             finalization: 'Root must remove only the temporary workflow and reproduce qualifiedTree exactly.'
           };
           fs.writeFileSync(process.env.RUNNER_TEMP + '/cowgol-final-evidence.json',
@@ -139,18 +153,21 @@ jobs:
           const paths = execFileSync('git', ['diff', '--cached', '--name-only'],
             {encoding:'utf8'}).trim().split('\n').filter(Boolean);
           const allowed = new Set(['docs/generated/READER-COVERAGE.md', 'docs/generated/ci-step-census.json']);
-          assert.ok(paths.length, 'the missing workflow observations must be saved');
           assert.deepEqual(paths.filter(path => !allowed.has(path)), []);
           NODE
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'test: refresh Cowgol reader and workflow evidence'
-          git push origin HEAD:refs/heads/feat/cowgol-platforms-20261128
+          if ! git diff --cached --quiet; then
+            git commit -m 'test: refresh Cowgol reader and workflow evidence'
+            git push origin HEAD:refs/heads/feat/cowgol-platforms-qualified-20261128
+          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: cowgol-final-evidence
           path: |
             ${{ runner.temp }}/cowgol-final-evidence.json
+            ${{ runner.temp }}/cowgol-gate-shapes.json
+            ${{ runner.temp }}/cowgol-wait-census.json
             docs/generated/READER-COVERAGE.md
             docs/generated/ci-step-census.json

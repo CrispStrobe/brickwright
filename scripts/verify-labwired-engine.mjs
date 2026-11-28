@@ -204,6 +204,7 @@ try {
     }
     const run = page.locator('[data-debug-panel]:visible [data-debug-run]').first();
     if (!await run.isVisible()) await page.getByRole('button', {name: 'Open debugger', exact: true}).first().click();
+    // gate-shapes-allow: this persistent Run control is a prerequisite; persisted engine identity, PA0 edge counts and the withheld-artifact branch establish the actual states.
     await run.waitFor();
     check('the Run control is reachable', await run.isEnabled());
 

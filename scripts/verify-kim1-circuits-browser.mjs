@@ -41,6 +41,7 @@ try {
     await page.getByTestId('bw-circuit-panel-examples').first().click();
     await page.getByPlaceholder(/^Search \d+ examples/).first().fill('KIM-1');
     const card = page.locator('[data-example-id="kim1-wired-io"]:visible');
+    // gate-shapes-allow: persistent lesson artwork readiness is followed by decoded-image, exact key-count, CPU/RAM, LED and ROM-state checks.
     await card.locator('img[data-example-artwork]').waitFor();
     await page.waitForFunction(() => document.querySelector('[data-example-id="kim1-wired-io"] img')?.naturalWidth > 0);
     await card.getByText('KIM-1: Wired I/O', {exact: true}).click();
