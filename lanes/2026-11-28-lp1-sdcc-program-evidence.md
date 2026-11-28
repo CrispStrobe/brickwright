@@ -12,9 +12,11 @@ use the verified complete parent tree while local full-clone storage is unavaila
 ## Bounded evidence slice
 
 Preserve the bounded read-only in-memory canary experiment in
-`docs/receipts/2026-11-28-lp1-sdcc-generated-program.json`, an optional
+`docs/receipts/2026-11-28-lp1-sdcc-generated-program.json`, the original
 `docs/receipts/2026-11-28-lp1-sdcc-generated-program-probe.cjs`
-reproduction runner, and this claim only.
+in-memory harness and
+`docs/receipts/2026-11-28-lp1-sdcc-generated-program-probe.py`
+transport/reproduction runner, and this claim only.
 
 Use the exact pinned supplier compiler/runtime bytes and the historical
 producer's existing `generated-multimeter-idle.c` canary and compile driver.
