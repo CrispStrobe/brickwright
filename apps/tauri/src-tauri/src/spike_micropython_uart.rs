@@ -94,12 +94,22 @@ pub(crate) enum UartError {
     Unavailable,
 }
 
+// A one-shot test rendezvous observes a real pending read without acquiring its
+// ownership mutex. Both the observer and its wait are absent from release builds.
+#[cfg(test)]
+struct PendingReadFixture {
+    ready: std::sync::mpsc::Sender<()>,
+    resume: std::sync::mpsc::Receiver<()>,
+}
+
 struct Inner {
     generation: u64,
     stream: TcpStream,
     stopped: AtomicBool,
     reader: Mutex<()>,
     writer: Mutex<()>,
+    #[cfg(test)]
+    pending_read_fixture: Mutex<Option<PendingReadFixture>>,
 }
 
 /// All clones share exactly one owned connection; no global session lock is
@@ -129,6 +139,8 @@ impl SpikeMicroPythonUart {
             stopped: AtomicBool::new(false),
             reader: Mutex::new(()),
             writer: Mutex::new(()),
+            #[cfg(test)]
+            pending_read_fixture: Mutex::new(None),
         })))
     }
 
@@ -161,7 +173,17 @@ impl SpikeMicroPythonUart {
                             bytes.truncate(count);
                             return Ok(UartReply::Bytes { generation, bytes });
                         }
-                        Err(error) if retryable(&error) => pause(deadline),
+                        Err(error) if retryable(&error) => {
+                            #[cfg(test)]
+                            {
+                                let fixture = self.0.pending_read_fixture.lock().unwrap().take();
+                                if let Some(fixture) = fixture {
+                                    fixture.ready.send(()).unwrap();
+                                    fixture.resume.recv().unwrap();
+                                }
+                            }
+                            pause(deadline);
+                        }
                         Err(_) => return Err(self.io_error()),
                     }
                 }
@@ -417,23 +439,20 @@ mod tests {
     fn synthetic_close_cancels_pending_read_and_only_its_own_socket() {
         let (uart, mut peer) = pair();
         let (other, mut other_peer) = pair();
+        let (ready, pending_read) = std::sync::mpsc::channel();
+        let (resume, resume_read) = std::sync::mpsc::channel();
+        *uart.0.pending_read_fixture.lock().unwrap() = Some(PendingReadFixture {
+            ready,
+            resume: resume_read,
+        });
         let pending = uart.clone();
         let reader = thread::spawn(move || pending.invoke(read(1, 1000)));
-        let ownership_deadline = Instant::now() + Duration::from_secs(5);
-        loop {
-            match uart.0.reader.try_lock() {
-                Err(TryLockError::WouldBlock) => break,
-                Ok(guard) => drop(guard),
-                Err(_) => panic!("reader lock poisoned"),
-            }
-            assert!(
-                Instant::now() < ownership_deadline,
-                "reader never acquired ownership"
-            );
-            // Yield the lock and CPU so the worker can acquire reader ownership.
-            // This is test setup; the cancellation deadline below stays unchanged.
-            thread::sleep(Duration::from_millis(1));
-        }
+        // The worker signals only after its real read is pending while it owns
+        // the reader mutex. The observer never competes for that mutex, and the
+        // rendezvous retains ownership until the test has issued Close.
+        pending_read
+            .recv_timeout(Duration::from_secs(5))
+            .expect("reader never reached pending I/O");
         let start = Instant::now();
         assert_eq!(uart.invoke(read(1, 1000)), Err(UartError::Busy));
         assert_eq!(
@@ -444,6 +463,7 @@ mod tests {
                 generation: GENERATION
             })
         );
+        resume.send(()).unwrap();
         assert_eq!(reader.join().unwrap(), Err(UartError::Cancelled));
         assert!(start.elapsed() < Duration::from_millis(300));
         assert_eq!(uart.invoke(read(1, 1000)), Err(UartError::Cancelled));

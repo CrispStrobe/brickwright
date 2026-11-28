@@ -51,6 +51,9 @@ fn main() {
     const APP_COMMANDS: &[&str] = &[
         "update_editor_menu",
         "save_project",
+        "stage_fat_image_chunk",
+        "finish_fat_image_export",
+        "discard_fat_image_export",
         "open_project_document",
         "open_recent_project",
         "recent_projects",

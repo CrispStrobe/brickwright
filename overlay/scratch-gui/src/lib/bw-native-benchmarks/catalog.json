@@ -144,5 +144,62 @@
       "notes": "Pinned software-FP PRINTOUT validation executable. Native i80386 DOS shim only; exact numeric modules, positive guest-clock duration, exit0 and zero unsupported services required. No physical timing/speedup or legacy CPU completion claim."
     },
     "sourceUrl": "https://www.netlib.org/benchmark/whetstone.c"
+  },
+  "native-sieve": {
+    "title": "Native 386 Sieve",
+    "files": {
+      "LICENSE": {
+        "bytes": 1081,
+        "sha256": "a991ac2aa77fe1dba902be47419cfc5a0d30ab032a6f9e697387dc4d5a6ed1f3"
+      },
+      "SIEVE.BIN": {
+        "bytes": 375,
+        "sha256": "ec78198054f2c65a49db577c7110c40f807437dc6dea6163231422a5306d8db8"
+      },
+      "brickwright-media.json": {
+        "bytes": 851,
+        "sha256": "73472fbf7d28c3d37d54202d00431e11b47291ead857a230fd8ca67bef272faf"
+      },
+      "assets.json": {
+        "bytes": 1206,
+        "sha256": "cb312f1ce316bddc69d9be86cd0ecd3424226b22f0cbad19b0ed04c2eadd0f7f"
+      },
+      "source/link.ld": {
+        "bytes": 208,
+        "sha256": "46738345b8ba9c34c4841cc84492920193b17710b8fe4c5203a095730e289a7a"
+      },
+      "source/sieve.c": {
+        "bytes": 829,
+        "sha256": "76aad7eb950526b2850cfb992570ea381ff501047e4eaa27d64ebdd074b792d7"
+      },
+      "source/start.S": {
+        "bytes": 188,
+        "sha256": "30bb2a7bf88a19fcc03c11f27144a85b9338ed813e477cbee9ea82c5aa07d746"
+      }
+    },
+    "manifest": {
+      "schema": "brickwright.native-i80386-benchmark.v1",
+      "title": "Owned freestanding Sieve integer control",
+      "kind": "native-i80386-raw",
+      "machine": "i80386-experimental",
+      "runner": "../run.mjs",
+      "slots": {
+        "raw": "SIEVE.BIN"
+      },
+      "format": "raw32",
+      "loadAddress": 65536,
+      "entry": 65536,
+      "stack": 589824,
+      "preset": "PCAT80386_EXPERIMENTAL",
+      "fpu": "absent",
+      "dosImage": null,
+      "biosImage": null,
+      "extender": null,
+      "expectedOutput": "NATIVE386 SIEVE n=8192 passes=20 primes=1028 sum=3908641\n",
+      "completion": "HLT after exact serial output",
+      "license": "MIT",
+      "guiSupported": false,
+      "notes": "Owned algorithm control, not a TOPBENCH/Dhrystone score or physical-386 timing. Loader explicitly seeds flat 32-bit protected-mode segments; guest runs startup/serial code at fixed addresses with no OS or extender."
+    }
   }
 }

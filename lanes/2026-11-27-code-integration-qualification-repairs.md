@@ -14,6 +14,12 @@ Inspected consumer: feature ccc9e8e0ffa7101893ade1218a4706a2473c2ff7 and main
 cda7931939ac67603b27ac695cd0a76df52fddb8. Refresh and reconcile each remote
 before implementation. Preserve the previous source and browser receipts.
 
+The isolated RF engine repair starts from bw-board master
+`d21d6d8b819263eb08231134b7556efa82289a90`. Independent diagonal-channel
+equations reproduce a global-norm consistency defect in `src/rf-bands.js`;
+the candidate correction remains unqualified while broader RF and actual
+supplier-circuit controls are investigated.
+
 ## Bounded repair envelope
 
 - Diagnose the supplier's actual r7mix direct-conversion whistle failure with
@@ -72,3 +78,19 @@ where the defect requires it. Batch bounded checks; do not rerun an unchanged
 failure or relax a release gate. Preserve current main changes, publish
 reviewable checkpoints incrementally with guarded non-force updates, and merge
 only after the applicable upstream identity and qualification gates pass.
+
+## First consumer checkpoint
+
+The current-pin repair reuses the reviewed live-identity delta from PR #1846,
+with official regeneration of capability, bundle and ROM/static provenance.
+The strict full-history suite passes 46/46, with 14,245 files, 133 receipts,
+zero unreadable files and no stale findings. Package/provenance controls pass
+113/113; original ROM and source bytes are unchanged. Historical sealed inputs
+retain their identities. The old 39-case candidate receipt is preserved as a
+byte-identical JSON block in documentary Markdown, with its original hash.
+
+Seventy editor/lifecycle fixture controls pass after binding their actual
+current adapters, CP1 hooks, camera cleanup and parsed start methods. Another
+23 local controls cover the current source-document buffer contract, compact
+mode buttons and the generated gzip Robot Lab archive's binary format.
+These bounded results do not close the remaining hosted or RF qualification.

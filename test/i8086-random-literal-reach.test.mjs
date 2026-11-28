@@ -159,12 +159,21 @@ test('N2f production holds device 62 and mixed generation 62 without neutralisat
         // lattice variant. Parsed, refused and generated counts are unchanged.
         const labPrograms = readdirSync(examples).filter(name => name.startsWith('lab-') &&
             existsSync(join(examples, name, 'program.bw')));
-        assert.equal(labPrograms.length, 92, 'the lab-* gallery program count moved');
+        // Current shipping gallery compared with f906dba5c: the original 399
+        // programs all remain; 244 additional lab programs and 56 CP1 programs
+        // are all refused at retarget in each of the four variants. Their
+        // separate device/analog routes must not inflate i8086 generated reach.
+        const cp1Programs = readdirSync(examples).filter(name => name.startsWith('cp1-') &&
+            existsSync(join(examples, name, 'program.bw')));
+        assert.equal(labPrograms.length, 336, 'the lab-* gallery program count moved');
+        assert.equal(cp1Programs.length, 56, 'the CP1 gallery program count moved');
         for (const variant of Object.values(report.variants)) {
-            for (const name of labPrograms) assert.ok(variant.retargetRefused.includes(name), name);
+            for (const name of [...labPrograms, ...cp1Programs]) {
+                assert.ok(variant.retargetRefused.includes(name), name);
+            }
         }
         assert.deepEqual(report.variants.baseline.counts, {
-            programs: 399, retargetRefused: 227, parsed: 164, parseFailed: 8,
+            programs: 699, retargetRefused: 527, parsed: 164, parseFailed: 8,
             refused: 102, generatedHost: 0, generatedDevice: 62, generatedTotal: 62
         });
         assert.equal(report.variants.literalOnly.counts.generatedTotal, 62);

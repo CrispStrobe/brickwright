@@ -22,7 +22,7 @@
 // vendor.
 
 import {readFile, writeFile, mkdir, readdir, rm, stat} from 'node:fs/promises';
-import { resolveRef, recordPin, localSha, assertPinMoveAllowed } from './lib-pin.mjs';
+import { resolveRef, recordPin, localSha, assertPinMoveAllowed, listTree } from './lib-pin.mjs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 
@@ -48,14 +48,12 @@ const RAW = `https://raw.githubusercontent.com/${REPO}/${remoteSha}`;
 
 async function readSource (rel) {
     if (srcDir) return readFile(path.join(srcDir, 'examples', rel));
-    const res = await fetch(`${RAW}/examples/${rel}`);
+    // Git path bytes are not URL syntax: preserve literal percent signs,
+    // question marks and fragments, including names such as "%2e%2e".
+    const encoded = rel.split('/').map(encodeURIComponent).join('/');
+    const res = await fetch(`${RAW}/examples/${encoded}`);
     if (!res.ok) throw new Error(`fetch examples/${rel} @ ${remoteSha}: HTTP ${res.status}`);
     return Buffer.from(await res.arrayBuffer());
-}
-
-async function readSourceText (rel) {
-    const buf = await readSource(rel);
-    return buf.toString('utf8');
 }
 
 // Discover all example directories and their files from a local checkout.
@@ -93,55 +91,53 @@ async function discoverLocal () {
     return {dirs, files};
 }
 
-// Discover from HTTP using the index.json to enumerate directories.
+// Discover the same source set as the local walk, at one immutable commit.
+// index.json names loadable assets, not every circuit variant or lesson file.
 async function discoverRemote () {
-    const indexText = await readSourceText('index.json');
-    const index = JSON.parse(indexText);
-    const files = new Map();
+    const sourcePaths = (await listTree(REPO, remoteSha))
+        .filter(name => name.startsWith('examples/'))
+        .map(name => name.slice('examples/'.length));
+    const sourceSet = new Set(sourcePaths);
+    if (!sourceSet.has('index.json')) throw new Error('source tree has no examples/index.json');
 
-    files.set('index.json', Buffer.from(indexText, 'utf8'));
-
-    // Collect all referenced directories from the index
-    const dirSet = new Set();
-    for (const entry of index) {
-        if (entry.files) {
-            for (const fpath of Object.values(entry.files)) {
-                dirSet.add(fpath.split('/')[0]);
-            }
+    const dirs = new Set();
+    const perDirectory = [];
+    for (const rel of sourcePaths) {
+        const parts = rel.split('/');
+        if (rel.includes('\\') || parts.some(part => !part || part === '.' || part === '..')) {
+            throw new Error(`invalid example tree path: ${rel}`);
+        }
+        if (parts.length > 2) {
+            // discoverLocal reads each immediate child as a file and refuses
+            // nested directories. Do not silently omit them in remote mode.
+            throw new Error(`nested example path is unsupported by local discovery: ${rel}`);
+        }
+        if (parts.length === 2) {
+            dirs.add(parts[0]);
+            perDirectory.push(rel);
         }
     }
-    const dirs = [...dirSet].sort();
 
-    // Fetch every declared file, including CP1 source and bilingual lesson prose.
-    // The fixed legacy names below remain optional extras, not the format contract.
-    const declared = [...new Set(index.flatMap(entry => Object.values(entry.files || {})))];
-    for (const name of declared) {
-        if (typeof name !== 'string' || name.startsWith('/') || name.split('/').includes('..')) {
+    const indexBytes = await readSource('index.json');
+    const index = JSON.parse(indexBytes.toString('utf8'));
+    const files = new Map([['index.json', indexBytes]]);
+    for (const name of index.flatMap(entry => Object.values(entry.files || {}))) {
+        if (typeof name !== 'string' || name.startsWith('/') || name.includes('\\') || name.split('/').includes('..')) {
             throw new Error(`invalid declared example path: ${String(name)}`);
         }
-        files.set(name, await readSource(name));
     }
 
-    // Fetch known file names per directory
-    const KNOWN_FILES = ['program.bw', 'circuit.json', 'EXPECTED.md'];
-    for (const dir of dirs) {
-        for (const name of KNOWN_FILES) {
-            if (files.has(`${dir}/${name}`)) continue;
-            try {
-                const buf = await readSource(`${dir}/${name}`);
-                files.set(`${dir}/${name}`, buf);
-            } catch { /* file doesn't exist in this dir — ok */ }
-        }
+    // Match discoverLocal's root-file policy: the other top-level files are
+    // internal audit/TODO documents. Every file inside a lesson is included,
+    // even when the lesson or circuit variant is absent from index.json.
+    const rootFiles = ['README.md', 'README.de.md', 'curriculum.json']
+        .filter(name => sourceSet.has(name));
+    for (const rel of [...rootFiles, ...perDirectory.sort()]) {
+        // A listed file is required. An HTTP error must not turn it into an
+        // apparent orphan that a subsequent mutation would delete.
+        files.set(rel, await readSource(rel));
     }
-
-    // READMEs, and the Codex manifest — see discoverLocal for why.
-    for (const name of ['README.md', 'README.de.md', 'curriculum.json']) {
-        try {
-            files.set(name, Buffer.from(await readSourceText(name), 'utf8'));
-        } catch { /* optional */ }
-    }
-
-    return {dirs, files};
+    return {dirs: [...dirs].sort(), files};
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────

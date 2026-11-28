@@ -56,7 +56,10 @@ test('Widget Editor mode switch is two compact accessible icons, not translated 
         assert.ok(at > 0, `${id} is missing`);
         const button = source.slice(source.lastIndexOf('<button', at), source.indexOf('</button>', at));
         assert.match(button, new RegExp(`aria-label=\\{t\\('${label}'\\)\\}`));
-        assert.match(button, /width:\s*34/);
+        const width = Number(button.match(/width:\s*(\d+)/)?.[1]);
+        assert.ok(width >= 24 && width <= 40, `${id} keeps a compact, usable fixed-width icon target`);
+        assert.match(button, new RegExp(`aria-pressed=\\{mode === '${label}'\\}`));
+        assert.match(button, new RegExp(`this\\._setMode\\('${label}'\\)`));
         assert.match(button, new RegExp(`\\{'${icon}'\\}`));
         assert.doesNotMatch(button, new RegExp(`>\\s*\\{t\\('${label}'\\)\\}`));
     }

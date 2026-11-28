@@ -6,8 +6,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {hiddenCodeDrafts, standaloneBasicDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {scopeAfter} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
+import {createCodeDocument, addCodeProjection} from '../overlay/scratch-gui/src/lib/code-source-document.js';
 
 const source = readFileSync(new URL(
     '../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
@@ -23,8 +24,7 @@ const signatures = [
     'activeCode () {'
 ];
 const methods = signatures.map(signature => signature.slice(0, -1) + scopeAfter(source, signature)).join('\n');
-const twoWay = new Set(Object.keys(labels).filter(lang => lang !== 'asm'));
-const Editor = new Function('LANG_LABEL', 'TWO_WAY', 'hiddenCodeDrafts', 'standaloneBasicDrafts', `return class {${methods}}`)(labels, twoWay, hiddenCodeDrafts, standaloneBasicDrafts);
+const Editor = codeDocumentEditorClass(source, methods, {LANG_LABEL: labels});
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const deferred = () => {
     let resolve;
@@ -32,7 +32,7 @@ const deferred = () => {
     return {promise, resolve};
 };
 
-function fixture () {
+function fixture ({generatedView = false} = {}) {
     const requests = [];
     const updates = [];
     const editor = new Editor();
@@ -76,6 +76,12 @@ function fixture () {
             for (const {update, done} of updates.splice(0)) apply(update, done);
         }
     });
+    if (generatedView) {
+        const document = createCodeDocument({lang: 'pseudocode', code: editor.state.buffers.pseudocode,
+            generationOptions: editor.codeGenerationOptions()});
+        editor.state.codeDocument = addCodeProjection(document, {lang: 'python', code: editor.state.buffers.python,
+            sourceRevision: document.revision, options: editor.genOpts('python')});
+    }
     return {editor, requests, updates};
 }
 
@@ -133,7 +139,7 @@ test('current failed language conversion retains source and offers the requested
 });
 
 test('current generator-option conversion updates only its admitted active representation', async () => {
-    const {editor, requests} = fixture();
+    const {editor, requests} = fixture({generatedView: true});
     const pseudocode = editor.state.buffers.pseudocode;
     editor.setGenOpt({asyncMode: true});
     assert.equal(editor.state.asyncMode, true);
@@ -151,7 +157,7 @@ test('current generator-option conversion updates only its admitted active repre
 });
 
 test('current generator-option failure remains visible without replacing source', async () => {
-    const {editor, requests} = fixture();
+    const {editor, requests} = fixture({generatedView: true});
     const buffers = editor.state.buffers;
     editor.setGenOpt({eventsMode: true});
     requests[0].gate.resolve({error: 'cannot generate selected profile'});
@@ -165,7 +171,7 @@ test('current generator-option failure remains visible without replacing source'
 for (const action of ['switch', 'options']) {
     for (const outcome of ['success', 'error']) {
         test(`${action}: late ${outcome} cannot replace a newer authored edit`, async () => {
-            const {editor, requests} = fixture();
+            const {editor, requests} = fixture({generatedView: action === 'options'});
             begin(editor, action);
             editor.setActiveCode('# newer authored Python\nprint(42)\n');
             publishNewerFeedback(editor);
@@ -176,7 +182,7 @@ for (const action of ['switch', 'options']) {
         });
 
         test(`${action}: edit and revert does not restore an old derivation's ownership (${outcome})`, async () => {
-            const {editor, requests} = fixture();
+            const {editor, requests} = fixture({generatedView: action === 'options'});
             const original = editor.state.buffers;
             begin(editor, action);
             editor.setActiveCode('temporary edit');
@@ -193,7 +199,7 @@ for (const action of ['switch', 'options']) {
         });
 
         test(`${action}: a replacement VM revokes late ${outcome} publication`, async () => {
-            const {editor, requests} = fixture();
+            const {editor, requests} = fixture({generatedView: action === 'options'});
             begin(editor, action);
             editor.props = {vm: {id: 'replacement-project'}};
             publishNewerFeedback(editor);
@@ -204,7 +210,7 @@ for (const action of ['switch', 'options']) {
         });
 
         test(`${action}: a newer language selection survives late ${outcome}`, async () => {
-            const {editor, requests} = fixture();
+            const {editor, requests} = fixture({generatedView: action === 'options'});
             begin(editor, action);
             editor.state = {...editor.state, lang: 'asm'};
             publishNewerFeedback(editor);
@@ -215,7 +221,7 @@ for (const action of ['switch', 'options']) {
         });
 
         test(`${action}: queued ${outcome} publication rechecks the editor when React applies it`, async () => {
-            const {editor, requests, updates} = fixture();
+            const {editor, requests, updates} = fixture({generatedView: action === 'options'});
             begin(editor, action);
             editor.deferUpdates = true;
             requests[0].gate.resolve(result(outcome));
@@ -233,7 +239,7 @@ for (const action of ['switch', 'options']) {
 for (const first of ['switch', 'options']) {
     for (const outcome of ['success', 'error']) {
         test(`${first}: old ${outcome} cannot clear a newer generator request's busy state`, async () => {
-            const {editor, requests} = fixture();
+            const {editor, requests} = fixture({generatedView: true});
             begin(editor, first);
             // Both entry points share derivation ownership. The public option
             // method can be called while an earlier derivation is pending.
@@ -253,7 +259,7 @@ for (const first of ['switch', 'options']) {
         });
 
         test(`${first}: newer completed derivation keeps its result after old ${outcome}`, async () => {
-            const {editor, requests} = fixture();
+            const {editor, requests} = fixture({generatedView: true});
             begin(editor, first);
             editor.setGenOpt({eventsMode: true});
             assert.equal(requests.length, 2);
@@ -270,7 +276,7 @@ for (const first of ['switch', 'options']) {
 }
 
 test('an already queued completion cannot clear a request started before React applies that completion', async () => {
-    const {editor, requests, updates} = fixture();
+    const {editor, requests, updates} = fixture({generatedView: true});
     editor.setGenOpt({asyncMode: true});
     editor.deferUpdates = true;
     requests[0].gate.resolve({code: 'old queued Python'});
@@ -363,11 +369,13 @@ function runFixture (context, {lang = 'javascript', code = 'console.log("clicked
         sessions.push(entry);
         return session;
     };
-    const RunEditor = new Function('createCodeExecutionSession', 'JAVASCRIPT_WORKER_SOURCE',
-        'createPythonWorkerSource', 'notifyEditorMenuActions', 'window',
-        `return class {${runMethods}}`)(startSession, '/* JavaScript worker source */',
-        ({core, stdlib}) => `/* Python worker source: ${core}; ${stdlib} */`, () => {},
-        {removeEventListener: (name, callback) => windowEvents.push({name, callback})});
+    const RunEditor = codeDocumentEditorClass(source, runMethods, {
+        createCodeExecutionSession: startSession,
+        JAVASCRIPT_WORKER_SOURCE: '/* JavaScript worker source */',
+        createPythonWorkerSource: ({core, stdlib}) => `/* Python worker source: ${core}; ${stdlib} */`,
+        notifyEditorMenuActions: () => {},
+        window: {removeEventListener: (name, callback) => windowEvents.push({name, callback})}
+    });
     const editor = new RunEditor();
     const apply = (update, done) => {
         const patch = typeof update === 'function' ? update(editor.state) : update;
@@ -379,6 +387,8 @@ function runFixture (context, {lang = 'javascript', code = 'console.log("clicked
         props: {vm: {runtime: runtime()}, isVisible: false},
         state: {
             lang, buffers: {[lang]: code}, asmMode: 'source', driverMode: 'shim',
+            codeDocument: createCodeDocument({lang, code, target: device,
+                runtime: editor.codeRuntimeFor(lang, device)}),
             busy: false, running: false, codeSessionRunning: false, codeInput: null,
             codeInputValue: '', codeRunLabel: '', output: null, status: '',
             revealed: true, actionsOpen: false, bundledExamplesStatus: 'ready'

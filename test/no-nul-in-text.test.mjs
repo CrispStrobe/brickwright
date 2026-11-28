@@ -68,10 +68,17 @@ export const BINARY_BY_ROLE = {
     // the .lms it came from — what the Virtual EV3's program VM loads.
     firmware: ['bin', 'rom', 'com', 'exe', 'uf2', 'elf', 'rcx', 'rxe', 'rbf'],
     wasm: ['wasm'],
+    // AutoCAD DWG is a binary drawing format. The canonical inch-plate browser
+    // fixture is AC1032 binary output of the pinned CAD codec, not text with an
+    // accidental NUL. STEP/STP and DXF remain text and are still inspected.
+    cad: ['dwg'],
     // `.io` (BrickLink Studio) and `.lxf` (LEGO Digital Designer) joined 2026-10-18 with
     // test/fixtures/bw-sim/interop/: both formats ARE ZIP archives (model.ldr / IMAGE100.LXFML
     // inside), so their NUL bytes are the ZIP format, as for .sb3.
-    archive: ['zip', 'sb3', 'sb2', 'sprite3', 'sprite2', 'gz', 'tgz', 'io', 'lxf'],
+    // Robot Lab's .pack is gzip-compressed LDraw JSON, produced and verified
+    // with gzipSync/gunzipSync by scripts/pack-robot-build-ldraw.mjs. Its NULs
+    // belong to that binary archive, just as they do in the .gz role above.
+    archive: ['zip', 'sb3', 'sb2', 'sprite3', 'sprite2', 'gz', 'tgz', 'io', 'lxf', 'pack'],
     object: ['lib', 'o', 'a'],
     // Typefaces. A font is binary by role in the same way a ROM is: the bytes
     // ARE the artefact. Added 2026-09-07 with the vendored replacement for the
@@ -219,7 +226,23 @@ test(`tracked app and installed upstream source text is free of NUL bytes, excep
 
 test('the binary roles name real formats, and no text format is among them', () => {
     for (const [role, exts] of Object.entries(BINARY_BY_ROLE)) assert.ok(exts.length > 0, role);
-    for (const ext of ['js', 'mjs', 'jsx', 'json', 'md', 'yml', 'txt', 'html', 'css', 'svg', 'asm', 'sh']) assert.equal(isBinaryByRole(`x.${ext}`), false, `${ext} is text`);
+    for (const ext of ['js', 'mjs', 'jsx', 'json', 'md', 'yml', 'txt', 'html', 'css', 'svg', 'asm', 'sh', 'step', 'stp', 'dxf']) assert.equal(isBinaryByRole(`x.${ext}`), false, `${ext} is text`);
+});
+
+test('DWG is binary by format while the same NUL bytes in drawing text still fail', () => {
+    const file = 'test/fixtures/cad/browser/inch-plate.dwg';
+    const buf = readFileSync(path.join(ROOT, file));
+    assert.equal(buf.subarray(0, 6).toString(), 'AC1032');
+    assert.ok(buf.includes(0), 'the retained binary drawing contains NUL bytes');
+    assert.equal(isBinaryByRole('another/path/renamed.DWG'), true, 'the role is a format, not one filename');
+    const binary = judge([{file, buf}], []);
+    assert.deepEqual(binary.findings, []);
+    assert.equal(binary.scanned, 0);
+    for (const file of ['drawing.step', 'drawing.stp', 'drawing.dxf', 'drawing.dwg.js']) {
+        const text = judge([{file, buf}], []);
+        assert.equal(text.scanned, 1);
+        assert.ok(text.findings.some(finding => finding.includes('literal NUL')), `${file} must still report NUL bytes`);
+    }
 });
 
 test('mutation: a NUL in a .js file is red naming file, line, offset and context; the same bytes in a .png are not', () => {

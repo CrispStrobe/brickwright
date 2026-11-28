@@ -287,6 +287,22 @@ const ABOUT_GROUPS = [
                 role: 'Machine lineage reference; Acorn ROM is NOT shipped'
             },
             {
+                name: 'cute-os',
+                url: 'https://github.com/makaram99/cute-os',
+                license: 'MIT',
+                licenseUrl: 'static/licenses/cute-os.MIT.txt',
+                role: 'Optional SDCC Timer0 scheduler lesson',
+                note: 'Mahmoud Karam; explicitly adapted guest, not the host scheduler'
+            },
+            {
+                name: 'ElectronicHourGlassKit',
+                url: 'https://github.com/mgoblin/ElectronicHourGlassKit',
+                license: 'MIT',
+                licenseUrl: 'static/firmware/bw8051-1/ElectronicHourGlassKit.LICENSE.txt',
+                role: 'Early high-impedance LED scanning firmware',
+                note: 'Michael Golovanov; unchanged stage 2 on a simplified circuit'
+            },
+            {
                 name: 'JimKnowler/BreadboardZ80',
                 url: 'https://github.com/JimKnowler/BreadboardZ80',
                 license: 'MIT',
@@ -314,6 +330,14 @@ const ABOUT_GROUPS = [
                 role: 'Z80 assembly examples'
             },
             {
+                name: 'MicroController-Lab',
+                url: 'https://github.com/AshrithSagar/MicroController-Lab',
+                license: 'MIT',
+                licenseUrl: 'static/licenses/ashrith-sagar-microcontroller-lab.MIT.txt',
+                role: 'Six reproducible 8051 assembly lessons',
+                note: 'Ashrith Sagar; SDAS syntax and explicit observations added'
+            },
+            {
                 name: 'newell-paul/caterpillar-assembler',
                 url: 'https://github.com/newell-paul/caterpillar-assembler',
                 license: 'MIT',
@@ -325,6 +349,22 @@ const ABOUT_GROUPS = [
                 url: 'https://github.com/PainfulDiodes',
                 license: 'MIT',
                 role: 'Z80 breadboard examples'
+            },
+            {
+                name: 'STC15lib',
+                url: 'https://github.com/mgoblin/STC15lib',
+                license: 'Apache-2.0',
+                licenseUrl: 'static/firmware/bw8051-1/STC15lib.LICENSE.txt',
+                role: 'Selected guest-firmware HAL headers',
+                note: 'Michael Golovanov (mgoblin), v0.18.0'
+            },
+            {
+                name: 'stc_diyclock',
+                url: 'https://github.com/orangetrialtruck/stc_diyclock',
+                license: 'MIT',
+                licenseUrl: 'static/firmware/bw8051-1/stc_diyclock.LICENSE.txt',
+                role: 'Four-digit DS1302 clock firmware and teaching circuit',
+                note: 'Jens Jensen; six documented repairs, NMEA disabled'
             },
             {
                 name: 'trevor-makes/avr-z80',

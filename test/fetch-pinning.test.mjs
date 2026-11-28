@@ -302,10 +302,28 @@ const CENSUS = [
         why: 'Historical source-package reproduction instructions, never executed by the app or its build. The next command checks out the full reference commit df32b7ff33595406ce7356d249ec61baec1fecf6 before using any sources; SHA_CONSTANTS checks that checkout remains a full SHA.'
     },
     {
+        file: 'test/sync-examples-remote.test.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/${REPO}/${AFTER}/',
+        class: 'source-link',
+        why: 'Offline expected-URL fixture: AFTER is a synthetic full 40-hex SHA. The production CLI '
+           + 'runs with an injected fetch recorder that returns local fixture bytes and rejects unexpected '
+           + 'URLs; no network request occurs. The production sync-examples fetch is declared separately.'
+    },
+    {
         file: 'test/vendor-bundles-targeted.test.mjs', kind: 'raw',
         text: 'raw.githubusercontent.com/${UPSTREAM_REPO}/${candidate}/extensions/CrispStrobe/arrays.js',
         class: 'source-link',
         why: 'Offline expected-URL assertion, not a real fetch: candidate is a synthetic 40-hex SHA and the subprocess fetch is replaced by an injected recorder returning synthetic source. The production rawURL site and immutable bundle receipts are judged separately.'
+    },
+    {
+        file: 'docs/receipts/2026-11-28-lp1-sdcc-historical-build.json', kind: 'archive',
+        text: 'github.com/madler/zlib/archive/refs/tags/v1.2.13.tar.gz',
+        class: 'source-link',
+        why: 'Metadata receipt for the optional SDCC package\'s historical build, never fetched by the app, '
+           + 'its build or any test. It quotes the Emscripten zlib port\'s own upstream archive URL, which names '
+           + 'a movable tag; the receipt does not trust the tag but records the archive\'s sha512, the full '
+           + 'source commit 04f42ceca40f73e2978b50e93806c2a18c1281fc and the notice blob beside it.'
     },
     {
         file: 'test/makecode-context-recovery-cli.test.mjs', kind: 'raw',
@@ -644,6 +662,24 @@ const CENSUS = [
            + 'it; locally the box gcc is used and the executed-C leg skips by name when neither is present.'
     },
     {
+        file: 'overlay/scratch-gui/src/lib/runtime-package-inventory.json',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/sdcc-wasm/64ea6915733cf6d6563dfe9424c8cc71b4731e06/static/sdcc-wasm/',
+        class: 'source-link',
+        why: 'Immutable source provenance for the optional SDCC package, recorded alongside its separate '
+           + 'managed download origin and per-member byte lengths and SHA-256 values. SHA_CONSTANTS below '
+           + 'rejects abbreviated or movable refs in this source URL.'
+    },
+    {
+        file: 'overlay/scratch-gui/src/lib/runtime-package-inventory.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/sdcc-wasm/64ea6915733cf6d6563dfe9424c8cc71b4731e06/static/sdcc-wasm/',
+        class: 'source-link',
+        why: 'Generated ESM copy of the canonical optional SDCC provenance record, with no fetch or '
+           + 'runtime I/O. The inventory generator check requires exact canonical JSON and mirror '
+           + 'equality; SHA_CONSTANTS also checks the full immutable ref in this generated entry.'
+    },
+    {
         file: 'overlay/scratch-gui/src/lib/bw-machines/lessons.js',
         kind: 'raw',
         text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${LINUX_MEDIA_COMMIT}/riscv32-linux',
@@ -702,6 +738,41 @@ const CENSUS = [
            + '07132874… in full — the same commit as lessons.js LINUX_MEDIA_COMMIT; SHA_CONSTANTS below '
            + 'asserts it is 40-hex. The proof also compares the downloaded bytes with a sha256 constant '
            + '(kernelSha256) and fails on a mismatch.'
+    },
+    {
+        file: 'overlay/scratch-gui/src/lib/bw-machines/ace-kim-library.js',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/5e54caab98d7ca6f641d7cc3e21f2ebdab937400/projects/ace-kim/',
+        class: 'sha-const',
+        why: 'The ACE KIM firmware slots load from the media-lab repository at a 40-hex commit constant '
+           + 'in this file, and every slot also carries a sha256 that defaultImageFetcher checks before '
+           + 'the bytes are used.'
+    },
+    {
+        file: 'overlay/scratch-gui/src/lib/bw-machines/kim1-cpm65.js',
+        kind: 'release',
+        text: 'github.com/davidgiven/cpm65/releases/download/dev/',
+        class: 'content-hash',
+        why: 'CP/M-65 for the KIM-1 is published only under the movable upstream "dev" release tag, so the '
+           + 'NAME is mutable. Every profile carries a reviewed sha256 constant in this file, and the ZIP '
+           + 'is refused ("checksum differs from the reviewed upstream release") before anything is '
+           + 'unpacked or mounted. A moved tag or replaced asset fails closed.'
+    },
+    {
+        file: 'test/dos-forth-library.test.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/forth/test/8482c3a6fdfb273851c177e46f1f568b65e223a7/',
+        class: 'sha-const',
+        why: 'The Forth test-suite sources the DOS Forth library test loads, at a 40-hex commit constant '
+           + 'in this file, with a sha256 checked by the library (the test asserts the mismatch refusal).'
+    },
+    {
+        file: 'test/kim1-cpm65.test.mjs',
+        kind: 'release',
+        text: 'github.com/davidgiven/cpm65/releases/download/dev/kim-1-',
+        class: 'content-hash',
+        why: 'Not a fetch: the exact assertion of kim1-cpm65.js\'s release URL, beside its check that every '
+           + 'profile carries a 64-hex sha256. The content-hash binding is the producer row above.'
     }
 ];
 
@@ -713,6 +784,10 @@ const SHA_CONSTANTS = [
     ['scripts/vendor.mjs', /const GUI_COMMIT = '([0-9a-zA-Z]+)'/],
     ['scripts/sync-emu8051-wasm.mjs', /const PIN = '([0-9a-zA-Z]+)'/],
     ['scripts/sync-labwired-wasm.mjs', /const PIN = '([0-9a-zA-Z]+)'/],
+    ['overlay/scratch-gui/src/lib/runtime-package-inventory.json',
+        /"sourceBaseUrl"\s*:\s*"https:\/\/raw\.githubusercontent\.com\/CrispStrobe\/sdcc-wasm\/([^/]+)\//],
+    ['overlay/scratch-gui/src/lib/runtime-package-inventory.mjs',
+        /\\"sourceBaseUrl\\"\s*:\s*\\"https:\/\/raw\.githubusercontent\.com\/CrispStrobe\/sdcc-wasm\/([^/]+)\//],
     ['.github/workflows/build.yml', /^\s*FLOOR=(\S+)/m],
     // The unit job now decodes the registered local carrier instead of fetching
     // the supplier. Its admission constant must still name a complete commit.

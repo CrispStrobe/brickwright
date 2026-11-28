@@ -40,6 +40,25 @@ emulated CPU and source lowered through blocks are different results and must
 be labeled accordingly. Keep the advanced retro-language routes; widen board
 coverage after current source semantics and modern reference routes are dependable.
 
+LP1a implementation checkpoint: shared SDCC package metadata now drives the
+existing downloader identities and the known-payload output guard; 46 focused
+source controls pass. Main landing uses the applicable automatic PR checks.
+[The claim](lanes/2026-11-28-lp1-toolchain-inventory.md) preserves exact scope
+and evidence.
+
+LP1b implementation checkpoint: all nine optional SDCC members now carry
+SHA-256/byte-length evidence from immutable supplier revision
+`64ea6915733cf6d6563dfe9424c8cc71b4731e06`. Managed download, cached reuse,
+offline inspection and browser import resolution verify the accepted bytes;
+service-worker activation retains the exact optional cache without prefetch.
+Forty-nine focused controls pass, independently reviewed, and a live-origin
+probe verified all 6,737,737 bytes and offline blob resolution. The
+[LP1b claim](lanes/2026-11-28-lp1-verified-installation-cache.md) records the
+scope and remaining hosted browser qualification. Complete compiler-component,
+linked-runtime and generated-output license evidence remains open; LP1 as a
+whole is not complete, and inherited hosted integration failures still block
+main landing.
+
 Status: **planned; claim and land bounded slices in LP0/LP1 → LP2/LP3 →
 LP4 → LP5 order**, with R1/R2/J1 as dependencies for new execution behavior.
 No pending runtime, silicon, installed-application or license qualification is
@@ -91,6 +110,28 @@ desktop packages, and J6 separately qualified Android/iOS packages. Prefer the
 existing Tauri tooling; an Electron desktop package needs its own reason and
 dependency/update review. None of these JS gates is closed by the Python runtime
 or authored pygame packaging probes.
+
+### Game export status — 2026-11-27 (evening)
+
+First G0/J3/G1 slices are implemented upstream in sb3-creator
+([#249](https://github.com/CrispStrobe/sb3-creator/pull/249),
+`docs/GAME-EXPORT.md`): a source-aware game model with a capability report
+(exact / approximate / unsupported; unsupported refuses), an editable
+generator-based JS game on the `bwgame-v1` runtime (module `index.html` and a
+self-contained `play.html`), and the same game as Python + pygame
+(`python main.py`). `bw export-game <file.bw|.py|.js|.c|.bas|.sb3> --to web|pygame`.
+
+Evidence: 17 gallery programs run frame-identical in scratch-vm and as exported
+JS (one tick per frame, frame clock, shared seeded random); 18 games, including
+the collision games, give byte-identical JS and Python state traces; pseudocode,
+generated Python and generated JavaScript export one identical game. Documented
+differences: one tick per frame, box collision around drawn content, simplified
+bubbles/monitors, ghost/brightness-only effects.
+
+Not yet: Brickwright adoption (vendor map + Code-tab "Playable web game" /
+"Python + pygame game" actions are prepared on `integ/code-runtime-20261127`,
+awaiting the sb3-creator pin move), Arcade source profile, desktop/mobile
+packaging (G3/G4, J4–J6).
 
 ## Examples across the workspace
 

@@ -15,8 +15,8 @@ import {tmpdir} from 'node:os';
 import {fileSystemStore} from '../overlay/scratch-gui/src/lib/sdcc-wasm/toolchain-store.js';
 import {
     primeToolchainCache, inspectToolchain, removeToolchain, measureToolchain,
-    TOOLCHAIN_FILES, GPL_TOOLCHAIN_ORIGIN as ORIGIN
-} from '../overlay/scratch-gui/src/lib/sdcc-wasm/toolchain-source.js';
+    TOOLCHAIN_FILES, GPL_TOOLCHAIN_ORIGIN as ORIGIN, fixtureBytes
+} from './helpers/toolchain-fixture.mjs';
 
 const newStore = async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'bw-toolchain-'));
@@ -215,7 +215,7 @@ test('progress is weighted by bytes, and never exceeds its own total', async () 
             return {ok: true, status: 200, headers: {get: k =>
                 (k === 'content-length' ? String(SIZES[name]) : null)}};
         }
-        return new Response('x'.repeat(4), {status: 200});
+        return new Response(fixtureBytes(name), {status: 200});
     };
     const {sizes, total} = await measureToolchain(ORIGIN, {fetch: headFetch});
     assert.equal(total, Object.values(SIZES).reduce((a, b) => a + b, 0));

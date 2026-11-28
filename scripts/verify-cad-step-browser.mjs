@@ -6,9 +6,11 @@ import {join} from 'node:path';
 import JSZip from 'jszip';
 import {chromium} from 'playwright';
 import {CAD_PROJECT_PATH} from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
+import {loadCadBrowserFixture} from './lib/cad-browser-fixtures.mjs';
 
 const [url,fixture]=process.argv.slice(2);
 if(!url||!fixture)throw Error('Usage: node scripts/verify-cad-step-browser.mjs <app-url> <Adafruit 3777 STEP file>');
+const fixtureFile=await loadCadBrowserFixture('step',fixture);
 const working=await mkdtemp(join(tmpdir(),'bw-step-import-'));
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const tab=page=>page.getByRole('tab',{name:'CAD',exact:true});
@@ -36,7 +38,7 @@ try{
   page.evaluate(()=>{void window.__bwCad.editor.executeCommand('import');})
  ]);
  assert.equal(await picker.element().getAttribute('accept'),'.stl,.step,.stp');
- await picker.setFiles(fixture);
+ await picker.setFiles(fixtureFile);
  await page.waitForFunction(()=>window.__bwCad?.editor.session.state.document.roots.length===8);
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
  assert.ok(workers.some(url=>url.includes('step-import.worker')));

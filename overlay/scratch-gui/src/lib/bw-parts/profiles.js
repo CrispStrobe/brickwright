@@ -65,7 +65,7 @@ export const SECTION = Object.freeze({
 export const REASON = Object.freeze({
     PASSIVE: 'passive',              // R/C/L, diodes, connectors, sources, regulators, crystals
     INSTRUMENT: 'instrument',        // bench meter / probe — measured, not coded
-    HOST: 'host',                    // the CPU/board the Code tab runs ON
+    HOST: 'host',                    // the CPU/board the learner's program runs on
     DIP_SURFACE: 'dip-surface',      // machine-level DIP peripheral; behavior in the emulated machine
     ANALOG_ONLY: 'analog-only',      // active analog part driven by the circuit (op-amp, comparator, 555)
     MECHANICAL: 'mechanical',        // mechanical switch array; read at the pin, no dedicated verb
@@ -233,6 +233,10 @@ export const REFUSED = Object.freeze({
         'esp8266',
         // The ESP32-4848S040 board (bw-board #722): its own firmware runs on it.
         'esp32_4848s040',
+        // Whole-system teaching computers: their own instruction listings run
+        // in the Microtronic/CP1 panels; neither is a Code-tab peripheral verb.
+        // Microtronic classification carried from the reviewed #1846 candidate.
+        'busch-microtronic', 'kosmos-cp1',
         // The MakeCode boards (bw-board #44): a MakeCode program drives them
         // from the MakeCode pane's runtime bridge, not from the Code tab.
         'calliopemini', 'circuit_playground_express', 'pybadge',
@@ -259,6 +263,11 @@ export const REFUSED = Object.freeze({
         // Round 3/4 radio front end (bw-board #740, #743): antenna, earth and
         // the tank/coil parts are passives a circuit tunes, not a program.
         'antenna', 'earth', 'tuning_cap', 'varicap', 'ferrite_coil', 'vhf_coil', 'air_coil',
+        // Radio and sensing passives: resistive transducers, coupled windings,
+        // an antenna/filter and a breakdown gap. Their electrical behaviour is
+        // set by the circuit, like ntc/ldr/inductor/diode above.
+        'ptc_sensor', 'humidity_comb', 'induction_loop', 'coil_pendulum',
+        'dipole', 'ceramic_filter', 'spark_gap',
         // Sources a learner builds rather than codes: fruit cells, a
         // thermocouple's EMF, an electrolysis cell (profiled as solar_cell /
         // ntc are — read at a pin or the ADC through the generic path).
@@ -284,7 +293,11 @@ export const REFUSED = Object.freeze({
         'spectrum_display', 'clock_display', 'opamp', 'npn', 'pnp', 'nmos', 'pmos',
         // The LM386 audio amplifier and the solver-only stages behind it and
         // the LM358/LM324 macromodel (ground-sensing-opamp.js, lm386.js).
-        'lm386', 'lm386_stage', 'ground_sensing_opamp_stage'
+        'lm386', 'lm386_stage', 'ground_sensing_opamp_stage',
+        // Circuit-driven analog stages: Hall displacement readout, PLL/VCO,
+        // mixer, FM limiting/detection and a dual-gate transistor. No dedicated
+        // emitter peripheral path is claimed by their simulation models.
+        'bending_ruler', 'cd4046', 'sa612', 'fm_if', 'dual_gate_mosfet'
     ],
     mechanical: [
         'dip_switch', 'dip_switch_dpst', 'dip_switch_spst', 'slide_switch',

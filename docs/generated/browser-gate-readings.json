@@ -8000,6 +8000,234 @@
    "p95": null,
    "max": null,
    "readings": []
+  },
+  "Browser gate \u2014 CAD command palette": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD sketch paths": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD outline constraints": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD path locks": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD curved offsets": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD sketch offsets": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD tangent constraints": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD mirrored sketches": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD sketch patterns": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD sketch revolutions": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD trimmed sketches": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD preview demand": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD printability": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD workspace persistence": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD drawing sheets and PDF export": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD DWG import and round trip": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD DXF regions and drawing export": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD Microtronic gallery and controls": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD DXF path import and export": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 CAD STEP import and project round trip": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 circuit palette artwork": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 costume gradient handoff": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 costume precision geometry": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 costume precision drawing": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 costume sketch refresh": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 costume to CAD workflow": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 costume toolbar": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 editor help": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 gallery artwork": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 owned console Code tab journey": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 shared 3D navigation": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab flexible tubes": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab measurement overlay": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab overlay buffers": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab run controls": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab startup downloads": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab thumbnail cache": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
+  },
+  "Browser gate \u2014 Robot Lab Twistspan motion": {
+   "n": 0,
+   "p95": null,
+   "max": null,
+   "readings": []
   }
  }
 }

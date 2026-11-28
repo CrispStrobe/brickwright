@@ -10,6 +10,7 @@ import {promptAsync} from '../../lib/native-dialog.js';
 import {memorySpaces, memoryPage, memoryJump, readMemoryPage, formatMemoryAddress,
     memorySessionCurrent, memoryWritable, memorySpacesDeclared}
     from '../../lib/bw-debug/memory-view.js';
+import {memoryByteHelp, memoryByteMarkerStyle} from '../../lib/bw-debug/memory-byte-help.js';
 
 /**
  * "Under the hood" — parity with emu8051's TUI, as a GUI.
@@ -98,6 +99,7 @@ const L10N = {
         dropped: 'older rows dropped',
         bank: 'bank', cycles: 'cycles', ms: 'ms',
         spaceNote: 'SFR and internal RAM share these addresses and are different memories.',
+        memoryMarkers: 'Yellow: SP · purple: DPTR · green: PC · blue: active register bank. Hover for byte values.',
         editHint: 'Click a byte to edit it.'
     },
     de: {
@@ -138,6 +140,7 @@ const L10N = {
         bank: 'Bank', cycles: 'Zyklen', ms: 'ms',
         spaceNote: 'Spezialregister und internes RAM teilen sich diese Adressen und sind ' +
             'verschiedene Speicher.',
+        memoryMarkers: 'Gelb: SP · violett: DPTR · grün: PC · blau: aktive Registerbank. Bytewerte beim Zeigen.',
         editHint: 'Auf ein Byte klicken zum Ändern.'
     }
 };
@@ -780,16 +783,25 @@ class DebugDrawer extends React.Component {
                     {result.error || this.state.memoryError}
                 </div> : null}
                 {!writable ? <div>Read-only memory</div> : null}
+                {snap && snap.flavor === '8051' ? (
+                    <div style={{fontSize: 10, marginBottom: 4}}>{this.tx('memoryMarkers')}</div>
+                ) : null}
                 {rows.map(row => (
                     <div key={row.addr} style={{whiteSpace: 'nowrap'}}>
                         <span style={{color: '#3498db'}}>{`${address(row.addr)}  `}</span>
-                        {row.data.map((b, i) => (
+                        {row.data.map((b, i) => {
+                            const help = memoryByteHelp({space: spec.id, address: row.addr + i,
+                                value: b, snapshot: snap, locale: this.props.locale});
+                            return (
                             <span
                                 key={i}
                                 role={writable ? 'button' : undefined}
                                 tabIndex={-1}
-                                title={`${address(row.addr + i)}${writable ? ` — ${this.tx('editHint')}` : ' — read-only'}`}
-                                style={{color: b ? '#ecf0f1' : '#4a5568', cursor: writable ? 'pointer' : 'default', padding: '0 2px'}}
+                                data-memory-byte={`${spec.id}:${address(row.addr + i)}`}
+                                data-memory-markers={help.markers.join(' ')}
+                                title={`${help.title}\n${writable ? this.tx('editHint') : 'read-only'}`}
+                                style={{color: b ? '#ecf0f1' : '#4a5568', cursor: writable ? 'pointer' : 'default',
+                                    padding: '0 2px', ...memoryByteMarkerStyle(help.markers)}}
                                 onClick={async () => {
                                     if (!writable) return;
                                     const raw = await promptAsync(
@@ -805,7 +817,8 @@ class DebugDrawer extends React.Component {
                                     }
                                 }}
                             >{hex8(b)}</span>
-                        ))}
+                            );
+                        })}
                     </div>
                 ))}
                 {/* The trap §6 names: these two spaces overlap numerically and

@@ -6,6 +6,7 @@ import Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {codeArtworkMatches} from '../overlay/scratch-gui/src/lib/bw-code-artwork.js';
 import {balancedFrom} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass, codeEditorMethod} from './helpers/code-document-editor.mjs';
 import {VM} from './helpers/bw-vm.mjs';
 import {importGuiDependency} from './helpers/bw-integrated.mjs';
 
@@ -28,15 +29,11 @@ test('serialized and object VM diagnostics retain every SB3 path and omit unrela
 
 test('actual Code compile catch displays a real VM serialized validation rejection and preserves the loaded project', async () => {
     const source = await fs.readFile(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-    const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {})';
-    const body = balancedFrom(source, source.indexOf(signature) + signature.length, '{', '}', 'Code compile');
-    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-    // DOS_LANG / generateDosLangs: the fe and Tcl tabs compile() also reads and
-    // regenerates; none here.
-    const compile = new AsyncFunction('TWO_WAY', 'LANG_LABEL', 'codeArtworkMatches', 'conversionFailure', 'DOS_LANG', 'generateDosLangs',
-        `return async function ({strict = false, pseudocode = null, scratchExample = false} = {}) ${body}`);
-    const execute = await compile(new Set(['pseudocode']), {pseudocode: 'Pseudocode'}, codeArtworkMatches, conversionFailure,
-        {}, async () => ({}));
+    const Editor = codeDocumentEditorClass(source,
+        codeEditorMethod(source, 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {'), {
+            TWO_WAY: new Set(['pseudocode']), LANG_LABEL: {pseudocode: 'Pseudocode'},
+            codeArtworkMatches, conversionFailure, DOS_LANG: {}
+        });
     class InvalidCostumes extends Creator {
         async generateSB3 () {
             const zip = await JSZip.loadAsync(await (await super.generateSB3()).arrayBuffer());
@@ -53,16 +50,20 @@ test('actual Code compile catch displays a real VM serialized validation rejecti
     const baseline = new Creator(); baseline.parse('SPRITE Game:\nWHEN flag clicked:\n  say "ready"');
     await vm.loadProject(await (await baseline.generateSB3()).arrayBuffer());
     const stage = vm.runtime.getTargetForStage(), before = vm.toJSON();
-    const context = {props: {vm}, state: {lang: 'pseudocode', uploads: []}, _animationImport: null, _codeArtwork: null,
+    const code = 'SPRITE Game:\nWHEN flag clicked:\n  say "changed"';
+    const context = Object.assign(new Editor(), {props: {vm}, state: {lang: 'pseudocode',
+        buffers: {pseudocode: code}, uploads: [], driverMode: 'shim', asyncMode: false,
+        eventsMode: false, jsExecution: 'classic', basicProfile: 'bbc', basicLineNumbers: true},
+        _animationImport: null, _codeArtwork: null,
         L: {stCompiling: 'Compiling', stError: message => `Error: ${message}`},
-        activeCode: () => 'SPRITE Game:\nWHEN flag clicked:\n  say "changed"',
+        activeCode: () => code,
         lib: async () => ({default: InvalidCostumes}), setState (patch) {
             // Match React's functional updater contract as well as object patches.
             const update = typeof patch === 'function' ? patch(this.state) : patch;
             if (update) Object.assign(this.state, update);
-        }};
+        }});
     try {
-        await execute.call(context);
+        await context.compile();
         assert.match(context.state.status, /Could not parse as a valid SB2 or SB3 project/);
         assert.match(context.state.status, /\.targets\[\d+\]\.costumes:.*duplicate/);
         assert.doesNotMatch(context.state.status, /undefined|objName/);
@@ -71,7 +72,7 @@ test('actual Code compile catch displays a real VM serialized validation rejecti
         assert.equal(context.state.busy, false);
         assert.strictEqual(vm.runtime.getTargetForStage(), stage);
         assert.equal(vm.toJSON(), before);
-        await assert.rejects(execute.call(context, {strict: true}), rejection => typeof rejection === 'string' && rejection.includes('uniqueItems'));
+        await assert.rejects(context.compile({strict: true}), rejection => typeof rejection === 'string' && rejection.includes('uniqueItems'));
         assert.equal(context.state.busy, false);
     } finally {vm.quit();}
 });
@@ -267,7 +268,8 @@ const realReportTransitions = async fixture => {
         const at = source.indexOf(signature);assert.ok(at >= 0, signature);
         return balancedFrom(source, at + signature.length, '{', '}', signature).slice(1, -1);
     };
-    const dismissNotice = new Function('notice', extract('dismissCodeNotice (notice)'));
+    assert.ok(source.includes('onClick={event => { event.stopPropagation(); this.setState({conversionReport: null}); }}'),
+        'actual report-dismiss handler changes the report state without replacing the request');
     const begin = new Function(extract('beginArcadeReport ()'));
     const publish = new Function('request', 'out', 'operation', 'outcome', extract('publishArcadeReport (request, out, operation, outcome)'));
     let methods = 0;
@@ -279,12 +281,7 @@ const realReportTransitions = async fixture => {
         methods++;publish.call(fixture.instance, request, {unsupported: ['receiver'], unsupportedDetails: [],
             refusalEvidence: {ownedJsonObservation: fixture.observation}}, operation, 'actual extracted report publication');
     };
-    const dismiss = () => {
-        const notice = {id: 1, report: fixture.instance.state.conversionReport};
-        fixture.instance.state.codeNotices = [notice];
-        dismissNotice.call(fixture.instance, notice);
-    };
-    return {start, finish, dismiss, methods: () => methods};
+    return {start, finish, methods: () => methods};
 };
 
 test('an idle prior export run import or dismissed report is followed by the actual new request and report at the same revision', async () => {
@@ -297,7 +294,7 @@ test('an idle prior export run import or dismissed report is followed by the act
             const initial = transitions.start();transitions.finish(initial, kind === 'prior run' ? 'run' : 'export');
             if (kind === 'dismissed report') {
                 assert.ok(f.instance.state.conversionReport);
-                transitions.dismiss();
+                f.instance.setState({conversionReport: null});
                 assert.strictEqual(f.instance._arcadeReportRequest, initial, 'the actual dismiss state update retains the prior request token');
                 assert.equal(f.instance.state.conversionReport, null);
             }

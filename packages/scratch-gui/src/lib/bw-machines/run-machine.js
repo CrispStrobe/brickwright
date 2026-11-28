@@ -134,7 +134,7 @@ export async function runMachineConfig(config, opts = {}) {
     const serialMachine = ['z80', 'rp2040js', 'eater6502', 'riscv32'].includes(activated.targetKind);
     if (serialMachine) detail.machineView = activated.videoWidget ? 'controller' : 'debugger';
     const awaitBoot = (activated.machinePreset === 'freedos-vga' || serialMachine ||
-        (activated.targetKind === 'i80386' && bm.slot === 'bios') ||
+        (activated.targetKind === 'i80386' && ['bios', 'floppy'].includes(bm.slot)) ||
         (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
     let completion = null;

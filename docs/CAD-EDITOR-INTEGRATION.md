@@ -79,12 +79,30 @@ active native build keeps its frontend inputs unchanged.
 
 The two editors share rectangle intersection math, touch arithmetic and core
 transform arithmetic already. With CAD hosted through its SDK, future CAD
-improvements flow through a pinned SDK update. The next shared extraction is
-camera gesture intents and precision/readout formatting. Robots keeps its fixed
+improvements flow through a pinned SDK update. Camera pointer intents are shared
+and pinned too (`src/lib/editor-interaction/camera-pointer.js`); precision/readout
+formatting remains a possible next extraction. Robots keeps its fixed
 Technic dimensions, connector snapping and physics model; the SDK retains its
 solid document and millimetre/Z-up coordinate system. CAD-to-Robots geometry
 export already exists in the CAD adapter; enabling simulated custom parts still
 requires explicit authored connectors and collision metadata.
+
+## Release synchronization
+
+After building and pinning its SDK, the CAD repository offers a read-only
+cross-check of the exact SDK hashes and source revision, the shared interaction
+modules and the common Jolt release and SHA-512:
+
+```sh
+# In the clean CAD checkout, after build:brickwright-sdk and sync-cad-sdk:
+npm run verify:brickwright-sync -- /path/to/brickwright
+```
+
+The simulation, renderer and model catalogue stay in the shared CAD SDK; host
+changes provide visibility, SB3 persistence and program commands rather than a
+forked editor. Pin the complete SDK directory, including its lazy catalogue
+chunks, workers, WASM and notices. A pin update does not replace an installed
+Brickwright binary; that application must be rebuilt to ship the new bundle.
 
 ## Shared fixes upstreamed on 15 November 2026
 
@@ -139,6 +157,15 @@ be signed with our distribution identity before upload. Compute the packaged
 runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
+
+## External mechanical clock for CrispBASIC (28 November 2026)
+
+Lite pins CrispCAD SDK `0b577f63d60424ead19e1aaa9cf602f81fee60ff` (previously
+`422e567`), CrispCAD main after "Merge preserved external mechanical clock
+recovery (#80)". It lets a program-driven host (CrispBASIC with Connect CAD
+motors) own the clock while CAD keeps its fixed solver quantum. The approved
+manifest, commit and carrier hashes in `scripts/lib/cad-sdk-fetch-pins.mjs`
+follow this SDK.
 
 ## Linked instances, mates, datums and manufacturing checks: document versions 51 and 52 (28 November 2026)
 

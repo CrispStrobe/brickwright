@@ -124,6 +124,9 @@ try {
         const collapse = page.getByRole('button', {name: label, exact: true});
         if (await collapse.isVisible()) await collapse.click();
     }
+    for (let n = 1; n <= 8; n++) {
+        await page.locator(`[data-switch-control="switch${n}"]`).waitFor({state: 'hidden'});
+    }
     await page.waitForFunction(() => document.querySelector('[data-canvas]')?.getBoundingClientRect().width >= 200);
     await fitCp1('narrow');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);

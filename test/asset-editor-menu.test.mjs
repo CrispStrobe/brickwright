@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {balancedAfter, scopeAfter} from './helpers/js-scope.mjs';
 import {makeT} from '../overlay/scratch-gui/src/lib/bw-i18n.js';
-import {registerEditorMenuActions, getEditorMenuItems, runEditorMenuAction} from '../overlay/scratch-gui/src/lib/editor-menu-actions.js';
+import {registerEditorMenuActions, getEditorMenuItems, runEditorMenuAction, editorMenuActionEnabled} from '../overlay/scratch-gui/src/lib/editor-menu-actions.js';
 const read = file => readFileSync(new URL(`../overlay/scratch-gui/src/${file}`, import.meta.url), 'utf8');
 const pixel = read('components/tw-pseudocode/pixel-art-editor.jsx');
 const tilemap = read('components/tw-pseudocode/tilemap-editor.jsx');
@@ -111,7 +111,8 @@ test('asset dispatch requires the current editor and current enabled descriptor'
     let enabled=true;
     const run=new Function('getEditorMenuItems','runEditorMenuAction',`return function(name,location) ${scopeAfter(source,'    handleAssetMenuAction (name, location)')}`)(
         ()=>[{name:'save',enabled}],(...args)=>{calls.push(args);return true;});
-    const resolve = new Function(`return function() ${scopeAfter(source, '    resolveAssetMenuSurface ()')}`)();
+    const resolve = new Function('editorMenuActionEnabled',
+        `return function() ${scopeAfter(source, '    resolveAssetMenuSurface ()')}`)(editorMenuActionEnabled);
     const host={resolveAssetMenuSurface: resolve, _activeEditorSurface:'pixel',props:{activeTabIndex:1,onRequestCloseFile:()=>{},onRequestCloseEdit:()=>{}}};
     assert.equal(run.call(host,'save','file'),true);
     enabled=false;assert.equal(run.call(host,'save','file'),false);

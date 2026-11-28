@@ -95,6 +95,7 @@ const FILES = [
     ['src/utils/cHostRuntime.js', path.join(lib, 'sb3-creator-chostruntime.js')],
     ['src/utils/cHostToPseudocode.js', path.join(lib, 'sb3-creator-chost.js')],
     ['src/utils/basicToPseudocode.js', path.join(lib, 'sb3-creator-basic.js')],
+    ['src/utils/crispBasicMode.js', path.join(lib, 'sb3-creator-crispbasic-mode.js')],
     ['src/utils/cubeDirections.js', path.join(lib, 'cubeDirections.js')],
     // The DEVICE EV3 word table, read by sb3Creator.js in both directions.
     ['src/utils/ev3Dialect.js', path.join(lib, 'ev3Dialect.js')],
@@ -105,7 +106,17 @@ const FILES = [
     ['src/utils/cpxDialect.js', path.join(lib, 'cpxDialect.js')],
     // The pin-role PART table (HCSR04 / DS18B20 / DS3231 / AT24C02 / I2C), read by
     // sb3Creator.js and the C reader (sb3-creator #52).
-    ['src/utils/pinRoleParts.js', path.join(lib, 'pinRoleParts.js')]
+    ['src/utils/pinRoleParts.js', path.join(lib, 'pinRoleParts.js')],
+    // Game export: the current project -> a playable JS web game or a Python +
+    // pygame project (sb3-creator docs/GAME-EXPORT.md). The runtime files travel
+    // inside sources.generated.js, so the app needs no other upstream file.
+    ['src/game/model.js', path.join(lib, 'sb3-creator-game-model.js')],
+    ['src/game/emit.js', path.join(lib, 'sb3-creator-game-emit.js')],
+    ['src/game/export.js', path.join(lib, 'sb3-creator-game-export.js')],
+    ['src/game/runtime/sources.generated.js', path.join(lib, 'sb3-creator-game-sources.js')],
+    // Costume rasters for pixel collisions and touching colour; the app rasterizes
+    // with its own canvas (rasterizeInPage), so no browser dependency is added.
+    ['src/game/raster.js', path.join(lib, 'sb3-creator-game-raster.js')]
 ];
 
 // Downstream-only modules imported by synced compiler files. EMPTY, with no stated
@@ -287,7 +298,10 @@ for (const [remote, dest] of FILES) {
             console.error('  this script records the new one itself.');
             process.exit(2);
         }
-        const base = resolved === null ? null : resolved.text;
+        // All three comparison points must use the destination filenames.
+        // An upstream edit to an import otherwise looks like a downstream-only
+        // line because the old raw import has its upstream module name.
+        const base = resolved === null ? null : rewriteImports(resolved.text);
         if (!force && base === null && current !== null && !warnedFallback) {
             warnedFallback = true;
             console.error('  NOTE: the old pinned version is not readable here, so the guard is');

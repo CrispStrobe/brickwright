@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "qualification": "crispbasic-named-board-targets",
+  "date": "2026-11-28",
+  "sourceCommit": "6cd147e5a2647e0b9c1196cc8b5ceb0f47b715f2",
+  "scope": {
+    "execution": "host-driven-logical-simulation",
+    "hardware": false,
+    "nativeMcuInterpreter": false,
+    "cpuEmulation": false,
+    "circuitPhysics": false
+  },
+  "environment": {
+    "node": "24.22.3",
+    "python": "3.12.14",
+    "filesystem": "read-only in-memory module/asset map because the execution workspace had no available checkout capacity",
+    "workers": "actual Node worker_threads.Worker instances; unchanged session, worker, interpreter and target sources"
+  },
+  "runtimeArtifact": {
+    "repository": "CrispStrobe/brickwright",
+    "runId": 46124192458,
+    "artifactId": 15254599855,
+    "sourceCommit": "597fc385277769c10c9c5791081b19002e638b6f",
+    "archiveSha256": "1784baf08733e9992d00faa464396e7e980b5571d436c016b1cfeb7b47d621a7",
+    "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+    "wasmSha256": "c22c6cbe4cea922450c979f41869b9b4e53de238f087341048fe9b4580edce9a",
+    "interpreterCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "emscripten": "3.1.64",
+    "provenance": "Archive, generated module, WASM binary, toolchain and all eight executable local build inputs matched their recorded hashes. All six compiled upstream file records are unchanged. The interpreter lock differs only by the two recorded native ARM32 source additions; the archived lock was independently hash-verified. No receipt or product packaging check was modified.",
+    "nativeOnlyLockAdditions": [
+      {
+        "path": "src/bbasmb_arm_32.c",
+        "sha256": "cef3b7b1459682cabab5d7bf7aeda653a8098ad1db236386b8d7f03c3f5a1f5f"
+      },
+      {
+        "path": "src/bbdata_arm_32.s",
+        "sha256": "744e0167d7b1124486607ee72a76afd8bf515894979384869371bc7047f69301"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "Named board API",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "sourceCommit": "dc315b6e4cb50327fd245574b9913a42a5d5e5b4",
+      "method": "Exact source module graph evaluated in Node; canonical maps, aliases, named terminals, fixture boundaries, immutability and lifecycle."
+    },
+    {
+      "name": "CLI discovery and refusals",
+      "passed": 32,
+      "failed": 0,
+      "method": "Real CLI and exact module graph via in-memory ESM resolution; fixture reads served from memory, no interpreter required."
+    },
+    {
+      "name": "Real WASM named board suite",
+      "file": "packages/crisp-basic/tests/board-targets-wasm.test.mjs",
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 5774.268915,
+      "method": "Unmodified committed tests/examples and real interpreter bytes executed in actual Node worker threads; only source/asset file access is served from memory."
+    },
+    {
+      "name": "Real WASM CLI",
+      "passed": 2,
+      "failed": 0,
+      "cases": [
+        {
+          "target": "nano",
+          "canonical": "arduino_nano",
+          "status": "completed",
+          "traceEvents": 15,
+          "elapsedMs": 30
+        },
+        {
+          "target": "rp2040",
+          "canonical": "pi_pico",
+          "status": "completed",
+          "traceEvents": 15,
+          "elapsedMs": 30
+        }
+      ],
+      "method": "Real CLI program/fixture reading, target selection, worker execution and JSON serialization through the same read-only in-memory file backend."
+    }
+  ],
+  "requiredRemainingQualification": [
+    "Fresh CI rebuild and exact artifact receipts",
+    "Full repository source/vendor/mirror gates",
+    "Complete production editor and browser qualification"
+  ],
+  "distributionBuild": false,
+  "mergeVerdict": "Not a substitute for current-head hosted qualification."
+}

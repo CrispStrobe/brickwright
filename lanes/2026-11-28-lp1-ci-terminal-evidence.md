@@ -1,6 +1,6 @@
 # LP1 landing prerequisite: browser terminal evidence — 2026-11-28
 
-Status: CLAIMED.
+Status: IMPLEMENTED SOURCE CANDIDATE; hosted qualification pending.
 
 Owner: Language/platform extension maintainer, continuing the repository
 owner's request to preserve incremental remote checkpoints and carry LP1
@@ -55,3 +55,36 @@ the three scalar bodies byte-for-byte. Independently review the patch,
 preserve the complete remote tree and publish incremental checkpoints.
 Applicable hosted checks and the real LP1b service-worker journey remain
 landing requirements. Independent active claims on main remain untouched.
+
+## Source checkpoint
+
+The declaration now covers all 295 preceding workflow steps in 100/100/95
+rows. The production repository-identity correction is copied verbatim from
+PR #1855 at the revision above; its test fixture selects this candidate's
+first actual shard. The original workflow reproduces the exact-scalar mapping
+refusal. No workflow content outside the three scalar bodies changes.
+
+Node 24.22.3 qualification: 42/42 audit controls and the existing 11/11 browser
+shard controls pass, without skips or cancellations. The audit controls exercise
+all 32 actual shards through complete source-derived expressions and the real
+Git-bound CLI. Each of the nine omitted rows has a regression whose deletion
+must refuse. Existing false-success, identity, malformed evidence, size,
+expression, partition and legacy controls remain load-bearing.
+
+Workflow blob: `a3f0cad0d6dc116d0d8ee1738edec687439bd343`.
+Audit script blob: `795d96410a7a65c4fbeffb5342bbfb0db564964e`.
+Audit test blob: `614fbe602bb2a5edda9b5475f4d0eb58ea9b5511`.
+The unchanged parser remains `4d833a5c95e61e65a09f9b33d8e5aa8c4b4014d8`.
+Removing the scalar bodies from old/new workflows produces identical bytes
+(SHA-1 `7ea55689207c97723b19575544aef69b5cca5528`). No browser product
+journey, condition, timeout or tolerance changes.
+
+Independent review approved the three exact implementation blobs above and
+confirmed the unchanged workflow and auditor boundaries. The initial repair
+checkpoint is saved at `ba8f205ea7bd389c67a599779f0856255adf60cf`.
+The reviewed repair is carried into PR #1856 and the stacked PR #1857 while
+preserving each slice's runtime bytes and the independent CrispBASIC and
+Cowgol claims. The existing LP1b thorough browser run uses a separate
+label-event concurrency group and is left running. The hosted service-worker
+journey and other integration failures still control landing; focused source
+success does not waive them.

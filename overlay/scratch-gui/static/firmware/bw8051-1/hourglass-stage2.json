@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "title": "Hourglass stage 2: one LED, Timer0 and high impedance",
+  "description": "Unmodified upstream stage-2 firmware on the STC15W408AS compatibility profile. L1 uses the original P3.0 anode/P1.0 cathode polarity; L2 checks an unselected line. The teaching bench adds 1 kΩ current-limiting resistors. This is not an exact STC15W201S/W204S package model.",
+  "vcc": 5,
+  "board": {
+    "device": "STC15W408AS",
+    "fosc": 11059200,
+    "vcc": 5
+  },
+  "firmware": "../images/hourglass-stage2.hex",
+  "parts": [
+    {
+      "id": "MCU",
+      "kind": "mcu",
+      "terminals": [
+        "P1.0",
+        "P3.0",
+        "P3.1"
+      ],
+      "params": {
+        "device": "STC15W408AS"
+      },
+      "x": 100,
+      "y": 180
+    },
+    {
+      "id": "R1",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 1000
+      },
+      "x": 330,
+      "y": 100
+    },
+    {
+      "id": "L1",
+      "kind": "led",
+      "terminals": [
+        "anode",
+        "cathode"
+      ],
+      "params": {
+        "color": "red"
+      },
+      "x": 480,
+      "y": 100
+    },
+    {
+      "id": "R2",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 1000
+      },
+      "x": 330,
+      "y": 240
+    },
+    {
+      "id": "L2",
+      "kind": "led",
+      "terminals": [
+        "anode",
+        "cathode"
+      ],
+      "params": {
+        "color": "red"
+      },
+      "x": 480,
+      "y": 240
+    }
+  ],
+  "nets": [
+    {
+      "id": "source1",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.0"
+        },
+        {
+          "part": "R1",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "led1",
+      "terminals": [
+        {
+          "part": "R1",
+          "terminal": "b"
+        },
+        {
+          "part": "L1",
+          "terminal": "anode"
+        }
+      ]
+    },
+    {
+      "id": "source2",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.1"
+        },
+        {
+          "part": "R2",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "led2",
+      "terminals": [
+        {
+          "part": "R2",
+          "terminal": "b"
+        },
+        {
+          "part": "L2",
+          "terminal": "anode"
+        }
+      ]
+    },
+    {
+      "id": "sink",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.0"
+        },
+        {
+          "part": "L1",
+          "terminal": "cathode"
+        },
+        {
+          "part": "L2",
+          "terminal": "cathode"
+        }
+      ]
+    }
+  ],
+  "wires": [
+    {
+      "id": "source1-1",
+      "netId": "source1",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.0"
+      },
+      "to": {
+        "part": "R1",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "led1-1",
+      "netId": "led1",
+      "from": {
+        "part": "R1",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "L1",
+        "terminal": "anode"
+      }
+    },
+    {
+      "id": "source2-1",
+      "netId": "source2",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.1"
+      },
+      "to": {
+        "part": "R2",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "led2-1",
+      "netId": "led2",
+      "from": {
+        "part": "R2",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "L2",
+        "terminal": "anode"
+      }
+    },
+    {
+      "id": "sink-1",
+      "netId": "sink",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.0"
+      },
+      "to": {
+        "part": "L1",
+        "terminal": "cathode"
+      }
+    },
+    {
+      "id": "sink-2",
+      "netId": "sink",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.0"
+      },
+      "to": {
+        "part": "L2",
+        "terminal": "cathode"
+      }
+    }
+  ]
+}

@@ -42,6 +42,8 @@ import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import path from 'node:path';
 // The emitter's OWN pad mapping, imported not recopied. See INDIRECT_PAD_RESOLVERS.
 import {ppiPadTerminal} from '../overlay/scratch-gui/src/lib/bw-asm/pseudocode-8086.js';
+import {parseCp1Program} from '../overlay/scratch-gui/src/lib/cp1-program.js';
+import {isOnboardCp1Circuit} from './helpers/onboard-cp1-circuit.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const cui = path.join(root, 'node_modules/bw-circuit-ui/src');
@@ -192,6 +194,8 @@ const KNOWN_UNCONNECTED = new Map([]);
 
 const declaredPins = (src) => [...src.matchAll(/^\s*PIN\s+([A-Za-z0-9_]+)\s*=\s*([A-Za-z0-9._]+)\s+([A-Z]+)/gm)]
     .map((m) => ({name: m[1], pad: m[2], mode: m[3]}));
+const hasProgramText = (src) => typeof src === 'string' && src.split(/\r?\n/)
+    .some(line => line.trim() && !/^\s*(?:#|\/\/)/.test(line));
 
 /** The DEVICE the program dispatches on — the same token the emitter reads, so
  *  an indirect-pad resolver keys on what actually runs. */
@@ -244,16 +248,21 @@ async function survey () {
         // forked from: example-device-only.js is now the ONE definition and
         // the Circuit tab imports the same one.
         const deviceOnly = isDeviceOnlyExample(e);
-        const row = {id: e.id, pins, device, deviceOnly,
+        const row = {id: e.id, pins, device, deviceOnly, hasProgram: hasProgramText(progSrc),
             hasCircuit: !!(circRel && existsSync(path.join(EXAMPLES, circRel)))};
         rows.push(row);
         if (!row.hasCircuit) continue;
         let c;
+        let source;
         try {
             resetIds();
             const raw = JSON.parse(readFileSync(path.join(EXAMPLES, circRel), 'utf8'));
-            c = Circuit.fromJSON(raw.circuit || raw);
+            source = raw.circuit || raw;
+            c = Circuit.fromJSON(source);
         } catch (err) { row.loadError = err.message.slice(0, 80); continue; }
+        const cp1Path = e.files?.cp1 && path.join(EXAMPLES, e.files.cp1);
+        const cp1Program = cp1Path && existsSync(cp1Path) ? readFileSync(cp1Path, 'utf8') : null;
+        row.onboardCp1 = isOnboardCp1Circuit({entry: e, source, circuit: c, program: cp1Program, pins});
         const byId = new Map(c.parts.map((p) => [p.id, p]));
         const wired = new Set();        // every terminal in a multi-terminal net
         // ...and the same, kept per PART KIND. `wired` is a flat set of names,
@@ -307,11 +316,15 @@ const ROWS = await survey();
 test('INSTRUMENT: the corpus walk actually derived something', t => {
     const report = (...a) => t.diagnostic(a.join(' '));
     const withPins = ROWS.filter((r) => r.pins.length);
+    const withPrograms = ROWS.filter((r) => r.hasProgram);
     const withCircuit = ROWS.filter((r) => r.hasCircuit);
     const resolved = ROWS.filter((r) => r.wired && r.wired.size > 0);
+    const onboard = ROWS.filter((r) => r.onboardCp1);
     const failed = ROWS.filter((r) => r.loadError);
-    report(`\nTier 2.1 survey: ${ROWS.length} index entries, ${withPins.length} declare pins, `
-        + `${withCircuit.length} have a circuit, ${resolved.length} resolved a non-empty netlist`);
+    report(`\nTier 2.1 survey: ${ROWS.length} index entries, ${withPrograms.length} contain program text, `
+        + `${withPins.length} declare pins, `
+        + `${withCircuit.length} have a circuit, ${resolved.length} resolved a non-empty netlist, `
+        + `${onboard.length} validated CP1 listings use only the machine's internal wiring`);
     for (const r of failed.slice(0, 10)) report(`  load failed: ${r.id} — ${r.loadError}`);
     assert.equal(failed.length, 0, `${failed.length} circuit(s) failed to load`);
 
@@ -323,11 +336,14 @@ test('INSTRUMENT: the corpus walk actually derived something', t => {
     assert.equal(ROWS.length, entries,
         `walked ${ROWS.length} of ${entries} index entries — the walk is dropping examples`);
 
-    // Every circuit that loaded must resolve a non-empty netlist. An
-    // unpopulated device registry resolves almost nothing and looks exactly
-    // like "the whole corpus is unwired".
-    const unresolved = withCircuit.filter((r) => !r.wired || r.wired.size === 0);
-    assert.ok(unresolved.length <= 1,
+    // Every external circuit must resolve a non-empty netlist. The CP1's
+    // arithmetic/display-only lessons have a whole-system connector and no
+    // external parts; their registered model, machine configuration and parsed
+    // non-I/O listing are validated separately above. An empty registry,
+    // stripped peripheral circuit or port-I/O program cannot enter that role.
+    // No unexplained empty circuit is allowed (the former tolerance was one).
+    const unresolved = withCircuit.filter((r) => (!r.wired || r.wired.size === 0) && !r.onboardCp1);
+    assert.equal(unresolved.length, 0,
         `${unresolved.length} circuit(s) resolved an EMPTY netlist: `
         + `${unresolved.slice(0, 5).map((r) => r.id).join(', ')} — a registry that never `
         + 'populated produces exactly this');
@@ -341,7 +357,7 @@ test('INSTRUMENT: the corpus walk actually derived something', t => {
     // rather than trusting either bootstrap step to have run.
     const MULTI_PIN = new Set(['keypad_4x4', 'ssd1306', 'char_lcd_i2c', 'hd44780', 'max7219',
         'seven_segment', 'mcu', 'stc_mcu', 'stc15_mcu', 'arduino_uno', 'arduino_nano',
-        'arduino_mega', 'pi_pico', 'w65c22', 'attiny88', 'attiny88_qfn32']);
+        'arduino_mega', 'pi_pico', 'w65c22', 'attiny88', 'attiny88_qfn32', 'kosmos-cp1']);
     const degraded = [];
     for (const r of ROWS) {
         for (const p of (r.parts || [])) {
@@ -361,9 +377,12 @@ test('INSTRUMENT: the corpus walk actually derived something', t => {
         + 'real pins, and every pad this gate checks would be wrong');
 
     // Declared pins are the gate's whole input; if the extractor stops matching
-    // the dialect, every check below passes over nothing.
-    assert.ok(withPins.length / ROWS.length >= 0.25,
-        `only ${withPins.length}/${ROWS.length} examples declare pins — below a quarter, `
+    // the dialect, every check below passes over nothing. Keep the quarter
+    // threshold on actual program text: pure analog and CP1 lessons have no
+    // pseudocode, or a comment-only program.bw explaining their separate panel.
+    // Adding those lessons cannot dilute the PIN extractor's measured yield.
+    assert.ok(withPins.length / withPrograms.length >= 0.25,
+        `only ${withPins.length}/${withPrograms.length} examples with program text declare pins — below a quarter, `
         + 'suspect the PIN extractor rather than the corpus');
     assert.ok(withCircuit.length / ROWS.length >= 0.5,
         `only ${withCircuit.length}/${ROWS.length} examples resolved a circuit path`);
@@ -518,6 +537,92 @@ test('a declared name matches the kind of part on its pad', t => {
 });
 
 // ── Canaries: re-introduce each defect, assert the detector fires ──
+async function onboardCp1Fixture (id = 'cp1-first-display') {
+    const index = JSON.parse(readFileSync(path.join(EXAMPLES, 'index.json'), 'utf8'));
+    const entry = index.find(example => example.id === id);
+    assert.ok(entry, `${id} must be a real catalog example`);
+    const source = JSON.parse(readFileSync(path.join(EXAMPLES, entry.files.circuit), 'utf8'));
+    const program = readFileSync(path.join(EXAMPLES, entry.files.cp1), 'utf8');
+    const {Circuit, resetIds} = await engine();
+    resetIds();
+    return {entry, source, program, circuit: Circuit.fromJSON(source)};
+}
+
+test('CANARY: onboard CP1 admission rejects broken metadata, structure and device registration', async () => {
+    const fixture = await onboardCp1Fixture();
+    assert.equal(isOnboardCp1Circuit(fixture), true, 'the real internal-display lesson must be recognised');
+    const mutations = [
+        ['wrong target', f => { f.entry.target = 'arduino-uno'; }],
+        ['wrong lesson kind', f => { f.entry.kind = 'program'; }],
+        ['no CP1 listing', f => { delete f.entry.files.cp1; }],
+        ['declared external pad', f => { f.pins = [{name: 'led', pad: 'P1.0'}]; }],
+        ['no authored computer', f => { f.source.parts = []; }],
+        ['unwired peripheral', f => { f.source.parts.push({id: 'led', kind: 'led'}); }],
+        ['dangling wire', f => { f.source.wires.push({from: 'cp1', fromTerminal: 'P1.0', to: 'missing'}); }],
+        ['hole jumper', f => { f.source.holeWires.push({boardId: 'missing', a: 'a1', b: 'b1'}); }],
+        ['malformed nets', f => { f.source.nets = {}; }],
+        ['unsupported clock', f => { f.source.parts[0].params.clockHz = 1000000; }],
+        ['invalid expansion', f => { f.source.parts[0].params.expansion = 'true'; }],
+        ['missing device registration', f => { f.registeredDevice = null; }],
+        ['fallback device terminals', f => { f.registeredDevice = {gpioFollowsPinStates: true, terminals: ['a', 'b']}; }],
+        ['netlist error', f => { f.circuit.netlistError = 'unregistered device'; }],
+        ['empty canonical board', f => { f.circuit.board.parts = []; }],
+        ['fallback loaded terminals', f => { f.circuit.parts[0].terminals = ['a', 'b']; }],
+        ['fallback board terminals', f => { f.circuit.board.parts[0].terminals = ['a', 'b']; }]
+    ];
+    for (const [name, mutate] of mutations) {
+        const changed = await onboardCp1Fixture();
+        mutate(changed);
+        assert.equal(isOnboardCp1Circuit(changed), false, name);
+    }
+});
+
+test('CANARY: CP1 port instructions and stripped peripheral lessons still require external nets', async () => {
+    const fixture = await onboardCp1Fixture();
+    const {Circuit} = await engine();
+    // Enable CP3 in both authored and loaded views so expansion port controls
+    // fail for requiring external wires, not for an invalid machine setup.
+    fixture.source.parts[0].params.expansion = true;
+    fixture.circuit = Circuit.fromJSON(fixture.source);
+    assert.equal(isOnboardCp1Circuit(fixture), true, 'CP3 still permits an internal-display listing');
+    for (const program of ['', 'DATA 42', 'NOT_AN_INSTRUCTION',
+        'P1E 1', 'P1A 1', 'P2A 1', 'P3E 1', 'P4A 1', 'P5A 1', '17.001']) {
+        if (/^P|^17\./.test(program)) {
+            assert.equal(parseCp1Program(program, {expansion: true}).ok, true,
+                `${program} must be a valid I/O instruction for this negative control`);
+        }
+        assert.equal(isOnboardCp1Circuit({...fixture, program}), false, JSON.stringify(program));
+    }
+    const wired = await onboardCp1Fixture('cp1-blink');
+    assert.equal(isOnboardCp1Circuit(wired), false, 'a real wired lesson remains on the electrical path');
+    wired.source.wires = [];
+    wired.source.holeWires = [];
+    wired.circuit = Circuit.fromJSON(wired.source);
+    assert.equal(isOnboardCp1Circuit(wired), false, 'stripping wires leaves real peripherals to validate');
+    wired.source.parts = wired.source.parts.filter(part => part.kind === 'kosmos-cp1');
+    wired.circuit = Circuit.fromJSON(wired.source);
+    assert.equal(isOnboardCp1Circuit(wired), false, 'stripping the peripherals cannot erase the port-I/O listing');
+    assert.equal(isOnboardCp1Circuit(await onboardCp1Fixture()), true,
+        'the positive control must still be admitted after the negative cases');
+});
+
+test('CANARY: the PIN extractor reads program declarations and ignores comment-only lessons', () => {
+    const program = '# PIN ignored = D7 INPUT\nDEVICE arduino-uno\n'
+        + 'PIN led = D13 OUTPUT\n  PIN button = P1.0 INPUT\nPIN knob = A0 ANALOG\n';
+    assert.equal(hasProgramText(program), true);
+    assert.deepEqual(declaredPins(program), [
+        {name: 'led', pad: 'D13', mode: 'OUTPUT'},
+        {name: 'button', pad: 'P1.0', mode: 'INPUT'},
+        {name: 'knob', pad: 'A0', mode: 'ANALOG'}
+    ]);
+    for (const comments of ['', '# Open program.cp1 in its panel.\n', '// Analog circuit, no program.\n']) {
+        assert.equal(hasProgramText(comments), false);
+        assert.deepEqual(declaredPins(comments), []);
+    }
+    assert.equal(hasProgramText('WHEN flag clicked:\n set value to 1'), true,
+        'a program with no DEVICE or PIN declaration must remain in the yield denominator');
+});
+
 test('CANARY: an unwired declared pin is detected', () => {
     const wired = new Set(['d13', 'gnd', 'vcc']);
     const pins = [{name: 'led', pad: 'D13'}, {name: 'btn', pad: 'D2'}];

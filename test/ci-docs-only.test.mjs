@@ -76,6 +76,8 @@ const executeShell = (shell, inputs) => {
             env: {PATH: process.env.PATH, EVENT: 'pull_request', ACTION: 'synchronize',
                 LABEL: '', HAS_FULL: 'false', DOCS_ONLY: 'false',
                 NEED_HEAVY: 'true', NEED_LIGHT: 'true', NEED_ROBOTLAB: 'true', NEED_FPGA: 'true',
+                NEED_LIGHTCAD1: 'false', NEED_LIGHTCAD2: 'false', NEED_LIGHTCAD3: 'false',
+                NEED_LIGHTARTWORK: 'false', NEED_ROBOTVIEW: 'false',
                 FAST: 'false', THOROUGH: 'false', ...inputs, GITHUB_OUTPUT: output},
             encoding: 'utf8', timeout: 5000, maxBuffer: 65536
         });
@@ -126,7 +128,7 @@ test('actual workflow selector keeps fast PR default and existing thorough/main/
     ];
     for (const [name, inputs, fast, thorough, browser, admitted] of cases) {
         const result = executeShell(tierShell, inputs);
-        assert.equal(result.status, 0, name);
+        assert.equal(result.status, 0, `${name}: ${result.stderr || result.stdout}`);
         assert.equal(result.output.fast, fast, name);
         assert.equal(result.output.thorough, thorough, name);
         for (const shard of ['browser', 'heavy', 'light', 'robotlab', 'fpga'])

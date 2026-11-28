@@ -51,6 +51,8 @@ import JSZip from 'jszip';
 import {createRequire} from 'node:module';
 import {compile, hasRuntime} from './lib/pxt-node.mjs';
 import {integratedGuiLibrary} from './lib/integrated-gui-library.mjs';
+import {validateCrispBasicPseudocode, validateCrispBasicProject, crispBasicModeError}
+    from '../packages/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const guiLibraries = integratedGuiLibrary(ROOT);
@@ -117,10 +119,18 @@ const base = f => path.basename(f).replace(/\.[^.]+$/, '');
 
 /** A project JSON plus a costume lookup, from an .sb3 or a .bw. */
 async function readProject (file) {
+    // Reject the durable runtime requirement before compiler/VM admission.
+    // Unmarked programs still use the canonical integrated library boundary.
+    const requireOrdinaryProject = project => {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('MakeCode export and execution');
+    };
     if (/\.bw$|\.txt$/i.test(file)) {
+        const source = fs.readFileSync(file, 'utf8');
+        if (validateCrispBasicPseudocode(source)) throw crispBasicModeError('MakeCode export and execution');
         const {default: SB3Creator} = await lib('sb3-creator.js');
         const cr = new SB3Creator();
-        cr.parse(fs.readFileSync(file, 'utf8'));
+        cr.parse(source);
+        requireOrdinaryProject(cr.project);
         const costumeSvg = (t, c) => {
             const a = cr.assets.get(c.assetId);
             return a && a.type === 'svg' ? a.data : null;
@@ -133,6 +143,7 @@ async function readProject (file) {
     const json = zip.file('project.json');
     if (!json) throw new Error(`${file}: no project.json — not an .sb3`);
     const project = JSON.parse(await json.async('string'));
+    requireOrdinaryProject(project);
     // Before anything rewrites the targets: the fingerprint is over the saved program.
     const original = makeCodeOriginal.original(project);
     const svgs = new Map();
@@ -467,12 +478,12 @@ async function runBoardsCommand (a, project) {
 }
 
 async function runCommand (a) {
-    const run = await import('./lib/makecode-run.mjs');
     if (/\.(sb3|bw|txt)$/i.test(a.input)) {
-        const {readBoards} = await lib('bw-boards/model.js');
         const {project} = await readProject(a.input);
+        const {readBoards} = await lib('bw-boards/model.js');
         if (readBoards(project)) return runBoardsCommand(a, project);
     }
+    const run = await import('./lib/makecode-run.mjs');
     if (a.press.length) throw Object.assign(new Error('--press is for a program with several boards'), {usage: true});
     const rb = RUN_BOARDS[a.board || 'v1'];
     const v2 = rb.board === 'microbit-v2';
@@ -552,6 +563,10 @@ async function runCommand (a) {
 }
 
 main().then(code => process.exit(code), e => {
+    if (e?.code === 'crispbasic-runtime-required' || e?.code === 'crispbasic-source-version') {
+        console.error(`refused: ${e.message}`);
+        process.exit(1);
+    }
     for (const refusal of e?.refused || []) console.error(`  dependency refused: ${refusal.id} (${refusal.spec}) — ${refusal.reason}`);
     console.error(e && e.stack || e);
     process.exit(e && e.code === 'NO_RUNTIME' ? 3 : 1);

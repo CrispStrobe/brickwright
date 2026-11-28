@@ -78,9 +78,9 @@ const expectedEmitted = [
     'two-toggle-keys',
     'z80-pd-bench'
 ];
-const labProgramNames = () => {
+const programNames = prefix => {
     const dir = join(root, 'overlay/scratch-gui/examples');
-    return readdirSync(dir).filter(name => name.startsWith('lab-') &&
+    return readdirSync(dir).filter(name => name.startsWith(prefix) &&
         existsSync(join(dir, name, 'program.bw'))).sort();
 };
 const namesOf = rows => rows.map(row => row.split(': ')[0]);
@@ -119,12 +119,17 @@ const auditReach = (receipt, {compiled}) => {
     // lab-* gallery programs, analog bench circuits with no hardware
     // declarations. Every one is refused at retarget (retargetRefused
     // 135 -> 227); no wait count, emit or compile moves.
-    assert.equal(s.programs, 399);
-    assert.equal(s.retargetRefused, 227);
-    const labPrograms = labProgramNames();
-    assert.equal(labPrograms.length, 92, 'the lab-* gallery program count moved');
+    // The original 399 programs remain; 244 analog lab programs and 56
+    // CP1 stubs add only to the retarget-refused denominator. Keep every
+    // actual wait/print/lowering/compile expectation unchanged.
+    assert.equal(s.programs, 699);
+    assert.equal(s.retargetRefused, 527);
+    const labPrograms = programNames('lab-');
+    const cp1Programs = programNames('cp1-');
+    assert.equal(labPrograms.length, 336, 'the lab-* gallery program count moved');
+    assert.equal(cp1Programs.length, 56, 'the CP1 gallery program count moved');
     const retargetRows = new Map(receipt.retarget.map(row => row.split(': ')));
-    for (const name of labPrograms) {
+    for (const name of [...labPrograms, ...cp1Programs]) {
         assert.equal(retargetRows.get(name), 'the source has no hardware declarations to retarget', name);
     }
     for (const name of ["school-intercom-101455", "school-led-people-dog", "school-miniorgan-107056"]) assert.ok(namesOf(receipt.retarget).includes(name), name);
@@ -214,7 +219,7 @@ const auditReach = (receipt, {compiled}) => {
     'every gallery program must land in exactly one outcome bucket');
 };
 
-test('the 399-program gallery records the wait/print gains and every emitted program compiles',
+test('the 699-program gallery records the wait/print gains and every emitted program compiles',
     {timeout: 300000}, async t => {
         const {stdout} = await execFileP(process.execPath, [
             '--import', guiScopeHook,

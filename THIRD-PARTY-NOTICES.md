@@ -1955,7 +1955,7 @@ imports code from, **BBC BASIC (Z80) / PicoBB (C)** by R.T. Russell.
 BBC BASIC (Z80) and PicoBB (the C/Pico port) are copyright
 (c) R.T. Russell, distributed under the **zlib licence** (see
 https://github.com/rtrussell/BBCSDL/blob/master/licence.txt). The
-interpreter binaries, when shipped, are included **unmodified**.
+legacy Z80 interpreter binary is included **unmodified**.
 
 The name "BBC BASIC" is used by permission of the BBC, granted to
 R.T. Russell. This project uses the name only to describe compatibility
@@ -1980,6 +1980,32 @@ sources are pinned in `bundled-upstream-pins.json`.
 `static/roms/bbc-video-6502.rom` is built from the Brickwright lesson source
 in `firmware/bbc-video-6502/main.s`. Copyright (c) 2026, Christian Ströbele
 (CrispStrobe). Distributed under the BSD-3-Clause licence.
+
+## CrispBASIC restricted WASM runtime — BSD-3-Clause / zlib
+
+Builds prepared with `npm run build:crispbasic` also ship the restricted
+CrispBASIC browser interpreter under `static/crispbasic/`. Its C interpreter
+comes from **BBCSDL**, copyright (c) 2021 Richard T. Russell, under the
+**zlib licence**, pinned to commit `6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f` of
+https://github.com/rtrussell/BBCSDL. CrispBASIC's host, worker and session code
+is **BSD-3-Clause**, copyright (c) 2026 Christian Ströbele (CrispStrobe).
+This is a modified integration: its explicit host replaces SDL/console
+services and applies the restrictions recorded in the package's patch files.
+It is branded CrispBASIC; BBC BASIC describes language compatibility.
+
+Emscripten **3.1.64** supplies runtime/support code under its **MIT and
+University of Illinois/NCSA licences**. The compiled library components retain
+their own musl, math-library, dlmalloc and compiler-rt notices. The payload
+includes the complete original notices under `static/crispbasic/licenses/`,
+the CrispBASIC licence as `LICENSE.txt`, and the package's
+`THIRD-PARTY-NOTICES.md`. Build and payload manifests record source inputs,
+compiler settings, imports and artifact digests; the packaging command verifies
+the upstream and toolchain licence hashes before writing the served files.
+
+See `packages/crisp-basic/THIRD-PARTY-NOTICES.md`,
+`packages/crisp-basic/upstream.lock.json` and
+`packages/crisp-basic/wasm/toolchain.lock.json` for provenance. The browser
+payload does not contain the native backend, SDL or the Matrix Brandy oracle.
 
 ## CP/M 2.2 (Z80) — redistributable (DRDOS grant) + MIT
 
@@ -2819,3 +2845,48 @@ retained notices and exact provenance before Run.
 Copyright (c) 2026 Brickwright contributors. The vendored benchmark sources and
 full MIT licence ship in `overlay/scratch-gui/src/lib/bw-native-benchmarks/`
 (`LICENSE`).
+
+## MicroController-Lab — MIT
+
+Copyright (c) 2022 Ashrith Sagar. Six self-contained 8051 algorithms are
+adapted from `AshrithSagar/MicroController-Lab` at
+`11d6f887feaffb763b937693d440d79fda31a65c`. Brickwright adds SDAS8051 syntax,
+reproducible inputs, prediction prompts and an explicit finish address. The
+complete MIT notice accompanies each source and ships at
+`overlay/scratch-gui/static/licenses/ashrith-sagar-microcontroller-lab.MIT.txt`.
+Retained originals and Git blob identities are in the teaching fixtures.
+
+## cute-os — MIT
+
+Copyright (c) 2022 Mahmoud Karam. The optional SDCC scheduler lesson adapts
+`makaram99/cute-os` at `c489ebfb1a9186903b6c60db66bd1154ec703d71` to Timer0,
+with bounded task periods and observable completion. It ships as guest source
+and HEX in `overlay/scratch-gui/static/teaching/bw8051-1/`; the full MIT license
+is `overlay/scratch-gui/static/licenses/cute-os.MIT.txt`. No Keil startup file
+or compiler runtime from that repository is imported.
+
+## STC15lib — Apache-2.0
+
+Selected STC15lib headers by Michael Golovanov (mgoblin), pinned to v0.18.0
+at `9b6dfece57540e344da6ce5f5dc1593274ee9321`, build the selected GPIO, ADC,
+timer and hourglass firmware. Original header attribution, including STC
+vendor attribution, is retained. The complete Apache-2.0 license and source
+archive ship beside the firmware under
+`overlay/scratch-gui/static/firmware/bw8051-1/`. The HAL remains guest code.
+
+## ElectronicHourGlassKit — MIT
+
+Copyright (c) 2025 Michael Golovanov. Stage 2 and its LED helper from
+`mgoblin/ElectronicHourGlassKit` at
+`f434bb574ba5a89350bf26beca7cb0462db3c2dc` are shipped unchanged, with a
+simplified teaching circuit. The source archive and full MIT license accompany
+the image under `overlay/scratch-gui/static/firmware/bw8051-1/`.
+
+## stc_diyclock — MIT
+
+Copyright (c) 2016 Jens Jensen. Selected four-digit firmware from
+`orangetrialtruck/stc_diyclock` at `0a3972439846843dc3f4671a8bbc6f9846b2e17a`
+is built with NMEA disabled. Six build/runtime corrections are retained as
+an explicit patch; the original files, MIT license and STC MCU attribution
+remain in the accompanying source archive. The image, circuit and source
+package ship under `overlay/scratch-gui/static/firmware/bw8051-1/`.

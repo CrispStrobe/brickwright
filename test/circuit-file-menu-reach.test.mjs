@@ -22,8 +22,12 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {scopeAfter} from './helpers/js-scope.mjs';
 import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
 
 const read = p => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+const requireGui = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
+const requireBabel = createRequire(requireGui.resolve('@babel/core'));
+const {parse} = requireBabel('@babel/parser');
 
 const MENU_BAR = 'overlay/scratch-gui/src/components/menu-bar/menu-bar.jsx';
 const CIRCUIT_TAB = 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx';
@@ -66,19 +70,21 @@ test('every circuit action the File menu dispatches is one the vendored receiver
 test('the cold-start listener is registered unconditionally, and replays what it queued', () => {
     const tab = read(CIRCUIT_TAB);
 
-    // componentDidMount's body, up to the next method. The listener must live HERE
-    // and not inside the `if (this.props.isVisible)` block that gates load() — that
-    // guard is the whole reason the receiver can be absent.
-    const mount = tab.slice(tab.indexOf('componentDidMount ()'));
-    const visibleGuard = mount.indexOf('if (this.props.isVisible)');
-    const registration = mount.indexOf(`addEventListener('bw-circuit-file'`);
-    assert.ok(registration !== -1,
-        'circuit-tab.jsx registers no bw-circuit-file listener: with the designer ' +
-        'unmounted, the four File-menu items dispatch into an empty room');
-    const guardEnd = mount.indexOf('}', mount.indexOf('loadExamples();', visibleGuard));
-    assert.ok(registration > guardEnd,
-        'the cold-start listener is inside the isVisible guard, so it is registered ' +
-        'only in the case where it was never needed');
+    // A direct statement in the actual mount body cannot be hidden inside its
+    // visibility guard or borrowed from a later method that happens to load examples.
+    const ast = parse(tab, {sourceType: 'module', plugins: ['jsx']});
+    const host = ast.program.body.find(node => node.type === 'ClassDeclaration' && node.id.name === 'CircuitTab');
+    const mount = host?.body.body.find(node => node.key?.name === 'componentDidMount');
+    assert.ok(mount, 'actual Circuit tab mount method');
+    const registrations = mount.body.body.filter(node => {
+        const call = node.type === 'ExpressionStatement' && node.expression;
+        return call?.type === 'CallExpression' && call.callee.type === 'MemberExpression' &&
+            call.callee.object.name === 'window' && call.callee.property.name === 'addEventListener' &&
+            call.arguments[0]?.value === 'bw-circuit-file' && call.arguments[1]?.type === 'MemberExpression' &&
+            call.arguments[1].object.type === 'ThisExpression' && call.arguments[1].property.name === '_circuitFileWake';
+    });
+    assert.equal(registrations.length, 1,
+        'one unconditional mount statement registers the real cold-start wake handler');
 
     // It must hand the action on rather than swallow it, and it must not echo itself.
     assert.match(tab, /_circuitFilePending/,

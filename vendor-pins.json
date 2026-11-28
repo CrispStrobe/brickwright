@@ -1,7 +1,7 @@
 {
-  "bw-circuit-ui": "d9e0982aa186bb1d75406367e7e57803c03fd8ad",
-  "bw-board": "d21d6d8b819263eb08231134b7556efa82289a90",
-  "sb3-creator": "1b414786039b9cc412a498a8307126ee6422066b",
+  "bw-circuit-ui": "659431ce46a7b6d4ae472182b069ec301aee0df3",
+  "bw-board": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+  "sb3-creator": "b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a",
   "stc-compiler-flasher": "30f43384a9f226de3c3cb753e119dd93ca2e81ff",
   "devices": "624cd047851e4434df5d99432dc4f1fe4035d505",
   "stc12": "65257390341f6af333ae45af6a1fcb44ffdbd041",

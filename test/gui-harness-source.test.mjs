@@ -5,12 +5,14 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
-import {inspectGuiHarnessSource} from '../scripts/lib/gui-harness-source.mjs';
+import {bindGuiHarnessGit, inspectGuiHarnessSource} from '../scripts/lib/gui-harness-source.mjs';
 
 // Explicit test-platform binding; never fall back to a PATH-resolved command.
 const executable = process.env.BW_GUI_GIT_EXECUTABLE || '/usr/bin/git';
 test('source attestation refuses omitted, relative and non-file executable bindings', () => {
-    for (const input of [undefined, 'git', './git']) assert.throws(() => inspectGuiHarnessSource({root:process.cwd(),executable:input}), /absolute Git executable/);
+    for (const inspect of [bindGuiHarnessGit, inspectGuiHarnessSource]) {
+        for (const input of [undefined, 'git', './git']) assert.throws(() => inspect({root:process.cwd(),executable:input}), /absolute Git executable/);
+    }
     assert.throws(() => inspectGuiHarnessSource({root:process.cwd(),executable:os.tmpdir()}), /regular file/);
 });
 test('explicit Git identity attests the actual clean checkout and rejects tracked edits', async () => {
@@ -32,6 +34,16 @@ test('explicit Git identity attests the actual clean checkout and rejects tracke
         } finally {for(const [key,value] of Object.entries(inherited)){if(value===undefined)delete process.env[key];else process.env[key]=value;}}
         await writeFile(path.join(root,'owned.txt'),'different\n');
         assert.throws(()=>inspectGuiHarnessSource({root,executable}),/tracked source must match/);
+        // An experimental candidate deliberately has a tracked patch. The same
+        // concrete tool binding must expose that patch without weakening the
+        // ordinary clean-harness attestation above.
+        const candidate = bindGuiHarnessGit({root, executable});
+        assert.deepEqual(candidate.tool, observed.tool);
+        assert.equal(candidate.run(['show', 'HEAD:owned.txt']), 'reviewed\n');
+        const patch = candidate.run(['diff', '--no-ext-diff', '--binary', 'HEAD', '--']);
+        assert.match(patch, /-reviewed\n\+different/);
+        assert.throws(()=>bindGuiHarnessGit({root:path.dirname(root),executable}), /Git must inspect|not a git repository/,
+            'a path outside the admitted checkout cannot borrow its source identity');
     } finally {await rm(root,{recursive:true,force:true});}
 });
 

@@ -3,6 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {CAMERA_PREFERENCES_EVENT} from '../overlay/scratch-gui/src/lib/bw-camera-preferences.js';
 
 const source = readFileSync(new URL('../overlay/scratch-gui/src/lib/bw-sim/editor/editor-view3d.js', import.meta.url), 'utf8');
 // Run the shipped async paste closure and disposal's entry, without a renderer.
@@ -22,12 +23,16 @@ const fixture = ({local = false, denied = false} = {}) => {
         return read;
     }}};
     const cancelled = [];
+    const removedWindowListeners = new Map();
+    const updateCameraGestures = () => {};
+    const onNativeCameraInput = () => {};
     const api = new Function('navigator', 'clipboard', 'systemHasCopy', 'pasteText', 'onUp', 'window', 'canvas',
-        'releaseSpace', 'lostCapture',
+        'releaseSpace', 'lostCapture', 'CAMERA_PREFERENCES_EVENT', 'updateCameraGestures', 'onNativeCameraInput',
         `let spaceHeld = true, gesture = {touch: false, pointerId: 7}; ${lifetime} ${paste} ${cancelPointer} ${dispose}}; return {paste, dispose, spaceHeld: () => spaceHeld};`)(
         navigator, local ? [{}] : [], false, text => { events.push(['paste', text]); return true; },
-        event => cancelled.push(event), {removeEventListener() {}}, {removeEventListener() {}}, () => {}, () => {});
-    return {...api, events, resolve, reject, cancelled};
+        event => cancelled.push(event), {removeEventListener: (name, listener) => removedWindowListeners.set(name, listener)},
+        {removeEventListener() {}}, () => {}, () => {}, CAMERA_PREFERENCES_EVENT, updateCameraGestures, onNativeCameraInput);
+    return {...api, events, resolve, reject, cancelled, removedWindowListeners, updateCameraGestures, onNativeCameraInput};
 };
 
 for (const outcome of ['resolve', 'reject']) {
@@ -74,4 +79,6 @@ test('disposal cancels an active pointer and releases space before clipboard com
     const f = fixture(); f.dispose();
     assert.equal(f.spaceHeld(), false);
     assert.deepEqual(f.cancelled, [{pointerId: 7, type: 'pointercancel'}]);
+    assert.equal(f.removedWindowListeners.get(CAMERA_PREFERENCES_EVENT), f.updateCameraGestures);
+    assert.equal(f.removedWindowListeners.get('brickwright-camera-input'), f.onNativeCameraInput);
 });

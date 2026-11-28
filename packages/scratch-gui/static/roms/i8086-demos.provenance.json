@@ -1,0 +1,48 @@
+{
+  "note": "Pre-built 8086 demo ROMs vendored from bw-board. See scripts/sync-i8086-demo-roms.mjs.",
+  "pinAtBuild": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+  "roms": [
+    {
+      "rom": "i8086-blink-demo.bin",
+      "upstream": "rom/blink-demo.bin",
+      "bytes": 32768,
+      "sha256": "4f9d09331bdf37c606df3ffaf77f6b491e2c4137e9159149bab3836781d2a413"
+    },
+    {
+      "rom": "i8086-cga-gfx-demo.bin",
+      "upstream": "rom/cga-gfx-demo.bin",
+      "bytes": 32768,
+      "sha256": "39fe4f6e277180f59beac2d2613baf2f98c9cf85bdf16c0e9afcefa06ab6a7e1"
+    },
+    {
+      "rom": "i8086-desk-demo.bin",
+      "upstream": "rom/desk-demo.bin",
+      "bytes": 32768,
+      "sha256": "51b8940c9c5234b614f670f6899bf99ceb0a0f9b9a42c5424296c4b8bb3eacae"
+    },
+    {
+      "rom": "i8086-ega-demo.bin",
+      "upstream": "rom/ega-demo.bin",
+      "bytes": 32768,
+      "sha256": "9b35f9e4a4492cbdd32573ae5f727385c25204915de4339229b617e40e21e100"
+    },
+    {
+      "rom": "i8086-hercules-demo.bin",
+      "upstream": "rom/hercules-demo.bin",
+      "bytes": 32768,
+      "sha256": "dd6399cbcce5afa35e197c1d3375da5d0ea7deaa4beeb578646d5467540b698b"
+    },
+    {
+      "rom": "i8086-keyboard-demo.bin",
+      "upstream": "rom/keyboard-demo.bin",
+      "bytes": 32768,
+      "sha256": "88d66b132eff501e6401927b7d7ced16b8c2eb840d89f3f2160fa2c735bc1c2b"
+    },
+    {
+      "rom": "i8086-vga-demo.bin",
+      "upstream": "rom/vga-demo.bin",
+      "bytes": 32768,
+      "sha256": "803cd82a0be9e661c2ad490734ccb8bfca7056c7197f7e9915ce0530fff61f25"
+    }
+  ]
+}

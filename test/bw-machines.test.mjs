@@ -690,6 +690,21 @@ test('386 hard-disk geometry survives activation and media dispatch', async () =
     assert.deepEqual(dispatched[0].geometry, {cylinders: 1000, heads: 4, sectors: 17});
 });
 
+test('386 floppy launch keeps its geometry and reports an attach failure', async () => {
+    const {fetcher} = stubFetcher();
+    const geometry = {cylinders: 80, heads: 2, sectors: 18, bytesPerSector: 512};
+    const config = fromMediaManifest({
+        machine: 'i80386', bios: {kind: 'bochs-lgpl'}, slots: {floppy: 'minix204.img'}, floppy: {geometry}
+    }, {baseUrl: 'https://cdn/projects/minix-2.0/'});
+    await assert.rejects(runMachineConfig(config, {fetcher, awaitBoot: true, dispatch: detail => {
+        assert.equal(detail.kind, 'i80386');
+        assert.equal(detail.slotId, 'floppy');
+        assert.equal(detail.profile, 'floppy-os');
+        assert.deepEqual(detail.geometry, geometry);
+        detail.bootCompletion.reject(new Error('floppy attach was refused'));
+    }}), /floppy attach was refused/);
+});
+
 test('runMachineConfig returns a wired descriptor and dispatches nothing', async () => {
     const {fetcher} = stubFetcher();
     let dispatched = 0;
@@ -766,4 +781,37 @@ test('the steerer drains a real keyboard widget FIFO into keyIn', () => {
     assert.equal(steer.keysSent, expected.length);
     steer.stop();
     assert.equal(steer.running, false);
+});
+
+test('a declared 65C02 gray framebuffer reaches Controller through the machine handoff', async () => {
+    const {fetcher} = stubFetcher();
+    const framebuffer = {chip: 'screen', at: 0x3000, width: 64, height: 32, stride: 64, format: 'gray8'};
+    const cfg = fromMediaManifest({machine: 'eater6502', slots: {rom: 'forth.rom'},
+        machineConfig: {regions: [], chips: [{kind: 'framebuffer', name: 'screen', at: 0x3000, size: 2048},
+            {kind: 'acia', name: 'acia1', at: 0x5000}]},
+        program: {framebuffer, console: 'acia1'}});
+    const {detail} = await runMachineConfig(cfg, {fetcher, dispatch () {}});
+    assert.deepEqual(detail.machineConfig6502.grayFramebuffer, framebuffer);
+    assert.equal(detail.machineConfig6502.pacedConsole, 'acia1');
+    assert.equal(detail.machineView, 'controller');
+    assert.deepEqual(detail.widgets[0].config, {width: 64, height: 32});
+    cfg.provenance.program.framebuffer = {...framebuffer, stride: 128};
+    await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /Invalid 65C02 grayscale framebuffer/);
+});
+
+test('published 65C02 frames need a writable counter outside the framebuffer', async () => {
+    const {fetcher} = stubFetcher();
+    const framebuffer = {chip: 'screen', at: 0x2000, width: 100, height: 64, stride: 128,
+        format: 'gray6', publishAt: 0x200};
+    const cfg = fromMediaManifest({machine: 'eater6502', slots: {rom: 'animation.rom'},
+        machineConfig: {regions: [{kind: 'ram', start: 0, end: 0x3fff}],
+            chips: [{kind: 'framebuffer', name: 'screen', at: 0x2000, size: 8192}]},
+        program: {framebuffer}});
+    const {detail} = await runMachineConfig(cfg, {fetcher, dispatch () {}});
+    assert.deepEqual(detail.machineConfig6502.grayFramebuffer, framebuffer);
+    assert.equal(detail.machineConfig6502.pacedConsole, undefined);
+    cfg.provenance.program.framebuffer = {...framebuffer, publishAt: 0x2000};
+    await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /Invalid 65C02 framebuffer publication address/);
+    cfg.provenance.program.framebuffer = {...framebuffer, publishAt: 0x4000};
+    await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /publication address must be in RAM/);
 });
