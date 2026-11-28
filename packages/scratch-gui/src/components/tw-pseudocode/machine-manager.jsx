@@ -50,6 +50,7 @@ const T = {
         bootFreeDos: 'Boot FreeDOS VGA',
         freedosMedia: 'FreeDOS media',
         zmiyHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 720k/x86BOOT.img, and the Zmiy 0.85.2 ZIP. In Controller, use the arrows to steer, P to pause and Esc to quit.',
+        sudoku86Help: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img, and the Sudoku86 1.0.3 ZIP. In Controller, left-click to enter a digit or right-click to make a pencil mark. F5 saves the puzzle and F7 restores it.',
         openGemHelp: 'Select the official FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. Move the pointer over the Controller screen to use the mouse.',
         aliceHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. ALICE opens DEMO.AP in Controller. Press F1 to run it. Use Save image in Controller to keep guest files.',
         bootBios: 'Boot BIOS only',
@@ -78,6 +79,7 @@ const T = {
         bootFreeDos: 'FreeDOS VGA starten',
         freedosMedia: 'FreeDOS-Medium',
         zmiyHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 720k/x86BOOT.img und das ZIP von Zmiy 0.85.2. Im Controller steuern die Pfeiltasten, P pausiert und Esc beendet das Spiel.',
+        sudoku86Help: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img und das ZIP von Sudoku86 1.0.3. Im Controller trägt ein Linksklick eine Ziffer ein, ein Rechtsklick setzt eine Notiz. F5 speichert das Rätsel, F7 lädt es.',
         openGemHelp: 'Wähle das ZIP der offiziellen FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. Bewege den Zeiger über den Controller-Bildschirm, um die Maus zu verwenden.',
         aliceHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. ALICE öffnet DEMO.AP im Controller. F1 startet das Programm. Abbild speichern im Controller sichert die Gastdateien.',
         bootBios: 'Nur BIOS starten',
@@ -175,7 +177,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
     const showLocal386 = matchesType('i80386');
     const mediaAllowed = remoteMachineImagesAllowed();
-    const availableMedia = libraryMedia.filter(item => mediaAllowed || item.guestPackage);
+    const availableMedia = libraryMedia.filter(item => mediaAllowed || item.guestPackage?.localOnly);
     const matchingMedia = availableMedia.map(item => localizedMedia(item, locale))
         .filter(item => matchesType(item.machine) && matchesTitle(item.title));
     const [circuits, setCircuits] = React.useState(null);

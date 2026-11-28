@@ -1,6 +1,7 @@
 import {createOpenGemMachine, cuteMouseSourceUrl, openGemLicenseUrl} from './opengem.js';
 import {aliceLicenseUrl, createAlicePascalMachine} from './alice-pascal.js';
 import {createZmiyMachine, zmiyDownloadUrl, zmiyProjectUrl} from './zmiy.js';
+import {createSudoku86Machine, sudoku86DownloadUrl, sudoku86ProjectUrl} from './sudoku86.js';
 import {aceKimMedia} from './ace-kim-library.js';
 import {makeT} from '../bw-i18n.js';
 import {activateConfig, defaultImageFetcher} from './activate.js';
@@ -71,7 +72,7 @@ export const libraryMedia = [
         code: {language: 'c', path: 'samples/demo.c', compilerTarget: 'i8086-smallc'}},
     {id: 'zmiy', title: 'Zmiy 0.85.2', machine: 'i8086', license: 'BSD-2-Clause',
         licenseFile: zmiyProjectUrl, freedosGuest: createZmiyMachine, freedosHelp: 'zmiyHelp',
-        guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP'}},
+        guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP', localOnly: true}},
     ...ackSamples,
     aceKimMedia,
     ...[
@@ -100,6 +101,10 @@ export const libraryMedia = [
         licenseFile: aliceLicenseUrl, freedosGuest: createAlicePascalMachine, freedosHelp: 'aliceHelp'},
     {id: 'opengem', title: 'OpenGEM 7 RC3', machine: 'i80386', license: 'GPL-2.0-or-later',
         licenseFile: openGemLicenseUrl, freedosGuest: createOpenGemMachine, freedosHelp: 'openGemHelp',
+        supportSource: {title: 'CuteMouse', url: cuteMouseSourceUrl}},
+    {id: 'sudoku86', title: 'Sudoku86 1.0.3', machine: 'i80386', license: 'BSD-2-Clause',
+        licenseFile: sudoku86ProjectUrl, freedosGuest: createSudoku86Machine, freedosHelp: 'sudoku86Help',
+        guestPackage: {url: sudoku86DownloadUrl, title: 'Sudoku86 1.0.3 ZIP'},
         supportSource: {title: 'CuteMouse', url: cuteMouseSourceUrl}},
     {id: 'x86-benchmarks/native-sieve', title: 'Native 386 Sieve', machine: 'i80386', license: 'MIT',
         licenseFile: 'LICENSE', revision: 'c8dc584d39b69b1ed9f98af69e548d9da3d5b240', benchmark: 'native-sieve'},

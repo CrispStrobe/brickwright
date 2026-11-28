@@ -33,6 +33,21 @@ async function readFreedosFloppy (file, {size, member, sha256}) {
     return source;
 }
 
+export async function readFreedosGuestPackage (file, {title, name, size, sha256, directory, files}) {
+    if (file?.size !== size) throw new Error(`Choose the official ${title} ZIP.`);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (bytes.length !== size || await sha256Hex(bytes) !== sha256) {
+        throw new Error(`The ${name} ZIP checksum differs. Choose the official release archive.`);
+    }
+    const {default: JSZip} = await import('jszip');
+    const archive = await JSZip.loadAsync(bytes);
+    return Promise.all(files.map(async fileName => {
+        const entry = archive.file(`${directory}/${fileName}`);
+        if (!entry) throw new Error(`The ${name} ZIP is missing ${fileName}.`);
+        return {name: fileName.toUpperCase(), bytes: await entry.async('uint8array')};
+    }));
+}
+
 export async function createFreedosGuest (floppy, {title, machine = 'i80386', readFiles, startup}, signal) {
     signal?.throwIfAborted();
     const source = await readFreedosFloppy(floppy, bootMedia[machine]);

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import JSZip from 'jszip';
+import {sha256Hex} from '../overlay/scratch-gui/src/lib/bw-machines/activate.js';
+import {readFreedosGuestPackage} from '../overlay/scratch-gui/src/lib/bw-machines/freedos-guest.js';
 import {fromMediaManifest} from '../overlay/scratch-gui/src/lib/bw-machines/importers.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
 import {createAlicePascalMachine} from '../overlay/scratch-gui/src/lib/bw-machines/alice-pascal.js';
@@ -95,4 +98,31 @@ test('Zmiy requires the XT FreeDOS boot image and the local game archive', async
     assert.equal(item.license, 'BSD-2-Clause');
     assert.match(item.guestPackage.url, /v0[.]85[.]2/);
     await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(1228800)])), /720k/);
+});
+
+test('Sudoku86 uses the AT floppy and links to the original game and PS/2 driver source', async () => {
+    const item = libraryMedia.find(item => item.id === 'sudoku86');
+    assert.equal(item.machine, 'i80386');
+    assert.equal(item.license, 'BSD-2-Clause');
+    assert.match(item.guestPackage.url, /v1[.]0[.]3/);
+    assert.equal(item.supportSource.title, 'CuteMouse');
+    assert.ok(!item.guestPackage.localOnly);
+    await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(720 * 1024)])), /120m/);
+});
+
+test('FreeDOS guest packages verify the archive and extract only the declared members', async () => {
+    const archive = new JSZip();
+    archive.file('game/start.exe', Uint8Array.of(1, 2, 3));
+    archive.file('game/readme.txt', 'not requested');
+    const bytes = await archive.generateAsync({type: 'uint8array'});
+    const file = new Blob([bytes]);
+    const release = {
+        title: 'Test guest 1.0', name: 'Test guest', size: file.size, sha256: await sha256Hex(bytes),
+        directory: 'game', files: ['start.exe']
+    };
+    assert.deepEqual(await readFreedosGuestPackage(file, release), [
+        {name: 'START.EXE', bytes: Uint8Array.of(1, 2, 3)}
+    ]);
+    await assert.rejects(readFreedosGuestPackage(new Blob([new Uint8Array(file.size)]), release), /checksum differs/);
+    await assert.rejects(readFreedosGuestPackage(file, {...release, files: ['missing.exe']}), /missing missing[.]exe/);
 });
