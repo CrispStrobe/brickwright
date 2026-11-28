@@ -267,11 +267,14 @@ test('late completion of an aborted Pico deployment preserves its successor', as
     const controller = new AbortController();
     const first = f.start('first', controller.signal);
     await f.until(() => f.stats.programs.includes('first'));
+    await assert.rejects(f.start('overlapping').promise, /Another circuit run is preparing/);
+    assert.deepEqual(f.stats.programs, ['first'], 'a refused overlapping run must not deploy');
+    controller.abort();
+    await assert.rejects(first.promise, {name: 'AbortError'});
+    assert.equal(f.vm.runtime.bwCircuitRunPreparing, undefined, 'abort releases the preparation owner');
     const second = await f.running(f.start('second'));
     const board = f.vm.runtime.bwRunBoard;
     const observation = f.window.__bwPicoSim;
-    controller.abort();
-    await assert.rejects(first.promise, {name: 'AbortError'});
     gate.resolve();
     await flush();
     await f.tick();
