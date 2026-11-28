@@ -51,9 +51,13 @@ function harness(props) {
     };
     const Component = new Function('React', 'pcSet1Bytes', 'ps2ButtonBit', 'ps2Delta',
         `${componentBody}; return MachineConsole;`)(React, pcSet1Bytes, ps2ButtonBit, ps2Delta);
+    // The controller supplies a concrete video widget, even before a frame
+    // arrives. Match its AT VGA shape so the real component can read config.
+    const widget = {name: 'AT VGA', type: 'simplevga', source: 'video',
+        config: {width: 640, height: 480}, state: {signal: false}};
     const render = nextProps => {
         refIndex = 0; effectIndex = 0; pending = [];
-        handlers = Component({widget: {}, ...nextProps});
+        handlers = Component({widget, ...nextProps});
         for (const effect of pending) effect();
     };
     render(props);
