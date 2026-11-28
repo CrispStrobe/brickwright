@@ -54,6 +54,7 @@ jobs:
         with:
           sparse-checkout: |
             overlay/scratch-gui/src
+            overlay/scratch-gui/examples/01-blink
             scripts
             test
             bin
