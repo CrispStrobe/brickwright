@@ -7,12 +7,17 @@ changes to a runtime with different host capabilities.
 
 | Backend | Build and execution target | Host behavior |
 | --- | --- | --- |
-| `native` (default) | Linux x64 or Linux ARM64; GCC/binutils, plus NASM on x64 | A fresh native process per run, raw VDU output, trusted local OS/file/native-call access |
+| `native` (default) | Linux x64, ARM64 or ARMv7 hard-float; GCC/binutils, plus NASM on x64 | A fresh process per run, optionally through an explicit CPU emulator; raw VDU output, trusted local OS/file/native-call access |
 | `wasm` | Node.js 22+ with WebAssembly and module workers | A fresh worker/module per run, raw VDU output, restricted host, optional logical-pin simulation |
 
 Linux ARM64 uses the existing pinned upstream ARM64 assembler and data layout;
 it does not emulate x86 instructions. This covers a Linux ARM64 process on an
-ARM64 computer, including a suitably configured Raspberry Pi. Bare-metal
+ARM64 computer, including a suitably configured Raspberry Pi. The ARMv7 port
+uses the distinct upstream ARM32 layout for a 32-bit hard-float Linux userspace.
+`--native-executable PATH`, `--native-runner PATH` and repeated
+`--native-runner-arg=VALUE` select a cross-built executable and QEMU CPU runner.
+See [CPU-EMULATION.md](CPU-EMULATION.md) for builds, sysroots and exact scope.
+Bare-metal
 microcontrollers and retro CPU emulators need separate target runtimes.
 The WASM runner needs its built `.mjs` and `.wasm` assets but no native BASIC
 executable. Its logical-pin fixture is independent of the GUI Circuit solver.

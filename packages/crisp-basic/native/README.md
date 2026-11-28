@@ -1,7 +1,7 @@
 # CrispBASIC native host
 
 This backend is a headless, single-process BBCSDL interpreter for **Linux x64
-and Linux ARM64**. It consumes a prepared BASIC source file, writes the original
+Linux ARM64 and ARMv7 hard-float**. It consumes a prepared BASIC source file, writes the original
 VDU output bytes, and reports completion separately from program output. It is
 the actual pinned interpreter, with a small host patch recorded in
 `patch-upstream.mjs`.
@@ -9,32 +9,38 @@ the actual pinned interpreter, with a small host patch recorded in
 ## Build
 
 Install GCC, GNU binutils, Git and Node.js. Linux x64 additionally requires
-NASM; ARM64 uses the native compiler's GNU assembler. Run from the package root:
+NASM; ARM targets use the selected compiler's GNU assembler. Run from the package root:
 
 ```sh
 node scripts/build-native.mjs
 ```
 
 `CC` and (on x64) `NASM` may specify alternative executable paths. This is a
-native build: the architecture follows the running Node.js process. The build fetches the
+native build by default: the architecture follows the running Node.js process.
+An explicit `CRISP_BASIC_TARGET` with `CC` enables a cross build. The build fetches the
 exact upstream commit into `.build/BBCSDL` and obtains each source directly from
 the pinned git object. It checks every source's SHA-256 against
-`upstream.lock.json` before patching a separate copy under `.build/native`.
+`upstream.lock.json` before patching a separate copy under `.build/native/TARGET`.
 Uncommitted changes in the upstream checkout cannot enter the build.
 `CRISP_BASIC_UPSTREAM` can name an existing local BBCSDL git checkout containing
 the pinned commit. The build output is `.build/crispbasic-native` with the
-upstream licence and toolchain metadata alongside it. Generated files are not
+upstream licence and toolchain metadata alongside it. Cross-build outputs are
+kept separately under `.build/targets/TARGET/`. Generated files are not
 committed. This pins the source inputs; binaries can differ between toolchains.
 
 The ARM64 build selects the pinned `src/bbasmb_arm_64.c` and
 `src/bbdata_arm_64.s`. Its symbol conversion matches the same revision's
 [Linux ARM64 console makefile](https://github.com/rtrussell/BBCSDL/blob/6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f/console/rpi64/makefile).
-Both architectures use the same batch host and process protocol. The build
+ARMv7 selects `src/bbasmb_arm_32.c` and `src/bbdata_arm_32.s`, with the
+ARMv7-A/Thumb-2 hard-float flags derived from the pinned `console/raspi/makefile`.
+All architectures use the same batch host and process protocol. The build
 receipt includes the architecture, selected sources and binary SHA-256; the
 runtime tests inspect the executable's ELF machine identity and execute the
 same structured-language, I/O, error and lifecycle suite on both CI runners.
 Linux on an ARM64 Raspberry Pi is covered by the architecture build; bare-metal
-Pico firmware, ARM32, RISC-V, macOS and Windows native hosts are separate ports.
+Pico firmware, ARMv6/soft-float, RISC-V, macOS and Windows native hosts are
+separate ports. [CPU-EMULATION.md](../CPU-EMULATION.md) covers ARMv7/AArch64
+cross builds and qualification using QEMU user-mode CPU execution.
 
 ## Process protocol, version 1
 

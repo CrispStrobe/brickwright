@@ -6,8 +6,16 @@ on:
       - 'packages/crisp-basic/**'
       - 'overlay/scratch-gui/src/lib/crispbasic-*.js'
       - 'packages/scratch-gui/src/lib/crispbasic-*.js'
-      - 'overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
-      - 'packages/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
+      - 'overlay/scratch-gui/src/lib/bw-cad-circuit/**'
+      - 'packages/scratch-gui/src/lib/bw-cad-circuit/**'
+      - 'overlay/scratch-gui/src/lib/bw-cad-*.js'
+      - 'packages/scratch-gui/src/lib/bw-cad-*.js'
+      - 'overlay/scratch-gui/static/cad-sdk/**'
+      - 'packages/scratch-gui/static/cad-sdk/**'
+      - 'overlay/scratch-gui/static/cad-robots/**'
+      - 'packages/scratch-gui/static/cad-robots/**'
+      - 'overlay/scratch-gui/static/circuit-cad/**'
+      - 'packages/scratch-gui/static/circuit-cad/**'
       - 'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'
       - 'packages/scratch-gui/src/lib/bw-debug/debug-runner.js'
       - 'overlay/scratch-gui/src/lib/pico-sim-run.js'
@@ -29,6 +37,10 @@ on:
       - 'scripts/package-crispbasic.mjs'
       - 'scripts/verify-crispbasic-*.mjs'
       - 'scripts/lib/crispbasic-*.mjs'
+      - 'scripts/lib/cad-worker-node-adapter.mjs'
+      - 'scripts/lib/cad-sdk-fetch-pins.mjs'
+      - 'scripts/sync-cad-sdk.mjs'
+      - 'scripts/verify-built-cad-*.mjs'
       - 'scripts/integrate.mjs'
       - 'scripts/vendor.mjs'
       - 'scripts/apply-vm-overlay.mjs'
@@ -48,8 +60,16 @@ on:
       - 'packages/crisp-basic/**'
       - 'overlay/scratch-gui/src/lib/crispbasic-*.js'
       - 'packages/scratch-gui/src/lib/crispbasic-*.js'
-      - 'overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
-      - 'packages/scratch-gui/src/lib/bw-cad-circuit/bridge.js'
+      - 'overlay/scratch-gui/src/lib/bw-cad-circuit/**'
+      - 'packages/scratch-gui/src/lib/bw-cad-circuit/**'
+      - 'overlay/scratch-gui/src/lib/bw-cad-*.js'
+      - 'packages/scratch-gui/src/lib/bw-cad-*.js'
+      - 'overlay/scratch-gui/static/cad-sdk/**'
+      - 'packages/scratch-gui/static/cad-sdk/**'
+      - 'overlay/scratch-gui/static/cad-robots/**'
+      - 'packages/scratch-gui/static/cad-robots/**'
+      - 'overlay/scratch-gui/static/circuit-cad/**'
+      - 'packages/scratch-gui/static/circuit-cad/**'
       - 'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'
       - 'packages/scratch-gui/src/lib/bw-debug/debug-runner.js'
       - 'overlay/scratch-gui/src/lib/pico-sim-run.js'
@@ -71,6 +91,10 @@ on:
       - 'scripts/package-crispbasic.mjs'
       - 'scripts/verify-crispbasic-*.mjs'
       - 'scripts/lib/crispbasic-*.mjs'
+      - 'scripts/lib/cad-worker-node-adapter.mjs'
+      - 'scripts/lib/cad-sdk-fetch-pins.mjs'
+      - 'scripts/sync-cad-sdk.mjs'
+      - 'scripts/verify-built-cad-*.mjs'
       - 'scripts/integrate.mjs'
       - 'scripts/vendor.mjs'
       - 'scripts/apply-vm-overlay.mjs'
@@ -185,7 +209,7 @@ jobs:
         run: |
           npm run package:crispbasic
           npm run package:crispbasic:check
-      - name: Verify generated BASIC and Brickwright session integration
+      - name: Verify source round trips, controller profiles and coupled CAD physics
         run: npm run test:brickwright
       - name: Verify shared circuit ownership and existing CAD cancellation
         working-directory: .
@@ -286,6 +310,9 @@ jobs:
       - name: Verify the emitted runtime's bytes and production asset boundary
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
         run: node scripts/verify-crispbasic-production-assets.mjs 2>&1 | tee artifacts/crispbasic-production/assets.log
+      - name: Verify the emitted CAD SDK and robot project bytes
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
+        run: node scripts/verify-built-cad-sdk.mjs 2>&1 | tee artifacts/crispbasic-production/cad-assets.log
       - name: Drive the complete editor and Circuit in Chromium
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
         timeout-minutes: 10
@@ -299,5 +326,6 @@ jobs:
             artifacts/crispbasic-production/**
             packages/scratch-gui/build/brickwright-build.json
             packages/scratch-gui/build/static/crispbasic/manifest.json
+            packages/scratch-gui/build/static/cad-sdk/manifest.json
           if-no-files-found: warn
           retention-days: 7

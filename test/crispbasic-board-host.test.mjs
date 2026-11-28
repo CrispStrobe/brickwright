@@ -61,12 +61,16 @@ test('logical IDs use controller numbering and reject analog-only, absent, and d
     assert.deepEqual(map('microbit_breakout', ['P8', 'P12', 'P16']).pins, [8, 12, 16]);
     assert.deepEqual(map('esp8266', ['GPIO2', 'GPIO6', 'GPIO16']).pins, [2]);
     assert.deepEqual(map('stm32f030', ['PA0', 'PA9', 'PB1', 'PF0', 'PA13']).pins, [0, 9, 17]);
-    assert.throws(() => map('pybadge', ['a0']), /does not support/);
+    assert.deepEqual(map('pybadge', ['a0', 'rx', 'tx']).pins, [0, 1, 14]);
+    assert.throws(() => map('pybadge', ['sda', 'stemma_sda']), /no supported digital pins/);
+    assert.deepEqual(map('stc15_mcu', ['P5.5', 'P4.1']).pins, [33, 45]);
     assert.throws(() => map('microbit', ['P0', 'p0']), /duplicate logical pin/);
     assert.throws(() => map('attiny88', ['PA0', 'PA3']), /no supported digital pins/);
 });
 
 const expandedControllers = [
+    {kind: 'stc15_mcu', output: 'P5.5', input: 'P4.1', outputId: 45, inputId: 33, voltage: 5},
+    {kind: 'pybadge', output: 'd5', input: 'rx', outputId: 5, inputId: 0, voltage: 3.3},
     {kind: 'microbit', output: 'p0', input: 'p1', outputId: 0, inputId: 1, voltage: 3.3},
     {kind: 'microbit_breakout', output: 'p8', input: 'p16', outputId: 8, inputId: 16, voltage: 3.3},
     {kind: 'calliopemini', output: 'p3', input: 'p2', outputId: 3, inputId: 2, voltage: 3.3},

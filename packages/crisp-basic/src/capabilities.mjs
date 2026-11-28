@@ -1,5 +1,5 @@
 // Capabilities describe the implemented backend, not the eventual language profiles.
-export const VERSION = '0.1.0-dev.7';
+export const VERSION = '0.1.0-dev.8';
 export const BACKEND = 'bbcsdl-native';
 
 function freeze(value) {
@@ -12,7 +12,7 @@ function freeze(value) {
 export const NATIVE_CAPABILITIES = freeze({
     schemaVersion: 1,
     backend: BACKEND,
-    platforms: ['linux-x64', 'linux-arm64'],
+    platforms: ['linux-x64', 'linux-arm64', 'linux-armv7'],
     language: 'BBC BASIC (BBCSDL core)',
     profile: 'native-console',
     execution: {run: true, input: true, cancellation: true, timeout: true, outputLimit: true},

@@ -60,6 +60,14 @@
       {
         "path": "src/bbdata_wasm32.c",
         "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+      },
+      {
+        "path": "src/bbasmb_arm_32.c",
+        "sha256": "cef3b7b1459682cabab5d7bf7aeda653a8098ad1db236386b8d7f03c3f5a1f5f"
+      },
+      {
+        "path": "src/bbdata_arm_32.s",
+        "sha256": "744e0167d7b1124486607ee72a76afd8bf515894979384869371bc7047f69301"
       }
     ]
   }

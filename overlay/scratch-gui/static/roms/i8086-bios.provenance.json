@@ -10,19 +10,19 @@
     "vendoredAs": "i8086-bios.asm",
     "license": "MIT",
     "sha256": "c9cbc1fb86c24d97d7f5c679c85b03df6024d62c33ae6931c2df3ce69fd02a35",
-    "sha": "1fa4734c18c7e037ff220e508ad33da5273d999f",
-    "date": "2026-11-25",
+    "sha": "7b31a6eee6203c3e5907619b9c8673009379792a",
+    "date": "2026-11-28",
     "lastTouchedBy": {
-      "sha": "de39245b0f74ade850e05efb93867c700646b57b",
-      "subject": "Add explicit unbuffered BIOS build and reproducible wired POST diagnostics",
-      "date": "2026-09-08"
+      "sha": "8be0fbc8e91f1ed2cebb26883210efceef9234cc",
+      "subject": "feat: qualify portable digital GPIO profiles for 16 circuit models",
+      "date": "2026-11-28"
     }
   },
   "assembler": {
     "path": "node_modules/bw-board/src/i8086-asm.js",
     "sha256": "3270c33885fbb6524ceaa727a1600570fe974e0bb4bc3488d1ecda894fdb0841"
   },
-  "pinAtBuild": "1fa4734c18c7e037ff220e508ad33da5273d999f",
+  "pinAtBuild": "7b31a6eee6203c3e5907619b9c8673009379792a",
   "ancestorOfPinAtBuild": true,
   "behindPinBy": 0
 }

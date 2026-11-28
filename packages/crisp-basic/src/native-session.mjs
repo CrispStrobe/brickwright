@@ -47,7 +47,7 @@ export class NativeSession {
     #disposed = false;
     #options;
 
-    constructor({executable = DEFAULT_EXECUTABLE, timeoutMs = 5000,
+    constructor({executable = DEFAULT_EXECUTABLE, runner, timeoutMs = 5000,
         maxOutputBytes = 1024 * 1024, onEvent, simulation} = {}) {
         if (simulation !== undefined) {
             throw new TypeError('The simulation bridge requires createWasmSession; it is unavailable in the native backend');
@@ -55,11 +55,23 @@ export class NativeSession {
         if (typeof executable !== 'string' || !executable || executable.includes('\0')) {
             throw new TypeError('executable must be a nonempty path');
         }
+        if (runner !== undefined && (!runner || typeof runner !== 'object' || Array.isArray(runner) ||
+            typeof runner.executable !== 'string' || !runner.executable || runner.executable.includes('\0') ||
+            (runner.args !== undefined && (!Array.isArray(runner.args) || runner.args.some(argument =>
+                typeof argument !== 'string' || argument.includes('\0')))))) {
+            throw new TypeError('runner must provide an executable and optional string args array');
+        }
         if (onEvent !== undefined && typeof onEvent !== 'function') {
             throw new TypeError('onEvent must be a function');
         }
         this.#options = {
             executable: resolve(executable),
+            // Configuration belongs to the embedding application, never BASIC
+            // source. spawn receives an argv array and never invokes a shell.
+            runner: runner === undefined ? null : {
+                executable: runner.executable.includes('/') ? resolve(runner.executable) : runner.executable,
+                args: [...(runner.args || [])]
+            },
             timeoutMs: positiveInteger(timeoutMs, 'timeoutMs'),
             maxOutputBytes: positiveInteger(maxOutputBytes, 'maxOutputBytes'),
             onEvent
@@ -254,7 +266,9 @@ export class NativeSession {
                     inputHandle = await open(input, 'r');
                 }
                 if (!active.reason) {
-                    const child = spawn(this.#options.executable, [program], {
+                    const runner = this.#options.runner;
+                    const child = spawn(runner?.executable || this.#options.executable,
+                        runner ? [...runner.args, this.#options.executable, program] : [program], {
                         cwd: directory,
                         stdio: [inputHandle?.fd ?? 'pipe', 'pipe', 'pipe', 'pipe'],
                         detached: process.platform !== 'win32',

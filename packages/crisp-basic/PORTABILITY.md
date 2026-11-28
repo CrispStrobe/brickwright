@@ -16,6 +16,8 @@ model does not execute BASIC on that controller's emulated CPU.
 | --- | --- | --- |
 | Native Linux x64 | Qualified by native runtime CI | A new native BBCSDL process per run; local files, OS and native facilities remain available to trusted programs |
 | Native Linux ARM64 | Qualified by native runtime CI | An ARM64 build using the upstream ARM64 data/assembler layout; no x86 emulation |
+| Linux ARMv7 hard-float executable | Qualified on an emulated Cortex-A7 CPU | Upstream ARM32 layout and ARMv7-A/Thumb-2 instructions; suitable 32-bit Linux userspace required |
+| ARMv7 / ARM64 through QEMU | Both CPU jobs passed at `00d05d03` | Real guest instructions on Cortex-A7/A53 user-mode emulation with a matching Linux sysroot; no guest board or kernel boot |
 | WASM in Node on Linux x64 and Linux ARM64 | Qualified runtime/CLI routes | A new worker and restricted interpreter instance per run; optional deterministic logical-pin host; ARM64 consumes the same built artifact |
 | WASM in the browser | Focused Chromium 158 qualification passed; browser and Brickwright gates exercise this route | The same restricted interpreter, interactive input, Stop/Reset, raw VDU output and a partial canvas preview |
 | WASM CLI on macOS ARM64 and Windows x64 | Qualified at the runtime checkpoint linked below | Real Node CLI execution of the same downloaded WASM artifact used on Linux; no native BASIC executable is needed |
@@ -23,11 +25,13 @@ model does not execute BASIC on that controller's emulated CPU.
 
 The native builds require Linux, Node 22+, Git and GCC/binutils; x64 additionally
 requires NASM. A suitable ARM64 Linux machine, including a Raspberry Pi running
-64-bit Linux, can use the ARM64 build. This does not cover 32-bit ARM Linux.
+64-bit Linux, can use the ARM64 build. The ARMv7 hard-float port covers a
+compatible 32-bit Linux userspace on ARMv7-or-newer CPUs; ARMv6 and soft-float
+targets remain unsupported.
 Native Windows and macOS executables are not supplied by the current builder.
 Native execution retains host access and is intended for trusted local programs.
 The pinned interpreter uses `long double` on native x64 and `double` on native
-ARM64. Passing the shared corpus does not imply identical results at every
+ARM targets. Passing the shared corpus does not imply identical results at every
 floating-point precision boundary.
 
 From the Brickwright repository root:
@@ -37,6 +41,21 @@ npm --prefix packages/crisp-basic run build:native
 node packages/crisp-basic/bin/crispbasic.mjs packages/crisp-basic/examples/structured.bas --json
 npm --prefix packages/crisp-basic run test:native
 ```
+
+[CPU-EMULATION.md](CPU-EMULATION.md) gives cross-build and emulator CLI commands,
+sysroot requirements, build-receipt checks and deployment guidance. The
+separate [CPU-emulation workflow](../../.github/workflows/crispbasic-cpu-emulation.yml)
+runs the real native test suite on emulated ARM CPUs; completed results and
+exact commits are recorded in [VALIDATION.md](VALIDATION.md). This does not
+port the interpreter to Brickwright's existing RISC-V32 Linux guest or to
+bare-metal MCU simulators.
+
+[CPU run 46129143522](https://github.com/CrispStrobe/brickwright/actions/runs/46129143522)
+passed both Cortex-A7/ARMv7 and Cortex-A53/AArch64 jobs at
+`00d05d0377b1000b498e451439a12097a4078ec2`. Each ran 122 source/contract checks,
+53 native runtime/CLI/corpus checks and the documented standalone example,
+with zero failing or skipped tests. The artifacts include architecture-checked
+executables and matching binary digests; no physical ARMv7 board was used.
 
 To build the WASM artifact, make Emscripten **3.1.64** available as `emcc`, or set
 `EMCC` to that executable. Run:

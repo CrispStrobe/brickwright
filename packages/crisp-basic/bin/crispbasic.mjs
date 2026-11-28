@@ -25,7 +25,10 @@ const HELP = `CrispBASIC ${VERSION} — BBC BASIC-compatible runtime
 Usage: crispbasic [options] program.bas
        crispbasic [--backend native|wasm] [--simulation FILE] --capabilities
 
-  --backend NAME      native (default, Linux x64/ARM64) or wasm (Node worker)
+  --backend NAME      native (default, Linux x64/ARM64/ARMv7) or wasm (Node worker)
+  --native-executable PATH  Select a built native interpreter, including a cross build
+  --native-runner PATH      Run it through an emulator such as qemu-arm
+  --native-runner-arg ARG   Emulator argument; may be repeated (no shell expansion)
   --capabilities      Print the selected runtime's capabilities as JSON
   --simulation FILE   Enable a validated logical-pin fixture (WASM only)
   --input FILE        Supply runtime input bytes from a file (otherwise stdin)
@@ -59,6 +62,8 @@ async function main() {
     const {values, positionals} = parseArgs({
         options: {
             backend: {type: 'string'}, capabilities: {type: 'boolean'}, simulation: {type: 'string'},
+            'native-executable': {type: 'string'}, 'native-runner': {type: 'string'},
+            'native-runner-arg': {type: 'string', multiple: true},
             input: {type: 'string'}, timeout: {type: 'string'},
             'max-output': {type: 'string'}, json: {type: 'boolean'},
             version: {type: 'boolean'}, help: {type: 'boolean'}
@@ -70,6 +75,12 @@ async function main() {
     if (values.version) { writeOut(`CrispBASIC ${VERSION}\n`); return; }
     const backend = values.backend ?? 'native';
     if (!['native', 'wasm'].includes(backend)) throw new Error('--backend must be native or wasm');
+    if (backend !== 'native' && ['native-executable', 'native-runner', 'native-runner-arg'].some(key => values[key] !== undefined)) {
+        throw new Error('--native-executable and --native-runner options require --backend native');
+    }
+    if (values['native-runner-arg'] !== undefined && values['native-runner'] === undefined) {
+        throw new Error('--native-runner-arg requires --native-runner');
+    }
     if (values.simulation !== undefined && backend !== 'wasm') {
         throw new Error('--simulation requires --backend wasm');
     }
@@ -85,6 +96,10 @@ async function main() {
         fixture = prepareCliSimulation(JSON.parse(await readFile(values.simulation, 'utf8')));
     }
     const session = (backend === 'wasm' ? createWasmSession : createNativeSession)({
+        ...(values['native-executable'] === undefined ? {} : {executable: values['native-executable']}),
+        ...(values['native-runner'] === undefined ? {} : {runner: {
+            executable: values['native-runner'], args: values['native-runner-arg'] || []
+        }}),
         ...(timeoutMs === undefined ? {} : {timeoutMs}),
         ...(maxOutputBytes === undefined ? {} : {maxOutputBytes}),
         ...(fixture ? {simulation: {maxRequests: fixture.maxRequests, createHost() {
