@@ -4,3 +4,4 @@ export {VERSION, BACKEND, NATIVE_CAPABILITIES} from './capabilities.mjs';
 export {WasmSession, createWasmSession} from './wasm-session.mjs';
 export {WASM_BACKEND, WASM_CAPABILITIES} from './wasm-capabilities.mjs';
 export {createSimulationHost, SimulationHost, SimulationError, SIMULATION_CAPABILITIES} from './simulation-host.mjs';
+export {listBoardTargets, resolveBoardTarget, createTargetSimulationHost, prepareTargetSimulation} from './board-targets.mjs';
