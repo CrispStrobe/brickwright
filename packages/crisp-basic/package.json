@@ -15,22 +15,33 @@
     "./wasm": "./src/wasm-session.mjs",
     "./browser": "./browser.mjs",
     "./simulation": "./src/simulation-host.mjs",
-    "./targets": "./src/board-targets.mjs"
+    "./targets": "./src/board-targets.mjs",
+    "./compiler": "./src/compiler/index.mjs",
+    "./compiler/targets": "./src/compiler-targets.mjs",
+    "./bundle": "./src/bundle.mjs"
   },
   "bin": {
     "crispbasic": "./bin/crispbasic.mjs"
   },
   "scripts": {
     "build:native": "node scripts/build-native.mjs",
-    "test": "node --test tests/source.test.mjs tests/cli-options.test.mjs tests/simulation-host.test.mjs tests/simulation-bridge.test.mjs tests/native-targets.test.mjs tests/board-targets.test.mjs tests/board-target-cli.test.mjs",
-    "test:native": "node --test tests/runtime.test.mjs tests/cli.test.mjs tests/native-corpus.test.mjs",
-    "test:all": "npm test && npm run test:native && npm run test:wasm && npm run test:parity",
+    "test": "node --test tests/source.test.mjs tests/cli-options.test.mjs tests/simulation-host.test.mjs tests/simulation-bridge.test.mjs tests/native-targets.test.mjs tests/board-targets.test.mjs tests/board-target-cli.test.mjs tests/bundle.test.mjs tests/serve-bundle.test.mjs",
+    "test:native": "node --test tests/runtime.test.mjs tests/cli.test.mjs tests/native-corpus.test.mjs tests/bundle-native.test.mjs",
+    "test:all": "npm test && npm run test:native && npm run test:wasm && npm run test:parity && npm run test:compiler && npm run test:compiler:parity && npm run test:compiler:wasm-parity",
     "start": "node bin/crispbasic.mjs",
     "build:wasm": "node scripts/build-wasm.mjs",
     "test:wasm": "node --test tests/wasm-runtime.test.mjs tests/wasm-policy.test.mjs tests/wasm-simulation.test.mjs tests/wasm-cli.test.mjs tests/board-targets-wasm.test.mjs",
     "test:parity": "node --test tests/parity.test.mjs",
     "test:browser": "node scripts/test-browser.mjs",
-    "test:brickwright": "node --test ../../test/crispbasic-*.test.mjs tests/brickwright.test.mjs tests/generator.test.mjs tests/robot-motor.test.mjs tests/roundtrip*.test.mjs"
+    "test:compiler": "node --test tests/compiler.test.mjs tests/compiler-cli.test.mjs tests/compiler-targets.test.mjs tests/compiler-decimal.test.mjs",
+    "test:compiler:parity": "node --test tests/compiler-parity.test.mjs tests/compiler-regressions.test.mjs tests/compiler-for.test.mjs",
+    "test:compiler:wasm-parity": "node --test tests/compiler-wasm-parity.test.mjs tests/compiler-for-wasm.test.mjs tests/compiler-wasm-regressions.test.mjs",
+    "test:bundle:browser": "node scripts/test-bundle-browser.mjs",
+    "build:sdl:native": "node scripts/build-sdl-native.mjs",
+    "build:sdl:web": "node scripts/build-sdl-web.mjs",
+    "run:sdl": "node scripts/run-sdl-native.mjs",
+    "test:bundle:sdl-native": "node --test tests/bundle-sdl.test.mjs",
+    "test:bundle:sdl-web": "node scripts/test-sdl-web-browser.mjs"
   },
   "devDependencies": {
     "esbuild": "0.25.12",

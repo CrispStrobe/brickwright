@@ -3,6 +3,11 @@
 // an independent BBC BASIC language implementation oracle.
 export const corpus = [
     {
+        name: 'overlapping string accumulator moves',
+        source: 'PRINT "x"+STR$(1.25)\nPRINT "xx"+STR$(1.25)\nPRINT "xxx"+STR$(1.25)\nPRINT "abc"+"1234"\nPRINT "x"+STRING$(2,"ab")\nEND\n',
+        text: 'x1.25\r\nxx1.25\r\nxxx1.25\r\nabc1234\r\nxabab\r\n'
+    },
+    {
         name: 'structured loops, procedures, functions, arrays and strings',
         source: `DIM values%(4)
 FOR i% = 0 TO 4

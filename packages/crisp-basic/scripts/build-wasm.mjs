@@ -66,16 +66,20 @@ if (selected.size) throw new Error('WASM source inputs missing from lock: ' + [.
 
 const objects = [];
 const includes = ['-I', join(work, 'include'), '-I', join(root, 'wasm')];
+// BBCSDL's wasm32 ABI represents heap addresses as offsets from zero. Tell
+// LLVM that these pointers may alias ordinary linear-memory pointers: without
+// this flag it changes overlapping memmove calls into memcpy (string corruption).
+const memoryFlags = ['-fno-delete-null-pointer-checks'];
 for (const name of ['bbmain', 'bbexec', 'bbeval', 'bbdata_wasm32']) {
     const object = join(work, name + '.o');
     // Keep default math semantics: WASM uses binary64 while native x86-64 uses
     // extended precision. Differential fixtures use explicit expected anchors.
-    run(emcc, ['-O2', '-Wall', ...includes, '-c', join(work, 'src', name + '.c'), '-o', object]);
+    run(emcc, ['-O2', '-Wall', ...memoryFlags, ...includes, '-c', join(work, 'src', name + '.c'), '-o', object]);
     objects.push(object);
 }
 for (const name of ['crispbasic', 'emscripten-host']) {
     const object = join(work, name + '.o');
-    run(emcc, ['-O2', '-Wall', '-Wextra', ...includes, '-c', join(root, 'wasm', name + '.c'), '-o', object]);
+    run(emcc, ['-O2', '-Wall', '-Wextra', ...memoryFlags, ...includes, '-c', join(root, 'wasm', name + '.c'), '-o', object]);
     objects.push(object);
 }
 const output = join(work, 'crispbasic.mjs');
@@ -120,7 +124,7 @@ for (const input of localSourceInputs) {
 }
 writeFileSync(join(work, 'build.json'), JSON.stringify({
     schemaVersion: 1, backend: 'bbcsdl-wasm', upstreamCommit: lock.commit,
-    compiler, settings, sourceInputs: verified, toolchain, imports,
+    compiler, settings, memoryFlags, sourceInputs: verified, toolchain, imports,
     localSourceInputs,
     moduleSha256: createHash('sha256').update(readFileSync(output)).digest('hex'),
     wasmSha256: createHash('sha256').update(binary).digest('hex')

@@ -6,7 +6,7 @@ and 32-bit data layout. It is not the x86 interpreter under a new platform
 label. The builder checks the resulting ELF class, byte order, machine ID
 and, for ARMv7, the hard-float ABI before recording a successful build.
 
-The new [CPU workflow](../../.github/workflows/crispbasic-cpu-emulation.yml)
+The new [CPU workflow](https://github.com/CrispStrobe/crispbasic/blob/main/.github/workflows/cpu-emulation.yml)
 cross-builds on x86-64 Linux and executes the actual ARM instructions using
 `qemu-arm -cpu cortex-a7` and `qemu-aarch64 -cpu cortex-a53`. The same runtime
 and CLI tests used for direct native execution run through those emulators.

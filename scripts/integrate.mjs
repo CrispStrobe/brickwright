@@ -36,6 +36,13 @@ if (existsSync(path.join(ROOT,'overlay/scratch-gui/static/cad-sdk'))) rmSync(pat
 cpSync(path.join(ROOT, 'overlay', 'scratch-gui'), GUI, { recursive: true });
 console.log('  overlaid scratch-gui delta (Code tab, SoundFX, de-brand, webpack, extension picker)');
 
+// The independent C99 compiler is a small, immutable source payload. Unlike the
+// optional interpreter WASM, every ordinary GUI build supplies Compile BASIC.
+// Fetch only the reviewed standalone commit and verify every packaged file.
+const crispBasicCompiler = spawnSync(process.execPath,
+    [path.join(ROOT, 'scripts/package-crispbasic-compiler.mjs')], {cwd: ROOT, stdio: 'inherit'});
+if (crispBasicCompiler.status !== 0) throw new Error('Locked CrispBASIC C99 compiler packaging failed');
+
 // CrispBASIC is an optional locally built payload, copied as plain ESM/WASM
 // rather than entering webpack's dependency graph. Re-stage after vendor/overlay
 // so a fresh vendored GUI cannot discard a previously built interpreter.

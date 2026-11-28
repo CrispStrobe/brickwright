@@ -5,14 +5,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {BoardImpl} from 'bw-board/board.js';
 import {registerBoardKinds} from 'bw-board/devices/board-kinds.js';
-import SB3Creator from '../../../overlay/scratch-gui/src/lib/sb3-creator.js';
-import basicToPseudocode from '../../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
-import {createCrispBasicBoardHost} from '../../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
-import {createWasmSession} from '../browser.mjs';
-import {SimulationError} from '../src/simulation-host.mjs';
+import SB3Creator from '../../overlay/scratch-gui/src/lib/sb3-creator.js';
+import basicToPseudocode from '../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
+import {createCrispBasicBoardHost} from '../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
+import {createWasmSession} from '../../packages/crisp-basic/browser.mjs';
+import {SimulationError} from '../../packages/crisp-basic/src/simulation-host.mjs';
 
 registerBoardKinds();
-const moduleURL = new URL('../.build/wasm/crispbasic.mjs', import.meta.url);
+const moduleURL = new URL('../../packages/crisp-basic/.build/wasm/crispbasic.mjs', import.meta.url);
 const portable = {profile: 'bbc', mode: 'crispbasic'};
 
 function generate(source, lineNumbers) {

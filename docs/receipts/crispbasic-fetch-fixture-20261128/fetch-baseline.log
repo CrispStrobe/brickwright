@@ -1,0 +1,33 @@
+(node:12) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/bw-machines/library-media.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ fetch pinning: every fetch that decides what ships names an immutable object
+  ✔ the walk says what it did not scan (0.850494ms)
+  ℹ skipped 1204 non-source file(s) holding a NUL
+  ✔ the detectors still fire (instrument before subject) (0.159851ms)
+  ✔ comment stripping removes prose about fetches and nothing else (0.164218ms)
+  ✔ the scan walks a real tree, and excludes exactly one file: itself (30.14593ms)
+  ✔ every `uses:` in every workflow names a 40-hex action sha, not a movable tag (0.681589ms)
+  ✔ every content-fetch site is in the declared census, and every census row is in the tree (8.761293ms)
+  ✔ the current engine fetch remains content-bound by producer and lockfile SHA512 (6.851952ms)
+  ✔ every waived row states a reason, and the waived set is the three known ones (0.365762ms)
+  ✔ every pin CONSTANT is a full 40-hex sha, never an abbreviation (1.262987ms)
+  ✔ built-in machine media overrides name full commit shas (5.343545ms)
+  ✔ vendor-pins.json records full shas for every vendored upstream (0.345942ms)
+  ✔ every sync script that can fetch remotely resolves the ref before reading content (0.511952ms)
+✔ fetch pinning: every fetch that decides what ships names an immutable object (56.862945ms)
+✔ x86 Google Fonts selectors require a full immutable commit and safe path before fetch (360.998085ms)
+▶ lib-pin: the mechanism the `resolved-var` class depends on
+  ✔ a full sha is passed through untouched and costs no request (0.441777ms)
+  ✔ recordPin refuses anything that is not a 40-hex sha (12.287456ms)
+  ✔ the gate and the library agree on what a sha looks like (0.138409ms)
+✔ lib-pin: the mechanism the `resolved-var` class depends on (13.114724ms)
+ℹ tests 16
+ℹ suites 2
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2535.425496

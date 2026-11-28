@@ -101,6 +101,9 @@ export const liteAddedDeps = (root, integrateText = readFileSync(path.join(root,
     });
 };
 
+/** Pins whose upstream is vendored whole as a workspace package directory. */
+export const PACKAGE_TREES = Object.freeze({crispbasic: 'packages/crisp-basic'});
+
 /** 2. vendored trees: pins, LICENSE files, VENDORED headers. */
 export const vendoredTrees = (root, owner) => {
     const out = [];
@@ -145,6 +148,17 @@ export const vendoredTrees = (root, owner) => {
                 header.match(/^[ \t]*\/\/[ \t]*By:[ \t]*([^<\n]+)/m)?.[1].trim() : null;
             if (needsAuthor && !author) throw new Error(`Scoped pin ${name} has no readable source author: ${evidence}`);
             out.push({kind:'vendored-tree', name, licence, holder:holderOf(header), author, evidence, pinned:true});
+            continue;
+        }
+        // A pinned upstream vendored as a whole workspace PACKAGE tree
+        // (crispbasic since 2026-11-28: packages/crisp-basic, byte-identical to
+        // CrispStrobe/crispbasic at the pin) ships its LICENSE at that root.
+        if (PACKAGE_TREES[name]) {
+            const evidence = `${PACKAGE_TREES[name]}/LICENSE`;
+            const file = path.join(root, evidence);
+            if (!existsSync(file)) throw new Error(`Pinned package tree ${name} has no LICENSE: ${evidence}`);
+            const text = readFileSync(file, 'utf8');
+            out.push({kind: 'vendored-tree', name, licence: licenceId(text), holder: holderOf(text), evidence, pinned: true});
             continue;
         }
         // A pinned upstream taken as an npm PACKAGE (bw-board, bw-circuit-ui since

@@ -1,0 +1,65 @@
+✔ the isolated corpus job installs pinned root packages before running solver walks (1.390259ms)
+✔ every external workflow checkout has a full pin or validated vendor-pin output (43.020187ms)
+ℹ Audited 33 external checkout sites across 42 workflows
+✔ vendor outputs reject a missing, abbreviated, moving or injected SHA before checkout (1.627066ms)
+✔ new checkout sites and unrecognized dynamic refs fail by repository (0.539975ms)
+✔ duplicate-ref fixture: a checkout has exactly one ref field (0.396249ms)
+✔ both build paths verify actual root and GUI bytes, pinned sources and shipped notices (38.700882ms)
+✔ both debugger jobs install the root packages their tests load (0.284289ms)
+✔ Arcade controls prepare the real integrated GUI and installed model before runtime verification (1.248334ms)
+✔ workflow script receipt fields do not become checkout declarations (0.856112ms)
+✔ multiline quoted YAML cannot hide a real checkout from the pin census (0.554136ms)
+(node:13) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/bw-matrix/code-languages.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ the selected machine exposes the languages it can run or deploy (2.297989ms)
+✔ BASIC profiles respect the selected machine and retain a compatible preference (0.407915ms)
+✔ PicoBB receives a complete numbered listing and one RUN command (0.790343ms)
+✔ machine filtering keeps authored drafts and lets stale generated views regenerate (4.856681ms)
+✔ PiccoloBASIC receives unnumbered lowercase source and keeps labels and string case (0.54328ms)
+✔ Stefan’s BASIC uses numbered lines and respects the UART editor limit (0.614447ms)
+✔ the two standalone Pico editors retain independent drafts across conversions (0.716761ms)
+✔ packaging produces a complete relocatable payload and a deterministic byte manifest (134.204848ms)
+✔ check rejects a missing payload without creating it (31.093371ms)
+✔ check rejects a tampered asset and repackaging repairs it (75.159536ms)
+✔ unexpected stale assets are rejected and removed by complete replacement (55.200476ms)
+✔ a changed host source refuses stale compiled artifacts before replacing an existing payload (45.13613ms)
+✔ a changed shared native patcher also invalidates the WASM build (16.623906ms)
+✔ packaging rejects a corrupt generated JavaScript module (14.277239ms)
+✔ packaging rejects a corrupt WASM binary (20.725962ms)
+✔ packaging rejects a corrupt BBCSDL licence (32.415415ms)
+✔ packaging rejects a corrupt wasm/licenses/EMSCRIPTEN-LICENSE.txt (30.099971ms)
+✔ packaging requires every distribution notice (21.875387ms)
+✔ packaging rejects an old build without local source provenance (25.670741ms)
+✔ packaging verifies the recorded WASM import surface against the compiled module (15.11325ms)
+✔ packaging rejects an incomplete upstream build record (23.002128ms)
+✔ production evidence binds emitted entry, chunks and exact runtime to the requested commit (39.610635ms)
+✔ production qualification authenticates emitted bytes instead of accepting an unchanged copied manifest (37.059956ms)
+✔ production qualification refuses a stale build identity and a page without the local GUI entry (68.621031ms)
+✔ default staging fetches the exact source commit, survives branch drift, and supports offline rebuilds (208.358641ms)
+✔ local source overrides and packaged assets must match locked hashes without replacing good assets (37.11301ms)
+✔ mutable revisions are refused before fetching or staging (29.967811ms)
+(node:21) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/crispbasic-compiler.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Compile BASIC passes the exact editor text to C99 and retains the authored BASIC document (7.00308ms)
+✔ source diagnostics keep the BASIC document and highlight the physical source line (5.838653ms)
+✔ an asynchronous compiler load cannot overwrite an edited or replaced document (2.45176ms)
+✔ compiler adapter maps only exact supported targets and preserves compiler diagnostics (0.864605ms)
+✔ Pico SDK output and wrong Uno targets are refused before the hosted route (0.44376ms)
+✔ Uno uses the existing C compiler seam with binary64 requirements and unchanged firmware handoff shape (0.849372ms)
+✔ checked-in editor and compiler adapter mirrors remain exact (2.243236ms)
+✔ vendor-pins.json pins crispbasic to a full sha (1.226421ms)
+✔ the vendored set excludes only the upstream repository-only paths (1.277047ms)
+✔ the copy carries the package licence and upstream notices (63.451599ms)
+✔ packages/crisp-basic equals CrispStrobe/crispbasic at the pin (29.335015ms)
+ℹ tests 48
+ℹ suites 0
+ℹ pass 48
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 852.36673

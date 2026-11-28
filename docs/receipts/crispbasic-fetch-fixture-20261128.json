@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "kind": "brickwright-crispbasic-fetch-fixture-followup",
+  "observedAt": "2026-11-28T20:18:54.388706+00:00",
+  "qualifiedSourceCommit": "bdbc79a67992a37a624b226cfcc4d0bc4f788311",
+  "qualifiedSourceTree": "d0bc8ecbb0ffd71aaf5b7cdaada430d838f170dd",
+  "mergeParents": [
+    "fd48bb07d08d76a15c34cc96f672721a144af147",
+    "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331"
+  ],
+  "reviewBranch": "review/compile-basic-fetch-proof-20261128",
+  "standalonePin": "550f8396fdb652a1a14e3635681244d2d21e59dc",
+  "inheritedBoardTargetHead": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331",
+  "concurrentRepairCommit": "98f5016ddc411a64e0e6701da13cd1f3f26366ad",
+  "nodeVersion": "v24.22.3",
+  "changedPathsFromPriorCandidate": [
+    "lanes/2026-11-28-crispbasic-board-targets.md",
+    "test/ci-workflow-inputs.test.mjs"
+  ],
+  "scope": "Normal merge of the already published test-only fixture correction and lane evidence. No independent duplicate fix. Production code, compiler/runtime sources, supplier pins, canonical workflow scanner, fetch census and mutation prover are unchanged.",
+  "fixtureEquivalence": {
+    "method": "Execute the actual regression callback extracted from each source version, wrap the imported real assertNoRawClones only to capture its clone.yml input, retain every original assertion and compare the two resulting strings byte-for-byte.",
+    "equal": true,
+    "realScannerRefusalAsserted": true,
+    "versions": [
+      {
+        "sha": "fd48bb07d08d76a15c34cc96f672721a144af147",
+        "sourceSha256": "bdebc5b96f81a030c3ea60517f3e2b96d66b1a0447a6d0da22ff192e2b14562d",
+        "bytes": 269,
+        "sha256": "916d13ea856294326d38d9ce73c688857cd19d663c56760d8cbd4375a6bc2518"
+      },
+      {
+        "sha": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331",
+        "sourceSha256": "2cee8ecfac1e41240cef01a4041561b4fd7708d92024dcb06a12fd7f1b8ef8ad",
+        "bytes": 269,
+        "sha256": "916d13ea856294326d38d9ce73c688857cd19d663c56760d8cbd4375a6bc2518"
+      }
+    ],
+    "log": {
+      "path": "docs/receipts/crispbasic-fetch-fixture-20261128/fixture-equivalence.log",
+      "sha256": "dd56efb593749a4201adf76e70e5ff0bfd5e9d9ade990ef5db0dace632cfb2ae",
+      "rawSha256": "dd56efb593749a4201adf76e70e5ff0bfd5e9d9ade990ef5db0dace632cfb2ae",
+      "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; all outcomes and diagnostics are retained."
+    }
+  },
+  "mutationProof": {
+    "command": "TMPDIR=<workspace-temp> node scripts/prove-fetch-pinning.mjs",
+    "baselineGreen": true,
+    "mutations": 11,
+    "caughtForStatedReason": 11,
+    "mutatedFilesRestoredByteForByte": 7,
+    "restoredGateGreen": true,
+    "log": {
+      "path": "docs/receipts/crispbasic-fetch-fixture-20261128/fetch-proof.log",
+      "sha256": "8952677afa96af1218388ef500d2d1ce759d79cf62e44e0f02d27eef5c65d816",
+      "rawSha256": "8952677afa96af1218388ef500d2d1ce759d79cf62e44e0f02d27eef5c65d816",
+      "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; all outcomes and diagnostics are retained."
+    }
+  },
+  "testRuns": [
+    {
+      "command": "CRISPBASIC_DIR=<crispbasic> TMPDIR=<workspace-temp> node --test test/crispbasic-compiler*.test.mjs test/code-device-languages.test.mjs test/ci-workflow-inputs.test.mjs test/crispbasic-assets.test.mjs test/crispbasic-vendor-identity.test.mjs",
+      "tests": 48,
+      "pass": 48,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": {
+        "path": "docs/receipts/crispbasic-fetch-fixture-20261128/focused.log",
+        "sha256": "7877dfc63e5220f3cd43d730dbf7ebb53ea8bbaba2fb3add8110ea7c819a654a",
+        "rawSha256": "01c0625f4190f27e4d085cd69942e2a5258d1b96cd6c8fcc03576be6ae4719b0",
+        "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; all outcomes and diagnostics are retained."
+      }
+    },
+    {
+      "command": "CRISPBASIC_DIR=<crispbasic> BW_BOARD_DIR=<bw-board> BW_CIRCUIT_UI_DIR=<bw-circuit-ui> SB3_CREATOR_DIR=<sb3-creator> TMPDIR=<workspace-temp> node --test test/pin-move-chain.test.mjs",
+      "tests": 47,
+      "pass": 47,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": {
+        "path": "docs/receipts/crispbasic-fetch-fixture-20261128/pin-history.log",
+        "sha256": "64a7fde6c01064f1cc02c0fb131daedaf5c48d5807001aa7f332ed16e4fe1025",
+        "rawSha256": "64a7fde6c01064f1cc02c0fb131daedaf5c48d5807001aa7f332ed16e4fe1025",
+        "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; all outcomes and diagnostics are retained."
+      }
+    },
+    {
+      "command": "TMPDIR=<workspace-temp> node --test test/fetch-pinning.test.mjs",
+      "tests": 16,
+      "pass": 16,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": {
+        "path": "docs/receipts/crispbasic-fetch-fixture-20261128/fetch-baseline.log",
+        "sha256": "713a5b632d7ee09a5b1ef1225fd57b0cb76a3da581bf14df5f3a395d3960ce24",
+        "rawSha256": "c8af0b9008b7d1ece2fb1d72ccd8e27301d1116555f5dd068b5947125aa27196",
+        "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; all outcomes and diagnostics are retained."
+      }
+    }
+  ],
+  "freshPassingTests": 111,
+  "scannerInventory": {
+    "trackedFiles": 22392,
+    "reportedBinaryNonSourceFilesSkipped": 1204,
+    "unexpectedSourceSkips": 0,
+    "scope": "Unchanged real tracked-source fetch census, including existing documented vendor/comment/document exclusions; binary non-source skips are reported separately from skipped tests."
+  },
+  "unchangedInputs": {
+    "packages/crisp-basic": {
+      "gitObject": "a1182ba81839c522c5d7d146822cc9301a84fa26",
+      "equalToPriorCandidate": true
+    },
+    "test/crispbasic-integration": {
+      "gitObject": "7edce9f9bcf03b2d4b085bb5bb3f118c2d5cdbcd",
+      "equalToPriorCandidate": true
+    },
+    "scripts/ci-workflow-inputs.mjs": {
+      "gitObject": "e3b63262b4d80167130b4a882833d2f459628b75",
+      "equalToPriorCandidate": true
+    },
+    "scripts/prove-fetch-pinning.mjs": {
+      "gitObject": "92aab8ed88743a1734d12759d5a694f8f816f5d1",
+      "equalToPriorCandidate": true
+    },
+    "test/fetch-pinning.test.mjs": {
+      "gitObject": "06f3a42dfcd4679ee24aeff19ac39ea4b2c68fbe",
+      "equalToPriorCandidate": true
+    },
+    "test/pin-move-chain.test.mjs": {
+      "gitObject": "e6ae1bf14dedc3fa324f684513acbe43938d19ea",
+      "equalToPriorCandidate": true
+    },
+    "vendor-pins.json": {
+      "gitObject": "edc0f29f913a9e302e0c58548591eac754722f92",
+      "equalToPriorCandidate": true
+    },
+    "overlay/scratch-gui/src/lib/crispbasic-compiler.js": {
+      "gitObject": "ba52bd10272260f6bf418678e5f476e134186c9b",
+      "equalToPriorCandidate": true
+    },
+    "overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx": {
+      "gitObject": "86aab4b1fa7284ae1fbcfd1df914c08ca5211126",
+      "equalToPriorCandidate": true
+    }
+  },
+  "priorQualification": {
+    "receipt": "docs/receipts/crispbasic-reconciliation-20261128.json",
+    "sha256": "db62e4a8e56bdf0baf28db961b5667ac9067afc87605cf07dafb5f7ea3ef081e",
+    "qualifiedSourceCommit": "b8825813c4cc5994bb5ff3edb80947c8fa980adb",
+    "qualifiedSourceTree": "4b4c9f54402fdc0495a4ba33944d97c6991a87cd",
+    "totalPassingTests": 197,
+    "relocatedIntegrationTests": 102,
+    "relocatedIntegrationRerunForThisFollowup": false,
+    "packagedCompilerExecutionRerunForThisFollowup": false,
+    "attribution": "The earlier 197-test result, six real WASM/electrical suites and packaged C99 execution remain historical results for their recorded source revision. This supplement does not restamp or count them as new executions. Their relevant runtime and test source objects are unchanged by this two-file merge."
+  },
+  "qualificationLimits": [
+    "Hosted whole-build, unit-shard and production-editor outcomes remain external landing gates; local follow-up results do not claim those checks passed.",
+    "No firmware or production-browser execution was repeated for this test-fixture-only follow-up."
+  ]
+}

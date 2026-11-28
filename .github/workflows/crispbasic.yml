@@ -34,7 +34,8 @@ on:
       - 'packages/scratch-gui/webpack.config.js'
       - 'packages/scratch-gui/package.json'
       - 'packages/scratch-gui/package-lock.json'
-      - 'scripts/package-crispbasic.mjs'
+      - 'scripts/package-crispbasic*.mjs'
+      - 'crispbasic-compiler.lock.json'
       - 'scripts/verify-crispbasic-*.mjs'
       - 'scripts/lib/crispbasic-*.mjs'
       - 'scripts/lib/cad-worker-node-adapter.mjs'
@@ -49,6 +50,7 @@ on:
       - 'vendor-pins.json'
       - 'bin/bwlite.mjs'
       - 'test/crispbasic-*.test.mjs'
+      - 'test/crispbasic-integration/**'
       - 'test/circuit-cad-cancellation.test.mjs'
       - 'test/circuit-cad-bridge.test.mjs'
       - 'test/b8-one-board-per-run.test.mjs'
@@ -88,7 +90,8 @@ on:
       - 'packages/scratch-gui/webpack.config.js'
       - 'packages/scratch-gui/package.json'
       - 'packages/scratch-gui/package-lock.json'
-      - 'scripts/package-crispbasic.mjs'
+      - 'scripts/package-crispbasic*.mjs'
+      - 'crispbasic-compiler.lock.json'
       - 'scripts/verify-crispbasic-*.mjs'
       - 'scripts/lib/crispbasic-*.mjs'
       - 'scripts/lib/cad-worker-node-adapter.mjs'
@@ -103,6 +106,7 @@ on:
       - 'vendor-pins.json'
       - 'bin/bwlite.mjs'
       - 'test/crispbasic-*.test.mjs'
+      - 'test/crispbasic-integration/**'
       - 'test/circuit-cad-cancellation.test.mjs'
       - 'test/circuit-cad-bridge.test.mjs'
       - 'test/b8-one-board-per-run.test.mjs'
@@ -116,6 +120,30 @@ concurrency:
   group: ${{ github.workflow }}${{ !(github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request')) && format('-isolated-{0}', github.run_id) || '' }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request') }}
 jobs:
+  compiler:
+    name: Locked C99 compiler assets and editor action
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Stage and verify the exact standalone compiler revision
+        run: |
+          npm run package:crispbasic:compiler
+          npm run package:crispbasic:compiler:check
+      - name: Exercise the real packaged compiler and editor lifecycle
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {compileSource} from './packages/scratch-gui/static/crispbasic-compiler/src/compiler/index.mjs';
+          const result = compileSource('PRINT "packaged compiler"\n', {filename: 'packaged.bas'});
+          assert.equal(result.metadata.interpreterEmbedded, false);
+          assert.match(result.c, /int main\(/);
+          NODE
+          node --test test/crispbasic-compiler*.test.mjs test/code-device-languages.test.mjs
+
   native:
     name: Native ${{ matrix.arch }}
     strategy:
@@ -210,7 +238,8 @@ jobs:
           npm run package:crispbasic
           npm run package:crispbasic:check
       - name: Verify source round trips, controller profiles and coupled CAD physics
-        run: npm run test:brickwright
+        working-directory: .
+        run: npm run test:crispbasic-integration
       - name: Verify shared circuit ownership and existing CAD cancellation
         working-directory: .
         run: node --test test/circuit-cad-cancellation.test.mjs test/circuit-cad-bridge.test.mjs test/b8-one-board-per-run.test.mjs
@@ -286,6 +315,7 @@ jobs:
       - name: Verify the staged interpreter and production source prerequisites
         run: |
           npm run package:crispbasic:check
+          npm run package:crispbasic:compiler:check
           npm run package:broker-proof-pins:check
           npm run package:broker-assets:check
           node scripts/check-flagged-jsx.mjs
@@ -310,6 +340,9 @@ jobs:
       - name: Verify the emitted runtime's bytes and production asset boundary
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
         run: node scripts/verify-crispbasic-production-assets.mjs 2>&1 | tee artifacts/crispbasic-production/assets.log
+      - name: Verify the emitted independent compiler's exact locked bytes
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
+        run: node scripts/package-crispbasic-compiler.mjs --check --destination packages/scratch-gui/build/static/crispbasic-compiler
       - name: Verify the emitted CAD SDK and robot project bytes
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
         run: node scripts/verify-built-cad-sdk.mjs 2>&1 | tee artifacts/crispbasic-production/cad-assets.log
@@ -326,6 +359,7 @@ jobs:
             artifacts/crispbasic-production/**
             packages/scratch-gui/build/brickwright-build.json
             packages/scratch-gui/build/static/crispbasic/manifest.json
+            packages/scratch-gui/build/static/crispbasic-compiler/manifest.json
             packages/scratch-gui/build/static/cad-sdk/manifest.json
           if-no-files-found: warn
           retention-days: 7

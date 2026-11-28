@@ -44,7 +44,7 @@ npm --prefix packages/crisp-basic run test:native
 
 [CPU-EMULATION.md](CPU-EMULATION.md) gives cross-build and emulator CLI commands,
 sysroot requirements, build-receipt checks and deployment guidance. The
-separate [CPU-emulation workflow](../../.github/workflows/crispbasic-cpu-emulation.yml)
+separate [CPU-emulation workflow](https://github.com/CrispStrobe/crispbasic/blob/main/.github/workflows/cpu-emulation.yml)
 runs the real native test suite on emulated ARM CPUs; completed results and
 exact commits are recorded in [VALIDATION.md](VALIDATION.md). This does not
 port the interpreter to Brickwright's existing RISC-V32 Linux guest or to
@@ -77,7 +77,7 @@ WASM has no host filesystem, process, network, native-call or arbitrary
 JavaScript interface. Its `TIME`/`WAIT` clock is separate from simulated circuit
 time. See [CLI.md](CLI.md), [SIMULATION.md](SIMULATION.md) and the
 [runtime README](README.md) for input, limits, capabilities and API details.
-The [workflow](../../.github/workflows/crispbasic.yml) defines the platform
+The [workflow](https://github.com/CrispStrobe/crispbasic/blob/main/.github/workflows/ci.yml) defines the platform
 matrix. [Runtime run 46124192458](https://github.com/CrispStrobe/brickwright/actions/runs/46124192458)
 qualified native Linux x64/ARM64, WASM and the portable Node CLI on Linux ARM64,
 macOS 15 ARM64 and Windows Server 2025 x64. The three portable jobs verified and
@@ -303,7 +303,7 @@ Run the real-interpreter qualification after building WASM and installing the
 root dependencies:
 
 ```sh
-node --test packages/crisp-basic/tests/robot-motor.test.mjs
+node --test test/crispbasic-package-robot-motor.test.mjs   # from the Brickwright root
 ```
 
 The [CAD robot example](examples/cad-robot/README.md) extends this path to the
@@ -332,7 +332,7 @@ npm --prefix packages/crisp-basic test
 npm --prefix packages/crisp-basic run test:native
 npm --prefix packages/crisp-basic run test:wasm
 npm --prefix packages/crisp-basic run test:parity
-npm --prefix packages/crisp-basic run test:brickwright
+npm run test:crispbasic-integration   # from the Brickwright root
 ```
 
 Runtime-dependent suites fail when an artifact is missing; they do not turn

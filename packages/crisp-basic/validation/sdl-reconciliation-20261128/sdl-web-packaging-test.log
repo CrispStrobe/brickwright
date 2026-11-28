@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: full SDL page embeds bytes, escapes source and title, and preserves notices
+ok 1 - full SDL page embeds bytes, escapes source and title, and preserves notices
+  ---
+  duration_ms: 18.460643
+  type: 'test'
+  ...
+# Subtest: runtime integrity and required BBCSDL notice are enforced
+ok 2 - runtime integrity and required BBCSDL notice are enforced
+  ---
+  duration_ms: 8.825231
+  type: 'test'
+  ...
+# Subtest: virtual resource paths reject traversal, reserved roots and collisions
+ok 3 - virtual resource paths reject traversal, reserved roots and collisions
+  ---
+  duration_ms: 21.273188
+  type: 'test'
+  ...
+# Subtest: atomic output never replaces an existing file or any aliased input accidentally
+ok 4 - atomic output never replaces an existing file or any aliased input accidentally
+  ---
+  duration_ms: 17.74973
+  type: 'test'
+  ...
+# Subtest: runtime receipt paths cannot escape their pack through traversal or symlinks
+ok 5 - runtime receipt paths cannot escape their pack through traversal or symlinks
+  ---
+  duration_ms: 9.074777
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 167.889114

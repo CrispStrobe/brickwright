@@ -1,0 +1,1144 @@
+TAP version 13
+# Subtest: named board execution requires the actual built WASM engine
+ok 1 - named board execution requires the actual built WASM engine
+  ---
+  duration_ms: 29.299293
+  type: 'test'
+  ...
+# Subtest: 8051: committed BASIC and named-pad fixture produce fixed output and trace
+ok 2 - 8051: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 265.4046
+  type: 'test'
+  ...
+# Subtest: 8051: excluded package pin raises authored BASIC ERR201 without a drive
+ok 3 - 8051: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 131.567013
+  type: 'test'
+  ...
+# Subtest: stc15: committed BASIC and named-pad fixture produce fixed output and trace
+ok 4 - stc15: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 179.92522
+  type: 'test'
+  ...
+# Subtest: stc15: excluded package pin raises authored BASIC ERR201 without a drive
+ok 5 - stc15: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 107.643601
+  type: 'test'
+  ...
+# Subtest: stm32: committed BASIC and named-pad fixture produce fixed output and trace
+ok 6 - stm32: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 88.027065
+  type: 'test'
+  ...
+# Subtest: stm32: excluded package pin raises authored BASIC ERR201 without a drive
+ok 7 - stm32: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 84.966628
+  type: 'test'
+  ...
+# Subtest: pico: committed BASIC and named-pad fixture produce fixed output and trace
+ok 8 - pico: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 101.998977
+  type: 'test'
+  ...
+# Subtest: pico: excluded package pin raises authored BASIC ERR201 without a drive
+ok 9 - pico: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 116.083054
+  type: 'test'
+  ...
+# Subtest: rp2040: committed BASIC and named-pad fixture produce fixed output and trace
+ok 10 - rp2040: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 94.708497
+  type: 'test'
+  ...
+# Subtest: rp2040: excluded package pin raises authored BASIC ERR201 without a drive
+ok 11 - rp2040: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 119.01166
+  type: 'test'
+  ...
+# Subtest: nano: committed BASIC and named-pad fixture produce fixed output and trace
+ok 12 - nano: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 111.028184
+  type: 'test'
+  ...
+# Subtest: nano: excluded package pin raises authored BASIC ERR201 without a drive
+ok 13 - nano: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 102.948595
+  type: 'test'
+  ...
+# Subtest: esp8266: committed BASIC and named-pad fixture produce fixed output and trace
+ok 14 - esp8266: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 112.594624
+  type: 'test'
+  ...
+# Subtest: esp8266: excluded package pin raises authored BASIC ERR201 without a drive
+ok 15 - esp8266: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 110.449796
+  type: 'test'
+  ...
+# Subtest: 8266: committed BASIC and named-pad fixture produce fixed output and trace
+ok 16 - 8266: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 126.755468
+  type: 'test'
+  ...
+# Subtest: 8266: excluded package pin raises authored BASIC ERR201 without a drive
+ok 17 - 8266: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 128.604339
+  type: 'test'
+  ...
+# Subtest: microbit: committed BASIC and named-pad fixture produce fixed output and trace
+ok 18 - microbit: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 87.31573
+  type: 'test'
+  ...
+# Subtest: microbit: excluded package pin raises authored BASIC ERR201 without a drive
+ok 19 - microbit: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 109.315164
+  type: 'test'
+  ...
+# Subtest: microbit-breakout: committed BASIC and named-pad fixture produce fixed output and trace
+ok 20 - microbit-breakout: committed BASIC and named-pad fixture produce fixed output and trace
+  ---
+  duration_ms: 108.719295
+  type: 'test'
+  ...
+# Subtest: microbit-breakout: excluded package pin raises authored BASIC ERR201 without a drive
+ok 21 - microbit-breakout: excluded package pin raises authored BASIC ERR201 without a drive
+  ---
+  duration_ms: 111.673143
+  type: 'test'
+  ...
+# Subtest: unknown named target refuses before any BASIC output
+ok 22 - unknown named target refuses before any BASIC output
+  ---
+  duration_ms: 1.298589
+  type: 'test'
+  ...
+# Subtest: target fixtures cannot expand a board profile or turn Nano A6 into digital GPIO
+ok 23 - target fixtures cannot expand a board profile or turn Nano A6 into digital GPIO
+  ---
+  duration_ms: 0.264219
+  type: 'test'
+  ...
+# Subtest: a second run receives a fresh target host and repeats the fixture from zero
+ok 24 - a second run receives a fresh target host and repeats the fixture from zero
+  ---
+  duration_ms: 234.306354
+  type: 'test'
+  ...
+# Subtest: a named target preserves parent-owned time limits across interpreter suspension
+ok 25 - a named target preserves parent-owned time limits across interpreter suspension
+  ---
+  duration_ms: 90.951167
+  type: 'test'
+  ...
+# Subtest: portable CLI qualification requires the real WASM artifact
+ok 26 - portable CLI qualification requires the real WASM artifact
+  ---
+  duration_ms: 14.989625
+  type: 'test'
+  ...
+# Subtest: WASM CLI executes structured source, Latin-1 bytes and intentional exit status
+ok 27 - WASM CLI executes structured source, Latin-1 bytes and intentional exit status
+  ---
+  duration_ms: 387.735637
+  type: 'test'
+  ...
+# Subtest: WASM CLI supplies both piped and file input and terminates after EOF
+ok 28 - WASM CLI supplies both piped and file input and terminates after EOF
+  ---
+  duration_ms: 712.544625
+  type: 'test'
+  ...
+# Subtest: WASM CLI preserves physical source diagnostics and restricted-host errors
+ok 29 - WASM CLI preserves physical source diagnostics and restricted-host errors
+  ---
+  duration_ms: 525.143242
+  type: 'test'
+  ...
+# Subtest: WASM CLI timeout and output bounds have stable terminal exit codes
+ok 30 - WASM CLI timeout and output bounds have stable terminal exit codes
+  ---
+  duration_ms: 469.47454
+  type: 'test'
+  ...
+# Subtest: portable simulation fixtures execute BASIC and expose deterministic final traces
+ok 31 - portable simulation fixtures execute BASIC and expose deterministic final traces
+  ---
+  duration_ms: 458.219605
+  type: 'test'
+  ...
+# Subtest: simulation budget is terminal and retains the completed trace
+ok 32 - simulation budget is terminal and retains the completed trace
+  ---
+  duration_ms: 294.81622
+  type: 'test'
+  ...
+# Subtest: invalid simulation fixtures never run or emit partial program output
+ok 33 - invalid simulation fixtures never run or emit partial program output
+  ---
+  duration_ms: 74.179297
+  type: 'test'
+  ...
+# Subtest: SIGTERM cancels the portable worker and completes the CLI result
+ok 34 - SIGTERM cancels the portable worker and completes the CLI result
+  ---
+  duration_ms: 405.232441
+  type: 'test'
+  ...
+# Subtest: restricted WASM refuses every native call and OS command entry point
+    # Subtest: named SYS
+    ok 1 - named SYS
+      ---
+      duration_ms: 180.481599
+      type: 'test'
+      ...
+    # Subtest: numeric SYS
+    ok 2 - numeric SYS
+      ---
+      duration_ms: 169.672535
+      type: 'test'
+      ...
+    # Subtest: SYS address expression
+    ok 3 - SYS address expression
+      ---
+      duration_ms: 111.80807
+      type: 'test'
+      ...
+    # Subtest: ON SYS event
+    ok 4 - ON SYS event
+      ---
+      duration_ms: 122.134496
+      type: 'test'
+      ...
+    # Subtest: CALL numeric address
+    ok 5 - CALL numeric address
+      ---
+      duration_ms: 89.900433
+      type: 'test'
+      ...
+    # Subtest: CALL string module
+    ok 6 - CALL string module
+      ---
+      duration_ms: 108.433354
+      type: 'test'
+      ...
+    # Subtest: USR numeric address
+    ok 7 - USR numeric address
+      ---
+      duration_ms: 114.137879
+      type: 'test'
+      ...
+    # Subtest: USR emulated OS address
+    ok 8 - USR emulated OS address
+      ---
+      duration_ms: 87.933111
+      type: 'test'
+      ...
+    # Subtest: OSCLI string
+    ok 9 - OSCLI string
+      ---
+      duration_ms: 91.090132
+      type: 'test'
+      ...
+    # Subtest: star command
+    ok 10 - star command
+      ---
+      duration_ms: 110.17004
+      type: 'test'
+      ...
+    # Subtest: inline assembler
+    ok 11 - inline assembler
+      ---
+      duration_ms: 86.46149
+      type: 'test'
+      ...
+    1..11
+ok 35 - restricted WASM refuses every native call and OS command entry point
+  ---
+  duration_ms: 1275.77519
+  type: 'test'
+  ...
+# Subtest: restricted WASM has no ambient or virtual file access
+    # Subtest: OPENIN
+    ok 1 - OPENIN
+      ---
+      duration_ms: 120.444957
+      type: 'test'
+      ...
+    # Subtest: OPENOUT
+    ok 2 - OPENOUT
+      ---
+      duration_ms: 97.822628
+      type: 'test'
+      ...
+    # Subtest: OPENUP
+    ok 3 - OPENUP
+      ---
+      duration_ms: 108.992608
+      type: 'test'
+      ...
+    # Subtest: BGET
+    ok 4 - BGET
+      ---
+      duration_ms: 113.571969
+      type: 'test'
+      ...
+    # Subtest: BPUT
+    ok 5 - BPUT
+      ---
+      duration_ms: 156.111076
+      type: 'test'
+      ...
+    # Subtest: PRINT\#
+    ok 6 - PRINT\#
+      ---
+      duration_ms: 127.950852
+      type: 'test'
+      ...
+    # Subtest: INPUT\#
+    ok 7 - INPUT\#
+      ---
+      duration_ms: 98.933445
+      type: 'test'
+      ...
+    # Subtest: CLOSE\#
+    ok 8 - CLOSE\#
+      ---
+      duration_ms: 97.620022
+      type: 'test'
+      ...
+    # Subtest: CLOSE\#0
+    ok 9 - CLOSE\#0
+      ---
+      duration_ms: 108.997695
+      type: 'test'
+      ...
+    # Subtest: PTR\# read
+    ok 10 - PTR\# read
+      ---
+      duration_ms: 78.386964
+      type: 'test'
+      ...
+    # Subtest: PTR\# write
+    ok 11 - PTR\# write
+      ---
+      duration_ms: 102.618356
+      type: 'test'
+      ...
+    # Subtest: EXT\# read
+    ok 12 - EXT\# read
+      ---
+      duration_ms: 112.847235
+      type: 'test'
+      ...
+    # Subtest: EXT\# write
+    ok 13 - EXT\# write
+      ---
+      duration_ms: 127.394302
+      type: 'test'
+      ...
+    # Subtest: EOF\#
+    ok 14 - EOF\#
+      ---
+      duration_ms: 82.733984
+      type: 'test'
+      ...
+    # Subtest: CHAIN
+    ok 15 - CHAIN
+      ---
+      duration_ms: 119.773364
+      type: 'test'
+      ...
+    # Subtest: RUN file
+    ok 16 - RUN file
+      ---
+      duration_ms: 99.598318
+      type: 'test'
+      ...
+    # Subtest: INSTALL
+    ok 17 - INSTALL
+      ---
+      duration_ms: 112.820975
+      type: 'test'
+      ...
+    1..17
+ok 36 - restricted WASM has no ambient or virtual file access
+  ---
+  duration_ms: 1871.362451
+  type: 'test'
+  ...
+# Subtest: restricted WASM refuses memory and pointer operations at execution time
+    # Subtest: prefix byte read
+    ok 1 - prefix byte read
+      ---
+      duration_ms: 175.897056
+      type: 'test'
+      ...
+    # Subtest: prefix byte write into internal low memory
+    ok 2 - prefix byte write into internal low memory
+      ---
+      duration_ms: 72.807071
+      type: 'test'
+      ...
+    # Subtest: prefix integer read
+    ok 3 - prefix integer read
+      ---
+      duration_ms: 75.762061
+      type: 'test'
+      ...
+    # Subtest: prefix integer write
+    ok 4 - prefix integer write
+      ---
+      duration_ms: 79.772494
+      type: 'test'
+      ...
+    # Subtest: prefix floating read
+    ok 5 - prefix floating read
+      ---
+      duration_ms: 74.474217
+      type: 'test'
+      ...
+    # Subtest: prefix 64-bit read
+    ok 6 - prefix 64-bit read
+      ---
+      duration_ms: 85.773963
+      type: 'test'
+      ...
+    # Subtest: CR-terminated indirect string
+    ok 7 - CR-terminated indirect string
+      ---
+      duration_ms: 86.850011
+      type: 'test'
+      ...
+    # Subtest: NUL-terminated indirect string
+    ok 8 - NUL-terminated indirect string
+      ---
+      duration_ms: 93.322832
+      type: 'test'
+      ...
+    # Subtest: infix byte read
+    ok 9 - infix byte read
+      ---
+      duration_ms: 95.427693
+      type: 'test'
+      ...
+    # Subtest: infix byte write
+    ok 10 - infix byte write
+      ---
+      duration_ms: 90.913975
+      type: 'test'
+      ...
+    # Subtest: infix integer read
+    ok 11 - infix integer read
+      ---
+      duration_ms: 74.683724
+      type: 'test'
+      ...
+    # Subtest: infix integer write
+    ok 12 - infix integer write
+      ---
+      duration_ms: 71.897347
+      type: 'test'
+      ...
+    # Subtest: address-of
+    ok 13 - address-of
+      ---
+      duration_ms: 78.430494
+      type: 'test'
+      ...
+    # Subtest: PTR string read
+    ok 14 - PTR string read
+      ---
+      duration_ms: 85.271464
+      type: 'test'
+      ...
+    # Subtest: PTR string assignment
+    ok 15 - PTR string assignment
+      ---
+      duration_ms: 68.741184
+      type: 'test'
+      ...
+    # Subtest: PTR array assignment
+    ok 16 - PTR array assignment
+      ---
+      duration_ms: 78.241134
+      type: 'test'
+      ...
+    # Subtest: PTR structure assignment
+    ok 17 - PTR structure assignment
+      ---
+      duration_ms: 66.4066
+      type: 'test'
+      ...
+    # Subtest: PAGE assignment
+    ok 18 - PAGE assignment
+      ---
+      duration_ms: 65.227441
+      type: 'test'
+      ...
+    # Subtest: LOMEM assignment
+    ok 19 - LOMEM assignment
+      ---
+      duration_ms: 71.593129
+      type: 'test'
+      ...
+    # Subtest: HIMEM assignment
+    ok 20 - HIMEM assignment
+      ---
+      duration_ms: 80.895124
+      type: 'test'
+      ...
+    # Subtest: indirect PROC
+    ok 21 - indirect PROC
+      ---
+      duration_ms: 68.756132
+      type: 'test'
+      ...
+    # Subtest: indirect FN
+    ok 22 - indirect FN
+      ---
+      duration_ms: 65.312214
+      type: 'test'
+      ...
+    # Subtest: function pointer assignment
+    ok 23 - function pointer assignment
+      ---
+      duration_ms: 72.509571
+      type: 'test'
+      ...
+    # Subtest: host system variable read
+    ok 24 - host system variable read
+      ---
+      duration_ms: 67.364632
+      type: 'test'
+      ...
+    # Subtest: host system variable write
+    ok 25 - host system variable write
+      ---
+      duration_ms: 70.880031
+      type: 'test'
+      ...
+    # Subtest: exposed function table
+    ok 26 - exposed function table
+      ---
+      duration_ms: 68.299383
+      type: 'test'
+      ...
+    1..26
+ok 37 - restricted WASM refuses memory and pointer operations at execution time
+  ---
+  duration_ms: 2091.614168
+  type: 'test'
+  ...
+# Subtest: EVAL cannot bypass restricted operation guards
+    # Subtest: USR 1
+    ok 1 - USR 1
+      ---
+      duration_ms: 138.021236
+      type: 'test'
+      ...
+    # Subtest: ?65536
+    ok 2 - ?65536
+      ---
+      duration_ms: 130.543476
+      type: 'test'
+      ...
+    # Subtest: !65536
+    ok 3 - !65536
+      ---
+      duration_ms: 74.724901
+      type: 'test'
+      ...
+    # Subtest: $65536
+    ok 4 - $65536
+      ---
+      duration_ms: 80.020328
+      type: 'test'
+      ...
+    # Subtest: @platform%
+    ok 5 - @platform%
+      ---
+      duration_ms: 67.892798
+      type: 'test'
+      ...
+    # Subtest: SYS "system"
+    ok 6 - SYS "system"
+      ---
+      duration_ms: 66.307841
+      type: 'test'
+      ...
+    1..6
+ok 38 - EVAL cannot bypass restricted operation guards
+  ---
+  duration_ms: 559.040199
+  type: 'test'
+  ...
+# Subtest: EVAL rejects constructed internal tokens while preserving Latin-1 literal data
+ok 39 - EVAL rejects constructed internal tokens while preserving Latin-1 literal data
+  ---
+  duration_ms: 703.456073
+  type: 'test'
+  ...
+# Subtest: unsupported host event traps fail explicitly without changing computed ON branches
+    # Subtest: ON TIME
+    ok 1 - ON TIME
+      ---
+      duration_ms: 64.475416
+      type: 'test'
+      ...
+    # Subtest: ON TIME OFF
+    ok 2 - ON TIME OFF
+      ---
+      duration_ms: 70.108974
+      type: 'test'
+      ...
+    # Subtest: ON CLOSE
+    ok 3 - ON CLOSE
+      ---
+      duration_ms: 69.081553
+      type: 'test'
+      ...
+    # Subtest: ON CLOSE OFF
+    ok 4 - ON CLOSE OFF
+      ---
+      duration_ms: 72.466947
+      type: 'test'
+      ...
+    # Subtest: ON MOVE
+    ok 5 - ON MOVE
+      ---
+      duration_ms: 84.579319
+      type: 'test'
+      ...
+    # Subtest: ON MOVE OFF
+    ok 6 - ON MOVE OFF
+      ---
+      duration_ms: 65.567159
+      type: 'test'
+      ...
+    # Subtest: ON MOUSE
+    ok 7 - ON MOUSE
+      ---
+      duration_ms: 66.714595
+      type: 'test'
+      ...
+    # Subtest: ON MOUSE OFF
+    ok 8 - ON MOUSE OFF
+      ---
+      duration_ms: 64.681908
+      type: 'test'
+      ...
+    1..8
+ok 40 - unsupported host event traps fail explicitly without changing computed ON branches
+  ---
+  duration_ms: 635.605904
+  type: 'test'
+  ...
+# Subtest: unsupported screen, audio and wall-clock queries are explicit BASIC errors
+    # Subtest: TIME$
+    ok 1 - TIME$
+      ---
+      duration_ms: 77.227883
+      type: 'test'
+      ...
+    # Subtest: SOUND
+    ok 2 - SOUND
+      ---
+      duration_ms: 82.518979
+      type: 'test'
+      ...
+    # Subtest: SOUND OFF
+    ok 3 - SOUND OFF
+      ---
+      duration_ms: 65.773926
+      type: 'test'
+      ...
+    # Subtest: ENVELOPE
+    ok 4 - ENVELOPE
+      ---
+      duration_ms: 70.006684
+      type: 'test'
+      ...
+    # Subtest: MOUSE
+    ok 5 - MOUSE
+      ---
+      duration_ms: 85.91823
+      type: 'test'
+      ...
+    # Subtest: MOUSE ON
+    ok 6 - MOUSE ON
+      ---
+      duration_ms: 292.177167
+      type: 'test'
+      ...
+    # Subtest: ADVAL
+    ok 7 - ADVAL
+      ---
+      duration_ms: 78.579343
+      type: 'test'
+      ...
+    # Subtest: POINT
+    ok 8 - POINT
+      ---
+      duration_ms: 135.352619
+      type: 'test'
+      ...
+    # Subtest: TINT
+    ok 9 - TINT
+      ---
+      duration_ms: 116.885371
+      type: 'test'
+      ...
+    # Subtest: WIDTH of string
+    ok 10 - WIDTH of string
+      ---
+      duration_ms: 104.099552
+      type: 'test'
+      ...
+    # Subtest: screen character
+    ok 11 - screen character
+      ---
+      duration_ms: 99.730718
+      type: 'test'
+      ...
+    1..11
+ok 41 - unsupported screen, audio and wall-clock queries are explicit BASIC errors
+  ---
+  duration_ms: 1211.759558
+  type: 'test'
+  ...
+# Subtest: restricted errors retain ON ERROR semantics and original source locations
+ok 42 - restricted errors retain ON ERROR semantics and original source locations
+  ---
+  duration_ms: 213.007838
+  type: 'test'
+  ...
+# Subtest: ordinary arrays, structures, function calls, exponentiation and formatting remain usable
+ok 43 - ordinary arrays, structures, function calls, exponentiation and formatting remain usable
+  ---
+  duration_ms: 130.250041
+  type: 'test'
+  ...
+# Subtest: WASM integration requires a real built module; an absent artifact fails
+ok 44 - WASM integration requires a real built module; an absent artifact fails
+  ---
+  duration_ms: 36.789229
+  type: 'test'
+  ...
+# Subtest: the restricted profile advertises only implemented capabilities
+ok 45 - the restricted profile advertises only implemented capabilities
+  ---
+  duration_ms: 0.560697
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: overlapping string accumulator moves
+ok 46 - WASM anchored corpus: overlapping string accumulator moves
+  ---
+  duration_ms: 142.673847
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: structured loops, procedures, functions, arrays and strings
+ok 47 - WASM anchored corpus: structured loops, procedures, functions, arrays and strings
+  ---
+  duration_ms: 150.180093
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: numbered source and real tokenization
+ok 48 - WASM anchored corpus: numbered source and real tokenization
+  ---
+  duration_ms: 131.209619
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: Latin-1 string bytes
+ok 49 - WASM anchored corpus: Latin-1 string bytes
+  ---
+  duration_ms: 105.182839
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: nested function stack and local scope
+ok 50 - WASM anchored corpus: nested function stack and local scope
+  ---
+  duration_ms: 89.707275
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: DATA, READ and RESTORE
+ok 51 - WASM anchored corpus: DATA, READ and RESTORE
+  ---
+  duration_ms: 97.007217
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: fixed line input and byte input
+ok 52 - WASM anchored corpus: fixed line input and byte input
+  ---
+  duration_ms: 104.048725
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: raw VDU bytes
+ok 53 - WASM anchored corpus: raw VDU bytes
+  ---
+  duration_ms: 125.50484
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: handled BASIC errors
+ok 54 - WASM anchored corpus: handled BASIC errors
+  ---
+  duration_ms: 102.878855
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: explicit program exit
+ok 55 - WASM anchored corpus: explicit program exit
+  ---
+  duration_ms: 92.389507
+  type: 'test'
+  ...
+# Subtest: WASM anchored corpus: empty source
+ok 56 - WASM anchored corpus: empty source
+  ---
+  duration_ms: 98.199057
+  type: 'test'
+  ...
+# Subtest: streamed output cannot be mutated by observers and matches the final bytes
+ok 57 - streamed output cannot be mutated by observers and matches the final bytes
+  ---
+  duration_ms: 98.663797
+  type: 'test'
+  ...
+# Subtest: unhandled errors preserve original editor positions and BASIC line numbers
+ok 58 - unhandled errors preserve original editor positions and BASIC line numbers
+  ---
+  duration_ms: 225.489968
+  type: 'test'
+  ...
+# Subtest: token record limits are reported before executing truncated source
+ok 59 - token record limits are reported before executing truncated source
+  ---
+  duration_ms: 102.085271
+  type: 'test'
+  ...
+# Subtest: interactive INPUT suspends and resumes nested function frames
+ok 60 - interactive INPUT suspends and resumes nested function frames
+  ---
+  duration_ms: 143.079026
+  type: 'test'
+  ...
+# Subtest: interactive input can be supplied before a worker finishes starting
+ok 61 - interactive input can be supplied before a worker finishes starting
+  ---
+  duration_ms: 90.458352
+  type: 'test'
+  ...
+# Subtest: ON ERROR LOCAL survives an asynchronous INPUT and returns through its procedure frame
+ok 62 - ON ERROR LOCAL survives an asynchronous INPUT and returns through its procedure frame
+  ---
+  duration_ms: 105.239072
+  type: 'test'
+  ...
+# Subtest: closed input produces a BASIC error and remains catchable by ON ERROR
+ok 63 - closed input produces a BASIC error and remains catchable by ON ERROR
+  ---
+  duration_ms: 194.125473
+  type: 'test'
+  ...
+# Subtest: nonblocking and timed INKEY respect available bytes and an open input stream
+ok 64 - nonblocking and timed INKEY respect available bytes and an open input stream
+  ---
+  duration_ms: 389.907054
+  type: 'test'
+  ...
+# Subtest: INKEY skips CRLF residue without waiting for another byte
+ok 65 - INKEY skips CRLF residue without waiting for another byte
+  ---
+  duration_ms: 99.827675
+  type: 'test'
+  ...
+# Subtest: WAIT yields while preserving the BASIC stack and TIME advances monotonically
+ok 66 - WAIT yields while preserving the BASIC stack and TIME advances monotonically
+  ---
+  duration_ms: 140.634296
+  type: 'test'
+  ...
+# Subtest: tight loops are stopped by a deadline outside the interpreter worker
+ok 67 - tight loops are stopped by a deadline outside the interpreter worker
+  ---
+  duration_ms: 163.252904
+  type: 'test'
+  ...
+# Subtest: the deadline includes time suspended in INPUT
+ok 68 - the deadline includes time suspended in INPUT
+  ---
+  duration_ms: 202.186799
+  type: 'test'
+  ...
+# Subtest: output limits preserve exactly the accepted byte budget
+ok 69 - output limits preserve exactly the accepted byte budget
+  ---
+  duration_ms: 77.660837
+  type: 'test'
+  ...
+# Subtest: AbortSignal and cancellation while awaiting input leave the session reusable
+ok 70 - AbortSignal and cancellation while awaiting input leave the session reusable
+  ---
+  duration_ms: 224.182283
+  type: 'test'
+  ...
+# Subtest: reset and concurrent dispose wait for the old run to finish
+ok 71 - reset and concurrent dispose wait for the old run to finish
+  ---
+  duration_ms: 1.08664
+  type: 'test'
+  ...
+# Subtest: repeated and concurrent instances do not share interpreter variables or input
+ok 72 - repeated and concurrent instances do not share interpreter variables or input
+  ---
+  duration_ms: 266.484142
+  type: 'test'
+  ...
+# Subtest: busy sessions reject concurrent runs and invalid inputs are rejected before starting
+ok 73 - busy sessions reject concurrent runs and invalid inputs are rejected before starting
+  ---
+  duration_ms: 8.475393
+  type: 'test'
+  ...
+# Subtest: missing WASM assets are host failures with a reusable idle session
+ok 74 - missing WASM assets are host failures with a reusable idle session
+  ---
+  duration_ms: 58.004093
+  type: 'test'
+  ...
+# Subtest: a worker exit or malformed result cannot impersonate successful BASIC completion
+ok 75 - a worker exit or malformed result cannot impersonate successful BASIC completion
+  ---
+  duration_ms: 179.141502
+  type: 'test'
+  ...
+# Subtest: an event observer failure terminates the worker and releases the session
+ok 76 - an event observer failure terminates the worker and releases the session
+  ---
+  duration_ms: 67.564958
+  type: 'test'
+  ...
+# Subtest: simulation integration requires the actual rebuilt C/WASM module
+ok 77 - simulation integration requires the actual rebuilt C/WASM module
+  ---
+  duration_ms: 12.112072
+  type: 'test'
+  ...
+# Subtest: ordinary BASIC library calls produce a fixed parent-owned pin and time trace
+ok 78 - ordinary BASIC library calls produce a fixed parent-owned pin and time trace
+  ---
+  duration_ms: 187.366736
+  type: 'test'
+  ...
+# Subtest: ordinary toggle preserves the latch across modes and evaluates the pin argument once
+ok 79 - ordinary toggle preserves the latch across modes and evaluates the pin argument once
+  ---
+  duration_ms: 194.766585
+  type: 'test'
+  ...
+# Subtest: a delayed atomic toggle preserves recursive PROC locals through suspension
+ok 80 - a delayed atomic toggle preserves recursive PROC locals through suspension
+  ---
+  duration_ms: 149.393557
+  type: 'test'
+  ...
+# Subtest: a five-operation adapter refuses toggle as catchable unavailable without sensing or writing
+ok 81 - a five-operation adapter refuses toggle as catchable unavailable without sensing or writing
+  ---
+  duration_ms: 235.718151
+  type: 'test'
+  ...
+# Subtest: a user toggle definition retains ordinary BASIC precedence with and without simulation
+ok 82 - a user toggle definition retains ordinary BASIC precedence with and without simulation
+  ---
+  duration_ms: 269.55458
+  type: 'test'
+  ...
+# Subtest: delayed simulation replies preserve recursive FN locals and enclosing PROC frames
+ok 83 - delayed simulation replies preserve recursive FN locals and enclosing PROC frames
+  ---
+  duration_ms: 174.387306
+  type: 'test'
+  ...
+# Subtest: ON ERROR LOCAL survives a rejected asynchronous reply and returns through its PROC
+ok 84 - ON ERROR LOCAL survives a rejected asynchronous reply and returns through its PROC
+  ---
+  duration_ms: 127.775232
+  type: 'test'
+  ...
+# Subtest: unhandled simulation errors retain their stable type and BASIC error number
+ok 85 - unhandled simulation errors retain their stable type and BASIC error number
+  ---
+  duration_ms: 93.916583
+  type: 'test'
+  ...
+# Subtest: nested argument requests cannot replace the outer callsite in a simulation diagnostic
+ok 86 - nested argument requests cannot replace the outer callsite in a simulation diagnostic
+  ---
+  duration_ms: 234.091655
+  type: 'test'
+  ...
+# Subtest: EVAL simulation errors map simple, sequential and nested expressions to their enclosing source
+ok 87 - EVAL simulation errors map simple, sequential and nested expressions to their enclosing source
+  ---
+  duration_ms: 350.40737
+  type: 'test'
+  ...
+# Subtest: EVAL origin unwinds through a local error handler before the outer expression fails
+ok 88 - EVAL origin unwinds through a local error handler before the outer expression fails
+  ---
+  duration_ms: 111.880556
+  type: 'test'
+  ...
+# Subtest: EVAL retains an authored FN body location when the error occurs in that body
+ok 89 - EVAL retains an authored FN body location when the error occurs in that body
+  ---
+  duration_ms: 86.495832
+  type: 'test'
+  ...
+# Subtest: EVAL recursive success preserves locals through delayed simulation replies
+ok 90 - EVAL recursive success preserves locals through delayed simulation replies
+  ---
+  duration_ms: 140.363362
+  type: 'test'
+  ...
+# Subtest: EVAL forwards END and QUIT through every nested expression frame
+ok 91 - EVAL forwards END and QUIT through every nested expression frame
+  ---
+  duration_ms: 204.394551
+  type: 'test'
+  ...
+# Subtest: the simulation library is opt-in and does not reserve public BASIC function names
+ok 92 - the simulation library is opt-in and does not reserve public BASIC function names
+  ---
+  duration_ms: 295.711366
+  type: 'test'
+  ...
+# Subtest: library loading leaves maximum authored line numbers available
+ok 93 - library loading leaves maximum authored line numbers available
+  ---
+  duration_ms: 98.747199
+  type: 'test'
+  ...
+# Subtest: CLEAR and RUN retain the installed library, clock and output latch
+ok 94 - CLEAR and RUN retain the installed library, clock and output latch
+  ---
+  duration_ms: 417.163845
+  type: 'test'
+  ...
+# Subtest: fractional, out-of-range, string and malformed arguments cannot reach host side effects
+ok 95 - fractional, out-of-range, string and malformed arguments cannot reach host side effects
+  ---
+  duration_ms: 1711.090135
+  type: 'test'
+  ...
+# Subtest: configured logical IDs and input/output state errors remain catchable and typed
+ok 96 - configured logical IDs and input/output state errors remain catchable and typed
+  ---
+  duration_ms: 475.502327
+  type: 'test'
+  ...
+# Subtest: the private intrinsic validates its complete fixed argument list before sending a request
+ok 97 - the private intrinsic validates its complete fixed argument list before sending a request
+  ---
+  duration_ms: 948.748053
+  type: 'test'
+  ...
+# Subtest: a cumulative request budget also stops reads that produce no trace
+ok 98 - a cumulative request budget also stops reads that produce no trace
+  ---
+  duration_ms: 73.516461
+  type: 'test'
+  ...
+# Subtest: each toggle consumes one request and parent limits stop before a further latch mutation
+ok 99 - each toggle consumes one request and parent limits stop before a further latch mutation
+  ---
+  duration_ms: 69.897775
+  type: 'test'
+  ...
+# Subtest: simulation trace and time budgets terminate in the parent outside ON ERROR
+ok 100 - simulation trace and time budgets terminate in the parent outside ON ERROR
+  ---
+  duration_ms: 223.999714
+  type: 'test'
+  ...
+# Subtest: an adapter input budget rejection is also a parent-owned limit
+ok 101 - an adapter input budget rejection is also a parent-owned limit
+  ---
+  duration_ms: 69.16281
+  type: 'test'
+  ...
+# Subtest: cancellation aborts a pending adapter and suppresses its late reply before a fresh run
+ok 102 - cancellation aborts a pending adapter and suppresses its late reply before a fresh run
+  ---
+  duration_ms: 148.170531
+  type: 'test'
+  ...
+# Subtest: cancelling a deferred toggle aborts its host before disposal and a fresh run starts from zero
+ok 103 - cancelling a deferred toggle aborts its host before disposal and a fresh run starts from zero
+  ---
+  duration_ms: 152.378061
+  type: 'test'
+  ...
+# Subtest: the deadline includes a never-resolving simulation reply and aborts its host
+ok 104 - the deadline includes a never-resolving simulation reply and aborts its host
+  ---
+  duration_ms: 1502.717008
+  type: 'test'
+  ...
+# Subtest: reset and repeated disposal settle runs suspended on simulation before returning
+ok 105 - reset and repeated disposal settle runs suspended on simulation before returning
+  ---
+  duration_ms: 202.175443
+  type: 'test'
+  ...
+# Subtest: repeated and concurrent sessions own separate hosts, clocks and pin latches
+ok 106 - repeated and concurrent sessions own separate hosts, clocks and pin latches
+  ---
+  duration_ms: 247.584049
+  type: 'test'
+  ...
+# Subtest: invalid adapter results and unexpected exceptions are uncatchable host failures
+ok 107 - invalid adapter results and unexpected exceptions are uncatchable host failures
+  ---
+  duration_ms: 722.772498
+  type: 'test'
+  ...
+# Subtest: simulation configuration never turns VDU output into a control channel
+ok 108 - simulation configuration never turns VDU output into a control channel
+  ---
+  duration_ms: 97.266434
+  type: 'test'
+  ...
+# Subtest: the configured bridge preserves existing SYS, memory, file and EVAL restrictions
+ok 109 - the configured bridge preserves existing SYS, memory, file and EVAL restrictions
+  ---
+  duration_ms: 683.723317
+  type: 'test'
+  ...
+1..109
+# tests 188
+# suites 0
+# pass 188
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10987.07963

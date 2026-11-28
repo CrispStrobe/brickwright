@@ -36,6 +36,13 @@ function hostError(message) {
     return {kind: 'host', message};
 }
 
+function workingDirectory(value) {
+    if (typeof value !== 'string' || !value || value.includes('\0')) {
+        throw new TypeError('cwd must be a nonempty path');
+    }
+    return resolve(value);
+}
+
 /**
  * A session owns at most one native child at a time. Each run starts a fresh
  * process because the pinned interpreter keeps process-global state.
@@ -48,7 +55,7 @@ export class NativeSession {
     #options;
 
     constructor({executable = DEFAULT_EXECUTABLE, runner, timeoutMs = 5000,
-        maxOutputBytes = 1024 * 1024, onEvent, simulation} = {}) {
+        maxOutputBytes = 1024 * 1024, onEvent, simulation, cwd} = {}) {
         if (simulation !== undefined) {
             throw new TypeError('The simulation bridge requires createWasmSession; it is unavailable in the native backend');
         }
@@ -66,6 +73,7 @@ export class NativeSession {
         }
         this.#options = {
             executable: resolve(executable),
+            cwd: cwd === undefined ? undefined : workingDirectory(cwd),
             // Configuration belongs to the embedding application, never BASIC
             // source. spawn receives an argv array and never invokes a shell.
             runner: runner === undefined ? null : {
@@ -110,13 +118,15 @@ export class NativeSession {
 
     run(source, {filename = 'main.bas', input = '', interactive = false,
         timeoutMs = this.#options.timeoutMs, maxOutputBytes = this.#options.maxOutputBytes,
-        signal} = {}) {
+        signal, cwd = this.#options.cwd ?? process.cwd()} = {}) {
         let prepared;
         let bytes;
+        let runCwd;
         try {
             if (this.#disposed) throw new Error('CrispBASIC session is disposed');
             if (this.#active) throw new Error('CrispBASIC session is already running');
             prepared = prepareSource(source, {filename});
+            runCwd = workingDirectory(cwd);
             positiveInteger(timeoutMs, 'timeoutMs');
             positiveInteger(maxOutputBytes, 'maxOutputBytes');
             if (typeof interactive !== 'boolean') throw new TypeError('interactive must be a boolean');
@@ -137,7 +147,7 @@ export class NativeSession {
         this.#active = active;
         this.#state = 'running';
         active.done = Promise.resolve().then(() =>
-            this.#execute(active, prepared, {timeoutMs, maxOutputBytes, signal})
+            this.#execute(active, prepared, {timeoutMs, maxOutputBytes, signal, cwd: runCwd})
         ).then(result => {
             if (this.#active === active) this.#active = null;
             this.#state = this.#disposed ? 'disposed' : 'idle';
@@ -201,7 +211,7 @@ export class NativeSession {
         this.#state = 'disposed';
     }
 
-    async #execute(active, prepared, {timeoutMs, maxOutputBytes, signal}) {
+    async #execute(active, prepared, {timeoutMs, maxOutputBytes, signal, cwd}) {
         const started = performance.now();
         const output = [];
         let outputLength = 0;
@@ -269,7 +279,10 @@ export class NativeSession {
                     const runner = this.#options.runner;
                     const child = spawn(runner?.executable || this.#options.executable,
                         runner ? [...runner.args, this.#options.executable, program] : [program], {
-                        cwd: directory,
+                        // The BASIC program uses the caller's directory. Only
+                        // the separately allocated private source/input
+                        // directory below is owned and removed by this session.
+                        cwd,
                         stdio: [inputHandle?.fd ?? 'pipe', 'pipe', 'pipe', 'pipe'],
                         detached: process.platform !== 'win32',
                         windowsHide: true

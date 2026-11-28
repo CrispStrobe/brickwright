@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "recovered-qualification-summary",
+  "observedOn": "2026-11-28",
+  "provenance": {
+    "observations": "Final verifier exits and measurements preserved in execution-tool output before the executor reset.",
+    "restoredSourceFingerprints": "Calculated from the restored source files after reapplying the exact final nonrecursive power-helper patch. These are current source fingerprints, not recovered firmware hashes.",
+    "historicalArtifactHashes": "Unavailable: the original full reports, generated C and firmware artifacts were lost during an executor reset before publication. No earlier build hashes have been substituted.",
+    "reproduction": "scripts/verify-compiler-boards.mjs recreates complete per-fixture artifact receipts; CI requires both real simulators and all four fixtures."
+  },
+  "validation": {
+    "status": "observed-passed",
+    "targets": 2,
+    "fixturesPerTarget": 4,
+    "coldBootsPerFixture": 2,
+    "totalColdBoots": 16,
+    "hardware": "not-run",
+    "circuitPhysics": false
+  },
+  "restoredSourceInputs": [
+    {
+      "path": "src/compiler/index.mjs",
+      "sha256": "abd10e081f46dd2c147fae5f61d38939cc97f4e85a8712fc3b4cd37b19e078fa"
+    },
+    {
+      "path": "src/compiler/platform.mjs",
+      "sha256": "4f433aab016607cee6a141c99d72f68c6f7db90c745977d4582b9eaf25d6825b"
+    },
+    {
+      "path": "src/compiler/runtime.mjs",
+      "sha256": "0378fdb0fb6722c252c412a8c9d4f7f5984ceb28c84d2e966e733ecf9a304264"
+    },
+    {
+      "path": "src/compiler-targets.mjs",
+      "sha256": "28660b09cf79a4d32a78ac0d6697ec120b747191b37a88c9f81a88e19cbd74ce"
+    },
+    {
+      "path": "scripts/verify-compiler-boards.mjs",
+      "sha256": "82c2abf319df88a4ba911ec4fcfb175b5ed82c793df94049d42e03c5665e0377"
+    }
+  ],
+  "restoredFixtures": [
+    {
+      "path": "examples/compiler/pins.bas",
+      "sha256": "0262019990d4d3010d1ba4b7f3626b0b53a43fa8439fe4df9f580fa99e2f9c50"
+    },
+    {
+      "path": "examples/compiler/console.bas",
+      "sha256": "5352a70d796ff9785ac51293bdfc4e77c39b49305cf077a1f0e3bf5f712820a7"
+    },
+    {
+      "path": "examples/compiler/decimal.bas",
+      "sha256": "75bcfacd631e40302ae9de71ad467df68ac3367166413a44b424b985f8e6c4cf"
+    },
+    {
+      "path": "examples/compiler/overflow.bas",
+      "sha256": "4535d9f30fd47c00179bb7b291b47f0defe4db597dc2be092f612705178a9e32"
+    }
+  ],
+  "oracle": {
+    "backend": "BBCSDL-WASM",
+    "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "emscriptenVersion": "3.1.64",
+    "historicalWasmSha256": null
+  },
+  "simulators": {
+    "repository": "https://github.com/CrispStrobe/bw-board",
+    "commit": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+    "avrForkCommit": "feea84c43e36e578841b5fce640202823b69b7f7",
+    "rp2040jsVersion": "1.3.3"
+  },
+  "toolchains": {
+    "arduino-uno": {
+      "compiler": "AVR GCC 14.2.0",
+      "avrLibc": "2.2.1",
+      "doubleBits": 64,
+      "longDoubleBits": 64,
+      "libf7Packing": "original nearest-even and subnormal correction"
+    },
+    "pico": {
+      "compiler": "arm-none-eabi-gcc 14.2.1 20241119",
+      "sdkVersion": "2.2.0",
+      "sdkCommit": "a1438dff1d38bd9c65dbd693f0e5db4b9ae91779",
+      "printfImplementation": "compiler",
+      "doubleImplementation": "compiler"
+    }
+  },
+  "fixtures": {
+    "pins": {
+      "comparison": "exact high/low/high levels and edge count; 10 ms and 5 ms intervals within 1 ms"
+    },
+    "console": {
+      "comparison": "UART byte-identical to BBCSDL",
+      "features": [
+        "strings",
+        "integers",
+        "binary64 PRINT",
+        "SQR",
+        "ABS",
+        "LEFT$",
+        "RIGHT$"
+      ]
+    },
+    "decimal": {
+      "comparison": "UART byte-identical to BBCSDL",
+      "features": [
+        "large exponents",
+        "minimum subnormal",
+        "literal and VAL 5E-324",
+        "signed zero",
+        "rounding boundaries",
+        "VAL integer tags",
+        "long fractional input",
+        "trailing text"
+      ]
+    },
+    "overflow": {
+      "comparison": "identical program-output prefix, expected runtime source-line error, unreachable output absent",
+      "oracleError": {
+        "code": 20,
+        "line": 3,
+        "message": "Number too big"
+      },
+      "compiledErrorLine": 3
+    }
+  },
+  "targets": [
+    {
+      "target": "arduino-uno",
+      "simulator": "Brickwright/avr8js",
+      "coldBootsPassed": 8,
+      "measurements": [
+        {
+          "fixture": "pins",
+          "coldBootsPassed": 2,
+          "flashBytes": 7472,
+          "staticRamBytes": 396,
+          "hexContainerBytes": 21041
+        },
+        {
+          "fixture": "console",
+          "coldBootsPassed": 2,
+          "flashBytes": 24304,
+          "staticRamBytes": 646,
+          "hexContainerBytes": 68381
+        },
+        {
+          "fixture": "decimal",
+          "coldBootsPassed": 2,
+          "flashBytes": 16958,
+          "staticRamBytes": 574,
+          "hexContainerBytes": 47722
+        },
+        {
+          "fixture": "overflow",
+          "coldBootsPassed": 2,
+          "flashBytes": 13416,
+          "staticRamBytes": 380,
+          "hexContainerBytes": 37765
+        }
+      ],
+      "firstPinBootIntervalsMs": [
+        10.3385,
+        5.781187
+      ],
+      "firstDecimalBootSimulatedMs": 508.014125,
+      "flashLimitBytes": 32256,
+      "staticRamLimitBytes": 1536,
+      "formatterHeapBytes": 288,
+      "historicalGeneratedCSha256": null,
+      "historicalFirmwareSha256": null
+    },
+    {
+      "target": "pico",
+      "simulator": "Brickwright/rp2040js",
+      "coldBootsPassed": 8,
+      "measurements": [
+        {
+          "fixture": "pins",
+          "coldBootsPassed": 2,
+          "uf2ContainerBytes": 82944
+        },
+        {
+          "fixture": "console",
+          "coldBootsPassed": 2,
+          "uf2ContainerBytes": 133120
+        },
+        {
+          "fixture": "decimal",
+          "coldBootsPassed": 2,
+          "uf2ContainerBytes": 100352
+        },
+        {
+          "fixture": "overflow",
+          "coldBootsPassed": 2,
+          "uf2ContainerBytes": 96256
+        }
+      ],
+      "firstPinBootIntervalsMs": [
+        10.027232,
+        5.019216
+      ],
+      "historicalGeneratedCSha256": null,
+      "historicalFirmwareSha256": null
+    }
+  ],
+  "additionalChecks": {
+    "status": "passed",
+    "testFiles": [
+      "tests/compiler-decimal.test.mjs",
+      "tests/compiler-stack.test.mjs"
+    ],
+    "testsPassed": 2,
+    "testsSkipped": 0,
+    "independentFormatterCases": 265,
+    "independentPackerCases": 812,
+    "avrProgramAndMainStackBytes": {
+      "oneStatement": 185,
+      "fiftyStatements": 28
+    }
+  },
+  "limits": [
+    "The results cover the four named fixtures; they are not exhaustive language or dynamic-memory bounds.",
+    "UART input and physical hardware were not qualified by these fixtures."
+  ]
+}

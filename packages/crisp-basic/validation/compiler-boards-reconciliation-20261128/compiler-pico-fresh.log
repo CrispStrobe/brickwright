@@ -1,0 +1,1 @@
+{"status":"simulator-pin-trace-passed","simulator":"Brickwright/rp2040js","hardware":"not-run","circuitPhysics":false,"fixtures":4,"coldBootsPerFixture":2,"timingToleranceMs":1}

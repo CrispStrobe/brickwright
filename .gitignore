@@ -44,6 +44,10 @@ CLAUDE.md
 # node --test per-file census output (scripts/check-test-run.mjs reads it; never an input)
 /test-results/
 
+# The standalone compiler packager fetches immutable Git objects here.
+# This cache is generated locally; the reviewed commit and hashes are tracked.
+/.build/crispbasic-compiler/
+
 # SDCC is GPL-2.0-or-later and this repository is BSD-3-Clause. The compiler
 # is fetched from https://github.com/CrispStrobe/sdcc-wasm when a user opts in,
 # and by CI for the Node gates. It must never be committed here again.

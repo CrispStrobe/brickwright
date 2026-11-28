@@ -1,0 +1,1592 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-28T19:59:04.251857+00:00",
+  "kind": "fresh-compiled-MCU-execution",
+  "testedCompilerCommit": "3c54195cfc696edac2c6d9e776360bb2e9592256",
+  "sourceInputs": [
+    {
+      "path": "src/compiler/index.mjs",
+      "sha256": "df79d13e51cca8b815861e5c7ad880af465cf3ca5ccf4399d2f82b7aa1f75adf"
+    },
+    {
+      "path": "src/compiler/runtime.mjs",
+      "sha256": "a6544b2483167db9d7534ce8d7739508a613cfd0b72734b9260fbfa78c498887"
+    },
+    {
+      "path": "src/compiler/platform.mjs",
+      "sha256": "4f433aab016607cee6a141c99d72f68c6f7db90c745977d4582b9eaf25d6825b"
+    },
+    {
+      "path": "src/compiler-targets.mjs",
+      "sha256": "28660b09cf79a4d32a78ac0d6697ec120b747191b37a88c9f81a88e19cbd74ce"
+    },
+    {
+      "path": "scripts/verify-compiler-boards.mjs",
+      "sha256": "82c2abf319df88a4ba911ec4fcfb175b5ed82c793df94049d42e03c5665e0377"
+    },
+    {
+      "path": "examples/compiler/pins.bas",
+      "sha256": "0262019990d4d3010d1ba4b7f3626b0b53a43fa8439fe4df9f580fa99e2f9c50"
+    },
+    {
+      "path": "examples/compiler/console.bas",
+      "sha256": "5352a70d796ff9785ac51293bdfc4e77c39b49305cf077a1f0e3bf5f712820a7"
+    },
+    {
+      "path": "examples/compiler/decimal.bas",
+      "sha256": "75bcfacd631e40302ae9de71ad467df68ac3367166413a44b424b985f8e6c4cf"
+    },
+    {
+      "path": "examples/compiler/overflow.bas",
+      "sha256": "4535d9f30fd47c00179bb7b291b47f0defe4db597dc2be092f612705178a9e32"
+    }
+  ],
+  "toolchains": [
+    {
+      "tool": "avr-gcc",
+      "version": "avr-gcc (GCC) 14.2.0",
+      "sha256": "311363766aebdb0a08fbdbf098381df7d01aaafd174ccfa852ba4b0f4dbe2efa"
+    },
+    {
+      "tool": "arm-none-eabi-gcc",
+      "version": "arm-none-eabi-gcc (15:14.2.rel1-1) 14.2.1 20241119",
+      "sha256": "9b369e040fa0889790fc1aaf673ed3099436f360cd022265f8e7c97d61ed00ec"
+    }
+  ],
+  "picoSdkCommit": "a1438dff1d38bd9c65dbd693f0e5db4b9ae91779",
+  "boardCommit": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+  "reference": {
+    "backend": "BBCSDL-WASM",
+    "wasmSha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2",
+    "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+    "build": {
+      "schemaVersion": 1,
+      "backend": "bbcsdl-wasm",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.64 (a1fe3902bf73a3802eae0357d273d0e37ea79898)",
+      "settings": [
+        "-O2",
+        "--no-entry",
+        "-sMODULARIZE=1",
+        "-sEXPORT_ES6=1",
+        "-sENVIRONMENT=web,worker,node",
+        "-sASYNCIFY=1",
+        "-sASYNCIFY_STACK_SIZE=1048576",
+        "-sSTACK_SIZE=2097152",
+        "-sINITIAL_MEMORY=67108864",
+        "-sALLOW_MEMORY_GROWTH=0",
+        "-sFILESYSTEM=0",
+        "-sDYNAMIC_EXECUTION=0",
+        "-sALLOW_TABLE_GROWTH=0",
+        "-sASSERTIONS=1",
+        "-sSTACK_OVERFLOW_CHECK=2",
+        "-sABORTING_MALLOC=0",
+        "-sEXPORTED_FUNCTIONS=[\"_crisp_run\",\"_crisp_simulation_abi\",\"_malloc\",\"_free\"]",
+        "-sEXPORTED_RUNTIME_METHODS=[\"ccall\"]"
+      ],
+      "memoryFlags": [
+        "-fno-delete-null-pointer-checks"
+      ],
+      "sourceInputs": [
+        {
+          "path": "src/bbmain.c",
+          "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+        },
+        {
+          "path": "src/bbexec.c",
+          "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+        },
+        {
+          "path": "src/bbeval.c",
+          "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+        },
+        {
+          "path": "licence.txt",
+          "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+        },
+        {
+          "path": "bin/wasm/BBC.h",
+          "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+        },
+        {
+          "path": "src/bbdata_wasm32.c",
+          "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+        }
+      ],
+      "toolchain": {
+        "version": "3.1.64",
+        "commit": "a1fe3902bf73a3802eae0357d273d0e37ea79898",
+        "repository": "https://github.com/emscripten-core/emscripten",
+        "installerRepository": "https://github.com/emscripten-core/emsdk",
+        "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+        "notices": [
+          {
+            "source": "LICENSE",
+            "path": "wasm/licenses/EMSCRIPTEN-LICENSE.txt",
+            "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+          },
+          {
+            "source": "AUTHORS",
+            "path": "wasm/licenses/EMSCRIPTEN-AUTHORS.txt",
+            "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+          },
+          {
+            "source": "system/lib/libc/musl/COPYRIGHT",
+            "path": "wasm/licenses/MUSL-COPYRIGHT.txt",
+            "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+          },
+          {
+            "source": "system/lib/compiler-rt/LICENSE.TXT",
+            "path": "wasm/licenses/COMPILER-RT-LICENSE.txt",
+            "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+          },
+          {
+            "source": "license comments from system/lib/libc/musl/src/math and system/lib/dlmalloc.c",
+            "path": "wasm/licenses/LIBC-SOURCE-NOTICES.txt",
+            "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+          }
+        ]
+      },
+      "imports": [
+        {
+          "module": "env",
+          "name": "invoke_ii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_v",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vi",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_i",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iiiiiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_simulation_request",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_error",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_exit",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_output",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_input_event",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_read_byte",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_now_ms",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_sleep_ms",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_memcpy_js",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "emscripten_resize_heap",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_throw_longjmp",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__handle_stack_overflow",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_j",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_ji",
+          "kind": "function"
+        }
+      ],
+      "localSourceInputs": [
+        {
+          "path": "scripts/build-wasm.mjs",
+          "sha256": "220052eacf1010a16e6f5250643cbd05952536c9929c495621199bfe88715ca8"
+        },
+        {
+          "path": "upstream.lock.json",
+          "sha256": "d43e383babe40a615710a8867ed7524375dc57f1d6b4587f404e9a36d6940f35"
+        },
+        {
+          "path": "wasm/build-inputs.mjs",
+          "sha256": "606833467f420a57d7e09cb61a9b614512bc9f686fbfe37e74159b91dd4fe71f"
+        },
+        {
+          "path": "wasm/toolchain.lock.json",
+          "sha256": "dd32df49ba277e7f3a27705fa9ae830a28fd7bfb84bdefe8d5f1a0821bf9c2ef"
+        },
+        {
+          "path": "wasm/patch-upstream.mjs",
+          "sha256": "f8df8ae9b22ed1b98587989b13e5509e44ab93a329c616a963deb41318b0ab9e"
+        },
+        {
+          "path": "native/patch-upstream.mjs",
+          "sha256": "ff1b7671373f115cfefcf2ad048b54083ae1c7579943f06bce8bb8c32a66a3e8"
+        },
+        {
+          "path": "wasm/crisp-host.h",
+          "sha256": "ed4a4785f9410e40b01dc8c48a5b1cae75b6741af40ef5019a024087c205f9f7"
+        },
+        {
+          "path": "wasm/crispbasic.c",
+          "sha256": "58f92c07d73751fce2eab255b0f89bb0eaacbc81a26588f41b295e998687f2a4"
+        },
+        {
+          "path": "wasm/emscripten-host.c",
+          "sha256": "3ca91c0cd19ee998bf287d0acadbfe3e8f22c6e248ad03d4513c6dd2777edc7d"
+        }
+      ],
+      "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+      "wasmSha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2"
+    }
+  },
+  "summary": {
+    "fixturesPerTarget": 4,
+    "targets": 2,
+    "coldBootsPerFixture": 2,
+    "executions": 16,
+    "passed": 16,
+    "failed": 0,
+    "hardware": "not-run",
+    "circuitPhysics": false
+  },
+  "reports": {
+    "arduino-uno": {
+      "schemaVersion": 2,
+      "target": "arduino-uno",
+      "fixtures": [
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/pins.bas",
+          "sourceSha256": "0262019990d4d3010d1ba4b7f3626b0b53a43fa8439fe4df9f580fa99e2f9c50",
+          "generatedCSha256": "d41b0598bb3818e8b253292922dbb0fcebcd52b1421599d4ddb97461e3bcd27d",
+          "target": "arduino-uno",
+          "build": {
+            "schemaVersion": 1,
+            "target": "arduino-uno",
+            "toolchain": "avr-gcc",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-pins.hex",
+                "bytes": 21041,
+                "sha256": "61e32f0ad959ee4668c858a5278fbfb3200d2feea9cf94f1d61e404246284b9c",
+                "format": "ihex"
+              },
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-pins.elf",
+                "bytes": 31508,
+                "sha256": "f08bdfd19a863b639f9d0379cecc85318b41fd61e88dc320ce0e2d74be03306b",
+                "format": "elf"
+              }
+            ],
+            "resources": {
+              "flashBytes": 7472,
+              "staticRamBytes": 396,
+              "flashLimitBytes": 32256,
+              "staticRamLimitBytes": 1536,
+              "reservedStackBytes": 512,
+              "numericFormat": "binary64"
+            },
+            "commands": [
+              {
+                "executable": "avr-gcc",
+                "args": [
+                  "-std=c99",
+                  "-Os",
+                  "-mmcu=atmega328p",
+                  "-DF_CPU=16000000UL",
+                  "-mdouble=64",
+                  "-mlong-double=64",
+                  "-ffunction-sections",
+                  "-fdata-sections",
+                  "program.c",
+                  "-Wl,--gc-sections",
+                  "-Wl,-u,vfprintf",
+                  "-lprintf_flt",
+                  "-lm",
+                  "-o",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-size",
+                "args": [
+                  "-A",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-objcopy",
+                "args": [
+                  "-O",
+                  "ihex",
+                  "-R",
+                  ".eeprom",
+                  "program.elf",
+                  "program.hex"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [
+              {
+                "sequence": 1,
+                "atMs": 0,
+                "type": "pin-mode",
+                "pin": 13,
+                "mode": "output"
+              },
+              {
+                "sequence": 2,
+                "atMs": 0,
+                "type": "digital-write",
+                "pin": 13,
+                "value": 1
+              },
+              {
+                "sequence": 3,
+                "atMs": 10,
+                "type": "delay",
+                "fromMs": 0,
+                "milliseconds": 10
+              },
+              {
+                "sequence": 4,
+                "atMs": 10,
+                "type": "digital-write",
+                "pin": 13,
+                "value": 0
+              },
+              {
+                "sequence": 5,
+                "atMs": 15,
+                "type": "delay",
+                "fromMs": 10,
+                "milliseconds": 5
+              },
+              {
+                "sequence": 6,
+                "atMs": 15,
+                "type": "digital-toggle",
+                "pin": 13,
+                "value": 1
+              }
+            ],
+            "output": "",
+            "status": "completed"
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/avr8js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-bytes"
+          },
+          "simulatorSourceHashes": {
+            "avr8js-adapter.js": "16f15a2a0111ccad27ff34dc213c21d59a70c6be93dc53430609c998ed0e3589",
+            "intel-hex.js": "625efa84278ae2e3ba629ec22939d051de223313eeb5605c1f1639fcc0ea3fa5"
+          },
+          "coldBoots": [
+            {
+              "pin": "D13",
+              "edges": [
+                {
+                  "atMs": 0.663313,
+                  "value": 0
+                },
+                {
+                  "atMs": 1.527813,
+                  "value": 1
+                },
+                {
+                  "atMs": 11.866313,
+                  "value": 0
+                },
+                {
+                  "atMs": 17.6475,
+                  "value": 1
+                }
+              ],
+              "authoredEdges": [
+                {
+                  "atMs": 1.527813,
+                  "value": 1
+                },
+                {
+                  "atMs": 11.866313,
+                  "value": 0
+                },
+                {
+                  "atMs": 17.6475,
+                  "value": 1
+                }
+              ],
+              "intervals": [
+                {
+                  "expectedMs": 10,
+                  "observedMs": 10.3385,
+                  "errorMs": 0.3384999999999998
+                },
+                {
+                  "expectedMs": 5,
+                  "observedMs": 5.781187000000001,
+                  "errorMs": 0.781187000000001
+                }
+              ],
+              "output": "",
+              "simulatedMs": 100.000313,
+              "stats": {
+                "pinChangeCount": 44,
+                "advanceToCount": 100,
+                "adcReadCount": 0,
+                "instructions": 867578,
+                "sleptCycles": 0
+              }
+            },
+            {
+              "pin": "D13",
+              "edges": [
+                {
+                  "atMs": 0.663313,
+                  "value": 0
+                },
+                {
+                  "atMs": 1.527813,
+                  "value": 1
+                },
+                {
+                  "atMs": 11.866313,
+                  "value": 0
+                },
+                {
+                  "atMs": 17.6475,
+                  "value": 1
+                }
+              ],
+              "authoredEdges": [
+                {
+                  "atMs": 1.527813,
+                  "value": 1
+                },
+                {
+                  "atMs": 11.866313,
+                  "value": 0
+                },
+                {
+                  "atMs": 17.6475,
+                  "value": 1
+                }
+              ],
+              "intervals": [
+                {
+                  "expectedMs": 10,
+                  "observedMs": 10.3385,
+                  "errorMs": 0.3384999999999998
+                },
+                {
+                  "expectedMs": 5,
+                  "observedMs": 5.781187000000001,
+                  "errorMs": 0.781187000000001
+                }
+              ],
+              "output": "",
+              "simulatedMs": 100.000313,
+              "stats": {
+                "pinChangeCount": 44,
+                "advanceToCount": 100,
+                "adcReadCount": 0,
+                "instructions": 867578,
+                "sleptCycles": 0
+              }
+            }
+          ]
+        },
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/console.bas",
+          "sourceSha256": "5352a70d796ff9785ac51293bdfc4e77c39b49305cf077a1f0e3bf5f712820a7",
+          "generatedCSha256": "ada7bd35bd37c65968baf1bf1df393258d095a162a13a0893af51dae1170a3a9",
+          "target": "arduino-uno",
+          "build": {
+            "schemaVersion": 1,
+            "target": "arduino-uno",
+            "toolchain": "avr-gcc",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-console.hex",
+                "bytes": 68381,
+                "sha256": "0789cf5329b8c7954172b8d0ed37fb61e6eb6ae34175a39c432dd72e55c1d2bd",
+                "format": "ihex"
+              },
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-console.elf",
+                "bytes": 69232,
+                "sha256": "cf45b5d6f5c884c59f1cefe918140770c56a9396fe2ab1fb5903088889809619",
+                "format": "elf"
+              }
+            ],
+            "resources": {
+              "flashBytes": 24304,
+              "staticRamBytes": 646,
+              "flashLimitBytes": 32256,
+              "staticRamLimitBytes": 1536,
+              "reservedStackBytes": 512,
+              "numericFormat": "binary64"
+            },
+            "commands": [
+              {
+                "executable": "avr-gcc",
+                "args": [
+                  "-std=c99",
+                  "-Os",
+                  "-mmcu=atmega328p",
+                  "-DF_CPU=16000000UL",
+                  "-mdouble=64",
+                  "-mlong-double=64",
+                  "-ffunction-sections",
+                  "-fdata-sections",
+                  "program.c",
+                  "-Wl,--gc-sections",
+                  "-Wl,-u,vfprintf",
+                  "-lprintf_flt",
+                  "-lm",
+                  "-o",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-size",
+                "args": [
+                  "-A",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-objcopy",
+                "args": [
+                  "-O",
+                  "ihex",
+                  "-R",
+                  ".eeprom",
+                  "program.elf",
+                  "program.hex"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [],
+            "output": "board console\r\n     12345\r\n      1.25\r\n      11.5\r\nstrck\r\ndone\r\n",
+            "status": "completed"
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/avr8js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-bytes"
+          },
+          "simulatorSourceHashes": {
+            "avr8js-adapter.js": "16f15a2a0111ccad27ff34dc213c21d59a70c6be93dc53430609c998ed0e3589",
+            "intel-hex.js": "625efa84278ae2e3ba629ec22939d051de223313eeb5605c1f1639fcc0ea3fa5"
+          },
+          "coldBoots": [
+            {
+              "pin": "D13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "board console\r\n     12345\r\n      1.25\r\n      11.5\r\nstrck\r\ndone\r\n",
+              "simulatedMs": 100.002688,
+              "stats": {
+                "pinChangeCount": 20,
+                "advanceToCount": 100,
+                "adcReadCount": 0,
+                "instructions": 918262,
+                "sleptCycles": 0
+              }
+            },
+            {
+              "pin": "D13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "board console\r\n     12345\r\n      1.25\r\n      11.5\r\nstrck\r\ndone\r\n",
+              "simulatedMs": 100.002688,
+              "stats": {
+                "pinChangeCount": 20,
+                "advanceToCount": 100,
+                "adcReadCount": 0,
+                "instructions": 918262,
+                "sleptCycles": 0
+              }
+            }
+          ]
+        },
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/decimal.bas",
+          "sourceSha256": "75bcfacd631e40302ae9de71ad467df68ac3367166413a44b424b985f8e6c4cf",
+          "generatedCSha256": "4c5da98613d52162c4ff0ffe615507009163f3b57227f932f34880092c6011f6",
+          "target": "arduino-uno",
+          "build": {
+            "schemaVersion": 1,
+            "target": "arduino-uno",
+            "toolchain": "avr-gcc",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-decimal.hex",
+                "bytes": 47722,
+                "sha256": "a268b41901f366fbf2ba9149fdb71913527ced1b99d134a909a5f7ba583b1f1e",
+                "format": "ihex"
+              },
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-decimal.elf",
+                "bytes": 49532,
+                "sha256": "1cfbf72efc196053152fb7ddd900ba13f5ea852e8f8984f7c041162da0d926b8",
+                "format": "elf"
+              }
+            ],
+            "resources": {
+              "flashBytes": 16958,
+              "staticRamBytes": 574,
+              "flashLimitBytes": 32256,
+              "staticRamLimitBytes": 1536,
+              "reservedStackBytes": 512,
+              "numericFormat": "binary64"
+            },
+            "commands": [
+              {
+                "executable": "avr-gcc",
+                "args": [
+                  "-std=c99",
+                  "-Os",
+                  "-mmcu=atmega328p",
+                  "-DF_CPU=16000000UL",
+                  "-mdouble=64",
+                  "-mlong-double=64",
+                  "-ffunction-sections",
+                  "-fdata-sections",
+                  "program.c",
+                  "-Wl,--gc-sections",
+                  "-Wl,-u,vfprintf",
+                  "-lprintf_flt",
+                  "-lm",
+                  "-o",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-size",
+                "args": [
+                  "-A",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-objcopy",
+                "args": [
+                  "-O",
+                  "ihex",
+                  "-R",
+                  ".eeprom",
+                  "program.elf",
+                  "program.hex"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [],
+            "output": "   1.7E308\r\n    1E-308\r\n4.94065646E-324\r\n4.94065646E-324\r\n4.94065646E-324\r\n        -0\r\n1.23456788\r\n       1E9\r\n    0.0001\r\n         0\r\n        -1\r\n      -125\r\ndone\r\n",
+            "status": "completed"
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/avr8js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-bytes"
+          },
+          "simulatorSourceHashes": {
+            "avr8js-adapter.js": "16f15a2a0111ccad27ff34dc213c21d59a70c6be93dc53430609c998ed0e3589",
+            "intel-hex.js": "625efa84278ae2e3ba629ec22939d051de223313eeb5605c1f1639fcc0ea3fa5"
+          },
+          "coldBoots": [
+            {
+              "pin": "D13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "   1.7E308\r\n    1E-308\r\n4.94065646E-324\r\n4.94065646E-324\r\n4.94065646E-324\r\n        -0\r\n1.23456788\r\n       1E9\r\n    0.0001\r\n         0\r\n        -1\r\n      -125\r\ndone\r\n",
+              "simulatedMs": 508.014125,
+              "stats": {
+                "pinChangeCount": 20,
+                "advanceToCount": 508,
+                "adcReadCount": 0,
+                "instructions": 5353113,
+                "sleptCycles": 0
+              }
+            },
+            {
+              "pin": "D13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "   1.7E308\r\n    1E-308\r\n4.94065646E-324\r\n4.94065646E-324\r\n4.94065646E-324\r\n        -0\r\n1.23456788\r\n       1E9\r\n    0.0001\r\n         0\r\n        -1\r\n      -125\r\ndone\r\n",
+              "simulatedMs": 508.014125,
+              "stats": {
+                "pinChangeCount": 20,
+                "advanceToCount": 508,
+                "adcReadCount": 0,
+                "instructions": 5353113,
+                "sleptCycles": 0
+              }
+            }
+          ]
+        },
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/overflow.bas",
+          "sourceSha256": "4535d9f30fd47c00179bb7b291b47f0defe4db597dc2be092f612705178a9e32",
+          "generatedCSha256": "c01cda668ad6f7ff55e31d7124eee81fe7e4004f84ca9855480d1edd627ad6fc",
+          "target": "arduino-uno",
+          "build": {
+            "schemaVersion": 1,
+            "target": "arduino-uno",
+            "toolchain": "avr-gcc",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-overflow.hex",
+                "bytes": 37765,
+                "sha256": "6d28adc433fc18c0fcae6e6706ee13c63c9bed084096dd6ff33570906e32af17",
+                "format": "ihex"
+              },
+              {
+                "path": ".build/compiler-board-proof/arduino-uno-overflow.elf",
+                "bytes": 42776,
+                "sha256": "48d0d8e99a8decd58c787951c088f6aecc82b7ef6e23afeb45e949d92ad79360",
+                "format": "elf"
+              }
+            ],
+            "resources": {
+              "flashBytes": 13416,
+              "staticRamBytes": 380,
+              "flashLimitBytes": 32256,
+              "staticRamLimitBytes": 1536,
+              "reservedStackBytes": 512,
+              "numericFormat": "binary64"
+            },
+            "commands": [
+              {
+                "executable": "avr-gcc",
+                "args": [
+                  "-std=c99",
+                  "-Os",
+                  "-mmcu=atmega328p",
+                  "-DF_CPU=16000000UL",
+                  "-mdouble=64",
+                  "-mlong-double=64",
+                  "-ffunction-sections",
+                  "-fdata-sections",
+                  "program.c",
+                  "-Wl,--gc-sections",
+                  "-Wl,-u,vfprintf",
+                  "-lprintf_flt",
+                  "-lm",
+                  "-o",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-size",
+                "args": [
+                  "-A",
+                  "program.elf"
+                ]
+              },
+              {
+                "executable": "avr-objcopy",
+                "args": [
+                  "-O",
+                  "ihex",
+                  "-R",
+                  ".eeprom",
+                  "program.elf",
+                  "program.hex"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [],
+            "output": "before overflow\r\n",
+            "status": "error",
+            "error": {
+              "code": 20,
+              "message": "Number too big",
+              "basicLine": 3,
+              "kind": "basic",
+              "line": 3,
+              "filename": "overflow.bas"
+            }
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/avr8js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-prefix-and-runtime-error"
+          },
+          "simulatorSourceHashes": {
+            "avr8js-adapter.js": "16f15a2a0111ccad27ff34dc213c21d59a70c6be93dc53430609c998ed0e3589",
+            "intel-hex.js": "625efa84278ae2e3ba629ec22939d051de223313eeb5605c1f1639fcc0ea3fa5"
+          },
+          "coldBoots": [
+            {
+              "pin": "D13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "before overflow\r\nBASIC line 3: numeric overflow or domain error\n",
+              "programOutput": "before overflow\r\n",
+              "runtimeDiagnostic": "BASIC line 3: numeric overflow or domain error\n",
+              "simulatedMs": 100.003563,
+              "stats": {
+                "pinChangeCount": 20,
+                "advanceToCount": 100,
+                "adcReadCount": 0,
+                "instructions": 909270,
+                "sleptCycles": 0
+              }
+            },
+            {
+              "pin": "D13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "before overflow\r\nBASIC line 3: numeric overflow or domain error\n",
+              "programOutput": "before overflow\r\n",
+              "runtimeDiagnostic": "BASIC line 3: numeric overflow or domain error\n",
+              "simulatedMs": 100.003563,
+              "stats": {
+                "pinChangeCount": 20,
+                "advanceToCount": 100,
+                "adcReadCount": 0,
+                "instructions": 909270,
+                "sleptCycles": 0
+              }
+            }
+          ]
+        }
+      ],
+      "validation": {
+        "status": "simulator-pin-trace-passed",
+        "simulator": "Brickwright/avr8js",
+        "hardware": "not-run",
+        "circuitPhysics": false,
+        "fixtures": 4,
+        "coldBootsPerFixture": 2,
+        "timingToleranceMs": 1
+      }
+    },
+    "pico": {
+      "schemaVersion": 2,
+      "target": "pico",
+      "fixtures": [
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/pins.bas",
+          "sourceSha256": "0262019990d4d3010d1ba4b7f3626b0b53a43fa8439fe4df9f580fa99e2f9c50",
+          "generatedCSha256": "a4c168284e4988a97902c0e39bed07abdcc63dc7a574ab358255a0f52b02f419",
+          "target": "pico",
+          "build": {
+            "schemaVersion": 1,
+            "target": "pico",
+            "toolchain": "pico-sdk",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/pico-pins.uf2",
+                "bytes": 82944,
+                "sha256": "98bc62f4f5df08178501f92fb63805da0dec522b23ae6668685edd6cc1e51718",
+                "format": "uf2"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-pins.elf",
+                "bytes": 603360,
+                "sha256": "66d9bc4182c7ee472524f76c2f095d8acb23a083aadbc0886aff1f8082a392e0",
+                "format": "elf"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-pins.bin",
+                "bytes": 41448,
+                "sha256": "6bf802e109ff19be5b9d69240f34f215cae4e8315fe3f2b77ad28c121d602168",
+                "format": "bin"
+              }
+            ],
+            "commands": [
+              {
+                "executable": "cmake",
+                "args": [
+                  "-S",
+                  ".",
+                  "-B",
+                  "build",
+                  "-DPICO_SDK_PATH=<WORKSPACE>/toolchains/pico-sdk",
+                  "-DPICO_BOARD=pico",
+                  "-DPICO_PLATFORM=rp2040",
+                  "-DPICO_SDK_FETCH_FROM_GIT=OFF",
+                  "-DCMAKE_BUILD_TYPE=MinSizeRel"
+                ]
+              },
+              {
+                "executable": "cmake",
+                "args": [
+                  "--build",
+                  "build",
+                  "--parallel",
+                  "2"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [
+              {
+                "sequence": 1,
+                "atMs": 0,
+                "type": "pin-mode",
+                "pin": 13,
+                "mode": "output"
+              },
+              {
+                "sequence": 2,
+                "atMs": 0,
+                "type": "digital-write",
+                "pin": 13,
+                "value": 1
+              },
+              {
+                "sequence": 3,
+                "atMs": 10,
+                "type": "delay",
+                "fromMs": 0,
+                "milliseconds": 10
+              },
+              {
+                "sequence": 4,
+                "atMs": 10,
+                "type": "digital-write",
+                "pin": 13,
+                "value": 0
+              },
+              {
+                "sequence": 5,
+                "atMs": 15,
+                "type": "delay",
+                "fromMs": 10,
+                "milliseconds": 5
+              },
+              {
+                "sequence": 6,
+                "atMs": 15,
+                "type": "digital-toggle",
+                "pin": 13,
+                "value": 1
+              }
+            ],
+            "output": "",
+            "status": "completed"
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/rp2040js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-bytes"
+          },
+          "simulatorSourceHashes": {
+            "rp2040js-adapter.js": "78e0321b04421dd544209311d229a4e9a06369b1f681c0b0ebbfa4d49a59b7d2",
+            "uf2.js": "9743cf378e7ff1163ba69b5f90566a191f490b1028372ac8807f73c828551fc4"
+          },
+          "coldBoots": [
+            {
+              "pin": "GP13",
+              "edges": [
+                {
+                  "atMs": 0.241728,
+                  "value": 0
+                },
+                {
+                  "atMs": 0.261464,
+                  "value": 1
+                },
+                {
+                  "atMs": 10.288696,
+                  "value": 0
+                },
+                {
+                  "atMs": 15.307912,
+                  "value": 1
+                }
+              ],
+              "authoredEdges": [
+                {
+                  "atMs": 0.261464,
+                  "value": 1
+                },
+                {
+                  "atMs": 10.288696,
+                  "value": 0
+                },
+                {
+                  "atMs": 15.307912,
+                  "value": 1
+                }
+              ],
+              "intervals": [
+                {
+                  "expectedMs": 10,
+                  "observedMs": 10.027232,
+                  "errorMs": 0.0272319999999997
+                },
+                {
+                  "expectedMs": 5,
+                  "observedMs": 5.019216,
+                  "errorMs": 0.019216000000000122
+                }
+              ],
+              "output": "",
+              "simulatedMs": 100.00068,
+              "stats": {
+                "pinChangeCount": 38,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            },
+            {
+              "pin": "GP13",
+              "edges": [
+                {
+                  "atMs": 0.241728,
+                  "value": 0
+                },
+                {
+                  "atMs": 0.261464,
+                  "value": 1
+                },
+                {
+                  "atMs": 10.288696,
+                  "value": 0
+                },
+                {
+                  "atMs": 15.307912,
+                  "value": 1
+                }
+              ],
+              "authoredEdges": [
+                {
+                  "atMs": 0.261464,
+                  "value": 1
+                },
+                {
+                  "atMs": 10.288696,
+                  "value": 0
+                },
+                {
+                  "atMs": 15.307912,
+                  "value": 1
+                }
+              ],
+              "intervals": [
+                {
+                  "expectedMs": 10,
+                  "observedMs": 10.027232,
+                  "errorMs": 0.0272319999999997
+                },
+                {
+                  "expectedMs": 5,
+                  "observedMs": 5.019216,
+                  "errorMs": 0.019216000000000122
+                }
+              ],
+              "output": "",
+              "simulatedMs": 100.00068,
+              "stats": {
+                "pinChangeCount": 38,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            }
+          ]
+        },
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/console.bas",
+          "sourceSha256": "5352a70d796ff9785ac51293bdfc4e77c39b49305cf077a1f0e3bf5f712820a7",
+          "generatedCSha256": "97c2a35512ab92b73b5c2621504a60d4142a481180ee3d3029b7a7a54575e5de",
+          "target": "pico",
+          "build": {
+            "schemaVersion": 1,
+            "target": "pico",
+            "toolchain": "pico-sdk",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/pico-console.uf2",
+                "bytes": 133120,
+                "sha256": "7607b931df544dfd8a5b09b08fbda187d226f6c2f9a8c73785e313e89be04fc6",
+                "format": "uf2"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-console.elf",
+                "bytes": 774912,
+                "sha256": "d45c1276828c17d9ff4ba1ef82cbe3fea69d2406e382f78fdf21c20689e3254c",
+                "format": "elf"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-console.bin",
+                "bytes": 66432,
+                "sha256": "207467b13d2ed7f06fd642c65eccea15079bffcdb8821045544bd2b992853123",
+                "format": "bin"
+              }
+            ],
+            "commands": [
+              {
+                "executable": "cmake",
+                "args": [
+                  "-S",
+                  ".",
+                  "-B",
+                  "build",
+                  "-DPICO_SDK_PATH=<WORKSPACE>/toolchains/pico-sdk",
+                  "-DPICO_BOARD=pico",
+                  "-DPICO_PLATFORM=rp2040",
+                  "-DPICO_SDK_FETCH_FROM_GIT=OFF",
+                  "-DCMAKE_BUILD_TYPE=MinSizeRel"
+                ]
+              },
+              {
+                "executable": "cmake",
+                "args": [
+                  "--build",
+                  "build",
+                  "--parallel",
+                  "2"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [],
+            "output": "board console\r\n     12345\r\n      1.25\r\n      11.5\r\nstrck\r\ndone\r\n",
+            "status": "completed"
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/rp2040js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-bytes"
+          },
+          "simulatorSourceHashes": {
+            "rp2040js-adapter.js": "78e0321b04421dd544209311d229a4e9a06369b1f681c0b0ebbfa4d49a59b7d2",
+            "uf2.js": "9743cf378e7ff1163ba69b5f90566a191f490b1028372ac8807f73c828551fc4"
+          },
+          "coldBoots": [
+            {
+              "pin": "GP13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "board console\r\n     12345\r\n      1.25\r\n      11.5\r\nstrck\r\ndone\r\n",
+              "simulatedMs": 100.000784,
+              "stats": {
+                "pinChangeCount": 33,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            },
+            {
+              "pin": "GP13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "board console\r\n     12345\r\n      1.25\r\n      11.5\r\nstrck\r\ndone\r\n",
+              "simulatedMs": 100.000784,
+              "stats": {
+                "pinChangeCount": 33,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            }
+          ]
+        },
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/decimal.bas",
+          "sourceSha256": "75bcfacd631e40302ae9de71ad467df68ac3367166413a44b424b985f8e6c4cf",
+          "generatedCSha256": "e6c03d2f2810c9bd057f85c5b371558841c20a17e02d868929eb8c98adde0f38",
+          "target": "pico",
+          "build": {
+            "schemaVersion": 1,
+            "target": "pico",
+            "toolchain": "pico-sdk",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/pico-decimal.uf2",
+                "bytes": 100352,
+                "sha256": "18b5567700a1fe96179bfb11cc34082af1336cc8c09410a7bf49181c3524d567",
+                "format": "uf2"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-decimal.elf",
+                "bytes": 670348,
+                "sha256": "1b858ae99fa205414ebadccc445da1c8c44375f1a01c0c8f861a5e5c22edab4c",
+                "format": "elf"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-decimal.bin",
+                "bytes": 49952,
+                "sha256": "54d28b2e5875e4c01ce64bf75c3ec77d4e2eb2012a170aa25733b9bd95cc3e56",
+                "format": "bin"
+              }
+            ],
+            "commands": [
+              {
+                "executable": "cmake",
+                "args": [
+                  "-S",
+                  ".",
+                  "-B",
+                  "build",
+                  "-DPICO_SDK_PATH=<WORKSPACE>/toolchains/pico-sdk",
+                  "-DPICO_BOARD=pico",
+                  "-DPICO_PLATFORM=rp2040",
+                  "-DPICO_SDK_FETCH_FROM_GIT=OFF",
+                  "-DCMAKE_BUILD_TYPE=MinSizeRel"
+                ]
+              },
+              {
+                "executable": "cmake",
+                "args": [
+                  "--build",
+                  "build",
+                  "--parallel",
+                  "2"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [],
+            "output": "   1.7E308\r\n    1E-308\r\n4.94065646E-324\r\n4.94065646E-324\r\n4.94065646E-324\r\n        -0\r\n1.23456788\r\n       1E9\r\n    0.0001\r\n         0\r\n        -1\r\n      -125\r\ndone\r\n",
+            "status": "completed"
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/rp2040js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-bytes"
+          },
+          "simulatorSourceHashes": {
+            "rp2040js-adapter.js": "78e0321b04421dd544209311d229a4e9a06369b1f681c0b0ebbfa4d49a59b7d2",
+            "uf2.js": "9743cf378e7ff1163ba69b5f90566a191f490b1028372ac8807f73c828551fc4"
+          },
+          "coldBoots": [
+            {
+              "pin": "GP13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "   1.7E308\r\n    1E-308\r\n4.94065646E-324\r\n4.94065646E-324\r\n4.94065646E-324\r\n        -0\r\n1.23456788\r\n       1E9\r\n    0.0001\r\n         0\r\n        -1\r\n      -125\r\ndone\r\n",
+              "simulatedMs": 100.0008,
+              "stats": {
+                "pinChangeCount": 33,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            },
+            {
+              "pin": "GP13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "   1.7E308\r\n    1E-308\r\n4.94065646E-324\r\n4.94065646E-324\r\n4.94065646E-324\r\n        -0\r\n1.23456788\r\n       1E9\r\n    0.0001\r\n         0\r\n        -1\r\n      -125\r\ndone\r\n",
+              "simulatedMs": 100.0008,
+              "stats": {
+                "pinChangeCount": 33,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            }
+          ]
+        },
+        {
+          "schemaVersion": 1,
+          "fixture": "examples/compiler/overflow.bas",
+          "sourceSha256": "4535d9f30fd47c00179bb7b291b47f0defe4db597dc2be092f612705178a9e32",
+          "generatedCSha256": "8d88ff292d75da111a49173fe8fe0c7e743c1f568b35c72b7bca1f75059e5319",
+          "target": "pico",
+          "build": {
+            "schemaVersion": 1,
+            "target": "pico",
+            "toolchain": "pico-sdk",
+            "artifacts": [
+              {
+                "path": ".build/compiler-board-proof/pico-overflow.uf2",
+                "bytes": 96256,
+                "sha256": "4503a82ceac7c35655b4a537690f08ec80b81ba9c4d4b010563cf130bc7f0427",
+                "format": "uf2"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-overflow.elf",
+                "bytes": 653184,
+                "sha256": "db3e206ba8d6cfc5a2b0add71d1984cea13499f295154881d941ea732a8f70d1",
+                "format": "elf"
+              },
+              {
+                "path": ".build/compiler-board-proof/pico-overflow.bin",
+                "bytes": 47928,
+                "sha256": "5f646cef085aae23d3c7809ed1f2bac26fbd50777cd48e1f0a8537860ce32140",
+                "format": "bin"
+              }
+            ],
+            "commands": [
+              {
+                "executable": "cmake",
+                "args": [
+                  "-S",
+                  ".",
+                  "-B",
+                  "build",
+                  "-DPICO_SDK_PATH=<WORKSPACE>/toolchains/pico-sdk",
+                  "-DPICO_BOARD=pico",
+                  "-DPICO_PLATFORM=rp2040",
+                  "-DPICO_SDK_FETCH_FROM_GIT=OFF",
+                  "-DCMAKE_BUILD_TYPE=MinSizeRel"
+                ]
+              },
+              {
+                "executable": "cmake",
+                "args": [
+                  "--build",
+                  "build",
+                  "--parallel",
+                  "2"
+                ]
+              }
+            ],
+            "validation": {
+              "status": "build-only",
+              "simulator": "not-run",
+              "hardware": "not-run"
+            }
+          },
+          "reference": {
+            "backend": "BBCSDL-WASM",
+            "trace": [],
+            "output": "before overflow\r\n",
+            "status": "error",
+            "error": {
+              "code": 20,
+              "message": "Number too big",
+              "basicLine": 3,
+              "kind": "basic",
+              "line": 3,
+              "filename": "overflow.bas"
+            }
+          },
+          "validation": {
+            "status": "simulator-pin-trace-passed",
+            "simulator": "Brickwright/rp2040js",
+            "hardware": "not-run",
+            "circuitPhysics": false,
+            "coldBoots": 2,
+            "timingToleranceMs": 1,
+            "uartComparison": "exact-prefix-and-runtime-error"
+          },
+          "simulatorSourceHashes": {
+            "rp2040js-adapter.js": "78e0321b04421dd544209311d229a4e9a06369b1f681c0b0ebbfa4d49a59b7d2",
+            "uf2.js": "9743cf378e7ff1163ba69b5f90566a191f490b1028372ac8807f73c828551fc4"
+          },
+          "coldBoots": [
+            {
+              "pin": "GP13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "before overflow\r\nBASIC line 3: numeric overflow or domain error\r\n",
+              "programOutput": "before overflow\r\n",
+              "runtimeDiagnostic": "BASIC line 3: numeric overflow or domain error\r\n",
+              "simulatedMs": 100.0008,
+              "stats": {
+                "pinChangeCount": 33,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            },
+            {
+              "pin": "GP13",
+              "edges": [],
+              "authoredEdges": [],
+              "intervals": [],
+              "output": "before overflow\r\nBASIC line 3: numeric overflow or domain error\r\n",
+              "programOutput": "before overflow\r\n",
+              "runtimeDiagnostic": "BASIC line 3: numeric overflow or domain error\r\n",
+              "simulatedMs": 100.0008,
+              "stats": {
+                "pinChangeCount": 33,
+                "advanceToCount": 100,
+                "adcReadCount": 0
+              }
+            }
+          ]
+        }
+      ],
+      "validation": {
+        "status": "simulator-pin-trace-passed",
+        "simulator": "Brickwright/rp2040js",
+        "hardware": "not-run",
+        "circuitPhysics": false,
+        "fixtures": 4,
+        "coldBootsPerFixture": 2,
+        "timingToleranceMs": 1
+      }
+    }
+  },
+  "limits": [
+    "Actual AVR and RP2040 firmware instructions ran through Brickwright MCU adapters; physical hardware was not exercised.",
+    "Successful UART bytes match the independent BBCSDL reference exactly. The deliberate overflow case compares the byte prefix and source line, preserving each runtime diagnostic wording.",
+    "Artifact SHA-256 values were verified against newly generated firmware bytes before recording. Raw binaries remain generated build outputs; this source commit retains their hashes, build commands, source fingerprints and execution receipts.",
+    "Reproduce with scripts/verify-compiler-boards.mjs --target arduino-uno or pico --fixture all and the recorded toolchains, SDK and board adapter source."
+  ]
+}

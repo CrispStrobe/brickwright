@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-compiler-differential-validation",
+  "completedAt": "2026-11-28T19:53:10.544953+00:00",
+  "testedSource": {
+    "repository": "https://github.com/CrispStrobe/crispbasic",
+    "commit": "3c54195cfc696edac2c6d9e776360bb2e9592256",
+    "tree": "822103bcd672242e92a2951fdf0d2de16d4090f3",
+    "inputs": {
+      "src/compiler/index.mjs": {
+        "sha256": "df79d13e51cca8b815861e5c7ad880af465cf3ca5ccf4399d2f82b7aa1f75adf",
+        "bytes": 45967
+      },
+      "src/compiler/runtime.mjs": {
+        "sha256": "a6544b2483167db9d7534ce8d7739508a613cfd0b72734b9260fbfa78c498887",
+        "bytes": 40781
+      },
+      "src/compiler/platform.mjs": {
+        "sha256": "4f433aab016607cee6a141c99d72f68c6f7db90c745977d4582b9eaf25d6825b",
+        "bytes": 10773
+      },
+      "src/source.mjs": {
+        "sha256": "5b48812da607a53c7d1f540afb4563e8d597dcbe817e78926cfbd8405ab5ee61",
+        "bytes": 6836
+      },
+      "tests/compiler-corpus.mjs": {
+        "sha256": "9f14b845339e242358707c029c23b2ef4469bef784d6506d59c4774b37a147a9",
+        "bytes": 8757
+      },
+      "tests/compiler-numeric-errors.mjs": {
+        "sha256": "8a4e10e46b1f75b7f7b8333e3e9b546dbb819a984691abd47dce30671e8f2404",
+        "bytes": 4950
+      },
+      "tests/compiler-for-runner.mjs": {
+        "sha256": "bb3b3cdbec39d141a5422e6e453caeb8b29e8bba9e400653ce7be9fa826fdb04",
+        "bytes": 3464
+      },
+      "tests/compiler-for.test.mjs": {
+        "sha256": "8db12645128827e395e293c57e59f28c7daa7958290441fa67a815e7ce25a5ff",
+        "bytes": 405
+      },
+      "tests/compiler-regressions.test.mjs": {
+        "sha256": "ad8f8158702b2c8941b09ba7c13baa54b5c35c50493b3034479ab08492d5f76d",
+        "bytes": 10041
+      },
+      "tests/compiler-parity-runner.mjs": {
+        "sha256": "9c017fe2274d5de2f60680804b5e63cd96bd32a498ba8cf66a9c53db23fe71f6",
+        "bytes": 2764
+      },
+      "tests/compiler-regression-helpers.mjs": {
+        "sha256": "d05e252a85e45ed080c5887302e9abb3e2f7b8c386f443e323b4d84f4efe022e",
+        "bytes": 1392
+      },
+      "tests/compiler-wasm-parity.test.mjs": {
+        "sha256": "832699f4e966cc3f266ddc604ae52c8f7cfcdbdeaf26370ef7cae923b721e263",
+        "bytes": 245
+      },
+      "tests/compiler-wasm-regressions.test.mjs": {
+        "sha256": "61eec1e9a98a350953244b8e106ab52a3b36b236fbaa21ee2a510202d5cb9e35",
+        "bytes": 1385
+      },
+      "upstream.lock.json": {
+        "sha256": "d43e383babe40a615710a8867ed7524375dc57f1d6b4587f404e9a36d6940f35",
+        "bytes": 2407
+      }
+    }
+  },
+  "referenceSource": {
+    "repository": "https://github.com/rtrussell/BBCSDL",
+    "commit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "license": "Zlib",
+    "interpreterIsIndependentOfCompiler": true
+  },
+  "changesQualified": [
+    "Native AArch64 real-to-integer expression conversion and binary64 negative-zero STEP behavior",
+    "Reserved BASIC keywords and delimiter/parenthesis boundaries without accepting unsupported statements as variable names",
+    "Native ARMv7 real-to-integer assignments and negative shift counts, expressed with defined C operations"
+  ],
+  "sharedCorpusPrograms": 29,
+  "summary": {
+    "testExecutions": 347,
+    "passed": 347,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "runs": [
+    {
+      "name": "Compiler core, CLI, target and decimal tests",
+      "command": "npm run test:compiler",
+      "profileOrTarget": "linux-x64",
+      "results": {
+        "tests": 33,
+        "pass": 33,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": {
+        "path": "validation/compiler-reconciliation-20261128/compiler-core.log",
+        "sha256": "7a026aaca3d5069fce551488f002e5752a305d57f6f4db75a292a0fc5afeda06",
+        "bytes": 3366
+      },
+      "execution": {
+        "generatedPrograms": "real x86-64 native executables compiled by GCC",
+        "reference": "core/CLI/contracts and independent host decimal formatter comparisons"
+      }
+    },
+    {
+      "name": "Native x64 differential/regression tests",
+      "command": "npm run test:compiler:parity",
+      "profileOrTarget": "linux-x64",
+      "results": {
+        "tests": 88,
+        "pass": 88,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": {
+        "path": "validation/compiler-reconciliation-20261128/compiler-parity.log",
+        "sha256": "e491df6f765227f99b174bb99b3001c733cbf312a77fe93872543cb95b9aa7c4",
+        "bytes": 8525
+      },
+      "execution": {
+        "generatedPrograms": "real x86-64 native executables compiled by GCC",
+        "reference": "independent BBCSDL native executable"
+      }
+    },
+    {
+      "name": "Native ARM64 differential/regression tests",
+      "command": "npm run test:compiler:parity",
+      "profileOrTarget": "linux-arm64",
+      "results": {
+        "tests": 88,
+        "pass": 88,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": {
+        "path": "validation/compiler-reconciliation-20261128/compiler-arm64-parity.log",
+        "sha256": "6b76cd4d6ae9a1b01bf411b3e8d99bc912a7aa16f22076545fc04a7ebbf70c15",
+        "bytes": 8731
+      },
+      "execution": {
+        "generatedPrograms": "real cross-compiled ELF executables through QEMU user-mode CPU emulation",
+        "reference": "independent BBCSDL ELF executable through the same CPU emulator",
+        "physicalHardware": false,
+        "compilerWrapper": "aarch64-cc-runner",
+        "referenceInterpreterSha256": "f09603319303bd36d0fd53c544a38906b5568d843620be02089cc0755572347a",
+        "cpu": "QEMU default AArch64 CPU"
+      }
+    },
+    {
+      "name": "Native ARMv7 differential/regression tests",
+      "command": "npm run test:compiler:parity",
+      "profileOrTarget": "linux-armv7",
+      "results": {
+        "tests": 88,
+        "pass": 88,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": {
+        "path": "validation/compiler-reconciliation-20261128/compiler-armv7-parity.log",
+        "sha256": "2b2a705259c95776ea6166dd9a60f0f06c5677042ca593622a5cbaa3f509675a",
+        "bytes": 8730
+      },
+      "execution": {
+        "generatedPrograms": "real cross-compiled ELF executables through QEMU user-mode CPU emulation",
+        "reference": "independent BBCSDL ELF executable through the same CPU emulator",
+        "physicalHardware": false,
+        "compilerWrapper": "armv7-cc-runner",
+        "referenceInterpreterSha256": "6314a49293c16da086aa74ce9f9686839dd58272324541cc5558f84515e2d5c2",
+        "cpu": "cortex-a7"
+      }
+    },
+    {
+      "name": "Binary64 C versus WASM differential/regression tests",
+      "command": "npm run test:compiler:wasm-parity",
+      "profileOrTarget": "binary64-wasm",
+      "results": {
+        "tests": 50,
+        "pass": 50,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": {
+        "path": "validation/compiler-reconciliation-20261128/compiler-wasm-parity.log",
+        "sha256": "c32dbfd0b15a3799792bc1d92a67a5fdf4c97b39adb97ca5c28f7d02fbcb344f",
+        "bytes": 5544
+      },
+      "execution": {
+        "generatedPrograms": "real x86-64 native executables using the explicit binary64 compiler profile",
+        "reference": "independent BBCSDL WASM interpreter in Node"
+      }
+    }
+  ],
+  "referenceBuilds": {
+    "linux-x64": {
+      "version": 1,
+      "backend": "bbcsdl-native",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "platform": "linux",
+      "architecture": "x64",
+      "target": "linux-x64",
+      "buildHost": "linux-x64",
+      "crossCompiled": false,
+      "compilerFlags": [],
+      "assemblerSource": "src/bbasmb_x86_64.c",
+      "dataSource": "src/bbdata_x86_64.nas",
+      "compiler": "gcc (Debian 14.2.0-19) 14.2.0",
+      "assembler": "NASM version 2.16.03",
+      "binarySha256": "1737b8efe981e29b2926bcc2fe94cfcc6fde02f75100845cc2e47b75a1183da1"
+    },
+    "linux-arm64": {
+      "version": 1,
+      "backend": "bbcsdl-native",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "platform": "linux",
+      "architecture": "arm64",
+      "target": "linux-arm64",
+      "buildHost": "linux-x64",
+      "crossCompiled": true,
+      "compilerFlags": [],
+      "assemblerSource": "src/bbasmb_arm_64.c",
+      "dataSource": "src/bbdata_arm_64.s",
+      "compiler": "aarch64-linux-gnu-gcc (Debian 14.2.0-19) 14.2.0",
+      "assembler": "GNU assembly via the selected C compiler",
+      "binarySha256": "f09603319303bd36d0fd53c544a38906b5568d843620be02089cc0755572347a"
+    },
+    "linux-armv7": {
+      "version": 1,
+      "backend": "bbcsdl-native",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "platform": "linux",
+      "architecture": "arm",
+      "target": "linux-armv7",
+      "buildHost": "linux-x64",
+      "crossCompiled": true,
+      "compilerFlags": [
+        "-march=armv7-a",
+        "-mthumb",
+        "-munaligned-access",
+        "-mfloat-abi=hard",
+        "-mfpu=vfpv3-d16"
+      ],
+      "assemblerSource": "src/bbasmb_arm_32.c",
+      "dataSource": "src/bbdata_arm_32.s",
+      "compiler": "arm-linux-gnueabihf-gcc (Debian 14.2.0-19) 14.2.0",
+      "assembler": "GNU assembly via the selected C compiler",
+      "binarySha256": "6314a49293c16da086aa74ce9f9686839dd58272324541cc5558f84515e2d5c2"
+    },
+    "wasm": {
+      "schemaVersion": 1,
+      "backend": "bbcsdl-wasm",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.64 (a1fe3902bf73a3802eae0357d273d0e37ea79898)",
+      "settings": [
+        "-O2",
+        "--no-entry",
+        "-sMODULARIZE=1",
+        "-sEXPORT_ES6=1",
+        "-sENVIRONMENT=web,worker,node",
+        "-sASYNCIFY=1",
+        "-sASYNCIFY_STACK_SIZE=1048576",
+        "-sSTACK_SIZE=2097152",
+        "-sINITIAL_MEMORY=67108864",
+        "-sALLOW_MEMORY_GROWTH=0",
+        "-sFILESYSTEM=0",
+        "-sDYNAMIC_EXECUTION=0",
+        "-sALLOW_TABLE_GROWTH=0",
+        "-sASSERTIONS=1",
+        "-sSTACK_OVERFLOW_CHECK=2",
+        "-sABORTING_MALLOC=0",
+        "-sEXPORTED_FUNCTIONS=[\"_crisp_run\",\"_crisp_simulation_abi\",\"_malloc\",\"_free\"]",
+        "-sEXPORTED_RUNTIME_METHODS=[\"ccall\"]"
+      ],
+      "memoryFlags": [
+        "-fno-delete-null-pointer-checks"
+      ],
+      "sourceInputs": [
+        {
+          "path": "src/bbmain.c",
+          "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+        },
+        {
+          "path": "src/bbexec.c",
+          "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+        },
+        {
+          "path": "src/bbeval.c",
+          "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+        },
+        {
+          "path": "licence.txt",
+          "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+        },
+        {
+          "path": "bin/wasm/BBC.h",
+          "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+        },
+        {
+          "path": "src/bbdata_wasm32.c",
+          "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+        }
+      ],
+      "toolchain": {
+        "version": "3.1.64",
+        "commit": "a1fe3902bf73a3802eae0357d273d0e37ea79898",
+        "repository": "https://github.com/emscripten-core/emscripten",
+        "installerRepository": "https://github.com/emscripten-core/emsdk",
+        "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+        "notices": [
+          {
+            "source": "LICENSE",
+            "path": "wasm/licenses/EMSCRIPTEN-LICENSE.txt",
+            "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+          },
+          {
+            "source": "AUTHORS",
+            "path": "wasm/licenses/EMSCRIPTEN-AUTHORS.txt",
+            "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+          },
+          {
+            "source": "system/lib/libc/musl/COPYRIGHT",
+            "path": "wasm/licenses/MUSL-COPYRIGHT.txt",
+            "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+          },
+          {
+            "source": "system/lib/compiler-rt/LICENSE.TXT",
+            "path": "wasm/licenses/COMPILER-RT-LICENSE.txt",
+            "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+          },
+          {
+            "source": "license comments from system/lib/libc/musl/src/math and system/lib/dlmalloc.c",
+            "path": "wasm/licenses/LIBC-SOURCE-NOTICES.txt",
+            "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+          }
+        ]
+      },
+      "imports": [
+        {
+          "module": "env",
+          "name": "invoke_ii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_v",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vi",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_i",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iiiiiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_simulation_request",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_error",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_exit",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_output",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_input_event",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_read_byte",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_now_ms",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_sleep_ms",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_memcpy_js",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "emscripten_resize_heap",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_throw_longjmp",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__handle_stack_overflow",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_j",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_ji",
+          "kind": "function"
+        }
+      ],
+      "localSourceInputs": [
+        {
+          "path": "scripts/build-wasm.mjs",
+          "sha256": "220052eacf1010a16e6f5250643cbd05952536c9929c495621199bfe88715ca8"
+        },
+        {
+          "path": "upstream.lock.json",
+          "sha256": "d43e383babe40a615710a8867ed7524375dc57f1d6b4587f404e9a36d6940f35"
+        },
+        {
+          "path": "wasm/build-inputs.mjs",
+          "sha256": "606833467f420a57d7e09cb61a9b614512bc9f686fbfe37e74159b91dd4fe71f"
+        },
+        {
+          "path": "wasm/toolchain.lock.json",
+          "sha256": "dd32df49ba277e7f3a27705fa9ae830a28fd7bfb84bdefe8d5f1a0821bf9c2ef"
+        },
+        {
+          "path": "wasm/patch-upstream.mjs",
+          "sha256": "f8df8ae9b22ed1b98587989b13e5509e44ab93a329c616a963deb41318b0ab9e"
+        },
+        {
+          "path": "native/patch-upstream.mjs",
+          "sha256": "ff1b7671373f115cfefcf2ad048b54083ae1c7579943f06bce8bb8c32a66a3e8"
+        },
+        {
+          "path": "wasm/crisp-host.h",
+          "sha256": "ed4a4785f9410e40b01dc8c48a5b1cae75b6741af40ef5019a024087c205f9f7"
+        },
+        {
+          "path": "wasm/crispbasic.c",
+          "sha256": "58f92c07d73751fce2eab255b0f89bb0eaacbc81a26588f41b295e998687f2a4"
+        },
+        {
+          "path": "wasm/emscripten-host.c",
+          "sha256": "3ca91c0cd19ee998bf287d0acadbfe3e8f22c6e248ad03d4513c6dd2777edc7d"
+        }
+      ],
+      "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+      "wasmSha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2"
+    }
+  },
+  "wasmArtifacts": {
+    "crispbasic.mjs": {
+      "sha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+      "bytes": 43705
+    },
+    "crispbasic.wasm": {
+      "sha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2",
+      "bytes": 216288
+    },
+    "build.json": {
+      "sha256": "be18956e4d51754038da2308b393ac372d66d490bb67c7080f26bf4f2c5da6a9",
+      "bytes": 6797
+    }
+  },
+  "toolExecutableHashes": {
+    "/usr/bin/gcc": {
+      "sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+      "bytes": 1162264
+    },
+    "/workspace/scratch/3cdb117b9e13/toolchains/root/usr/bin/aarch64-linux-gnu-gcc": {
+      "sha256": "fb743ca27a77466c91da66047eec879a615993feaabd860aaf3750e7b222b131",
+      "bytes": 1899904
+    },
+    "/workspace/scratch/3cdb117b9e13/toolchains/root/usr/bin/arm-linux-gnueabihf-gcc": {
+      "sha256": "c502a6d1d3e6105b02d1737dca36d4194984934fef5a19d298e1e06aee5da5a8",
+      "bytes": 2063744
+    },
+    "/workspace/scratch/3cdb117b9e13/toolchains/root/usr/bin/qemu-aarch64": {
+      "sha256": "73cc2584f119f9e74c85c0a8549dbb6fd104ae3897a06a7500797f9e5b4d0943",
+      "bytes": 16661520
+    },
+    "/workspace/scratch/3cdb117b9e13/toolchains/root/usr/bin/qemu-arm": {
+      "sha256": "94f4d938a299230026c759b348a5c8f8eaf05969ee5d7a6819598de8c6d342bb",
+      "bytes": 14674352
+    },
+    "/workspace/scratch/3cdb117b9e13/toolchains/nasm/usr/bin/nasm": {
+      "sha256": "b0e9b463a6f800117de60c0a55507b7880dfa0d4dbf15f47e1350e23c54c0128",
+      "bytes": 1948336
+    }
+  },
+  "toolVersions": {
+    "hostGcc": "gcc (Debian 14.2.0-19) 14.2.0",
+    "aarch64Gcc": "aarch64-linux-gnu-gcc (Debian 14.2.0-19) 14.2.0",
+    "armv7Gcc": "arm-linux-gnueabihf-gcc (Debian 14.2.0-19) 14.2.0",
+    "qemu": "10.0.13 (Debian 1:10.0.13+ds-0+deb13u1)",
+    "nasm": "2.16.03",
+    "emscripten": "3.1.64",
+    "node": "v24.22.3"
+  },
+  "crossCompilerWrappers": {
+    "aarch64-cc": {
+      "path": "validation/compiler-reconciliation-20261128/aarch64-cc.py",
+      "sha256": "2757abf3d8adec3fbec24f2d591848fd19faf21afc6449b1c296ab2a47dea0d2",
+      "bytes": 277
+    },
+    "aarch64-cc-runner": {
+      "path": "validation/compiler-reconciliation-20261128/aarch64-cc-runner.py",
+      "sha256": "64c1b96498f32093e7458e00be9964c039df1e7e73d4fc7f45e733165d5ee635",
+      "bytes": 686
+    },
+    "armv7-cc": {
+      "path": "validation/compiler-reconciliation-20261128/armv7-cc.py",
+      "sha256": "2e6ec34b6cba4e80277d48e9f61f3b2ce4e176ccce7dcecbac1c69420e496f2c",
+      "bytes": 281
+    },
+    "armv7-cc-runner": {
+      "path": "validation/compiler-reconciliation-20261128/armv7-cc-runner.py",
+      "sha256": "cd147f50123eedee7aef712beb0453900cc36f594c354ff54e331e6c8afa0008",
+      "bytes": 699
+    }
+  },
+  "reproductionNotes": [
+    "Cross compiler wrappers invoke unmodified GCC on the generated C, retain its output as a real ELF under a .aarch64-elf or .armv7-elf suffix, and place a QEMU exec launcher at the path the current test harness executes. They do not transform generated C or substitute expected output.",
+    "Set CRISP_BASIC_C99_CC to the corresponding runner wrapper; CRISP_BASIC_TEST_NATIVE_TARGET to linux-arm64 or linux-armv7; CRISP_BASIC_TEST_NATIVE_EXECUTABLE to the actual target BBCSDL executable; and CRISP_BASIC_TEST_NATIVE_RUNNER to JSON with the QEMU executable and sysroot arguments shown in the wrapper. Wrapper paths describe this observed environment and must be adjusted when reproducing elsewhere.",
+    "The native-bbcsdl C profile is selected by the actual target GCC architecture; the WASM comparison explicitly selects binary64. No architecture macro is faked for these runs.",
+    "This receipt records fresh local execution, not a claim about queued or completed GitHub Actions checks."
+  ],
+  "artifactRetention": {
+    "rawLogs": "committed in validation/compiler-reconciliation-20261128",
+    "crossCompilerWrappers": "committed with the exact sources used for these runs",
+    "generatedProgramArtifacts": "Per-test generated C and executables were temporary files removed by the test harness. No fabricated artifact hashes are supplied. Tests regenerate them from the committed source corpus.",
+    "interpreterArtifacts": "Actual locally built interpreter hashes and build manifests are recorded above; the binaries are not committed in this change."
+  },
+  "limits": [
+    "ARM64 and ARMv7 results are QEMU CPU execution, not physical hardware tests.",
+    "This is compiler validation; it does not rerun the bundler, browser host, AVR MCU, or Pico MCU suites.",
+    "Corpus agreement establishes observed behavior for these tests, not equivalence for all possible BBC BASIC programs.",
+    "Only permitted BBCSDL source was studied for reference semantics; no ABC, !BBC_C or other proprietary compiler was studied or copied."
+  ]
+}

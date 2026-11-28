@@ -24,6 +24,9 @@ const writeError = text => { if (!closedStreams.has(process.stderr)) process.std
 const HELP = `CrispBASIC ${VERSION} — BBC BASIC-compatible runtime
 
 Usage: crispbasic [options] program.bas
+       crispbasic bundle program.bas [--target linux-x64|linux-arm64|linux-armv7|web]
+       crispbasic compile program.bas [--target native|pico|arduino-uno] [--emit-c]
+       crispbasic serve program.html [--port 8080]
        crispbasic --list-targets
        crispbasic --backend wasm --target NAME [--simulation FILE] program.bas
        crispbasic [--backend native|wasm] [--target NAME] [--simulation FILE] --capabilities
@@ -67,6 +70,21 @@ const EXIT = {completed: 0, error: 1, 'host-error': 1, timeout: 124,
     'output-limit': 125, 'simulation-limit': 125, cancelled: 130};
 
 async function main() {
+    const args = process.argv.slice(2);
+    if (args[0] === 'serve') {
+        const {runServeCli} = await import('../src/serve-bundle.mjs');
+        return runServeCli(args.slice(1), {writeOut, onServer: server => {
+            activeSession = {cancel: () => { void server.close(); }};
+        }});
+    }
+    if (args[0] === 'bundle') {
+        const {runBundleCli} = await import('../src/bundle-cli.mjs');
+        return runBundleCli(args.slice(1), {writeOut, writeError});
+    }
+    if (args[0] === 'compile') {
+        const {runCompileCli} = await import('../src/compile-cli.mjs');
+        return runCompileCli(args.slice(1), {writeOut, writeError});
+    }
     const {values, positionals, tokens} = parseArgs({
         options: {
             backend: {type: 'string'}, capabilities: {type: 'boolean'}, simulation: {type: 'string'},

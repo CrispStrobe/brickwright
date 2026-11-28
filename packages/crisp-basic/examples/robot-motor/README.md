@@ -87,7 +87,7 @@ the authenticated WASM interpreter following the [CrispBASIC package
 README](../../README.md), then run:
 
 ```sh
-node --test packages/crisp-basic/tests/robot-motor.test.mjs
+node --test test/crispbasic-package-robot-motor.test.mjs
 ```
 
 The test loads this exact saved JSON through `Circuit.fromJSON`, runs this exact

@@ -1,0 +1,46 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @crispstrobe/crispbasic@0.1.0-dev.8 test:compiler
+> node --test tests/compiler.test.mjs tests/compiler-cli.test.mjs tests/compiler-targets.test.mjs tests/compiler-decimal.test.mjs
+
+✔ compile CLI emits self-contained C99 and gcc executable with a truthful build receipt (368.61035ms)
+✔ emit-c needs no toolchain and retains the requested target platform (182.043676ms)
+✔ compiler refusal reports physical and BASIC source lines before writing outputs (136.090408ms)
+✔ toolchain failure cannot produce a successful receipt (108.329015ms)
+✔ compiler CLI prevents source replacement and rejects unknown target/options (546.983876ms)
+✔ AVR binary64 packing and decimal formatting agree with independent host rounding (388.37707ms)
+✔ compiler target names are distinct from host-driven interpreter targets (4.248182ms)
+✔ native generated platform trace agrees with the independent logical host (150.850471ms)
+✔ native platform rejects an undriven input instead of inventing a level (199.678699ms)
+✔ missing toolchains and unsafe artifact collisions fail without a success receipt (30.851365ms)
+✔ compiler refuses EVAL with the original physical and BASIC line (11.022807ms)
+✔ compiler refuses inline assembler with the original physical and BASIC line (0.479944ms)
+✔ compiler refuses word indirection with the original physical and BASIC line (0.274624ms)
+✔ compiler refuses byte indirection with the original physical and BASIC line (0.706427ms)
+✔ compiler refuses string indirection with the original physical and BASIC line (4.628205ms)
+✔ compiler refuses memory DIM with the original physical and BASIC line (0.340313ms)
+✔ compiler refuses SYS with the original physical and BASIC line (0.162385ms)
+✔ compiler refuses OSCLI with the original physical and BASIC line (0.13946ms)
+✔ compiler refuses star OS command with the original physical and BASIC line (0.183567ms)
+✔ compiler refuses CALL with the original physical and BASIC line (0.429939ms)
+✔ compiler refuses USR with the original physical and BASIC line (0.267864ms)
+✔ compiler refuses dynamic library with the original physical and BASIC line (0.192992ms)
+✔ compiler refuses dynamic program with the original physical and BASIC line (0.200192ms)
+✔ forbidden spellings in comments and strings are ordinary data (1.558342ms)
+✔ unsupported syntax is not silently deleted or handed to GCC (5.495324ms)
+✔ full lexical pass diagnoses even unreachable unsupported features (0.171298ms)
+✔ unsupported reserved words cannot silently become variable assignments (7.536214ms)
+✔ multiple NEXT variables close the matching nested FOR loops (5.543848ms)
+✔ dynamic LOCAL arrays and scalar bindings emit cleanup for function results (17.019057ms)
+✔ binary64 profile is explicit, browser safe and rejects wide integer variables (0.894991ms)
+✔ emitted binary64 C refuses an incompatible floating format at C compilation (472.46025ms)
+✔ source mapping and compiler output are deterministic (1.615788ms)
+✔ reentrant INPUT inside a target subscript is diagnosed before emitting C (0.911616ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1522.300856

@@ -24,6 +24,8 @@ import {IMPORT_ACCEPT, isImportableArtefact} from '../../lib/bw-makecode/accept.
 import {asmExamplesFor, riscvCExamplesFor, arduinoSketchExamplesFor} from '../../lib/bw-asm/examples.js';
 import {blinkChoices, blinkMachineLabel, blinkFamily, blinkMachines, blinkProgramSource, blinkSource, blinkStarter} from '../../lib/bw-asm/blink-machines.js';
 import {requestSketchBuild, sketchBoardFor, sketchFirmware} from '../../lib/bw-debug/arduino-sketch.js';
+import {prepareCompiledBasic, compiledBasicTarget, assertCompiledBasicRoute,
+    requestCompiledBasicBuild} from '../../lib/crispbasic-compiler.js';
 import {armRunFor, imageFromIntelHex} from '../../lib/bw-asm/arm-image.js';
 import {stcRunFor, stcAssemblyFirmware} from '../../lib/bw-asm/stc-image.js';
 import {STC_FIRMWARE_EXAMPLES, STC_FIRMWARE_ASSET_ROOT, loadStcFirmwareExample}
@@ -232,6 +234,11 @@ const L10N = {
         fromBlocks: 'From blocks ⇨', fromBlocksTitle: 'Read the current blocks back into all languages',
         compactToBlocks: '⇦ Blocks', compactFromBlocks: 'Blocks ⇨',
         run: 'Run', runBasic: '▶ Run BASIC', runFe: '▶ Run fe', runTcl: '▶ Run Tcl', runForth: '▶ Run Forth', animationLabel: 'Animation', runViaBlocks: d => `▶ ${d} via blocks`,
+        basicC99Compile: 'Compile BASIC', basicC99Compiling: 'Compiling BASIC to C99…',
+        basicC99Emulate: 'Build C and emulate',
+        basicC99Native: 'Native C99 source is ready. Save the C file for gcc, or use crispbasic compile to build a native executable.',
+        basicC99Ready: 'C99 source is ready. The original BASIC is retained. Use the C build, flash or firmware actions for the selected target.',
+        basicC99Pico: 'Pico C99 source is ready. Build with crispbasic compile --target pico, then import its UF2/ELF. This requires the Pico SDK; the hosted SRAM compiler cannot build it.',
         runFeRiscv: '▶ fe on RISC-V', runTclRiscv: '▶ Tcl on RISC-V',
         runTclRiscvTitle: 'Build Jim Tcl with this program as C and run it on the RISC-V board', runForthRiscv: '▶ Forth on RISC-V',
         runForthRiscvTitle: 'Build zForth with this program as C and run it on the RISC-V board', runFeRiscvTitle: 'Build the fe interpreter with this program as C and run it on the RISC-V board',
@@ -619,6 +626,11 @@ const L10N = {
         fromBlocks: 'Von Blöcken ⇨', fromBlocksTitle: 'Das aktuelle Projekt in alle Sprachen einlesen',
         compactToBlocks: '⇦ Blöcke', compactFromBlocks: 'Blöcke ⇨',
         run: 'Ausführen', runBasic: '▶ BASIC ausführen', runFe: '▶ fe ausführen', runTcl: '▶ Tcl ausführen', runForth: '▶ Forth ausführen', animationLabel: 'Animation', runViaBlocks: d => `▶ ${d} über Blöcke`,
+        basicC99Compile: 'BASIC kompilieren', basicC99Compiling: 'BASIC wird nach C99 übersetzt…',
+        basicC99Emulate: 'C bauen und emulieren',
+        basicC99Native: 'Nativer C99-Quelltext ist bereit. Als C-Datei für gcc speichern oder mit crispbasic compile eine ausführbare Datei bauen.',
+        basicC99Ready: 'C99-Quelltext ist bereit. Das ursprüngliche BASIC bleibt erhalten. Die C-Aktionen zum Bauen, Flashen oder Laden der Firmware verwenden das gewählte Ziel.',
+        basicC99Pico: 'Pico-C99-Quelltext ist bereit. Mit crispbasic compile --target pico bauen und UF2/ELF importieren. Dafür ist das Pico SDK nötig; der gehostete SRAM-Compiler kann es nicht bauen.',
         runFeRiscv: '▶ fe auf RISC-V', runTclRiscv: '▶ Tcl auf RISC-V',
         runTclRiscvTitle: 'Jim Tcl mit diesem Programm als C bauen und auf dem RISC-V-Board ausführen', runForthRiscv: '▶ Forth auf RISC-V',
         runForthRiscvTitle: 'zForth mit diesem Programm als C bauen und auf dem RISC-V-Board ausführen', runFeRiscvTitle: 'Den fe-Interpreter mit diesem Programm als C bauen und auf dem RISC-V-Board ausführen',
@@ -4326,7 +4338,7 @@ class PseudocodeImporter extends React.Component {
         this.setState({busy: true, status: this.L.runSketchBuilding, output: null});
         let built;
         try {
-            built = await requestSketchBuild({
+            built = await (compiledBasicTarget(source) ? requestCompiledBasicBuild : requestSketchBuild)({
                 source, device,
                 compile: async (code, target, format, language, extra) =>
                     await this.hostedCompileC(code, target, format, language, extra)
@@ -5067,6 +5079,11 @@ class PseudocodeImporter extends React.Component {
      * @returns {Promise<object>} the service's successful response
      */
     async hostedCompileC (code, target, format, language = 'c', extra = {}) {
+        assertCompiledBasicRoute(code, target, language);
+        if (compiledBasicTarget(code) === 'arduino-uno') {
+            extra = {...extra, fosc: 16000000,
+                options: [...new Set([...(extra.options || []), '-mdouble=64', '-mlong-double=64', '-Wl,-u,vfprintf', '-lprintf_flt', '-lm'])]};
+        }
         const res = await fetch('https://stc-compiler.vercel.app/compile', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({code, language, target, format, ...extra})
@@ -5121,7 +5138,9 @@ class PseudocodeImporter extends React.Component {
             return this.deployToPico();
         }
 
-        const src = this.state.buffers.pseudocode || '';
+        const compiledC = this.state.lang === 'c' && compiledBasicTarget(this.state.buffers.c) === 'arduino-uno'
+            ? this.state.buffers.c : null;
+        const src = compiledC || this.state.buffers.pseudocode || '';
         if (!src.trim()) return;
 
         const noSerial = typeof navigator === 'undefined' || !navigator.serial;
@@ -5132,10 +5151,13 @@ class PseudocodeImporter extends React.Component {
         try {
             // Compile through the same hosted service and format the Run
             // path uses: hex for STC/AVR, a raw bin for STM32.
-            const SB3Creator = (await this.lib()).default;
-            const creator = new SB3Creator();
-            creator.parse(src);
-            const cSrc = creator.generateC(creator.project, {debug: false});
+            let cSrc = compiledC;
+            if (!cSrc) {
+                const SB3Creator = (await this.lib()).default;
+                const creator = new SB3Creator();
+                creator.parse(src);
+                cSrc = creator.generateC(creator.project, {debug: false});
+            }
             const COMPILE_TARGET = {
                 'arduino-nano': 'atmega328p', 'arduino-uno': 'atmega328p',
                 'atmega328p': 'atmega328p', 'atmega168p': 'atmega168p',
@@ -5895,6 +5917,52 @@ class PseudocodeImporter extends React.Component {
         return import(/* webpackChunkName: "crispbasic-runner" */ '../../lib/crispbasic-runner.js');
     }
 
+    async compileCrispBasic () {
+        const profile = this.selectedBasicProfile();
+        if (this._unmounted || this.state.busy || this.state.running || this.state.basicResetting ||
+            this.state.lang !== 'basic' || !(profile?.compiled || (profile?.id === 'bbc' && this.state.basicEngine === 'crispbasic')) ||
+            this.state.basicGenerationFailed) return;
+        const source = this.activeCode();
+        if (!source.trim() || this.basicGenerationPlaceholder(source)) return;
+        const buffers = this.state.buffers;
+        const document = this.codeDocumentSnapshot();
+        const device = this.codeDevice();
+        const vm = this.props.vm;
+        const request = this._basicCompileRequest = {};
+        const owns = () => !this._unmounted && this._basicCompileRequest === request;
+        const current = () => owns() && this.state.buffers === buffers && this.state.lang === 'basic' &&
+            this.codeDevice() === device && this.props.vm === vm;
+        this.setState({busy: true, status: this.L.basicC99Compiling, basicDiagnostic: null});
+        try {
+            const built = await prepareCompiledBasic({source, device, filename: this.state.basicFilename || 'editor.bas'});
+            if (!current()) return;
+            // A C-authored document may have a BASIC projection. Do not replace
+            // that original C document when compiling its BASIC view.
+            if (document.lang === 'c') {
+                this.saveBlob(built.c, 'compiled-basic.c', 'text/x-c');
+                this.setState({status: this.L.basicC99Ready});
+                return;
+            }
+            const next = addCodeProjection(document, {lang: 'c', code: built.c,
+                sourceRevision: document.revision, options: this.genOpts('c'),
+                diagnostics: {direction: 'BBC BASIC → C99', preserved: true, changed: [], unsupported: []}});
+            this.setState(state => current() ? {
+                ...this.withRetainedDrafts(this.codeDocumentState(next), state, 'c'),
+                lang: 'c', output: null, basicDiagnostic: null,
+                status: built.target === 'pico' ? this.L.basicC99Pico :
+                    built.target === 'native' ? this.L.basicC99Native : this.L.basicC99Ready
+            } : null);
+        } catch (error) {
+            if (current()) {
+                const diagnostic = this.crispBasicDiagnostic(error, this.state.basicFilename || 'editor.bas');
+                this.setState({status: diagnostic.message, basicDiagnostic: diagnostic});
+                if (diagnostic.line) this.setHighlightedLine(diagnostic.line);
+            }
+        } finally {
+            if (owns()) { this._basicCompileRequest = null; this.setState({busy: false}); }
+        }
+    }
+
     async runCrispBasic (code) {
         if (this._unmounted || this._crispBasicRun || this._crispBasicReset || this.state.running) return;
         const epoch = this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
@@ -6243,6 +6311,7 @@ class PseudocodeImporter extends React.Component {
 
     async runBasic () {
         const selection = this.selectedBasicProfile();
+        if (selection?.compiled) return this.compileCrispBasic();
         const profile = selection?.id;
         if (!profile || this.state.busy || this.state.running || this.state.basicResetting) return;
         const code = this.activeCode();
@@ -7189,7 +7258,10 @@ class PseudocodeImporter extends React.Component {
                 'Für Sprünge Zeilennummern verwenden und INPUT im Controller beantworten. SAVE, CATALOG und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.')
         };
         const basicProfile = lang === 'basic' && this.selectedBasicProfile();
-        const languageNote = standalone ? notes[standalone.dialect] + ' ' + local(
+        const languageNote = basicProfile?.compiled ? local(
+            'Compile BASIC creates C99 for the selected board while retaining your BASIC source. Unsupported statements are refused with source lines. Build the generated C with the documented toolchain; a build does not establish simulator or physical-device behavior.',
+            'BASIC kompilieren erzeugt C99 für das gewählte Board und behält den BASIC-Quelltext. Nicht unterstützte Anweisungen werden mit Quellzeilen abgelehnt. Das erzeugte C benötigt die dokumentierte Toolchain; ein Build belegt keine Simulator- oder Hardwarefunktion.'
+        ) : standalone ? notes[standalone.dialect] + ' ' + local(
             'Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',
             'BASIC ausführen sendet den Quelltext an die UART-Konsole des Pico. Für diesen Dialekt ist keine Blockumwandlung verfügbar.'
         ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
@@ -7697,7 +7769,8 @@ class PseudocodeImporter extends React.Component {
                             method downloads the image + names the programmer for
                             the rest. Pico keeps its own MicroPython button above. */}
                         {this.currentDevice() !== 'pico'
-                         && this.state.lang === 'pseudocode'
+                         && (this.state.lang === 'pseudocode' ||
+                             (this.state.lang === 'c' && compiledBasicTarget(this.state.buffers.c) === 'arduino-uno'))
                          && this.flashFamily(this.currentDevice()) !== null ? (
                             <button onClick={this.flashToBoard} disabled={this.state.busy}
                                 data-testid={menu ? "bw-flash-board-menu" : "bw-flash-board"}
@@ -7834,7 +7907,7 @@ class PseudocodeImporter extends React.Component {
                                         data-testid={menu ? "bw-run-arduino-sketch-menu" : "bw-run-arduino-sketch"}
                                         title={this.L.runSketchTitle}
                                         style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                        {this.L.runSketch}
+                                        {compiledBasicTarget(this.state.buffers.c) ? this.L.basicC99Emulate : this.L.runSketch}
                                     </button>
                                 </span>
                             ) : null}
@@ -7959,11 +8032,20 @@ class PseudocodeImporter extends React.Component {
                                 ■ {this.L.stop}
                             </button>
                         ) : null}
-                        {this.state.lang === 'basic' && this.activeCode().trim() ? (
+                        {this.state.lang === 'basic' && !this.selectedBasicProfile()?.compiled && this.activeCode().trim() ? (
                             <button onClick={() => this.runBasic()} disabled={this.state.running || this.state.busy || this.state.basicResetting || this.state.basicGenerationFailed || this.basicGenerationPlaceholder(this.state.buffers.basic)}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
                                 data-testid={menu ? "bw-basic-run-menu" : "bw-basic-run"}>
                                 {this.L.runBasic}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'basic' && (this.selectedBasicProfile()?.compiled ||
+                            (this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic')) && this.activeCode().trim() ? (
+                            <button type="button" onClick={() => this.compileCrispBasic()}
+                                disabled={this.state.running || this.state.busy || this.state.basicResetting ||
+                                    this.state.basicGenerationFailed || this.basicGenerationPlaceholder(this.activeCode())}
+                                style={actionBtn} data-testid={menu ? 'bw-basic-compile-menu' : 'bw-basic-compile'}>
+                                {this.L.basicC99Compile}
                             </button>
                         ) : null}
                         {this.state.crispBasicActive && this.state.running ? (
@@ -8119,7 +8201,7 @@ class PseudocodeImporter extends React.Component {
             this.state.kim1Active ? 'kim1' : null;
         const languageAvailable = lang => !machine && this.allowsCodeLanguage(lang);
         const basicProfile = this.selectedBasicProfile();
-        const basicProfileLabels = {bbc: 'BBC BASIC (Z80)', ms: '6502 BASIC', i8086: '8086 BASIC (native)',
+        const basicProfileLabels = {bbc: 'BBC BASIC (Z80)', 'bbc-c99': 'BBC BASIC (compiled C99)', ms: '6502 BASIC', i8086: '8086 BASIC (native)',
             'i8086-dos': '8086 BASIC (MS-DOS 2.0)', 'i8086-ubasic': 'uBASIC (DOS)', 'pico-bbcbasic': 'PicoBB BBC BASIC',
             'pico-piccolo': 'PiccoloBASIC', 'pico-stefan': 'Stefan’s BASIC'};
         const renderLanguages = menu => (

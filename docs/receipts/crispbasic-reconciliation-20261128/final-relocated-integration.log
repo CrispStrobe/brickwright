@@ -1,0 +1,134 @@
+(node:12) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/sb3-creator.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ blocks -> generated BBC source -> packaged WASM: structured repeat (361.405014ms)
+✔ blocks -> generated BBC source -> packaged WASM: generated counter (168.4194ms)
+✔ real graphics commands reach the existing VDU decoder with fixed expected coordinates (128.42771ms)
+✔ delayed interactive input survives recursive BASIC frames through the app adapter (114.310123ms)
+✔ numbered text keeps original filename and physical editor line on errors (130.406516ms)
+✔ reset cancels blocked input and the same adapter starts a clean real instance (273.864888ms)
+✔ parent deadline stops tight loops and bounded output remains bounded in the GUI view (274.905634ms)
+✔ unsupported source-to-block conversion remains a warning even when full BASIC runs (146.665631ms)
+✔ the UI adapter retains restricted SYS refusal and reports unavailable graphics queries (239.829572ms)
+✔ packaged BASIC drives a real Uno LED and senses its circuit button at explicit simulated time (130.698217ms)
+✔ a fresh circuit run restarts FNmillis while retaining the active board clock and button state (163.651433ms)
+✔ Stop during a real solver delay abandons deferred work and releases the circuit before resolving (133.411566ms)
+✔ circuit time ceilings remain parent-owned even with a BASIC error handler (73.613126ms)
+✔ real solver work exhaustion terminates packaged WASM outside BASIC error handling (77.121101ms)
+✔ Stop-all from a solver observer releases a real BASIC write after the clock call unwinds (90.972596ms)
+✔ a foreign GPIO write cancels blocked BASIC and releases its other pins without overwriting the foreign pin (97.10946ms)
+(node:13) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/sb3-creator.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ portable blocks execute logical polarity and raw normalized digital writes with a fixed trace (280.404788ms)
+✔ portable structured toggle uses the electrical latch with ACTIVE HIGH (156.729607ms)
+✔ portable structured toggle uses the electrical latch with ACTIVE LOW (123.453678ms)
+✔ portable numbered toggle uses the electrical latch with ACTIVE HIGH (236.333715ms)
+✔ portable numbered toggle uses the electrical latch with ACTIVE LOW (140.196593ms)
+✔ portable Boolean operators normalize sensed and numeric truth values before digital writes (149.945337ms)
+✔ a Boolean nested in arithmetic retains its numeric 0/1 value before a digital write (141.855806ms)
+✔ serialized Stage metadata and numeric scalar state reach actual generated pin and timing execution (160.738138ms)
+✔ portable structured delays use integer simulation time and timer reset (127.548212ms)
+✔ portable numbered delays use integer simulation time and timer reset (117.413295ms)
+✔ a generated delay evaluates a simulation reporter once before rounding (102.18421ms)
+✔ dynamic invalid seconds -0.0004 fail at the wait block before advancing time (106.923703ms)
+✔ dynamic invalid seconds 2147483.648 fail at the wait block before advancing time (88.409409ms)
+✔ generated simulation calls require explicit bridge enablement (91.077296ms)
+✔ generated portable calls are refused by To blocks while legacy hardware comments stay inert (8.674742ms)
+✔ generated Uno output and delay drive the real LED with fixed electrical and time anchors (149.309477ms)
+✔ generated toggle inverts the requested latch while the real clamped net keeps reading low (106.197146ms)
+(node:14) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/crispbasic-board-host.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real BASIC drives, reverses, brakes and coasts the saved motor Circuit (1202.17625ms)
+✔ real BASIC drives, reverses, brakes and coasts the saved motor Circuit with exchanged leads (614.489326ms)
+✔ Stop during a real motor delay releases the driver and clock without later motion or requests (147.147277ms)
+✔ an interpreter error with a spinning motor releases its outputs and leaves a reusable clock (191.1214ms)
+(node:20) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/sb3-creator.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ structured reusable pulses preserve GPIO and rounded millisecond timing (529.833432ms)
+✔ structured recursion restores each caller's argument (277.011954ms)
+✔ numbered reusable pulses preserve GPIO and rounded millisecond timing (269.219651ms)
+✔ numbered recursion restores each caller's argument (311.439284ms)
+✔ procedure call arguments retain electrical read order and numeric BBC truth (248.789515ms)
+✔ same-spelled parameters in nested procedures preserve independent locals (252.87397ms)
+✔ generated parameter aliases cannot change an authored global (213.186402ms)
+✔ computed procedure wait preserves out-of-range error for -0.0004 (205.670935ms)
+✔ computed procedure wait preserves out-of-range error for 2147483.648 (175.44904ms)
+✔ the reusable pulse example is executable and reversible (171.27835ms)
+✔ portable robot/math expression preserves real BASIC result: SQR(9) (137.153439ms)
+✔ portable robot/math expression preserves real BASIC result: LN(1) (149.469448ms)
+✔ portable robot/math expression preserves real BASIC result: SIN(RAD(30)) (137.263616ms)
+✔ portable robot/math expression preserves real BASIC result: COS(RAD(60)) (138.42628ms)
+✔ portable robot/math expression preserves real BASIC result: TAN(RAD(45)) (178.692015ms)
+✔ portable robot/math expression preserves real BASIC result: DEG(ASN(1)) (298.2383ms)
+✔ portable robot/math expression preserves real BASIC result: DEG(ACS(1)) (156.881074ms)
+✔ portable robot/math expression preserves real BASIC result: DEG(ATN(1)) (139.779213ms)
+✔ portable robot/math expression preserves real BASIC result: 7 MOD 3 (148.974661ms)
+✔ portable robot/math expression preserves real BASIC result: -7 MOD 3 (150.675009ms)
+✔ portable robot/math expression preserves real BASIC result: 7 MOD -3 (172.420638ms)
+✔ portable robot/math expression preserves real BASIC result: LN(100)/LN(10) (156.424742ms)
+✔ portable PI preserves the interpreter constant without inserting a decimal approximation (143.861569ms)
+✔ portable numeric conversion retains BASIC domain error: SQR(-1) (159.929741ms)
+✔ portable numeric conversion retains BASIC domain error: LN(0) (165.101538ms)
+✔ portable numeric conversion retains BASIC domain error: DEG(ASN(2)) (139.000573ms)
+✔ portable numeric conversion retains BASIC domain error: 7 MOD 0 (134.154839ms)
+✔ ceiling is correct for both signs and samples an electrical operand once (149.959498ms)
+(node:21) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/sb3-creator.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ PYBADGE original and regenerated programs drive independent real circuit pads (1068.034692ms)
+✔ STC15F2K60S2 original and regenerated programs drive independent real circuit pads (663.796412ms)
+(node:23) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<workspace>/brickwright/overlay/scratch-gui/src/lib/sb3-creator.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <workspace>/brickwright/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ portable round-trip qualification requires a real, valid WASM artifact (25.567099ms)
+✔ structured active-low sensing, latches, control flow and virtual time round-trip exactly (471.160211ms)
+✔ structured canvas movement, color and pen state retain exact binary VDU output (297.095079ms)
+✔ numbered active-low sensing, latches, control flow and virtual time round-trip exactly (396.11609ms)
+✔ numbered canvas movement, color and pen state retain exact binary VDU output (259.22119ms)
+✔ handwritten BASIC numeric truth and generated temporary-name collisions round-trip exactly (236.894983ms)
+✔ handwritten BASIC canvas commands retain exact coordinates and bytes through pseudocode (199.826938ms)
+✔ portable expression round trip: "Aa""BB" (190.869675ms)
+✔ portable expression round trip: "C:\tmp\x" (174.611446ms)
+✔ portable expression round trip: -a (174.776861ms)
+✔ portable expression round trip: ABS(-a) (157.765415ms)
+✔ portable expression round trip: INT(-a/2) (138.747965ms)
+✔ portable expression round trip: FNmillis (158.577711ms)
+✔ portable expression round trip: ABS(FNdigitalRead(2)=1) (142.25618ms)
+✔ portable expression round trip: NOT (FNdigitalRead(2)=1) (160.866085ms)
+✔ portable expression round trip: (FNdigitalRead(2)=1) AND (a>2) (279.329054ms)
+✔ portable expression round trip: (FNdigitalRead(2)=1) OR (a>3) (195.144397ms)
+✔ portable expression round trip: ABS(FNdigitalRead(2)=1)>0 (186.776617ms)
+✔ portable expression round trip: ABS(FNdigitalRead(2)=1)<=0 (167.999281ms)
+✔ portable expression round trip: ABS(FNdigitalRead(2)=1)<>0 (167.475966ms)
+✔ portable expression round trip: (FNdigitalRead(2)=1)<0 (157.845175ms)
+✔ portable expression round trip: (FNdigitalRead(2)=1)>=0 (147.324521ms)
+✔ portable expression round trip: (FNdigitalRead(2)=1)<>0 (149.254193ms)
+✔ portable expression round trip: (FNdigitalRead(2)=1)=0 (168.318302ms)
+✔ portable expression round trip: -ABS(FNdigitalRead(2)=1) (152.111325ms)
+✔ portable expression round trip: -(FNdigitalRead(2)=1) (146.285889ms)
+✔ portable expression round trip: 1-FNdigitalRead(2) (156.883233ms)
+✔ portable expression round trip: ABS(-1) (133.912968ms)
+✔ portable expression round trip: INT(-1) (142.70909ms)
+✔ portable expression round trip: FALSE (291.778779ms)
+✔ portable expression round trip: TRUE (146.910025ms)
+✔ portable reader explicitly refuses to erase the read in ABS(FNdigitalRead(2)=1)<0 (84.66656ms)
+✔ portable reader explicitly refuses to erase the read in ABS(FNdigitalRead(2)=1)>=0 (73.344562ms)
+✔ portable reader explicitly refuses to erase the read in (FNdigitalRead(2)=1)>0 (79.859193ms)
+✔ portable reader explicitly refuses to erase the read in (FNdigitalRead(2)=1)<=0 (91.130767ms)
+ℹ tests 102
+ℹ suites 0
+ℹ pass 102
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6900.582529
