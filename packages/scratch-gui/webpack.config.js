@@ -60,6 +60,7 @@ const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 const preserveProofAssetInfo = ({filename}) =>
     (/^static\/native-broker\/proof-pins\/sources\/[0-9a-f]{64}\.js$/.test(filename.replace(/\\/g, '/')) ||
         filename.replace(/\\/g, '/') === 'static/labwired/labwired_wasm.js' ||
+        filename.replace(/\\/g, '/').startsWith('static/crispbasic/') ||
         filename.replace(/\\/g, '/').startsWith('static/cad-sdk/'))
         ? {minimized: true} : {};
 

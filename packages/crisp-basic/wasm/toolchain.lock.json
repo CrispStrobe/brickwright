@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "emscripten": {
+    "version": "3.1.64",
+    "commit": "a1fe3902bf73a3802eae0357d273d0e37ea79898",
+    "repository": "https://github.com/emscripten-core/emscripten",
+    "installerRepository": "https://github.com/emscripten-core/emsdk",
+    "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+    "notices": [
+      {
+        "source": "LICENSE",
+        "path": "wasm/licenses/EMSCRIPTEN-LICENSE.txt",
+        "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+      },
+      {
+        "source": "AUTHORS",
+        "path": "wasm/licenses/EMSCRIPTEN-AUTHORS.txt",
+        "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+      },
+      {
+        "source": "system/lib/libc/musl/COPYRIGHT",
+        "path": "wasm/licenses/MUSL-COPYRIGHT.txt",
+        "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+      },
+      {
+        "source": "system/lib/compiler-rt/LICENSE.TXT",
+        "path": "wasm/licenses/COMPILER-RT-LICENSE.txt",
+        "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+      },
+      {
+        "source": "license comments from system/lib/libc/musl/src/math and system/lib/dlmalloc.c",
+        "path": "wasm/licenses/LIBC-SOURCE-NOTICES.txt",
+        "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+      }
+    ]
+  }
+}

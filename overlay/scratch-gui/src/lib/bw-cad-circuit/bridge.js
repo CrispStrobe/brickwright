@@ -27,7 +27,7 @@ const prepareCad = (signal, action, discard = () => {}) => new Promise((resolve,
         }, error => finish(reject, error));
     } catch (error) {finish(reject, error);}
 });
-const circuitOwner = (board, signal) => new Promise((resolve, reject) => {
+const circuitOwner = (board, signal, owner) => new Promise((resolve, reject) => {
     let timeout, settled = false;
     const finish = (callback, value) => {
         if (settled) return;
@@ -38,7 +38,7 @@ const circuitOwner = (board, signal) => new Promise((resolve, reject) => {
     if (signal.aborted) {abort(); return;}
     signal.addEventListener('abort', abort, {once: true});
     timeout = setTimeout(() => finish(reject, new Error('Open the Circuit tab before connecting CAD')), 10000);
-    window.dispatchEvent(new CustomEvent('bw-circuit-clock-owner', {detail: {board,
+    window.dispatchEvent(new CustomEvent('bw-circuit-clock-owner', {detail: {board, signal, owner,
         ready: () => finish(resolve), reject: error => finish(reject, error)}}));
 });
 async function circuitReady(runtime, signal, config) {
@@ -77,7 +77,7 @@ export function installCircuitCadBridge(vm) {
     } : undefined;
     const clock = new SimLabClock({paceNominal: true, defer});
     let session = null, generation = 0, pending = false, disposed = false, ownsCircuit = false, mechanics = null, ownedBoard = null;
-    let preparation = null, lastProgressAt = -Infinity;
+    let preparation = null, lastProgressAt = -Infinity, circuitOwnerId = null;
     let status = {phase: 'idle', time: 0, readings: [], error: ''};
     const emitStatus = () => window.dispatchEvent(new CustomEvent(STATUS_EVENT, {detail: status}));
     const publish = next => {status = {...status, ...next};emitStatus();};
@@ -96,8 +96,10 @@ export function installCircuitCadBridge(vm) {
         preparation?.abort();preparation=null;
         clock.uninstall();session?.stop();session=null;mechanics?.release();mechanics=null;
         if (ownsCircuit) {ownsCircuit=false;
-            if(ownedBoard){for(const pin of ownedBoard.getPinStates())if(!['input','input-pullup'].includes(pin.mode))ownedBoard.setPin(pin.pin,'input',false);ownedBoard.setPower(false);ownedBoard=null;}
-            window.dispatchEvent(new CustomEvent('bw-circuit-clock-owner',{detail:{board:null}}));}
+            if(ownedBoard){for(const pin of ownedBoard.getPinStates())if(!['input','input-pullup'].includes(pin.mode))ownedBoard.setPin(pin.pin,'input',false);ownedBoard.setPower(false);}}
+        ownedBoard=null;
+        if(circuitOwnerId){const owner=circuitOwnerId;circuitOwnerId=null;
+            window.dispatchEvent(new CustomEvent('bw-circuit-clock-owner',{detail:{board:null,owner}}));}
         publish({phase:'idle',error:''});
     };
     const fail = error => {shutdown();vm.stopAll();publish({phase:'error',error:error.message || String(error)});};
@@ -106,7 +108,7 @@ export function installCircuitCadBridge(vm) {
         state: () => status,
         async start(mode = 'blocks') {
             if (pending) return;
-            if (runtime.bwRunBoard || (runtime.bwProgramClock && runtime.bwProgramClock !== clock)) throw new Error('Stop the other simulator or debugger first');
+            if (runtime.bwCrispBasicSimulation || runtime.bwCircuitRunPreparing || runtime.bwRunBoard || (runtime.bwProgramClock && runtime.bwProgramClock !== clock)) throw new Error('Stop the other simulator or debugger first');
             shutdown();vm.stopAll();const expected=generation;pending=true;
             const controller=new AbortController();preparation=controller;
             const check=()=>{if(disposed || generation!==expected)throw new Error('Coupled simulation was stopped');};
@@ -116,7 +118,8 @@ export function installCircuitCadBridge(vm) {
                 publish({phase:'preparing',error:'',time:0,readings:[],realTimeFactor:null});
                 const board=await circuitReady(runtime,controller.signal,config);check();
                 // Acquire the host before compiling or resetting: the designer relinquishes its clock.
-                ownedBoard=board;ownsCircuit=true;await circuitOwner(board,controller.signal);check();
+                ownedBoard=board;circuitOwnerId={stop:()=>api.stop()};
+                await circuitOwner(board,controller.signal,circuitOwnerId);check();ownsCircuit=true;
                 await prepareCad(controller.signal, () => runtime.cadSimulation.reset());check();
                 const acquired=await prepareCad(controller.signal, () => runtime.cadSimulation.acquireExternalClock(), lease => lease.release());
                 if(disposed || generation!==expected){acquired.release();check();}

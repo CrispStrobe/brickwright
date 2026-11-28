@@ -55,7 +55,17 @@ const SLICE_NS = 8_000_000; // 8 ms of sim time per frame
  *          if the circuit on the canvas was rejected (resolveNetlist refuses a
  *          phantom bench by name) — the caller shows the message.
  */
-export async function startPicoSimRun ({image, vm, stc, py, onStatus, onError, signal}) {
+export async function startPicoSimRun (options) {
+    const runtime = options.vm?.runtime;
+    if (runtime?.bwCrispBasicSimulation) throw new Error('Stop BASIC before starting the Pico simulator');
+    if (runtime?.bwCircuitRunPreparing) throw new Error('Another circuit run is preparing');
+    const preparation = {};
+    if (runtime) runtime.bwCircuitRunPreparing = preparation;
+    try { return await startPicoSimRunOwned(options); }
+    finally { if (runtime?.bwCircuitRunPreparing === preparation) delete runtime.bwCircuitRunPreparing; }
+}
+
+async function startPicoSimRunOwned ({image, vm, stc, py, onStatus, onError, signal}) {
     const status = onStatus || (() => {});
     // Code-tab source/target replacement can happen before the asynchronous
     // startup returns its handle. Retain the existing Pico route while giving
@@ -135,6 +145,7 @@ export async function startPicoSimRun ({image, vm, stc, py, onStatus, onError, s
         // One board, one truth — the SAME resolution the debugger uses (designer's
         // live circuit, else inferred; a rejected circuit refuses here by name).
         const netlist = await resolveNetlist(vm, stc, inferNetlist);
+        if (vm?.runtime?.bwCrispBasicSimulation) throw new Error('Stop BASIC before starting the Pico simulator');
         requireActive();
         board = new BoardImpl(VCC);
         board.setNetlist(netlist.parts, netlist.nets);

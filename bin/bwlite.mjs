@@ -77,10 +77,16 @@ const loadPseudocode = async file => {
     if (/\.c$/i.test(file)) reader = (await import(`${lib}${/@bw-program/.test(source) ? 'sb3-creator-chost' : 'sb3-creator-c'}.js`)).default;
     else if (/\.py$/i.test(file)) reader = (await import(`${lib}${/^\s*from\s+(machine|microbit)\s+import/m.test(source) ? 'sb3-creator-micropython' : 'sb3-creator-python'}.js`)).default;
     else if (/\.js$/i.test(file)) reader = (await import(`${lib}sb3-creator-javascript.js`)).default;
-    else if (/\.(bas|basic)$/i.test(file)) reader = (await import(`${lib}sb3-creator-basic.js`)).default;
+    else if (/\.(bas|basic)$/i.test(file)) {
+        if (/^[ \t]*(?:\d+[ \t]*)?REM[ \t]*===[ \t]*Cannot[ \t]*show[ \t]*as[ \t]*BASIC[ \t]*===/mi.test(source)) {
+            throw new Error('BASIC generation was refused. Remove or replace the generation-error banner.');
+        }
+        reader = (await import(`${lib}sb3-creator-basic.js`)).default;
+    }
     else if (/\.bw$/i.test(file)) return source;
     else throw new Error('Input must be .bw, .c, .py, .js, .bas, or .sb3');
     const result = reader(source);
+    if (result.ok === false) throw new Error((result.reasons || []).join('\n') || `${file}: conversion refused`);
     for (const warning of result.warnings || []) console.error(`warning: ${warning}`);
     return result.pseudocode ?? result;
 };
