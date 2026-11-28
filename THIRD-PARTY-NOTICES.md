@@ -1955,7 +1955,7 @@ imports code from, **BBC BASIC (Z80) / PicoBB (C)** by R.T. Russell.
 BBC BASIC (Z80) and PicoBB (the C/Pico port) are copyright
 (c) R.T. Russell, distributed under the **zlib licence** (see
 https://github.com/rtrussell/BBCSDL/blob/master/licence.txt). The
-interpreter binaries, when shipped, are included **unmodified**.
+legacy Z80 interpreter binary is included **unmodified**.
 
 The name "BBC BASIC" is used by permission of the BBC, granted to
 R.T. Russell. This project uses the name only to describe compatibility
@@ -1980,6 +1980,32 @@ sources are pinned in `bundled-upstream-pins.json`.
 `static/roms/bbc-video-6502.rom` is built from the Brickwright lesson source
 in `firmware/bbc-video-6502/main.s`. Copyright (c) 2026, Christian Ströbele
 (CrispStrobe). Distributed under the BSD-3-Clause licence.
+
+## CrispBASIC restricted WASM runtime — BSD-3-Clause / zlib
+
+Builds prepared with `npm run build:crispbasic` also ship the restricted
+CrispBASIC browser interpreter under `static/crispbasic/`. Its C interpreter
+comes from **BBCSDL**, copyright (c) 2021 Richard T. Russell, under the
+**zlib licence**, pinned to commit `6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f` of
+https://github.com/rtrussell/BBCSDL. CrispBASIC's host, worker and session code
+is **BSD-3-Clause**, copyright (c) 2026 Christian Ströbele (CrispStrobe).
+This is a modified integration: its explicit host replaces SDL/console
+services and applies the restrictions recorded in the package's patch files.
+It is branded CrispBASIC; BBC BASIC describes language compatibility.
+
+Emscripten **3.1.64** supplies runtime/support code under its **MIT and
+University of Illinois/NCSA licences**. The compiled library components retain
+their own musl, math-library, dlmalloc and compiler-rt notices. The payload
+includes the complete original notices under `static/crispbasic/licenses/`,
+the CrispBASIC licence as `LICENSE.txt`, and the package's
+`THIRD-PARTY-NOTICES.md`. Build and payload manifests record source inputs,
+compiler settings, imports and artifact digests; the packaging command verifies
+the upstream and toolchain licence hashes before writing the served files.
+
+See `packages/crisp-basic/THIRD-PARTY-NOTICES.md`,
+`packages/crisp-basic/upstream.lock.json` and
+`packages/crisp-basic/wasm/toolchain.lock.json` for provenance. The browser
+payload does not contain the native backend, SDL or the Matrix Brandy oracle.
 
 ## CP/M 2.2 (Z80) — redistributable (DRDOS grant) + MIT
 

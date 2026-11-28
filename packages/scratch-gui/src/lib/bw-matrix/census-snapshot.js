@@ -91,7 +91,7 @@ export const CENSUS_ROWS = Object.freeze([
     {
         "id": "lcapy",
         "kind": "oracle",
-        "present": true,
+        "present": false,
         "ciAvailable": false
     },
     {
@@ -103,7 +103,7 @@ export const CENSUS_ROWS = Object.freeze([
     {
         "id": "ngspice",
         "kind": "oracle",
-        "present": true,
+        "present": false,
         "ciAvailable": true
     },
     {
@@ -121,7 +121,7 @@ export const CENSUS_ROWS = Object.freeze([
     {
         "id": "stc-examples",
         "kind": "fixture",
-        "present": true,
+        "present": false,
         "ciAvailable": false
     },
     {

@@ -255,11 +255,22 @@ class CircuitTab extends React.Component {
 
     componentDidMount () {
         this._couplingHandler = event => {
-            const {board, ready, reject} = event.detail || {};
+            const {board, owner, signal, ready, reject} = event.detail || {};
+            if (board && signal?.aborted) { reject?.(new Error('Circuit clock request was cancelled')); return; }
             if (board && this.props.vm?.runtime?.bwRunBoard) { reject?.(new Error('Stop the circuit debugger first')); return; }
-            if (!board) this._coupledBoard = null;
-            else this._coupledBoard = board;
-            this.setState({board: board || null, cadCircuitRequested: false}, () => setTimeout(() => ready?.(), 0));
+            const identity = owner || board;
+            if (board && this._coupledOwner && this._coupledOwner !== identity) {
+                reject?.(new Error('The Circuit clock already has an owner')); return;
+            }
+            if (!board && this._coupledOwner &&
+                (owner ? this._coupledOwner !== owner : this._coupledOwner !== this._coupledBoard)) return;
+            this._coupledOwner = board ? identity : null;
+            this._coupledBoard = board || null;
+            this.setState({board: board || null, cadCircuitRequested: false}, () => setTimeout(() => {
+                // A cancelled acquisition cannot acknowledge a newer owner.
+                if (board && (this._coupledOwner !== identity || signal?.aborted)) return;
+                ready?.();
+            }, 0));
         };
         this._couplingOpen = () => {this.setState({cadCircuitRequested: true});this.load({explicit: true});};
         window.addEventListener('bw-circuit-clock-owner', this._couplingHandler);
@@ -787,6 +798,9 @@ class CircuitTab extends React.Component {
 
     componentWillUnmount () {
         this.galleryArtworkRequest = null;
+        this._coupledOwner?.stop?.();
+        this._coupledOwner = null;
+        this._coupledBoard = null;
         window.removeEventListener('bw-circuit-clock-owner', this._couplingHandler);
         window.removeEventListener('bw-circuit-ensure-ready', this._couplingOpen);
         this.releaseEsp32S040Input();

@@ -13,9 +13,9 @@
     "sha": "de39245b0f74ade850e05efb93867c700646b57b",
     "date": "2026-09-08",
     "lastTouchedBy": {
-      "sha": "de39245b0f74ade850e05efb93867c700646b57b",
-      "subject": "Add explicit unbuffered BIOS build and reproducible wired POST diagnostics",
-      "date": "2026-09-08"
+      "sha": "8be0fbc8e91f1ed2cebb26883210efceef9234cc",
+      "subject": "feat: qualify portable digital GPIO profiles for 16 circuit models",
+      "date": "2026-11-28"
     }
   },
   "assembler": {
