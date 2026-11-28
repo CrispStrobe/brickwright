@@ -69,6 +69,7 @@ try {
     if (await expand.isVisible()) await expand.click();
     for (let n = 1; n <= 8; n++) {
         const control = page.locator(`[data-switch-control="switch${n}"]`);
+        // gate-shapes-allow: persistent switch readiness; aria-pressed and the later P1/P2/current/brightness checks prove its state.
         await control.waitFor({state: 'visible'});
         assert.equal(await control.getAttribute('aria-pressed'), 'true');
     }

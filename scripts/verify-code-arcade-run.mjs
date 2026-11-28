@@ -68,6 +68,7 @@ async function run(visibilityBlocks) {
         assert.equal(await page.evaluate(() => window.arcadeSpeechCompiled), true, 'compiled program contains the speech');
 
         const pane = page.locator('[data-testid="bw-makecode-pane"][data-target="arcade"]');
+        // gate-shapes-allow: this Running wait synchronizes the canvas colour-state check below; speech compilation is asserted above.
         await pane.getByTestId('bw-makecode-state').filter({hasText: /^Running$/}).waitFor();
         const sim = pane.frameLocator('[data-testid="bw-makecode-frame"]').frameLocator('iframe[src*="simulator.html"]');
         const canvas = sim.locator('canvas').first();
