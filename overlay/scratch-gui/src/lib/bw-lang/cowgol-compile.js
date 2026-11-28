@@ -5,7 +5,67 @@ export const COWGOL_COMPILE_TARGETS = Object.freeze({
     'z80-cpm': {format: 'bin', toolchain: 'cowgol-cpmz', filename: 'program.com', maxBytes: 0xcf00},
     'i8080-cpm': {format: 'bin', toolchain: 'cowgol-cpm', filename: 'program.com', maxBytes: 0xcf00},
     dos: {format: 'bin', toolchain: 'cowgol-msdos', filename: 'program.exe', maxBytes: 1024 * 1024},
+    riscv32: {format: 'elf', toolchain: 'cowgol-riscv32', filename: 'program.elf', maxBytes: 4 * 1024 * 1024},
     'cowgol-cgen': {format: 'c', toolchain: 'cowgol-cgen', filename: 'program.c', maxBytes: 8 * 1024 * 1024}
+});
+
+const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+// The RV32 console has 4 MiB RAM. Keep the upper 32 KiB for its C stack.
+const RISCV_LOAD_LIMIT = 0x3f8000;
+
+/** Validate both the downloadable ELF and the exact image the debugger boots. */
+export function cowgolRiscvImage (bytes, reported) {
+    const fail = () => { throw new Error('Cowgol compiler returned an invalid RISC-V executable image.'); };
+    if (!(bytes instanceof Uint8Array) || bytes.length < 52) return fail();
+    const elf = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    if (elf.getUint32(0, false) !== 0x7f454c46 || bytes[4] !== 1 || bytes[5] !== 1 || bytes[6] !== 1 ||
+        elf.getUint16(16, true) !== 2 || elf.getUint16(18, true) !== 243 || elf.getUint32(20, true) !== 1 ||
+        elf.getUint16(40, true) !== 52 || elf.getUint16(42, true) !== 32) return fail();
+    const entry = elf.getUint32(24, true);
+    const table = elf.getUint32(28, true);
+    const count = elf.getUint16(44, true);
+    if (!count || count > 32 || table < 52 || table + count * 32 > bytes.length || (entry & 1)) return fail();
+    const segments = [];
+    let executableEntry = false;
+    for (let i = 0; i < count; i++) {
+        const at = table + i * 32;
+        if (elf.getUint32(at, true) !== 1) continue;
+        const offset = elf.getUint32(at + 4, true);
+        const addr = elf.getUint32(at + 8, true);
+        const physical = elf.getUint32(at + 12, true);
+        const size = elf.getUint32(at + 16, true);
+        const memory = elf.getUint32(at + 20, true);
+        const flags = elf.getUint32(at + 24, true);
+        const align = elf.getUint32(at + 28, true);
+        if (!memory) {
+            if (size) return fail();
+            continue;
+        }
+        if ((align > 1 && ((align & (align - 1)) !== 0 || addr % align !== offset % align)) ||
+            physical !== addr || addr < 0x1000 || memory < size || addr + memory > RISCV_LOAD_LIMIT ||
+            offset + size > bytes.length || segments.some(s => addr < s.addr + s.bytes.length && s.addr < addr + memory)) return fail();
+        const data = new Uint8Array(memory);
+        data.set(bytes.subarray(offset, offset + size));
+        segments.push({addr, bytes: data});
+        if ((flags & 1) && entry >= addr && entry < addr + size) executableEntry = true;
+    }
+    if (!executableEntry || !reported || reported.entry !== entry ||
+        !Array.isArray(reported.segments) || reported.segments.length !== segments.length) return fail();
+    segments.sort((a, b) => a.addr - b.addr);
+    for (let i = 0; i < segments.length; i++) {
+        const actual = segments[i], supplied = reported.segments[i];
+        if (!supplied || supplied.addr !== actual.addr || typeof supplied.bytes !== 'string' ||
+            supplied.bytes.length !== Math.ceil(actual.bytes.length / 3) * 4 || !base64Pattern.test(supplied.bytes)) return fail();
+        const data = atob(supplied.bytes);
+        if (data.length !== actual.bytes.length || actual.bytes.some((byte, n) => byte !== data.charCodeAt(n))) return fail();
+    }
+    return {entry, segments};
+}
+
+/** Same image handoff used by the RISC-V C and assembler actions. */
+export const cowgolRiscvDetail = image => ({
+    rom: null, image, listing: null, target: 'riscv32',
+    slotId: 'riscv', profile: 'riscv', format: 'riscv'
 });
 
 /** Full Cowgol compilation, independent of the deliberately smaller Blocks reader. */
@@ -34,7 +94,7 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
     if (out.toolchain !== spec.toolchain || out.target !== target || out.language !== 'cowgol' ||
         typeof out.base64 !== 'string' ||
         out.base64.length > Math.ceil(spec.maxBytes / 3) * 4 ||
-        !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(out.base64)) {
+        !base64Pattern.test(out.base64)) {
         throw new Error('Cowgol compiler returned an invalid artifact.');
     }
     const bytes = Uint8Array.from(atob(out.base64), char => char.charCodeAt(0));
@@ -42,6 +102,14 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
         (target.endsWith('-cpm') && out.origin !== 0x100) ||
         (target === 'dos' && (bytes[0] !== 0x4d || bytes[1] !== 0x5a))) {
         throw new Error('Cowgol compiler returned an invalid artifact size or load address.');
+    }
+    if (target === 'riscv32') {
+        if (out.format !== 'elf' || out.artifact_kind !== 'executable') {
+            throw new Error('Cowgol compiler returned an invalid RISC-V artifact format.');
+        }
+        const image = cowgolRiscvImage(bytes, out.image);
+        if (out.entry !== image.entry) throw new Error('Cowgol compiler returned an invalid RISC-V entry point.');
+        return {...out, bytes, image, target, filename: spec.filename};
     }
     return {...out, bytes, target, filename: spec.filename};
 }

@@ -9,7 +9,7 @@ test('fe, Tcl, Forth and Cowgol offer a board run through their blocks', () => {
     assert.match(source, /\['fe', 'tcl', 'forth', 'cowgol'\]\.includes\(this\.state\.lang\) && this\.currentDevice\(\)/);
     assert.match(source, /data-testid=\{menu \? "bw-run-via-blocks-menu" : "bw-run-via-blocks"\}/);
     // The run opens the debugger only after a conversion that preserved the program.
-    assert.match(source, /const applied = await this\.compile\(\);/);
+    assert.match(source, /const applied = device === 'riscv32' \? await this\.compile\(\{targetDevice: device\}\) : await this\.compile\(\);/);
     assert.doesNotMatch(source, /'(?:Lisp \(fe|Tcl \(partcl|Forth \(zForth) on DOS\)'/);
     assert.match(source, /'Tcl \(Jim: DOS, or any board via blocks\)'/);
 });

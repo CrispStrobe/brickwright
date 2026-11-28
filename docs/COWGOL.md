@@ -12,13 +12,14 @@ by the web and native application wrappers.
    operations produce named diagnostics.
 3. Edit the source, then **To blocks** to import it, or **Run as Blocks** to
    import and start the accepted program on the canvas and virtual circuit.
-4. With a machine selected, **Run via blocks** opens the existing circuit
-   debugger after successful conversion. Its established build/emulate/flash
-   actions apply to the resulting pseudocode and the selected target.
-5. Native **Cowgol on CP/M** and **Cowgol on DOS** compile the original source
-   on the hosted service and hand the executable to the existing machine
-   loaders. Downloads include Z80 and 8080 CP/M `.COM`, DOS `.EXE`, and compiled
-   C source. These actions require the companion compiler-service deployment.
+4. With a machine selected, **Run via blocks** imports successfully, then uses
+   the existing circuit debugger and its build/emulate/flash actions. RISC-V
+   instead compiles the accepted console Blocks project and loads the RV32 image.
+5. **Cowgol on CP/M**, **Cowgol on DOS**, and **Cowgol on RISC-V** compile the
+   original source on the hosted service and hand the executable to the
+   existing machine loaders. Downloads include Z80 and 8080 CP/M `.COM`, DOS
+   `.EXE`, RISC-V `.ELF`, and compiled C source. These actions require the
+   companion compiler-service deployment.
 
 Syntax highlighting, editable optional tabs, the overflow language menu,
 source downloads, reopen/autosave, conversion, and keyboard Run all recognize
@@ -78,7 +79,7 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | Z80 | Existing BASIC/C circuit routes | Real Z80 CP/M and 8080-compatible CP/M compilers |
 | 8086 | Existing assembly/C circuit routes | Real DOS MZ compiler |
 | Arcade / PyBadge | Existing PXT/TypeScript route where available | No new native backend |
-| RISC-V | Pseudocode backend remains an existing open task | No native service target added |
+| RISC-V | Checked int32 console C through hosted GCC; one sequential flag script | Full Cowgol → cgen → RV32 GCC/picolibc → executable ELF, using console output |
 
 Availability follows actual existing lowered routes. A selected backend still
 enforces its own supported operations; accepting a Cowgol turtle program does
@@ -87,10 +88,45 @@ from a matching CPU name. The shared producer documents exact accepted digital
 coordinates and reserved pins in
 [COWGOL-CONVERSION.md](https://github.com/CrispStrobe/sb3-creator/blob/feat/cowgol-integration-20261128/docs/COWGOL-CONVERSION.md).
 
-The matrix keeps native CP/M and DOS facts **open** until the companion service
-is deployed. Their console wrappers implement portable text/number output;
+The matrix keeps native CP/M, DOS and RISC-V facts **open** until the companion
+service is deployed. Their console wrappers implement portable text/number output;
 native canvas and GPIO require a real host binding and fail to compile/link
 when absent. Circuit programs can use the Blocks route today.
+
+### RISC-V console
+
+Select **RISC-V**, open **Cowgol**, and choose **Cowgol on RISC-V** to compile the
+original program. The keyboard Run action selects that route on RISC-V.
+Cowgol's C backend and the service's RV32 GCC toolchain produce a real ELF for
+Brickwright's four-MiB RV32 machine. Arrays, pointers, allocation and integer
+division are available through this full compiler route. This is a port through
+generated C, not a new Cowgol RISC-V instruction selector. Console output is
+implemented; file I/O, command-line arguments, clocks, GPIO and graphics are
+not supplied. `argv.coh` sees a safe empty argument list.
+
+**Run via blocks** is a separate checked route: after a successful import, the
+current Blocks project becomes console C and is compiled with hosted
+`riscv32-gcc`. Pseudocode also offers **Run on RISC-V via Blocks**. Programs may
+declare `DEVICE RISCV32`; a declaration-free Cowgol program retains the selected
+RISC-V machine for this action. An explicit conflicting device declaration is
+refused before replacing the project.
+
+The console lowerer supports int32/text variables, assignment, addition,
+subtraction, multiplication, bit operations, comparisons, short-circuit
+conditions, loops, output and stop. Arithmetic intermediates are checked at
+runtime; overflow prints an error and exits. GPIO, canvas, waits, concurrent
+events, procedures, lists and unsupported reporters are refused before C is
+submitted. There is no qualified timer in this console profile. It requires
+full GCC and does not claim compatibility with the browser's shecc subset.
+The producer's [RISC-V console contract](https://github.com/CrispStrobe/sb3-creator/blob/feat/cowgol-integration-20261128/docs/RISCV-CONSOLE.md)
+documents the exact boundary.
+
+For native Cowgol, both the service and editor validate the ELF architecture,
+entry point, load segments and uninitialized workspace. The top 32 KiB of guest
+RAM remain reserved for the stack. The image the editor boots must exactly
+match the downloadable ELF, including zero-initialized workspace. Source,
+device or project changes revoke a pending run; edits to Blocks during either
+module loading or compilation revoke the checked route as well.
 
 ## Companion repositories and reproducibility
 
@@ -100,7 +136,7 @@ branch merge is part of these checkpoints.
 
 The Cowgol fork supplies a dependency-light C bootstrap, an explicit fixed-width
 host ABI, portable CP/M/DOS console headers and real compiler regression tests.
-The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS and C backends,
+The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V and C routes,
 checks source/includes and artifact limits, and packages them for Docker,
 Hugging Face and Vercel. Missing toolchains return an explicit failure.
 
@@ -120,10 +156,29 @@ separate experimental browser runtime.
 
 `test/cowgol-integration.test.mjs` checks source persistence, target visibility,
 real machine-loader handoff, refusal/current-source behavior, restricted builds,
-and exact native artifact identity. Existing editor ownership/conversion tests
+and exact native artifact identity. `test/cowgol-platforms.test.mjs` covers RV32
+ELF/image identity, unsafe-memory refusal and actual editor-method ownership.
+Existing editor ownership/conversion tests
 cover the asynchronous import lifecycle. The producer tests also execute emitted
 Cowgol through the actual compiler and compare its host trace. The service
-tests run compiled `.COM` and `.EXE` files in independent CP/M and DOS emulators.
+tests run compiled `.COM` and `.EXE` files in independent CP/M and DOS emulators,
+and RV32 ELF images on the pinned Brickwright machine. The producer additionally
+compiles and executes the checked console C on that same RV32 machine.
+
+The reproducible HTTP check uses Brickwright's actual client against a child
+local service, then executes the returned artifact on the pinned machine:
+
+```sh
+node scripts/verify-cowgol-platforms.mjs \
+  --service ../stc-compiler --bundle ../cowgol-bundle --board ../bw-board \
+  --riscv-gcc-stage ../riscv-gcc-stage --tmpdir ../validation
+```
+
+The default checks native RISC-V and compiled C export. It exercises arrays,
+integer division, allocation and both signed int32 limits. Dependencies and a
+built compiler bundle must already exist; it installs nothing and sends no
+source to a deployed service. The JSON result records exact compiler and
+machine commits. Use `--help` for paths and explicit target selection.
 
 These checks qualify the conversion and software execution paths. They do not
 claim physical-board testing or a full production GUI build.

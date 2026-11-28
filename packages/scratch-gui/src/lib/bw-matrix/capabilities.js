@@ -818,15 +818,18 @@ export const CELLS = Object.freeze({
     },
     // RISC-V: two local roads, both measured in bw-board (riscv-asm.test.mjs
     // runs assembled programs on the core; riscv-cc-wasm.test.mjs compiles C
-    // with shecc in wasm and runs it), no network. Nothing lowers to it YET:
-    // sb3-creator's generateC has no RISC-V core, so the dialect (and every
-    // language read into it) has no road here. N12 is that road -- a RISC-V
-    // console profile in generateC whose C the same shecc compiles.
+    // with shecc in wasm and runs it). The checked int32 console lowerer uses
+    // full hosted GCC for its fixed-width types and checked intermediate math.
+    // Its source languages inherit that console-only operation boundary.
     riscv32: {
-        pseudocode: {native: AST, lowered: [viaOpen('c', 'N12')]},
-        cowgol: cowgolVia([viaOpen('c', 'N12')]),
-        python: {native: no('no-port', 'no Python port wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
-        javascript: {native: no('no-port', 'no JavaScript engine wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
+        pseudocode: {native: AST, lowered: [via('c', {note: 'Checked int32 console profile; full hosted GCC; no GPIO, canvas or timing'})]},
+        cowgol: {...cowgolVia([via('c')]),
+            native: open('elf', 'Cowgol cgen + RV32 GCC', 'hosted', 'L5', {
+                note: 'Full Cowgol compiles through C to a validated RV32 ELF console image; companion service deployment required'
+            }),
+            lowered: [via('c', {note: 'Cowgol checked subset → Blocks → int32 console C; full hosted GCC; no GPIO, canvas or timing'})]},
+        python: {native: no('no-port', 'no Python port wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; full hosted GCC'})]},
+        javascript: {native: no('no-port', 'no JavaScript engine wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; full hosted GCC'})]},
         c: {
             native: shipped('elf', 'shecc (wasm) in the browser; hosted gcc fallback', 'local', {
                 note: 'shecc (BSD-2-Clause) compiles the C subset it supports, straight to an RV32IM '
@@ -835,14 +838,14 @@ export const CELLS = Object.freeze({
             }),
             lowered: []
         },
-        basic: {native: no('no-port', 'no BASIC interpreter wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
+        basic: {native: no('no-port', 'no BASIC interpreter wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; full hosted GCC'})]},
         asm: {
             native: shipped('elf', 'riscv-asm.js (RV32IM, local)', 'local', {
                 note: 'bw-board riscv-asm.test.mjs checks encodings against the ISA layout and runs programs'
             }),
             lowered: []
         },
-        micropython: {native: no('no-port', 'no MicroPython port wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]}
+        micropython: {native: no('no-port', 'no MicroPython port wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; hardware calls refused; full hosted GCC'})]}
     },
     samd51: {
         cowgol: cowgolVia([via('ts', {evidence: EVIDENCE.DECLARED})]),

@@ -224,13 +224,16 @@ const L10N = {
         cowgolRunBlocksTitle: 'Convert the checked Cowgol subset and run its blocks on the canvas and virtual circuit',
         cowgolRunCpm: '▶ Cowgol on CP/M',
         cowgolRunDos: '▶ Cowgol on DOS',
+        cowgolRunRiscv: '▶ Cowgol on RISC-V',
+        cowgolDownloadRiscv: 'Download RISC-V .ELF',
+        runBlocksRiscv: '▶ Run on RISC-V via Blocks',
         cowgolDownloadDos: 'Download DOS .EXE',
         cowgolDownload8080: 'Download 8080 CP/M .COM',
         cowgolDownloadCpm: 'Download CP/M .COM',
         cowgolExportC: 'Export compiled C',
         cowgolCompiling: 'Compiling with Cowgol on the hosted service…',
         cowgolStale: 'The source, project or selected machine changed. The compiled program was not applied.',
-        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. Native CP/M and DOS compilation and C export use the hosted Cowgol compiler, which must be installed on the service. CP/M and DOS programs use their console; canvas and circuit host calls use the Blocks route.',
+        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS and RISC-V compilation and C export use the hosted Cowgol compiler. RISC-V compiles full Cowgol through C and GCC and runs on its console; timing, canvas and GPIO need their own host bindings. Run via blocks uses the selected machine’s supported operations.',
         nqcCompile: '⚙ Compile .rcx', nqcSend: '🧱 Send to RCX',
         nqcEmpty: 'Type some NQC first.',
         nqcNoCompiler: 'This build has no local NQC compiler.',
@@ -587,13 +590,16 @@ const L10N = {
         cowgolRunBlocksTitle: 'Die geprüfte Cowgol-Teilmenge umwandeln und als Blöcke auf Bühne und virtueller Schaltung ausführen',
         cowgolRunCpm: '▶ Cowgol unter CP/M',
         cowgolRunDos: '▶ Cowgol unter DOS',
+        cowgolRunRiscv: '▶ Cowgol auf RISC-V',
+        cowgolDownloadRiscv: 'RISC-V-.ELF herunterladen',
+        runBlocksRiscv: '▶ Über Blöcke auf RISC-V ausführen',
         cowgolDownloadDos: 'DOS-.EXE herunterladen',
         cowgolDownload8080: '8080-CP/M-.COM herunterladen',
         cowgolDownloadCpm: 'CP/M-.COM herunterladen',
         cowgolExportC: 'Kompiliertes C exportieren',
         cowgolCompiling: 'Cowgol wird auf dem Compiler-Dienst kompiliert…',
         cowgolStale: 'Quelltext, Projekt oder ausgewählte Maschine wurde geändert. Das kompilierte Programm wurde nicht angewendet.',
-        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. Native CP/M- und DOS-Kompilierung und C-Export benötigen den installierten Cowgol-Compiler auf dem Dienst. CP/M- und DOS-Programme verwenden ihre Konsole; Zeichen- und Schaltungsaufrufe verwenden den Weg über Blöcke.',
+        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS- und RISC-V-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V übersetzt vollständiges Cowgol über C und GCC und nutzt seine Konsole; Zeit-, Zeichen- und GPIO-Aufrufe benötigen eigene Laufzeitbindungen. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
         nqcCompile: '⚙ .rcx kompilieren', nqcSend: '🧱 An RCX senden',
         nqcEmpty: 'Zuerst NQC eingeben.',
         nqcNoCompiler: 'Dieser Build hat keinen lokalen NQC-Compiler.',
@@ -1464,7 +1470,8 @@ class PseudocodeImporter extends React.Component {
         if (!this.allowsCodeLanguage(lang)) return;
         const target = asmTargetForDevice(device);
         const actions = {
-            cowgol: () => this.runCowgolAsBlocks(),
+            pseudocode: target === 'riscv32' && (() => this.runViaBlocksOnDevice()),
+            cowgol: () => target === 'riscv32' ? this.compileCowgolSource('riscv32', true) : this.runCowgolAsBlocks(),
             tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
             forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
             fe: () => target === 'riscv32' ? this.runFeOnRiscv() : this.runFeOnDosInterp(),
@@ -2899,6 +2906,7 @@ class PseudocodeImporter extends React.Component {
 
     componentWillUnmount () {
         if (this._cowgolCompile) this._cowgolCompile.abort();
+        this._riscvBlocksBuild = null;
         window.removeEventListener('bw-hardware-state', this.onHardwareState);
         window.removeEventListener('bw-library-code', this.openLibraryCode);
         window.removeEventListener('bw-code-machine-selected', this.onLibraryMachineSelected);
@@ -4979,6 +4987,10 @@ class PseudocodeImporter extends React.Component {
 
     stopCodeRun () {
         if (this._cowgolCompile) this._cowgolCompile.abort();
+        if (this._riscvBlocksBuild) {
+            this._riscvBlocksBuild = null;
+            this.setState({busy: false});
+        }
         if (this._picoBasicHardware) {
             if (this.state.busy) this.closePicoBasicHardware();
             else this._picoBasicHardware.session?.terminal.send([3]);
@@ -5959,15 +5971,18 @@ class PseudocodeImporter extends React.Component {
             asmTargetForDevice(this.currentDevice()) === 'i8086';
     }
 
-    // fe, Tcl and Forth interpreters exist only as DOS programs. On any other
-    // board the program runs as its blocks, which the debugger builds as C.
+    // The RISC-V console takes a checked C image. Other boards open their
+    // established circuit-debugger build controls after the Blocks import.
     async runViaBlocksOnDevice () {
         const source = this.activeCode();
         const lang = this.state.lang;
         const device = this.codeDevice();
-        const applied = await this.compile();
+        const applied = device === 'riscv32' ? await this.compile({targetDevice: device}) : await this.compile();
         if (applied && !this._unmounted && this.state.lang === lang &&
-            this.activeCode() === source && this.codeDevice() === device) showCircuitDebugger();
+            this.activeCode() === source && this.codeDevice() === device) {
+            if (device === 'riscv32') return this.runBlocksOnRiscv();
+            showCircuitDebugger();
+        }
     }
     async runCowgolAsBlocks () {
         if (this.state.busy || this.state.running) return;
@@ -5978,6 +5993,56 @@ class PseudocodeImporter extends React.Component {
             this.props.vm.greenFlag();
         } catch (error) {
             // compile() already reports the refusal and preserves the loaded project.
+        }
+    }
+    async runBlocksOnRiscv () {
+        if (!remoteToolchainsAllowed()) {
+            this.setState({status: this.L.runCRiscvUnavailable('Hosted compilation is unavailable in this build.')});
+            return;
+        }
+        const source = this.activeCode();
+        const buffers = this.state.buffers;
+        const lang = this.state.lang;
+        const stage = this.props.vm.runtime.getTargetForStage();
+        const request = {};
+        this._riscvBlocksBuild = request;
+        const projectRevision = this.props.vm.toJSON();
+        const deviceRevision = JSON.stringify(this.props.vm.runtime.stc || null);
+        const owns = () => !this._unmounted && this._riscvBlocksBuild === request;
+        const current = () => owns() && this.state.buffers === buffers && this.state.lang === lang &&
+            this.activeCode() === source && this.codeDevice() === 'riscv32' &&
+            this.props.vm.runtime.getTargetForStage() === stage &&
+            this.props.vm.toJSON() === projectRevision &&
+            JSON.stringify(this.props.vm.runtime.stc || null) === deviceRevision;
+        this.setState({busy: true, status: this.L.runCRiscvBuilding});
+        try {
+            const SB3Creator = (await this.lib()).default;
+            if (!current()) return;
+            const project = JSON.parse(projectRevision);
+            project.stc = this.props.vm.runtime.stc || project.stc;
+            const generated = new SB3Creator().generateRiscvC(project, {device: 'RISCV32'});
+            if (!generated.ok) throw new Error(generated.reasons.join(' · ') || 'RISC-V console generation was refused.');
+            if (!current()) return;
+            const out = await requestRiscvCBuild({source: generated.c, route: 'server', hostedTarget: 'riscv32-gcc'});
+            if (!current()) {
+                if (owns() && this.state.status === this.L.runCRiscvBuilding) this.setState({status: this.L.cowgolStale});
+                return;
+            }
+            const detail = {rom: null, image: out.image, listing: null, target: 'riscv32',
+                slotId: 'riscv', profile: 'riscv', format: 'riscv'};
+            try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
+            window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
+            window.__bwPendingMedia = {type: 'asm', detail};
+            window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
+            const size = out.image.segments.reduce((n, segment) => n + segment.bytes.length, 0);
+            this.setState({status: this.L.runCRiscvBuilt(size, out.image.segments.length, out.image.entry, 'gcc')});
+        } catch (error) {
+            if (current()) this.setState({status: this.L.stError(error.message)});
+        } finally {
+            if (owns()) {
+                this._riscvBlocksBuild = null;
+                this.setState({busy: false});
+            }
         }
     }
     async compileCowgolSource (target, run = false) {
@@ -5994,19 +6059,27 @@ class PseudocodeImporter extends React.Component {
             this.props.vm.runtime.getTargetForStage() === stage;
         this.setState({busy: true, status: this.L.cowgolCompiling});
         try {
-            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig} = await import('../../lib/bw-lang/cowgol-compile.js');
+            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig, cowgolRiscvDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
             if (!current()) return;
             const out = await compileCowgol(source, target, {signal: request.signal});
             if (!current()) {
-                if (owns()) this.setState({status: this.L.cowgolStale});
+                if (owns() && this.state.status === this.L.cowgolCompiling) this.setState({status: this.L.cowgolStale});
                 return;
             }
-            if (run && target === 'dos') {
+            if (run && target === 'riscv32') {
+                const detail = cowgolRiscvDetail(out.image);
+                try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
+                window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
+                window.__bwPendingMedia = {type: 'asm', detail};
+                window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
+            } else if (run && target === 'dos') {
                 await runMachineConfig(cowgolDosConfig(), {fetcher: () => ({bytes: out.bytes})});
-            } else if (run) {
+            } else if (run && (target === 'z80-cpm' || target === 'i8080-cpm')) {
                 const {runCpmCom} = await import('../../lib/bw-machines/run-machine.js');
                 if (!current()) return;
                 await runCpmCom(cowgolCpmConfig(), out.bytes);
+            } else if (run) {
+                throw new Error('This Cowgol artifact has no machine Run action.');
             } else {
                 await downloadBlob(out.filename, new Blob([out.bytes], {
                     type: target === 'cowgol-cgen' ? 'text/x-csrc' : 'application/octet-stream'
@@ -6014,7 +6087,7 @@ class PseudocodeImporter extends React.Component {
             }
             if (current()) this.setState({status: `${out.toolchain}: ${out.bytes.length} bytes`});
         } catch (error) {
-            if (owns()) this.setState({status: this.L.stError(error.message)});
+            if (current()) this.setState({status: this.L.stError(error.message)});
         } finally {
             if (owns()) {
                 this._cowgolCompile = null;
@@ -6022,7 +6095,7 @@ class PseudocodeImporter extends React.Component {
             }
         }
     }
-    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {
+    async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null} = {}) {
         if (pseudocode == null && this.state.lang === 'basic' && this.standaloneBasicProfile()) return;
         const conversionRequest = {};
         this._conversionRequest = conversionRequest;
@@ -6092,7 +6165,11 @@ class PseudocodeImporter extends React.Component {
             }
             const SB3Creator = (await this.lib()).default;
             const creator = new SB3Creator();
+            if (targetDevice && !/^\s*DEVICE\s+/im.test(source)) source = `DEVICE ${targetDevice}\n${source}`;
             creator.parse(source);
+            if (targetDevice && creator.project.stc?.device !== targetDevice) {
+                throw new Error(`This source declares a different machine. Select ${creator.project.stc?.device || 'its declared target'} before running it.`);
+            }
             const sourceDeclarations = JSON.parse(JSON.stringify(creator.project));
             const missing = [];
             uploads.forEach(u => {
@@ -6148,6 +6225,7 @@ class PseudocodeImporter extends React.Component {
                 }
             }
             if (!ownsConversion() || this._makeCodeRequest !== ownedMakeCodeRequest) return;
+            if (targetDevice && (!ownsEditor(this.state) || this.codeDevice() !== targetDevice)) return;
             if (this.props.vm.runtime.getTargetForStage() !== stage || this._animationImport !== pending || this.state.uploads !== uploads ||
                 this.activeCode() !== activeAtStart) throw new Error('The code or loaded project changed while preparing this conversion. Try again.');
             // A request still preparing a new conversion does not revoke the
@@ -6250,10 +6328,18 @@ class PseudocodeImporter extends React.Component {
                 setCircuitView({fullWidth: false, dock: 'off', rightPaneVisible: usesScratchStage(proj)});
             }
             const nb = {...this.state.buffers};
+            const targetWarnings = [];
             if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts());
             if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
-            if (lang !== 'c') nb.c = new SB3Creator().generateC(proj);
+            if (lang !== 'c') {
+                try { nb.c = new SB3Creator().generateC(proj); }
+                catch (error) {
+                    if (error.code !== 'RISCV_CONSOLE_UNSUPPORTED') throw error;
+                    nb.c = '';
+                    targetWarnings.push(`RISC-V C export: ${error.message}`);
+                }
+            }
             if (lang !== 'basic') {
                 const br = new SB3Creator().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
@@ -6268,7 +6354,7 @@ class PseudocodeImporter extends React.Component {
                 const mp = new SB3Creator().generateMicroPython(proj);
                 nb.micropython = mp.ok ? mp.py : `# === Cannot generate MicroPython ===\n${mp.reasons.map(s => '# ' + s).join('\n')}`;
             }
-            const warns = [...parseWarnings, ...creator.warnings];
+            const warns = [...parseWarnings, ...creator.warnings, ...targetWarnings];
             if (missing.length) warns.push(`no sprite named: ${missing.join(', ')}`);
             const classified = classifyConversionWarnings(warns);
             // Generator callbacks may reenter the editor. A revoked import
@@ -6305,13 +6391,21 @@ class PseudocodeImporter extends React.Component {
             const {assetLibraryRecords, withoutAssetLibraries} = await import('../../lib/bw-asset-library.js');
             const savedProject = JSON.parse(this.props.vm.toJSON());
             const project = withoutAssetLibraries(savedProject, assetLibraryRecords(this.props.vm, savedProject));
+            if (this.props.vm.runtime.stc) project.stc = this.props.vm.runtime.stc;
             const basicResult = new SB3Creator().generateBASIC(project, {profile: this.selectedBasicProfile()?.dialect === 'ms' ? 'ms' : 'bbc', lineNumbers: this.state.basicLineNumbers});
             const mpResult = new SB3Creator().generateMicroPython(project);
+            let cSource = '';
+            let cWarning = '';
+            try { cSource = new SB3Creator().generateC(project); }
+            catch (error) {
+                if (error.code !== 'RISCV_CONSOLE_UNSUPPORTED') throw error;
+                cWarning = `RISC-V C export: ${error.message}`;
+            }
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
                 python: new SB3Creator().generatePython(project, this.genOpts()),
                 javascript: new SB3Creator().generateJavaScript(project, this.genOpts()),
-                c: new SB3Creator().generateC(project),
+                c: cSource,
                 basic: basicResult.ok ? basicResult.basic : `REM === Cannot show as BASIC ===\n${basicResult.reasons.map(s => 'REM ' + s).join('\n')}`,
                 asm: this.state.buffers.asm ?? '',
                 nqc: this.state.buffers.nqc ?? '',
@@ -6328,6 +6422,7 @@ class PseudocodeImporter extends React.Component {
             // Diagnostics sit inside scripts too, indented, so match any indent and
             // list each one: a count of column-0 comments reported "✓ OK" for them.
             const unsupportedDiagnostics = Array.from(buffers.pseudocode.matchAll(/^\s*# unsupported:\s*(.*)$/gm), match => match[1].trim());
+            if (cWarning) unsupportedDiagnostics.push(cWarning);
             const unsupported = unsupportedDiagnostics.length;
             this.setState(state => ({
                 buffers: {...buffers, ...hiddenCodeDrafts(state.authoredSources, state.buffers, this.codeDevice())},
@@ -7292,6 +7387,14 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.runBasic}
                             </button>
                         ) : null}
+                        {this.state.lang === 'pseudocode' && this.codeDevice() === 'riscv32' &&
+                            this.activeCode().trim() && remoteToolchainsAllowed() ? (
+                            <button type="button" onClick={() => this.runViaBlocksOnDevice()}
+                                disabled={this.state.running || this.state.busy} style={actionBtn}
+                                data-testid={menu ? 'bw-blocks-riscv-run-menu' : 'bw-blocks-riscv-run'}>
+                                {this.L.runBlocksRiscv}
+                            </button>
+                        ) : null}
                         {this.state.lang === 'cowgol' && this.activeCode().trim() ? (
                             <React.Fragment>
                                 <button type="button" onClick={() => this.runCowgolAsBlocks()}
@@ -7312,7 +7415,17 @@ class PseudocodeImporter extends React.Component {
                                         data-testid={menu ? 'bw-cowgol-dos-run-menu' : 'bw-cowgol-dos-run'}>
                                         {this.L.cowgolRunDos}
                                     </button>}
+                                {remoteToolchainsAllowed() && (!this.codeDevice() || this.codeDevice() === 'riscv32') &&
+                                    <button type="button" onClick={() => this.compileCowgolSource('riscv32', true)}
+                                        disabled={this.state.running || this.state.busy} style={actionBtn}
+                                        data-testid={menu ? 'bw-cowgol-riscv-run-menu' : 'bw-cowgol-riscv-run'}>
+                                        {this.L.cowgolRunRiscv}
+                                    </button>}
                                 {menu && remoteToolchainsAllowed() && <React.Fragment>
+                                    <button type="button" onClick={() => this.compileCowgolSource('riscv32')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolDownloadRiscv}
+                                    </button>
                                     <button type="button" onClick={() => this.compileCowgolSource('dos')}
                                         disabled={this.state.running || this.state.busy}>
                                         {this.L.cowgolDownloadDos}

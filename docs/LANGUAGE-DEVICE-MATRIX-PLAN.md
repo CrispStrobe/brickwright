@@ -873,18 +873,22 @@ Existing target backends retain their restrictions; pointer/record semantics,
 concurrent event scripts and full graphics APIs are not inferred. See
 [Cowgol integration](COWGOL.md) for the supported contract and validation.
 
-**N12. RISC-V from the dialect. OPEN 2026-09-25, unclaimed.** The riscv32
-column joined the matrix on 2026-09-25 (it had been listed as a console while
-two local roads shipped: `riscv-asm.js` assembles RV32IM and shecc-in-wasm
-compiles C, both in the browser, both run on the RV32IMA SoC). Its other five
-rows are open on one road: sb3-creator's `generateC` has no RISC-V core, so the
-dialect -- and every language read into it -- cannot reach this device. N12 is a
-RISC-V *console* profile in `generateC` (print/say, variables, loops, waits;
-no pins, the SoC has none) whose C the same shecc compiles, so the ▶ Run C on
-RISC-V path carries it. Upstream first: sb3-creator is vendored.
-DoD: a dialect program round-trips to C that shecc compiles and the SoC runs,
-printing the expected console output; the five cells flip `viaOpen('c','N12')`
-→ `via('c')`.
+**N12. RISC-V from the dialect. CONSOLE ROUTE IMPLEMENTED 2026-11-28;
+local shecc and timing remain open.** The producer now owns `DEVICE RISCV32`
+and `generateRiscvC()`, a checked sequential int32 console backend. `generateC`
+dispatches to it, and the Code tab's Run via Blocks action builds the accepted
+project with full hosted GCC and loads its exact RV32 image. A real compiler
+and pinned `RiscV32Machine` test exercise output, control flow, signed limits,
+short-circuiting and runtime overflow refusal. The lowered cells now describe
+that available console route, with its hosted-compiler qualification.
+
+The original objective also proposed browser shecc compatibility and waits.
+Those remain open: the checked arithmetic implementation uses fixed-width C
+types and int64 intermediates, and this console has no qualified timer API.
+Waits, GPIO and canvas are explicitly refused. Full Cowgol compilation through
+cgen and RV32 GCC is separately implemented by the compiler service, with
+deployment required. See [COWGOL.md](COWGOL.md) and the producer's console
+contract for the two distinct routes.
 
 **N13. ESP8266 C on the hosted service. DONE 2026-10-15.** The esp8266
 column joined with sb3-creator's DEVICE ESP8266 back end and bw-board's

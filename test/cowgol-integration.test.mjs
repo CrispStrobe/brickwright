@@ -145,8 +145,8 @@ test('the + menu, file extensions, conversion, Run actions and highlighting all 
     assert.match(importer, /BW_OPTIONAL_LANGS = \[\['cowgol'/);
     assert.match(importer, /cowgol:\s+\{ext: 'cow'/);
     assert.match(importer, /TWO_WAY = new Set\(\[[^\n]*'cowgol'/);
-    assert.match(importer, /cowgol: \(\) => this\.runCowgolAsBlocks\(\)/);
-    for (const id of ['bw-cowgol-blocks-run', 'bw-cowgol-cpm-run', 'bw-cowgol-dos-run']) assert.ok(importer.includes(id), id);
+    assert.match(importer, /cowgol: \(\) => target === 'riscv32' \? this\.compileCowgolSource\('riscv32', true\) : this\.runCowgolAsBlocks\(\)/);
+    for (const id of ['bw-cowgol-blocks-run', 'bw-cowgol-cpm-run', 'bw-cowgol-dos-run', 'bw-cowgol-riscv-run']) assert.ok(importer.includes(id), id);
     const modes = readFileSync(new URL('../overlay/scratch-gui/src/lib/codemirror-languages.js', import.meta.url), 'utf8');
     assert.match(modes, /case 'cowgol': return cowgolLang\(\)/);
 });

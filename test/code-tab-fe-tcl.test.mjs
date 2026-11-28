@@ -421,7 +421,7 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // overwrote an edit typed meanwhile, or reloaded the project after a
     // machine had started.
     assert.match(importer, /for \(const l of Object\.keys\(DOS_LANG\)\) if \(l !== lang\) nb\[l\] = '';/);
-    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null, scratchExample = false} = {})');
+    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null} = {})');
     const compileEnd = importer.indexOf('async fromBlocks ()', compileStart);
     assert.doesNotMatch(importer.slice(compileStart, compileEnd), /dosLangBuffersFor|generateDosLangs|\.generate\(await/,
         'compile() runs no fe/Tcl generator (reading the open fe/Tcl tab is its input, not a regeneration)');

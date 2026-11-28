@@ -1,0 +1,233 @@
+#!/usr/bin/env node
+// SPDX-License-Identifier: BSD-3-Clause
+// Real frontend client -> local HTTP service -> actual compiler -> pinned guest.
+// Starts the server as a child so loopback also works in isolated exec sandboxes.
+// Requires the service's Python requirements, a built Cowgol bundle, and cc for
+// C export. No packages are installed and no remote compiler endpoint is used.
+//
+// node scripts/verify-cowgol-platforms.mjs \
+//   --service ../stc-compiler --bundle ../cowgol-bundle --board ../bw-board \
+//   --riscv-gcc-stage ../riscv-gcc-stage --tmpdir ../validation
+// Add --targets riscv32,cowgol-cgen,eater6502 when that native ROM is installed.
+import assert from 'node:assert/strict';
+import {spawn, execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import path from 'node:path';
+import {setTimeout as delay} from 'node:timers/promises';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {parseArgs} from 'node:util';
+import {compileCowgol, COWGOL_COMPILE_TARGETS} from '../overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js';
+
+const root = fileURLToPath(new URL('..', import.meta.url));
+const {values} = parseArgs({options: {
+    service: {type: 'string'}, bundle: {type: 'string'}, board: {type: 'string'},
+    'riscv-gcc-stage': {type: 'string'}, tmpdir: {type: 'string'},
+    targets: {type: 'string'}, python: {type: 'string'}, cc: {type: 'string'},
+    help: {type: 'boolean', short: 'h'}
+}});
+if (values.help) {
+    console.log(`Usage: node scripts/verify-cowgol-platforms.mjs [options]
+  --service PATH           stc-compiler checkout (COWGOL_STC_COMPILER; default ../stc-compiler)
+  --bundle PATH            Built bundle (COWGOL_BUNDLE; default SERVICE/vendor/cowgol)
+  --board PATH             Exact pinned bw-board checkout (COWGOL_BW_BOARD; default ../bw-board)
+  --riscv-gcc-stage PATH   Existing executable GCC stage (COWGOL_RISCV_GCC_STAGE)
+  --tmpdir PATH            Temporary parent directory (TMPDIR; default this repository)
+  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502 (default first two)
+  --python COMMAND        Python executable (PYTHON; default python3)
+  --cc COMMAND            Host C compiler executable (CC; default cc)
+
+The service binds an ephemeral 127.0.0.1 port. Every compiler request uses that
+local endpoint through Brickwright's real compileCowgol client. Temporary
+artifacts and the child server are removed on success and on ordinary failure.
+C export is compiled with the bundle's real portable console binding. Eater6502
+is explicit opt-in and fails if its frontend/service/bundle route is absent.`);
+    process.exit(0);
+}
+
+const service = path.resolve(values.service || process.env.COWGOL_STC_COMPILER || path.join(root, '../stc-compiler'));
+const bundle = path.resolve(values.bundle || process.env.COWGOL_BUNDLE || path.join(service, 'vendor/cowgol'));
+const board = path.resolve(values.board || process.env.COWGOL_BW_BOARD || path.join(root, '../bw-board'));
+const temporaryParent = path.resolve(values.tmpdir || process.env.TMPDIR || root);
+const python = values.python || process.env.PYTHON || 'python3';
+const compiler = values.cc || process.env.CC || 'cc';
+const targets = [...new Set((values.targets || 'riscv32,cowgol-cgen').split(',').map(item => item.trim()).filter(Boolean))];
+assert.ok(targets.length, 'Select at least one platform');
+for (const target of targets) {
+    assert.ok(['riscv32', 'cowgol-cgen', 'eater6502'].includes(target), `Unsupported verification target: ${target}`);
+    assert.ok(COWGOL_COMPILE_TARGETS[target], `The frontend does not yet expose ${target}`);
+}
+for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifest.json')]) {
+    assert.ok(existsSync(filename), `Required input is missing: ${filename}`);
+}
+
+const git = (directory, ...args) => execFileSync('git', ['-C', directory, ...args], {encoding: 'utf8', timeout: 10_000}).trim();
+const manifest = JSON.parse(readFileSync(path.join(bundle, 'manifest.json'), 'utf8'));
+const boardPin = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'))['bw-board'];
+if (targets.some(target => target !== 'cowgol-cgen')) {
+    assert.equal(git(board, 'rev-parse', 'HEAD'), boardPin, 'The machine checkout must match vendor-pins.json');
+    assert.equal(git(board, 'status', '--porcelain', '--untracked-files=no'), '', 'The pinned machine must have no tracked edits');
+}
+mkdirSync(temporaryParent, {recursive: true});
+const work = mkdtempSync(path.join(temporaryParent, 'bw-cowgol-platforms-'));
+const riscvStage = path.resolve(values['riscv-gcc-stage'] || process.env.COWGOL_RISCV_GCC_STAGE || path.join(work, 'riscv-gcc'));
+
+const fullSource = `include "cowgol.coh";
+include "brickwright.coh";
+include "malloc.coh";
+var values: int32[3];
+values[0] := 20;
+values[1] := 22;
+values[2] := values[0] + values[1];
+var quotient: uint32;
+var remainder: uint32;
+(quotient, remainder) := divmodu32(85, 2);
+var memory := Alloc(8);
+[memory] := 17;
+bw_print_text("HTTP Cowgol");
+bw_print_number(values[2]);
+bw_print_number(quotient as int32);
+bw_print_number(remainder as int32);
+bw_print_number([memory] as int32);
+Free(memory);
+bw_print_number(-2147483647 as int32 - 1);
+bw_print_number(2147483647 as int32);
+`;
+const fullOutput = 'HTTP Cowgol\n42\n42\n1\n17\n-2147483648\n2147483647\n';
+const romSource = `include "cowgol.coh";
+include "brickwright.coh";
+bw_print_text("HTTP Cowgol 6502");
+bw_print_number(42 as int32);
+bw_print_number(-2147483647 as int32 - 1);
+bw_print_number(2147483647 as int32);
+`;
+const romOutput = 'HTTP Cowgol 6502\n42\n-2147483648\n2147483647\n';
+
+// Import the real application; only its writable staging directory changes.
+// /health stages unrelated toolchains, so readiness uses the ordinary OpenAPI
+// route instead. The Cowgol request still crosses the actual /compile guard.
+const serverCode = `
+import os, pathlib, socket, sys
+sys.path.insert(0, sys.argv[1])
+import app, uvicorn
+app.RISCV_GCC_STAGE = sys.argv[2]
+app.RISCV_GCC_STAGE_BIN = str(pathlib.Path(sys.argv[2]) / "bin")
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind(("127.0.0.1", 0))
+print("BW_COWGOL_ENDPOINT=http://127.0.0.1:%d/compile" % sock.getsockname()[1], flush=True)
+uvicorn.Server(uvicorn.Config(app.app, log_level="warning", access_log=False)).run(sockets=[sock])
+`;
+let server;
+let closed;
+let exitResult;
+let serviceLog = '';
+let endpoint;
+const results = [];
+try {
+    server = spawn(python, ['-u', '-c', serverCode, service, riscvStage], {
+        cwd: service, env: {...process.env, TMPDIR: work, COWGOL_BUNDLE: bundle, PYTHONDONTWRITEBYTECODE: '1'},
+        stdio: ['ignore', 'pipe', 'pipe']
+    });
+    closed = new Promise(resolve => {
+        server.once('error', error => { exitResult = {error}; });
+        server.once('close', (code, signal) => { exitResult ||= {code, signal}; resolve(exitResult); });
+    });
+    server.stdout.setEncoding('utf8'); server.stderr.setEncoding('utf8');
+    const collect = chunk => {
+        serviceLog = (serviceLog + chunk).slice(-16_384);
+        endpoint ||= serviceLog.match(/^BW_COWGOL_ENDPOINT=(http:\/\/127\.0\.0\.1:\d+\/compile)$/m)?.[1];
+    };
+    server.stdout.on('data', collect); server.stderr.on('data', collect);
+    const startDeadline = Date.now() + 30_000;
+    let ready = false;
+    while (!ready && Date.now() < startDeadline) {
+        if (exitResult) throw new Error(`Local compiler server exited: ${JSON.stringify(exitResult)}`);
+        if (endpoint) {
+            try {
+                const response = await fetch(endpoint.replace(/\/compile$/, '/openapi.json'), {
+                    redirect: 'error', signal: AbortSignal.timeout(1_000)
+                });
+                ready = response.ok;
+                await response.arrayBuffer();
+            } catch { /* The listening socket may precede ASGI startup. */ }
+        }
+        if (!ready) await delay(50);
+    }
+    assert.ok(ready, 'Local compiler server did not start within 30 seconds');
+    const localFetch = (url, options) => {
+        assert.equal(url, endpoint, 'Verification must not send source outside its local compiler server');
+        return fetch(url, {...options, redirect: 'error', signal: AbortSignal.timeout(120_000)});
+    };
+    for (const target of targets) {
+        const out = await compileCowgol(target === 'eater6502' ? romSource : fullSource, target, {endpoint, fetcher: localFetch});
+        assert.equal(out.compiler_commit, manifest.source_commit, 'HTTP response must identify the supplied compiler bundle');
+        let output;
+        let execution;
+        if (target === 'riscv32') {
+            const {RiscV32Machine} = await import(pathToFileURL(path.join(board, 'src/riscv32-machine.js')).href);
+            const machine = new RiscV32Machine({memSize: 1 << 22, resetPc: out.image.entry});
+            for (const segment of out.image.segments) machine.load(segment.bytes, segment.addr);
+            machine.run(50_000_000);
+            assert.equal(machine.halted, true, 'RV32 program must halt within the instruction budget');
+            assert.equal(machine.exitCode, 0, 'RV32 program must exit successfully');
+            output = machine.output;
+            execution = {entry: out.image.entry, segments: out.image.segments.length, exitCode: machine.exitCode};
+        } else if (target === 'cowgol-cgen') {
+            assert.equal(out.artifact_kind, 'source');
+            assert.equal(out.c, new TextDecoder().decode(out.bytes), 'Downloaded C and response text must agree');
+            const relative = 'rt/cgen/brickwright-console.h';
+            const host = readFileSync(path.join(bundle, relative));
+            assert.equal(createHash('sha256').update(host).digest('hex'), manifest.sha256[relative], 'Use the pinned console binding');
+            const source = path.join(work, 'export.c');
+            const executable = path.join(work, 'export');
+            writeFileSync(source, Buffer.concat([out.bytes, Buffer.from('\n'), host]));
+            execFileSync(compiler, ['-std=gnu99', '-fwrapv', '-fno-strict-aliasing', source, '-o', executable], {
+                encoding: 'utf8', timeout: 30_000, env: {...process.env, TMPDIR: work}, maxBuffer: 1024 * 1024
+            });
+            output = execFileSync(executable, [], {encoding: 'utf8', timeout: 10_000});
+            execution = {compiler, exitCode: 0, binding: relative};
+        } else {
+            const {M6502Machine, EATER6502} = await import(pathToFileURL(path.join(board, 'src/m6502-machine.js')).href);
+            assert.equal(out.bytes.length, 0x8000, 'Eater6502 must be a complete 32 KiB ROM');
+            const serial = [], romWrites = [];
+            const machine = new M6502Machine(EATER6502, {onSerial: byte => serial.push(byte)});
+            machine.mem.fill(0xa5, 0, 0x4000);
+            machine.loadRom(out.bytes);
+            const write = machine.cpu.write;
+            machine.cpu.write = (address, byte) => {
+                if (address >= 0x8000) romWrites.push(address);
+                write(address, byte);
+            };
+            machine.reset();
+            let steps = 0;
+            for (; steps < 4_000_000 && !machine.cpu.stopped; steps++) machine.step();
+            assert.equal(machine.cpu.stopped, true, '6502 program must stop within the instruction budget');
+            assert.equal(machine.cpu.a, 0, '6502 program must exit successfully');
+            assert.deepEqual(romWrites, [], '6502 program must not attempt to use ROM as workspace');
+            assert.deepEqual(machine.mem.subarray(0x8000), out.bytes, 'ROM must remain unchanged');
+            output = Buffer.from(serial).toString('utf8');
+            execution = {entry: out.entry, steps, exitCode: machine.cpu.a};
+        }
+        assert.equal(output, target === 'eater6502' ? romOutput : fullOutput, `${target} console output must include both int32 limits`);
+        results.push({target, toolchain: out.toolchain, artifactBytes: out.bytes.length, ...execution, output});
+        console.error(`PASS ${target}: real HTTP artifact executed with the expected console and signed int32 limits`);
+    }
+    console.log(JSON.stringify({
+        serviceCommit: git(service, 'rev-parse', 'HEAD'),
+        serviceTrackedEdits: git(service, 'status', '--porcelain', '--untracked-files=no') !== '',
+        cowgolCommit: manifest.source_commit, boardCommit: targets.some(target => target !== 'cowgol-cgen') ? boardPin : null,
+        results
+    }, null, 2));
+} catch (error) {
+    if (error.log) console.error(error.log);
+    if (serviceLog) console.error(`Local compiler log:\n${serviceLog}`);
+    throw error;
+} finally {
+    if (server && !exitResult) {
+        server.kill('SIGTERM');
+        await Promise.race([closed, delay(5_000, undefined, {ref: false})]);
+        if (!exitResult) server.kill('SIGKILL');
+    }
+    if (closed) await closed;
+    rmSync(work, {recursive: true, force: true});
+}
