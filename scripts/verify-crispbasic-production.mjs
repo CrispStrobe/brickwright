@@ -24,7 +24,7 @@ const mime = new Map([
 ]);
 const report = {format: 'crispbasic-production-qualification', version: 1,
     commit: process.env.GITHUB_SHA || null, buildDirectory: relative(root, build),
-    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 11,
+    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 12,
     scenarios: [], serverFailures: []};
 let browser, server, origin;
 
@@ -302,6 +302,74 @@ scenario('production CodeMirror generates BBC BASIC from blocks and loads the in
         await page.screenshot({path: resolve(artifacts, 'generated-basic.png'), fullPage: true});
     });
 
+scenario('production portable source round trip survives reopening and preserves its required runtime',
+    async (page, evidence, record) => {
+        await openCircuit(page);
+        await codeTab(page);
+        const controllers = page.getByTestId('bw-crispbasic-controller-list');
+        await controllers.locator('summary').click();
+        assert.equal(await controllers.locator('li').count(), 16);
+        record.controllers = await controllers.locator('li').allTextContents();
+        assert.ok(record.controllers.some(label => /STM32F030/.test(label)));
+        assert.ok(record.controllers.some(label => /ESP8266/.test(label)));
+        assert.ok(record.controllers.some(label => /6502/.test(label)));
+        await controllers.locator('summary').click();
+        await page.getByTestId('bw-basic-portable-library').check();
+        await page.getByTestId('bw-crispbasic-connect-circuit').check();
+        const original = `REM @bw device arduino-uno
+REM @bw pin lamp D13 output
+PROCpinMode(13,"output")
+PROCdigitalWrite(13,1)
+PROCdelay(2)
+PROCdigitalToggle(13)
+PRINT FNmillis
+GCOL 0,2
+MOVE 640,512
+DRAW 680,552
+END
+`;
+        await openCodeFile(page, 'roundtrip.bas', original);
+        await page.getByTestId('bw-basic-run').click();
+        await finished(page);
+        assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+        const originalOutput = await page.getByTestId('bw-basic-output').textContent();
+        assert.equal(originalOutput, '         2\r\n');
+        await page.getByTestId('bw-code-editor').getByRole('button', {name: '🧩 Pseudo', exact: true}).click();
+        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"] .cm-content')
+            ?.innerText.startsWith('# @crispbasic-portable 1'));
+        const marked = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        assert.equal((marked.match(/# @crispbasic-portable 1/g) || []).length, 1);
+        const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.getByTestId('bw-code-status').filter({hasText: /To blocks is not qualified/}).waitFor();
+        assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), marked);
+        await page.getByTestId('bw-code-editor').getByRole('button', {name: '🐍 Py', exact: true}).click();
+        await page.getByTestId('bw-code-status').filter({hasText: /python is not qualified/}).waitFor();
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), marked);
+        // Reopen saved source after discarding the checkbox preference and all
+        // derived buffers: the marker alone must retain the runtime contract.
+        await page.getByTestId('bw-code-editor').getByRole('button', {name: '📺 BAS', exact: true}).click();
+        await page.getByTestId('bw-basic-portable-library').uncheck();
+        await openCodeFile(page, 'roundtrip.bw', marked);
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.getByTestId('bw-code-status').filter({hasText: /To blocks is not qualified/}).waitFor();
+        assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
+        await page.getByTestId('bw-code-editor').getByRole('button', {name: '📺 BAS', exact: true}).click();
+        await page.getByTestId('bw-basic-engine').waitFor({state: 'visible'});
+        assert.equal(await page.getByTestId('bw-basic-engine').inputValue(), 'crispbasic');
+        assert.equal(await page.getByTestId('bw-basic-portable-library').isChecked(), true);
+        record.regenerated = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        assert.match(record.regenerated, /PROCdigitalToggle\(13\)/);
+        await page.getByTestId('bw-basic-run').click();
+        await finished(page);
+        assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+        assert.equal(await page.getByTestId('bw-basic-output').textContent(), originalOutput);
+        record.pseudocode = marked;
+        record.output = originalOutput;
+        await page.screenshot({path: resolve(artifacts, 'portable-roundtrip.png'), fullPage: true});
+    });
+
 scenario('production portable generation drives the Circuit and To blocks preserves the refused source and project',
     async (page, evidence, record) => {
         // Compile through the ordinary Code importer before loading the Circuit,
@@ -525,7 +593,7 @@ scenario('production VDU renderer paints the expected pixels on identical repeat
         assert.equal(result.diagnostic, null);
         const canvas = page.getByTestId('bw-vdu-terminal').locator('canvas');
         await canvas.waitFor({state: 'visible'});
-        const colour = await canvas.evaluate(node => [...node.getContext('2d').getImageData(80, 192, 1, 1).data]);
+        const colour = await canvas.evaluate(node => [...node.getContext('2d').getImageData(80, 190, 1, 1).data]);
         assert.ok(colour[0] > 200 && colour[1] < 20 && colour[2] < 20, JSON.stringify(colour));
         colours.push(colour);
     }

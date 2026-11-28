@@ -173,7 +173,9 @@ test('real VDU output paints the mounted renderer and survives an identical seco
     const first = await runSource(page, source);
     assert.equal(first.diagnostic, null);
     const pixel = () => page.locator('[data-testid="bw-vdu-terminal"] canvas').evaluate(canvas =>
-        [...canvas.getContext('2d').getImageData(80, 192, 1, 1).data]);
+        // Logical Y=256 is canvas Y=191; sample inside the descending
+        // segment at pixel centre (80.5,190.5), away from its antialias edge.
+        [...canvas.getContext('2d').getImageData(80, 190, 1, 1).data]);
     const colour = await pixel();
     assert.ok(colour[0] > 200 && colour[1] < 20 && colour[2] < 20, JSON.stringify(colour));
     const second = await runSource(page, source);

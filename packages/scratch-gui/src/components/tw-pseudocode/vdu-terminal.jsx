@@ -7,11 +7,13 @@ import {VduDecoder} from 'bw-board/vdu-decoder.js';
  * The BBC's graphics are a BYTE PROTOCOL: MOVE/DRAW/PLOT/COLOUR are
  * VDU control sequences on the same stream as printed text. This
  * component feeds the raw serial output through VduDecoder and renders:
- * - text on a fixed 40-column preview grid
+ * - opaque text cells on a fixed 40-column by 16-row preview grid
  * - relative/absolute lines, points, filled triangles and rectangles
  *
  * BBC BASIC screen coordinates: origin at bottom-left, Y increases
  * upward, 1280×1024 logical units in MODE 0-6.
+ * This preview does not resize its text grid for MODE or emulate scrolling;
+ * text outside the fixed grid is reported instead of painted off-canvas.
  */
 
 // BBC BASIC 8-colour palette (physical colours 0-7)
@@ -97,6 +99,32 @@ class VduTerminal extends React.Component {
         if (this._unsupported.size < 16) this._unsupported.add(operation);
     }
 
+    _moveTextCursor (dx, dy = 0) {
+        const column = this._cx + dx;
+        this._cx = ((column % 40) + 40) % 40;
+        this._cy += dy + Math.floor(column / 40);
+    }
+
+    _paintTextCell (ctx, char = null) {
+        if (this._cx < 0 || this._cx >= 40 || this._cy < 0 || this._cy >= 16) {
+            this._cannotRender('text outside 40x16 preview (scrolling unavailable)');
+            return;
+        }
+        const x = this._cx * 8, y = this._cy * 16;
+        // VDU 4 text is opaque, including spaces used to erase old text.
+        // Keep graphics background colour independent of these text cells.
+        ctx.fillStyle = PALETTE[this._bgCol & 7];
+        ctx.fillRect(x, y, 8, 16);
+        if (char === null) return;
+        // A glyph must not spill into its neighbour and survive a later erase.
+        ctx.save();
+        ctx.beginPath(); ctx.rect(x, y, 8, 16); ctx.clip();
+        ctx.fillStyle = PALETTE[this._textCol & 7];
+        ctx.font = '12px monospace';
+        ctx.fillText(char, x + 2, y + 13);
+        ctx.restore();
+    }
+
     _handleEvent (ev) {
         const canvas = this._canvasRef.current;
         if (!canvas) return;
@@ -109,14 +137,16 @@ class VduTerminal extends React.Component {
 
         switch (ev.type) {
         case 'char':
-            ctx.fillStyle = PALETTE[this._textCol & 7];
-            ctx.font = '12px monospace';
-            ctx.fillText(ev.char, this._cx * 8 + 2, this._cy * 16 + 13);
-            this._cx++;
-            if (this._cx >= 40) { this._cx = 0; this._cy++; }
+            this._paintTextCell(ctx, ev.char);
+            this._moveTextCursor(1);
+            break;
+        case 'delete':
+            // DEL is backspace-space-backspace: clear without advancing.
+            this._moveTextCursor(-1);
+            this._paintTextCell(ctx);
             break;
         case 'newline':
-            this._cy++;
+            this._moveTextCursor(0, 1);
             break;
         case 'cr':
             this._cx = 0;
@@ -204,8 +234,7 @@ class VduTerminal extends React.Component {
             this._cx = ev.x; this._cy = ev.y;
             break;
         case 'cursor':
-            this._cx = Math.max(0, this._cx + ev.dx);
-            this._cy = Math.max(0, this._cy + ev.dy);
+            this._moveTextCursor(ev.dx, ev.dy);
             break;
         case 'vdu':
             // NUL and text-output enable do not paint anything. Other VDUs

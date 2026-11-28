@@ -1,5 +1,92 @@
 # Validation records
 
+## Portable controllers, source round trips and motor physics — 2026-11-28
+
+This integration is saved incrementally on
+[`feature/crispbasic-portable-simulators-20261128`](https://github.com/CrispStrobe/brickwright/tree/feature/crispbasic-portable-simulators-20261128).
+Its owning producers are `bw-board` at
+[`8be0fbc8e91f1ed2cebb26883210efceef9234cc`](https://github.com/CrispStrobe/bw-board/commit/8be0fbc8e91f1ed2cebb26883210efceef9234cc)
+and `sb3-creator` at
+[`2c991d9a590d189eaad66c96951d4815a9f34e29`](https://github.com/CrispStrobe/sb3-creator/commit/2c991d9a590d189eaad66c96951d4815a9f34e29).
+The compiler, lightweight mode helper, both GUI mirrors, authoring inventory
+and vendor pins are adopted through the official sync. The gallery is unchanged
+and passes its 5,941-file check. The feature pin is deliberate, using the sync's
+supported `--allow-stale` option for the requested branch-only incubation. The 22 mapped compiler files match the exact producer after the
+sync's documented import rewrites.
+
+The runtime implementation is
+[`597fc385277769c10c9c5791081b19002e638b6f`](https://github.com/CrispStrobe/brickwright/commit/597fc385277769c10c9c5791081b19002e638b6f),
+integrated in the consumer's
+[`8620eaae7cbe82d93b17d954ef2e71c632ec5ff9`](https://github.com/CrispStrobe/brickwright/commit/8620eaae7cbe82d93b17d954ef2e71c632ec5ff9)
+checkpoint. In [run 46124192458](https://github.com/CrispStrobe/brickwright/actions/runs/46124192458),
+both native architecture jobs and the WASM job passed. Native x64 and ARM64
+each passed 117 source/fixture/bridge checks and 42 actual native runtime/CLI
+checks. The portable CLI jobs downloaded the same artifact and passed on
+Linux ARM64 (15 checks), macOS 15 ARM64 (15) and Windows Server 2025 x64 (14),
+with zero failures or skips. Windows does not declare the POSIX signal test;
+all hosts qualify parent-owned timeout/output/request limits.
+
+The shared runtime artifact is `15254599855`, with archive SHA-256
+`1784baf08733e9992d00faa464396e7e980b5571d436c016b1cfeb7b47d621a7`.
+Each portable job verified this same artifact. Native ARM64 uses upstream
+`double` while x64 uses `long double`; the common corpus does not prove
+bit-identical results at every floating-point precision boundary.
+
+### Consumer execution evidence
+
+The integrated local native/source/WASM CLI/robot check passed 172 tests
+(117 source/fixture/bridge, 42 native, nine WASM CLI and four motor cases),
+with freshly rebuilt native and WASM artifacts. Subsequent editor/compiler
+integration passed all **292** `test:brickwright` checks, with zero failures
+or skips, including the real round-trip suite below. Nine pin-identity and
+localization checks also passed without skips. Hosted production status is
+recorded with the closing integration receipt.
+
+Real Chromium 158 executed all 14 focused editor/renderer/Circuit scenarios,
+with zero failures or skips. This includes the actual C/WASM interpreter,
+relative/absolute canvas geometry, unsupported-operation diagnostics, input,
+Stop/Reset, asynchronous circuit cancellation and board replacement. The
+complete production GUI is a separate workflow gate; focused browser success
+does not substitute for its final-head result.
+
+The permanent `tests/roundtrip.test.mjs` suite has 35 passing checks: a real
+artifact requirement, six complete original/regenerated programs, 24 accepted
+expressions and four explicit refusals. It compares byte-identical VDU output,
+text and the complete ordered pin trace, including timestamps and operation
+counts. Cases cover numbered/structured loops, active-low reads and output
+latches, elapsed time, integer canvas paths, negative arithmetic/Boolean values,
+quoted strings and temporary-variable collisions. The four rejected constant
+comparisons would discard an electrical read; the original program is executed
+to prove that read exists. This is same-interpreter semantic regression
+qualification, not an independent language-implementation oracle.
+
+The motor example uses the real Circuit solver and WASM interpreter. Four
+checks exercise forward/reverse/brake/coast, swapped motor leads, Stop during
+an outstanding delay and interpreter-error cleanup. Independent anchors cover
+steady-state speed/current and signed shaft travel. Cancellation releases the
+pins/clock, preserves physical rotor state and a preexisting power-on state,
+and allows a fresh owner without late work. It does not qualify CAD body/world
+motion; BASIC and the existing CAD coupling retain exclusive clock ownership.
+
+The sync now applies its import rewrites to the old comparison base as well
+as incoming files; upstream import changes no longer appear to delete local
+work solely because of vendored filenames. The final identity check covers
+the exact resulting file set.
+
+The first consumer checkpoints exposed two test-integration failures: the
+existing dependency-free circuit-guard harness still removed the old import
+instead of the new profile resolver, and an old canvas pixel anchor sampled
+outside the corrected Y coordinate. The harness now injects only its declared
+two-pin mapping while real profile tests remain separate; the pixel test now
+samples the full-coverage interior of the actual descending line. All 17 guard
+checks and the 14 real browser scenarios pass after those corrections.
+
+The final producer follow-up also aligns reserved-marker detection/stripping
+with parser whitespace, including BOM/NBSP/vertical-tab/form-feed. This prevents
+a saved runtime requirement from being treated as an ordinary comment during
+a generic export. Editor, CLI and direct MakeCode guards run before destination
+writes or project mutation; unsupported marker versions refuse explicitly.
+
 ## Native ARM64 and portable CLI — 2026-11-28
 
 Runtime `0.1.0-dev.7` adds a native Linux ARM64 build and an explicit

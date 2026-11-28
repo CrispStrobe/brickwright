@@ -35,6 +35,7 @@ import {showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import downloadBlob from '../../lib/download-blob.js';
 import animationResourceMenuItems from 'scratch-vm/src/util/bw-animation-resource-menu.js';
 import {conversionFailure} from '../../lib/bw-conversion-error.js';
+import {validateCrispBasicPseudocode, crispBasicModeError} from '../../lib/sb3-creator-crispbasic-mode.js';
 import {PORTABLE_GPIO_PROFILES} from 'bw-board/portable-gpio.js';
 import {getCostumeDocument, inspectArtwork, applyArtwork, syncAnimationResources} from '../../lib/bw-artwork-bundle.js';
 import {captureCodeArtwork, codeArtworkMatches, retainCodeArtwork,
@@ -234,8 +235,8 @@ const L10N = {
         basicCircuitControllers: count => `Supported Circuit controllers (${count})`,
         basicCircuitHost: 'CrispBASIC runs in this browser and controls the simulated pins. Use the logical pin numbers below; only pins exposed by the loaded circuit are available.',
         basicCircuitBenchVoltage: 'bench voltage',
-        basicPortableLibrary: 'Generate portable Circuit calls',
-        basicPortableHint: 'Regenerate from blocks to apply this choice. Portable calls need Connect Circuit to run; To blocks currently refuses them. Toggle reverses the requested output level. Unsupported hardware operations are reported as generation errors.',
+        basicPortableLibrary: 'Portable BASIC ↔ pseudocode',
+        basicPortableHint: 'Use the qualified portable subset when switching between BASIC and pseudocode. Regenerate from blocks to apply this choice to generated BASIC. Circuit calls need Connect Circuit to run. Portable pseudocode retains its CrispBASIC requirement when saved; To blocks and other runtimes refuse it. Toggle reverses the requested output level. Unsupported operations are reported as conversion errors.',
         basicCrispError: 'CrispBASIC could not finish this program.',
         basicInputLine: 'Program input', basicInputKey: 'One character (empty for Enter)',
         basicInputSend: 'Send', basicInputEnd: 'End input',
@@ -596,8 +597,8 @@ const L10N = {
         basicCircuitControllers: count => `Unterstützte Schaltungscontroller (${count})`,
         basicCircuitHost: 'CrispBASIC läuft in diesem Browser und steuert die simulierten Pins. Verwende die logischen Pinnummern unten; verfügbar sind nur die Pins der geladenen Schaltung.',
         basicCircuitBenchVoltage: 'Spannung der Schaltung',
-        basicPortableLibrary: 'Portable Schaltungsaufrufe erzeugen',
-        basicPortableHint: 'Diese Auswahl mit „Aus Blöcken“ anwenden. Portable Aufrufe benötigen „Schaltung verbinden“; „Zu Blöcken“ lehnt sie derzeit ab. Umschalten kehrt den angeforderten Ausgangspegel um. Nicht unterstützte Hardwareoperationen werden als Erzeugungsfehler gemeldet.',
+        basicPortableLibrary: 'Portables BASIC ↔ Pseudocode',
+        basicPortableHint: 'Beim Wechsel zwischen BASIC und Pseudocode die geprüfte portable Teilmenge verwenden. Für erzeugtes BASIC diese Auswahl mit „Aus Blöcken“ anwenden. Schaltungsaufrufe benötigen „Schaltung verbinden“. Portabler Pseudocode behält beim Speichern seine CrispBASIC-Anforderung; „Zu Blöcken“ und andere Laufzeiten lehnen ihn ab. Umschalten kehrt den angeforderten Ausgangspegel um. Nicht unterstützte Operationen werden als Konvertierungsfehler gemeldet.',
         basicCrispError: 'CrispBASIC konnte dieses Programm nicht beenden.',
         basicInputLine: 'Programmeingabe', basicInputKey: 'Ein Zeichen (leer für Eingabetaste)',
         basicInputSend: 'Senden', basicInputEnd: 'Eingabe beenden',
@@ -2864,7 +2865,14 @@ class PseudocodeImporter extends React.Component {
     // source → pseudocode → parse() → project → generate(to). Returns {code} or {error}.
     async deriveBuffer (src, from, to) {
         try {
-            const SB3 = (await this.lib()).default;
+            const crispEngine = this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic';
+            const portableRead = crispEngine && this.state.basicPortableLibrary;
+            // A saved portable source carries its runtime requirement with it.
+            // Check it before loading a compiler or touching a destination buffer.
+            if (from === 'pseudocode' && validateCrispBasicPseudocode(src) &&
+                to !== 'pseudocode' && !(to === 'basic' && crispEngine)) {
+                throw crispBasicModeError(to);
+            }
             let pseudo = src;
             if (from === 'c') pseudo = (await this.readC(src)).pseudocode;
             else if (from === 'python') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(src).pseudocode;
@@ -2873,11 +2881,19 @@ class PseudocodeImporter extends React.Component {
                 if (this.state.basicGenerationFailed || this.basicGenerationPlaceholder(src)) {
                     throw new Error((this.state.basicWarnings || []).join('\n') || 'BASIC generation was refused. Remove or replace the generation-error banner.');
                 }
-                const result = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
+                const result = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(
+                    src, portableRead ? {mode: 'crispbasic'} : undefined);
                 if (result.ok === false) throw new Error((result.reasons || []).join('\n') || 'BASIC conversion refused.');
                 pseudo = result.pseudocode;
             }
             else if (DOS_LANG[from]) pseudo = (await DOS_LANG[from].load()).default(src).pseudocode;
+            const portableSource = validateCrispBasicPseudocode(pseudo);
+            if (portableSource) {
+                if (to === 'pseudocode') return {code: pseudo};
+                if (to !== 'basic' || !crispEngine) throw crispBasicModeError(to);
+            }
+            const portableGeneration = crispEngine && (this.state.basicPortableLibrary || portableSource);
+            const SB3 = (await this.lib()).default;
             const creator = new SB3();
             creator.parse(pseudo);
             const proj = creator.project;
@@ -2890,7 +2906,7 @@ class PseudocodeImporter extends React.Component {
             else if (to === 'basic') {
                 const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile,
                     lineNumbers: this.state.basicLineNumbers,
-                    ...(this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' && this.state.basicPortableLibrary ? {mode: 'crispbasic'} : {})});
+                    ...(portableGeneration ? {mode: 'crispbasic'} : {})});
                 code = r.ok ? r.basic : `REM === Cannot show as BASIC ===\n${r.reasons.map(s => 'REM ' + s).join('\n')}`;
                 basicWarnings = [...(r.reasons || []), ...(r.warnings || [])];
                 basicGenerationFailed = !r.ok;
@@ -2900,7 +2916,8 @@ class PseudocodeImporter extends React.Component {
             } else if (DOS_LANG[to]) {
                 code = DOS_LANG[to].generate(await DOS_LANG[to].load(), proj);
             } else code = new SB3().generateJavaScript(proj, this.genOpts());
-            return {code, ...(to === 'basic' ? {basicWarnings, basicGenerationFailed} : {})};
+            return {code, ...(to === 'basic' ? {basicWarnings, basicGenerationFailed,
+                basicPortableLibrary: Boolean(portableGeneration)} : {})};
         } catch (e) { return {error: e.message}; }
     }
 
@@ -2998,12 +3015,13 @@ class PseudocodeImporter extends React.Component {
             return;
         }
         this.setState({busy: true, status: this.L.stConverting(to), emptyTabOffer: null});
-        this.deriveBuffer(src, from, to).then(({code, error, basicWarnings = [], basicGenerationFailed = false}) => {
+        this.deriveBuffer(src, from, to).then(({code, error, basicWarnings = [], basicGenerationFailed = false,
+            basicPortableLibrary = false}) => {
             // A failed conversion keeps the source tab, and offers an explicit
             // way into the requested tab with an empty buffer instead of a dead end.
             if (error) { this.setState({busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to}); return; }
             this.setState(s => ({lang: to, busy: false, output: null, status: '', emptyTabOffer: null,
-                ...(to === 'basic' ? {basicWarnings, basicGenerationFailed, basicFilename: 'editor.bas'} : {}),
+                ...(to === 'basic' ? {basicWarnings, basicGenerationFailed, basicPortableLibrary, basicFilename: 'editor.bas'} : {}),
                 buffers: {...s.buffers, [to]: code}}));
         });
     }
@@ -5572,6 +5590,7 @@ class PseudocodeImporter extends React.Component {
         const activeAtStart = this.activeCode();
         try {
             let source = typeof pseudocode === 'string' ? pseudocode : this.activeCode();
+            if (lang === 'pseudocode' && validateCrispBasicPseudocode(source)) throw crispBasicModeError('To blocks');
             let parseWarnings = [];
             if (lang === 'asm') {
                 const lift = (await import(/* webpackChunkName: "bw-asm-reader" */ '../../lib/bw-asm/asm-8086-to-pseudocode.js')).default;
@@ -5615,6 +5634,7 @@ class PseudocodeImporter extends React.Component {
                 const res = await this.readC(text);
                 source = res.pseudocode; parseWarnings = parseWarnings.concat(res.warnings || []);
             }
+            if (validateCrispBasicPseudocode(source)) throw crispBasicModeError('To blocks');
             const SB3Creator = (await this.lib()).default;
             const creator = new SB3Creator();
             creator.parse(source);

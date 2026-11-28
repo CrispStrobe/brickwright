@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {EventEmitter} from 'node:events';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
+import {validateCrispBasicPseudocode, crispBasicModeError} from '../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
 
 const editorSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 function between(source, start, end) {
@@ -17,7 +18,8 @@ function between(source, start, end) {
 const editorMethods = between(editorSource, '    async loadCrispBasicRunner () {', '    // Fetch examples/index.json once') +
     between(editorSource, '    componentWillUnmount () {', '    // Current-locale string table') +
     between(editorSource, '    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?');
-const Editor = new Function('DOS_LANG', `return class {${editorMethods}}`)({});
+const Editor = new Function('DOS_LANG', 'validateCrispBasicPseudocode', 'crispBasicModeError',
+    `return class {${editorMethods}}`)({}, validateCrispBasicPseudocode, crispBasicModeError);
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -428,12 +430,16 @@ const Terminal = new Function('React', 'VduDecoder', 'PALETTE', `return ${termin
 
 function terminal(output, resetKey = 1) {
     const operations = [];
-    const ctx = Object.fromEntries(['fillRect', 'fillText', 'beginPath', 'moveTo', 'lineTo', 'stroke', 'closePath', 'fill'].map(
-        key => [key, (...args) => operations.push([key, ...args])]));
+    const paints = [];
+    const ctx = Object.fromEntries(['fillRect', 'fillText', 'beginPath', 'moveTo', 'lineTo', 'stroke', 'closePath', 'fill',
+        'save', 'rect', 'clip', 'restore'].map(key => [key, (...args) => {
+        operations.push([key, ...args]);
+        if (key === 'fillRect' || key === 'fillText') paints.push([key, ctx.fillStyle, ...args]);
+    }]));
     const component = new Terminal({output, resetKey});
     component._canvasRef.current = {width: 320, height: 256, getContext: () => ctx};
     component.componentDidMount();
-    return {component, operations, ctx, update(next, key = component.props.resetKey) {
+    return {component, operations, paints, ctx, update(next, key = component.props.resetKey) {
         const previous = component.props;
         component.props = {output: next, resetKey: key};
         component.componentDidUpdate(previous);
@@ -470,7 +476,7 @@ test('replaced or shortened output resets even without an explicit run key', () 
     assert.deepEqual(t.operations.filter(op => op[0] === 'fillText').slice(-3),
         [['fillText', 'C', 2, 13], ['fillText', 'D', 10, 13], ['fillText', 'E', 18, 13]]);
     t.update(''); t.update('Z');
-    assert.deepEqual(t.operations.at(-1), ['fillText', 'Z', 2, 13]);
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText').at(-1), ['fillText', 'Z', 2, 13]);
 });
 
 const vdu = (...bytes) => String.fromCharCode(...bytes);
@@ -516,6 +522,61 @@ test('TAB and text cursor controls position text without treating LF as CR', () 
     assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
         ['fillText', 'A', 26, 45], ['fillText', 'B', 26, 45], ['fillText', 'C', 34, 61]
     ]);
+});
+
+test('text cells erase previous glyphs and use the current text background before each character', () => {
+    const t = terminal('X' + vdu(17, 129, 18, 0, 130, 31, 0, 0) + ' ');
+    assert.deepEqual(t.paints.slice(1), [
+        ['fillRect', '#000000', 0, 0, 8, 16], ['fillText', '#ffffff', 'X', 2, 13],
+        ['fillRect', '#ff0000', 0, 0, 8, 16], ['fillText', '#ffffff', ' ', 2, 13]
+    ], 'a space overwrites X with red text background, independently of green graphics background');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'rect'), [['rect', 0, 0, 8, 16], ['rect', 0, 0, 8, 16]],
+        'glyphs are clipped to the cell which a subsequent overwrite clears');
+    assert.equal(t.operations.filter(op => op[0] === 'save').length, 2);
+    assert.equal(t.operations.filter(op => op[0] === 'clip').length, 2);
+    assert.equal(t.operations.filter(op => op[0] === 'restore').length, 2);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('horizontal VDU cursor controls wrap across both edges before the next character is drawn', () => {
+    const t = terminal(vdu(31, 39, 0, 9) + 'X' + vdu(31, 0, 1, 8) + 'Y');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
+        ['fillText', 'X', 2, 29], ['fillText', 'Y', 314, 13]
+    ]);
+    assert.deepEqual([t.component._cx, t.component._cy], [0, 1]);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('DEL backspaces, erases in text background and leaves the cursor at the erased cell', () => {
+    const t = terminal('AB' + vdu(17, 132, 127));
+    assert.deepEqual(t.paints.at(-1), ['fillRect', '#0000ff', 8, 0, 8, 16]);
+    assert.deepEqual([t.component._cx, t.component._cy], [1, 0]);
+    t.update(t.component.props.output + 'C');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
+        ['fillText', 'A', 2, 13], ['fillText', 'B', 10, 13], ['fillText', 'C', 10, 13]
+    ]);
+    assert.deepEqual([t.component._cx, t.component._cy], [2, 0]);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('DEL at the start of a row clears the previous row last cell', () => {
+    const t = terminal(vdu(31, 0, 1, 127));
+    assert.deepEqual(t.paints.at(-1), ['fillRect', '#000000', 312, 0, 8, 16]);
+    assert.deepEqual([t.component._cx, t.component._cy], [39, 0]);
+    assert.equal(t.operations.some(op => op[0] === 'fillText'), false);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('text outside the fixed preview is diagnosed and cannot erase or paint an unrelated visible cell', () => {
+    const t = terminal(vdu(31, 39, 15) + 'A' + vdu(9) + 'B' + vdu(31, 0, 0, 127));
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [['fillText', 'A', 314, 253]]);
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillRect'), [
+        ['fillRect', 0, 0, 320, 256], ['fillRect', 312, 240, 8, 16]
+    ]);
+    assert.deepEqual(t.component.state.unsupported, ['text outside 40x16 preview (scrolling unavailable)']);
+    t.update('', 2);
+    assert.deepEqual(t.component.state.unsupported, []);
+    assert.deepEqual([t.component._cx, t.component._cy], [0, 0]);
 });
 
 test('unsupported geometry and raster actions are reported instead of painted as lines', () => {

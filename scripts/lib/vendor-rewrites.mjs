@@ -118,6 +118,7 @@ export const SB3_CREATOR_FILES = Object.freeze([
     ['sb3-creator-chostruntime.js', 'src/utils/cHostRuntime.js'],
     ['sb3-creator-chost.js', 'src/utils/cHostToPseudocode.js'],
     ['sb3-creator-basic.js', 'src/utils/basicToPseudocode.js'],
+    ['sb3-creator-crispbasic-mode.js', 'src/utils/crispBasicMode.js'],
     ['cubeDirections.js', 'src/utils/cubeDirections.js'],
     ['ev3Dialect.js', 'src/utils/ev3Dialect.js'],
     ['cpxDialect.js', 'src/utils/cpxDialect.js'],
@@ -152,7 +153,8 @@ export const SB3_CREATOR_IMPORT_REWRITES = Object.freeze([
     ['runtimeRegistry.generated.js', 'sb3-creator-runtime.js'],
     ['scratchRuntime.js', 'sb3-creator-scratchruntime.js'],
     ['cHostRuntime.js', 'sb3-creator-chostruntime.js'],
-    ['cHostToPseudocode.js', 'sb3-creator-chost.js']
+    ['cHostToPseudocode.js', 'sb3-creator-chost.js'],
+    ['crispBasicMode.js', 'sb3-creator-crispbasic-mode.js']
 ]);
 
 /** Every rename the file map implies — the superset the sync does NOT fully cover. */

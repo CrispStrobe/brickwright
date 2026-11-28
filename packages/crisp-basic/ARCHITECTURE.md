@@ -199,7 +199,7 @@ See [VALIDATION.md](VALIDATION.md) for the tested revision and observed results.
 
 The owning `sb3-creator` producer now has an explicit `mode: 'crispbasic'`,
 integrated through the exact pin and both generated mirrors. The Code tab's
-**Generate portable Circuit calls** choice selects it independently of the
+**Portable BASIC ↔ pseudocode** choice selects it independently of the
 runtime's **Connect Circuit** option. Existing default/retro output remains
 unchanged. Digital writes normalize to `0` or `1`; delays convert seconds to
 integer simulated milliseconds; timer reset moves a program-owned offset.
@@ -211,18 +211,26 @@ colon-separated text within `REM`. See [GENERATOR.md](GENERATOR.md).
 
 A solved electrical read is not an output latch. The generator now emits
 `PROCdigitalToggle` against the explicit host latch, with producer, runtime,
-solver and production-browser coverage for that distinction. The next generator
-boundary is a meaning-preserving reverse representation: it must preserve
-polarity, retained latch state, simulated-clock units, timer-reset offsets,
-validation, expression evaluation and authored definition overrides before
-replacing a project. Live portable calls continue to refuse **To blocks** until
-that representation is implemented and qualified.
+solver and production-browser coverage for that distinction. The explicit
+reverse reader now emits a bounded source representation carrying
+`# @crispbasic-portable 1` and project metadata requiring CrispBASIC execution.
+It preserves qualified polarity, latch operations, clock units, scalar
+expressions and pen paths. Original and regenerated programs are compared
+against exact output bytes and complete ordered pin traces in real WASM runs.
+Authored runtime overrides and unsupported or ambiguous forms refuse the whole
+conversion. The marker survives decompilation, saved files and editor reopening;
+generic generators, CLI retargeting and **To blocks** reject it before mutation.
+This source round trip does not qualify ordinary Scratch VM execution of the
+same timing/electrical semantics. That remains a separate runtime integration.
 Extend board and peripheral capabilities only with corresponding solver tests.
 No physical-pin connection is claimed.
 
-The GUI renderer currently implements only part of the VDU semantics. It is
-not a correctness oracle for the full graphics language. CrispBASIC's engine
-should not import the React component or `bw-board`.
+The GUI renderer implements absolute/relative lines, origins, points, filled
+triangles/rectangles and opaque fixed-grid text with horizontal cursor wrapping
+and DEL. Unsupported geometry/raster actions and text outside the 40×16 preview
+produce visible, bounded diagnostics. It is not a correctness oracle for the
+full graphics language. CrispBASIC's engine should not import the React component
+or `bw-board`. [PORTABILITY.md](PORTABILITY.md) gives the exact support inventory.
 
 ### 2. Source debugger
 
@@ -270,8 +278,9 @@ running this same BBCSDL core twice is not independent evidence.
 The extraction unit is `packages/crisp-basic/`. Runtime, build inputs, tests,
 examples, license notices and this roadmap live together. The root workflow
 sets up the SDK/build tools and invokes package commands. The portable generator
-adoption changes only the existing `sb3-creator` pin; the board, Circuit and
-interpreter pins retain their identities. The existing external BBCSDL
+adoption uses an exact `sb3-creator` pin and the electrical profile expansion
+uses an exact `bw-board` pin. The Circuit and interpreter pins retain their
+identities. The existing external BBCSDL
 reference build keeps its role. The npm development dependencies are locked Playwright and esbuild for browser
 qualification and JSX transformation; runtime code has no npm dependencies.
 Brickwright integration tests also use the repository's existing pinned

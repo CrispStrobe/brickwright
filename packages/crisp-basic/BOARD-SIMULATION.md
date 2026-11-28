@@ -7,9 +7,12 @@ profile and does not acquire a circuit. No physical hardware is accessed.
 
 The implementation belongs to Brickwright's GUI integration, outside the
 interpreter package. The package still has no React or `bw-board` dependency.
-The adapter uses the existing pinned `bw-board` revision
-`cc18f3c8d84d68e008450e65ddf838b8ec03c7f7`; this change does not move the pin or
-modify the solver.
+The adapter consumes `bw-board` revision
+[`8be0fbc8e91f1ed2cebb26883210efceef9234cc`](https://github.com/CrispStrobe/bw-board/commit/8be0fbc8e91f1ed2cebb26883210efceef9234cc).
+That revision owns the reusable `portable-gpio.js` profile inventory and resolver;
+the GUI adapter owns run lifecycle, time, resource limits and cleanup. See
+[PORTABILITY.md](PORTABILITY.md) for the distinction between host platforms,
+electrical model support and native MCU interpreter ports.
 
 ## Selecting a board and pins
 
@@ -19,21 +22,46 @@ failure. The adapter never creates an inferred replacement bench. The circuit
 must contain exactly one supported GPIO controller; ambiguous multi-controller
 circuits and unsupported controllers are refused.
 
-Logical pin numbers have these meanings:
+The 16 admitted profiles define these logical pin numbers:
 
-| Circuit controller | BASIC logical IDs | Circuit terminals |
-| --- | --- | --- |
-| Arduino Uno / Nano | `0..13`, `14..19` | `d0..d13`, `a0..a5` |
-| Arduino Mega | `0..53`, `54..69` | `d0..d53`, `a0..a15` |
-| Raspberry Pi Pico | `0..22`, `25`, `26..28` | Corresponding `gpn` terminals |
-| STC-style `mcu` | `8 × port + bit`, ports/bits `0..7` | `Pport.bit`, such as `P1.0` → `8` |
+| Circuit kind | BASIC logical IDs | Circuit terminals | Modeled logic supply |
+| --- | --- | --- | --- |
+| `mcu` | `8 × port + bit`, ports/bits `0..7` | `Pport.bit`, such as `P1.0` → `8` | Bench voltage |
+| `arduino_uno` | `0..13`, `14..19` | `d0..d13`, `a0..a5` | 5 V |
+| `arduino_nano` | `0..13`, `14..19` | `d0..d13`, `a0..a5` | 5 V |
+| `arduino_mega` | `0..53`, `54..69` | `d0..d53`, `a0..a15` | 5 V |
+| `pi_pico` | `0..22`, `25..28` | Corresponding `gpN` terminals | 3.3 V |
+| `microbit` | `0..2` | `p0..p2` | 3.3 V |
+| `microbit_breakout` | `0,1,2,8,12,16` | Corresponding `pN` terminals | 3.3 V |
+| `calliopemini` | `0..3` | `p0..p3` | 3.3 V |
+| `circuit_playground_express` | `0..7` | `a0..a7`; no Arduino analog offset | 3.3 V |
+| `esp8266` | `0..5`, `12..15` | Corresponding `gpioN` terminals | 3.3 V |
+| `esp32_4848s040` | `1,2,40,43,44` | H1 `gpio1`, `gpio2`, `gpio40`, `gpio43`, `gpio44` | 3.3 V |
+| `attiny85` | `8..13` | `pb0..pb5` | 5 V |
+| `attiny88` | `8..15`, `16..23`, `24..31` | `pb0..pb7`, `pc0..pc7`, `pd0..pd7` | 5 V |
+| `attiny88_qfn32` | `0..3`, `8..15`, `16..23`, `24..31` | `pa0..pa3`, `pb0..pb7`, `pc0..pc7`, `pd0..pd7` | 5 V |
+| `stm32f030` | `0..7`, `9,10,17` | `pa0..pa7`, `pa9`, `pa10`, `pb1` | 3.3 V |
+| `eater6502` | `0..7`, `8..15` | `via1.pa0..via1.pa7`, `via1.pb0..via1.pb7` | 5 V |
 
-Only terminals actually exposed by that controller are included. Power, ground,
-reset and reference pads are excluded. Nano's analog-only A6/A7 are excluded.
-Unknown pins are rejected; values are never clamped or redirected to another
-terminal. The host exposes a frozen controller/pin-map capability record for
-inspection. This mapping is a library contract, not a CPU register interface or
-package-pin numbering scheme.
+Only admitted terminals actually exposed by the controller are included. Power,
+ground and reference pads are excluded, as are Nano A6/A7, Pico GP23/24/29,
+ESP8266 flash pins/GPIO16 and STM32 boot/reset/crystal/SWD pads. The ATtiny
+electrical models expose some reset-capable port pads; the host does not model
+reset or fuses. Generation uses a stricter map and excludes ATtiny85 PB5 and
+ATtiny88 PC6. These host profiles also do not imply matching `DEVICE` syntax:
+ESP32-S040 and ATtiny88 QFN-only PA pins currently require authored BASIC.
+
+The resolver matches complete canonical terminal names without case sensitivity.
+Duplicate logical aliases refuse. Unverified kinds and missing/incompatible
+registered models refuse rather than falling back to a generic controller.
+Unknown pins are rejected; IDs are never clamped or redirected. A 3.3 V model
+keeps its modeled output voltage on a 5 V bench.
+
+The host exposes frozen `controller`, `profile`, `pins` and `pinMap` capability
+records. Profile metadata includes the label, numbering/help, nominal voltage,
+`execution: 'host-driven-circuit'`, `hardware: false` and
+`nativeInterpreter: false`. This is a library/electrical-model contract; it
+does not run CrispBASIC on the component's CPU or use package-pin numbering.
 
 ## Drive and sense semantics
 
@@ -173,9 +201,27 @@ END
 The electrical pull-up reads high while the switch is open and low when it is
 closed. An external resistor/LED on D13 must be wired into the same Circuit
 board. The code generator's default hardware comments remain comments. Select
-**Generate portable Circuit calls** and then **From blocks** for the explicit
+**Portable BASIC ↔ pseudocode** and then **From blocks** for the explicit
 portable generation mode, including `toggle` as `PROCdigitalToggle`. See
 [GENERATOR.md](GENERATOR.md) for its pin maps, polarity rules and refusals.
+
+The [robot motor example](examples/robot-motor/README.md) supplies a complete
+saved Circuit and BASIC source. It drives an H-bridge and an inductive DC motor
+forward, reverse, brake and coast. The test loads the same Circuit JSON and runs
+the actual WASM interpreter while checking current, signed speed, shaft travel
+and cancellation. Pulldowns disable the driver after Stop or an interpreter
+error even if the circuit was initially powered. Stop preserves residual rotor
+state; it does not reset or instantaneously brake the motor.
+
+### CAD and Robot Lab boundary
+
+CAD/circuit coupling and BASIC each require exclusive ownership of the circuit
+clock, so they cannot run together through these adapters. CAD coupling uses
+reset origins and fixed 5 ms mechanical frames; BASIC preserves existing circuit
+history and supports individual integer-millisecond delays. Direct integration
+needs one shared clock owner, a defined policy for sub-5 ms delays and cleanup
+across both electrical and mechanical state. The robot example qualifies the
+electrical motor model, without CAD body or Robot Lab world motion.
 
 ## Qualification scope
 
@@ -186,6 +232,11 @@ The latch tests include a high output request clamped to a low electrical read,
 mixed writes and toggles, retained state across modes, fresh-run state, and
 refusals before mutation. Generated active-low toggle is also exercised in the
 production scenario set.
+The canonical profile tests check every admitted model terminal against the
+registered models, including voltage, drive, release and sensing. Consumer tests
+exercise all newly admitted controller kinds through the GUI-owned host, and the
+robot test additionally verifies current/velocity against a steady-state oracle,
+reversed motor leads, Stop during a delay and interpreter-error cleanup.
 The production gate additionally builds the full webpack workbench and drives
 its real editor and Circuit file controls in Chromium. See
 [VALIDATION.md](VALIDATION.md) for the exact revision, commands and observed

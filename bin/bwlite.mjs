@@ -8,6 +8,8 @@ import {resolve, join} from 'node:path';
 import {homedir, tmpdir} from 'node:os';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
+import {validateCrispBasicPseudocode, crispBasicModeError}
+    from '../packages/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const guiRequire = createRequire(resolve(root, 'packages/scratch-gui/package.json'));
@@ -17,8 +19,9 @@ const help = `Brickwright Lite CLI
   bwlite check PROGRAM.bw
   bwlite devices [PROGRAM.bw]
   bwlite retarget PROGRAM.bw DEVICE [--out FILE]
-  bwlite convert FILE.bw|.c|.py|.js|.bas|.sb3 --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic [--device DEVICE] [--out FILE]
-  bwlite transpile PROGRAM.bw --to c|micropython|python|sb3 [--device DEVICE] [--out FILE]
+  bwlite convert FILE.bw|.c|.py|.js|.bas|.sb3 --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic|crispbasic [--crispbasic] [--numbered] [--device DEVICE] [--out FILE]
+  bwlite transpile PROGRAM.bw --to c|micropython|python|sb3|crispbasic [--device DEVICE] [--out FILE]
+  bwlite read PROGRAM.bas --crispbasic [--out PORTABLE.bw]
   bwlite spike probe [--port USB_DEVICE]
   bwlite spike run PROGRAM.bw [--port USB_DEVICE]
   bwlite spike bridge --port USB_DEVICE [--listen IP] [--tcp-port N]
@@ -33,6 +36,10 @@ const help = `Brickwright Lite CLI
 
   npm run cli -- spike probe
   npm run cli -- spike run scripts/spike/example-usb-stream.bw
+
+CrispBASIC conversion is explicit: --to crispbasic generates portable BBC source;
+--crispbasic reads its qualified pin/time/canvas subset back into marked pseudocode.
+Marked source requires the CrispBASIC runtime; generic Blocks/native exports refuse.
 
 The SPIKE USB commands require LEGO MINDSTORMS MicroPython firmware and
 Python with pyserial (pip install pyserial). Set BWLITE_PYTHON to select a venv.
@@ -49,8 +56,14 @@ const output = async (data, destination) => {
     else process.stdout.write(data);
 };
 const creatorClass = async () => (await import('../packages/scratch-gui/src/lib/sb3-creator.js')).default;
+const requireSourceTarget = (source, target, portable = false) => {
+    const marked = validateCrispBasicPseudocode(source);
+    if (marked && !portable) throw crispBasicModeError(target);
+    return marked;
+};
 const retarget = (source, device, SB3Creator) => {
     if (!device) return source;
+    requireSourceTarget(source, 'retargeting');
     if (/^spike(?:prime)?$/i.test(device)) {
         const declared = source.match(/^DEVICE\s+(\S+)/im);
         if (!declared) return `DEVICE SPIKE\n\n${source}`;
@@ -61,7 +74,7 @@ const retarget = (source, device, SB3Creator) => {
     for (const warning of result.warnings || []) console.error(`warning: ${warning}`);
     return result.pseudocode;
 };
-const loadPseudocode = async file => {
+const loadPseudocode = async (file, {portable = false} = {}) => {
     const input = await readFile(file);
     if (/\.sb3$/i.test(file)) {
         const zip = await guiRequire('jszip').loadAsync(input);
@@ -82,12 +95,23 @@ const loadPseudocode = async file => {
         }
         reader = (await import(`${lib}sb3-creator-basic.js`)).default;
     }
-    else if (/\.bw$/i.test(file)) return source;
+    else if (/\.bw$/i.test(file)) { validateCrispBasicPseudocode(source); return source; }
     else throw new Error('Input must be .bw, .c, .py, .js, .bas, or .sb3');
-    const result = reader(source);
+    const result = reader(source, portable && /\.(bas|basic)$/i.test(file) ? {mode: 'crispbasic'} : {});
     if (result.ok === false) throw new Error((result.reasons || []).join('\n') || `${file}: conversion refused`);
     for (const warning of result.warnings || []) console.error(`warning: ${warning}`);
     return result.pseudocode ?? result;
+};
+const rejectPortableInputFiles = async (rest, target) => {
+    // Delegated hardware tools must not become an escape around the source
+    // requirement. Output paths are destinations, not source files to inspect.
+    for (let index = 0; index < rest.length; index++) {
+        if (['--out', '-o', '--output', '--bw'].includes(rest[index])) { index++; continue; }
+        const candidate = rest[index];
+        if (!candidate.startsWith('-') && /\.(bw|txt)$/i.test(candidate) && existsSync(candidate)) {
+            requireSourceTarget(await readFile(candidate, 'utf8'), target);
+        }
+    }
 };
 const runScript = (script, rest) => {
     const result = spawnSync(process.execPath, [resolve(root, script), ...rest], {stdio: 'inherit'});
@@ -100,7 +124,10 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
 } else if (['toolchain', 'machine', 'fpga', 'makecode'].includes(args[0])) {
     const scripts = {toolchain: 'scripts/bw-toolchain.mjs', machine: 'scripts/machine-manager.mjs',
         fpga: 'scripts/bw-fpga.mjs', makecode: 'scripts/makecode.mjs'};
-    runScript(scripts[args[0]], args.slice(1));
+    try {
+        await rejectPortableInputFiles(args.slice(1), `${args[0]} tool execution`);
+        runScript(scripts[args[0]], args.slice(1));
+    } catch (error) { die(error.message); }
 } else if (args[0] === '8051' && ['build', 'flash'].includes(args[1])) {
     const mode = args[1];
     const file = args[2];
@@ -123,6 +150,7 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
                 let device = '';
                 if (/\.bw$/i.test(file)) {
                     const pseudo = await loadPseudocode(file);
+                    requireSourceTarget(pseudo, '8051 native build');
                     device = ((pseudo.match(/^DEVICE\s+([\w-]+)/im) || [])[1] || '').toLowerCase();
                     if (!/^stc(?:12|15|89)/.test(device)) throw new Error('8051 build needs an STC12, STC15, or STC89 DEVICE');
                     const creator = new SB3Creator();
@@ -164,6 +192,7 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
             if (!file) console.log(all.join('\n'));
             else {
                 const source = await loadPseudocode(file);
+                requireSourceTarget(source, 'device retargeting');
                 const authored = ((source.match(/^DEVICE\s+([\w-]+)/im) || [])[1] || '').toLowerCase();
                 for (const device of all) {
                     const result = SB3Creator.retargetPseudocode(source, device);
@@ -176,7 +205,10 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
             if (!args[2] || args[2].startsWith('--')) die('retarget needs PROGRAM.bw DEVICE');
             else await output(retarget(await loadPseudocode(file), args[2], SB3Creator), value('--out'));
         } else {
-            let source = await loadPseudocode(file);
+            let source = await loadPseudocode(file, {portable: args.includes('--crispbasic')});
+            const to = command === 'read' ? 'pseudocode' : value('--to');
+            requireSourceTarget(source, command === 'check' ? 'source checking' : `${to || command} conversion`,
+                command === 'check' || to === 'pseudocode' || to === 'crispbasic');
             source = retarget(source, value('--device'), SB3Creator);
             const creator = new SB3Creator();
             creator.parse(source);
@@ -187,9 +219,8 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
                 console.log(verdict.isValid ? 'ok' : 'INVALID');
                 if (!verdict.isValid) process.exitCode = 1;
             } else {
-                const to = command === 'read' ? 'pseudocode' : value('--to');
-                if (!['pseudocode', 'sb3', 'c', 'host-c', 'python', 'javascript', 'micropython', 'basic'].includes(to)) {
-                    throw new Error('Use --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic');
+                if (!['pseudocode', 'sb3', 'c', 'host-c', 'python', 'javascript', 'micropython', 'basic', 'crispbasic'].includes(to)) {
+                    throw new Error('Use --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic|crispbasic');
                 }
                 let result;
                 if (to === 'pseudocode') result = source;
@@ -203,7 +234,8 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
                     if (!generated.ok) throw new Error(`MicroPython refused: ${generated.reasons.join('; ')}`);
                     result = generated.py;
                 } else {
-                    const generated = creator.generateBASIC();
+                    const generated = creator.generateBASIC(undefined, to === 'crispbasic' ?
+                        {profile: 'bbc', mode: 'crispbasic', lineNumbers: args.includes('--numbered')} : {});
                     if (!generated.ok) throw new Error(`BASIC refused: ${generated.reasons.join('; ')}`);
                     result = generated.basic;
                 }
@@ -225,10 +257,13 @@ if (!args.length || args.includes('--help') || args[0] === 'help') {
     } else if (mode === 'bridge' && !value('--port')) {
         die('spike bridge needs --port USB_DEVICE');
     } else {
-        const command = mode === 'probe' ? ['--probe', ...pass] : pass;
-        const result = spawnSync(python, [script, ...command], {stdio: 'inherit'});
-        if (result.error) die(`${python}: ${result.error.message}`);
-        else process.exitCode = result.status ?? 1;
+        try {
+            if (mode === 'run') requireSourceTarget(await readFile(pass[0], 'utf8'), 'SPIKE hardware execution');
+            const command = mode === 'probe' ? ['--probe', ...pass] : pass;
+            const result = spawnSync(python, [script, ...command], {stdio: 'inherit'});
+            if (result.error) die(`${python}: ${result.error.message}`);
+            else process.exitCode = result.status ?? 1;
+        } catch (error) { die(error.message); }
     }
 } else if (args[0] === 'mindstorms' && ['import', 'export'].includes(args[1])) {
     const command = args[1];

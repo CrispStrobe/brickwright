@@ -91,6 +91,7 @@ const FILES = [
     ['src/utils/cHostRuntime.js', path.join(lib, 'sb3-creator-chostruntime.js')],
     ['src/utils/cHostToPseudocode.js', path.join(lib, 'sb3-creator-chost.js')],
     ['src/utils/basicToPseudocode.js', path.join(lib, 'sb3-creator-basic.js')],
+    ['src/utils/crispBasicMode.js', path.join(lib, 'sb3-creator-crispbasic-mode.js')],
     ['src/utils/cubeDirections.js', path.join(lib, 'cubeDirections.js')],
     // The DEVICE EV3 word table, read by sb3Creator.js in both directions.
     ['src/utils/ev3Dialect.js', path.join(lib, 'ev3Dialect.js')],
@@ -283,7 +284,10 @@ for (const [remote, dest] of FILES) {
             console.error('  this script records the new one itself.');
             process.exit(2);
         }
-        const base = resolved === null ? null : resolved.text;
+        // All three comparison points must use the destination filenames.
+        // An upstream edit to an import otherwise looks like a downstream-only
+        // line because the old raw import has its upstream module name.
+        const base = resolved === null ? null : rewriteImports(resolved.text);
         if (!force && base === null && current !== null && !warnedFallback) {
             warnedFallback = true;
             console.error('  NOTE: the old pinned version is not readable here, so the guard is');

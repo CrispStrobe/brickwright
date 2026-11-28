@@ -16,8 +16,15 @@ Circuit board through a GUI-owned adapter. Digital pin operations use the pinned
 electrical solver, and integer-millisecond delays advance its clock cooperatively.
 The portable generator emits an explicit `PROCdigitalToggle` operation backed
 by retained output latches, including when the solved electrical level differs
-from the requested output. Reverse conversion of portable calls remains refused.
+from the requested output. Explicit portable mode now reads a qualified BASIC
+subset back into pseudocode, including digital pins, simulated time and simple
+pen paths. Saved source retains a CrispBASIC requirement; generic Blocks and
+other execution targets refuse that source before changing a project.
 Full graphics, source debugging and physical-board targets remain subsequent work.
+
+See [PORTABILITY.md](PORTABILITY.md) for supported host platforms, all 16
+electrical controller profiles, two-way source conversion, canvas behavior and
+the real motor-circuit example.
 
 ## Try it
 
@@ -356,7 +363,7 @@ milliseconds.
 | Area | Native | Restricted WASM |
 | --- | --- | --- |
 | Language engine | Pinned BBCSDL tokenizer and executor | Same pinned core, correct WASM32 ABI |
-| Host | Linux x86-64 process | Browser module worker or Node worker thread |
+| Host | Linux x86-64 or ARM64 process | Browser module worker or Node worker thread |
 | Execution | Fixed/interactive input, cancellation, deadline, output bound | Same, with Asyncify input/wait suspension |
 | Diagnostics | Separate control channel; original editor-line mapping | Separate worker records; same source mapping |
 | Output | Raw VDU bytes and Latin-1 text | Same |
