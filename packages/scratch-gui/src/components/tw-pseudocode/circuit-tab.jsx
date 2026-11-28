@@ -1815,6 +1815,7 @@ class CircuitTab extends React.Component {
         window.dispatchEvent(new CustomEvent('bw-board-ready'));
         const media = pending.media;
         if (!media) return;
+        if (media.kind === 'z80') media.wiredZ80Board = board;
         if (media.circuitVideo6502) {
             try {
                 media.machineConfig6502 = bindGrayFramebufferToCircuit(
@@ -2157,9 +2158,10 @@ class CircuitTab extends React.Component {
                 throw new Error('not a circuit (no parts with wires or nets)');
             }
             const circuitFirmware = opts?.circuitFirmware;
+            const wiredCpu = circuitFirmware?.kind === 'z80' ? 'z80' : 'w65c02';
             const wiredBoot = this.state.Designer?.supportsWiredExampleBoot &&
-                data.parts.some(part => part.kind === 'w65c02');
-            if (circuitFirmware && !wiredBoot) throw new Error('This firmware requires a 6502 circuit.');
+                data.parts.some(part => part.kind === wiredCpu);
+            if (circuitFirmware && !wiredBoot) throw new Error(`This firmware requires a ${wiredCpu} circuit.`);
             const microtronicPart = data.parts.find(item => item.kind === 'busch-microtronic');
             const kim1Part = data.parts.find(item => item.kind === 'kim-1');
             const kim1Tape = opts?.kim1Tape;

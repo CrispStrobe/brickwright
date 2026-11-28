@@ -152,10 +152,8 @@ export async function checkZ80Bench (bench, circuit, examples) {
     const checks = [eq('decoded memory map', [['rom', 0, 0x7fff], ['ram', 0x8000, 0xffff]],
         config.regions.map(({kind, start, end}) => [kind, start, end]).sort((a, b) => a[1] - b[1]))];
     if (bench.id === 'z80-bench') {
-        // No program is bundled with this bench. Exercise its decoded ACIA
-        // through a small ROM that waits for a byte and echoes it.
-        const echo = Uint8Array.of(0x3e, 3, 0xd3, 0x80, 0x3e, 0x16, 0xd3, 0x80,
-            0xdb, 0x80, 0xe6, 1, 0x28, 0xfa, 0xdb, 0x81, 0xd3, 0x81, 0x18, 0xf4);
+        // Exercise the exact ROM available through the Machines library.
+        const echo = await readFile(join(examples, '../static/roms/z80-acia-echo.bin'));
         const adapter = createZ80Adapter({config: {clockHz: 4_000_000, ...config}, rom: echo});
         adapter.attachBoard(circuit.board);
         const observed = [];

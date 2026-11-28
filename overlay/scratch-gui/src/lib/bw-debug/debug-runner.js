@@ -3312,6 +3312,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const isCpmSystem = bootMedia && bootMedia.profile === 'cpm-system';
         const isCom = !isCpmSystem && bootMedia && (bootMedia.slot === 'com' || bootMedia.profile === 'cpm');
         const spectrum = bootMedia?.spectrum;
+        const declaredMachine = bootMedia?.machineConfigZ80;
+        const wiredBoard = bootMedia?.wiredZ80Board;
         const blink = bootMedia?.asmBlink;
         if (spectrum) {
             targetOpts.config = spectrum.kind === 'zx128' ? {clockHz: 3_546_900, zx128: true}
@@ -3362,10 +3364,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 const {SEARLE} = await import('bw-board/z80-machine.js');
                 targetOpts.config = blink.config || {...SEARLE,
                     ports: [...SEARLE.ports, {kind: 'latch', name: 'blink', at: 1}]};
-            } else if (machineConfig) targetOpts.config = benchConfigZ80();
+            } else if (declaredMachine) targetOpts.config = declaredMachine;
+            else if (machineConfig) targetOpts.config = benchConfigZ80();
             readyMsg = S('ready.romOnMap', {
                 name: bootMedia.name || S('noun.rom'),
-                map: S(machineConfig ? 'map.extracted' : 'map.searle')
+                map: declaredMachine ? 'library machine map' : S(machineConfig ? 'map.extracted' : 'map.searle')
             });
         } else if (machineConfig) {
             setStatus('attaching', S('boot.extractedZ80'));
@@ -3381,7 +3384,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         if (!checkMediaLaunch()) return null;
         const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
-            designerBoard();
+            declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
+        if (wiredBoard && (db.board !== wiredBoard || !machineConfig)) throw new Error('The Z80 circuit changed before boot.');
+        if (declaredMachine && typeof window !== 'undefined') window.__bwMachineBoard = db;
         if (db.board) {
             targetOpts.board = db.board;
             board = db.board;
