@@ -78,11 +78,14 @@ DEF FNdouble(value%) = value% * 2
     assert.equal(result.text, Buffer.from(result.output).toString('latin1'));
 });
 
-test('native floating SYS arguments retain their hard-float register positions including a leading zero', async t => {
+test('native floating SYS arguments retain their register positions, including a leading zero on ARM', async t => {
     const session = sessionFor(t);
-    const result = await session.run(`zero# = 0
-negative# = -1
-SYS "atan2", zero#, negative# TO angle#
+    // On x64 the upstream 80-bit variant represents positive zero as an
+    // integer even for 0.0; on ARM a direct 0.0 literal retains its float tag.
+    // A stored zero# also reloads as an integer on both ABIs. Use a direct
+    // floating expression so this test checks the C ABI, not value tagging.
+    const leadingFloat = target.architecture === 'x64' ? '1E-30' : '0.0';
+    const result = await session.run(`SYS "atan2", ${leadingFloat}, -1.0 TO angle#
 PRINT STR$(ABS(angle# - PI) < 1E-12)
 SYS "ldexp", 1.5, 3 TO scaled#
 PRINT STR$(scaled#)

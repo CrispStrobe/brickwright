@@ -25,7 +25,7 @@ const HELP = `CrispBASIC ${VERSION} — BBC BASIC-compatible runtime
 Usage: crispbasic [options] program.bas
        crispbasic [--backend native|wasm] [--simulation FILE] --capabilities
 
-  --backend NAME      native (Linux x64/ARM64/ARMv7) or wasm (Node worker)
+  --backend NAME      native (default, Linux x64/ARM64/ARMv7) or wasm (Node worker)
   --native-executable PATH  Select a built native interpreter, including a cross build
   --native-runner PATH      Run it through an emulator such as qemu-arm
   --native-runner-arg ARG   Emulator argument; may be repeated (no shell expansion)

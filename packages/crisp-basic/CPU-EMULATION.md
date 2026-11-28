@@ -11,6 +11,9 @@ cross-builds on x86-64 Linux and executes the actual ARM instructions using
 `qemu-arm -cpu cortex-a7` and `qemu-aarch64 -cpu cortex-a53`. The same runtime
 and CLI tests used for direct native execution run through those emulators.
 It retains each executable, license and SHA-256 build receipt as an artifact.
+After downloading an Actions artifact, restore execute permission with
+`chmod +x crispbasic-native` before running it; artifact ZIPs do not preserve
+Unix executable permissions.
 The latest completed qualification and its exact commit are recorded in
 [VALIDATION.md](VALIDATION.md).
 
