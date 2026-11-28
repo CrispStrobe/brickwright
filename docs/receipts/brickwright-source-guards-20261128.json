@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-28T21:08:44.176887+00:00",
+  "repository": "CrispStrobe/brickwright",
+  "baseCommit": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331",
+  "qualifiedSourceCommit": "fbcf2fe61762bb44e7ac46aeb68f1238829b5f1e",
+  "qualifiedSourceTree": "26f4f1b0d9059650a039f14d67430047d9dfc2e3",
+  "scope": "Five stale source/harness guards inherited in board PR #1866; tests only, no product or vendor-pin changes. Existing TODO tests unchanged.",
+  "hostedFailure": {
+    "run": "https://github.com/CrispStrobe/brickwright/actions/runs/46185229797",
+    "job": "https://github.com/CrispStrobe/brickwright/actions/runs/46185229797/job/141103859713",
+    "sourceCommit": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331"
+  },
+  "runtime": {
+    "node": "v24.22.3",
+    "platform": "Linux x64"
+  },
+  "validation": {
+    "command": "TMPDIR=\"$PWD/.build/tmp\" node --test --test-reporter=tap --import ./scripts/lib/register-gui-scope.mjs test/c-route-8086.test.mjs test/circuit-data-load-batching.test.mjs test/i80386-debugger-user-paths.test.mjs test/i8086-debug-startup-performance.test.mjs test/memory-byte-help.test.mjs docs/receipts/brickwright-source-guards-20261128/arcade-source-cases.test.mjs",
+    "fullFileCases": 33,
+    "extractedArcadeCases": 2,
+    "tests": 35,
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "todo": 0,
+    "log": "qualified-35.tap"
+  },
+  "dependencies": {
+    "bw-board": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+    "bw-circuit-ui": "659431ce46a7b6d4ae472182b069ec301aee0df3",
+    "npmManifest": "installed-lock-deps.json",
+    "npmPackageCount": 46,
+    "npmIntegrity": "All 45 Babel closure packages and the scratch-vm 4.8.115 tarball verified against checked-in package-lock SRI before extraction; no lifecycle scripts. Official apply-vm-overlay.mjs --vm-only applied to that actual VM package.",
+    "jszip": "3.10.1 from provided runtime; matches checked-in package version.",
+    "circuitDesignerSha256": "f5b29c4590ee5ef26b3261afc5e8740433d7d901da2304233edd2e0f0d0c431a"
+  },
+  "boundaries": [
+    "The full makecode-export-arcade.test.mjs module was attempted with the two-case filter and failed during top-level dependency resolution: playwright is not installed in this isolated GUI scope. This is retained as an environment failure, not counted as a pass.",
+    "The exact unchanged exportOf helper and two repaired callbacks are retained in the evidence harness; they execute the real SB3Creator, projectToArcade and canonical owned procedure model. They do not qualify the remaining VM/browser cases.",
+    "The complete hosted unit shard and production/browser jobs must still run on the composed head. No existing TODO or skip setting was modified."
+  ],
+  "sourceSha256": {
+    "test/c-route-8086.test.mjs": "e95e5258325cd46c51fc8bd9bd7a7a045b4e831f61d4a613aa19d615657b8a5c",
+    "test/circuit-data-load-batching.test.mjs": "52ca9197435e976fdea339782ddc7a1fdf5924c698228565c70eb10aa0c5e4a4",
+    "test/i80386-debugger-user-paths.test.mjs": "0ac65c99658f5ff48d20ced89bf344e859cf728cb8afca692c6b919fbe183359",
+    "test/i8086-debug-startup-performance.test.mjs": "433924ab72af55c6534bc05cf29f3e2856a33b8b1c4934ecfe3cf96bd9dcb120",
+    "test/makecode-export-arcade.test.mjs": "c5dc8f98f8e588d0d44dea0b4c832412983f774bfa2225b6c79f03e51cc6048e",
+    "test/memory-byte-help.test.mjs": "b8b793272c62828c40746ba57969bac86717495724431ccd956aba36bf60c1ee",
+    "overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx": "7d8cb52db88190c041f37d6ac15f6bac6a5f480108d230e34462ac98a9b0fb40",
+    "overlay/scratch-gui/src/components/tw-pseudocode/debug-drawer.jsx": "fa346e949e45169c4a0fb0c9797fd768aa75cba5fd6389984635c40ef1b18e23",
+    "overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx": "f19d2f3e9a4a36e1279d6d7c6c0e0531073e380b929905aadb5b59e45f7a1634",
+    "overlay/scratch-gui/src/lib/bw-debug/debug-runner.js": "abf79739b61c435267fbec106eead4cefe286e8a966634c5f82f1d18ae7a6c12",
+    "overlay/scratch-gui/src/lib/bw-debug/memory-byte-help.js": "60d12215ea53cabb92a24405aa1e52f38311e7f4ca0fe6e5e021a4c4cd2f7834",
+    "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "3c20402b9db3f582d02725ed33d2bc1a4969bcf14d8f373a47bf666ab7573a2b",
+    "overlay/scratch-gui/src/lib/sb3-creator.js": "6a5c279963a19f0069c1dc9a5fe99127ff35c365cabc164dc5a0f503ed4d7519",
+    "overlay/scratch-vm/src/util/bw-procedure-constraint-model.js": "76f49b61cf0ae2c7c8b71d6154258a32810d79fd80eb63de2b2c761d196c5f96",
+    "overlay/scratch-vm/src/util/bw-graph-version.js": "7a0a35ff4c05fc8683000fe7c64eb59fb879d1edc5a0d4c28d992c62ab1ab048",
+    "scripts/apply-vm-overlay.mjs": "96f3ca451c03732185776969d72be2d08786fdc03f65d79a7724cf64e2f088ce",
+    "scripts/lib/vm-package-exports.mjs": "4579453786d3db49faaa04866e7171da410b0fa6c649ff22765ee284c259d12e",
+    "packages/scratch-gui/package-lock.json": "100c25b3db25105b75b6aa3f639e9445031cd143c353f46be69f4c81506af956",
+    "vendor-pins.json": "9f4eee04bad5110cf2c2c6b7b9c90957b807670321e79ab53dcc91f19a30d8b9"
+  },
+  "artifacts": {
+    "arcade-before.tap": {
+      "sha256": "604fc204cdcfe0aea1c571fddb52f70cefee1cf27d944d49aae50e1264075473",
+      "bytes": 1528
+    },
+    "arcade-extraction.json": {
+      "sha256": "5906aa8e473a24ac3a62084028cff457c3efbf02032bd5d3f3e8e97006181d71",
+      "bytes": 812
+    },
+    "arcade-full-file-dependency-limit.tap": {
+      "sha256": "7c5e8651ca56f4a881ca6e9480d82db97162bfe931e30e8d023ecf005203303e",
+      "bytes": 1551
+    },
+    "arcade-source-cases.test.mjs": {
+      "sha256": "e42f81df2debbec5b50a02b66d4f3dc7aa35c01825e06e511709de7c84340288",
+      "bytes": 2001
+    },
+    "initial-failure-summary.json": {
+      "sha256": "835913d2176a9c3ee7839db6dd7798ffe2b46c106e43d61b75a9be98327024a7",
+      "bytes": 2050
+    },
+    "installed-lock-deps.json": {
+      "sha256": "9b2d0986f705e0146cd70eec9f21150e02482725125fc7672067962f56c395d7",
+      "bytes": 13103
+    },
+    "qualified-35.tap": {
+      "sha256": "9281ef7329ac78e327cc6dd418cfc4557ff50ef8f235cb9f0482183206379178",
+      "bytes": 9706
+    },
+    "vm-overlay.log": {
+      "sha256": "14b3ec35a1c6a379027d1d4fbcff4ee1665e00c10061001b588148b5a1556b19",
+      "bytes": 1283
+    }
+  }
+}

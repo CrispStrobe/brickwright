@@ -1,0 +1,40 @@
+{
+  "baseCommit": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331",
+  "scope": "Full C route, circuit-data batching and 8086 startup files before repair, with pinned board/UI packages installed. Summary extracted from local raw TAP; not a rerun of the complete hosted shard.",
+  "tests": 14,
+  "passed": 9,
+  "failed": 5,
+  "failures": [
+    {
+      "test": "not ok 7 - the C tab decides the route through this module, and in one place",
+      "location": "location: '/workspace/scratch/3cdb117b9e13/brickwright-source-guards/test/c-route-8086.test.mjs:162:1'",
+      "error": "error: 'the C tab has no \u25b6 for the 8086'"
+    },
+    {
+      "test": "not ok 9 - the vendored circuitData path batches its atomic load transaction",
+      "location": "location: '/workspace/scratch/3cdb117b9e13/brickwright-source-guards/test/circuit-data-load-batching.test.mjs:34:1'",
+      "error": "error: 'the circuitData load effect remains identifiable'"
+    },
+    {
+      "test": "not ok 10 - the generated package mirror retains the same batching and load behavior",
+      "location": "location: '/workspace/scratch/3cdb117b9e13/brickwright-source-guards/test/circuit-data-load-batching.test.mjs:38:1'",
+      "error": "error: 'the circuitData load effect remains identifiable'"
+    },
+    {
+      "test": "not ok 11 - the assembled DOS path does not eagerly load the bw-board barrel",
+      "location": "location: '/workspace/scratch/3cdb117b9e13/brickwright-source-guards/test/i8086-debug-startup-performance.test.mjs:18:1'",
+      "error": "error: 'attachI8086 capture is empty or truncated'"
+    },
+    {
+      "test": "not ok 14 - debugger faces do not merge back into the full circuit designer chunk",
+      "location": "location: '/workspace/scratch/3cdb117b9e13/brickwright-source-guards/test/i8086-debug-startup-performance.test.mjs:63:1'",
+      "error": "error: |-",
+      "errorContext": [
+        "    port LEDs, switches and video should share only their focused face chunk",
+        "    ",
+        "    2 !== 3",
+        "    "
+      ]
+    }
+  ]
+}

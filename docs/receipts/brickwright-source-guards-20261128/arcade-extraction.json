@@ -1,0 +1,11 @@
+{
+  "source": "test/makecode-export-arcade.test.mjs",
+  "sourceSha256": "c5dc8f98f8e588d0d44dea0b4c832412983f774bfa2225b6c79f03e51cc6048e",
+  "helperSha256": "ffc348fe67d19ac5671476e85d45df1d2ffdd6a786cbee25b441e502bbbfc9e0",
+  "testCasesSha256": "bd79f1aed11dbb66e9d279e094263bb609d14fdf5d8a55f400d097edd9d09986",
+  "caseCount": 2,
+  "scope": "Exact unchanged helper and two changed test callbacks, production parser/exporter; excludes full-file Scratch VM/browser tests and their uninstalled runtime dependencies.",
+  "scratchHarnessSha256": "ac3256ef417138167db9d0e774ae222117aa8e1168638263269aaed84f2bf0f3",
+  "committedHarnessSha256": "e42f81df2debbec5b50a02b66d4f3dc7aa35c01825e06e511709de7c84340288",
+  "committedHarness": "docs/receipts/brickwright-source-guards-20261128/arcade-source-cases.test.mjs"
+}
