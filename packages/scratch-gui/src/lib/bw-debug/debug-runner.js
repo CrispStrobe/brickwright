@@ -42,6 +42,7 @@ import {
 } from './breakpoints.js';
 import { parseCondition } from './condition.js';
 import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.js';
+import {capturePublishedFramebuffer, createGrayFramebufferVideo, grayFramebufferSpec} from '../bw-machines/gray-framebuffer.js';
 import {createReadyGatedInput} from './ready-gated-input.js';
 import {createTerminalOutput} from './terminal-output.js';
 import {picoBasicAtPrompt, picoBasicConsoleSpec} from '../bw-machines/pico-basic-source.js';
@@ -107,7 +108,7 @@ function uiLang () {
 /** Status text in the reader's language. `S('boot.media', {name})`. */
 const S = (key, vars) => statusT(uiLang(), key, vars);
 import { localCompilerRequest, localToolchainEnabled } from '../sdcc-wasm/toolchain-source.js';
-import {withI80386MouseCmos} from '../bw-machines/i80386-cmos.js';
+import {i80386FloppyCmos, withI80386MouseCmos} from '../bw-machines/i80386-cmos.js';
 
 /**
  * How many suppressed breakpoint hits one frame will absorb before yielding to
@@ -3228,6 +3229,23 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (!via) throw new Error('Blink requires a 65C22 VIA');
             runner.asmBlinkValue = () => via.orb & via.ddrb & 1;
         }
+        if (declaredMachine?.grayFramebuffer) {
+            const spec = grayFramebufferSpec(declaredMachine.chips, declaredMachine.grayFramebuffer);
+            const machine = result.adapter.machine;
+            const source = machine.chips[spec.chip];
+            runner.video = spec.publishAt === undefined ? createGrayFramebufferVideo(source, spec) :
+                capturePublishedFramebuffer(machine, source, spec);
+            const acia = machine.chips[declaredMachine.pacedConsole];
+            if (typeof acia?.rdrf === 'boolean') {
+                const input = createReadyGatedInput({isReady: () => serialLines.some(line => line.length),
+                    send: runner.sendSerial, canAccept: () => !acia.rdrf, burst: 1});
+                runner.sendSerial = data => typeof data === 'number' ? input.push(data) :
+                    input.write(Uint8Array.from(String(data), ch => ch.charCodeAt(0)));
+                terminalFrame = input.flush;
+            } else if (spec.publishAt !== undefined) {
+                delete runner.sendSerial;
+            }
+        }
         if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
         if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||
             (declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom))) {
@@ -3849,6 +3867,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             throw new Error('Choose a 386 BIOS, a boot floppy or a hard disk image.');
         }
         const bootImg = isFloppy || isHdd ? await resolveMediaImage(bootMedia) : null;
+        const floppyGeom = bootMedia?.geometry || {cylinders: 80, heads: 2, sectors: 15, bytesPerSector: 512};
 
         // The FreeDOS-VGA preset carves a 32K option-ROM window at C0000h; the
         // LGPL VGABios is 38400 bytes, so widen that one region to C0000-C9FFF
@@ -3860,7 +3879,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // Type-47 CMOS drive-C geometry, byte-for-byte as the CLI qualification
         // sets it, so the Bochs BIOS builds a real FDPT for drive 0 and FreeDOS
         // mounts the partition as C:. Only applied for a hard-disk boot; a
-        // floppy boot leaves the passive AT CMOS alone.
+        // floppy boot instead selects the floppy and its drive density.
         const hdCmos = isHdd ? (g => [
             [0x19, 47],
             [0x1b, g.cylinders & 0xff], [0x1c, (g.cylinders >> 8) & 0xff],
@@ -3880,7 +3899,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 { kind: 'rom', start: 0xc0000, end: 0xc9fff },
             ],
             chips: withI80386MouseCmos(base.chips,
-                isHdd ? [[0x3d, 0x21], [0x12, 0xf0], ...hdCmos] : []),
+                isHdd ? [[0x3d, 0x21], [0x12, 0xf0], ...hdCmos] : isFloppy ? i80386FloppyCmos(floppyGeom) : []),
         };
 
         const targetOpts = { config };
@@ -3924,9 +3943,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (!fdc || typeof fdc.insert !== 'function') {
                 throw new Error('the free-386 FreeDOS floppy profile needs a µPD765 (fdc1) — none was built');
             }
-            const geom = bootMedia.geometry ||
-                { cylinders: 80, heads: 2, sectors: 15, bytesPerSector: 512 };
-            fdc.insert(0, bootImg.bytes, geom);
+            fdc.insert(0, bootImg.bytes, floppyGeom);
             readyMsg = S('ready.free386Floppy', {name: bootMedia.name || S('noun.floppy')});
         } else if (isHdd) {
             readyMsg = S('ready.free386Disk', {name: bootMedia.name || S('noun.hardDisk')});

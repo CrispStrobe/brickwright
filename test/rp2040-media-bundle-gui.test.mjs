@@ -78,17 +78,19 @@ test('Pico BASIC source is dispatched using the selected firmware dialect', asyn
 
 test('Pico media hands a pinned sector-aligned storage partition to the runner', async () => {
     const sha256 = 'f'.repeat(64);
-    const flashStorage = {offset: 0x1df000, length: 0x20000};
-    const config = newMachineConfig({
-        executionMode: 'functional', machine: 'rp2040js',
-        slots: {flash: {url: 'stefan_basic_uart.uf2', sha256}},
-        provenance: {program: {basicConsole: 'stefan', flashStorage}}
-    });
-    const result = await runMachineConfig(config, {
-        fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}),
-        dispatch () {}
-    });
-    assert.deepEqual(result.detail.picoFlashStorage, {...flashStorage, sha256});
+    for (const [basicConsole, offset] of [['stefan', 0x1df000], ['piccolo', 0xa0000]]) {
+        const flashStorage = {offset, length: 0x20000};
+        const config = newMachineConfig({
+            executionMode: 'functional', machine: 'rp2040js',
+            slots: {flash: {url: basicConsole + '.uf2', sha256}},
+            provenance: {program: {basicConsole, flashStorage}}
+        });
+        const result = await runMachineConfig(config, {
+            fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}),
+            dispatch () {}
+        });
+        assert.deepEqual(result.detail.picoFlashStorage, {...flashStorage, sha256});
+    }
 });
 
 test('only the pinned PicoBB console image supplies the preformatted flash partition', async () => {

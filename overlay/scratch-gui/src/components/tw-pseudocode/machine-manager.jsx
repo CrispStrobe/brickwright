@@ -27,8 +27,11 @@ import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
 import {
-    libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readLibraryCode, readMediaManifest
+    libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readKim1LibraryTape, readLibraryCode, readMediaManifest
 } from '../../lib/bw-machines/library-media.js';
+import {aceKimLicenses, createLibraryAceKim} from '../../lib/bw-machines/ace-kim-library.js';
+import {createXkimTerminal, readXkimMedia, XKIM_SOURCE} from '../../lib/bw-machines/kim1-xkim.js';
+import {kim1CpmProfiles, readKim1CpmArchive, createKim1CpmTerminal} from '../../lib/bw-machines/kim1-cpm65.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
@@ -137,7 +140,7 @@ function MachineEntry({title, info, infoPrefix, actions, children, rowAttributes
     );
 }
 
-export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample}) {
+export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample, onRunKim1Tty, onRunAceKim}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
     // viewport, which this app floors at 1024px wide — so on a 430pt phone the
     // modal centred at x=512 and its buttons sat off the side of the screen.
@@ -166,6 +169,13 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const matchingMedia = mediaAllowed ? libraryMedia.map(item => localizedMedia(item, locale))
         .filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
     const [circuits, setCircuits] = React.useState(null);
+    const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
+    const [cpmFile, setCpmFile] = React.useState(null);
+    const [xkimRom, setXkimRom] = React.useState(null);
+    const [xkimMedia, setXkimMedia] = React.useState([]);
+    const [xkimMediaKind, setXkimMediaKind] = React.useState('files');
+    const controllerRequest = React.useRef(null);
+    React.useEffect(() => () => { controllerRequest.current = null; }, []);
     const [launching, setLaunching] = React.useState(null);
     const [status, setStatus] = React.useState('');
     const [text, setText] = React.useState('');
@@ -200,6 +210,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const closeManager = event => {
         invalidateDosPackage();
+        controllerRequest.current = null;
         if (onClose) onClose(event);
     };
     const run = async (cfg, opts) => {
@@ -398,11 +409,13 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         lessons: lessons.filter(lesson => lesson.config.machine === kind),
         saved: matchingMachines.filter(machine => machine.machine === kind),
         media: matchingMedia.filter(item => item.machine === kind),
+        cpm65: kind === 'kim1' && onRunKim1Tty && matchesTitle('CP/M-65 for KIM-1'),
+        xkim: kind === 'kim1' && onRunKim1Tty && matchesTitle('Corsham xKIM'),
         examples: showCircuitPrograms ? matchingCircuits.filter(example => example.machine === kind) : [],
         local: kind === 'i80386' && (
             !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
     })).filter(group => group.bios || group.local || group.graphics || group.virtual.length || group.presets.length ||
-        group.lessons.length || group.saved.length || group.media.length || group.examples.length);
+        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65 || group.xkim);
 
     return (
         <div onClick={closeManager} data-testid="bw-machine-manager"
@@ -526,17 +539,32 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             rowAttributes={{'data-machine-media': item.id}}
                                             info={<>
                                                 {item.summary && <div>{item.summary}</div>}
-                                                {item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
+                                                {item.aceKim ? aceKimLicenses.map(({label, url}) => <div key={label}>
+                                                    <a href={url} target="_blank" rel="noopener noreferrer">{label} · MIT</a>
+                                                </div>) : item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
                                                     {item.license}
                                                 </a> : (/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`)}
                                             </>}
                                             actions={
-                                                <button type="button" disabled={launching !== null || (!item.benchmark && !onRun)} style={btn}
+                                                <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
+                                                        item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun)} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
                                                                 {detail: {run: item.benchmark}}));
                                                             return true;
+                                                        }
+                                                        if (item.aceKim) {
+                                                            const request = {};
+                                                            controllerRequest.current = request;
+                                                            const machine = await createLibraryAceKim();
+                                                            if (controllerRequest.current !== request) return false;
+                                                            onRunAceKim(machine);
+                                                            return true;
+                                                        }
+                                                        if (item.kim1Tape) {
+                                                            const kim1Tape = await readKim1LibraryTape(item);
+                                                            return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
                                                         const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
                                                         return onRun(config, {code});
@@ -545,6 +573,74 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 </button>
                                             } />)}
                                     </div>}
+                                    {group.cpm65 && <MachineEntry title="CP/M-65 for KIM-1" infoPrefix={infoPrefix}
+                                        rowAttributes={{'data-testid': 'bw-mm-kim1-cpm65'}}
+                                        info={<>Choose the matching <a href={cpmProfile.url} target="_blank" rel="noreferrer">upstream ZIP</a>.
+                                            {' '}The archive stays in this session. CP/M-65 itself is BSD-2-Clause, and the disk includes separately licensed utilities.</>}
+                                        actions={<>
+                                            <select aria-label="CP/M-65 drive" value={cpmProfile.id} disabled={launching !== null}
+                                                onChange={event => {
+                                                    setCpmProfile(kim1CpmProfiles.find(profile => profile.id === event.target.value));
+                                                    setCpmFile(null);
+                                                    setStatus('');
+                                                }}>
+                                                {kim1CpmProfiles.map(profile => <option key={profile.id} value={profile.id}>{profile.label}</option>)}
+                                            </select>
+                                            <input key={cpmProfile.id} type="file" accept=".zip" aria-label="CP/M-65 ZIP"
+                                                style={{maxWidth: 175}} disabled={launching !== null}
+                                                onChange={event => setCpmFile(event.target.files?.[0] || null)} />
+                                            <button type="button" style={btn} disabled={launching !== null || !cpmFile}
+                                                onClick={() => launch('kim1-cpm65', async () => {
+                                                    const request = {};
+                                                    controllerRequest.current = request;
+                                                    const media = await readKim1CpmArchive(cpmProfile.id, cpmFile);
+                                                    if (controllerRequest.current !== request) return false;
+                                                    const session = await createKim1CpmTerminal(media);
+                                                    if (controllerRequest.current !== request) {
+                                                        session.dispose();
+                                                        return false;
+                                                    }
+                                                    onRunKim1Tty(session);
+                                                    return true;
+                                                })}>{t('run')}</button>
+                                        </>} />}
+                                    {group.xkim && <MachineEntry title="Corsham xKIM" infoPrefix={infoPrefix}
+                                        rowAttributes={{'data-testid': 'bw-mm-xkim'}}
+                                        info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
+                                            {' '}Choose loose 8.3 files or a FAT12/16/32 image up to 128 MiB. For an image, only compatible root files are imported.
+                                            {' '}The guest changes session copies. Export files in Controller keeps them in a ZIP.</>}
+                                        actions={<>
+                                            <label style={fieldsStyle}>ROM
+                                                <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}
+                                                    style={{maxWidth: 140}} onChange={event => setXkimRom(event.target.files?.[0] || null)} />
+                                            </label>
+                                            <select value={xkimMediaKind} aria-label="xKIM storage type" disabled={launching !== null}
+                                                onChange={event => { setXkimMedia([]); setXkimMediaKind(event.target.value); }}>
+                                                <option value="files">Loose files</option>
+                                                <option value="fat">FAT image</option>
+                                            </select>
+                                            <input key={xkimMediaKind} type="file" multiple={xkimMediaKind === 'files'}
+                                                aria-label={xkimMediaKind === 'files' ? 'xKIM Corsham files' : 'xKIM FAT image'}
+                                                disabled={launching !== null} style={{maxWidth: 140}}
+                                                onChange={event => setXkimMedia(Array.from(event.target.files || []))} />
+                                            <button type="button" style={btn} disabled={launching !== null || !xkimRom}
+                                                onClick={() => launch('kim1-xkim', async () => {
+                                                    const request = {};
+                                                    controllerRequest.current = request;
+                                                    if (xkimMediaKind === 'fat' && !xkimMedia[0]) throw new Error('Choose an xKIM FAT image.');
+                                                    const media = await readXkimMedia(
+                                                        xkimRom, xkimMediaKind === 'files' ? xkimMedia : [], xkimMediaKind === 'fat' ? xkimMedia[0] : null
+                                                    );
+                                                    if (controllerRequest.current !== request) return false;
+                                                    const session = await createXkimTerminal(media);
+                                                    if (controllerRequest.current !== request) {
+                                                        session.dispose();
+                                                        return false;
+                                                    }
+                                                    onRunKim1Tty(session);
+                                                    return true;
+                                                })}>{t('run')}</button>
+                                        </>} />}
                                     {group.examples.length > 0 && <div data-testid="bw-mm-circuit-programs">
                                         {group.examples.map(example => <MachineEntry key={example.id} title={circuitTitle(example)} rowAttributes={{'data-machine-example': example.id}} actions={
                                             <button type="button" disabled={launching !== null} style={btn}

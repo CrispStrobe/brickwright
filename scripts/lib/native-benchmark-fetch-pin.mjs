@@ -9,9 +9,9 @@ export const NATIVE_BENCHMARK_ROOT = 'overlay/scratch-gui/src/lib/bw-native-benc
 // notices or return, and rehashes executable bytes before loading native code.
 // A change to that ordering must be reviewed, not silently reclassified.
 export const APPROVED_BENCHMARK_FILES = Object.freeze({
-    'index.js': 'c08e94db8a4b1dcca123ec6d6131b334c602e7db1db3f405c6123d61771e0af0',
+    'index.js': 'e8ee45ecc92842e69ec545f6dcdabd2fb9c6a5a17a7649f84cb7c2dac173d4a3',
     'provenance.json': 'a8edcd3e46823eab98de85614e6251923a95aa71a03d68723ca368b0e56c8c95',
-    'catalog.json': '8869b9b66edc98fb96cf35818425a9a6009ea8c3f6e4ac996f1819f4bcfc2194'
+    'catalog.json': 'c39788c934ffcfb89e9878a942ca8ffe39254a276f62355ec2a5ed876c70c093'
 });
 const safePath = value => typeof value === 'string' && value.split('/').every(part =>
     /^[A-Za-z0-9_.-]+$/.test(part) && part !== '.' && part !== '..');
