@@ -151,3 +151,26 @@ through a scratch import resolver. No dependency was installed and no source
 or artifact was mocked. The reviewed test blob is
 `37adc4d9d90344a768f8acdbc964017c33337bcd`. The following candidate still
 requires applicable hosted source and integration qualification.
+
+## Gallery fixture fetch-census declaration
+
+The new gallery CLI fixture contains a raw GitHub URL template intercepted by
+its offline fetch recorder. This lane also owns its exact `source-link` row
+in `test/fetch-pinning.test.mjs`, with the synthetic SHA and zero-network
+fixture behavior stated explicitly. Preserve detectors, exclusions, waivers
+and mutation proofs; carry the declaration through both consumer candidates.
+
+### Fixture declaration receipt
+
+The offline test URL is classified explicitly in the existing census; the
+fixture recorder returns local bytes and rejects unexpected URLs with no
+network fallback. The production sync URL remains separately declared.
+This adds nine declaration lines and changes no detector, exclusion, waiver,
+assertion or prover. The LP1a gate blob is
+`89d0801db37630887cd432a10631055af6cdc535`.
+
+Independent review matched the actual detector hit and exercised the unchanged
+census assertion: the row passes; removing it, changing the URL or removing the
+fixture fails. A sweep of 16 changed/new scanner-eligible code files identifies
+only the separately declared production, provenance and fixture raw URLs.
+The full repository scanner and mutation prover remain hosted requirements.
