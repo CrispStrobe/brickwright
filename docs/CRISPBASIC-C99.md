@@ -88,3 +88,32 @@ executes four BASIC fixtures through BBCSDL, compiles each to firmware, and chec
 two cold boots in Brickwright's pinned AVR and RP2040 simulators. See its
 `COMPILING-BOARDS.md` for the source pins, commands, timing tolerance, observed
 trace results and qualification limits.
+
+## Reconciled standalone source and fresh integration qualification
+
+`vendor-pins.json` and `crispbasic-compiler.lock.json` both select immutable
+CrispBASIC commit `550f8396fdb652a1a14e3635681244d2d21e59dc`. All 185
+vendored package files match that source byte for byte and mode for mode;
+the separately staged five compiler files retain size and SHA-256 checks.
+The ordinary sync path is `npm run sync:crispbasic -- --dir <checkout> --pin`.
+Its exact-copy check is `npm run sync:crispbasic -- --dir <checkout> --check`.
+
+The six tests requiring Brickwright's real board and Circuit models now live
+in `test/crispbasic-integration/` and run through
+`npm run test:crispbasic-integration`. Their assertions are preserved from the
+prepared extraction; only package/import paths moved. Upstream owns the
+standalone CPU-emulation workflow. The compiler asset/editor job remains
+in Brickwright's runtime workflow.
+
+The [fresh receipt](receipts/crispbasic-reconciliation-20261128.json) records
+**48 focused and package-identity checks, 47 complete supplier-history checks,
+and 102 real-WASM integration checks**, all passing with zero skips. Three
+transcripts, exact test/source hashes and the authenticated WASM recipe are
+retained beside it. The actual staged compiler was also loaded through the
+editor adapter, generated C99, built with GCC 14 and produced 22 output bytes
+identical to the independent BBCSDL reference. This checks source retention,
+diagnostics, stale loads, packaging, GPIO timing, electrical solver behavior,
+procedures, source round trips and the saved motor Circuit.
+
+This local qualification does not claim production-browser or hosted-service
+execution. Current-head hosted build/unit/production gates remain separate.

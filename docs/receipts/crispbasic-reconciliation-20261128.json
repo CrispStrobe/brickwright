@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "kind": "brickwright-crispbasic-reconciliation",
+  "observedAt": "2026-11-28T20:06:01.871552+00:00",
+  "qualifiedSourceCommit": "b8825813c4cc5994bb5ff3edb80947c8fa980adb",
+  "qualifiedSourceTree": "4b4c9f54402fdc0495a4ba33944d97c6991a87cd",
+  "standalonePin": "550f8396fdb652a1a14e3635681244d2d21e59dc",
+  "inheritedBoardTargetHead": "0f4920cbba99214fd5262439e274d0eb67d20210",
+  "nodeVersion": "v24.22.3",
+  "packageIdentity": {
+    "files": 185,
+    "byteAndModeIdentical": true,
+    "check": "node scripts/sync-crispbasic.mjs --dir <crispbasic> --ref 550f8396fdb652a1a14e3635681244d2d21e59dc --check",
+    "repositoryOnlyExclusions": [
+      ".github/",
+      "tools/"
+    ]
+  },
+  "compilerAssets": {
+    "files": 5,
+    "allSizesAndHashesVerified": true,
+    "lock": {
+      "schemaVersion": 1,
+      "repository": "https://github.com/CrispStrobe/crispbasic.git",
+      "commit": "550f8396fdb652a1a14e3635681244d2d21e59dc",
+      "files": {
+        "src/compiler/index.mjs": {
+          "bytes": 45967,
+          "sha256": "df79d13e51cca8b815861e5c7ad880af465cf3ca5ccf4399d2f82b7aa1f75adf"
+        },
+        "src/compiler/runtime.mjs": {
+          "bytes": 40781,
+          "sha256": "a6544b2483167db9d7534ce8d7739508a613cfd0b72734b9260fbfa78c498887"
+        },
+        "src/compiler/platform.mjs": {
+          "bytes": 10773,
+          "sha256": "4f433aab016607cee6a141c99d72f68c6f7db90c745977d4582b9eaf25d6825b"
+        },
+        "src/source.mjs": {
+          "bytes": 6836,
+          "sha256": "5b48812da607a53c7d1f540afb4563e8d597dcbe817e78926cfbd8405ab5ee61"
+        },
+        "LICENSE": {
+          "bytes": 1520,
+          "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad"
+        }
+      }
+    }
+  },
+  "testRuns": [
+    {
+      "command": "CRISPBASIC_DIR=<crispbasic> node --test test/crispbasic-compiler*.test.mjs test/code-device-languages.test.mjs test/ci-workflow-inputs.test.mjs test/crispbasic-assets.test.mjs test/crispbasic-vendor-identity.test.mjs",
+      "tests": 48,
+      "pass": 48,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": "docs/receipts/crispbasic-reconciliation-20261128/final-focused.log",
+      "logSha256": "88028a5dc0e7966324205aa9c94d5cd3086721e774d8b7e347345b720205885a",
+      "rawLogSha256": "bb1531ac9f68008701584140c23b606385b2399041fd7e6e27723577394cadeb",
+      "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; test outcomes and diagnostics are retained."
+    },
+    {
+      "command": "CRISPBASIC_DIR=<crispbasic> BW_BOARD_DIR=<bw-board> BW_CIRCUIT_UI_DIR=<bw-circuit-ui> SB3_CREATOR_DIR=<sb3-creator> node --test test/pin-move-chain.test.mjs",
+      "tests": 47,
+      "pass": 47,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": "docs/receipts/crispbasic-reconciliation-20261128/final-pin-history.log",
+      "logSha256": "628a6b76cdf03428c35eddbbfc8fa2a89deb32258edfc2affd518f5cd05a96b5",
+      "rawLogSha256": "628a6b76cdf03428c35eddbbfc8fa2a89deb32258edfc2affd518f5cd05a96b5",
+      "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; test outcomes and diagnostics are retained."
+    },
+    {
+      "command": "node --test test/crispbasic-integration/*.test.mjs",
+      "tests": 102,
+      "pass": 102,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": "docs/receipts/crispbasic-reconciliation-20261128/final-relocated-integration.log",
+      "logSha256": "70c8e54948e24a7b9516f07c294388b2d52e38012bda9106a5bc8dd73efcb2e3",
+      "rawLogSha256": "07c717da8ac2eb77458697aa3580bb37f61c54170da795c14bca277d3bbb9d38",
+      "sanitization": "Only the absolute shared workspace prefix is replaced with <workspace>; test outcomes and diagnostics are retained."
+    }
+  ],
+  "totalPassingTests": 197,
+  "inputSha256": {
+    "overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx": "fe1396b53f42eaa4d3dca50fc4ec330eac94e2671e79146567b5170bd08ce2ce",
+    "overlay/scratch-gui/src/lib/crispbasic-compiler.js": "bf04cfa1a1464e6217fb51e8d16da57a766cc79e8ece1963327f6ed0acd035e1",
+    "scripts/package-crispbasic-compiler.mjs": "95afae2bca211e87aa3928905d152d94d83d8e3cf6dcc7af5e13595345a07df4",
+    "scripts/package-crispbasic.mjs": "46e21f6930d7e1b435904fdf6d3c7148cf53dc806f9cfc1b2587b621a156bf8f",
+    "test/ci-workflow-inputs.test.mjs": "bdebc5b96f81a030c3ea60517f3e2b96d66b1a0447a6d0da22ff192e2b14562d",
+    "test/code-device-languages.test.mjs": "9f85137cbce2ca5e032d98f98db6c62ad500e1651384116717146eb8fe00ea9d",
+    "test/crispbasic-assets.test.mjs": "dd04c7e4d1e85fd8961a7e7171bacd27cd1852c1d9776d679eaa2f86c41c96c0",
+    "test/crispbasic-compiler-package.test.mjs": "307410358cb46fd0e48f5af3c70a98d3512e46d793a9222589c7c63b0a189d68",
+    "test/crispbasic-compiler.test.mjs": "b581e0e1acdbda130a6031a15471830b1235fa96e81f98a5dfeeceb54aa403e0",
+    "test/crispbasic-integration/brickwright.test.mjs": "fd0be176bb88604c932da353392401a7246e5f12c2224d5816d0ef68b12d2ef7",
+    "test/crispbasic-integration/generator.test.mjs": "94131337791328f80c6760b0218867787541b5e6b9c4cbd663bcf1dc988bfb18",
+    "test/crispbasic-integration/robot-motor.test.mjs": "6c6dbe73394ac6639b40d97e351e5a0518859c8e2f3737a541c8f84e66981072",
+    "test/crispbasic-integration/roundtrip-procedures.test.mjs": "0068c626286152cbf75dab2f3bff1bed54c902c9a7cbbb954a9a8a23b99a6d6d",
+    "test/crispbasic-integration/roundtrip-profiles.test.mjs": "b04a80e3de031ef2816f94bdd2036b58150eed20408cf656cfcc7289004f65d5",
+    "test/crispbasic-integration/roundtrip.test.mjs": "887b9547af2faaa719dfba0fef7d1a6f4e49f11000757a600ce2626b23cf4999",
+    "test/crispbasic-vendor-identity.test.mjs": "7ea2930a2fb0e60e0c61e9baab9d11886d1bef98d55ff84e3bafbaab3ecc2b2c",
+    "test/pin-move-chain.test.mjs": "601bbb4bf1dc17ffa9156b4d8d4e68accc05184325cbb848dec123bc198691d7"
+  },
+  "wasmExecution": {
+    "backend": "bbcsdl-wasm",
+    "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.64 (a1fe3902bf73a3802eae0357d273d0e37ea79898)",
+    "toolchain": {
+      "version": "3.1.64",
+      "commit": "a1fe3902bf73a3802eae0357d273d0e37ea79898",
+      "repository": "https://github.com/emscripten-core/emscripten",
+      "installerRepository": "https://github.com/emscripten-core/emsdk",
+      "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+      "notices": [
+        {
+          "source": "LICENSE",
+          "path": "wasm/licenses/EMSCRIPTEN-LICENSE.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+        },
+        {
+          "source": "AUTHORS",
+          "path": "wasm/licenses/EMSCRIPTEN-AUTHORS.txt",
+          "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+        },
+        {
+          "source": "system/lib/libc/musl/COPYRIGHT",
+          "path": "wasm/licenses/MUSL-COPYRIGHT.txt",
+          "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+        },
+        {
+          "source": "system/lib/compiler-rt/LICENSE.TXT",
+          "path": "wasm/licenses/COMPILER-RT-LICENSE.txt",
+          "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+        },
+        {
+          "source": "license comments from system/lib/libc/musl/src/math and system/lib/dlmalloc.c",
+          "path": "wasm/licenses/LIBC-SOURCE-NOTICES.txt",
+          "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+        }
+      ]
+    },
+    "sourceInputs": [
+      {
+        "path": "src/bbmain.c",
+        "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+      },
+      {
+        "path": "src/bbexec.c",
+        "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+      },
+      {
+        "path": "src/bbeval.c",
+        "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+      },
+      {
+        "path": "licence.txt",
+        "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+      },
+      {
+        "path": "bin/wasm/BBC.h",
+        "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+      },
+      {
+        "path": "src/bbdata_wasm32.c",
+        "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+      }
+    ],
+    "localSourceInputs": [
+      {
+        "path": "scripts/build-wasm.mjs",
+        "sha256": "220052eacf1010a16e6f5250643cbd05952536c9929c495621199bfe88715ca8"
+      },
+      {
+        "path": "upstream.lock.json",
+        "sha256": "d43e383babe40a615710a8867ed7524375dc57f1d6b4587f404e9a36d6940f35"
+      },
+      {
+        "path": "wasm/build-inputs.mjs",
+        "sha256": "606833467f420a57d7e09cb61a9b614512bc9f686fbfe37e74159b91dd4fe71f"
+      },
+      {
+        "path": "wasm/toolchain.lock.json",
+        "sha256": "dd32df49ba277e7f3a27705fa9ae830a28fd7bfb84bdefe8d5f1a0821bf9c2ef"
+      },
+      {
+        "path": "wasm/patch-upstream.mjs",
+        "sha256": "f8df8ae9b22ed1b98587989b13e5509e44ab93a329c616a963deb41318b0ab9e"
+      },
+      {
+        "path": "native/patch-upstream.mjs",
+        "sha256": "ff1b7671373f115cfefcf2ad048b54083ae1c7579943f06bce8bb8c32a66a3e8"
+      },
+      {
+        "path": "wasm/crisp-host.h",
+        "sha256": "ed4a4785f9410e40b01dc8c48a5b1cae75b6741af40ef5019a024087c205f9f7"
+      },
+      {
+        "path": "wasm/crispbasic.c",
+        "sha256": "58f92c07d73751fce2eab255b0f89bb0eaacbc81a26588f41b295e998687f2a4"
+      },
+      {
+        "path": "wasm/emscripten-host.c",
+        "sha256": "3ca91c0cd19ee998bf287d0acadbfe3e8f22c6e248ad03d4513c6dd2777edc7d"
+      }
+    ],
+    "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+    "wasmSha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2"
+  },
+  "realCompilerAdapter": {
+    "standalonePin": "550f8396fdb652a1a14e3635681244d2d21e59dc",
+    "target": "native",
+    "interpreterEmbedded": false,
+    "compiledOutputBytes": 22,
+    "outputLatin1": "6\r\npackaged compiler\r\n",
+    "byteIdenticalToBBCSDL": true,
+    "sourceSha256": "bbd7d3502bb70aeefd5fece86d13006d7b0595e7b6336f32ad1d5524080fdf2d",
+    "generatedCSha256": "8e117c699092e18178a2e91ad56b7b078d32f98e4ebbbfc12f0685a46b448795",
+    "executableSha256": "b56b9edfa8d75584c7cba9d30dd0d121f84a405d3ed6af29965a374e1134b5aa",
+    "referenceExecutableSha256": "1737b8efe981e29b2926bcc2fe94cfcc6fde02f75100845cc2e47b75a1183da1",
+    "compiler": "gcc (Debian 14.2.0-19) 14.2.0",
+    "source": "sum%=0\nFOR n%=1 TO 3:sum%+=n%:NEXT\nPRINT STR$(sum%)\nPRINT \"packaged compiler\"\n",
+    "filename": "packaged.bas",
+    "generatedBy": "prepareCompiledBasic using the actual staged locked compiler; no injected compiler stub"
+  },
+  "firmwareDistributionRepair": {
+    "commit": "0f4920cbba99214fd5262439e274d0eb67d20210",
+    "supplierPin": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+    "verifiedAssets": 11,
+    "unchangedLooseAssets": 10,
+    "archiveEntriesWithIdenticalPayloadModeAndLinks": 71,
+    "newArchiveSha256": "0007ad2a1db63b048186c5422f0a63ed4799996e073ed1dbc62ba4fefa084b54",
+    "measuredBuildRecordsUnchanged": true
+  },
+  "limits": [
+    "These local checks do not replace current-head hosted full-build/unit/production-browser gates.",
+    "No production browser, hosted C service or physical board was exercised by this integration qualification.",
+    "Pico SDK firmware is built by the standalone CLI; the existing hosted SRAM RP2040 service is explicitly refused."
+  ]
+}
