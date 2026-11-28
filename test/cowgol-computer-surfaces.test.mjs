@@ -63,8 +63,8 @@ function fixture ({hold = null, images = true, toolchains = true, device = 'z80'
         }
     });
     const Editor = new Function('loadCompiler', 'runMachineConfig', 'remoteMachineImagesAllowed',
-        'remoteToolchainsAllowed', 'cowgolTargetForDevice', `return class {${methods}}`)(
-        loadCompiler, machine, () => images, () => toolchains, compiler.cowgolTargetForDevice);
+        'remoteToolchainsAllowed', 'cowgolTargetForDevice', 'cowgolCanonicalDevice', `return class {${methods}}`)(
+        loadCompiler, machine, () => images, () => toolchains, compiler.cowgolTargetForDevice, compiler.cowgolCanonicalDevice);
     const editor = new Editor();
     Object.assign(editor, {
         state: {lang, buffers: {[lang]: authored}, busy: false, running: false},

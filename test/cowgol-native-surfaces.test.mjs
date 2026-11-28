@@ -18,7 +18,7 @@ function record (address, data, type = 0) {
     bytes.push((-bytes.reduce((sum, byte) => sum + byte, 0)) & 255);
     return `:${bytes.map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
 }
-function avrArtifact (size = 128) {
+function avrArtifact (size = 128, target = 'atmega328p') {
     const flash = new Uint8Array(size);
     flash.set([0x0c, 0x94, 0x34, 0]); // JMP after the complete 104-byte vector table.
     const lines = [];
@@ -26,10 +26,11 @@ function avrArtifact (size = 128) {
     lines.push(record(0, [], 1));
     const bytes = new TextEncoder().encode(`${lines.join('\n')}\n`);
     return {flash, bytes, reply: {
-        success: true, language: 'cowgol', target: 'atmega328p', toolchain: 'cowgol-atmega328p',
+        success: true, language: 'cowgol', target, toolchain: `cowgol-${target}`,
+        ...(target === 'arduino-nano' ? {board: target, bootloader_reserve: 2048} : {}),
         format: 'hex', artifact_kind: 'executable', mcu: 'atmega328p', origin: 0, entry: 0,
         f_cpu: 16_000_000, uart_baud: 9600, bytes: bytes.length, base64: encode(bytes), memory_end: 0x304,
-        memory_layout: {flash_end: size, flash_limit: 0x7e00, data_start: 0x100, data_end: 0x102,
+        memory_layout: {flash_end: size, flash_limit: target === 'arduino-nano' ? 0x7800 : 0x7e00, data_start: 0x100, data_end: 0x102,
             bss_end: 0x304, heap_start: 0x104, heap_end: 0x304, stack_start: 0x700,
             stack_reserve: 512, ram_end: 0x900, halted_addr: 0x102, status_addr: 0x103}
     }};
@@ -42,25 +43,25 @@ const replaceHex = (reply, text) => {
 test('native device routing advertises only explicitly qualified machine profiles', () => {
     for (const [device, target] of Object.entries({
         z80: 'z80-cpm', i8086: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
-        'arduino-uno': 'atmega328p', atmega328p: 'atmega328p'
+        'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano'
     })) {
         assert.equal(compiler.cowgolTargetForDevice(device), target);
         assert.equal(compiler.cowgolTargetForDevice(device.toUpperCase()), target);
     }
-    for (const device of ['arduino-nano', 'arduino-mega', 'atmega168p', 'attiny85', 'pico', 'i80386', 'constructor', '__proto__', '', null]) {
+    for (const device of ['arduino-mega', 'atmega168p', 'attiny85', 'pico', 'i80386', 'constructor', '__proto__', '', null]) {
         assert.equal(compiler.cowgolTargetForDevice(device), null, String(device));
     }
 });
 
-test('the capability matrix records the pending Uno/328P native port without widening the family', () => {
-    for (const device of ['arduino-uno', 'atmega328p']) {
+test('the capability matrix records the pending Uno/328P and classic Nano ports without widening the family', () => {
+    for (const device of ['arduino-uno', 'atmega328p', 'arduino-nano']) {
         const capability = cell('cowgol', device);
         assert.equal(isNativeNull(capability.native), false, device);
         assert.equal(capability.native.artefact, 'hex', device);
         assert.equal(capability.native.status, 'open', device);
         assert.equal(capability.native.sim, false, 'a pending deployment is not a shipped machine route');
     }
-    for (const device of ['arduino-nano', 'arduino-mega', 'atmega168p', 'attiny85']) {
+    for (const device of ['arduino-mega', 'atmega168p', 'attiny85']) {
         assert.equal(isNativeNull(cell('cowgol', device).native), true, device);
     }
 });
@@ -172,6 +173,31 @@ test('AVR rejects an otherwise valid odd-length flash image, matching service va
     await assert.rejects(compiler.compileCowgol(requestSource, 'atmega328p', {fetcher: fetcher(reply)}), /invalid/i);
 });
 
+test('Nano requires its own compiler identity, 2 KiB reservation and fixed MCU handoff', async () => {
+    const target = 'arduino-nano';
+    const {reply, bytes} = avrArtifact(0x7800, target);
+    const out = await compiler.compileCowgol(requestSource, target, {fetcher: fetcher(reply)});
+    assert.deepEqual(out.bytes, bytes);
+    assert.equal(out.filename, 'nano.hex');
+    assert.deepEqual(compiler.cowgolAvrDetail(out.bytes, {target}), {
+        format: 'firmware', target, kind: 'avr8js',
+        firmware: {name: 'nano.hex', bytes: null, text: new TextDecoder().decode(bytes),
+            fCpu: 16_000_000, device: 'atmega328p'}, rom: null, image: null, listing: null
+    });
+    for (const changes of [{board: 'arduino-uno'}, {board: undefined}, {bootloader_reserve: 512},
+        {bootloader_reserve: undefined}, {toolchain: 'cowgol-atmega328p'}, {target: 'atmega328p'}]) {
+        await assert.rejects(compiler.compileCowgol(requestSource, target, {
+            fetcher: fetcher({...reply, ...changes})
+        }), /invalid/i);
+    }
+    const oversized = avrArtifact(0x7802, target);
+    await assert.rejects(compiler.compileCowgol(requestSource, target, {fetcher: fetcher(oversized.reply)}), /invalid/i);
+    const wrongLimit = avrArtifact(128, target).reply;
+    wrongLimit.memory_layout.flash_limit = 0x7e00;
+    await assert.rejects(compiler.compileCowgol(requestSource, target, {fetcher: fetcher(wrongLimit)}), /invalid/i);
+    assert.throws(() => compiler.cowgolAvrDetail(bytes, {target: 'atmega168p'}), /Unqualified/);
+});
+
 test('AVR exit markers must be in zero-initialized SRAM rather than initialized .data', async () => {
     for (const [name, address] of [['halted_addr', 0x100], ['status_addr', 0x101]]) {
         const {reply} = avrArtifact();
@@ -187,6 +213,7 @@ const extract = (start, end) => {
     return importer.slice(first, last);
 };
 const methods = extract('    convertedSource (', '    // source → pseudocode') +
+    extract('    codeDevice () {', '    // Publish the device') +
     extract('    stopCodeRun ()', '    disposeCodeRun ()') +
     extract('    async runViaCowgolOnDevice (', '    async runBlocksOnRiscv ()') +
     extract('    async compileCowgolSource (', '    // Read the running project into all languages at once.')
@@ -205,7 +232,7 @@ const parseProject = (source, device) => {
 };
 
 function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = pseudocode,
-    projectSource = pseudocode, hold = null, output = null, allowed = true} = {}) {
+    projectSource = pseudocode, hold = null, output = null, allowed = true, actualDevice = false} = {}) {
     const events = [], builds = [], loads = [], machineRuns = [], downloads = [];
     const entered = deferred(), release = deferred();
     const pause = async phase => { if (phase === hold) { entered.resolve(); await release.promise; } };
@@ -223,20 +250,20 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
         builds.push({code, target, options});
         await pause('network');
         if (output) return output;
-        if (target === 'atmega328p') return {...avrArtifact(), toolchain: 'cowgol-atmega328p'};
+        if (target === 'atmega328p' || target === 'arduino-nano') return {...avrArtifact(), toolchain: `cowgol-${target}`};
         return {bytes: new Uint8Array([0x4d, 0x5a, 0]), toolchain: `cowgol-${target}`,
             image: {entry: 0x1000, segments: [{addr: 0x1000, bytes: new Uint8Array([0x73, 0, 0, 0])}]}};
     };
     const loadCompiler = async () => { await pause('compiler-module'); return {...compiler, compileCowgol: build}; };
     const loadMachine = async () => { await pause('machine-module'); return {runCpmCom: async (config, bytes) => machineRuns.push({config, bytes})}; };
     const Editor = new Function('loadCompiler', 'loadMachine', 'window', 'localStorage', 'CustomEvent',
-        'runMachineConfig', 'downloadBlob', 'remoteToolchainsAllowed', 'cowgolTargetForDevice',
+        'runMachineConfig', 'downloadBlob', 'remoteToolchainsAllowed', 'cowgolTargetForDevice', 'cowgolCanonicalDevice',
         'TWO_WAY', 'DOS_LANG', 'codeArtworkMatches', 'captureCodeArtwork', 'classifyConversionWarnings',
         'conversionFailure', 'LANG_LABEL', 'hiddenCodeDrafts', `return class {${methods}}`)(
         loadCompiler, loadMachine, window, {setItem () {}}, Event,
         async (config, options) => machineRuns.push({config, bytes: (await options.fetcher()).bytes}),
         async (name, blob) => downloads.push({name, bytes: new Uint8Array(await blob.arrayBuffer())}),
-        () => allowed, compiler.cowgolTargetForDevice, new Set(['cowgol', 'pseudocode']),
+        () => allowed, compiler.cowgolTargetForDevice, compiler.cowgolCanonicalDevice, new Set(['cowgol', 'pseudocode']),
         {cowgol: {load: async () => ({default: readCowgol})}}, () => false, () => null,
         () => ({changed: [], unsupported: []}), error => ({message: error.message, issues: []}), {}, () => ({}));
     const editor = new Editor();
@@ -253,8 +280,8 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
         }
     };
     Object.assign(editor, {
-        props: {vm}, state: {lang, buffers: {[lang]: source}, uploads: [], busy: false, running: false},
-        codeDevice: () => device,
+        props: {vm}, state: {lang, buffers: {pseudocode: `DEVICE ${device}\n${pseudocode}`, [lang]: source}, uploads: [], busy: false, running: false},
+        ...(actualDevice ? {} : {codeDevice: () => device}),
         activeCode () { return this.state.buffers[this.state.lang] || ''; },
         setState (update) { const patch = typeof update === 'function' ? update(this.state) : update; if (patch) Object.assign(this.state, patch); },
         lib: async () => { await pause('builder-module'); return {default: SB3Creator}; },
@@ -271,7 +298,7 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
 }
 
 test('the actual native Blocks method sends real checked Cowgol to every qualified compiler/loader', async () => {
-    for (const device of ['z80', 'i8086', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p']) {
+    for (const device of ['z80', 'i8086', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
         const f = editorFixture({device});
         const target = compiler.cowgolTargetForDevice(device);
         const generated = new SB3Creator().generateCowgol(f.currentProject(), {target});
@@ -323,8 +350,8 @@ test('native Blocks runtime refusal never calls the compiler or replaces/starts 
     }
 });
 
-test('Uno and bare ATmega328P editor routes emit native timed digital sequences', async () => {
-    for (const device of ['arduino-uno', 'atmega328p']) {
+test('Uno, classic Nano and bare ATmega328P editor routes emit native timed digital sequences', async () => {
+    for (const device of ['arduino-uno', 'arduino-nano', 'atmega328p']) {
         const source = `DEVICE ${device.toUpperCase()}\nPIN lamp = D13 OUTPUT\n` +
             'WHEN flag clicked:\n  turn on lamp\n  wait 0.001 seconds\n  turn off lamp\n';
         const f = editorFixture({device, lang: 'pseudocode', source});
@@ -332,8 +359,11 @@ test('Uno and bare ATmega328P editor routes emit native timed digital sequences'
         assert.equal(f.loads.length, 1, f.editor.state.status);
         assert.equal(f.builds.length, 1, f.editor.state.status);
         assert.match(f.builds[0].code, /bw_digital_write\(13, 1\);\s+bw_delay\(1\);\s+bw_digital_write\(13, 0\);/);
-        assert.equal(f.builds[0].target, 'atmega328p');
-        assert.equal(f.events.filter(event => event.type === 'bw-asm-rom-ready').length, 1);
+        const target = compiler.cowgolTargetForDevice(device);
+        assert.equal(f.builds[0].target, target);
+        const media = f.events.filter(event => event.type === 'bw-asm-rom-ready');
+        assert.equal(media.length, 1);
+        assert.deepEqual(media[0].detail, compiler.cowgolAvrDetail(avrArtifact().bytes, {target}));
     }
 });
 
@@ -406,6 +436,25 @@ test('native actions preserve the selected device and use the successfully impor
         assert.match(f.builds[0].code, /bw_checked_add/);
         assert.equal(f.events.filter(event => event.type === 'bw-asm-rom-ready').length, 1);
         assert.equal(f.editor.state.busy, false);
+    }
+});
+
+test('actual Uno and Nano DEVICE aliases survive strict import and canonical device metadata publication', async () => {
+    for (const [alias, device, target] of [['UNO', 'arduino-uno', 'atmega328p'], ['NANO', 'arduino-nano', 'arduino-nano']]) {
+        for (const lang of ['pseudocode', 'cowgol']) {
+            const source = lang === 'pseudocode' ? `DEVICE ${alias}\n${pseudocode}` :
+                `# @bw-declaration "DEVICE ${device.toUpperCase()}"\nbw_print_number(42);`;
+            const f = editorFixture({device: alias, lang, source, actualDevice: true});
+            assert.equal(f.editor.currentDevice(), alias.toLowerCase());
+            assert.equal(f.editor.codeDevice(), alias.toLowerCase());
+            await f.editor.runViaCowgolOnDevice();
+            assert.equal(f.loads.length, 1, `${alias}/${lang}: ${f.editor.state.status}`);
+            assert.equal(f.builds.length, 1, `${alias}/${lang}: ${f.editor.state.status}`);
+            assert.equal(f.builds[0].target, target);
+            assert.equal(f.vm.runtime.stc.device, device);
+            assert.equal(f.editor.activeCode(), source);
+            assert.equal(f.events.filter(event => event.type === 'bw-asm-rom-ready').length, 1);
+        }
     }
 });
 

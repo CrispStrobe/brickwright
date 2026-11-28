@@ -137,6 +137,39 @@ test('native CLI refuses mismatched devices, unsupported source and unsafe argum
     assert.equal(f.requests.length, 0);
 });
 
+test('native CLI builds classic Nano timed GPIO with its separate target and refuses Uno substitution', async t => {
+    const image = Buffer.alloc(128);
+    image.set([0x0c, 0x94, 0x34, 0]);
+    const lines = [];
+    for (let address = 0; address < image.length; address += 16) {
+        const data = [16, 0, address, 0, ...image.subarray(address, address + 16)];
+        data.push((-data.reduce((sum, byte) => sum + byte, 0)) & 255);
+        lines.push(`:${Buffer.from(data).toString('hex').toUpperCase()}`);
+    }
+    const hex = Buffer.from(`${lines.join('\n')}\n:00000001FF\n`);
+    const f = await fixture(t, () => ({success: true, language: 'cowgol', target: 'arduino-nano',
+        toolchain: 'cowgol-arduino-nano', format: 'hex', artifact_kind: 'executable',
+        board: 'arduino-nano', bootloader_reserve: 2048, mcu: 'atmega328p', origin: 0, entry: 0,
+        f_cpu: 16000000, uart_baud: 9600, base64: hex.toString('base64'), bytes: hex.length,
+        memory_end: 0x304, memory_layout: {flash_end: 128, flash_limit: 0x7800,
+            data_start: 0x100, data_end: 0x102, bss_end: 0x304, heap_start: 0x104,
+            heap_end: 0x304, stack_start: 0x700, stack_reserve: 512, ram_end: 0x900,
+            halted_addr: 0x102, status_addr: 0x103}}));
+    const input = await f.put('nano.bw', 'DEVICE NANO\nPIN led = D13 OUTPUT\nWHEN flag clicked:\n' +
+        '  turn on led\n  wait 0.001 seconds\n  turn off led\n');
+    const output = await f.put('nano.hex', 'OLD');
+    success(await f.build(input, 'arduino-nano', output));
+    assert.equal(f.requests[0].body.target, 'arduino-nano');
+    assert.match(f.requests[0].body.code, /bw_delay\(1\)/);
+    assert.match(f.requests[0].body.code, /bw_digital_write\(13/);
+    assert.deepEqual(await readFile(output), hex);
+    const rejected = await f.build(input, 'atmega328p', output);
+    assert.equal(rejected.status, 2, rejected.stderr);
+    assert.match(rejected.stderr, /cannot run DEVICE arduino-nano/);
+    assert.equal(f.requests.length, 1);
+    assert.deepEqual(await readFile(output), hex);
+});
+
 test('native CLI preserves prior artifacts on compiler refusal, invalid bytes and policy denial', async t => {
     let response = cpmReply();
     const f = await fixture(t, () => response);
@@ -242,7 +275,7 @@ test('native Cowgol conversion refuses original parse warnings before device ret
 test('native command help and discovery enumerate every existing compiler output', async () => {
     const list = await run(['cowgol', 'targets']);
     success(list);
-    for (const target of ['z80-cpm', 'i8080-cpm', 'dos', 'riscv32', 'eater6502', 'atmega328p', 'cowgol-cgen']) {
+    for (const target of ['z80-cpm', 'i8080-cpm', 'dos', 'riscv32', 'eater6502', 'atmega328p', 'arduino-nano', 'cowgol-cgen']) {
         assert.match(list.stdout, new RegExp(`^${target}\\s`, 'm'));
     }
     const help = await run(['cowgol', '--help']);

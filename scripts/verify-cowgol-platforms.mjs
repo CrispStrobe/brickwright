@@ -8,7 +8,7 @@
 // node scripts/verify-cowgol-platforms.mjs \
 //   --service ../stc-compiler --bundle ../cowgol-bundle --board ../bw-board \
 //   --riscv-gcc-stage ../riscv-gcc-stage --tmpdir ../validation
-// Add eater6502 or atmega328p to --targets when those native profiles are installed.
+// Add DOS, Eater, Uno or Nano to --targets when those native profiles are installed.
 import assert from 'node:assert/strict';
 import {spawn, execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -38,7 +38,7 @@ if (values.help) {
   --avr-runner PATH        Cowgol tests/avr-run.mjs (COWGOL_AVR_RUNNER; default ../cowgol/tests/avr-run.mjs)
   --avr8js-root PATH       Exact GUI-pinned avr8js checkout (AVR8JS_ROOT; default ../avr8js-oracle)
   --tmpdir PATH            Temporary parent directory (TMPDIR; default this repository)
-  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502,atmega328p,z80-cpm,i8080-cpm (default first two)
+  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502,atmega328p,arduino-nano,z80-cpm,i8080-cpm,dos (default first two)
   --cli                   Also build through bwlite cowgol and execute its exact saved artifact
   --python COMMAND        Python executable (PYTHON; default python3)
   --cc COMMAND            Host C compiler executable (CC; default cc)
@@ -47,10 +47,11 @@ The service binds an ephemeral 127.0.0.1 port. Every compiler request uses that
 local endpoint through Brickwright's real compileCowgol client. Temporary
 artifacts and the child server are removed on success and on ordinary failure.
 C export is compiled with the bundle's real portable console binding. Eater6502
-and ATmega328P are explicit opt-ins and fail if their bundle/runtime is absent.
+and the Uno/Nano AVR profiles are explicit opt-ins and fail if their bundle/runtime is absent.
 The AVR test also requires the exact pinned GUI engine and compiler checkout.
 CP/M programs run under the actual CP/M 2.2 OS on both serial and Controller
-surfaces; both compiler targets execute on the pinned Z80 CPU.`);
+surfaces; both compiler targets execute on the pinned Z80 CPU. DOS executes on
+8086, 80186 and real-mode 80286 with console and Controller text output.`);
     process.exit(0);
 }
 
@@ -63,7 +64,7 @@ const compiler = values.cc || process.env.CC || 'cc';
 const targets = [...new Set((values.targets || 'riscv32,cowgol-cgen').split(',').map(item => item.trim()).filter(Boolean))];
 assert.ok(targets.length, 'Select at least one platform');
 for (const target of targets) {
-    assert.ok(['riscv32', 'cowgol-cgen', 'eater6502', 'atmega328p', 'z80-cpm', 'i8080-cpm'].includes(target), `Unsupported verification target: ${target}`);
+    assert.ok(Object.hasOwn(COWGOL_COMPILE_TARGETS, target), `Unsupported verification target: ${target}`);
     assert.ok(COWGOL_COMPILE_TARGETS[target], `The frontend does not yet expose ${target}`);
 }
 for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifest.json')]) {
@@ -73,7 +74,7 @@ for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifes
 const git = (directory, ...args) => execFileSync('git', ['-C', directory, ...args], {encoding: 'utf8', timeout: 10_000}).trim();
 const manifest = JSON.parse(readFileSync(path.join(bundle, 'manifest.json'), 'utf8'));
 const boardPin = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'))['bw-board'];
-const needsBoard = targets.some(target => ['riscv32', 'eater6502', 'z80-cpm', 'i8080-cpm'].includes(target));
+const needsBoard = targets.some(target => ['riscv32', 'eater6502', 'z80-cpm', 'i8080-cpm', 'dos'].includes(target));
 if (needsBoard) {
     assert.equal(git(board, 'rev-parse', 'HEAD'), boardPin, 'The machine checkout must match vendor-pins.json');
     assert.equal(git(board, 'status', '--porcelain', '--untracked-files=no'), '', 'The pinned machine must have no tracked edits');
@@ -157,7 +158,7 @@ app._AVR_STAMP = str(pathlib.Path(sys.argv[3]) / ".bundle-fingerprint")
 requested = set(sys.argv[4].split(","))
 if "riscv32" not in requested:
     app.stage_riscv_gcc = lambda: None
-if "atmega328p" not in requested:
+if not requested.intersection({"atmega328p", "arduino-nano"}):
     app.stage_avr = lambda: None
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.bind(("127.0.0.1", 0))
@@ -251,6 +252,20 @@ try {
             execution = {machine: 'Z80', boots: report.runs.length,
                 surfaces: report.runs.map(run => run.surface), ccpBdosSha256: report.ccpBdosSha256,
                 displaySha256: report.runs.find(run => run.video)?.video.rgbaSha256, exitCode: 0};
+        } else if (target === 'dos') {
+            const artifact = path.join(work, 'program.exe');
+            writeFileSync(artifact, out.bytes);
+            const report = JSON.parse(execFileSync(process.execPath,
+                [path.join(root, 'scripts/verify-cowgol-dos.mjs'), '--exe', artifact, '--board', board,
+                    '--expect-output', fullOutput, ...fullOutput.trimEnd().split('\n').map(text => `--expect=${text}`)], {
+                    encoding: 'utf8', timeout: 90_000, maxBuffer: 1024 * 1024,
+                    env: {...process.env, TMPDIR: work}
+                }));
+            assert.equal(report.runs.length, 6, 'Execute three DOS CPUs on both console and Controller surfaces');
+            output = report.runs[0].output.replace(/\r/g, '');
+            execution = {machine: 'PC DOS services', boots: report.runs.length, exitCode: 0,
+                artifactSha256: report.artifact.sha256, sources: report.sources, probes: report.probes,
+                runs: report.runs};
         } else if (target === 'riscv32') {
             const {RiscV32Machine} = await import(pathToFileURL(path.join(board, 'src/riscv32-machine.js')).href);
             const machine = new RiscV32Machine({memSize: 1 << 22, resetPc: out.image.entry});
@@ -260,7 +275,7 @@ try {
             assert.equal(machine.exitCode, 0, 'RV32 program must exit successfully');
             output = machine.output;
             execution = {entry: out.image.entry, segments: out.image.segments.length, exitCode: machine.exitCode};
-        } else if (target === 'atmega328p') {
+        } else if (target === 'atmega328p' || target === 'arduino-nano') {
             assert.ok(existsSync(avrRunner), 'The real AVR machine runner must exist');
             assert.equal(git(avrRoot, 'rev-parse', 'HEAD'), avrPin, 'Use exactly the AVR engine pinned by the GUI');
             assert.equal(git(avrRoot, 'status', '--porcelain', '--untracked-files=no'), '', 'The AVR engine must have no tracked edits');
@@ -269,8 +284,8 @@ try {
                 'The AVR runner must match the compiled Cowgol runtime revision');
             assert.equal(git(runnerCheckout, 'status', '--porcelain', '--untracked-files=no'), '',
                 'The AVR runner checkout must have no tracked edits');
-            const firmware = path.join(work, 'uno.hex');
-            const layout = path.join(work, 'uno-layout.json');
+            const firmware = path.join(work, `${target}.hex`);
+            const layout = path.join(work, `${target}-layout.json`);
             writeFileSync(firmware, out.bytes);
             writeFileSync(layout, JSON.stringify(out.memory_layout));
             const observed = JSON.parse(execFileSync(process.execPath,
@@ -287,7 +302,8 @@ try {
                 assert.equal(run.text, fullOutput);
             }
             output = observed.runs[0].text;
-            execution = {flashBytes: out.memory_layout.flash_end, sramBytes: out.memory_end - 0x100,
+            execution = {board: out.board, flashLimit: out.memory_layout.flash_limit,
+                flashBytes: out.memory_layout.flash_end, sramBytes: out.memory_end - 0x100,
                 cycles: observed.runs[0].cycles, minSP: observed.runs[0].minSP, boots: 2, exitCode: 0};
         } else if (target === 'cowgol-cgen') {
             assert.equal(out.artifact_kind, 'source');
@@ -335,7 +351,7 @@ try {
         serviceTrackedEdits: git(service, 'status', '--porcelain', '--untracked-files=no') !== '',
         cowgolCommit: manifest.source_commit,
         boardCommit: needsBoard ? boardPin : null,
-        avrCommit: targets.includes('atmega328p') ? avrPin : null,
+        avrCommit: targets.some(target => ['atmega328p', 'arduino-nano'].includes(target)) ? avrPin : null,
         results
     }, null, 2));
 } catch (error) {

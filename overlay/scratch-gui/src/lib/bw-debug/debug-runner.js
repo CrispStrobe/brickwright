@@ -3616,7 +3616,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             runner.i8086MediaIo = {
                 serial: true,
                 terminalName: 'DOS Console',
-                ...(bootMedia.i8086Assembly ? {display: 'cga', dosKeyboard: true, gpio: 'A'} : {})
+                // The service bench consumes ASCII through its DOS key queue.
+                // A declared Controller display must use that same input
+                // path, including for compiled Cowgol MZ executables.
+                dosKeyboard: true,
+                ...(bootMedia.i8086Assembly ? {display: 'cga', gpio: 'A'} : {})
             };
             runner.dosScreenText = bench.screenText;
             if (exited === null) {

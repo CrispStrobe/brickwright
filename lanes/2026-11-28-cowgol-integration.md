@@ -70,5 +70,59 @@ The platform audit found that i80386 currently accepts disk/BIOS media rather
 than a direct DOS executable; a genuine Cowgol route needs the 386 service
 adapter or FAT image injection. ARM board ports need freestanding runtime,
 startup and memory contracts; Cowgol's ARM Linux ABI cannot provide those by
-renaming a target. Nano and other AVR boards also need explicit memory and
-bootloader contracts. These were not advertised as new native targets.
+renaming a target. At this checkpoint Nano and other AVR boards still needed
+explicit memory and bootloader contracts; the classic Nano contract is added below.
+
+
+## Further platform and surface expansion
+
+The next continuation adds classic ATmega328P Nano as a distinct native
+compiler/generator profile, and exposes additional verified uses of the
+existing PC cores:
+
+- `arduino-nano` explicitly fixes ATmega328P at 16 MHz and reserves the final
+  2 KiB of flash. Its 30720-byte application ceiling is enforced by the linker,
+  independent HEX/ELF checks and the editor client. SRAM/heap/stack and GPIO
+  contracts remain shared with the existing 16 MHz AVR runtime. The eight-target
+  bundle continues to pin Cowgol `4082aaba5c023b17f469f74d7a84504e3dbbebd4`.
+- Full-source and checked I8086 programs can select actual 8086, 80186 or
+  real-mode 80286 execution, each with serial output or the 720x400 Controller
+  text screen. The DOS-service ASCII keyboard queue is now advertised to the
+  Controller for compiled Cowgol. No full DOS boot or 386 adapter is claimed.
+- The editor exposes the existing 8080-compatible CP/M compiler through
+  explicit full CP/M computer/display actions, both running on the Z80 core.
+- Checked draft downloads from pseudocode/Cowgol use a temporary producer
+  graph, preserving the current project and source. Parser diagnostics,
+  unsupported operations and conflicting device contracts refuse before
+  compilation. Pending downloads retain the existing source/project/Blocks/
+  device/cancellation ownership checks.
+- Exact documented UNO/NANO source aliases normalize only for the native
+  board contract. Tests invoke the real source-device methods so parser aliases
+  cannot silently remove actions from the menu or bypass device conflicts.
+
+Published sibling dependencies:
+
+| Repository | Commit |
+| --- | --- |
+| Compiler/runtime | `4082aaba5c023b17f469f74d7a84504e3dbbebd4` (unchanged) |
+| Compiler service | `d54f5d9d9583a1cafecc5f2e4d5ec33b3f1db7e6` |
+| Producer | `8c26badb54cdf3ef6a98978dfedfac60c88e0362` |
+
+The service checkpoint passes 45 tests, including the full six-test AVR
+execution suite repeated with Nano's separate build target. The producer
+checkpoint passes 62 conversion tests and 26 native execution groups. Its only
+changed vendored source is `src/utils/cowgol.js`; all 28 mapped converter
+sources match the app after its standard import rewrites. The producer gallery
+tree is unchanged across this pin move. All 6130 app-vendored gallery files have
+identical Git blob identities at the new producer pin; the four producer-only
+root audit notes are not app gallery inputs.
+
+Brickwright's dedicated workflow now parses the complete editor JSX, executes
+the editor/CLI/ownership regressions, builds real DOS and CP/M output through
+its client and CLI, and qualifies all six DOS CPU/surface combinations. A
+separate job builds Uno and Nano through actual HTTP and CLI routes and boots
+the exact returned HEX with cold SRAM on the GUI-pinned AVR engine. Witness
+reports retain machine/compiler identities, exact artifact bytes or hashes,
+console traces and display hashes. Native capabilities remain deployment-open;
+physical Nano flashing, a full production GUI build, protected-mode 286,
+80386 DOS loading and board-specific ARM runtime ports remain separate work.

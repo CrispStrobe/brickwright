@@ -62,7 +62,7 @@ question from whether the row agrees with the code.
 | task | cells | which |
 | --- | --- | --- |
 | L4 | 4 | javascript/arcade, javascript/pybadge, javascript/pybadge-lc, javascript/samd51 |
-| L5 | 6 | cowgol/arduino-uno, cowgol/atmega328p, cowgol/eater6502, cowgol/z80, cowgol/riscv32, cowgol/i8086 |
+| L5 | 7 | cowgol/arduino-uno, cowgol/arduino-nano, cowgol/atmega328p, cowgol/eater6502, cowgol/z80, cowgol/riscv32, cowgol/i8086 |
 | N1 | 1 | asm/z80 |
 | N5 | 3 | javascript/pico, javascript/microbit, javascript/calliopemini |
 | N7 | 2 | c/microbit, c/calliopemini |
@@ -101,7 +101,6 @@ question from whether the row agrees with the code.
 | MicroPython | arduino-uno | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | arduino-nano | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | arduino-nano | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
-| Cowgol | arduino-nano | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | arduino-nano | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | arduino-mega | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | arduino-mega | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |

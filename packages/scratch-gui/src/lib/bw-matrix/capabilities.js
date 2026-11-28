@@ -916,7 +916,10 @@ const COWGOL_UNO = open('hex', 'Cowgol cgen + AVR GCC (ATmega328P)', 'hosted', '
 });
 export const DEVICE_NATIVE = Object.freeze({
     'arduino-uno': {cowgol: COWGOL_UNO},
-    atmega328p: {cowgol: COWGOL_UNO}
+    atmega328p: {cowgol: COWGOL_UNO},
+    'arduino-nano': {cowgol: open('hex', 'Cowgol cgen + AVR GCC (classic Nano)', 'hosted', 'L5', {
+        note: 'Classic ATmega328P Nano at 16 MHz: 30 KiB application flash with 2 KiB bootloader reservation, UART and digital GPIO; companion service deployment required'
+    })}
 });
 
 export const isNativeNull = function (native) {
