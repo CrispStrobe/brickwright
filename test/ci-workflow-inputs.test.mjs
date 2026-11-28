@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {workflowSources, assertCheckoutPins} from '../scripts/ci-workflow-inputs.mjs';
+import {workflowSources, assertCheckoutPins, assertNoRawClones} from '../scripts/ci-workflow-inputs.mjs';
 import {vendorPinOutputs} from '../scripts/ci-vendor-pins.mjs';
 
 const workflows = workflowSources(new URL('..', import.meta.url).pathname);
@@ -203,4 +203,44 @@ test('Arcade controls prepare the real integrated GUI and installed model before
     const integrate = 'node scripts/integrate.mjs', apply = 'node scripts/apply-vm-overlay.mjs';
     assert.throws(() => assertArcadeControlsPreparation(source.replace(integrate, '__SWAP__').replace(apply, integrate).replace('__SWAP__', apply)));
     assert.throws(() => assertArcadeControlsPreparation(source.replace('timeout-minutes: 15', 'timeout-minutes: 30')));
+});
+
+test('workflow script receipt fields do not become checkout declarations', () => {
+    const file = '.github/workflows/service-worker-browser.yml';
+    const source = workflows.get(file);
+    assert.ok(source.includes('repository: process.env.GITHUB_REPOSITORY'),
+        'exercise the actual workflow receipt that exposed this false positive');
+    assert.deepEqual(assertCheckoutPins(new Map([[file, source]])), []);
+
+    const script = [
+        'steps:',
+        '  - name: Record receipt',
+        '    run: |',
+        "      node --input-type=module <<'NODE'",
+        '      const receipt = {',
+        '        repository: process.env.GITHUB_REPOSITORY,',
+        '        ref: process.env.GITHUB_REF',
+        '      };',
+        '      NODE'
+    ].join('\n') + '\n';
+    const checkout = ref => [
+        '  - uses: actions/checkout@full',
+        '    with:',
+        '      repository: Acme/after-script',
+        ...(ref === undefined ? [] : ['      ref: ' + ref])
+    ].join('\n') + '\n';
+    const sites = assertCheckoutPins(new Map([['receipt.yml', script + checkout('a'.repeat(40))]]));
+    assert.equal(sites.length, 1);
+    assert.equal(sites[0].repository, 'Acme/after-script');
+    assert.equal(sites[0].line, 12, 'source line numbers survive scalar exclusion');
+    for (const ref of [undefined, 'main', 'abc1234', '${{ steps.unreviewed.outputs.sha }}']) {
+        assert.throws(() => assertCheckoutPins(new Map([['receipt.yml', script + checkout(ref)]])),
+            /Acme\/after-script: expected a full/);
+    }
+    assert.throws(() => assertCheckoutPins(new Map([['receipt.yml',
+        script + checkout('a'.repeat(40)) + '      ref: ' + 'b'.repeat(40) + '\n']])),
+        /duplicate checkout ref/);
+    assert.throws(() => assertNoRawClones(new Map([['clone.yml', script
+        .replace('      NODE', '      NODE\n      git clone https://example.invalid/unreviewed.git')]])),
+        /unreviewed raw clone/);
 });

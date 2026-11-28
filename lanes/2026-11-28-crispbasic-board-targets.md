@@ -69,3 +69,27 @@ existing enforcement in place:
   and emitted helper, including wrapped hue changes and negative controls.
   The committed tests invoke the full project exporter, which remains part of
   the hosted integration gate.
+
+## Shared workflow scanner follow-up
+
+Hosted qualification of `8918704a` exposed one additional shared-tool defect:
+JavaScript receipt properties inside a YAML block scalar were interpreted as
+checkout fields. CP1/CP5 browser execution passed, but that census failure also
+blocked the PXT controls gate.
+
+The canonical owner is `CrispStrobe/bw-circuit-ui`. Its proposed fix is saved
+in PR #186 at `f2ee9d32244f898a7c329a10e36070e46c72eed6`, scanner Git blob
+`6e79894bc2c4f09a38f13c4c98de04eb33ade3c3`. This checkpoint saves the
+consumer regression while the producer's hosted qualification and normal
+merge are pending; it does not yet adopt the unlanded helper.
+
+The exact 43 consumer workflow sources were loaded with the actual scanner,
+vendor-pin helper and complete existing consumer test file. With the added
+regression, the old scanner passes 7/9 and fails the two scalar cases at the
+same production workflow line. The proposed canonical scanner passes all 9,
+auditing all 33 external checkout sites. The new regression retains exact
+line numbers and rejects missing, moving, dynamic and duplicate checkout refs,
+as well as raw clones inside scripts.
+
+This standalone tooling adoption has its own producer history. The installed
+runtime CUI pin and sealed HDD/source identities remain unchanged.
