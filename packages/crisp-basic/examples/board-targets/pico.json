@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "pins": [
+    "GP25",
+    "GP2"
+  ],
+  "maxRequests": 32,
+  "maxTimeMs": 100,
+  "maxTraceEvents": 32,
+  "maxScheduledInputs": 4,
+  "inputs": [
+    {
+      "pin": "GP2",
+      "value": 0,
+      "atMs": 25
+    },
+    {
+      "pin": "GP2",
+      "value": null,
+      "atMs": 30
+    }
+  ]
+}

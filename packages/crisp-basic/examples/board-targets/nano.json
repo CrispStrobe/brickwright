@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "pins": [
+    "D13",
+    "D2"
+  ],
+  "maxRequests": 32,
+  "maxTimeMs": 100,
+  "maxTraceEvents": 32,
+  "maxScheduledInputs": 4,
+  "inputs": [
+    {
+      "pin": "D2",
+      "value": 0,
+      "atMs": 25
+    },
+    {
+      "pin": "D2",
+      "value": null,
+      "atMs": 30
+    }
+  ]
+}
