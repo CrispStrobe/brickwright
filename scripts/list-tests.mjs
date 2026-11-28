@@ -1,14 +1,19 @@
 #!/usr/bin/env node
 /**
- * The one place that says which test files belong to which CI step.
+ * The assignment of root-level source test files to their CI steps.
  *
- * `npm test` runs everything. CI splits the suite in two: the `corpus` job runs
+ * `npm test` runs the root-level source suite. CI splits that suite in two:
+ * the `corpus` job runs
  * the two lesson walks (every bench in the catalog, solved twice over — ~14 CPU
  * minutes), and required unit shards partition the rest as `test:fast:shard`.
- * The local `test:fast` command still runs the complete non-corpus suite. Both the npm
+ * The local `test:fast` command runs the complete non-corpus source suite. Both the npm
  * scripts and scripts/check-test-run.mjs (which verifies that every file handed
  * to `node --test` actually reported tests) read the split from HERE, so the
  * list cannot drift between the runner and the check that audits the runner.
+ * Runtime-dependent tests under test/crispbasic-wasm/ run explicitly in the
+ * CrispBASIC workflow after its real interpreter build. Their required route
+ * is guarded by the fast crispbasic-cad-ci.test.mjs test; the source clock and
+ * cancellation tests remain in the ordinary fast set.
  *
  *   node scripts/list-tests.mjs all|fast|corpus [--shard index/count]
  *                                                   -> one path per line

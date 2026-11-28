@@ -1,0 +1,91 @@
+{
+  "format": "brickwright-crispbasic-cad-runtime-placement",
+  "version": 1,
+  "recordedAt": "2026-11-28T21:16:10.699868+00:00",
+  "baseCommit": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331",
+  "change": "Move unchanged physics assertions to a mandatory build-owning WASM step; retain fast source/mutation guards.",
+  "assertionPreservation": {
+    "oldPath": "test/crispbasic-cad-physics.test.mjs",
+    "newPath": "test/crispbasic-wasm/cad-physics.test.mjs",
+    "originalSha256": "626312246386f57c643d7b6c049f99f1244bd4d87b7cf96abd58c5a6b7668f33",
+    "movedSha256": "22107ac1f4a0a8bbca084ffb46a0ded030ea16b3c8c21cf30a6e361baeef5568",
+    "onlyContentChange": "Fixture import gains one parent-directory component.",
+    "normalizedBytesIdentical": true
+  },
+  "runtime": {
+    "sourceRoot": "packages/crisp-basic at baseCommit",
+    "freshLocalBuild": true,
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.64 (a1fe3902bf73a3802eae0357d273d0e37ea79898)",
+    "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "buildRecordSha256": "04c56d6307b2cb7423b90899a651e0326257cb58f75703bda44a29081670c058",
+    "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+    "wasmSha256": "c22c6cbe4cea922450c979f41869b9b4e53de238f087341048fe9b4580edce9a",
+    "localSourceInputs": [
+      {
+        "path": "scripts/build-wasm.mjs",
+        "sha256": "96452a710d90b01f8644a9d0c1588424601dfb1f2d882a873033ff5a00c353f2"
+      },
+      {
+        "path": "upstream.lock.json",
+        "sha256": "d43e383babe40a615710a8867ed7524375dc57f1d6b4587f404e9a36d6940f35"
+      },
+      {
+        "path": "wasm/build-inputs.mjs",
+        "sha256": "606833467f420a57d7e09cb61a9b614512bc9f686fbfe37e74159b91dd4fe71f"
+      },
+      {
+        "path": "wasm/toolchain.lock.json",
+        "sha256": "dd32df49ba277e7f3a27705fa9ae830a28fd7bfb84bdefe8d5f1a0821bf9c2ef"
+      },
+      {
+        "path": "wasm/patch-upstream.mjs",
+        "sha256": "f8df8ae9b22ed1b98587989b13e5509e44ab93a329c616a963deb41318b0ab9e"
+      },
+      {
+        "path": "native/patch-upstream.mjs",
+        "sha256": "ff1b7671373f115cfefcf2ad048b54083ae1c7579943f06bce8bb8c32a66a3e8"
+      },
+      {
+        "path": "wasm/crisp-host.h",
+        "sha256": "ed4a4785f9410e40b01dc8c48a5b1cae75b6741af40ef5019a024087c205f9f7"
+      },
+      {
+        "path": "wasm/crispbasic.c",
+        "sha256": "58f92c07d73751fce2eab255b0f89bb0eaacbc81a26588f41b295e998687f2a4"
+      },
+      {
+        "path": "wasm/emscripten-host.c",
+        "sha256": "3ca91c0cd19ee998bf287d0acadbfe3e8f22c6e248ad03d4513c6dd2777edc7d"
+      }
+    ],
+    "upstreamInputCount": 6,
+    "packageProvenanceVerification": "createCrispBasicPackage passed all recorded source, artifact, notice and import checks"
+  },
+  "cad": {
+    "producerCommit": "0b577f63d60424ead19e1aaa9cf602f81fee60ff",
+    "manifestSha256": "5f9f088feab345da4582c34df5715f0cde7eca391e7aaa47bb239a831ce5d19d",
+    "manifestMatchesBaseCommit": true,
+    "assetBytesVerifiedByFixture": true,
+    "execution": "Actual shipped geometry/Jolt worker via Node worker_threads; saved Scout circuit and public CAD controller."
+  },
+  "tests": {
+    "physics": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "log": "physics.log"
+    },
+    "sourceAndRouting": {
+      "passed": 83,
+      "failed": 0,
+      "skipped": 0,
+      "routeGuardTests": 3,
+      "routeGuardMutations": 14,
+      "log": "source-guards.log"
+    }
+  },
+  "limits": [
+    "No new physical hardware or browser execution claimed.",
+    "Exact composed-head hosted unit and WASM jobs must pass before landing."
+  ]
+}
