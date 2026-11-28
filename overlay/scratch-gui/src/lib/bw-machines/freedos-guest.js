@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: BSD-3-Clause
+import {sha256Hex} from './activate.js';
+import {writeDosFloppyFiles} from './kim1-xkim-fat.js';
+import {localFloppyMedia, pcXtFloppy} from './local-floppy.js';
+import {localFreedosVgaMachine} from './local-freedos-vga.js';
+
+export const freedosFloppyZipUrl = 'https://download.freedos.org/1.4/FD14-FloppyEdition.zip';
+const archiveBytes = 23624258;
+const archiveHash = '45b1fa7c52dd996c3bfa5e352ffcd410781b952a6ad629f15a4c9ec4bbaefc5a';
+const bootMedia = {
+    '120m': {size: 1200 * 1024, sectors: 15, member: '120m/x86BOOT.img',
+        sha256: '03df6088be016e57a6c44275f5bb9ab0244db71de1360957fd76ba83243b6a77'},
+    '720k': {size: 720 * 1024, sectors: 9, member: '720k/x86BOOT.img',
+        sha256: 'cbca90627b944319f02043bc41f1715ff5366b23e5e8e75aa3ca23bb564e0789'}
+};
+
+export const dosText = lines => new TextEncoder().encode([...lines, ''].join('\r\n'));
+
+async function readFreedosFloppy (file, {size, member, sha256}) {
+    if (file?.size !== size && file?.size !== archiveBytes) {
+        throw new Error(`Choose ${member} or the official FreeDOS 1.4 Floppy Edition ZIP.`);
+    }
+    let source = new Uint8Array(await file.arrayBuffer());
+    if (source.length === archiveBytes) {
+        if (await sha256Hex(source) !== archiveHash) throw new Error('The FreeDOS 1.4 ZIP checksum differs.');
+        const {default: JSZip} = await import('jszip');
+        const archive = await JSZip.loadAsync(source);
+        source = await archive.file(member).async('uint8array');
+    }
+    if (source.length !== size || await sha256Hex(source) !== sha256) {
+        throw new Error(`The FreeDOS floppy checksum differs. Choose ${member} from the official FreeDOS 1.4 archive.`);
+    }
+    return source;
+}
+
+export async function readFreedosGuestPackage (file, {title, name, size, sha256, directory, files}) {
+    if (file?.size !== size) throw new Error(`Choose the official ${title} ZIP.`);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (bytes.length !== size || await sha256Hex(bytes) !== sha256) {
+        throw new Error(`The ${name} ZIP checksum differs. Choose the official release archive.`);
+    }
+    const {default: JSZip} = await import('jszip');
+    const archive = await JSZip.loadAsync(bytes);
+    return Promise.all(files.map(async fileName => {
+        const entry = archive.file(`${directory}/${fileName}`);
+        if (!entry) throw new Error(`The ${name} ZIP is missing ${fileName}.`);
+        return {name: fileName.toUpperCase(), bytes: await entry.async('uint8array')};
+    }));
+}
+
+export async function createFreedosGuest (floppy, {title, machine = 'i80386',
+    floppyFormat = machine === 'i8086' ? '720k' : '120m', readFiles, startup}, signal) {
+    signal?.throwIfAborted();
+    const format = bootMedia[floppyFormat];
+    const source = await readFreedosFloppy(floppy, format);
+    signal?.throwIfAborted();
+    const files = await readFiles();
+    signal?.throwIfAborted();
+    const bytes = writeDosFloppyFiles(source, [...files,
+        {name: 'FDCONFIG.SYS', bytes: dosText([
+            'DOS=LOW', 'BUFFERS=20', 'FILES=40',
+            'SHELL=\\FREEDOS\\BIN\\COMMAND.COM \\FREEDOS\\BIN /E:2048 /P=\\FDAUTO.BAT'
+        ])},
+        {name: 'FDAUTO.BAT', bytes: dosText(['@ECHO OFF', ...startup])}
+    ]);
+    if (machine === 'i8086') {
+        return pcXtFloppy({title, bytes, cylinders: 80, sectors: format.sectors, provenance: {source: 'local-freedos-guest'}});
+    }
+    const config = localFreedosVgaMachine({floppy: {size: bytes.length, name: title}});
+    return localFloppyMedia(config, bytes);
+}

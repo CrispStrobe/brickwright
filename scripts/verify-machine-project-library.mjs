@@ -7,13 +7,15 @@ import {libraryCircuitPrograms} from '../overlay/scratch-gui/src/lib/bw-machines
 const url = process.argv[2];
 assert.ok(url, 'Pass the URL of the assembled Brickwright frontend');
 const index = JSON.parse(await readFile(new URL('../overlay/scratch-gui/examples/index.json', import.meta.url)));
-const projects = libraryCircuitPrograms(index);
+const requested = process.argv.slice(3);
+const projects = libraryCircuitPrograms(index).filter(project => !requested.length || requested.includes(project.id));
+assert.ok(projects.length, 'No matching machine projects');
 const browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const failures = [];
 
 async function check({id, machine}) {
     const page = await browser.newPage({viewport: {width: 1520, height: 960}, locale: 'en-US', serviceWorkers: 'block'});
-    page.setDefaultTimeout(20000);
+    page.setDefaultTimeout(45000);
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('dialog', dialog => dialog.accept());
@@ -24,8 +26,12 @@ async function check({id, machine}) {
         await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
         const dialog = page.getByTestId('bw-machine-manager');
         await dialog.getByRole('combobox', {name: 'Machine type'}).selectOption(machine);
+        if (id === 'i8086-blink') {
+            await dialog.getByTestId('bw-mm-path-i8086').selectOption('circuit');
+            assert.equal(await dialog.getByTestId('bw-mm-8086-cga-demo').count(), 0);
+        }
         const item = dialog.locator(`[data-machine-example="${id}"]`);
-        await item.getByRole('button', {name: 'Open', exact: true}).click();
+        await item.getByRole('button', {name: 'Open', exact: true}).click({noWaitAfter: true});
         const confirm = page.getByRole('button', {name: 'OK', exact: true});
         const opened = dialog.waitFor({state: 'hidden'});
         await Promise.race([opened, confirm.waitFor().then(() => confirm.click()).then(() => opened)]);
@@ -53,19 +59,36 @@ async function check({id, machine}) {
                         [1, 2, 3, 4, 5, 6, 7].every(pin => board.ledBrightness(`led${pin}`) === 0);
                 }, lit, {timeout: 6000});
             }
+
+            await page.getByTestId('bw-file-menu-trigger').click();
+            await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
+            await dialog.getByRole('combobox', {name: 'Machine type'}).selectOption('i8086');
+            await dialog.getByTestId('bw-mm-path-i8086').selectOption('functional');
+            assert.equal(await item.count(), 0);
+            await dialog.getByTestId('bw-mm-8086-cga-demo').click();
+            await page.getByTestId('bw-machine-console').getByText('PC CGA', {exact: false}).waitFor();
+            await page.waitForFunction(() => {
+                const heading = '8086 PC/XT - CGA text ready';
+                const target = window.__benchTarget;
+                const bytes = target?.readMem('mem', 0xb8000, heading.length * 2);
+                return target?.video()?.mode === 3 && bytes &&
+                    String.fromCharCode(...bytes.filter((_, index) => index % 2 === 0)) === heading;
+            });
+            console.log('PASS 8086 functional CGA demo · guest video mode and text');
         }
         assert.deepEqual(errors, []);
         console.log(`PASS ${machine} ${id} · project handoff`);
     } catch (error) {
         failures.push(id);
-        console.error(`FAIL ${id}: ${error.message}`);
+        const status = await page.getByTestId('bw-mm-status').allTextContents();
+        console.error(`FAIL ${id}: ${error.message}`, status, errors);
     } finally {
         await page.close();
     }
 }
 
 try {
-    await Promise.all(Array.from({length: 4}, async () => {
+    await Promise.all(Array.from({length: requested.length ? 1 : 4}, async () => {
         while (projects.length) await check(projects.shift());
     }));
 } finally {

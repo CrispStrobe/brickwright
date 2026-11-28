@@ -118,6 +118,7 @@ const FPGA_TAB_INDEX = 5;
 const L10N = {
     en: {
         closeNotice: 'Close',
+        smallCRunHint: 'Build and run this source with Small-C on 8086 DOS.',
         cpmRunHint: 'Run the CP/M program. Edits build with hosted SDCC.',
         actionFiles: 'Files', actionPrograms: 'Program and export', actionExamples: 'Examples',
         fileMenuTitle: 'Open, save, import, examples and reference',
@@ -559,6 +560,7 @@ const L10N = {
     },
     de: {
         closeNotice: 'Schließen',
+        smallCRunHint: 'Kompiliere und starte den Quelltext mit Small-C unter 8086-DOS.',
         cpmRunHint: 'Führe das CP/M-Programm aus. Änderungen werden mit dem SDCC-Dienst kompiliert.',
         actionFiles: 'Dateien', actionPrograms: 'Programm und Export', actionExamples: 'Beispiele',
         fileMenuTitle: 'Öffnen, speichern, importieren, Beispiele und Referenz',
@@ -1586,8 +1588,16 @@ class PseudocodeImporter extends React.Component {
         const program = this.state.libraryProgram;
         if (!program || this.state.busy) return;
         const source = this.activeCode();
-        this.setState({busy: true, status: ''});
+        const smallC = program.compilerTarget === 'i8086-smallc';
+        const build = smallC ? new AbortController() : null;
+        if (build) this._smallCBuild = build;
+        this.setState({busy: true, status: smallC ? this.L.smallCRunHint : ''});
         try {
+            if (build) {
+                await program.run(source, {signal: build.signal});
+                if (!this._unmounted) this.setState({status: ''});
+                return;
+            }
             if (program.dosSourceName) {
                 if (!source.trim()) {
                     this.setState({status: this.L.basicEmpty});
@@ -1620,8 +1630,9 @@ class PseudocodeImporter extends React.Component {
             await runCpmCom(program.config, bytes);
             this.setState({status: ''});
         } catch (error) {
-            if (!this._unmounted) this.setState({status: error.message});
+            if (!this._unmounted) this.setState({status: build?.signal.aborted ? '' : error.message});
         } finally {
+            if (build) this._smallCBuild = null;
             if (!this._unmounted) this.setState({busy: false});
         }
     };
@@ -3209,6 +3220,7 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this.setMaximizedChrome(false);
         this._unmounted = true;
+        this._smallCBuild?.abort();
         this.disposeCodeRun();
         if (this._picoSimRequest || this._picoSimStop) this.stopPicoSim();
         if (this._picoBasicHardware) this.closePicoBasicHardware();
@@ -5527,6 +5539,7 @@ class PseudocodeImporter extends React.Component {
             this._riscvBlocksBuild = null;
             this.setState({busy: false});
         }
+        this._smallCBuild?.abort();
         if (this._picoBasicHardware) {
             if (this.state.busy) this.closePicoBasicHardware();
             else this._picoBasicHardware.session?.terminal.send([3]);
@@ -8774,7 +8787,8 @@ class PseudocodeImporter extends React.Component {
                         </>}
                         {this.state.lang === this.state.libraryProgram?.language && (
                             <button type="button" style={actionBtn} onClick={this.runLibraryProgram}
-                                disabled={this.state.busy} title={this.L.cpmRunHint}
+                                disabled={this.state.busy} title={this.state.libraryProgram.compilerTarget === 'i8086-smallc'
+                                    ? this.L.smallCRunHint : this.L.cpmRunHint}
                                 data-testid={menu ? 'bw-library-code-run-menu' : 'bw-library-code-run'}>
                                 {menu ? <Icon name="run" /> : '▶ '}{this.state.libraryProgram.title}
                             </button>

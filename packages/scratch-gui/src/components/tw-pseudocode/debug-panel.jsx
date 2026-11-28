@@ -399,7 +399,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
-        const {i8086Assembly} = e.detail || {};
+        const {i8086Assembly, i80386HddGeometry} = e.detail || {};
         const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt, picoBasicConsole, picoBasicCommands, picoFlashStorage} = e.detail || {};
         if (!bytes && !riscvImage) return;
         if (!ownsLaunch()) return cancelLaunch();
@@ -470,7 +470,9 @@ class DebugPanel extends React.Component {
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
             machinePreset: kind === 'i80386' || kind === 'z80' ? machinePreset || null : null,
             i80386Media: kind === 'i80386' ? i80386Media || null : null,
+            i80386HddGeometry: kind === 'i80386' ? i80386HddGeometry || null : null,
             machineConfig6502: kind === 'eater6502' ? machineConfig6502 || null : null,
+            wired6502Board: kind === 'eater6502' ? e.detail?.wired6502Board : null,
             // HARDWARE THE PROGRAM ASKED FOR, and it has to be listed here
             // explicitly: this destructure is a fixed field list, so a new
             // field on the event is silently dropped unless it is named in
@@ -573,6 +575,7 @@ class DebugPanel extends React.Component {
                 serialInFn: machinePreset === 'CPM64K_TMS9918' || hasBbcKeyboard || io?.dosKeyboard
                     ? byte => runner.sendSerial(byte) : null,
                 mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
+                captureFloppy: runner.captureFloppy,
                 focusController: nextKind !== 'i8086'});
             if (nextKind === 'i8086') this._showPcController();
         }

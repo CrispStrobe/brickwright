@@ -3,7 +3,7 @@ import downloadBlob from '../download-blob.js';
 
 const chunkSize = 192 * 1024;
 
-export async function saveXkimDiskImage (filename, bytes, isOpen) {
+export async function saveDiskImage (filename, bytes, isOpen) {
     const invoke = window.__TAURI__?.core?.invoke;
     if (!invoke) return downloadBlob(filename, new Blob([bytes], {type: 'application/octet-stream'}));
 

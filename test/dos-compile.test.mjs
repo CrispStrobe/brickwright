@@ -8,6 +8,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
+import {buildSmallC} from '../overlay/scratch-gui/src/lib/bw-debug/small-c-dos.js';
 import {
     runDosProgram, compileAndRunOnDos
 } from '../overlay/scratch-gui/src/lib/bw-debug/dos-compile.js';
@@ -57,6 +58,20 @@ test('runDosProgram runs a program and reads back the file it wrote', async () =
     const out = files.get('OUT.TXT');
     assert.ok(out instanceof Uint8Array, 'the program-created file is on the mounted disk');
     assert.equal(new TextDecoder().decode(out), 'HI');
+});
+
+test('runDosProgram yields so an interrupted guest cannot keep the browser busy', async () => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 0);
+    await assert.rejects(runDosProgram({
+        bytes: Uint8Array.of(0xeb, 0xfe), format: 'com',
+        yieldEvery: 100, signal: controller.signal
+    }), {name: 'AbortError'});
+});
+
+test('Small-C rejects empty source and incomplete toolchains before launching DOS', async () => {
+    await assert.rejects(buildSmallC(FILE_WRITER, new Map(), ' '), /Enter Small-C source/);
+    await assert.rejects(buildSmallC(FILE_WRITER, new Map(), 'int main() {}'), /missing ASM[.]EXE/);
 });
 
 test('compileAndRunOnDos mounts sources, runs the compiler, extracts its output', async () => {

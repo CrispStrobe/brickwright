@@ -163,10 +163,8 @@ const TABLE = {
         'bbcVideo.summary': 'Focus the Controller display and press 0–6 to change modes. The 6502 draws both the text and the colour bars into screen RAM.',
         'bbcVideo.licence': 'Original Brickwright demonstration ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC on 6502',
-        'msbasic.summary': 'Microsoft’s original 1978 6502 BASIC (V1.1, the MIT release) boots on the emulated ' +
-            'Ben Eater 6502 to the OK prompt with the default memory size and terminal width. ' +
-            'Try PRINT 2+2 in the debugger’s serial console. ' +
-            'The console is the Debug panel’s serial terminal (the 65C51 ACIA). Ships in the app — no download.',
+        'msbasic.summary': 'Run BASIC on the virtual 6502 or open the Ben Eater breadboard with the same ROM. ' +
+            'At the OK prompt, try PRINT 2+2 in Controller’s ACIA terminal.',
         'msbasic.licence': 'Microsoft BASIC for 6502 is MIT (Microsoft’s 1978 source, MIT release; built with ca65). ' +
             'It ships in this app.',
         'msbasic.source': 'Project',
@@ -207,10 +205,8 @@ const TABLE = {
         'bbcVideo.summary': 'Die Controller-Anzeige anklicken und mit 0–6 den Modus wechseln. Der 6502 zeichnet Text und Farbbalken direkt in den Bildspeicher.',
         'bbcVideo.licence': 'Brickwright-Demo-ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC auf 6502',
-        'msbasic.summary': 'Microsofts ursprüngliches 6502-BASIC von 1978 (V1.1, die MIT-Ausgabe) startet auf dem ' +
-            'emulierten Ben-Eater-6502 mit Standardwerten für Speichergröße und Terminalbreite bis zum OK-Prompt. ' +
-            'Probiere PRINT 2+2 im seriellen Terminal des Debuggers. ' +
-            'Die Konsole ist das serielle Terminal im Debug-Panel (der 65C51-ACIA). In der App enthalten — kein Download.',
+        'msbasic.summary': 'Starte BASIC auf dem virtuellen 6502 oder öffne das Ben-Eater-Steckbrett mit demselben ROM. ' +
+            'Gib nach der OK-Meldung PRINT 2+2 im ACIA-Terminal des Controllers ein.',
         'msbasic.licence': 'Microsoft BASIC für 6502 steht unter MIT (Microsofts Quellcode von 1978, MIT-Ausgabe; mit ca65 gebaut). ' +
             'Es ist in dieser App enthalten.',
         'msbasic.source': 'Projekt',
@@ -377,8 +373,8 @@ export function lessonMachines (locale) {
     // Microsoft BASIC for 6502 (self-contained): the MIT 32 KB ROM ships in
     // static/roms. The `rom` slot has no profile — it loads as a ROM image into
     // the eater6502 machine's ROM region ($8000-$FFFF). The inline machineConfig
-    // supplies the 65C51 ACIA the BASIC console talks to; output is the Debug
-    // serial terminal. MIT, not GPL media, so not behind the remote gate.
+    // supplies the 65C51 ACIA for the virtual route. The circuit route extracts
+    // its own bus map from the Ben Eater breadboard and boots the same ROM.
     const msbasicConfig = newMachineConfig({
         id: 'lesson-msbasic-6502',
         title: t('msbasic.title'),
@@ -397,6 +393,7 @@ export function lessonMachines (locale) {
     });
     rows.push({
         config: msbasicConfig,
+        wiredExample: 'eater6502-bench',
         summary: t('msbasic.summary'),
         licence: t('msbasic.licence'),
         source: `${MEDIA_LAB}/tree/main/projects/ms-basic-6502`,

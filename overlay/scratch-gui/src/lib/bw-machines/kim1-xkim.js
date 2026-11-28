@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import downloadBlob from '../download-blob.js';
 import {createKim1Tty} from './kim1-tty.js';
-import {saveXkimDiskImage} from './kim1-xkim-download.js';
+import {saveDiskImage} from './disk-image-download.js';
 import {
     readXkimFatImage, writeXkimFatImage, XKIM_FAT_IMAGE_LIMIT, XKIM_FILE_COUNT, XKIM_FILE_LIMIT,
     XKIM_SHORT_NAME, XKIM_TOTAL_LIMIT
@@ -68,7 +68,7 @@ export function createXkimTerminal ({rom, files, diskImage, timerLine = 'none'})
         exportImage: diskImage && ((snapshot, isOpen) => {
             const updated = writeXkimFatImage(diskImage.source, snapshot);
             const stem = diskImage.name?.replace(/\.[^.]+$/, '') || 'xkim';
-            return saveXkimDiskImage(stem + '-updated.img', updated, isOpen);
+            return saveDiskImage(stem + '-updated.img', updated, isOpen);
         }),
         title: 'xKIM · Corsham files',
         inputLabel: 'xKIM command',

@@ -17,7 +17,7 @@
 import {grayFramebufferSpec} from './gray-framebuffer.js';
 import {PICOBB_FLASH, picoFlashStorageFor} from './pico-basic-flash.js';
 import {
-    normalizeMachineConfig, validateMachineConfig
+    normalizeMachineConfig, validateMachineConfig, usesWiredCircuit
 } from './machine-config.js';
 import {remoteMachineImagesAllowed} from '../distribution-policy.js';
 
@@ -59,7 +59,7 @@ const isObj = v => v != null && typeof v === 'object' && !Array.isArray(v);
 const isStr = v => typeof v === 'string' && v.length > 0;
 
 /** Hex-encode a SHA-256 of the bytes using Web Crypto. */
-async function sha256Hex(bytes) {
+export async function sha256Hex(bytes) {
     const subtle = globalThis.crypto && globalThis.crypto.subtle;
     if (!subtle) throw new Error('Web Crypto (crypto.subtle) is unavailable; cannot verify sha256');
     const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -142,10 +142,7 @@ export async function activateConfig(config, opts = {}) {
 
     // Wired (or an auto config that is wired in effect): no image fetch, just a
     // descriptor pointing at the circuit for the designer board to realize.
-    const isWired = cfg.executionMode === 'wired' ||
-        (cfg.executionMode === 'auto' && isObj(cfg.circuit) &&
-            Object.keys(cfg.slots).length === 0);
-    if (isWired) {
+    if (usesWiredCircuit(cfg)) {
         return {
             mode: 'wired',
             executionMode: cfg.executionMode,
@@ -184,6 +181,7 @@ export async function activateConfig(config, opts = {}) {
     // `snapshot`, when the config has one, to open at the shell prompt.
     const extraSlots = [...new Set(['bios', 'vga-rom', 'initrd', 'snapshot',
         ...(cfg.machine === 'i80386' && machinePreset === 'freedos-vga' ? ['hdd', 'floppy'] : []),
+        ...(cfg.machine === 'i80386' && bootSlotId === 'floppy' ? ['hdd'] : []),
         ...(spectrumRoms ? [...spectrumRoms, 'tape', 'snapshot'] : [])])].filter(id => id !== bootSlotId && cfg.slots[id]);
     // ALL AT ONCE. The boot image and every companion are fetched in parallel:
     // one after the other, the Linux lesson's three files (9.5 MB) cost the sum
@@ -216,7 +214,10 @@ export async function activateConfig(config, opts = {}) {
     if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.program?.name)) {
         bootMedia.name = cfg.provenance.program.name;
     }
-    if (cfg.machine === 'i80386') bootMedia.nativeBlocks = cfg.nativeBlocks === true;
+    if (cfg.machine === 'i80386') {
+        bootMedia.nativeBlocks = cfg.nativeBlocks === true;
+        if (media.hdd && cfg.slots.hdd.geometry) bootMedia.i80386HddGeometry = {...cfg.slots.hdd.geometry};
+    }
     if (bootRef.geometry) bootMedia.geometry = {...bootRef.geometry};
     // A ROM image states its own load address via the config; carry it so the
     // reset vector reads from real bytes (debug-runner's romAt path).

@@ -809,7 +809,8 @@ const GUIComponent = props => {
             setMachineConsole({name: widget.name, keyboardSet: p.keyboardSet,
                 keyIn: typeof p.keyInFn === 'function' ? p.keyInFn : null,
                 serialIn: typeof p.serialInFn === 'function' ? p.serialInFn : null,
-                mouseIn: typeof p.mouseInFn === 'function' ? p.mouseInFn : null});
+                mouseIn: typeof p.mouseInFn === 'function' ? p.mouseInFn : null,
+                captureFloppy: typeof p.captureFloppy === 'function' ? p.captureFloppy : null});
             // Make the screen actually visible: dock the Widgets pane, play
             // mode, and surface the code tab where the dock renders — exactly as
             // the FPGA mirror does for its LEDs.
@@ -1016,9 +1017,12 @@ const GUIComponent = props => {
             <MachineManager store={getMachineStore()} locale={props.intl.locale} preferredMachine={showMachines.kind}
                 onRun={async (cfg, opts) => {
                     const code = opts?.code;
-                    const run = (source = code?.text) => runMachineConfig(cfg, code?.dosSourceName ? {
-                        ...opts, dosSource: {name: code.dosSourceName, text: source}
-                    } : opts);
+                    const run = (source = code?.text, runOptions) => runMachineConfig(cfg, {
+                        ...opts,
+                        ...runOptions,
+                        ...(code?.dosSourceName ? {dosSource: {name: code.dosSourceName, text: source}} : {}),
+                        ...(code?.compilerTarget === 'i8086-smallc' ? {smallCSource: source} : {})
+                    });
                     const started = await run();
                     if (started && code) {
                         const program = {...code, config: cfg, run};
@@ -1065,7 +1069,7 @@ const GUIComponent = props => {
                 onOpenExample={(exampleId, codeOnly, options) => new Promise((resolve, reject) => {
                     props.onActivateTab(codeOnly ? 3 : CIRCUIT_TAB_INDEX);
                     window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
-                        exampleId, kim1Tape: options?.kim1Tape, onResult: result => {
+                        exampleId, kim1Tape: options?.kim1Tape, circuitFirmware: options?.circuitFirmware, onResult: result => {
                             if (result.error) reject(new Error(result.error));
                             else {
                                 if (result.ok && options?.kim1Tape) props.onActivateTab(CODE_TAB_INDEX);

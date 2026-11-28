@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {capturePublishedFramebuffer, createGrayFramebufferVideo, grayFramebufferSpec} from '../overlay/scratch-gui/src/lib/bw-machines/gray-framebuffer.js';
+import {bindGrayFramebufferToCircuit, capturePublishedFramebuffer, createGrayFramebufferVideo, grayFramebufferSpec} from '../overlay/scratch-gui/src/lib/bw-machines/gray-framebuffer.js';
 
 test('65C02 grayscale video uses the chip stride and reuses unchanged frames', () => {
     const at = 0x3000;
@@ -51,4 +51,22 @@ test('animation publishes only complete frames and follows the guest counter thr
     cpu.write(0x200, 0);
     assert.equal(video().rgba[0], 255);
     assert.equal(first.rgba[0], 0);
+});
+
+test('circuit video retains decoded devices, remaps ACIA by address and refuses incompatible circuits', () => {
+    const regions = [{kind: 'ram', start: 0, end: 0x3fff}, {kind: 'rom', start: 0x8000, end: 0xffff}];
+    const acia = {kind: 'acia', name: 'acia', at: 0x5000};
+    const via = {kind: 'via', name: 'via', at: 0x6000};
+    const framebuffer = {kind: 'framebuffer', name: 'screen', at: 0x3000, size: 2048};
+    const media = {regions, chips: [{...acia, name: 'acia1'}, {...via, name: 'via1'}, framebuffer],
+        pacedConsole: 'acia1', grayFramebuffer: {chip: 'screen', at: 0x3000, width: 64, height: 32, stride: 64, format: 'gray8'}};
+    const circuit = {regions, chips: [acia, via]};
+    const bound = bindGrayFramebufferToCircuit(circuit, media);
+    assert.equal(bound.chips[0], acia);
+    assert.equal(bound.chips[1], via);
+    assert.equal(bound.chips[2], framebuffer);
+    assert.equal(bound.pacedConsole, 'acia');
+    assert.equal(circuit.chips.length, 2);
+    assert.throws(() => bindGrayFramebufferToCircuit({...circuit, chips: [via]}, media), /does not match/);
+    assert.throws(() => bindGrayFramebufferToCircuit({...circuit, regions: regions.slice(1)}, media), /does not match/);
 });

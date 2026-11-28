@@ -239,12 +239,94 @@ test('firmware browsing filters machine-specific media, searches wired presets a
     assert.equal(get('bw-mm-wired-vdp').length, 0);
     await act(async () => get('bw-mm-wired-basic')[0].props.onClick());
     assert.equal(launched, true);
-    await act(async () => renderer.root.findByType('select').props.onChange({target: {value: 'i80386'}}));
+    await act(async () => renderer.root.findByProps({'aria-label': 'Machine type'}).props.onChange({target: {value: 'i80386'}}));
     assert.equal(get('bw-mm-wired-basic').length, 0);
     assert.equal(get('bw-mm-local-386').length, 0, 'search still filters the newly selected CPU');
     await act(async () => search.props.onChange({target: {value: ''}}));
     assert.equal(get('bw-mm-local-386').length, 1);
     renderer.unmount();
+});
+
+test('8086 offers both execution paths from a circuit and opens saved circuit references', async () => {
+    const MachineManager = await loadManager();
+    const saved = newMachineConfig({title: 'My breadboard', machine: 'i8086', executionMode: 'auto',
+        circuit: {ref: 'circuits/i8086-blink'}});
+    const store = createMemoryMachineStore([saved]);
+    const opened = [];
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store, preferredMachine: 'i8086', locale: 'en',
+            wiredPresets: [{id: 'blink', title: 'Board blink', run() {}}],
+            onRun: cfg => ({mode: 'wired', activated: {circuit: cfg.circuit}}),
+            onOpenExample: (id, codeOnly) => { opened.push({id, codeOnly}); return true; }
+        }));
+    });
+    try {
+        const get = id => renderer.root.findAllByProps({'data-testid': id});
+        const path = () => get('bw-mm-path-i8086')[0];
+        assert.equal(path().props.value, 'circuit');
+        assert.equal(get('bw-mm-native-blocks').length, 0);
+        assert.equal(get('bw-mm-8086-graphics').length, 0);
+        assert.equal(get('bw-mm-wired-blink').length, 1);
+        assert.equal(get('bw-mm-row').length, 1);
+
+        await act(async () => path().props.onChange({target: {value: 'functional'}}));
+        assert.equal(get('bw-mm-8086-graphics').length, 1);
+        assert.equal(get('bw-mm-8086-cga-demo').length, 1);
+        assert.equal(get('bw-mm-wired-blink').length, 0);
+        assert.equal(get('bw-mm-row').length, 0);
+
+        await act(async () => path().props.onChange({target: {value: ''}}));
+        assert.equal(get('bw-mm-8086-cga-demo').length, 1);
+        assert.equal(get('bw-mm-wired-blink').length, 1);
+        await act(async () => get('bw-mm-run')[0].props.onClick());
+        assert.deepEqual(opened, [{id: 'i8086-blink', codeOnly: false}]);
+    } finally {
+        renderer.unmount();
+    }
+});
+
+test('Microsoft BASIC uses the same verified ROM for the virtual and circuit launch actions', async t => {
+    const MachineManager = await loadManager();
+    const romUrl = 'static/roms/msbasic-6502.rom';
+    const bytes = await readFile(new URL('../overlay/scratch-gui/' + romUrl, import.meta.url));
+    let selectedBytes = bytes;
+    t.mock.method(globalThis, 'fetch', async url => url === 'examples/index.json' ?
+        {ok: true, json: async () => []} :
+        {ok: url === romUrl, arrayBuffer: async () => new Uint8Array(selectedBytes).buffer});
+    const launches = [];
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store: createMemoryMachineStore(), locale: 'en', preferredMachine: 'eater6502',
+            onRun: config => launches.push(config.slots.rom),
+            onOpenExample: (...args) => launches.push(args)
+        }));
+    });
+    try {
+        const row = () => renderer.root.findByProps({'data-lesson-id': 'lesson-msbasic-6502'});
+        const path = () => renderer.root.findByProps({'data-testid': 'bw-mm-path-eater6502'});
+        await act(async () => path().props.onChange({target: {value: 'functional'}}));
+        assert.equal(row().findAllByProps({'data-testid': 'bw-mm-lesson-wired'}).length, 0);
+        await act(async () => row().findByProps({'data-testid': 'bw-mm-lesson-run'}).props.onClick());
+        assert.equal(launches[0].url, romUrl);
+
+        await act(async () => path().props.onChange({target: {value: 'circuit'}}));
+        assert.equal(row().findAllByProps({'data-testid': 'bw-mm-lesson-run'}).length, 0);
+        const runWired = () => row().findByProps({'data-testid': 'bw-mm-lesson-wired'}).props.onClick();
+        await act(async () => runWired());
+        assert.equal(launches[1][0], 'eater6502-bench');
+        assert.deepEqual(launches[1][2].circuitFirmware.bytes, new Uint8Array(bytes));
+
+        selectedBytes = new Uint8Array(bytes);
+        selectedBytes[0] ^= 1;
+        await act(async () => runWired());
+        assert.equal(launches.length, 2);
+        assert.match(renderer.root.findByProps({'data-testid': 'bw-mm-status'}).props.children, /sha256 mismatch/);
+    } finally {
+        renderer.unmount();
+    }
 });
 
 test('reviewed media uses an immutable manifest URL and rejects a changed machine or license', async () => {

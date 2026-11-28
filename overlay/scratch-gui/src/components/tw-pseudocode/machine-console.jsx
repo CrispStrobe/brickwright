@@ -1,8 +1,16 @@
 import React from 'react';
 import MachineScreenHeader from './machine-screen-header.jsx';
+import useMachineExport from './use-machine-export.js';
+import {saveDiskImage} from '../../lib/bw-machines/disk-image-download.js';
+import {makeT} from '../../lib/bw-i18n.js';
 import {keyToBytes} from '../../lib/bw-debug/terminal-keys.js';
 import {pcSet1Bytes} from '../../lib/bw-machines/pc-scancodes.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
+
+const exportHelp = makeT({
+    en: {save: 'Save your work in the guest, then use Save image to download a copy of the floppy.'},
+    de: {save: 'Speichere deine Arbeit im Gastsystem. Mit Abbild speichern lädst du eine Kopie der Diskette herunter.'}
+});
 
 const spectrumSpecialKeys = {
     ShiftLeft: ['caps'], ShiftRight: ['caps'], AltLeft: ['sym'], AltRight: ['sym'],
@@ -18,7 +26,7 @@ function spectrumKeys (code) {
 
 /** Large, focusable VGA face for the Widgets pane. The panel owns frame storage;
  * this face only paints it and sends live input to the active machine runner. */
-export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen, locale}) {
+export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, captureFloppy, isFullScreen, onToggleFullScreen, locale}) {
     const root = React.useRef(null);
     const canvas = React.useRef(null);
     const aspect = widget.config.displayAspect;
@@ -27,6 +35,10 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
     const buttons = React.useRef(0);
     const point = React.useRef(null);
     const [focused, setFocused] = React.useState(false);
+    const {runExport, exportBusy, exportError} = useMachineExport(captureFloppy);
+    const keyboardHelp = (keyIn || serialIn) && (mouseIn ? 'Click the screen to use the keyboard and mouse.'
+        : 'Click the screen to type into the machine.');
+    const help = [keyboardHelp, captureFloppy && exportHelp(locale, 'save')].filter(Boolean).join(' ');
     React.useEffect(() => {
         const el = canvas.current;
         const rgba = widget?.state?.rgba;
@@ -144,9 +156,10 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
             style={{width: '100%', height: '100%', minHeight: 0, background: '#000',
                 display: 'flex', flexDirection: 'column', outline: focused ? '2px solid #60a5fa' : 'none'}}>
             <MachineScreenHeader locale={locale} title={widget.name}
-                help={(keyIn || serialIn) && (mouseIn ? 'Click the screen to use the keyboard and mouse.'
-                    : 'Click the screen to type into the machine.')}
-                isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen && toggleFull} />
+                help={help} isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen && toggleFull}
+                onExportImage={captureFloppy && (() => runExport(isCurrent =>
+                    saveDiskImage('freedos-session.img', captureFloppy(), isCurrent)))} exportBusy={exportBusy} />
+            {exportError && <div role="alert" style={{padding: '4px 8px', color: '#fecaca'}}>{exportError}</div>}
             <div onPointerMove={pointerMove} onPointerDown={pointerDown} onPointerUp={pointerUp}
                 onLostPointerCapture={() => {
                     if (buttons.current) { buttons.current = 0; mouseIn?.({dx: 0, dy: 0, buttons: 0}); }

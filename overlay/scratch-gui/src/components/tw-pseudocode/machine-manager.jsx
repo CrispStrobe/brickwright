@@ -11,19 +11,21 @@
 // app. Inline styles, matching the rest of tw-pseudocode.
 
 import React from 'react';
+import {readLibraryFloppy} from '../../lib/bw-machines/local-floppy.js';
 import {makeT} from '../../lib/bw-i18n.js';
 import {currentBox, overlayStyleFor, subscribeVisualViewport} from '../../lib/visual-viewport.js';
 import {
     fromMediaManifest, fromDosboxConf
 } from '../../lib/bw-machines/importers.js';
 import {
-    newMachineConfig, validateMachineConfig
+    newMachineConfig, usesWiredCircuit, validateMachineConfig
 } from '../../lib/bw-machines/machine-config.js';
 import {localDosboxMachine} from '../../lib/bw-machines/local-dosbox.js';
 import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-package-zip.js';
 import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
+import {freedosFloppyZipUrl} from '../../lib/bw-machines/freedos-guest.js';
 import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
-import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
+import {activateConfig, defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
 import {
@@ -37,6 +39,8 @@ import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 const T = {
     en: {
         wiredFirmware: 'Wired firmware',
+        path: 'Execution path', allPaths: 'All paths', functionalPath: 'Functional (fast)', circuitPath: 'Circuits',
+        circuitExamples: 'Circuit examples', runOnCircuit: 'Run on circuit',
         local386: 'Local 386 media',
         localDos: 'Boot a local DOSBox HDD',
         localDosInfo: 'Select a raw hard-disk image. An optional DOSBox configuration supplies the 386 CPU and disk geometry. Its imgmount filename must match the image.',
@@ -47,6 +51,13 @@ const T = {
         bootDisk: 'Boot disk',
         bootPackage: 'Boot package HDD',
         bootFreeDos: 'Boot FreeDOS VGA',
+        freedosMedia: 'FreeDOS media',
+        berkeleyLogoHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. Click the Controller screen and try REPEAT 4 [FD 60 RT 90]. The DOS archive includes Logo source and notices for its separately licensed compiler libraries.',
+        sopwithHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img, and the original Sopwith ZIP. Click the Controller screen. X and Z adjust throttle. Comma and slash pitch up and down. The DOS binary contains a separately licensed Microsoft runtime.',
+        zmiyHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 720k/x86BOOT.img, and the Zmiy 0.85.2 ZIP. In Controller, use the arrows to steer, P to pause and Esc to quit.',
+        sudoku86Help: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img, and the Sudoku86 1.0.3 ZIP. In Controller, left-click to enter a digit or right-click to make a pencil mark. F5 saves the puzzle and F7 restores it.',
+        openGemHelp: 'Select the official FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. Move the pointer over the Controller screen to use the mouse.',
+        aliceHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. ALICE opens DEMO.AP in Controller. Press F1 to run it. Use Save image in Controller to keep guest files.',
         bootBios: 'Boot BIOS only',
         diskImage: 'Disk image',
         zipFile: 'ZIP file',
@@ -61,6 +72,8 @@ const T = {
     },
     de: {
         wiredFirmware: 'Firmware für die Schaltung',
+        path: 'Ausführungspfad', allPaths: 'Alle Pfade', functionalPath: 'Funktional (schnell)', circuitPath: 'Schaltungen',
+        circuitExamples: 'Schaltungsbeispiele', runOnCircuit: 'Auf Schaltung starten',
         local386: 'Lokale 386-Medien',
         localDos: 'Lokales DOSBox-Festplattenabbild starten',
         localDosInfo: 'Wähle ein Rohabbild der Festplatte. Eine optionale DOSBox-Konfiguration legt die 386-CPU und die Geometrie fest. Der Dateiname im imgmount-Befehl muss zum Abbild passen.',
@@ -71,6 +84,13 @@ const T = {
         bootDisk: 'Festplatte starten',
         bootPackage: 'Paket-Festplatte starten',
         bootFreeDos: 'FreeDOS VGA starten',
+        freedosMedia: 'FreeDOS-Medium',
+        berkeleyLogoHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. Klicke auf den Controller-Bildschirm und probiere REPEAT 4 [FD 60 RT 90]. Das DOS-Archiv enthält den Logo-Quellcode sowie Hinweise zu den separat lizenzierten Compiler-Bibliotheken.',
+        sopwithHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img und das originale Sopwith-ZIP. Klicke auf den Controller-Bildschirm. X und Z regeln den Schub. Komma und Schrägstrich steuern die Neigung. Die DOS-Datei enthält eine separat lizenzierte Microsoft-Laufzeitbibliothek.',
+        zmiyHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 720k/x86BOOT.img und das ZIP von Zmiy 0.85.2. Im Controller steuern die Pfeiltasten, P pausiert und Esc beendet das Spiel.',
+        sudoku86Help: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img und das ZIP von Sudoku86 1.0.3. Im Controller trägt ein Linksklick eine Ziffer ein, ein Rechtsklick setzt eine Notiz. F5 speichert das Rätsel, F7 lädt es.',
+        openGemHelp: 'Wähle das ZIP der offiziellen FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. Bewege den Zeiger über den Controller-Bildschirm, um die Maus zu verwenden.',
+        aliceHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. ALICE öffnet DEMO.AP im Controller. F1 startet das Programm. Abbild speichern im Controller sichert die Gastdateien.',
         bootBios: 'Nur BIOS starten',
         diskImage: 'Festplattenabbild',
         zipFile: 'ZIP-Datei',
@@ -156,7 +176,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [query, setQuery] = React.useState('');
     const [openGroups, setOpenGroups] = React.useState({});
     const [graphics8086, setGraphics8086] = React.useState('cga-demo');
-    const virtual8086 = !(preferredMachine === 'i8086' && wiredPresets?.length);
+    const [machinePaths, setMachinePaths] = React.useState(() =>
+        preferredMachine && wiredPresets?.length ? {[preferredMachine]: 'circuit'} : {});
     const openByDefault = Boolean(machineFilter || query.trim());
     const infoPrefix = /^de/i.test(locale) ? 'Informationen zu' : 'About';
     const matchesType = kind => !machineFilter || kind === machineFilter;
@@ -166,8 +187,9 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
     const showLocal386 = matchesType('i80386');
     const mediaAllowed = remoteMachineImagesAllowed();
-    const matchingMedia = mediaAllowed ? libraryMedia.map(item => localizedMedia(item, locale))
-        .filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
+    const availableMedia = libraryMedia.filter(item => mediaAllowed || item.localFloppy || item.guestPackage?.localOnly);
+    const matchingMedia = availableMedia.map(item => localizedMedia(item, locale))
+        .filter(item => matchesType(item.machine) && matchesTitle(item.title));
     const [circuits, setCircuits] = React.useState(null);
     const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
     const [cpmFile, setCpmFile] = React.useState(null);
@@ -184,6 +206,10 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [localNativeBlocks, setLocalNativeBlocks] = React.useState(false);
     const [dosPackageFile, setDosPackageFile] = React.useState(null);
     const [dosPackageBusy, setDosPackageBusy] = React.useState(false);
+    const [guestMedia, setGuestMedia] = React.useState({});
+    const [guestPackages, setGuestPackages] = React.useState({});
+    const mediaLaunch = React.useRef(null);
+    React.useEffect(() => () => mediaLaunch.current?.abort(), []);
     const dosPackageOwner = React.useRef({mounted:true,epoch:{},file:null,busy:false});
     React.useEffect(() => {
         const owner = dosPackageOwner.current; owner.mounted = true;
@@ -211,12 +237,18 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const closeManager = event => {
         invalidateDosPackage();
+        mediaLaunch.current?.abort();
         controllerRequest.current = null;
         if (onClose) onClose(event);
     };
     const run = async (cfg, opts) => {
         try {
-            if (onRun) await onRun(cfg, opts);
+            const result = await onRun?.(cfg, opts);
+            if (result?.mode === 'wired') {
+                if (!onOpenExample) throw new Error('Circuit editor unavailable');
+                const id = result.activated.circuit.ref.replace(/^circuits\//, '');
+                if (await onOpenExample(id, false) === false) return;
+            }
             if (onClose) onClose();
         } catch (e) { setStatus(e.message); }
     };
@@ -306,7 +338,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const allLessons = React.useMemo(() => lessonMachines(locale), [locale]);
     const lessons = allLessons.filter(lesson => matchesType(lesson.config.machine) && matchesTitle(lesson.config.title));
     const machineKinds = [...new Set([preferredMachine, 'i8086', 'i80386', ...CIRCUIT_LIBRARY_MACHINES,
-        ...allLessons.map(lesson => lesson.config.machine), ...(mediaAllowed ? libraryMedia.map(item => item.machine) : []),
+        ...allLessons.map(lesson => lesson.config.machine), ...availableMedia.map(item => item.machine),
         ...machines.map(machine => machine.machine)].filter(Boolean))].sort(sortMachines);
     const circuitTitle = example => example.title?.[/^de/i.test(locale) ? 'de' : 'en'] || example.title?.en || example.id;
     const canOpenExample = !!onOpenExample;
@@ -352,6 +384,25 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             setStatus(lessonT(locale, 'lessons.failed', {title, reason: (e && e.message) || String(e)}));
         }
     };
+    const runWiredLesson = lesson => launch(lesson.config.id, async () => {
+        const ref = lesson.config.slots.rom;
+        const {bytes} = await defaultImageFetcher(ref);
+        return onOpenExample(lesson.wiredExample, false, {circuitFirmware: {
+            slotId: 'rom', kind: lesson.config.machine, bytes,
+            name: ref.url.split('/').pop(), machineView: 'controller'
+        }});
+    });
+    const runWiredMedia = item => launch(item.id, async () => {
+        const request = {};
+        controllerRequest.current = request;
+        const config = await openLibraryMedia(item);
+        const {bootMedia, machineConfig, widgets} = await activateConfig(config);
+        if (controllerRequest.current !== request) return false;
+        return onOpenExample(item.wiredExample, false, {circuitFirmware: {
+            slotId: bootMedia.slot, kind: config.machine, bytes: bootMedia.bytes, name: bootMedia.name,
+            machineView: 'controller', widgets, circuitVideo6502: machineConfig
+        }});
+    });
     const dup = async id => { try { await store.duplicate(id); setStatus(t('duped')); await refresh(); } catch (e) { setStatus(e.message); } };
     const del = async id => { try { await store.remove(id); setStatus(t('removed')); await refresh(); } catch (e) { setStatus(e.message); } };
     const setNativeBlocks = async (cfg, enabled) => {
@@ -403,8 +454,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const groups = machineKinds.filter(matchesType).map(kind => ({
         kind,
         bios: kind === 'i80386' && matchesTitle('386 AT BIOS'),
-        graphics: kind === 'i8086' && virtual8086 ? graphicsPreset : null,
-        virtual: kind === 'i8086' && virtual8086 ?
+        graphics: kind === 'i8086' ? graphicsPreset : null,
+        virtual: kind === 'i8086' ?
             virtual8086Presets.filter(([title]) => matchesTitle(title)) : [],
         presets: kind === preferredMachine ? matchingPresets : [],
         lessons: lessons.filter(lesson => lesson.config.machine === kind),
@@ -416,7 +467,35 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         local: kind === 'i80386' && (
             !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
     })).filter(group => group.bios || group.local || group.graphics || group.virtual.length || group.presets.length ||
-        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65 || group.xkim);
+        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65 || group.xkim)
+        .map(group => {
+            const isCircuitExample = example => !example.codeOnly;
+            const isCircuitMedia = item => Boolean(item.kim1Tape);
+            const hasCircuitPath = group.presets.length || group.examples.some(isCircuitExample) ||
+                (canOpenExample && group.lessons.some(lesson => lesson.wiredExample)) ||
+                group.saved.some(usesWiredCircuit) ||
+                group.media.some(item => isCircuitMedia(item) || (canOpenExample && item.wiredExample));
+            const hasFunctionalPath = group.bios || group.local || group.graphics || group.virtual.length ||
+                group.lessons.length || group.cpm65 || group.xkim || group.examples.some(example => !isCircuitExample(example)) ||
+                group.saved.some(config => !usesWiredCircuit(config)) || group.media.some(item => !isCircuitMedia(item));
+            const bothPaths = Boolean(hasCircuitPath && hasFunctionalPath);
+            const path = bothPaths ? machinePaths[group.kind] || '' : '';
+            if (!path) return {...group, bothPaths, path};
+            const circuit = path === 'circuit';
+            const matchesPath = isCircuit => item => isCircuit(item) === circuit;
+            return {
+                ...group, bothPaths, path,
+                bios: !circuit && group.bios, graphics: !circuit && group.graphics,
+                virtual: circuit ? [] : group.virtual,
+                lessons: circuit ? group.lessons.filter(lesson => canOpenExample && lesson.wiredExample) : group.lessons,
+                presets: circuit ? group.presets : [],
+                saved: group.saved.filter(matchesPath(usesWiredCircuit)),
+                media: group.media.filter(item => circuit ?
+                    isCircuitMedia(item) || (canOpenExample && item.wiredExample) : !isCircuitMedia(item)),
+                examples: group.examples.filter(matchesPath(isCircuitExample)),
+                cpm65: !circuit && group.cpm65, xkim: !circuit && group.xkim, local: !circuit && group.local
+            };
+        });
 
     return (
         <div onClick={closeManager} data-testid="bw-machine-manager"
@@ -463,6 +542,17 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             {title}
                                         </button>
                                     </h3>
+                                    {group.bothPaths && <select aria-label={`${t('path')} · ${title}`}
+                                        data-testid={`bw-mm-path-${group.kind}`} style={btn} value={group.path}
+                                        onChange={event => {
+                                            const path = event.target.value;
+                                            setMachinePaths(current => ({...current, [group.kind]: path}));
+                                            setOpenGroups(current => ({...current, [group.kind]: true}));
+                                        }}>
+                                        <option value="">{t('allPaths')}</option>
+                                        <option value="circuit">{t('circuitPath')}</option>
+                                        <option value="functional">{t('functionalPath')}</option>
+                                    </select>}
                                     {group.graphics && <select aria-label={/^de/i.test(locale) ? '8086-Grafik' : '8086 graphics'}
                                         data-testid="bw-mm-8086-graphics" style={btn} value={group.graphics[1]}
                                         onChange={event => {
@@ -507,12 +597,16 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         data-testid="bw-mm-lesson-source">{lesson.sourceLabel}</a>
                                                 </div>
                                             </>} actions={<>
-                                                <button onClick={() => {invalidateDosPackage(); return runLesson(lesson);}} style={primary}
-                                                    disabled={lessonBusy === lesson.config.id}
-                                                    data-testid="bw-mm-lesson-run">{lessonT(locale, 'lessons.run')}</button>
+                                                {group.path !== 'circuit' && <button onClick={() => {invalidateDosPackage(); return runLesson(lesson);}} style={primary}
+                                                    disabled={lessonBusy !== null || launching !== null}
+                                                    data-testid="bw-mm-lesson-run">{lessonT(locale, 'lessons.run')}</button>}
+                                                {group.path !== 'functional' && canOpenExample && lesson.wiredExample &&
+                                                    <button type="button" style={btn} disabled={launching !== null || lessonBusy !== null}
+                                                        data-testid="bw-mm-lesson-wired"
+                                                        onClick={() => runWiredLesson(lesson)}>{t('runOnCircuit')}</button>}
                                                 {lesson.coldConfig && (
                                                     <button onClick={() => {invalidateDosPackage(); return runLesson(lesson, true);}} style={btn}
-                                                        disabled={lessonBusy === lesson.config.id}
+                                                        disabled={lessonBusy !== null || launching !== null}
                                                         data-testid="bw-mm-lesson-cold">{lesson.coldLabel}</button>
                                                 )}
                                             </>} />
@@ -540,15 +634,29 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             rowAttributes={{'data-machine-media': item.id}}
                                             info={<>
                                                 {item.summary && <div>{item.summary}</div>}
+                                                {item.freedosGuest && <div>{t(item.freedosHelp)}{' '}
+                                                    <a href={freedosFloppyZipUrl} target="_blank" rel="noopener noreferrer">FreeDOS 1.4</a>
+                                                </div>}
+                                                {item.localFloppy && <div>
+                                                    <a href={item.localFloppy.url} target="_blank" rel="noopener noreferrer">{item.localFloppy.name}</a>
+                                                </div>}
+                                                {item.guestPackage && <div>
+                                                    <a href={item.guestPackage.url} target="_blank" rel="noopener noreferrer">{item.guestPackage.title}</a>
+                                                </div>}
+                                                {item.supportSource && <div>
+                                                    <a href={item.supportSource.url} target="_blank" rel="noopener noreferrer">{item.supportSource.title}</a>
+                                                </div>}
                                                 {item.aceKim ? aceKimLicenses.map(({label, url}) => <div key={label}>
                                                     <a href={url} target="_blank" rel="noopener noreferrer">{label} · MIT</a>
                                                 </div>) : item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
                                                     {item.license}
                                                 </a> : (/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`)}
                                             </>}
-                                            actions={
+                                            actions={<>
+                                                {(group.path !== 'circuit' || !item.wiredExample) &&
                                                 <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
-                                                        item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun)} style={btn}
+                                                        item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun) ||
+                                                        ((item.freedosGuest || item.localFloppy) && !guestMedia[item.id]) || (item.guestPackage && !guestPackages[item.id])} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
@@ -567,12 +675,55 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                             const kim1Tape = await readKim1LibraryTape(item);
                                                             return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
-                                                        const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
-                                                        return onRun(config, {code});
+                                                        const build = item.freedosGuest || item.localFloppy || item.code?.compilerTarget === 'i8086-smallc'
+                                                            ? new AbortController() : null;
+                                                        if (build) mediaLaunch.current = build;
+                                                        try {
+                                                            if (item.localFloppy) {
+                                                                const {config, fetcher} = await readLibraryFloppy(
+                                                                    guestMedia[item.id], item, build.signal);
+                                                                return await onRun(config, {fetcher, signal: build.signal});
+                                                            }
+                                                            if (item.freedosGuest) {
+                                                                const {config, fetcher} = await item.freedosGuest(guestMedia[item.id], build.signal, guestPackages[item.id]);
+                                                                return await onRun(config, {fetcher, signal: build.signal});
+                                                            }
+                                                            const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
+                                                            if (build?.signal.aborted) return false;
+                                                            return await onRun(config, {code, signal: build?.signal});
+                                                        } catch (error) {
+                                                            if (build?.signal.aborted) return false;
+                                                            throw error;
+                                                        } finally {
+                                                            if (build) mediaLaunch.current = null;
+                                                        }
                                                     })}>
                                                     {t('run')}
-                                                </button>
-                                            } />)}
+                                                </button>}
+                                                {group.path !== 'functional' && canOpenExample && item.wiredExample &&
+                                                    <button type="button" style={btn} disabled={launching !== null || lessonBusy !== null}
+                                                        data-testid="bw-mm-media-wired"
+                                                        onClick={() => runWiredMedia(item)}>{t('runOnCircuit')}</button>}
+                                            </>}>
+                                            {(item.freedosGuest || item.localFloppy) && <label style={fieldsStyle}>
+                                                {item.localFloppy ? item.localFloppy.name : t('freedosMedia')}{' '}
+                                                <input type="file" accept={item.localFloppy ? '.img,.ima' : '.zip,.img,.ima'}
+                                                    data-testid={item.localFloppy ? 'bw-mm-local-floppy' : 'bw-mm-freedos-guest-media'}
+                                                    disabled={launching !== null}
+                                                    onChange={event => {
+                                                        const selected = event.target.files?.[0] || null;
+                                                        setGuestMedia(current => ({...current, [item.id]: selected}));
+                                                    }} />
+                                            </label>}
+                                            {item.guestPackage && <label style={fieldsStyle}>{item.guestPackage.title}{' '}
+                                                <input type="file" accept=".zip" data-testid="bw-mm-freedos-guest-package"
+                                                    disabled={launching !== null}
+                                                    onChange={event => {
+                                                        const selected = event.target.files?.[0] || null;
+                                                        setGuestPackages(current => ({...current, [item.id]: selected}));
+                                                    }} />
+                                            </label>}
+                                        </MachineEntry>)}
                                     </div>}
                                     {group.cpm65 && <MachineEntry title="CP/M-65 for KIM-1" infoPrefix={infoPrefix}
                                         rowAttributes={{'data-testid': 'bw-mm-kim1-cpm65'}}
@@ -650,6 +801,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 })}>{t('run')}</button>
                                         </>} />}
                                     {group.examples.length > 0 && <div data-testid="bw-mm-circuit-programs">
+                                        {group.examples.some(example => !example.codeOnly) &&
+                                            <h4 style={{margin: '8px 0 2px', fontSize: 12}}>{t('circuitExamples')}</h4>}
                                         {group.examples.map(example => <MachineEntry key={example.id} title={circuitTitle(example)} rowAttributes={{'data-machine-example': example.id}} actions={
                                             <button type="button" disabled={launching !== null} style={btn}
                                                 onClick={() => launch(example.id, () => onOpenExample(example.id, example.codeOnly))}>

@@ -37,7 +37,7 @@ test('CircuitTab keeps broad circuit imports behind the guarded load boundary', 
         assert.ok(!beforeClass.includes(specifier), `${specifier} returned to the initial import graph`);
     }
 
-    const load = source.slice(source.indexOf('async load ('), source.indexOf('handleCircuitReady ('));
+    const load = source.slice(source.indexOf('async loadDesigner ('), source.indexOf('handleCircuitReady ('));
     assert.match(load, /shouldLoadCircuitDesigner\(\{/,
         'load itself must defend against incidental callers, not only one lifecycle path');
     for (const specifier of [

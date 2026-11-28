@@ -41,6 +41,7 @@ export async function runDosProgram(opts = {}) {
     if (!(opts.bytes instanceof Uint8Array) || !opts.bytes.length) {
         throw new Error('runDosProgram: no program bytes');
     }
+    opts.signal?.throwIfAborted();
     const files = opts.files instanceof Map ? opts.files : new Map();
     const chars = [];
     const bench = await createI8086DosBench({
@@ -49,6 +50,8 @@ export async function runDosProgram(opts = {}) {
         files,
         keys: asKeyBytes(opts.keys),
         variant: opts.variant,
+        args: opts.args,
+        executionSignal: opts.signal,
         onChar: ch => chars.push(ch),
         // Observe every 8086 OUT/IN. A DOS Forth `pin!` does an OUT to 0x378+pin
         // (dosmain.c), so this is how a Code-tab program drives a device.
@@ -56,7 +59,16 @@ export async function runDosProgram(opts = {}) {
     });
     const max = opts.maxSteps || 20_000_000;
     let steps = 0;
-    while (!bench.terminated && steps < max) { bench.step(); steps += 1; }
+    const batch = opts.yieldEvery || max;
+    while (!bench.terminated && steps < max) {
+        opts.signal?.throwIfAborted();
+        const end = Math.min(steps + batch, max);
+        while (!bench.terminated && steps < end) {
+            bench.step();
+            steps += 1;
+        }
+        if (!bench.terminated && steps < max) await new Promise(resolve => setTimeout(resolve, 0));
+    }
     let screenText = [];
     try { screenText = bench.screenText(); } catch { /* renderer optional */ }
     return {

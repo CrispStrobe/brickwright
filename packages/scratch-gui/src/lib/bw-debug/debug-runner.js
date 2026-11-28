@@ -1662,6 +1662,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         disposeTerminal?.();
         disposeTerminal = null;
         delete runner.terminal;
+        delete runner.captureFloppy;
         terminalFrame = null;
         const device = String(built?.device || userFirmware?.device || projectStc(null)?.device || '').toLowerCase();
         const selectedTargetKind = selectDebugTargetKind(device, targetKind);
@@ -3223,8 +3224,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.tali');
         }
 
+        const wiredBoard = bootMedia?.wired6502Board;
         const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
-            declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
+            declaredMachine && !wiredBoard ? {board: null, why: 'library machine map'} : designerBoard();
+        if (wiredBoard && db.board !== wiredBoard) throw new Error('The 65C02 circuit changed before boot.');
         if (db.board) {
             targetOpts.board = db.board;
             // Machine targets drive the designer's real board rather than a
@@ -3277,7 +3280,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
         if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||
-            (declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom))) {
+            await isBundledMicrosoftBasic(targetOpts.rom)) {
             const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
             basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
             runner.sendBasicLine = line => runner.sendSerial(microsoftBasicLine(line));
@@ -3928,13 +3931,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // (40K) exactly as the CLI qualification does, leaving every other
         // region untouched. functionalInstructionCycles matches the receipt.
         const base = PCAT80386_EXPERIMENTAL_4M_HDD_FREEDOS_VGA;
-        const hdGeom = (bootMedia && bootMedia.geometry) ||
+        const hddBytes = isHdd ? bootImg.bytes : bootMedia?.i80386Media?.hdd;
+        const hdGeom = (isHdd ? bootMedia.geometry : bootMedia?.i80386HddGeometry) ||
             { cylinders: 306, heads: 4, sectors: 17 };
         // Type-47 CMOS drive-C geometry, byte-for-byte as the CLI qualification
         // sets it, so the Bochs BIOS builds a real FDPT for drive 0 and FreeDOS
-        // mounts the partition as C:. Only applied for a hard-disk boot; a
-        // floppy boot instead selects the floppy and its drive density.
-        const hdCmos = isHdd ? (g => [
+        // mounts the partition as C:. A boot floppy can share the AT with the
+        // hard disk, in which case the CMOS boot order tries A: first.
+        const hdCmos = hddBytes ? (g => [
+            [0x12, 0xf0],
+            [0x3d, 0x21],
             [0x19, 47],
             [0x1b, g.cylinders & 0xff], [0x1c, (g.cylinders >> 8) & 0xff],
             [0x1d, g.heads & 0xff],
@@ -3952,17 +3958,18 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 ...base.regions.filter(r => !(r.kind === 'rom' && r.start === 0xc0000)),
                 { kind: 'rom', start: 0xc0000, end: 0xc9fff },
             ],
-            chips: withI80386MouseCmos(base.chips,
-                isHdd ? [[0x3d, 0x21], [0x12, 0xf0], ...hdCmos] : isFloppy ? i80386FloppyCmos(floppyGeom) : []),
+            chips: withI80386MouseCmos(base.chips, [
+                ...(isFloppy ? i80386FloppyCmos(floppyGeom) : []),
+                ...hdCmos
+            ]),
         };
 
         const targetOpts = { config };
         if (bootMedia?.nativeBlocks === true) targetOpts.nativeBlocks = true;
-        // A hard-disk boot attaches its image as the ATA16 drive at construction
-        // (the adapter reads opts.ataImage/ataGeometry). A floppy is inserted
-        // into the µPD765 after construction, below.
-        if (isHdd) {
-            targetOpts.ataImage = bootImg.bytes;
+        // The adapter attaches the hard disk at construction. The boot floppy
+        // is inserted into the FDC before reset.
+        if (hddBytes) {
+            targetOpts.ataImage = hddBytes;
             targetOpts.ataGeometry = hdGeom;
         }
         const db = designerBoard();
@@ -4052,6 +4059,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         wireMachineBench(result, createDebugSession);
         if (typeof result.adapter?.mouseIn === 'function' && machine.canTakeMouse?.()) {
             runner.mouseIn = event => result.adapter.mouseIn(event);
+        }
+        if (entries.floppy && typeof result.adapter.captureFloppy === 'function') {
+            const captureFloppy = () => {
+                if (destroyed || runner.captureFloppy !== captureFloppy || i8086ExecutionResult !== result) {
+                    throw new Error('The floppy session is closed.');
+                }
+                return result.adapter.captureFloppy();
+            };
+            runner.captureFloppy = captureFloppy;
         }
         const name = bootMedia.name || S('noun.floppy');
         const readyMsg = bootMedia.slot === 'floppy'

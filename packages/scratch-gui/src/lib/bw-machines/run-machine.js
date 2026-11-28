@@ -39,6 +39,7 @@ export function runCpmCom(config, bytes) {
  *   `{mode:'cancelled', activated}` if ownership was revoked before launch.
  */
 export async function runMachineConfig(config, opts = {}) {
+    opts.signal?.throwIfAborted();
     const dispatch = typeof opts.dispatch === 'function'
         ? opts.dispatch
         : detail => {
@@ -81,7 +82,16 @@ export async function runMachineConfig(config, opts = {}) {
         return {mode: 'wired', activated};
     }
 
-    const bm = activated.bootMedia;
+    let bm = activated.bootMedia;
+    if (opts.smallCSource != null) {
+        if (activated.targetKind !== 'i8086' || bm.slot !== 'exe' || !bm.dosFiles) {
+            throw new Error('Small-C needs an 8086 DOS toolchain.');
+        }
+        const {buildSmallC} = await import('../bw-debug/small-c-dos.js');
+        const bytes = await buildSmallC(bm.bytes, bm.dosFiles, opts.smallCSource, opts.signal);
+        bm = {...bm, bytes, name: 'PROG.EXE', dosArgs: undefined, dosFiles: undefined};
+    }
+    opts.signal?.throwIfAborted();
     const detail = {
         slotId: bm.slot,
         bytes: bm.bytes,
@@ -140,6 +150,7 @@ export async function runMachineConfig(config, opts = {}) {
             const bytes = activated.media?.[slot]?.bytes;
             if (bytes) (detail.i80386Media ||= {})[slot] = bytes;
         }
+        if (bm.i80386HddGeometry) detail.i80386HddGeometry = bm.i80386HddGeometry;
     }
     // An inline machineConfig ({regions,chips}) — the Eater 6502 case — carries
     // the program's hardware as `chips`; a string preset (PCXT8086) is built by
@@ -161,7 +172,7 @@ export async function runMachineConfig(config, opts = {}) {
     const awaitBoot = (activated.machinePreset === 'freedos-vga' || serialMachine ||
         (activated.targetKind === 'i80386' && ['dos-service', 'dos-boot'].includes(activated.machinePreset)) ||
         (activated.targetKind === 'i80386' && ['bios', 'floppy'].includes(bm.slot)) ||
-        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe', 'disk'].includes(bm.slot))) &&
+        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe', 'disk', 'floppy'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
     let completion = null;
     let timer = null;

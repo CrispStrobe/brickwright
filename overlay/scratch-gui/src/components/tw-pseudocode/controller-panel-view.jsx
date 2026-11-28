@@ -2117,6 +2117,7 @@ class ControllerPanelView extends React.Component {
                         serialIn={this.props.machineConsole.serialIn}
                         isFullScreen={this.props.isFullScreen}
                         onToggleFullScreen={toggleMachineFullScreen}
+                        captureFloppy={this.props.machineConsole.captureFloppy}
                         mouseIn={this.props.machineConsole.mouseIn} />}
                     {terminal && <div style={{height: '100%', minHeight: 0}}>
                         <MachineTerminal session={terminal} locale={this.props.locale} isFullScreen={this.props.isFullScreen}

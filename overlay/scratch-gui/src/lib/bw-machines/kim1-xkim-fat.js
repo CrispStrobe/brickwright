@@ -71,7 +71,7 @@ function locateVolume (disk) {
 const readShortName = (bytes, offset, length) =>
     String.fromCharCode(...bytes.subarray(offset, offset + length)).replace(/ +$/, '');
 
-function openFat (bytes) {
+function openFat (bytes, fileLimit = XKIM_FILE_LIMIT) {
     if (bytes.length > XKIM_FAT_IMAGE_LIMIT) fail('choose an image up to 128 MiB.');
     const disk = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     const volume = locateVolume(disk);
@@ -143,7 +143,7 @@ function openFat (bytes) {
         }
         if (files.has(name)) fail(`duplicate filename ${name}.`);
         const size = disk.getUint32(offset + 28, true);
-        if (size > XKIM_FILE_LIMIT) fail(`${name} exceeds the 64 KiB file limit.`);
+        if (size > fileLimit) fail(`${name} exceeds the ${fileLimit / 1024} KiB file limit.`);
         totalBytes += size;
         if (files.size >= XKIM_FILE_COUNT || totalBytes > XKIM_TOTAL_LIMIT) {
             fail('the root files exceed 64 files or 2 MiB in total.');
@@ -232,7 +232,15 @@ function updateFsInfo (fat) {
 }
 
 export function writeXkimFatImage (source, files) {
-    const fat = openFat(source);
+    return writeFatRootFiles(source, files, XKIM_FILE_LIMIT);
+}
+
+export function writeDosFloppyFiles (source, files) {
+    return writeFatRootFiles(source, files, 256 * 1024);
+}
+
+function writeFatRootFiles (source, files, fileLimit) {
+    const fat = openFat(source, fileLimit);
     const {bits, clusterSize, copies, fatOffset, fatSectors, sectorSize, activeFat, mirrored, rootCluster} = fat.volume;
     const changes = [];
     const names = new Set();
@@ -242,7 +250,7 @@ export function writeXkimFatImage (source, files) {
         const name = file.name.toUpperCase();
         if (!XKIM_SHORT_NAME.test(file.name) || names.has(name)) fail('session files need unique 8.3 names.');
         names.add(name);
-        if (file.bytes.length > XKIM_FILE_LIMIT) fail(`${name} exceeds the 64 KiB file limit.`);
+        if (file.bytes.length > fileLimit) fail(`${name} exceeds the ${fileLimit / 1024} KiB file limit.`);
         if (fat.directories.has(name)) fail(`${name} is already a directory.`);
         const entry = fat.files.get(name);
         totalBytes += file.bytes.length - (entry?.size ?? 0);
@@ -263,7 +271,7 @@ export function writeXkimFatImage (source, files) {
     const output = new Uint8Array(source);
     if (!changes.length) return output;
     const disk = new DataView(output.buffer);
-    const resultFat = openFat(output);
+    const resultFat = openFat(output, fileLimit);
     const setCluster = (cluster, next) => {
         const count = mirrored ? copies : 1;
         for (let copy = 0; copy < count; copy++) {

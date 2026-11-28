@@ -16,6 +16,22 @@ export function grayFramebufferSpec (chips, spec) {
     return {chip, at, width, height, stride, format, ...(publishAt !== undefined && {publishAt})};
 }
 
+/** Keep the circuit's decoded bus. Add only the write-snooping video observer. */
+export function bindGrayFramebufferToCircuit (circuit, media) {
+    const {chips, regions, grayFramebuffer, pacedConsole} = media;
+    const framebuffer = chips.find(chip => chip.name === grayFramebuffer.chip && chip.kind === 'framebuffer');
+    const mapped = chips.filter(chip => chip !== framebuffer);
+    const devices = mapped.map(chip => circuit.chips.find(part => part.kind === chip.kind && part.at === chip.at));
+    const regionsMatch = regions.every(region => circuit.regions.some(part =>
+        part.kind === region.kind && part.start <= region.start && part.end >= region.end && !part.perm));
+    if (!framebuffer || !regionsMatch || devices.some(chip => !chip) ||
+        circuit.chips.some(chip => chip.name === framebuffer.name)) {
+        throw new Error('The circuit does not match the 65C02 framebuffer ROM map.');
+    }
+    return {...circuit, chips: [...circuit.chips, framebuffer], grayFramebuffer,
+        pacedConsole: devices[mapped.findIndex(chip => chip.name === pacedConsole)]?.name};
+}
+
 /** Convert bus-observed pixels to the Controller video contract. */
 export function createGrayFramebufferVideo (source, {width, height, stride, format}) {
     if (!source || typeof source.getFrame !== 'function') throw new Error('Missing 65C02 framebuffer chip');
