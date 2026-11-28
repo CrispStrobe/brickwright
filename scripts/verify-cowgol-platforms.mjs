@@ -73,8 +73,8 @@ for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifes
 
 const git = (directory, ...args) => execFileSync('git', ['-C', directory, ...args], {encoding: 'utf8', timeout: 10_000}).trim();
 const manifest = JSON.parse(readFileSync(path.join(bundle, 'manifest.json'), 'utf8'));
-const boardPin = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'))['bw-board'];
 const needsBoard = targets.some(target => ['riscv32', 'eater6502', 'z80-cpm', 'i8080-cpm', 'dos'].includes(target));
+const boardPin = needsBoard ? JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'))['bw-board'] : null;
 if (needsBoard) {
     assert.equal(git(board, 'rev-parse', 'HEAD'), boardPin, 'The machine checkout must match vendor-pins.json');
     assert.equal(git(board, 'status', '--porcelain', '--untracked-files=no'), '', 'The pinned machine must have no tracked edits');
