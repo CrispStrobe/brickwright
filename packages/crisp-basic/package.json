@@ -29,8 +29,7 @@
     "build:wasm": "node scripts/build-wasm.mjs",
     "test:wasm": "node --test tests/wasm-runtime.test.mjs tests/wasm-policy.test.mjs tests/wasm-simulation.test.mjs tests/wasm-cli.test.mjs tests/board-targets-wasm.test.mjs",
     "test:parity": "node --test tests/parity.test.mjs",
-    "test:browser": "node scripts/test-browser.mjs",
-    "test:brickwright": "node --test ../../test/crispbasic-*.test.mjs tests/brickwright.test.mjs tests/generator.test.mjs tests/robot-motor.test.mjs tests/roundtrip*.test.mjs"
+    "test:browser": "node scripts/test-browser.mjs"
   },
   "devDependencies": {
     "esbuild": "0.25.12",

@@ -3,12 +3,12 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
-import SB3Creator from '../../../overlay/scratch-gui/src/lib/sb3-creator.js';
-import basicToPseudocode from '../../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
-import {createWasmSession} from '../browser.mjs';
-import {createSimulationHost} from '../src/simulation-host.mjs';
+import SB3Creator from '../../overlay/scratch-gui/src/lib/sb3-creator.js';
+import basicToPseudocode from '../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
+import {createWasmSession} from '../../packages/crisp-basic/browser.mjs';
+import {createSimulationHost} from '../../packages/crisp-basic/src/simulation-host.mjs';
 
-const moduleURL = new URL('../.build/wasm/crispbasic.mjs', import.meta.url);
+const moduleURL = new URL('../../packages/crisp-basic/.build/wasm/crispbasic.mjs', import.meta.url);
 const portable = {profile: 'bbc', mode: 'crispbasic'};
 const numberOutput = value => `${String(value).padStart(10)}\r\n`;
 
@@ -139,7 +139,7 @@ for (const duration of [-0.0004, 2147483.648]) {
 }
 
 test('the reusable pulse example is executable and reversible', async () => {
-    const source = await readFile(new URL('../examples/procedure-pulses.bas', import.meta.url), 'utf8');
+    const source = await readFile(new URL('../../packages/crisp-basic/examples/procedure-pulses.bas', import.meta.url), 'utf8');
     const result = await equivalent(source, false);
     assert.equal(result.status, 'completed');
     assert.equal(result.text, numberOutput(5));

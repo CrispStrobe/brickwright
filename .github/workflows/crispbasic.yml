@@ -49,6 +49,7 @@ on:
       - 'vendor-pins.json'
       - 'bin/bwlite.mjs'
       - 'test/crispbasic-*.test.mjs'
+      - 'test/crispbasic-integration/**'
       - 'test/circuit-cad-cancellation.test.mjs'
       - 'test/circuit-cad-bridge.test.mjs'
       - 'test/b8-one-board-per-run.test.mjs'
@@ -103,6 +104,7 @@ on:
       - 'vendor-pins.json'
       - 'bin/bwlite.mjs'
       - 'test/crispbasic-*.test.mjs'
+      - 'test/crispbasic-integration/**'
       - 'test/circuit-cad-cancellation.test.mjs'
       - 'test/circuit-cad-bridge.test.mjs'
       - 'test/b8-one-board-per-run.test.mjs'
@@ -210,7 +212,8 @@ jobs:
           npm run package:crispbasic
           npm run package:crispbasic:check
       - name: Verify source round trips, controller profiles and coupled CAD physics
-        run: npm run test:brickwright
+        working-directory: .
+        run: npm run test:crispbasic-integration
       - name: Verify shared circuit ownership and existing CAD cancellation
         working-directory: .
         run: node --test test/circuit-cad-cancellation.test.mjs test/circuit-cad-bridge.test.mjs test/b8-one-board-per-run.test.mjs

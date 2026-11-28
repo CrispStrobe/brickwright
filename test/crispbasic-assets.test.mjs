@@ -18,7 +18,7 @@ const write = async (root, path, bytes) => {
 
 // Synthetic build records exercise packaging integrity; this fixture is not a
 // BASIC interpreter. Actual generated source/worker execution has a separate
-// WASM-dependent test:brickwright job, so ordinary source tests need no compiler.
+// WASM-dependent test:crispbasic-integration job, so ordinary source tests need no compiler.
 async function fixture(t) {
     const parent = join(root, 'artifacts');
     await mkdir(parent, {recursive: true});

@@ -1,7 +1,7 @@
 # BASIC drives the saved Scout CAD robot
 
 [source.bas](source.bas) runs the shipped
-[Scout encoder project](../../../../overlay/scratch-gui/static/circuit-cad/scout-encoder.sb3)
+[Scout encoder project](https://github.com/CrispStrobe/brickwright/blob/main/overlay/scratch-gui/static/circuit-cad/scout-encoder.sb3)
 through the actual CrispBASIC interpreter, Circuit electrical solver and CAD
 physics worker. The project already contains the robot, circuit and saved motor
 connections; this example does not require a second copy of its CAD document.
