@@ -130,11 +130,21 @@ test('the CLI reads version 2 and animated version 3 palettes for exact Arcade i
 });
 
 test('what has no Arcade counterpart is named and left as a comment where it stood', () => {
-    // (Backdrops were the example here until they were mapped — task A4; the
-    // mapped constructs are held by test/makecode-export-arcade-constructs.)
-    const {ts, unsupported} = exportOf('SPRITE s:\nWHEN flag clicked:\n  think hmm\n  wait 1 seconds\n');
-    assert.ok(unsupported.some(u => /looks_think/.test(u)), JSON.stringify(unsupported));
-    assert.match(ts, /\/\/ looks_think/);
+    // Thoughts now map to text bubbles. List monitors still have no Arcade
+    // counterpart, so retain the named-refusal and source-position guard here.
+    const {ts, unsupported} = exportOf('SPRITE s:\nLIST xs\nWHEN flag clicked:\n  say "before"\n  show list xs\n  say "after"\n');
+    assert.deepEqual(unsupported, ['show list: Arcade has no list monitors']);
+    assert.match(ts, /\.sayText\("before"\)[\s\S]*\/\/ show list: Arcade has no list monitors[\s\S]*\.sayText\("after"\)/);
+});
+
+test('thoughts use the mapped Arcade text bubble and explain the presentation change', () => {
+    for (const [message, emitted] of [['"hmm"', /sSprite\.sayText\("hmm"\)/],
+        ['hmm', /sSprite\.sayText\(s_hmm\)/]]) {
+        const {ts, unsupported, warnings} = exportOf(`SPRITE s:\nWHEN flag clicked:\n  think ${message}\n  wait 1 seconds\n`);
+        assert.deepEqual(unsupported, []);
+        assert.match(ts, emitted);
+        assert.ok(warnings.includes('Scratch thoughts use Arcade text bubbles'), JSON.stringify(warnings));
+    }
 });
 
 // ── Round-trip shapes MakeCode rejected (task F5 of docs/OPEN-TASKS-2026-09-29.md) ──

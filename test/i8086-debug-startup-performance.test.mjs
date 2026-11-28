@@ -17,8 +17,8 @@ const panelSources = [
 
 test('the assembled DOS path does not eagerly load the bw-board barrel', () => {
     for (const source of sources) {
-        const start = source.indexOf('    async function attachI8086() {');
-        const end = source.indexOf('\n    /**\n     * Should this halt be swallowed?', start);
+        const start = source.indexOf('    async function attachI8086(');
+        const end = source.indexOf('\n    async function ', start + 1);
         const attach = start >= 0 && end > start ? source.slice(start, end) : '';
         assert.ok(attach.length > 3000, 'attachI8086 capture is empty or truncated');
         const dosBranch = attach.indexOf('if (isDosProgram)');
@@ -60,10 +60,14 @@ test('the target picker loads metadata without the bw-board barrel', () => {
     }
 });
 
-test('debugger faces do not merge back into the full circuit designer chunk', () => {
+test('debugger faces stay in their focused chunk and video uses the existing mirror', () => {
     for (const source of panelSources) {
-        assert.equal((source.match(/webpackChunkName: "bw-debug-faces"/g) || []).length, 3,
-            'port LEDs, switches and video should share only their focused face chunk');
+        const faces = [...source.matchAll(/import\(\/\* webpackChunkName: "bw-debug-faces" \*\/ '([^']+)'\)/g)]
+            .map(match => match[1]);
+        assert.deepEqual(faces, ['bw-circuit-ui/components/PortLeds.jsx', 'bw-circuit-ui/components/SwitchPanel.jsx'],
+            'port LEDs and switches should use their focused face chunk');
+        assert.match(source, /window\.bwMirrorMachineVideo\(\{videoFn: \(\) => runner\.video\(\), widget: screen,/,
+            'machine video should reuse the GUI mirror instead of loading another circuit face');
         assert.doesNotMatch(source, /webpackChunkName: "bw-circuit-ui"/,
             'a shared chunk label would pull the full designer into DOS startup');
     }

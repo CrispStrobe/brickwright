@@ -8,11 +8,11 @@ const packagePath = 'packages/scratch-gui/node_modules/bw-circuit-ui/src/compone
 
 const assertBatchedLoad = source => {
     assert.match(source, /import ReactDOM from 'react-dom';/);
-    const effect = /const prevCircuitDataRef = useRef\(null\);[\s\S]*?useEffect\(\(\) => \{([\s\S]*?)\n  \}, \[circuitData, handleLoad, projectData, circuit\]\);/.exec(source);
+    const effect = /const prevCircuitDataRef = useRef\(null\);[\s\S]*?useEffect\(\(\) => \{([\s\S]*?)\n  \}, \[circuitData, handleLoad, projectData, circuit, handleBuildMachine, onWiredBootReady\]\);/.exec(source);
     assert.ok(effect, 'the circuitData load effect remains identifiable');
     const batch = /ReactDOM\.unstable_batchedUpdates\(\(\) => \{([\s\S]*?)\n    \}\);/.exec(effect[1]);
     assert.ok(batch, 'the common file-load path must batch React 16 state updates');
-    assert.match(batch[1], /handleLoad\(circuitData\);[\s\S]*setAnnotations\(\[\]\);/);
+    assert.match(batch[1], /loaded = handleLoad\(circuitData\);[\s\S]*if \(loaded\) setAnnotations\(\[\]\);/);
     assert.ok(effect[1].indexOf('prevCircuitDataRef.current = circuitData;') <
         effect[1].indexOf('ReactDOM.unstable_batchedUpdates'));
     // The shared loader now owns file authority so a host echo cannot replace

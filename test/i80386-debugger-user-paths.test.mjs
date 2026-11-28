@@ -136,6 +136,7 @@ import {createRequire} from 'node:module';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import * as memoryView from '../overlay/scratch-gui/src/lib/bw-debug/memory-view.js';
+import * as memoryByteHelp from '../overlay/scratch-gui/src/lib/bw-debug/memory-byte-help.js';
 import * as trace from '../overlay/scratch-gui/src/lib/bw-debug/trace.js';
 import * as opcodes from '../overlay/scratch-gui/src/lib/bw-debug/opcodes.js';
 const guiRequire = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
@@ -153,7 +154,8 @@ function loadDrawer (prompt) {
     const react = {Component, createElement: (type, props, ...children) => ({type, props: props || {}, children: children.flat(Infinity)})};
     const modules = {react, 'prop-types': {}, '../../lib/bw-debug/trace.js': trace,
         '../../lib/bw-debug/opcodes.js': opcodes, '../../lib/bw-debug/trace-csv.js': {},
-        '../../lib/native-dialog.js': {promptAsync: prompt}, '../../lib/bw-debug/memory-view.js': memoryView};
+        '../../lib/native-dialog.js': {promptAsync: prompt}, '../../lib/bw-debug/memory-view.js': memoryView,
+        '../../lib/bw-debug/memory-byte-help.js': memoryByteHelp};
     const context = {exports: {}, require: name => {
         assert.ok(Object.hasOwn(modules, name), `unexpected drawer import ${name}`); return modules[name];
     }};
@@ -180,6 +182,8 @@ test('actual drawer cells respect read-only rights; legacy cell writes through i
     const readonly = componentFixture(Drawer, {spaces: {mem}});
     const cell = elements(readonly.drawer.renderMemory()).find(e => e.type === 'span' && e.children[0] === '5A');
     assert.equal(cell.props.role, undefined);
+    assert.match(cell.props.title, /Hex: 5A · Decimal: 90 · Binary: 01011010/);
+    assert.match(cell.props.title, /read-only$/);
     await cell.props.onClick(); assert.equal(prompts, 0); assert.equal(readonly.writes.length, 0);
     const old = componentFixture(Drawer, {steps: ['insn']});
     const editable = elements(old.drawer.renderMemory()).find(e => e.props.role === 'button');
