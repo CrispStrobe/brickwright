@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "format": "crispbasic-native-bundle-qualification",
+  "recordedAt": "2026-11-28T19:17:41.167345+00:00",
+  "scope": "Full SDL source/bundle byte parity and packaging behavior; both execute the same pinned BBCSDL interpreter.",
+  "validation": {
+    "status": "passed",
+    "targets": 3,
+    "tests": 36,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0,
+    "inlineAssemblyAndUSR": "passed on all three targets"
+  },
+  "reference": {
+    "repository": "https://github.com/rtrussell/BBCSDL.git",
+    "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f"
+  },
+  "inputsSha256": {
+    "sdl/upstream.lock.json": "1fffc5b5ba1f10479cb22b060e3c1a0dadab6ad7020585c24c466c4cfb39a21d",
+    "sdl/patch-upstream.mjs": "69d3f9fc5a5b377fcb04ea1a06c7414ffbacc11c0cffbd5e61c04b0f7bad4642",
+    "sdl/source-loader.h": "107d4fe193830d0ace10cbe6e09fc62533e44b6352ee9d00b89cd4fc02a4cda3",
+    "sdl/launcher.c": "ab54cee8c620286e480b48a994b197ee4ac12b7c6af6757a46328a01fe149c71",
+    "scripts/build-sdl-native.mjs": "09415f9bfa4839b067d177f2a5f127be3bfd51339cd25455923e61d7ccb19010",
+    "scripts/native-targets.mjs": "5c6abd8fbbcb9837554e0cd6a5df65bbaf6ceeff7378589ec6d6676665e49832",
+    "scripts/run-sdl-native.mjs": "0acc6542e2b347c7c8354a3e97519579081b64bea23bed0261631f6bcde27a50",
+    "src/bundle-sdl.mjs": "18805772e641e29b82e82cfbe98b78e2747173d89e054bf045713a59221ab68d",
+    "src/source.mjs": "5b48812da607a53c7d1f540afb4563e8d597dcbe817e78926cfbd8405ab5ee61",
+    "tests/bundle-sdl.test.mjs": "33f6b4b61f0b37d68690f52b19c8f4e57c755831dec05afb9c7a0a25def389e8"
+  },
+  "targets": [
+    {
+      "target": "linux-x64",
+      "execution": "native x86_64",
+      "cpuRequirement": "x64",
+      "compiler": "gcc (Debian 14.2.0-19) 14.2.0",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "runtimeSha256": "f93f4e22d41bcec047879b77cb7532016bc1eb217a9444ee28c953911935fe20",
+      "launcherSha256": "f5fc17676e69d3fc151e822dbfcdbcd8db5fe9a4b656d571b74980b7e4a66bba",
+      "runtimeReceiptSha256": "85904d3aee1e22cdc42a39975f089bdafee5676cd7fdd7b72fa3b5d557c0f2cc",
+      "logSha256": "ad90015b6cac3c24491f1d817db716ccc046381061a87c291835e0c866184494"
+    },
+    {
+      "target": "linux-armv7",
+      "execution": "QEMU Cortex-A7",
+      "cpuRequirement": "ARMv7-A with NEON and hard-float ABI (upstream SDL audio mixer)",
+      "compiler": "arm-linux-gnueabihf-gcc (Debian 14.2.0-19) 14.2.0",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "runtimeSha256": "3a9cf882555e7b06e565301a255e69bd1724729c2ab6e5071fdcc8e839c47ffe",
+      "launcherSha256": "b49dd82ad5f7dd6e9f9908fb2a28af730a5b06b39d75465e73102ac5e9b98b83",
+      "runtimeReceiptSha256": "f5ed7654a4d1e21f767eadcfe879513dd10cac039c37f22ee071622a72ef28e9",
+      "logSha256": "37338308b1f889c135fd6484907975ed06630f4dc151555508401eb808208884"
+    },
+    {
+      "target": "linux-arm64",
+      "execution": "QEMU Cortex-A53",
+      "cpuRequirement": "arm64",
+      "compiler": "aarch64-linux-gnu-gcc (Debian 14.2.0-19) 14.2.0",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "runtimeSha256": "68baf3493576e29bb009fa3713c117b1be3aedf58de13e3f241b25086c97669c",
+      "launcherSha256": "c2f74053bf1d1bda905aab34d44ebb79dfe994fcea0b370c32c712d9cf60c7ba",
+      "runtimeReceiptSha256": "bf8637a8f5254f5d2968c7a583e079cab11ae9171e4085544e7642fee911809e",
+      "logSha256": "b5903c9f998c619b40a0da613aba82812fc7e632a073d4dfb8d3344fcec76a55"
+    }
+  ],
+  "environment": {
+    "qemu": "10.0.13 Debian 1:10.0.13+ds-0+deb13u1",
+    "SDL_VIDEODRIVER": "offscreen",
+    "SDL_RENDER_DRIVER": "software",
+    "SDL_AUDIODRIVER": "dummy"
+  },
+  "workflow": {
+    "path": ".github/workflows/sdl-bundles.yml",
+    "sha256": "6afb06a923e9554c46dd6f821608167d76ef5ea327484448be22da2e3571c8f7",
+    "bashSyntaxCheckedSteps": 11
+  },
+  "limitations": [
+    "ARM execution is QEMU user-mode CPU emulation, not physical ARM hardware.",
+    "Graphics readback used SDL software/offscreen; audio used the real mixer with a dummy device, not audible speakers.",
+    "Bundles retain their documented Linux/glibc and platform shared-library dependencies.",
+    "ARMv7 full SDL host requires NEON and the hard-float ABI."
+  ]
+}

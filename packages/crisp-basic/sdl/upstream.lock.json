@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "bbcSDL": {
+    "repository": "https://github.com/rtrussell/BBCSDL.git",
+    "commit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "license": "Zlib",
+    "files": [
+      {
+        "path": "licence.txt",
+        "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+      },
+      {
+        "path": "include/BBC.h",
+        "sha256": "eeefa176f509b9ea5f307f4ca1ac2a141dff5d39931ccedb601ff2af17565efd"
+      },
+      {
+        "path": "include/bbcsdl.h",
+        "sha256": "e8074ea35917a89f3b3c7241209d46312cd977e108b8337e32e2f83f097faa6b"
+      },
+      {
+        "path": "include/version.h",
+        "sha256": "b92b5c623228270938a4a05ad0ca4051ad25adc883965e2228d3667d5d404b4d"
+      },
+      {
+        "path": "include/SDL2_gfxPrimitives.h",
+        "sha256": "9672af33715cd47a5c7bc6e5ff24df986dface43e11ad338eaf63f95342afedc"
+      },
+      {
+        "path": "include/SDL2_gfxPrimitives_font.h",
+        "sha256": "563802eb958d1f5292c604388195aac033b10ffcec399f6dedf86b1cfb6690d8"
+      },
+      {
+        "path": "include/SDL2_rotozoom.h",
+        "sha256": "a2e7e498bdf73142044476103c2da0f8ea78a31e877aed93e3dd7a65c18bf8db"
+      },
+      {
+        "path": "include/SDL_stbimage.h",
+        "sha256": "1773e6ba734859b296e4da8f6f0781e5ea29c54491dce73296df5a9caf6f0168"
+      },
+      {
+        "path": "include/stb_image.h",
+        "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c"
+      },
+      {
+        "path": "include/dr_mp3.h",
+        "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83"
+      },
+      {
+        "path": "src/bbmain.c",
+        "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+      },
+      {
+        "path": "src/bbexec.c",
+        "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+      },
+      {
+        "path": "src/bbeval.c",
+        "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+      },
+      {
+        "path": "src/bbcmos.c",
+        "sha256": "e5cf8f4009f0b62ffcf6370cc63947be9ebf10fa4ee5741ef7587d23ba68b406"
+      },
+      {
+        "path": "src/bbccli.c",
+        "sha256": "4e9d24dec62c616609dfbf41b85ab77659a22e8f941a63b3b4c710d248828fc2"
+      },
+      {
+        "path": "src/bbcvdu.c",
+        "sha256": "4104a4086ef65261e21bf9c2ad32d15547859dfa6d50c702ea2edd383c5cb085"
+      },
+      {
+        "path": "src/bbcvtx.c",
+        "sha256": "a75516e4c67152bba8bad5978eed3f2ef5e455b404da8d1997e56403229c089b"
+      },
+      {
+        "path": "src/bbcsdl.c",
+        "sha256": "70a852f1a4816eab8b120e9def7cfe40f89355ca62faa554f05cd92cf480ed13"
+      },
+      {
+        "path": "src/flood.c",
+        "sha256": "ad343be3fe530c4802e54923243fdc99fee45d34bbc51f42edfabac0b4e7dc8f"
+      },
+      {
+        "path": "src/sort.c",
+        "sha256": "89c921df33df5455dcd46ce6e3afa1bb803897683fd0a5f5d1ae46afa51da105"
+      },
+      {
+        "path": "src/SDL2_gfxPrimitives.c",
+        "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5"
+      },
+      {
+        "path": "src/SDL2_rotozoom.c",
+        "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7"
+      },
+      {
+        "path": "src/bbasmb_x86_64.c",
+        "sha256": "e1aef20c0e118573c50b8f219d44c0138bb6f5bf559232f625c367d90b5e23e2"
+      },
+      {
+        "path": "src/bbasmb_arm_64.c",
+        "sha256": "6e8c7f0ef317ee7ee8a2383317abb435190cef8db913dd88d2d97104aafee0fc"
+      },
+      {
+        "path": "src/bbasmb_arm_32.c",
+        "sha256": "cef3b7b1459682cabab5d7bf7aeda653a8098ad1db236386b8d7f03c3f5a1f5f"
+      },
+      {
+        "path": "src/bbdata_x86_64.nas",
+        "sha256": "e21ab96847df67433dae1c10a84671ce4fcdf98b6df0baaeb49bf30cabd77f20"
+      },
+      {
+        "path": "src/bbdata_arm_64.s",
+        "sha256": "be4a6ca4966f53ae632bd469b46f3fd5f970d6308748d54ff040b5bcc9d558a4"
+      },
+      {
+        "path": "src/bbdata_arm_32.s",
+        "sha256": "744e0167d7b1124486607ee72a76afd8bf515894979384869371bc7047f69301"
+      },
+      {
+        "path": "src/bbdata_wasm32.c",
+        "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+      },
+      {
+        "path": "src/bbasmb_wasm32.c",
+        "sha256": "13753da062f9b39b4b81df13fdcea2f1594b091160df40b400237a3553d4b694"
+      },
+      {
+        "path": "bin/wasm/BBC.h",
+        "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+      },
+      {
+        "path": "bin/wasm/bbcsdl.h",
+        "sha256": "ff4be4ddcc4d30f81f32827224bca450c217e8fe7f61eadd4777219807653e62"
+      }
+    ]
+  }
+}

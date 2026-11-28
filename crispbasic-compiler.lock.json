@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "https://github.com/CrispStrobe/crispbasic.git",
-  "commit": "a7ba8f950c75a43e08ce079a70569c1393954add",
+  "commit": "8430c861b5cd467349e0b07efdd61baec92ff51f",
   "files": {
     "src/compiler/index.mjs": {
       "bytes": 44260,

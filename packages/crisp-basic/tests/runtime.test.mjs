@@ -321,7 +321,8 @@ test('busy and disposed sessions reject invalid lifecycle operations', async t =
 
 test('concurrent dispose calls both await process termination and workspace cleanup', {timeout: 10000}, async t => {
     const fake = await fakeExecutable(t, `
-process.stdout.write(JSON.stringify({pid: process.pid, directory: process.cwd()}) + "\\n");
+const {dirname} = await import('node:path');
+process.stdout.write(JSON.stringify({pid: process.pid, directory: dirname(process.argv[2]), cwd: process.cwd()}) + "\\n");
 setInterval(() => {}, 1000);
 `);
     let signalReady;
@@ -346,9 +347,29 @@ setInterval(() => {}, 1000);
         assert.equal(session.state, 'disposed');
         assert.throws(() => process.kill(child.pid, 0), {code: 'ESRCH'});
         await assert.rejects(access(child.directory), {code: 'ENOENT'});
+        await access(child.cwd);
     };
     await Promise.all([verifyDisposal(first), verifyDisposal(second)]);
     assert.equal((await pending).status, 'cancelled');
+});
+
+test('native cwd is explicit, overridable and never owned by session cleanup', async t => {
+    const first = await mkdtemp(path.join(tmpdir(), 'crispbasic-cwd-first-'));
+    const second = await mkdtemp(path.join(tmpdir(), 'crispbasic-cwd-second-'));
+    t.after(() => rm(first, {recursive: true, force: true}));
+    t.after(() => rm(second, {recursive: true, force: true}));
+    await writeFile(path.join(first, 'keep.txt'), 'first');
+    await writeFile(path.join(second, 'keep.txt'), 'second');
+    const session = sessionFor(t, {cwd: first});
+    for (const [cwd, expected] of [[undefined, first], [second, second]]) {
+        const result = await session.run('OSCLI "pwd"\nEND\n', cwd === undefined ? {} : {cwd});
+        assert.equal(result.status, 'completed');
+        assert.equal(result.text.trim(), expected);
+    }
+    await session.dispose();
+    assert.equal(await readFile(path.join(first, 'keep.txt'), 'utf8'), 'first');
+    assert.equal(await readFile(path.join(second, 'keep.txt'), 'utf8'), 'second');
+    assert.throws(() => createNativeSession({cwd: ''}), /cwd/);
 });
 
 test('missing executable is a host error with no lingering running state', async t => {

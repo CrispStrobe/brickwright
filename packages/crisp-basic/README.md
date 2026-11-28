@@ -1,8 +1,8 @@
 # CrispBASIC
 
-CrispBASIC is a BBC BASIC-compatible runtime. It was developed in Brickwright's
-`packages/crisp-basic` directory and now lives in
-<https://github.com/CrispStrobe/crispbasic>. Brickwright vendors it unmodified at a pinned commit.
+CrispBASIC is a BBC BASIC-compatible runtime, bundler and C99 compiler developed
+in this repository. It was extracted with its history from Brickwright, which
+consumes a pinned package revision.
 
 **CrispBASIC runs real BASIC through the pinned BBCSDL C interpreter in native
 processes and restricted WebAssembly workers.** Both use the original tokenizer
@@ -23,7 +23,11 @@ subset back into pseudocode, including digital pins, simulated time, reusable
 numeric procedures, checked computed waits, qualified math and simple pen
 paths. Saved source retains a CrispBASIC requirement; generic Blocks and
 other execution targets refuse that source before changing a project.
-Full graphics, source debugging and physical-board targets remain subsequent work.
+The session renderer remains partial; full SDL bundles use the upstream
+graphical hosts. Source debugging remains subsequent work. The independent
+compiler now builds Pico SDK and Arduino Uno firmware; see
+[COMPILING-BOARDS.md](COMPILING-BOARDS.md) for actual MCU simulator evidence
+and the distinction from the interpreted logical-board routes.
 
 The optional **Connect CAD motors** path coordinates the Circuit clock with
 the saved CAD motor/joint connections and preserves the paused physical world
@@ -38,6 +42,45 @@ classic Nano, ESP8266, micro:bit and the other admitted Circuit profiles.
 Use `--list-targets` to discover exact pads and `--backend wasm --target NAME`
 to execute against a fresh profile-constrained logical host.
 
+## Bundle or compile
+
+`bundle` embeds the original source and an already built interpreter. `compile`
+parses the supported structured subset independently and emits C99 plus a small
+runtime; the generated executable contains no BBCSDL parser or executor.
+
+```sh
+# Full SDL interpreter and program in one Linux executable:
+npm run build:sdl:native
+node bin/crispbasic.mjs bundle examples/hello.bas -o .build/hello
+.build/hello
+
+# One offline HTML file, including all WASM/JavaScript/source/licence assets:
+npm run build:sdl:web
+node bin/crispbasic.mjs bundle examples/hello.bas --target web -o .build/hello.html
+node bin/crispbasic.mjs serve .build/hello.html
+
+# Independent C99 and a GCC-built executable:
+node bin/crispbasic.mjs compile examples/structured.bas -o .build/structured
+.build/structured
+node bin/crispbasic.mjs compile examples/compiler/pins.bas --target pico --emit-c -o .build/pico.c
+```
+
+| Route | Reference and evidence | Details |
+| --- | --- | --- |
+| Full SDL native bundles: Linux x64, ARM64, ARMv7 | Full upstream host, resources, raw VDU/exit parity, graphics readback and sound tests; architecture-specific execution gates | [SDL-BUNDLING.md](SDL-BUNDLING.md) |
+| Full SDL offline web page | One HTML document served locally; real Chromium graphics, audio, input, files and byte comparisons, with no external assets | [SDL-WEB.md](SDL-WEB.md) |
+| Explicit headless bundles | Console ELF or restricted single-file page; the latter also runs from `file:` with browser networking disabled | [BUNDLING.md](BUNDLING.md) |
+| Independent C99 compiler | Original lexer/parser/code generator; generated programs compared with BBCSDL native and binary64 WASM | [COMPILER.md](COMPILER.md) |
+| Pico SDK and Uno firmware | Real cross compilers; two cold boots and pin traces in Brickwright's MCU adapters | [COMPILING-BOARDS.md](COMPILING-BOARDS.md) |
+
+Bundling defaults to the full `sdl` profile; `--profile headless` selects the
+console/restricted-WASM host. Native SDL uses ordinary system libraries and
+drivers, and ARMv7 requires NEON. The browser retains upstream browser limits:
+virtual files and supported SYS wrappers, no native assembler/CALL/USR, and no
+optional Box2D export in this source build. Manifests report these boundaries. Compilation
+rejects excluded language features with source-line diagnostics; its supported
+syntax and target numeric profiles are specified in [COMPILER.md](COMPILER.md).
+
 ## Try it
 
 ### Native CLI
@@ -47,7 +90,7 @@ The x86-64 build also requires NASM. On Debian/Ubuntu the native build tools
 are available as `build-essential` and (for x64) `nasm`.
 
 ```sh
-cd packages/crisp-basic
+cd crispbasic
 npm run build:native
 node bin/crispbasic.mjs examples/hello.bas
 node bin/crispbasic.mjs examples/structured.bas --json
@@ -78,7 +121,7 @@ executable path. Node 22+ and Git are also required. GCC and NASM are only neede
 when building the native backend for comparison.
 
 ```sh
-cd packages/crisp-basic
+cd crispbasic
 npm run build:wasm
 node examples/run-wasm.mjs
 node bin/crispbasic.mjs --backend wasm examples/hello.bas
@@ -105,7 +148,7 @@ for commands, fixture semantics and platform qualification.
 
 ### Brickwright Code tab
 
-From the repository root, `npm run build:crispbasic` builds and packages the
+From the Brickwright repository root, `npm run build:crispbasic` builds and packages the
 engine for the GUI. Select **BAS → BBC BASIC → CrispBASIC (browser)**; the
 separate Z80 engine remains available for retrocomputing. See
 [BRICKWRIGHT.md](BRICKWRIGHT.md) for build order, controls, asset integrity,
@@ -396,8 +439,8 @@ milliseconds.
 | App integration / physical boards | Planned | Code tab/VDU integration and opt-in Circuit board-solver connection; physical boards planned |
 
 **The native backend is for trusted local programs.** It retains upstream
-native memory, `SYS`/`CALL`, filesystem and OS facilities. A temporary working
-directory, process isolation, and execution limits are useful lifecycle
+native memory, `SYS`/`CALL`, filesystem and OS facilities. Temporary source/input
+files, process isolation, and execution limits are useful lifecycle
 controls; they do not create a security sandbox. It is not exposed as a web
 service or wired into the learner-facing application.
 
@@ -457,10 +500,14 @@ Original wrapper code follows [BSD-3-Clause](LICENSE). BBCSDL retains its
 original zlib notice, and generated modified files are marked. Read
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) before redistributing a build.
 
-## Moving into its own repository
+## Repository coordination
 
-Keep core implementation, fixtures, notices and build logic inside this
-directory. It does not import Scratch, React, `bw-board`, or root build tools.
-When the separate repository is wanted, this subtree can be extracted with
-its history; the small host CI workflow then needs its working-directory and
-path filters adjusted. Until then, all work stays on the feature branch.
+The extracted package history is retained here. Compiler and bundler development
+lives in this repository; Brickwright consumes an immutable compiler revision
+with per-file integrity checks. Core implementation does not import Scratch,
+React or `bw-board`. The optional board verifier takes an explicit `bw-board`
+checkout to execute generated firmware through its AVR and RP2040 adapters.
+
+Interpreter changes from the separate Pico/board route can be imported and
+reviewed normally without replacing compiler work. See [.github/README.md](.github/README.md)
+for the retained history, mirror-import workflow and CI ownership.

@@ -1,6 +1,6 @@
 # CrispBASIC on native hosts and portable Node workers
 
-The CLI selects either of the two existing interpreter implementations.
+Running a source file selects either of the two existing interpreter backends.
 Both execute the same BBC BASIC-compatible source through the pinned BBCSDL
 core. Backend selection is explicit; a failed native launch never silently
 changes to a runtime with different host capabilities.
@@ -22,9 +22,48 @@ microcontrollers and retro CPU emulators need separate target runtimes.
 The WASM runner needs its built `.mjs` and `.wasm` assets but no native BASIC
 executable. Its logical-pin fixture is independent of the GUI Circuit solver.
 
+## Bundle and compile commands
+
+The existing interpreter command remains `crispbasic [options] program.bas`.
+Two explicit subcommands produce artifacts:
+
+```sh
+crispbasic bundle program.bas --target linux-x64 -o program
+crispbasic bundle program.bas --target web -o program.html
+crispbasic serve program.html
+crispbasic bundle program.bas --profile headless --target web -o console.html
+crispbasic compile program.bas -o program
+crispbasic compile program.bas --emit-c -o program.c
+crispbasic compile program.bas --target arduino-uno -o program.hex
+crispbasic compile program.bas --target pico --pico-sdk /path/to/pico-sdk -o program.uf2
+```
+
+`bundle` defaults to the full SDL host. Build it with `npm run build:sdl:native`
+or `npm run build:sdl:web`; `--runtime-pack DIR` selects a matching verified
+pack. Repeated `--asset FILE=PATH` arguments embed application resources.
+The web output includes all JavaScript, WASM and resources in one HTML file.
+`serve` binds loopback only and provides the isolation headers needed by its
+threaded runtime; no Internet access is required after building. Use `--port 0`
+to select an available port, and Ctrl-C to stop the server.
+
+Explicit `--profile headless` uses `build:native` / `build:wasm` and the old
+`--runtime`, `--module`, `--wasm` asset selectors. Its restricted web page also
+works directly from `file:`. See [BUNDLING.md](BUNDLING.md),
+[SDL-BUNDLING.md](SDL-BUNDLING.md) and [SDL-WEB.md](SDL-WEB.md) for the exact
+platform boundaries and output evidence.
+
+`compile` writes a self-contained C99 translation unit and invokes the target
+C toolchain unless `--emit-c` is given. `--cc` selects GCC/AVR GCC by executable
+path, without a shell. `--json` returns artifact hashes, target information and
+validation status; a successful build is labelled `build-only` until a separate
+simulation or hardware test has actually run. Unsupported BASIC is rejected
+before output is written. See [COMPILER.md](COMPILER.md) and
+[COMPILING-BOARDS.md](COMPILING-BOARDS.md) for the subset, numeric profiles and
+board toolchain requirements.
+
 ## Run and inspect
 
-From `packages/crisp-basic`:
+From the repository root:
 
 ```sh
 npm run build:native

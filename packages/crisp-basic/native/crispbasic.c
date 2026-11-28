@@ -29,6 +29,7 @@ _Static_assert(sizeof(void *) == 8, "x64 and ARM64 require the 64-bit upstream l
 #define SOURCE_LINE_LIMIT 4096
 #define SOURCE_LIMIT (4 * 1024 * 1024)
 #define BASIC_LINE_MAX 65279
+#include "bundle.h"
 
 extern int entry(void *);
 extern char *lexan(char *, char *, unsigned char);
@@ -213,10 +214,8 @@ static int source_error(int code, const char *message, unsigned short line)
 
 /* Loading through the actual upstream tokenizer preserves BBCSDL semantics.
  * The JS frontend supplies explicit, increasing line numbers and Latin-1. */
-static int load_source(const char *filename)
+static int load_source_stream(FILE *source)
 {
-    FILE *source = fopen(filename, "rb");
-    if (!source) return source_error(214, "Cannot open BASIC source", 0);
     char *line = NULL;
     size_t capacity = 0, total = 0;
     unsigned int previous = 0;
@@ -281,8 +280,23 @@ static int load_source(const char *filename)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2) {
+    char *embedded_source = NULL, *bundle_metadata = NULL;
+    size_t embedded_length = 0;
+    int bundled = crisp_bundle_read(&embedded_source, &embedded_length, &bundle_metadata);
+    if (bundled < 0) {
+        fprintf(stderr, "CrispBASIC: invalid embedded program\n");
+        return 1;
+    }
+    if (bundled && argc == 2 && strcmp(argv[1], "--bundle-info") == 0) {
+        puts(bundle_metadata);
+        free(embedded_source); free(bundle_metadata);
+        return 0;
+    }
+    if ((!bundled && argc != 2) || (bundled && argc != 1)) {
+        if (bundled) fprintf(stderr, "Usage: %s [--bundle-info]\n", argv[0]);
+        else
         fprintf(stderr, "Usage: crispbasic-native numbered-program.bas\n");
+        free(embedded_source); free(bundle_metadata);
         return 2;
     }
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -311,11 +325,16 @@ int main(int argc, char **argv)
     *szCmdLine = 0;
     platform = sizeof(void *) == 8 ? 0x41 : 1; /* Linux; upstream bit 6 denotes 64-bit. */
     liston = 0x30;
-    if (load_source(argv[1])) {
+    FILE *source = bundled ? fmemopen(embedded_source, embedded_length, "rb") : fopen(argv[1], "rb");
+    int loaded = source ? load_source_stream(source) : source_error(214, "Cannot open BASIC source", 0);
+    free(embedded_source); free(bundle_metadata);
+    if (loaded) {
         flags = 0;
         (void)entry((void *)-1);
     }
     result_event();
+    if (bundled && failed) fprintf(stderr, "CrispBASIC: line %d: %s (error %d)\n",
+                                  failure_line, failure_message, failure_code);
     munmap(userRAM, (size_t)MaximumRAM);
     return failed ? 1 : (completed_exit & 255);
 }

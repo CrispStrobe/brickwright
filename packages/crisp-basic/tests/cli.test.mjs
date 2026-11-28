@@ -108,7 +108,7 @@ test('CLI output budget terminates excessive output with exit 125', async t => {
     assert.equal(Buffer.byteLength(parsed.text, 'latin1'), 64);
 });
 
-test('a broken output pipe waits for native process and workspace cleanup', {timeout: 10000}, async t => {
+test('a broken output pipe stops the native process and preserves the caller directory', {timeout: 10000}, async t => {
     const filename = await programFile(t, `SYS "getpid" TO pid%
 PRINT STR$(pid%)
 OSCLI "pwd"
@@ -125,6 +125,7 @@ UNTIL FALSE
     // the native program enters its silent loop. Closing the downstream pipe
     // must clean up that process, not crash Node and abandon it.
     const child = spawn(process.execPath, [cli, ...nativeCliArgs([filename, '--timeout', '5000'])], {
+        cwd: path.dirname(filename),
         stdio: ['pipe', 'pipe', 'pipe']
     });
     let stderr = '';
@@ -155,7 +156,8 @@ UNTIL FALSE
         }
         if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
         await closed.catch(() => {});
-        if (workspace) await rm(workspace, {recursive: true, force: true});
+        // Only programFile's mkdtemp directory is owned by this test. Never
+        // recursively remove a directory reported by the child process.
     });
 
     let ready = false;
@@ -179,7 +181,8 @@ UNTIL FALSE
     assert.equal(result.code, 141, stderr);
     assert.doesNotMatch(stderr, /Unhandled|node:events|WriteWrap|at .*file:\/\//);
     assert.throws(() => process.kill(nativePid, 0), {code: 'ESRCH'});
-    await assert.rejects(access(workspace), {code: 'ENOENT'});
+    assert.equal(workspace, path.dirname(filename));
+    await access(path.join(workspace, 'output-ready.txt'));
 });
 
 test('invalid CLI arguments fail clearly without running the source', async t => {
