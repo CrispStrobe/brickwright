@@ -232,6 +232,8 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC reached the output limit.',
         basicCrispSimulationLimit: 'CrispBASIC reached a circuit simulation limit.',
         basicConnectCircuit: 'Connect Circuit',
+        basicConnectCad: 'Connect CAD motors',
+        basicConnectCadHint: 'Use the saved circuit–CAD motor connections. BASIC delays advance the circuit and CAD world together. Stop preserves the last completed physical state.',
         basicCircuitControllers: count => `Supported Circuit controllers (${count})`,
         basicCircuitHost: 'CrispBASIC runs in this browser and controls the simulated pins. Use the logical pin numbers below; only pins exposed by the loaded circuit are available.',
         basicCircuitBenchVoltage: 'bench voltage',
@@ -241,7 +243,7 @@ const L10N = {
         basicInputLine: 'Program input', basicInputKey: 'One character (empty for Enter)',
         basicInputSend: 'Send', basicInputEnd: 'End input',
         basicInputKeyError: 'Enter one Latin-1 character, or leave the field empty for Enter.',
-        basicCrispScope: 'Text, input and basic VDU drawing. Connect Circuit enables digital pins and simulated time on the current circuit. Physical hardware, files, graphics queries, sound and source debugging are unavailable. Runs stop after 60 seconds.',
+        basicCrispScope: 'Text, input and basic VDU drawing. Connect Circuit enables digital pins and simulated time on the current circuit; Connect CAD motors also drives its connected mechanical joints. Physical hardware, files, graphics queries, sound and source debugging are unavailable. Runs stop after 60 seconds.',
         basic8086Building: 'Compiling BASIC for the 8086 in this browser…',
         basicRealDosBuilding: 'Compiling BASIC and preparing a real MS-DOS 2.0 boot disk…',
         basicRealDosFailed: (m) => `Could not prepare the MS-DOS boot disk: ${m}`,
@@ -594,6 +596,8 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC hat die Ausgabegrenze erreicht.',
         basicCrispSimulationLimit: 'CrispBASIC hat eine Grenze der Schaltungssimulation erreicht.',
         basicConnectCircuit: 'Schaltung verbinden',
+        basicConnectCad: 'CAD-Motoren verbinden',
+        basicConnectCadHint: 'Die gespeicherten Motorverbindungen zwischen Schaltung und CAD verwenden. BASIC-Wartezeiten treiben Schaltung und CAD-Welt gemeinsam voran. Stopp erhält den letzten abgeschlossenen physikalischen Zustand.',
         basicCircuitControllers: count => `Unterstützte Schaltungscontroller (${count})`,
         basicCircuitHost: 'CrispBASIC läuft in diesem Browser und steuert die simulierten Pins. Verwende die logischen Pinnummern unten; verfügbar sind nur die Pins der geladenen Schaltung.',
         basicCircuitBenchVoltage: 'Spannung der Schaltung',
@@ -603,7 +607,7 @@ const L10N = {
         basicInputLine: 'Programmeingabe', basicInputKey: 'Ein Zeichen (leer für Eingabetaste)',
         basicInputSend: 'Senden', basicInputEnd: 'Eingabe beenden',
         basicInputKeyError: 'Ein Latin-1-Zeichen eingeben oder das Feld für die Eingabetaste leer lassen.',
-        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Schaltung verbinden aktiviert digitale Pins und simulierte Zeit in der aktuellen Schaltung. Physische Hardware, Dateien, Grafikabfragen, Ton und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
+        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Schaltung verbinden aktiviert digitale Pins und simulierte Zeit; CAD-Motoren verbinden treibt zusätzlich die verbundenen mechanischen Gelenke an. Physische Hardware, Dateien, Grafikabfragen, Ton und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
         basic8086Building: 'Übersetze BASIC für den 8086 in diesem Browser…',
         basicRealDosBuilding: 'Übersetze BASIC und bereite eine echte MS-DOS-2.0-Bootdiskette vor…',
         basicRealDosFailed: (m) => `Die MS-DOS-Bootdiskette konnte nicht vorbereitet werden: ${m}`,
@@ -1303,7 +1307,7 @@ class PseudocodeImporter extends React.Component {
             // ever left without one — a missing buffer made activeCode()
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
-            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false, basicConnectCircuit: false,
+            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false, basicConnectCircuit: false, basicConnectCad: false,
             basicPortableLibrary: false,
             basicFilename: 'editor.bas', basicOutputRunId: 0,
             basicWarnings: [], basicGenerationFailed: false,
@@ -5007,7 +5011,8 @@ class PseudocodeImporter extends React.Component {
         if (this._unmounted || this._crispBasicRun || this._crispBasicReset || this.state.running) return;
         const epoch = this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
         const run = {source: code, filename: this.state.basicFilename || 'editor.bas', runner: null, cancelled: false};
-        const circuit = this.state.basicConnectCircuit ? {runtime: this.props.vm?.runtime} : undefined;
+        const circuit = this.state.basicConnectCircuit ? {runtime: this.props.vm?.runtime,
+            ...(this.state.basicConnectCad ? {cad: true} : {})} : undefined;
         this._crispBasicRun = run;
         const owns = () => !this._unmounted && this._crispBasicRun === run;
         const ownsOutcome = () => !this._unmounted && this._crispBasicEpoch === epoch;
@@ -5029,7 +5034,8 @@ class PseudocodeImporter extends React.Component {
         };
         const circuitEvents = circuit && typeof window !== 'undefined' ?
             ['bw-circuit-changed', 'bw-board-ready', 'bw-project-bundle-loaded', 'bw-settings-change',
-                'bw-stop-all', 'bw-power-off', 'bw-green-flag'] : [];
+                'bw-stop-all', 'bw-power-off', 'bw-green-flag',
+                ...(circuit.cad ? ['bw-cad-circuit-bindings-changed', 'bw-cad-toggle', 'bw-cad-simulation-interrupt'] : [])] : [];
         for (const name of circuitEvents) window.addEventListener(name, pendingCircuitChange);
         const circuitRuntimeEvents = circuit?.runtime?.on && circuit?.runtime?.off ?
             ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED'].map(name => [name, () => pendingCircuitChange({type: name})]) : [];
@@ -6664,9 +6670,21 @@ class PseudocodeImporter extends React.Component {
                             <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}>
                                 <input type="checkbox" checked={Boolean(this.state.basicConnectCircuit)}
                                     disabled={this.state.running || this.state.basicResetting}
-                                    onChange={event => this.setState({basicConnectCircuit: event.target.checked})}
+                                    onChange={event => this.setState({basicConnectCircuit: event.target.checked,
+                                        ...(event.target.checked ? {} : {basicConnectCad: false})})}
                                     data-testid="bw-crispbasic-connect-circuit" />
                                 {this.L.basicConnectCircuit}
+                            </label>
+                        ) : null}
+                        {process.env.BW_ENABLE_CAD && this.state.lang === 'basic' && this.state.basicProfile === 'bbc' &&
+                            this.state.basicEngine === 'crispbasic' && this.state.basicConnectCircuit ? (
+                            <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}
+                                title={this.L.basicConnectCadHint}>
+                                <input type="checkbox" checked={Boolean(this.state.basicConnectCad)}
+                                    disabled={this.state.running || this.state.basicResetting}
+                                    onChange={event => this.setState({basicConnectCad: event.target.checked})}
+                                    data-testid="bw-crispbasic-connect-cad" />
+                                {this.L.basicConnectCad}
                             </label>
                         ) : null}
                         {this.state.lang === 'fe' && this.activeCode().trim() ? (

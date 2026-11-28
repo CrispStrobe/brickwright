@@ -15,7 +15,7 @@ export const resolveCrispBasicPinMap = resolvePortableGpioController;
  * relative to the acquired board time. Never calls board.reset(), which would
  * revoke someone else's clock lease. Solver batches yield outside lease.run().
  */
-export function createCrispBasicBoardHost({board, signal, SimulationError,
+export function createCrispBasicBoardHost({board, signal, SimulationError, clock = null,
     maxTimeMs = 60000, maxSolverSteps = 65536, maxTraceEvents = 4096,
     maxStepsPerBatch = 16, yieldTask = () => new Promise(resolve => setTimeout(resolve, 0)),
     onInvalidate = () => {}} = {}) {
@@ -32,6 +32,8 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
     limit(maxStepsPerBatch, 1, 128, 'maxStepsPerBatch');
     if (typeof yieldTask !== 'function') throw new TypeError('yieldTask must be a function');
     if (typeof onInvalidate !== 'function') throw new TypeError('onInvalidate must be a function');
+    if (clock !== null && (!clock || ['run', 'isActive', 'release', 'completeStep'].some(name => typeof clock[name] !== 'function') ||
+        typeof clock.nextBoundaryNs !== 'bigint')) throw new TypeError('Invalid coupled CAD clock');
     if (!signal || typeof signal.addEventListener !== 'function' || typeof signal.removeEventListener !== 'function') {
         throw new TypeError('An AbortSignal is required');
     }
@@ -61,6 +63,7 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
         analogPins: false, pwm: false, interrupts: false,
         clock: 'explicit-integer-milliseconds', digitalRead: 'solved-electrical-level',
         outputLatch: 'per-run-retained-electrical-level',
+        cadPhysics: Boolean(clock), ...(clock ? {mechanicalStepMs: 5, mechanicalFeedback: 'last-completed-step'} : {}),
         floatingInputs: 'solver-default', pinModes: MODES, ...mapping,
         limits: Object.freeze({maxTimeMs, maxSolverSteps, maxTraceEvents, maxStepsPerBatch})
     });
@@ -176,7 +179,9 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
     const abort = () => { try { dispose(); } catch { /* The parent invokes dispose too; no deferred effect may survive. */ } };
 
     try {
-        lease = board.claimExternalClock();
+        // A coupled CAD clock already owns the board. Borrow that exact lease,
+        // and release its mechanics only after our GPIO cleanup has unwound.
+        lease = clock || board.claimExternalClock();
         if (!lease || ['run', 'isActive', 'release'].some(name => typeof lease[name] !== 'function')) {
             throw new Error('Circuit engine returned an invalid clock lease');
         }
@@ -262,8 +267,21 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
                     if (remaining <= 0) budgetFailure('solver-limit', 'BASIC circuit solver step limit reached');
                     const batch = Math.min(maxStepsPerBatch, remaining);
                     const started = lastTime;
-                    const receipt = synchronous(() => board.advanceToLive(target, {maxSteps: batch}));
-                    validateReceipt(receipt, started, target, batch);
+                    const boundary = clock?.nextBoundaryNs;
+                    if (clock && (typeof boundary !== 'bigint' || boundary <= started)) {
+                        throw new Error('The CAD clock returned an invalid boundary');
+                    }
+                    const until = clock && boundary < target ? boundary : target;
+                    const receipt = synchronous(() => board.advanceToLive(until, {maxSteps: batch}));
+                    validateReceipt(receipt, started, until, batch);
+                    if (clock && receipt.completed && lastTime === boundary) {
+                        // Electrical charge accumulated across all sub-millisecond
+                        // solver steps and all BASIC pin writes in this interval.
+                        // Mechanics consumes it once, then returns shaft/sensor
+                        // feedback before BASIC can observe the completed delay.
+                        await clock.completeStep(synchronous);
+                        ready();
+                    }
                     if (!receipt.completed) {
                         if (solverSteps >= maxSolverSteps) budgetFailure('solver-limit', 'BASIC circuit solver step limit reached');
                         await yieldTask();
@@ -272,6 +290,11 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
                 }
                 elapsedMs = untilMs;
                 record('delay', {fromMs, milliseconds});
+            } catch (error) {
+                // A failed mechanical reply cannot be retried against an already
+                // consumed torque integral, even if BASIC traps the host error.
+                if (clock && !disposed) terminalFailure = error;
+                throw error;
             } finally { pending = false; }
         },
         millis() {

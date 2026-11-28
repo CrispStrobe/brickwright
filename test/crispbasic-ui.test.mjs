@@ -95,6 +95,31 @@ test('Connect Circuit passes the actual runtime only when explicitly enabled', a
     f.completion.resolve(done); await pending;
 });
 
+test('Connect CAD motors requests the shared clock only with Circuit access enabled', async () => {
+    for (const connectCircuit of [false, true]) {
+        const f = fixture();
+        f.editor.state.basicConnectCircuit = connectCircuit;
+        f.editor.state.basicConnectCad = true;
+        const pending = f.editor.runBasic();await f.entered.promise;
+        assert.deepEqual(f.runnerOptions.circuit,
+            connectCircuit ? {runtime: f.editor.props.vm.runtime, cad: true} : undefined);
+        f.completion.resolve(done);await pending;
+    }
+});
+
+test('a CAD connection edit during the cold import revokes the pending BASIC start', async () => {
+    const previous = globalThis.window;globalThis.window = new EventTarget();
+    try {
+        const gate = deferred(), f = fixture({loadGate: gate});
+        f.editor.state.basicConnectCircuit = true;f.editor.state.basicConnectCad = true;
+        const pending = f.editor.runBasic();
+        window.dispatchEvent(new CustomEvent('bw-cad-circuit-bindings-changed'));
+        gate.resolve();await pending;
+        assert.equal(f.created, 0);
+        assert.equal(f.editor.state.running, false);
+    } finally {if (previous === undefined) delete globalThis.window;else globalThis.window = previous;}
+});
+
 for (const name of ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED']) {
     test(`${name} during the cold Circuit import revokes the old BASIC start`, async () => {
         const gate = deferred(), f = fixture({loadGate: gate});

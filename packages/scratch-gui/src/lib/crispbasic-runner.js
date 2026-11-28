@@ -9,6 +9,8 @@ export const CRISPBASIC_VIEW_CAPABILITIES = Object.freeze({
 });
 const CIRCUIT_VIEW_CAPABILITIES = Object.freeze({...CRISPBASIC_VIEW_CAPABILITIES,
     circuitPins: true, hardware: false});
+const CAD_VIEW_CAPABILITIES = Object.freeze({...CIRCUIT_VIEW_CAPABILITIES,
+    cadPhysics: true, mechanicalStepMs: 5});
 
 const DEFAULT_TIMEOUT_MS = 60000;
 const DEFAULT_OUTPUT_BYTES = 1024 * 1024;
@@ -93,7 +95,8 @@ export class CrispBasicRunner {
     }
 
     get state () { return this._state; }
-    get capabilities () { return this._options.circuit ? CIRCUIT_VIEW_CAPABILITIES : CRISPBASIC_VIEW_CAPABILITIES; }
+    get capabilities () { return this._options.circuit?.cad ? CAD_VIEW_CAPABILITIES :
+        this._options.circuit ? CIRCUIT_VIEW_CAPABILITIES : CRISPBASIC_VIEW_CAPABILITIES; }
 
     _emit (event, active = this._active) {
         if (this._disposed) return;
