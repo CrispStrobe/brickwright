@@ -203,6 +203,8 @@ jobs:
           path: _avr8js
       - name: Prepare the native compiler and local HTTP service
         run: |
+          cp _stc_compiler/scripts/cowgol-bullseye.list /etc/apt/sources.list
+          rm -f /etc/apt/sources.list.d/debian.sources
           apt-get update
           apt-get install -y --no-install-recommends build-essential git
           python3 -m pip install --quiet fastapi pydantic uvicorn
