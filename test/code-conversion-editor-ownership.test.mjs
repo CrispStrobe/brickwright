@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {basicProfileFor, hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {blinkFamily, blinkSource, blinkStarter} from '../overlay/scratch-gui/src/lib/bw-asm/blink-machines.js';
+import cowgolToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-cowgol-reader.js';
 
 const importer = new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url);
 const original = readFileSync(importer, 'utf8');
@@ -15,7 +16,8 @@ const extract = (start, end) => {
     assert.ok(a >= 0 && b > a, `Actual method boundaries: ${start}`);
     return original.slice(a, b);
 };
-const methods = extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
+const methods = extract('    convertedSource (', '    // source → pseudocode') +
+    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
     '    // Read the running project into all languages at once.') +
     extract('    async loadAsmExample (id) {', '    openArtefactFile (file) {') +
     extract('    publishAppliedDevice (stc) {',
@@ -23,7 +25,8 @@ const methods = extract('    async compile ({strict = false, pseudocode = null, 
 const Editor = new Function('TWO_WAY', 'DOS_LANG', 'codeArtworkMatches', 'captureCodeArtwork',
     'classifyConversionWarnings', 'conversionFailure', 'LANG_LABEL', 'pickLocale', 'confirmAsync', 'DEVICE_BY_ID',
     'blinkFamily', 'blinkSource', 'blinkStarter', 'hiddenCodeDrafts',
-    `return class {${methods}}`)(new Set(['pseudocode']), {}, () => false, () => null,
+    `return class {${methods}}`)(new Set(['pseudocode', 'cowgol']),
+    {cowgol: {load: async () => ({default: cowgolToPseudocode})}}, () => false, () => null,
     () => ({changed: [], unsupported: []}), error => ({message: error.message, issues: []}),
     {pseudocode: 'Pseudo'}, () => 'en', async () => true,
     {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}}, blinkFamily, blinkSource, blinkStarter, hiddenCodeDrafts);
@@ -54,7 +57,7 @@ function fixture (hold = null, failure = null) {
         constructor () {
             this.project = {targets: [], stc: hold === 'load-commit' ? {device: 'pico', pins: []} :
                 hold === 'comment' || editor.withStc ? {device: 'i8086', pins: []} : null};
-            this.warnings = [];
+            this.warnings = editor.parserWarnings || [];
         }
         parse () { if (failure === 'parse') throw new Error('current parse failed'); }
         async generateSB3 () {
@@ -62,6 +65,7 @@ function fixture (hold = null, failure = null) {
             return {arrayBuffer: async () => new ArrayBuffer(0)};
         }
         generatePython () { editor.onGenerate?.(); return 'generated Python'; }
+        decompile () { return 'generated Pseudocode'; }
         generateJavaScript () { return 'generated JS'; }
         generateC () { return 'generated C'; }
         generateBASIC () { return {ok: true, basic: 'generated BASIC'}; }
@@ -126,6 +130,31 @@ test('ordinary conversion still regenerates buffers, retains authored ASM and fi
     assert.equal(f.editor.state.importedPython, false);
     assert.equal(f.editor.state.status, 'Blocks loaded.');
     assert.equal(f.editor.state.busy, false);
+});
+
+test('strict Cowgol import accepts the real reader range qualification and retains it in feedback', async () => {
+    const f = fixture();
+    f.editor.state.lang = 'cowgol';
+    f.editor.state.buffers.cowgol = 'include "cowgol.coh"; include "brickwright.coh"; var n: int32 := 42; bw_print_number(n);';
+    const applied = await f.editor.compile({strict: true});
+    assert.equal(applied, true);
+    assert.deepEqual(f.calls, ['load', 'refresh']);
+    assert.match(f.editor.state.status, /32/);
+    assert.equal(f.editor.state.conversionReport.preserved, true);
+});
+
+test('strict Cowgol import still rejects reader refusals and downstream parser warnings before VM load', async () => {
+    for (const [code, warnings] of [['var a: uint8 := 1;', []],
+        ['include "brickwright.coh"; bw_print_number(42);', ['Unsupported target operation']]]) {
+        const f = fixture();
+        f.editor.state.lang = 'cowgol';
+        f.editor.state.buffers.cowgol = code;
+        f.editor.parserWarnings = warnings;
+        await assert.rejects(f.editor.compile({strict: true}));
+        assert.deepEqual(f.calls, []);
+        assert.equal(f.editor.state.conversionReport.preserved, false);
+        assert.equal(f.editor.state.buffers.cowgol, code);
+    }
 });
 
 test('explicit device-retarget source still compiles while ASM is selected', async () => {
@@ -239,7 +268,8 @@ test('publication rechecks editor ownership after a generator reenters the edito
         current = f.editor.state.buffers = {...f.editor.state.buffers, asm: 'new edit during generation'};
         f.editor.state.status = 'new edit owns feedback';
     };
-    await f.editor.compile();
+    const applied = await f.editor.compile();
+    assert.equal(applied, undefined, 'revoked publication cannot authorize an immediate Run');
     assert.equal(f.editor.state.buffers, current);
     assert.equal(f.editor.state.buffers.asm, 'new edit during generation');
     assert.equal(f.editor.state.status, 'new edit owns feedback');

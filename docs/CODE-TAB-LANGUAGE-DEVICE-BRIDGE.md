@@ -1,5 +1,9 @@
 # Design spike: letting a Code-tab DOS language drive the board
 
+For the current Cowgol implementation, including canvas/circuit conversion and
+native CP/M/DOS execution, see [Cowgol support and limits](COWGOL.md). This page
+retains the earlier DOS-interpreter host-call design discussion.
+
 *Status: design + verified primitive. Not implemented. Needs one owner decision
 (the device/port surface) before build. — 2026-10-12*
 

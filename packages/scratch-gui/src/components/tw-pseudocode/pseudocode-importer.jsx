@@ -1036,7 +1036,7 @@ const deviceHelp = id => DEVICE_HELP[id] || (/^(arduino|atmega|attiny)/.test(id 
 const TWO_WAY = new Set(['pseudocode', 'python', 'javascript', 'c', 'basic', 'fe', 'tcl', 'forth', 'cowgol']);
 
 /**
- * The DOS-interpreter languages' halves, loaded on demand: the module's
+ * Optional language converters, loaded on demand: the module's
  * default export reads the tab's text into pseudocode; `generate` turns a
  * project into the tab's text,
  * or into a comment block naming why it cannot (each language's own comment
@@ -1047,7 +1047,12 @@ const DOS_LANG = {
         load: () => import(/* webpackChunkName: "bw-lang-cowgol" */ '../../lib/bw-lang/cowgol.js'),
         generate: (m, proj) => {
             const r = m.generateCowgol(proj);
-            return r.ok ? r.cowgol : `# === Cannot show as Cowgol ===\n${r.reasons.map(s => '# ' + s).join('\n')}\n`;
+            // A comment-only refusal is a valid empty Cowgol program. Keep the
+            // source buffer on failure so To blocks cannot replace it with PASS.
+            if (!r.ok) throw new Error((r.reasons || []).join(' · ') || 'Cowgol generation was refused.');
+            // The producer includes its signed-int32 range qualification in the
+            // generated header, so that advice travels with copied source too.
+            return r.cowgol;
         }
     },
     fe: {
@@ -6007,7 +6012,7 @@ class PseudocodeImporter extends React.Component {
                     type: target === 'cowgol-cgen' ? 'text/x-csrc' : 'application/octet-stream'
                 }));
             }
-            if (owns()) this.setState({status: `${out.toolchain}: ${out.bytes.length} bytes`});
+            if (current()) this.setState({status: `${out.toolchain}: ${out.bytes.length} bytes`});
         } catch (error) {
             if (owns()) this.setState({status: this.L.stError(error.message)});
         } finally {
@@ -6266,6 +6271,9 @@ class PseudocodeImporter extends React.Component {
             const warns = [...parseWarnings, ...creator.warnings];
             if (missing.length) warns.push(`no sprite named: ${missing.join(', ')}`);
             const classified = classifyConversionWarnings(warns);
+            // Generator callbacks may reenter the editor. A revoked import
+            // must not report success to callers that immediately start a VM.
+            if (!ownsEditor(this.state) || !ownsLoadedProject()) return;
             publishEditor(state => ({
                 buffers: {...nb, ...hiddenCodeDrafts(state.authoredSources, state.buffers, this.codeDevice(), lang)},
                 // This flag belongs to the admitted buffer regeneration too.

@@ -1,0 +1,61 @@
+name: Cowgol editor integration
+
+on:
+  push:
+    branches: [main, feat/cowgol-integration-20261128]
+    paths:
+      - '.github/workflows/cowgol.yml'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/**'
+      - 'overlay/scratch-gui/src/lib/bw-lang/cowgol*'
+      - 'overlay/scratch-gui/src/lib/sb3-creator-cowgol*'
+      - 'overlay/scratch-gui/src/lib/bw-matrix/**'
+      - 'overlay/scratch-gui/src/lib/code-source-document.js'
+      - 'test/cowgol-integration.test.mjs'
+      - 'test/code-conversion-editor-ownership.test.mjs'
+      - 'test/code-tab-run-via-blocks.test.mjs'
+      - 'vendor-pins.json'
+  pull_request:
+    paths:
+      - '.github/workflows/cowgol.yml'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/**'
+      - 'overlay/scratch-gui/src/lib/bw-lang/cowgol*'
+      - 'overlay/scratch-gui/src/lib/sb3-creator-cowgol*'
+      - 'overlay/scratch-gui/src/lib/bw-matrix/**'
+      - 'overlay/scratch-gui/src/lib/code-source-document.js'
+      - 'test/cowgol-integration.test.mjs'
+      - 'test/code-conversion-editor-ownership.test.mjs'
+      - 'test/code-tab-run-via-blocks.test.mjs'
+      - 'vendor-pins.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cowgol-editor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  editor-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            overlay/scratch-gui/src
+            scripts
+            test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Editor, persistence, machine visibility and native handoff
+        run: >-
+          node --test
+          test/cowgol-integration.test.mjs
+          test/code-conversion-editor-ownership.test.mjs
+          test/code-tab-run-via-blocks.test.mjs
+          test/code-device-languages.test.mjs
+          test/code-source-document.test.mjs
+          test/bw-matrix-schema.test.mjs
+          test/editor-conversion-menu.test.mjs

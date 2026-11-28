@@ -111,8 +111,10 @@ intervening gallery and export fixes, so those generated updates accompany the
 pin rather than leaving two upstream versions in the tree.
 
 The earlier CrispBASIC branches informed the portable-call and pin-contract
-design. They remain separate work; this feature does not merge them or label
-their experimental behavior as Cowgol support.
+design. The producer pin also includes its CrispBASIC generator work, merged
+to the producer's main branch during this integration. Cowgol has its own
+checked reader and native routes; its GUI changes do not activate CrispBASIC's
+separate experimental browser runtime.
 
 ## Validation
 

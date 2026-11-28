@@ -1098,8 +1098,8 @@ carries both.
 `overlay/scratch-gui/src/lib/cubeDirections.js` and
 `overlay/scratch-gui/src/lib/ev3Dialect.js`
 
-These 12 files are vendored from **sb3-creator** (the Code tab's pseudocode
-compiler: Scratch blocks to/from C, Python, MicroPython, JavaScript, and
+These mapped files are vendored from **sb3-creator** (the Code tab's pseudocode
+compiler: Scratch blocks to/from C, Python, MicroPython, JavaScript, Cowgol, and
 the runtime registries), relicensed to **MPL-2.0** as of commit `f72f1e7`.
 
 - **Licence:** MPL-2.0
@@ -1114,6 +1114,19 @@ the runtime registries), relicensed to **MPL-2.0** as of commit `f72f1e7`.
 Each of the 11 files named in the licence file remains licensed under MPL-2.0.
 MPL-2.0 §3.3 ("Larger Work") permits distributing them alongside BSD-3-Clause
 files. Modifications to any of those files must be made available under MPL-2.0.
+
+## Cowgol — BSD-2-Clause
+
+The optional Cowgol tab uses David Given's Cowgol compiler through the hosted
+`stc-compiler` service for CP/M, DOS and standalone C output. The compiler itself
+is not bundled in the GUI. Its fork, portable host headers and build metadata
+are available at <https://github.com/CrispStrobe/cowgol>; the upstream copyright
+and BSD-2-Clause terms are preserved in `COPYING`. Exported standalone C includes
+the runtime's full notice. Service compiler bundles carry their own compiler,
+assembler and linker notices.
+
+The JavaScript Cowgol reader/generator is part of the separately licensed
+sb3-creator source above and follows its exact pin in `vendor-pins.json`.
 
 ## SmallerC — BSD-2-Clause (and ucpp, a BSD variant)
 

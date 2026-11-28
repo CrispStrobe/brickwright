@@ -5,8 +5,8 @@
  *
  * Two acquisition methods, both reproducible from the tree:
  *
- *  - ROUND-TRIP, for the five emit-target readers (python, javascript, c,
- *    basic, micropython). These languages have no hand-written source corpus in
+ *  - ROUND-TRIP, for the six emit-target readers (python, javascript, c,
+ *    basic, micropython, cowgol). These languages have no hand-written source corpus in
  *    the tree; they are what the lowered path EMITS. So the honest coverage
  *    question is whether the reader can lift back what the emitter produced:
  *    each device-tagged program.bw in overlay/scratch-gui/examples is parsed,
@@ -15,7 +15,8 @@
  *
  *  - NATIVE, for the readers that DO have real source in the tree: the 8086
  *    lifter (bw-asm/examples-i8086.js, 11 MASM programs) and the device-C reader
- *    (the two oracle .c fixtures). These are fed to the reader verbatim.
+ *    (the two oracle .c fixtures), plus the authored Cowgol boundary probes.
+ *    These are fed to the reader verbatim.
  *
  * The emitters and the SB3 creator resolve `jszip`/`scratch-vm` only from
  * the INTEGRATED tree (packages/scratch-gui), which is where the other gates

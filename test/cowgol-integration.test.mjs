@@ -106,6 +106,19 @@ const Editor = new Function(`return class {
     ${method('    async runCowgolAsBlocks ()', '    async compileCowgolSource (')}
 }`)();
 
+test('Cowgol generator refusals remain errors instead of executable empty programs', () => {
+    const generate = new Function(`${method('const DOS_LANG = {', '/** The fe/Tcl buffers')}\nreturn DOS_LANG.cowgol.generate;`)();
+    const project = {targets: []};
+    assert.throws(() => generate({generateCowgol: received => {
+        assert.equal(received, project);
+        return {ok: false, reasons: ['Concurrent scripts need an event runtime'], warnings: [], preview: '# unsupported'};
+    }}, project), /Concurrent scripts need an event runtime/);
+    assert.throws(() => generate({generateCowgol: () => ({ok: false})}, project), /generation was refused/);
+    const accepted = '# Arithmetic is signed int32; values must remain in range.\nbw_print_number(3);\n';
+    assert.equal(generate({generateCowgol: () => ({ok: true, cowgol: accepted,
+        warnings: ['Arithmetic must remain in int32 range']})}, project), accepted);
+});
+
 test('a refused conversion cannot import partial pseudocode or start the VM', async () => {
     const editor = new Editor();
     assert.throws(() => editor.convertedSource({ok: false, pseudocode: 'say "partial"', reasons: ['Pointers are unsupported']}), /Pointers/);
