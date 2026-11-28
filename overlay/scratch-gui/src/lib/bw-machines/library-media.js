@@ -1,3 +1,4 @@
+import {berkeleyLogoDosUrl, berkeleyLogoProjectUrl, createBerkeleyLogoMachine} from './berkeley-logo.js';
 import {createOpenGemMachine, cuteMouseSourceUrl, openGemLicenseUrl} from './opengem.js';
 import {aliceLicenseUrl, createAlicePascalMachine} from './alice-pascal.js';
 import {createZmiyMachine, zmiyDownloadUrl, zmiyProjectUrl} from './zmiy.js';
@@ -82,6 +83,9 @@ export const libraryMedia = [
         licenseFile: 'PUBLIC-DOMAIN.txt', infoKey: 'smallC', revision: '925c5b12902867b3cd6c87b2450a7183c9db8848',
         code: {language: 'c', path: 'samples/demo.c', compilerTarget: 'i8086-smallc'}},
     {...pdos86, id: 'pdos86', title: 'PDOS/86', machine: 'i8086', infoKey: 'pdos86'},
+    {id: 'berkeley-logo-dos', title: 'Berkeley Logo 3.6 (DOS)', machine: 'i8086', license: 'GPL-2.0-or-later',
+        licenseFile: berkeleyLogoDosUrl, freedosGuest: createBerkeleyLogoMachine, freedosHelp: 'berkeleyLogoHelp',
+        supportSource: {title: 'Berkeley Logo', url: berkeleyLogoProjectUrl}},
     {id: 'zmiy', title: 'Zmiy 0.85.2', machine: 'i8086', license: 'BSD-2-Clause',
         licenseFile: zmiyProjectUrl, freedosGuest: createZmiyMachine, freedosHelp: 'zmiyHelp',
         guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP', localOnly: true}},

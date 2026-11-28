@@ -172,3 +172,12 @@ test('PDOS/86 AT mounts the same verified floppy through the clock-equipped prof
         detail.bootCompletion.resolve();
     }});
 });
+
+test('Berkeley Logo uses an XT with the 1.2 MB FreeDOS disk and publisher archive', async () => {
+    const item = libraryMedia.find(item => item.id === 'berkeley-logo-dos');
+    assert.equal(item.machine, 'i8086');
+    assert.equal(item.license, 'GPL-2.0-or-later');
+    assert.equal(libraryLicenseUrl(item), 'https://people.eecs.berkeley.edu/~bh/downloads/blogo.exe');
+    await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(720 * 1024)])), /120m/);
+    await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(1200 * 1024)])), /floppy checksum differs/);
+});

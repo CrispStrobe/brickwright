@@ -3,14 +3,14 @@ import {defaultImageFetcher, sha256Hex} from './activate.js';
 import {localFreedosVgaMachine} from './local-freedos-vga.js';
 import {newMachineConfig} from './machine-config.js';
 
-const xtFloppyGeometry = cylinders => ({cylinders, heads: 2, sectors: 9, bytesPerSector: 512});
+const xtFloppyGeometry = (cylinders, sectors = 9) => ({cylinders, heads: 2, sectors, bytesPerSector: 512});
 
 export function localFloppyMedia (config, bytes) {
     return {config, fetcher: ref => ref.url === 'local-media:floppy' ? {bytes} : defaultImageFetcher(ref)};
 }
 
-export function pcXtFloppy ({title, bytes, cylinders, provenance}) {
-    const geometry = xtFloppyGeometry(cylinders);
+export function pcXtFloppy ({title, bytes, cylinders, sectors, provenance}) {
+    const geometry = xtFloppyGeometry(cylinders, sectors);
     const config = newMachineConfig({
         title, machine: 'i8086', executionMode: 'functional', machineConfig: 'PCXT8086',
         slots: {floppy: {url: 'local-media:floppy', geometry}},

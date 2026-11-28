@@ -8,9 +8,9 @@ export const freedosFloppyZipUrl = 'https://download.freedos.org/1.4/FD14-Floppy
 const archiveBytes = 23624258;
 const archiveHash = '45b1fa7c52dd996c3bfa5e352ffcd410781b952a6ad629f15a4c9ec4bbaefc5a';
 const bootMedia = {
-    i80386: {size: 1200 * 1024, member: '120m/x86BOOT.img',
+    '120m': {size: 1200 * 1024, sectors: 15, member: '120m/x86BOOT.img',
         sha256: '03df6088be016e57a6c44275f5bb9ab0244db71de1360957fd76ba83243b6a77'},
-    i8086: {size: 720 * 1024, member: '720k/x86BOOT.img',
+    '720k': {size: 720 * 1024, sectors: 9, member: '720k/x86BOOT.img',
         sha256: 'cbca90627b944319f02043bc41f1715ff5366b23e5e8e75aa3ca23bb564e0789'}
 };
 
@@ -48,9 +48,11 @@ export async function readFreedosGuestPackage (file, {title, name, size, sha256,
     }));
 }
 
-export async function createFreedosGuest (floppy, {title, machine = 'i80386', readFiles, startup}, signal) {
+export async function createFreedosGuest (floppy, {title, machine = 'i80386',
+    floppyFormat = machine === 'i8086' ? '720k' : '120m', readFiles, startup}, signal) {
     signal?.throwIfAborted();
-    const source = await readFreedosFloppy(floppy, bootMedia[machine]);
+    const format = bootMedia[floppyFormat];
+    const source = await readFreedosFloppy(floppy, format);
     signal?.throwIfAborted();
     const files = await readFiles();
     signal?.throwIfAborted();
@@ -62,7 +64,7 @@ export async function createFreedosGuest (floppy, {title, machine = 'i80386', re
         {name: 'FDAUTO.BAT', bytes: dosText(['@ECHO OFF', ...startup])}
     ]);
     if (machine === 'i8086') {
-        return pcXtFloppy({title, bytes, cylinders: 80, provenance: {source: 'local-freedos-guest'}});
+        return pcXtFloppy({title, bytes, cylinders: 80, sectors: format.sectors, provenance: {source: 'local-freedos-guest'}});
     }
     const config = localFreedosVgaMachine({floppy: {size: bytes.length, name: title}});
     return localFloppyMedia(config, bytes);
