@@ -37,7 +37,7 @@ test('native runner validation rejects malformed configuration without launching
     }
 });
 
-test('a configured runner gets literal argv and cleanup still owns the entire process group', async t => {
+test('a configured runner receives copied literal argv without shell evaluation', async t => {
     const directory = await mkdtemp(join(tmpdir(), 'crispbasic-runner-'));
     t.after(() => rm(directory, {recursive: true, force: true}));
     const script = join(directory, 'runner.mjs');

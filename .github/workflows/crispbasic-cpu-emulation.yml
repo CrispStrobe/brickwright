@@ -26,10 +26,12 @@ jobs:
         include:
           - target: linux-armv7
             triplet: arm-linux-gnueabihf
+            libc: libc6-dev-armhf-cross
             emulator: qemu-arm
             cpu: cortex-a7
           - target: linux-arm64
             triplet: aarch64-linux-gnu
+            libc: libc6-dev-arm64-cross
             emulator: qemu-aarch64
             cpu: cortex-a53
     defaults:
@@ -43,7 +45,7 @@ jobs:
       - name: Install the cross compiler and CPU emulator
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gcc-${{ matrix.triplet }} qemu-user
+          sudo apt-get install -y --no-install-recommends gcc-${{ matrix.triplet }} ${{ matrix.libc }} qemu-user
       - name: Verify source, target and launch contracts
         run: npm test
       - name: Cross-build the pinned interpreter for the guest CPU

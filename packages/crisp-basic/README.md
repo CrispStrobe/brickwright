@@ -9,8 +9,9 @@ and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
 access. The Brickwright Code tab now adapts this runtime, with interactive input,
 Stop/Reset, mapped diagnostics and the existing partial VDU renderer. Version
-`0.1.0-dev.7` extends the native build to Linux ARM64 and adds a portable WASM
-command-line runner with capability discovery and deterministic simulation fixtures.
+`0.1.0-dev.8` adds a Linux ARMv7 hard-float port, target-verified cross builds
+and explicit CPU-emulator launch support. Linux ARM64/x64 and the portable WASM
+command-line runner retain capability discovery and deterministic simulation fixtures.
 It retains the opt-in BASIC simulation bridge to the active Brickwright
 Circuit board through a GUI-owned adapter. Digital pin operations use the pinned
 electrical solver, and integer-millisecond delays advance its clock cooperatively.
@@ -30,7 +31,7 @@ the real motor-circuit example.
 
 ### Native CLI
 
-Requirements: Linux x86-64 or ARM64, Node 22 or newer, Git and GCC/binutils.
+Requirements: Linux x86-64, ARM64 or ARMv7 hard-float, Node 22 or newer, Git and GCC/binutils.
 The x86-64 build also requires NASM. On Debian/Ubuntu the native build tools
 are available as `build-essential` and (for x64) `nasm`.
 
@@ -51,6 +52,12 @@ Generated sources, objects, the native executable and build metadata stay in
 `.build/`. Use `CC` or `NASM` to select an installed compiler/assembler. An
 existing BBCSDL checkout can be supplied through `CRISP_BASIC_UPSTREAM`; the
 builder reads the locked Git objects, not its working-tree edits.
+
+Set `CRISP_BASIC_TARGET` and a cross compiler in `CC` to build for another
+supported Linux CPU. The CLI's `--native-executable`, `--native-runner` and
+`--native-runner-arg` flags can run the guest executable under QEMU. See
+[CPU-EMULATION.md](CPU-EMULATION.md) for ARMv7/AArch64 commands and the boundary
+between CPU user-mode emulation, a full machine and a Circuit GPIO host.
 
 ### Restricted WASM
 
@@ -127,6 +134,8 @@ Brickwright GUI dependency installation is needed. The dedicated
 [workflow](../../.github/workflows/crispbasic.yml) tests both backends, parity,
 and real Chromium workers on Ubuntu with Node 22 and the pinned SDK installer.
 Native qualification runs the same interpreter suite on Linux x64 and ARM64.
+The separate CPU-emulation workflow cross-builds ARMv7 and ARM64 executables
+and runs that native runtime/CLI suite on emulated Cortex-A7/A53 CPUs.
 The same built WASM artifact also receives focused CLI qualification on
 Linux ARM64, macOS ARM64 and Windows x64, without rebuilding the interpreter.
 The recorded local results and their limits are in [VALIDATION.md](VALIDATION.md).
@@ -363,7 +372,7 @@ milliseconds.
 | Area | Native | Restricted WASM |
 | --- | --- | --- |
 | Language engine | Pinned BBCSDL tokenizer and executor | Same pinned core, correct WASM32 ABI |
-| Host | Linux x86-64 or ARM64 process | Browser module worker or Node worker thread |
+| Host | Linux x86-64, ARM64 or ARMv7 hard-float process; optional explicit CPU runner | Browser module worker or Node worker thread |
 | Execution | Fixed/interactive input, cancellation, deadline, output bound | Same, with Asyncify input/wait suspension |
 | Diagnostics | Separate control channel; original editor-line mapping | Separate worker records; same source mapping |
 | Output | Raw VDU bytes and Latin-1 text | Same |
