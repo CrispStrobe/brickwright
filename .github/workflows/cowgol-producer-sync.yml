@@ -1,0 +1,109 @@
+name: Cowgol producer snapshot
+
+on:
+  push:
+    branches: [feat/cowgol-platforms-20261128]
+    paths: ['.github/workflows/cowgol-producer-sync.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    if: ${{ github.repository == 'CrispStrobe/brickwright' && github.ref == 'refs/heads/feat/cowgol-platforms-20261128' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      PRODUCER_REF: 227caef2b32a4c529a91fa644cc12896e8a1ecb2
+      SB3_CREATOR_DIR: ${{ github.workspace }}/_producer
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: CrispStrobe/sb3-creator
+          ref: 227caef2b32a4c529a91fa644cc12896e8a1ecb2
+          path: _producer
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare the converter dependency
+        run: |
+          npm install --prefix .cowgol-sync-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1
+          ln -s .cowgol-sync-deps/node_modules node_modules
+      - name: Sync the exact reviewed source and its gallery
+        run: |
+          set -euo pipefail
+          test "$(git -C _producer rev-parse HEAD)" = "$PRODUCER_REF"
+          set +e
+          node scripts/sync-sb3creator.mjs --dir _producer --allow-stale --pin > "$RUNNER_TEMP/cowgol-source-sync.log" 2>&1
+          sync_status=$?
+          set -e
+          if [ "$sync_status" != 0 ]; then
+            # The source script deliberately records its pin, then refuses a
+            # stale gallery before its mirror phase. Accept only that named
+            # intermediate state; the following two canonical syncs finish it.
+            node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const log = fs.readFileSync(process.env.RUNNER_TEMP + '/cowgol-source-sync.log', 'utf8');
+          assert.ok(log.includes('STALE GALLERY:'), log.slice(-8000));
+          assert.ok(!log.includes('REFUSED'), log.slice(-8000));
+          assert.equal(JSON.parse(fs.readFileSync('vendor-pins.json'))['sb3-creator'], process.env.PRODUCER_REF);
+          NODE
+          fi
+          node scripts/sync-examples.mjs --dir _producer --allow-stale --pin > "$RUNNER_TEMP/cowgol-gallery-sync.log" 2>&1 || { tail -100 "$RUNNER_TEMP/cowgol-gallery-sync.log"; exit 1; }
+          node scripts/sync-sb3creator.mjs --dir _producer --allow-stale --pin > "$RUNNER_TEMP/cowgol-source-final.log" 2>&1 || { tail -100 "$RUNNER_TEMP/cowgol-source-final.log"; exit 1; }
+          tail -12 "$RUNNER_TEMP/cowgol-source-final.log"
+          node scripts/gen-language-device-matrix.mjs
+      - name: Verify supplier identity, gallery, mirrors and the SPIKE artifact
+        run: |
+          node scripts/sync-sb3creator.mjs --dir _producer --check
+          node scripts/sync-examples.mjs --dir _producer --check
+          node scripts/check-mirrors.mjs
+          node --test test/sb3-creator-vendor-identity.test.mjs test/lego-spike-roundtrip.test.mjs test/bw-matrix-doc.test.mjs
+      - name: Save the reviewed generated snapshot
+        run: |
+          set -euo pipefail
+          git add -u
+          git add -- overlay/scratch-gui/examples
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          import {SB3_CREATOR_FILES} from './scripts/lib/vendor-rewrites.mjs';
+          for (const [local] of SB3_CREATOR_FILES) {
+            for (const root of ['overlay/scratch-gui/src/lib/', 'packages/scratch-gui/src/lib/']) {
+              execFileSync('git', ['add', '-f', '--', root + local]);
+            }
+          }
+          const paths = execFileSync('git', ['diff', '--cached', '--name-only', '-z'], {encoding:'utf8'}).split('\0').filter(Boolean);
+          const allowed = path => path === 'vendor-pins.json' ||
+            /^overlay\/scratch-gui\/(src\/lib|examples)\//.test(path) ||
+            /^packages\/scratch-gui\/src\/lib\//.test(path) ||
+            /^scripts\/lib\/vendor\//.test(path) ||
+            /^docs\/generated\/(ARCADE-AUTHORING-VOCABULARY|LANGUAGE-DEVICE-MATRIX)\.md$/.test(path);
+          assert.deepEqual(paths.filter(path => !allowed(path)), [], 'snapshot changed files outside the supplier boundary');
+          const before = execFileSync('git', ['ls-tree', '--name-only', 'HEAD'], {encoding:'utf8'}).trim().split('\n');
+          const tree = execFileSync('git', ['write-tree'], {encoding:'utf8'}).trim();
+          const after = execFileSync('git', ['ls-tree', '--name-only', tree], {encoding:'utf8'}).trim().split('\n');
+          assert.deepEqual(after, before, 'snapshot must retain the complete repository root');
+          const report = {producer: process.env.PRODUCER_REF, mappedFiles: SB3_CREATOR_FILES.length,
+            changedFiles: paths.length, rootEntries: after.length, sourceIdentity: 'passed',
+            galleryIdentity: 'passed', trackedMirrors: 'passed', spikeArtifact: 'passed'};
+          fs.writeFileSync(process.env.RUNNER_TEMP + '/cowgol-supplier-sync.json', JSON.stringify(report, null, 2) + '\n');
+          console.log(JSON.stringify(report));
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'build: sync reviewed Cowgol producer and derived artifacts'
+          git push origin HEAD:refs/heads/feat/cowgol-platforms-20261128
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cowgol-supplier-sync
+          path: ${{ runner.temp }}/cowgol-supplier-sync.json
