@@ -308,11 +308,13 @@ scenario('production portable source round trip survives reopening and preserves
         await codeTab(page);
         const controllers = page.getByTestId('bw-crispbasic-controller-list');
         await controllers.locator('summary').click();
-        assert.equal(await controllers.locator('li').count(), 16);
+        assert.equal(await controllers.locator('li').count(), 18);
         record.controllers = await controllers.locator('li').allTextContents();
         assert.ok(record.controllers.some(label => /STM32F030/.test(label)));
         assert.ok(record.controllers.some(label => /ESP8266/.test(label)));
         assert.ok(record.controllers.some(label => /6502/.test(label)));
+        assert.ok(record.controllers.some(label => /PyBadge/.test(label)));
+        assert.ok(record.controllers.some(label => /STC15/.test(label)));
         await controllers.locator('summary').click();
         await page.getByTestId('bw-basic-portable-library').check();
         await page.getByTestId('bw-crispbasic-connect-circuit').check();
