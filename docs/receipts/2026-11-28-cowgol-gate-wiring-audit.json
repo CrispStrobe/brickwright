@@ -1,0 +1,426 @@
+{
+  "sourceRef": "689feabf5d68086865448ecdb362ceecf0b00df4",
+  "sourceBase": "https://github.com/CrispStrobe/brickwright/blob/689feabf5d68086865448ecdb362ceecf0b00df4/",
+  "counts": {
+    "inspectedSources": 56,
+    "documentedManualCommands": 13,
+    "documentedLocalScopesOrReceipts": 19,
+    "unresolved": 24
+  },
+  "evidenceScope": "All 56 source headers and argument/environment prerequisites were read. Existing manual commands or local-check descriptions support only the 32 documented entries. No scripts were executed by this inventory; no current qualification is asserted.",
+  "documented": [
+    {
+      "script": "scripts/verify-cad-command-palette-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 415
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-curved-offset-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 440
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-drawing-sheet-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 386
+        },
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 467
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-dxf-region-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 372
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-gallery-workspace.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 126
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-mirror-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 402
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-offset-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 428
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-path-dxf-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 453
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-path-lock-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 460
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-pattern-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 409
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-revolution-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 396
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-sketch-path-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 446
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-tangent-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 422
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-cad-trim-browser.mjs",
+      "category": "manual_command",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 434
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-circuit-shift-registers.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 108
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-code-arduboy-python.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 128
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-code-console-browser.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-code-conversion-matrix.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 132
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 138
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-code-language-readback.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 129
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 132
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-code-machine-menu.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 124
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-compact-editor-menus.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 138
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-controller-machine-io.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 117
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 131
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-costume-precision-browser.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 596,
+          "endLine": 607
+        }
+      ],
+      "match": "Documented 60x30 region with 9x12 hole, YZ center 12.5/-7.25 and 16,920 cubic millimetres matches the script's numeric journey."
+    },
+    {
+      "script": "scripts/verify-costume-precision-drawing.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 525,
+          "endLine": 528
+        }
+      ],
+      "match": "The initial script commit 05bb49d1173db7bd3f343ea5f12dce69e8a896b3 added the matching Chrome-check paragraph and harness."
+    },
+    {
+      "script": "scripts/verify-costume-sketch-refresh.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 546,
+          "endLine": 548
+        },
+        {
+          "path": "docs/ROBOT-CAD-EDITOR-PARITY.md",
+          "line": 559,
+          "endLine": 560
+        }
+      ],
+      "match": "The script journeys match the chapter's Chrome update and linked-region checks; initial harness commit 0cd5c08b86ca88b6e6733bb31c904fd86e8b2deb adds the update paragraph."
+    },
+    {
+      "script": "scripts/verify-costume-to-cad-workflow.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/CAD-ROBOT-PROJECTS.md",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-editor-overflow-style.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 116
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-firmware-cardiac-browser.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-imported-machine-profiles.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 154
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-machine-library-launch.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 101
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 139
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 153
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 169
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 172
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-retro-6502-browser.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 130
+        },
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 165
+        }
+      ]
+    },
+    {
+      "script": "scripts/verify-x86-debugger-picker.mjs",
+      "category": "local_scope_or_historical_receipt",
+      "evidence": [
+        {
+          "path": "docs/WORKBENCH-OWNER-ROADMAP.md",
+          "line": 154
+        }
+      ]
+    }
+  ],
+  "unresolved": [
+    "scripts/verify-cad-dwg-browser.mjs",
+    "scripts/verify-cad-microtronic-browser.mjs",
+    "scripts/verify-cad-outline-constraints-browser.mjs",
+    "scripts/verify-cad-preview-demand.mjs",
+    "scripts/verify-cad-printability.mjs",
+    "scripts/verify-cad-step-browser.mjs",
+    "scripts/verify-cad-workspace-browser.mjs",
+    "scripts/verify-circuit-palette-artwork.mjs",
+    "scripts/verify-code-device-languages.mjs",
+    "scripts/verify-code-machine-choices.mjs",
+    "scripts/verify-costume-gradient-handoff.mjs",
+    "scripts/verify-costume-toolbar.mjs",
+    "scripts/verify-editor-help-browser.mjs",
+    "scripts/verify-gallery-artwork-browser.mjs",
+    "scripts/verify-pc-firmware-browser.mjs",
+    "scripts/verify-pico-basic-hardware.mjs",
+    "scripts/verify-robot-lab-flexible-tubes.mjs",
+    "scripts/verify-robot-lab-measurement-overlay.mjs",
+    "scripts/verify-robot-lab-overlay-buffers.mjs",
+    "scripts/verify-robot-lab-run.mjs",
+    "scripts/verify-robot-lab-startup-downloads.mjs",
+    "scripts/verify-robot-lab-thumbnail-cache.mjs",
+    "scripts/verify-robot-lab-twistspan-motion.mjs",
+    "scripts/verify-shared-3d-navigation.mjs"
+  ],
+  "unresolvedNote": "CLI usage, localhost defaults, Playwright imports, optional CAD settings and skip-ci commit labels do not alone establish manual intent. Routine PR/light-browser builds enable CAD. Microtronic PR1845 is a matching verification receipt without explicit local/manual scope, so it remains unresolved. External DWG/STEP inputs likewise need documented intent or wiring, not an inferred exemption.",
+  "inspectedDocs": [
+    "docs/WORKBENCH-OWNER-ROADMAP.md",
+    "docs/ROBOT-CAD-EDITOR-PARITY.md",
+    "docs/CAD-WORKSPACE-UX.md",
+    "docs/COSTUME-EDITOR-PLAN.md",
+    "docs/ROBOT-LAB-UX.md",
+    "docs/GALLERY-ARTWORK.md",
+    "docs/CAD-EDITOR-INTEGRATION.md",
+    "docs/ROBOT-LAB-MEASUREMENTS.md",
+    "docs/CAD-ROBOT-PROJECTS.md"
+  ]
+}

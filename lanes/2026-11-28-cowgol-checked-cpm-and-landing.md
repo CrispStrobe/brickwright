@@ -1,6 +1,6 @@
 # Cowgol checked CP/M surfaces and landing — 2026-11-28
 
-Status: active. Owner: ChatGPT, at the repository owner's request.
+Status: implementation complete; hosted qualification and normal-PR landing pending. Owner: ChatGPT, at the repository owner's request.
 Branch: `feat/cowgol-platforms-20261128`; continuation checkpoint: `689feabf5d68086865448ecdb362ceecf0b00df4`. Default-branch base at claim: `f93b83ce4fda4525eea79d54bc8b036078bfb1a1`.
 
 Continue the already claimed Cowgol platform integration. Expose the qualified 8080-compatible CP/M compiler to checked pseudocode/Blocks source on the existing Z80 machine, including serial/display OS routes and checked COM download. Preserve exact target validation, current-source ownership, cancellation, distribution policy, and truthful CPU identity. This adds user surfaces for an existing compiler; it does not claim a new 8080 emulator or an ARM runtime.
@@ -12,3 +12,13 @@ Landing prerequisites are limited to the concrete failures observed in the exist
 Use the existing one-use Cowgol evidence workflow to regenerate canonical reader/workflow evidence, retain exact supplier and mirror identity, and remove that workflow only after its qualified final tree is verified. Save implementation checkpoints to GitHub and merge through the normal enabled pull-request checks, with guarded head identities. Existing merged runtime, compiler-service and producer revisions remain authoritative.
 
 Qualification: actual editor-method tests for both compiler variants and serial/display/download routes, wrong-target/device refusal, policy and stale/cancelled build behavior; existing exact-machine HTTP/CLI qualification; meaningful negative controls for repaired gate accounting; unchanged wait/gate-shape budgets; canonical generated evidence and ordinary enabled PR checks. Software/emulator execution does not imply physical hardware or deployment qualification.
+
+## Saved continuation
+
+The editor now offers three checked 8080-compatible actions on the existing Z80 machine: CP/M 2.2 serial execution, TMS9918 Controller execution, and a project-preserving COM download. The shared selector refuses incompatible explicit targets, and the chosen target is captured before asynchronous work. The tracked importer mirrors are identical; producer and machine pins are unchanged.
+
+Source checkpoint `83a333664a8a5f96d9e515b054fe288201b706cf` has independent implementation review, syntax checks for the helper and test modules, and the isolated target-selector regression. Complete editor/JSX and native qualification are required on the final candidate. The preceding nine-target checkpoint `689feabf5d68086865448ecdb362ceecf0b00df4` passed all three jobs in [Cowgol qualification](https://github.com/CrispStrobe/brickwright/actions/runs/46158649469); that receipt is not substituted for the changed candidate.
+
+Gate repairs remove the CAD submenu's added 100 ms fixed sleep, classify optional Logikus source provenance precisely, and bind browser-gate credit to the actual imported Node child program. The new detector retains conservative executable, working-directory, argument, shell and mutation checks. Its seven isolated helper groups and unchanged gate-shape budgets pass; full repository checks remain authoritative.
+
+The [wiring audit](../docs/receipts/2026-11-28-cowgol-gate-wiring-audit.json) records 32 documented local probes among the 56 inspected sources. It contains no new execution receipts. Another 24 lack established wiring or documented manual scope and remain failures; no blanket unwired allowance is added. Broader normal-PR failures remain explicit landing blockers. The one-use evidence workflow retains its strict successful-gate requirement before publishing a qualified final tree.

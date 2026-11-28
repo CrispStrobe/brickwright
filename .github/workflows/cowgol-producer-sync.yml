@@ -42,9 +42,12 @@ jobs:
           execFileSync('git', ['diff', '--exit-code',
             '301316b0736180ee84bedb4439b8f33689f65bd3', 'HEAD', '--',
             'vendor-pins.json', 'overlay/scratch-gui/src/lib',
-            'packages/scratch-gui/src/lib', 'overlay/scratch-gui/examples'], {stdio: 'inherit'});
+            'packages/scratch-gui/src/lib', 'overlay/scratch-gui/examples',
+            // The app-owned compiler selector now exposes the existing checked
+            // 8080 profile; all producer sources and galleries remain identical.
+            ':(exclude)overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js'], {stdio: 'inherit'});
           NODE
-          npm install --prefix .cowgol-evidence-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1 acorn@8.14.0 acorn-walk@8.3.4
+          npm install --prefix .cowgol-evidence-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1 acorn@8.14.0 acorn-walk@8.3.4 @babel/parser@7.28.5
           ln -s .cowgol-evidence-deps/node_modules node_modules
       - name: Generate reader coverage and qualify the final workflow set
         run: |
@@ -68,9 +71,12 @@ jobs:
       - name: Verify the focused app gates and exact CLI refusal behavior
         run: |
           node scripts/check-mirrors.mjs
+          node -e "require('@babel/parser').parse(require('node:fs').readFileSync('overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx','utf8'),{sourceType:'module',plugins:['jsx']})"
           node --test \
             test/gate-shapes.test.mjs \
             test/gate-coverage.test.mjs \
+            test/gate-promisified-exec.test.mjs \
+            test/gate-direct-exec.test.mjs \
             test/fetch-pinning.test.mjs \
             test/ci-step-census.test.mjs \
             test/reader-coverage-doc.test.mjs \
@@ -79,7 +85,9 @@ jobs:
             test/wait-census.test.mjs \
             test/build-trigger-paths.test.mjs \
             test/cowgol-verifier-cli.test.mjs \
-            test/cowgol-native-surfaces.test.mjs
+            test/cowgol-native-surfaces.test.mjs \
+            test/cowgol-computer-surfaces.test.mjs \
+            test/cowgol-download-surfaces.test.mjs
       - name: Record the qualified final tree and save only generated evidence
         run: |
           set -euo pipefail
