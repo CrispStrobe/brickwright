@@ -28,7 +28,11 @@ const NATIVE_TARGETS = Object.freeze({
     // A6/A7 are analog-input only and have no native digital binding.
     'arduino-nano': {devices: ['arduino-nano'], label: 'Arduino Nano (classic ATmega328P)', digital: true,
         mcu: 'atmega328p', clock: 16000000, pullups: true, delay: true,
-        memory: {flashLimit: 30720, ramBytes: 2048, heapBytes: 512, stackReserve: 512}}
+        memory: {flashLimit: 30720, ramBytes: 2048, heapBytes: 512, stackReserve: 512}},
+    // Bare ATmega168P: 16 KiB flash with no bootloader and only 1 KiB SRAM.
+    atmega168p: {devices: ['atmega168p'], label: 'ATmega168P (bare chip)', digital: true,
+        mcu: 'atmega168p', clock: 16000000, pullups: true, delay: true,
+        memory: {flashLimit: 16384, ramBytes: 1024, heapBytes: 128, stackReserve: 512}}
 });
 
 /** The checked native generator contracts, not installed compiler discovery.
@@ -95,7 +99,10 @@ function nativeArithmetic(helpers) {
 }
 function stringIssue(value) {
     const s = String(value);
-    if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(s)) return 'Text contains a control character outside the shared newline/tab/return subset';
+    for (const ch of s) {
+        const c = ch.charCodeAt(0);
+        if (c < 0x20 && c !== 0x09 && c !== 0x0a && c !== 0x0d) return 'Text contains a control character outside the shared newline/tab/return subset';
+    }
     let bytes = 0;
     for (let i = 0; i < s.length; i++) {
         const c = s.charCodeAt(i);
@@ -204,8 +211,8 @@ export function generateCowgol(creator, project = creator.project, opts = {}) {
         if (native?.digital && pin.direction === 'input' && pin.activeLow && !native.pullups) {
             fail(`Native ${native.label} Cowgol has no input pull-up binding for active-low pin ${pin.name}`);
         }
-        if (native?.mcu === 'atmega328p' && id !== null && (id < 2 || id > 19)) {
-            fail(`Native ATmega328P Cowgol reserves D0/D1 for USART0; ${where} is not available as GPIO`);
+        if (['atmega328p', 'atmega168p'].includes(native?.mcu) && id !== null && (id < 2 || id > 19)) {
+            fail(`Native ${native.mcu.toUpperCase()} Cowgol reserves D0/D1 for USART0; ${where} is not available as GPIO`);
         }
         if (stc.device === 'z80' && ((/^OUT/i.test(where) && pin.direction !== 'output') || (/^IN/i.test(where) && pin.direction !== 'input'))) fail(`Z80 ${where} has a fixed electrical direction`);
         if (/^BUTTON_[AB]$/i.test(where) && pin.direction !== 'input') fail(`Button ${where} is input-only`);
@@ -491,7 +498,7 @@ function lex(source) {
         }
         const name = /^[A-Za-z_][A-Za-z_0-9]*/.exec(rest);
         if (name) { tokens.push({kind: 'name', text: name[0], line}); i += name[0].length; continue; }
-        const op = /^(?::=|==|!=|<=|>=|<<|>>|[()+\-*/%&|^~<>,;:\[\]])/.exec(rest);
+        const op = /^(?::=|==|!=|<=|>=|<<|>>|[()+\-*/%&|^~<>,;:[\]])/.exec(rest);
         if (!op) throw new Error(`Line ${line}: unsupported token ${q(ch)}`);
         tokens.push({kind: 'op', text: op[0], line}); i += op[0].length;
     }
@@ -574,7 +581,13 @@ class Reader {
     }
     args() {
         this.take('('); const args = [];
-        if (!this.peek(')')) { do { args.push(this.expr()); if (!this.peek(',')) break; this.take(','); } while (true); }
+        if (!this.peek(')')) {
+            for (;;) {
+                args.push(this.expr());
+                if (!this.peek(',')) break;
+                this.take(',');
+            }
+        }
         this.take(')'); return args;
     }
     count(name, args, count) { if (args.length !== count) this.error(`${name} expects ${count} arguments`); }
@@ -704,12 +717,15 @@ class Reader {
             const mainWasStarted = this.runtimeStarted;
             for (const v of this.vars.values()) delete v.constant;
             this.take(); const name = this.name(); this.take('('); const params = [];
-            if (!this.peek(')')) do {
-                const id = this.name(); this.take(':'); const type = this.type();
-                if (this.vars.has(id)) this.error(`Parameter shadowing ${id} is not supported`);
-                this.vars.set(id, {name: id, type, parameter: true}); params.push({id, type});
-                if (!this.peek(',')) break; this.take(',');
-            } while (true);
+            if (!this.peek(')')) {
+                for (;;) {
+                    const id = this.name(); this.take(':'); const type = this.type();
+                    if (this.vars.has(id)) this.error(`Parameter shadowing ${id} is not supported`);
+                    this.vars.set(id, {name: id, type, parameter: true}); params.push({id, type});
+                    if (!this.peek(',')) break;
+                    this.take(',');
+                }
+            }
             this.take(')'); this.take('is'); this.procs.set(name, params);
             this.inProc = name;
             this.definitions.push(`DEFINE ${name}${params.map(p => ` (${p.id})`).join('')}:`);
