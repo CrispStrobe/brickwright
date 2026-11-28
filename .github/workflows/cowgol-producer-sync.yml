@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cowgol-producer-snapshot-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sync:
     if: ${{ github.repository == 'CrispStrobe/brickwright' && github.ref == 'refs/heads/feat/cowgol-platforms-20261128' }}
@@ -16,7 +20,7 @@ jobs:
     permissions:
       contents: write
     env:
-      PRODUCER_REF: 227caef2b32a4c529a91fa644cc12896e8a1ecb2
+      PRODUCER_REF: edd30b11967747774cfddd01f8eb888509866c5c
       SB3_CREATOR_DIR: ${{ github.workspace }}/_producer
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: CrispStrobe/sb3-creator
-          ref: 227caef2b32a4c529a91fa644cc12896e8a1ecb2
+          ref: edd30b11967747774cfddd01f8eb888509866c5c
           path: _producer
           fetch-depth: 0
           persist-credentials: false

@@ -370,11 +370,11 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> 1b414786 (2026-11-27): update multimeter guidance for LM358 input bias.
     // -> adf1e4e8 (2026-11-28): Cowgol DOS I80386 console declarations;
     // SPIKE-specific source remains unchanged and the complete artifact test is re-run.
-    // -> 227caef2 (2026-11-28): current main reconciliation and ATmega168P Cowgol;
+    // -> edd30b11 (2026-11-28): main reconciliation, ATmega168P Cowgol and lint parity;
     // rerun the complete SPIKE artifact and round-trip behavior at the new pin.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '227caef2b32a4c529a91fa644cc12896e8a1ecb2');
+        'edd30b11967747774cfddd01f8eb888509866c5c');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
