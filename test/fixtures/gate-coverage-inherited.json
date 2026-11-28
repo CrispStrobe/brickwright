@@ -1,0 +1,512 @@
+{
+  "schema": 1,
+  "baselineCommit": "44e08bc8eb2c5a283cfe199d611c0b9253dedb68",
+  "verifiedCommit": "689feabf5d68086865448ecdb362ceecf0b00df4",
+  "state": "Inherited browser programs with no workflow or test execution path observed at the verified commit. No current execution or pass is claimed.",
+  "pendingWiringState": "PR1855's separately owned wiring is not adopted here. Its commands and historical receipts do not qualify these current source bytes.",
+  "entries": [
+    {
+      "name": "verify-cad-command-palette-browser.mjs",
+      "blobSha": "ceff97e9b3df854c85fa9aa3baa5620db3272f47",
+      "purpose": "Touch and keyboard command-palette dispatch with selection-aware results",
+      "prerequisites": "A served GUI with CAD enabled, Playwright Chromium, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-curved-offset-browser.mjs",
+      "blobSha": "a7a9fd931e00fea7901c66bcbe17c0cb9fa6c181",
+      "purpose": "Curved profile offset refusal, editable arcs, and SB3 round trips",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-drawing-sheet-browser.mjs",
+      "blobSha": "95d9661aea3c5f68872272d44cce47b7e50f1a94",
+      "purpose": "Linked drawing sheets, dimensions, section views, PDF output, and saved CAD documents",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL; optional PDF output paths",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-dwg-browser.mjs",
+      "blobSha": "b364ef14c747656c46561e238be16da53aca13e8",
+      "purpose": "DWG import/export/reimport, inch scaling, layers, and saved editable geometry",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, an app URL, and the inch-plate DWG input file",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-dxf-region-browser.mjs",
+      "blobSha": "819055cc330b05da5b7dbae78103847d3dfe6c65",
+      "purpose": "DXF region and layer filtering, editable holes, export, and reopen",
+      "prerequisites": "A served CAD-enabled GUI and Playwright Chromium; optional DXF input and DXF/PDF output paths",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-gallery-workspace.mjs",
+      "blobSha": "b41cdc074e05ca2a4094ea82e487b38a1eebe4d8",
+      "purpose": "CAD gallery artwork, extension loading, and Workspace CAD/FPGA toggles",
+      "prerequisites": "A served GUI built with CAD and FPGA, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-cad-microtronic-browser.mjs",
+      "blobSha": "92361db6df0aab2a64b1d0957d679645269853c2",
+      "purpose": "CAD gallery cards and Microtronic project front panel, physical I/O, and editable program",
+      "prerequisites": "A served CAD-enabled GUI with the gallery assets and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-mirror-browser.mjs",
+      "blobSha": "bfa8c17c3b4b63a2d1e760389a2e05ac26907ec8",
+      "purpose": "Touch Mirror, linked source edits, and SB3 persistence",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-offset-browser.mjs",
+      "blobSha": "6f7e661a2b6daf00803f441f0ce195b922eda68a",
+      "purpose": "Touch profile offset, unchanged draft after refusal, and SB3 persistence",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-outline-constraints-browser.mjs",
+      "blobSha": "ce3f0318d268e41c2b73a90a2153416ce5995cd1",
+      "purpose": "Outline constraints, dimensions, solver workers, linked edits, and saved geometry",
+      "prerequisites": "A served CAD-enabled GUI with its constraint worker, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-path-dxf-browser.mjs",
+      "blobSha": "c6b7d47b9b1f78fb915a7e995e7e53021abc72f7",
+      "purpose": "Tilted DXF path import/export, model-space filtering, and saved layer styling",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL; optional DXF input and export paths",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-path-lock-browser.mjs",
+      "blobSha": "72f906f96dfc9880757199132f73fde09010d06a",
+      "purpose": "Touch path point locks and segment constraints across SB3 save/reopen",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-pattern-browser.mjs",
+      "blobSha": "fc6aa7624c1787647693218849fcb82e01ed7349",
+      "purpose": "Linear/circular patterns, linked source edits, and SB3 persistence",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-preview-demand.mjs",
+      "blobSha": "46ea63d2a5b90140bcfb3b2755f15b665496e236",
+      "purpose": "On-demand CAD catalogue/preview loading, pagination, and retained requests",
+      "prerequisites": "A served CAD-enabled GUI with its catalogue and preview assets and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-printability.mjs",
+      "blobSha": "ae65ddef4fe997b47050a91474b9c84e855cd12f",
+      "purpose": "On-demand File-menu printability analysis without changing project history",
+      "prerequisites": "A served CAD-enabled GUI with the analysis chunk and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-revolution-browser.mjs",
+      "blobSha": "d183067a04a912362568b688f1e55ac756197863",
+      "purpose": "Touch Revolve, linked sketch geometry, and SB3 persistence",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-sketch-path-browser.mjs",
+      "blobSha": "2fbe7d3652aa89993875413ff679dab1fc58a670",
+      "purpose": "Open-path trimming, saved paths, closure, and extrusion",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-step-browser.mjs",
+      "blobSha": "60668fa5940ef6a77088417977f09548c0d36622",
+      "purpose": "STEP import with eight reference bodies, colors, print exclusion, and SB3 reopen",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, an app URL, and the Adafruit 3777 STEP input file",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-tangent-browser.mjs",
+      "blobSha": "94a426bd6e1e29999819c69b7c296d5ebac2d66f",
+      "purpose": "Touch tangent snapping, retained adjacent arcs, and SB3 round trips",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-trim-browser.mjs",
+      "blobSha": "20935d3e993032b07388beb0e20f3921a1082958",
+      "purpose": "Touch trim lines, retained arcs, and SB3 round trips",
+      "prerequisites": "A served CAD-enabled GUI, Playwright Chromium, JSZip, and an app URL",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-cad-workspace-browser.mjs",
+      "blobSha": "a66f9980495d715c5ef3ef1d52fb7567419cf0c5",
+      "purpose": "CAD ribbon, view cube, filtered library, robot previews, and confirmed project loading",
+      "prerequisites": "A served CAD-enabled GUI with robot gallery assets and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-circuit-palette-artwork.mjs",
+      "blobSha": "30e48e686643a27840bb0819426de7b350df6dee",
+      "purpose": "Deferred Circuit palette artwork, scrolling, and search",
+      "prerequisites": "A served GUI with Circuit palette assets and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-circuit-shift-registers.mjs",
+      "blobSha": "b44395f445c0c5fd14777ba9ef633fdfc9058048",
+      "purpose": "Pico and STC 74HC595 authored examples after device switching",
+      "prerequisites": "An assembled GUI with the shift-register examples and machine runtimes, an app URL, and Playwright Chromium",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-arduboy-python.mjs",
+      "blobSha": "a3be43f0b73f7543946341105d0d2f2e656188e5",
+      "purpose": "Arduboy-to-blocks selection and inline Python target surfaces",
+      "prerequisites": "An assembled GUI with Code conversion/Python support, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-console-browser.mjs",
+      "blobSha": "02e7bcedc8cb51c325600455386683be67c90fcc",
+      "purpose": "Python and JavaScript input, child tasks, cancellation, and clean worker restart",
+      "prerequisites": "An assembled GUI with Code console workers, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-conversion-matrix.mjs",
+      "blobSha": "96721c5a78baa76f81d8ba50312d77fd142e1327",
+      "purpose": "Language/block conversion round trips, independent assembly drafts, and NQC authoring",
+      "prerequisites": "An assembled GUI with its language converters, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit; BW_SKIP_LANGUAGE_PAIRS changes the exercised scope",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-device-languages.mjs",
+      "blobSha": "e9a22ca729fc1d20d54e1d0578d6bc0780d07903",
+      "purpose": "Device-dependent Code tabs, retained drafts, BASIC profiles, Pico UART, and saved storage",
+      "prerequisites": "An assembled GUI with its Code/machine assets, an app URL, Playwright Chromium, and JSZip",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-language-readback.mjs",
+      "blobSha": "240960b570375dd803630769ee57b34e350e36a4",
+      "purpose": "Language-to-blocks conversion, retained source, and refusal without replacing the project",
+      "prerequisites": "An assembled GUI with Code readers, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-machine-choices.mjs",
+      "blobSha": "ba8e130f93bc3f0f427dc116cab13eb3909cbe69",
+      "purpose": "CP1/CARDIAC choices and real hosted RISC-V compilation and execution",
+      "prerequisites": "An assembled GUI, an app URL, Playwright Chromium, machine assets, and the live hosted RISC-V GCC route",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-code-machine-menu.mjs",
+      "blobSha": "f23651473de6656c428e11691c69de22971e13c1",
+      "purpose": "Single-line machine picker, CP1 keyboard launch, and example ordering",
+      "prerequisites": "An assembled GUI with its examples, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-compact-editor-menus.mjs",
+      "blobSha": "d8e21197093344a89a1cba85b7e0906ade602539",
+      "purpose": "Compact editor menus, conversion notices, language options, and fullscreen surfaces",
+      "prerequisites": "A served built GUI with the exercised editors, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-controller-machine-io.mjs",
+      "blobSha": "1485bedbcf366451ec55b2a1e8574321d6776ec7",
+      "purpose": "Linux and CP/M Controller I/O, edited C, restart, and Tcl handoff",
+      "prerequisites": "An assembled GUI with machine media and a CP/M compiler route, an app URL, and Playwright Chromium; BW_CPM_TEST_COMPILER can provide the compiler endpoint",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-costume-gradient-handoff.mjs",
+      "blobSha": "896a03bef7c1b6a5673160b0a8cb23bb7ca79324",
+      "purpose": "Gradient SVG regions, extrusion, and external-reference refusal",
+      "prerequisites": "A served CAD-enabled GUI and Playwright Chromium; an app URL and optional original Arrow1 SVG path",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-costume-precision-browser.mjs",
+      "blobSha": "266f05d800661aa6a6efa64b37af31699f7d852a",
+      "purpose": "Costume precision profiles, CAD handoff, dimensions, and saved geometry",
+      "prerequisites": "A served CAD-enabled GUI with Costumes precision tools and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-costume-precision-drawing.mjs",
+      "blobSha": "d763f03c87c81e6dba6db22fdb55582ed8cdb75c",
+      "purpose": "Precision drawing, SVG/region selection, and CAD sketch handoff",
+      "prerequisites": "A served CAD-enabled GUI with Costumes precision tools and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-costume-sketch-refresh.mjs",
+      "blobSha": "e005706a688eba7d47db6a6138a5f17410886234",
+      "purpose": "Linked costume-to-sketch refresh, stable identities, and undo/reopen behavior",
+      "prerequisites": "A served CAD-enabled GUI with linked Costumes sketches and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-costume-to-cad-workflow.mjs",
+      "blobSha": "eb198f9accf49ef7da528ee569822cca4bc0c7ef",
+      "purpose": "Costumes rectangle to constrained CAD outline, extrusion, and binary STL",
+      "prerequisites": "A served CAD-enabled GUI and Playwright; PROOF_BROWSER selects the browser and PROOF_EXPORT_MODE selects download or share handling",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-costume-toolbar.mjs",
+      "blobSha": "717651e60169e45fa5ae9eae7adb1ca958a853e5",
+      "purpose": "Compact costume toolbar labels and CAD handoff with precision mode disabled",
+      "prerequisites": "A served CAD-enabled GUI, an app URL, and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-editor-help-browser.mjs",
+      "blobSha": "eec5c497ad9d85664a97caab1e1cd6423eb2bcf6",
+      "purpose": "Editor help, gesture references, modal focus, and sketch dropdown visibility",
+      "prerequisites": "A served GUI with the exercised editors and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-editor-overflow-style.mjs",
+      "blobSha": "7fbae55684353a0671e61c5b1b541bae619991e1",
+      "purpose": "Shared popup styles, keyboard Blocks zoom, and FPGA workspace navigation",
+      "prerequisites": "A served GUI built with CAD and FPGA, an app URL, and Playwright Chromium",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-firmware-cardiac-browser.mjs",
+      "blobSha": "bf787bbb790214281e7539ccf1901112ef0343bf",
+      "purpose": "CARDIAC firmware selection and authored execution in Code and Controller",
+      "prerequisites": "A served built GUI with CARDIAC assets, an app URL, and Playwright Chromium",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-gallery-artwork-browser.mjs",
+      "blobSha": "e1a0f6b68e3e37d8ddb3a690d8472b4c48c8aa16",
+      "purpose": "Deferred Robot Lab/Circuit gallery artwork and paginated catalogue loading",
+      "prerequisites": "A served GUI with Robot Lab and Circuit gallery assets and Playwright Chromium",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-imported-machine-profiles.mjs",
+      "blobSha": "d43a6b984752bf7faea770d9b502d9512d91d22b",
+      "purpose": "Imported machine profiles, display surfaces, and fullscreen controls",
+      "prerequisites": "An assembled GUI, an app URL, Playwright Chromium, and node_modules/bw-board/vendor/gpascal/gpascal.bin",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-machine-library-launch.mjs",
+      "blobSha": "96769c643be7670a860fe53d8c0dda7ab1a0b3bb",
+      "purpose": "Machine-library DOS/CPM/Pico/386/CP1/Microtronic launches and Controller output",
+      "prerequisites": "An assembled GUI with machine runtime/media assets, an app URL, Playwright Chromium, and the bw-board FUNSCII module",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-pc-firmware-browser.mjs",
+      "blobSha": "b24a5dda569684464b93711e8a6d9b2717542db9",
+      "purpose": "Virtual PC firmware boot, GPIO Blink, local binary, and 386 Controller surfaces",
+      "prerequisites": "An assembled GUI with PC firmware/media and local fixture inputs, an app URL, and Playwright Chromium",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-pico-basic-hardware.mjs",
+      "blobSha": "0415ca3e5fa9cf0be910357db72e49a0e310b1a5",
+      "purpose": "Pinned Pico BASIC UF2 download and Code/Controller serial controls",
+      "prerequisites": "An assembled GUI with the Pico BASIC UF2 download, an app URL, and Playwright Chromium; the script supplies its serial proof fixture",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-retro-6502-browser.mjs",
+      "blobSha": "fb12ca1caac1bddcc84a09e3045bb90442013c05",
+      "purpose": "6502 BASIC/Forth/video/LCD/keyboard surfaces and machine-switch lifecycle",
+      "prerequisites": "An assembled GUI with the retro firmware/media assets, an app URL, and Playwright Chromium",
+      "pendingWiring": null
+    },
+    {
+      "name": "verify-robot-lab-flexible-tubes.mjs",
+      "blobSha": "c1b80135e6cfdda0d1074bf1f5478a1a305082fe",
+      "purpose": "Live flexible tubes and pneumatic-press motion without per-frame allocation",
+      "prerequisites": "A served Robot Lab GUI with model assets and Playwright Firefox; BW_TUBE_BASELINE changes assertion scope",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-robot-lab-measurement-overlay.mjs",
+      "blobSha": "da1f940b0dd1d12e1b33ca4eb4b88133384dec06",
+      "purpose": "Measurement overlay updates, camera following, replay visibility, and live Run",
+      "prerequisites": "A served Robot Lab GUI with model assets and Playwright Firefox",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-robot-lab-overlay-buffers.mjs",
+      "blobSha": "1ad17d1626481be26fbb79e397f68105c82dcab1",
+      "purpose": "Cable/sensor-ray buffer reuse while a robot is translated",
+      "prerequisites": "A served Robot Lab GUI with model assets and Playwright Firefox; BW_OVERLAY_BASELINE changes assertion scope",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-robot-lab-run.mjs",
+      "blobSha": "512d09f4b5c4812e17a220a05b05a62c27c6a420",
+      "purpose": "First Run, starter/model motion, and explicit handling of an existing Code draft",
+      "prerequisites": "A served Robot Lab GUI with model programs and Playwright Chromium or BW_ROBOT_BROWSER=firefox",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-robot-lab-startup-downloads.mjs",
+      "blobSha": "2f3693d84ff77427fa08084c8c25e2026855467d",
+      "purpose": "Bounded model downloads, TwistSpan motion, and saved-assembly controls",
+      "prerequisites": "A served Robot Lab GUI with model assets and Playwright Firefox; BW_STARTUP_BASELINE changes assertion scope",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-robot-lab-thumbnail-cache.mjs",
+      "blobSha": "ce322682171c9d5de52f6a73448841df89912832",
+      "purpose": "Packed model loading and persistent thumbnail reuse after reload",
+      "prerequisites": "A served Robot Lab GUI with model/thumbnail assets and Playwright Firefox; BW_GEOMETRY_BASELINE changes assertion scope",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-robot-lab-twistspan-motion.mjs",
+      "blobSha": "958f7662acd927b3185c6098ba2cc49bcbdbb42e",
+      "purpose": "TwistSpan physics/display motion and optional idle/replay/render-fence scenarios",
+      "prerequisites": "A served Robot Lab GUI with TwistSpan assets and Playwright Chromium or BW_ROBOT_BROWSER=firefox; BW_CHECK_IDLE_RENDER, BW_CHECK_REPLAY and BW_STALL_RENDER_FENCE select extra scenarios",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-shared-3d-navigation.mjs",
+      "blobSha": "64802dfefaabd19dbef6b8c7e96ecf0521e1ac80",
+      "purpose": "Shared CAD/Robot Lab navigation gestures and persisted settings",
+      "prerequisites": "A served GUI with CAD and Robot Lab, and Playwright Chromium or BW_NAV_BROWSER=firefox",
+      "pendingWiring": {
+        "pullRequest": 1855,
+        "commit": "29e5265583bf9ae4d07d58e3fb28fe6f2df89696"
+      }
+    },
+    {
+      "name": "verify-x86-debugger-picker.mjs",
+      "blobSha": "f6ce6c4214c2b4e31b12fbe42fc36a5664ca0e53",
+      "purpose": "8086/286/386 debugger selections, bundled BIOS execution, and Controller displays",
+      "prerequisites": "An assembled GUI with x86 firmware/media, an app URL, and Playwright Chromium",
+      "pendingWiring": null
+    }
+  ]
+}

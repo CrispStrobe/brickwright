@@ -145,8 +145,9 @@ try{
       // The submenu is fitted into the window on the next animation frame (menu.jsx).
       // Wait for that placement itself; polling must not add an unconditional browser sleep.
       await page.waitForFunction(({element,viewport})=>{
+       if(!element?.isConnected||!element.getClientRects().length||getComputedStyle(element).visibility!=='visible')return false;
        const box=element.getBoundingClientRect();
-       return box.y>=0&&box.y+box.height<=viewport.height+1;
+       return box.width>0&&box.height>0&&box.y>=0&&box.y+box.height<=viewport.height+1;
       },{element:await entry.elementHandle(),viewport:view},{polling:'raf',timeout:2000});
       const box=await entry.boundingBox();
       assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=view.width+1&&box.y+box.height<=view.height+1,`${where}: ${name} inside the viewport: ${JSON.stringify(box)} in ${JSON.stringify(view)}`);}
