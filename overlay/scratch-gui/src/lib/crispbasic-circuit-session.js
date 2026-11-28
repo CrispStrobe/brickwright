@@ -98,7 +98,7 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         clean(() => host?.dispose());
         clean(() => cadPreparation?.abort());
         if (!host && !creatingHost) clean(() => cadClock?.release());
-        if (cleanupPending()) {
+        if (cad && cleanupPending()) {
             cleanupTask = Promise.resolve().then(async () => {
                 // Also cover cancellation while initial CAD sensing is in
                 // flight, before a programClock could be returned to us.

@@ -41,12 +41,13 @@ export async function createCoupledSession({board, mechanics, connections, firmw
     let fullFrame = frame;
     const sample = (drive, value) => {
         const positions = value[drive.positionField], speeds = value[drive.speedField];
-        if (!positions || !speeds || !Object.hasOwn(positions,drive.jointId) || !Object.hasOwn(speeds,drive.jointId) ||
-            !Number.isFinite(positions[drive.jointId]) || !Number.isFinite(speeds[drive.jointId])) throw new Error('A connected CAD joint is missing or has changed kind');
+        if (!positions || !speeds || !Object.hasOwn(positions,drive.jointId) || !Object.hasOwn(speeds,drive.jointId)) throw new Error('A connected CAD joint is missing or has changed kind');
+        const position = positions[drive.jointId], speed = speeds[drive.jointId];
+        if (!Number.isFinite(position) || !Number.isFinite(speed)) throw new Error('A connected CAD joint is missing or has changed kind');
         return {
             partId: drive.partId,
-            angleRad: positions[drive.jointId] * drive.scale * drive.ratio * drive.direction,
-            velocityRadS: speeds[drive.jointId] * drive.scale * drive.ratio * drive.direction
+            angleRad: position * drive.scale * drive.ratio * drive.direction,
+            velocityRadS: speed * drive.scale * drive.ratio * drive.direction
         };
     };
     const validateFeedback = value => {
