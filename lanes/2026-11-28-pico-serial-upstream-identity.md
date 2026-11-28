@@ -117,3 +117,37 @@ recorded separately; it is not represented as a successful local sync.
 The official vocabulary generator was run separately, changing only its pin
 line. The complete checkout's hosted vendor, gallery, identity, mirror and
 generated-reference gates remain mandatory before consumer landing.
+
+## Pin-linked SPIKE qualification
+
+The first consumer candidate passes vendor freshness and all 13 gallery CLI
+controls, but `test/lego-spike-roundtrip.test.mjs` deliberately asserts the
+old sb3-creator pin before artifact generation. This lane also owns the exact
+pin acknowledgement and a brief provenance note in that test. Preserve every
+SB3 generation, canonical variable/extension, motor/distance and decompile
+assertion, and rerun the complete existing test at the reviewed backport.
+This is qualification of the unchanged compiler bytes, not a SPIKE behavior change.
+
+## Hosted vendor result and SPIKE requalification
+
+The complete hosted
+[vendor-freshness run](https://github.com/CrispStrobe/brickwright/actions/runs/46141726925)
+**passed** at consumer candidate
+`bb557027ba0b8efef41c9b78a5193b9f5992ce8e`. Its upstream-byte identity,
+transpiler, complete examples gallery and runtime gallery-pin checks all
+succeeded. This supplies the complete-checkout qualification unavailable
+locally; the original Pico vendor blocker is cleared.
+
+The bounded source run at that candidate passed **200 of 201** controls,
+including all 13 gallery tests. Its sole failure was the intentional old-pin
+assertion before SPIKE artifact generation. The follow-up changes only that
+exact pin literal and three provenance comment lines; removing those changes
+reconstructs baseline test blob
+`5cb70d8aa1caaddc6395d588054b9ecb59afb429` exactly.
+
+The complete existing SPIKE artifact/round-trip test now passes **1/1**, with
+all assertions retained, using preinstalled repository-pinned JSZip 3.10.1
+through a scratch import resolver. No dependency was installed and no source
+or artifact was mocked. The reviewed test blob is
+`37adc4d9d90344a768f8acdbc964017c33337bcd`. The following candidate still
+requires applicable hosted source and integration qualification.
