@@ -174,6 +174,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [xkimRom, setXkimRom] = React.useState(null);
     const [xkimMedia, setXkimMedia] = React.useState([]);
     const [xkimMediaKind, setXkimMediaKind] = React.useState('files');
+    const [xkimTimerLine, setXkimTimerLine] = React.useState('none');
     const controllerRequest = React.useRef(null);
     React.useEffect(() => () => { controllerRequest.current = null; }, []);
     const [launching, setLaunching] = React.useState(null);
@@ -608,7 +609,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                         rowAttributes={{'data-testid': 'bw-mm-xkim'}}
                                         info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
                                             {' '}Choose loose 8.3 files or a FAT12/16/32 image up to 128 MiB. For an image, only compatible root files are imported.
-                                            {' '}Controller can export the session files as ZIP or save an updated copy of the FAT image.</>}
+                                            {' '}Controller can export the session files as ZIP or save an updated copy of the FAT image.
+                                            {' '}Choose IRQ or NMI to connect the shield’s TIMER_OUT pin to the KIM-1 expansion connector.</>}
                                         actions={<>
                                             <label style={fieldsStyle}>ROM
                                                 <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}
@@ -623,6 +625,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 aria-label={xkimMediaKind === 'files' ? 'xKIM Corsham files' : 'xKIM FAT image'}
                                                 disabled={launching !== null} style={{maxWidth: 140}}
                                                 onChange={event => setXkimMedia(Array.from(event.target.files || []))} />
+                                            <select value={xkimTimerLine} aria-label="xKIM timer output" disabled={launching !== null}
+                                                onChange={event => setXkimTimerLine(event.target.value)}>
+                                                <option value="none">Timer unwired</option>
+                                                <option value="irq">Timer → IRQ</option>
+                                                <option value="nmi">Timer → NMI</option>
+                                            </select>
                                             <button type="button" style={btn} disabled={launching !== null || !xkimRom}
                                                 onClick={() => launch('kim1-xkim', async () => {
                                                     const request = {};
@@ -632,7 +640,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         xkimRom, xkimMediaKind === 'files' ? xkimMedia : [], xkimMediaKind === 'fat' ? xkimMedia[0] : null
                                                     );
                                                     if (controllerRequest.current !== request) return false;
-                                                    const session = await createXkimTerminal(media);
+                                                    const session = await createXkimTerminal({...media, timerLine: xkimTimerLine});
                                                     if (controllerRequest.current !== request) {
                                                         session.dispose();
                                                         return false;

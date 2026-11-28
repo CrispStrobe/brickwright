@@ -53,11 +53,12 @@ export async function createXkimArchive (files) {
     return archive.generateAsync({type: 'blob', compression: 'STORE'});
 }
 
-export function createXkimTerminal ({rom, files, diskImage}) {
+export function createXkimTerminal ({rom, files, diskImage, timerLine = 'none'}) {
     return createKim1Tty({
         setup: control => {
             control('setMemoryCard', createXkimMemoryMap(rom));
             control('mountCorshamFiles', files);
+            control('setCorshamTimerLine', timerLine);
         },
         boot: 'E000 G', bootPrompt: /Extended KIM Monitor[\s\S]*>\s*$/,
         // xKIM takes one key at its main prompt and a line at the file prompt.
