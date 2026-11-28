@@ -17,7 +17,7 @@
 import {grayFramebufferSpec} from './gray-framebuffer.js';
 import {PICOBB_FLASH, picoFlashStorageFor} from './pico-basic-flash.js';
 import {
-    normalizeMachineConfig, validateMachineConfig
+    normalizeMachineConfig, validateMachineConfig, usesWiredCircuit
 } from './machine-config.js';
 import {remoteMachineImagesAllowed} from '../distribution-policy.js';
 
@@ -142,10 +142,7 @@ export async function activateConfig(config, opts = {}) {
 
     // Wired (or an auto config that is wired in effect): no image fetch, just a
     // descriptor pointing at the circuit for the designer board to realize.
-    const isWired = cfg.executionMode === 'wired' ||
-        (cfg.executionMode === 'auto' && isObj(cfg.circuit) &&
-            Object.keys(cfg.slots).length === 0);
-    if (isWired) {
+    if (usesWiredCircuit(cfg)) {
         return {
             mode: 'wired',
             executionMode: cfg.executionMode,

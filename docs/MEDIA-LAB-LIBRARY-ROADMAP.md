@@ -4,6 +4,8 @@ This inventory covers the 34 manifests on media-lab main at `5e54caab98d7ca6f641
 
 [Media-lab projects at the reviewed revision](https://github.com/CrispStrobe/brickwright-media-lab/tree/5e54caab98d7ca6f641d7cc3e21f2ebdab937400/projects) · [Candidate ledger at that revision](https://github.com/CrispStrobe/brickwright-media-lab/blob/5e54caab98d7ca6f641d7cc3e21f2ebdab937400/docs/CANDIDATES.md)
 
+In Machines, a CPU with both launch paths offers **All paths**, **Circuits** and **Functional (fast)**. Circuits opens examples in the Circuit editor and includes firmware for the current board when available. Functional (fast) starts the virtual machine and opens its console or display in Controller. The Circuit firmware entry starts on Circuits when it has presets. For example, 8086 offers the wired blink board and the virtual CGA test under the same CPU. The available choices depend on the CPU and the firmware. A circuit can still contain functional chip models, and a virtual guest needs its own hardware qualification before it can run through a circuit.
+
 | Manifest | Machines handoff or work remaining |
 | --- | --- |
 | ACK | Three DOS programs under 8086. Pascal and Modula-2 print primes. C prints factorials. The media-lab copy of the BSD-3-Clause licence is linked per entry, and each COM has its own SHA-256. The ACK cross-compiler runs on the build host. |

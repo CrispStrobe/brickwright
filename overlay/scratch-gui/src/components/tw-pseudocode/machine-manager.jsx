@@ -18,7 +18,7 @@ import {
     fromMediaManifest, fromDosboxConf
 } from '../../lib/bw-machines/importers.js';
 import {
-    newMachineConfig, validateMachineConfig
+    newMachineConfig, usesWiredCircuit, validateMachineConfig
 } from '../../lib/bw-machines/machine-config.js';
 import {localDosboxMachine} from '../../lib/bw-machines/local-dosbox.js';
 import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-package-zip.js';
@@ -39,6 +39,8 @@ import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 const T = {
     en: {
         wiredFirmware: 'Wired firmware',
+        path: 'Execution path', allPaths: 'All paths', functionalPath: 'Functional (fast)', circuitPath: 'Circuits',
+        circuitExamples: 'Circuit examples',
         local386: 'Local 386 media',
         localDos: 'Boot a local DOSBox HDD',
         localDosInfo: 'Select a raw hard-disk image. An optional DOSBox configuration supplies the 386 CPU and disk geometry. Its imgmount filename must match the image.',
@@ -70,6 +72,8 @@ const T = {
     },
     de: {
         wiredFirmware: 'Firmware für die Schaltung',
+        path: 'Ausführungspfad', allPaths: 'Alle Pfade', functionalPath: 'Funktional (schnell)', circuitPath: 'Schaltungen',
+        circuitExamples: 'Schaltungsbeispiele',
         local386: 'Lokale 386-Medien',
         localDos: 'Lokales DOSBox-Festplattenabbild starten',
         localDosInfo: 'Wähle ein Rohabbild der Festplatte. Eine optionale DOSBox-Konfiguration legt die 386-CPU und die Geometrie fest. Der Dateiname im imgmount-Befehl muss zum Abbild passen.',
@@ -172,7 +176,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [query, setQuery] = React.useState('');
     const [openGroups, setOpenGroups] = React.useState({});
     const [graphics8086, setGraphics8086] = React.useState('cga-demo');
-    const virtual8086 = !(preferredMachine === 'i8086' && wiredPresets?.length);
+    const [machinePaths, setMachinePaths] = React.useState(() =>
+        preferredMachine && wiredPresets?.length ? {[preferredMachine]: 'circuit'} : {});
     const openByDefault = Boolean(machineFilter || query.trim());
     const infoPrefix = /^de/i.test(locale) ? 'Informationen zu' : 'About';
     const matchesType = kind => !machineFilter || kind === machineFilter;
@@ -238,7 +243,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const run = async (cfg, opts) => {
         try {
-            if (onRun) await onRun(cfg, opts);
+            const result = await onRun?.(cfg, opts);
+            if (result?.mode === 'wired') {
+                if (!onOpenExample) throw new Error('Circuit editor unavailable');
+                const id = result.activated.circuit.ref.replace(/^circuits\//, '');
+                if (await onOpenExample(id, false) === false) return;
+            }
             if (onClose) onClose();
         } catch (e) { setStatus(e.message); }
     };
@@ -425,8 +435,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const groups = machineKinds.filter(matchesType).map(kind => ({
         kind,
         bios: kind === 'i80386' && matchesTitle('386 AT BIOS'),
-        graphics: kind === 'i8086' && virtual8086 ? graphicsPreset : null,
-        virtual: kind === 'i8086' && virtual8086 ?
+        graphics: kind === 'i8086' ? graphicsPreset : null,
+        virtual: kind === 'i8086' ?
             virtual8086Presets.filter(([title]) => matchesTitle(title)) : [],
         presets: kind === preferredMachine ? matchingPresets : [],
         lessons: lessons.filter(lesson => lesson.config.machine === kind),
@@ -438,7 +448,31 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         local: kind === 'i80386' && (
             !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
     })).filter(group => group.bios || group.local || group.graphics || group.virtual.length || group.presets.length ||
-        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65 || group.xkim);
+        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65 || group.xkim)
+        .map(group => {
+            const isCircuitExample = example => !example.codeOnly;
+            const isCircuitMedia = item => Boolean(item.kim1Tape);
+            const hasCircuitPath = group.presets.length || group.examples.some(isCircuitExample) ||
+                group.saved.some(usesWiredCircuit) || group.media.some(isCircuitMedia);
+            const hasFunctionalPath = group.bios || group.local || group.graphics || group.virtual.length ||
+                group.lessons.length || group.cpm65 || group.xkim || group.examples.some(example => !isCircuitExample(example)) ||
+                group.saved.some(config => !usesWiredCircuit(config)) || group.media.some(item => !isCircuitMedia(item));
+            const bothPaths = Boolean(hasCircuitPath && hasFunctionalPath);
+            const path = bothPaths ? machinePaths[group.kind] || '' : '';
+            if (!path) return {...group, bothPaths, path};
+            const circuit = path === 'circuit';
+            const matchesPath = isCircuit => item => isCircuit(item) === circuit;
+            return {
+                ...group, bothPaths, path,
+                bios: !circuit && group.bios, graphics: !circuit && group.graphics,
+                virtual: circuit ? [] : group.virtual, lessons: circuit ? [] : group.lessons,
+                presets: circuit ? group.presets : [],
+                saved: group.saved.filter(matchesPath(usesWiredCircuit)),
+                media: group.media.filter(matchesPath(isCircuitMedia)),
+                examples: group.examples.filter(matchesPath(isCircuitExample)),
+                cpm65: !circuit && group.cpm65, xkim: !circuit && group.xkim, local: !circuit && group.local
+            };
+        });
 
     return (
         <div onClick={closeManager} data-testid="bw-machine-manager"
@@ -485,6 +519,17 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             {title}
                                         </button>
                                     </h3>
+                                    {group.bothPaths && <select aria-label={`${t('path')} · ${title}`}
+                                        data-testid={`bw-mm-path-${group.kind}`} style={btn} value={group.path}
+                                        onChange={event => {
+                                            const path = event.target.value;
+                                            setMachinePaths(current => ({...current, [group.kind]: path}));
+                                            setOpenGroups(current => ({...current, [group.kind]: true}));
+                                        }}>
+                                        <option value="">{t('allPaths')}</option>
+                                        <option value="circuit">{t('circuitPath')}</option>
+                                        <option value="functional">{t('functionalPath')}</option>
+                                    </select>}
                                     {group.graphics && <select aria-label={/^de/i.test(locale) ? '8086-Grafik' : '8086 graphics'}
                                         data-testid="bw-mm-8086-graphics" style={btn} value={group.graphics[1]}
                                         onChange={event => {
@@ -724,6 +769,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 })}>{t('run')}</button>
                                         </>} />}
                                     {group.examples.length > 0 && <div data-testid="bw-mm-circuit-programs">
+                                        {group.examples.some(example => !example.codeOnly) &&
+                                            <h4 style={{margin: '8px 0 2px', fontSize: 12}}>{t('circuitExamples')}</h4>}
                                         {group.examples.map(example => <MachineEntry key={example.id} title={circuitTitle(example)} rowAttributes={{'data-machine-example': example.id}} actions={
                                             <button type="button" disabled={launching !== null} style={btn}
                                                 onClick={() => launch(example.id, () => onOpenExample(example.id, example.codeOnly))}>

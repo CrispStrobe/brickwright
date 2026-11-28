@@ -228,12 +228,7 @@ export function validateMachineConfig(cfg) {
     }
 
     const mode = cfg.executionMode;
-    const wired = mode === 'wired' ||
-        // an `auto` config with a circuit and no bootable slots is wired in
-        // effect (design §3: auto is functional UNLESS the circuit is needed).
-        (mode === 'auto' && isObj(cfg.circuit) && !hasBootableSlot(cfg));
-
-    if (wired) {
+    if (usesWiredCircuit(cfg)) {
         if (!isObj(cfg.circuit) || !isStr(cfg.circuit.ref)) {
             errors.push('a wired machine requires circuit.ref');
         }
@@ -295,6 +290,11 @@ export function validateMachineConfig(cfg) {
     }
 
     return {ok: errors.length === 0, errors};
+}
+
+export function usesWiredCircuit(cfg) {
+    return cfg.executionMode === 'wired' ||
+        (cfg.executionMode === 'auto' && isObj(cfg.circuit) && !hasBootableSlot(cfg));
 }
 
 function hasBootableSlot(cfg) {
