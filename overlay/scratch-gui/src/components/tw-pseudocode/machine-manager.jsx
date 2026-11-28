@@ -30,6 +30,7 @@ import {
     libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readKim1LibraryTape, readLibraryCode, readMediaManifest
 } from '../../lib/bw-machines/library-media.js';
 import {aceKimLicenses, createLibraryAceKim} from '../../lib/bw-machines/ace-kim-library.js';
+import {createXkimTerminal, readXkimMedia, XKIM_SOURCE} from '../../lib/bw-machines/kim1-xkim.js';
 import {kim1CpmProfiles, readKim1CpmArchive, createKim1CpmTerminal} from '../../lib/bw-machines/kim1-cpm65.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
@@ -139,7 +140,7 @@ function MachineEntry({title, info, infoPrefix, actions, children, rowAttributes
     );
 }
 
-export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample, onRunKim1Cpm, onRunAceKim}) {
+export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample, onRunKim1Tty, onRunAceKim}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
     // viewport, which this app floors at 1024px wide — so on a 430pt phone the
     // modal centred at x=512 and its buttons sat off the side of the screen.
@@ -170,6 +171,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [circuits, setCircuits] = React.useState(null);
     const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
     const [cpmFile, setCpmFile] = React.useState(null);
+    const [xkimRom, setXkimRom] = React.useState(null);
+    const [xkimFiles, setXkimFiles] = React.useState([]);
     const controllerRequest = React.useRef(null);
     React.useEffect(() => () => { controllerRequest.current = null; }, []);
     const [launching, setLaunching] = React.useState(null);
@@ -405,12 +408,13 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         lessons: lessons.filter(lesson => lesson.config.machine === kind),
         saved: matchingMachines.filter(machine => machine.machine === kind),
         media: matchingMedia.filter(item => item.machine === kind),
-        cpm65: kind === 'kim1' && onRunKim1Cpm && matchesTitle('CP/M-65 for KIM-1'),
+        cpm65: kind === 'kim1' && onRunKim1Tty && matchesTitle('CP/M-65 for KIM-1'),
+        xkim: kind === 'kim1' && onRunKim1Tty && matchesTitle('Corsham xKIM'),
         examples: showCircuitPrograms ? matchingCircuits.filter(example => example.machine === kind) : [],
         local: kind === 'i80386' && (
             !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
     })).filter(group => group.bios || group.local || group.graphics || group.virtual.length || group.presets.length ||
-        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65);
+        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65 || group.xkim);
 
     return (
         <div onClick={closeManager} data-testid="bw-machine-manager"
@@ -595,7 +599,35 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         session.dispose();
                                                         return false;
                                                     }
-                                                    onRunKim1Cpm(session);
+                                                    onRunKim1Tty(session);
+                                                    return true;
+                                                })}>{t('run')}</button>
+                                        </>} />}
+                                    {group.xkim && <MachineEntry title="Corsham xKIM" infoPrefix={infoPrefix}
+                                        rowAttributes={{'data-testid': 'bw-mm-xkim'}}
+                                        info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
+                                            {' '}Optional files have 8.3 names and are available read-only. Enter D to list them or T to display one.</>}
+                                        actions={<>
+                                            <label style={fieldsStyle}>ROM
+                                                <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}
+                                                    style={{maxWidth: 140}} onChange={event => setXkimRom(event.target.files?.[0] || null)} />
+                                            </label>
+                                            <label style={fieldsStyle}>Files
+                                                <input type="file" multiple aria-label="xKIM Corsham files" disabled={launching !== null}
+                                                    style={{maxWidth: 140}} onChange={event => setXkimFiles(Array.from(event.target.files || []))} />
+                                            </label>
+                                            <button type="button" style={btn} disabled={launching !== null || !xkimRom}
+                                                onClick={() => launch('kim1-xkim', async () => {
+                                                    const request = {};
+                                                    controllerRequest.current = request;
+                                                    const media = await readXkimMedia(xkimRom, xkimFiles);
+                                                    if (controllerRequest.current !== request) return false;
+                                                    const session = await createXkimTerminal(media);
+                                                    if (controllerRequest.current !== request) {
+                                                        session.dispose();
+                                                        return false;
+                                                    }
+                                                    onRunKim1Tty(session);
                                                     return true;
                                                 })}>{t('run')}</button>
                                         </>} />}

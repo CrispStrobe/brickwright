@@ -1034,7 +1034,7 @@ const GUIComponent = props => {
                     }
                     return started;
                 }}
-                onRunKim1Cpm={session => {
+                onRunKim1Tty={session => {
                     props.vm.stopAll();
                     window.bwStopMachineVideo?.();
                     const unmirror = window.bwMirrorMachineTerminal(session, true);

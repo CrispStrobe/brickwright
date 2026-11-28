@@ -1542,6 +1542,9 @@ class ControllerPanelView extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
+        if (prevProps.machineTerminal !== this.props.machineTerminal && this.props.machineTerminal?.focusOnOpen) {
+            this.setState({machineSurface: 'terminal'});
+        }
         if (prevProps.board !== this.props.board) {
             const panel = this._getPanel();
             this._buttonInputs?.releaseAll();
