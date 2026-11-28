@@ -419,9 +419,13 @@ test('every selectable example × MCU combination resolves to an overlap-free be
         // 53 examples gain ATtiny targets, +87.
         // 138/1156 -> 138/1177 (total 1294 -> 1315) on 2026-10-06 (task B13,
         // sb3-creator #57): +34 ATtiny benches, -13 refused combinations.
+        // 138/1177 -> 138/1185 (total 1315 -> 1323) on 2026-11-28:
+        // disp-led-matrix gains its eight explicit MAX7219 retarget benches:
+        // Uno, Mega, Nano, ATmega168P, ATtiny85/88, Pico and STM32F030.
+        // The authored STC12 bench and every other example target are unchanged.
         authored: 138,
-        retargeted: 1177,
-        total: 1315
+        retargeted: 1185,
+        total: 1323
     });
 });
 

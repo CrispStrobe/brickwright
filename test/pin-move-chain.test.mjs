@@ -57,6 +57,10 @@
  *     pin" is only recognisable when the repo-history half runs (the three
  *     *_DIR checkouts or BW_VENDOR_HISTORY_DIR); without it such a sha is an
  *     unknown hex string, invisible here as it is in every other role.
+ *     Two sealed supplier-source comparison receipts have a separate exact-
+ *     field role below: they record upstream CI or generator work before pin
+ *     adoption. Their immutable bytes and source fields remain checked; this
+ *     evidence does not qualify the installed vendor pins.
  *   - packages/** is not scanned: packages/scratch-gui/src is a byte-identical
  *     mirror of overlay/ (test/overlay-packages-pairs holds it) and the rest is
  *     upstream Scratch, whose CHANGELOGs carry thousands of shas of their own.
@@ -82,7 +86,7 @@ import {hddBeforeRepositoryIdentityControl, hddWorkflowBeforeRepositoryIdentity}
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PINS = path.join(ROOT, 'vendor-pins.json');
 const REPOS = ['bw-board', 'sb3-creator', 'bw-circuit-ui'];
-const SCOPED_PINS = ['stc-compiler-flasher', 'arrays-values', 'microbitplus', 'circuitplayground', 'wedo2unified', 'spikeprime',
+const SCOPED_PINS = ['stc-compiler-flasher', 'devices', 'stc12', 'arrays-values', 'microbitplus', 'circuitplayground', 'wedo2unified', 'spikeprime',
     'ev3comprehensive', 'legoboostunified', 'legonxt', 'legopoweredup'];
 const ENV_DIR = {'bw-board': 'BW_BOARD_DIR', 'sb3-creator': 'SB3_CREATOR_DIR', 'bw-circuit-ui': 'BW_CIRCUIT_UI_DIR'};
 const PROVENANCE = 'overlay/scratch-gui/static/roms/i8086-bios.provenance.json';
@@ -196,9 +200,43 @@ export const parsePreviousPins = (logText, currentShas = new Set(), allowedKeys 
     return prev;
 };
 
+
+// These two supplier-source captures compare upstream work before adoption;
+// their source identity is deliberately not an installed Brickwright pin.
+// Admit only the reviewed JSON fields in the exact original bytes. They do
+// not qualify a current pin, and no other receipt gains this role.
+const SOURCE_COMPARISON_RECEIPTS = Object.freeze({
+    'docs/receipts/2026-11-25-kim1-engine-ci-comparison.json': {
+        sha256: '213f6c897bfe00e0fd5b6a744ea5fe2932872a8e216fc694bca37408eba7be94',
+        repo: 'bw-board',
+        fields: [/"baseline":\s*\{\s*"commit":\s*"([0-9a-f]{40})"/g,
+            /"candidate":\s*\{\s*"commit":\s*"([0-9a-f]{40})"/g]
+    },
+    'scripts/probes/code-runtime/session-console-values-browser-results.json': {
+        sha256: '7fefc5441fae0dddf91ccb2177e99fe77e8ec01fe7c054f89d5a7601816ce971',
+        repo: 'sb3-creator',
+        fields: [/"generator":\s*\{\s*"repository":\s*"CrispStrobe\/sb3-creator",\s*"head":\s*"([0-9a-f]{40})"/g]
+    }
+});
+
+export const historicalSupplierSourceSpans = (file, text, known) => {
+    const rule = SOURCE_COMPARISON_RECEIPTS[file];
+    if (!rule) return [];
+    assert.equal(createHash('sha256').update(text).digest('hex'), rule.sha256,
+        `${file}: frozen supplier-source comparison changed`);
+    return rule.fields.map(pattern => {
+        const matches = [...text.matchAll(pattern)];
+        assert.equal(matches.length, 1, `${file}: supplier source field must occur exactly once`);
+        const match = matches[0], sha = match[1];
+        const repo = known.previous.get(sha)?.repo || known.history.get(sha);
+        if (repo) assert.equal(repo, rule.repo, `${file}: supplier source belongs to the wrong repository`);
+        return match.index + match[0].lastIndexOf(sha);
+    });
+};
+
 /** Role of a tracked file for this test: 'ledger' | 'receipt' | 'docs-prose' | 'skip' | 'code'. */
 export const roleOf = file => {
-    if (Object.hasOwn(SEALED_STUDY_FILES, file)) return 'receipt';
+    if (Object.hasOwn(SEALED_STUDY_FILES, file) || Object.hasOwn(SOURCE_COMPARISON_RECEIPTS, file)) return 'receipt';
     if (/^(LANES|HISTORY|ROADMAP|PLAN|BLOCKED|HANDOFF|CI-POINTERS)\.md$/.test(file) || /^lanes\/[^/]+\.(md|tsv)$/.test(file)) return 'ledger';
     if (/^docs\/generated\//.test(file)) return 'code';
     // A dated run receipt records the pin it was MEASURED at; moving that sha
@@ -638,7 +676,8 @@ export const judgeFile = (file, text, known, frozenAdmissions = new Map()) => {
         assert.equal(bytes.subarray(...admission.span).toString(), admission.value);
         body = Buffer.concat([bytes.subarray(0, admission.span[0]), Buffer.alloc(40, 32), bytes.subarray(admission.span[1])]).toString();
     }
-    const historical = new Set([...historicalCuiSpans(file, text, known),
+    const historical = new Set([...historicalSupplierSourceSpans(file, text, known),
+        ...historicalCuiSpans(file, text, known),
         ...historicalBoardSpans(file, text, known), ...historicalV8CuiSpans(file, text, known),
         ...historicalV10Spans(file, text, known)]);
     const out = []; let lineAt = 0;
@@ -802,8 +841,32 @@ const historicalFixtureSpans = f => (file, text, known) =>
     historicalCuiSpansForProfile(file, text, known, f.profiles);
 const historicalJudgeWith = (recognize, recognizeBoard = () => [], recognizeV8 = () => [], recognizeV10 = () => []) => vm.runInNewContext(`(${judgeFile.toString()})`,
     {roleOf, PROVENANCE, COMMENT, CODE_EXT, HEX40, SEALED_STUDY_FILES, assert, createHash, studyBeforeConcurrencyPolicy, sealedStudyBody,
+        historicalSupplierSourceSpans,
         historicalCuiSpans: recognize,
         historicalBoardSpans: recognizeBoard, historicalV8CuiSpans: recognizeV8, historicalV10Spans: recognizeV10});
+
+
+test('supplier source comparisons preserve exact evidence without admitting arbitrary never-pinned receipts', () => {
+    for (const [file, rule] of Object.entries(SOURCE_COMPARISON_RECEIPTS)) {
+        const text = readFileSync(path.join(ROOT, file), 'utf8');
+        const shas = rule.fields.map(pattern => [...text.matchAll(pattern)][0][1]);
+        const sourceKnown = {current: new Set(), previous: new Map(),
+            history: new Map(shas.map(sha => [sha, rule.repo]))};
+        assert.equal(roleOf(file), 'receipt');
+        assert.equal(historicalSupplierSourceSpans(file, text, sourceKnown).length, rule.fields.length);
+        assert.deepEqual(judgeFile(file, text, sourceKnown), []);
+        assert.ok(judgeFile('docs/receipts/unreviewed-source-comparison.json', text, sourceKnown).length > 0,
+            'the same never-pinned source remains forbidden in an unreviewed receipt');
+        assert.ok(judgeFile('docs/generated/supplier-source.json', text, sourceKnown).length > 0,
+            'historical evidence cannot become a current generated supplier reference');
+        assert.throws(() => judgeFile(file, text + '\n', sourceKnown),
+            /frozen supplier-source comparison changed/, 'even whitespace drift invalidates the seal');
+        assert.throws(() => judgeFile(file, text.replace(shas[0], 'f'.repeat(40)), sourceKnown),
+            /frozen supplier-source comparison changed/, 'a new source cannot inherit the reviewed role');
+        const wrongSupplier = {...sourceKnown, history: new Map(shas.map(sha => [sha, 'bw-circuit-ui']))};
+        assert.throws(() => judgeFile(file, text, wrongSupplier), /wrong repository/);
+    }
+});
 
 test('three exact historical CUI occurrences are previous-pin roles, not code-file exemptions', () => {
     const f = historicalRoleFixtures(), k = historicalTestKnown();
@@ -1348,6 +1411,10 @@ test('the pins file names three global repos plus explicitly scoped artifact pin
     for (const [repo, sha] of Object.entries(pins)) assert.match(sha, /^[0-9a-f]{40}$/, `${repo} pin is not a full sha`);
     const bundles = JSON.parse(readFileSync(path.join(ROOT,
         'overlay/scratch-vm/src/extension-support/bundled-upstream-pins.json'), 'utf8'));
+    for (const name of ['devices', 'stc12']) {
+        assert.equal(bundles.files[name].commit, pins[name], `scoped ${name} pin must name the actual bundled source`);
+        assert.equal(bundles.files[name].repo, 'CrispStrobe/extensions', `scoped ${name} source belongs to its declared repository`);
+    }
     assert.equal(bundles.files.arrays.commit, pins['arrays-values'], 'scoped Arrays pin must name the actual bundled source');
     assert.equal(bundles.files.arrays.repo, 'CrispStrobe/extensions', 'scoped Arrays source belongs to its declared repository');
     assert.equal(bundles.files.circuitplayground.commit, pins.circuitplayground, 'scoped Circuit Playground pin must name the actual bundled source');
