@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "scope": "selected-runtime-packages",
+  "packages": [
+    {
+      "id": "sdcc-wasm",
+      "name": "SDCC mcs51 WebAssembly toolchain",
+      "version": "4.5.0",
+      "kind": "compiler-toolchain",
+      "targets": [
+        "mcs51"
+      ],
+      "compilerLicense": {
+        "declaredSpdx": "GPL-2.0-or-later",
+        "status": "component-review-required",
+        "licenseUrl": "https://github.com/CrispStrobe/sdcc-wasm/blob/64ea6915733cf6d6563dfe9424c8cc71b4731e06/COPYING",
+        "sourceUrl": "https://sourceforge.net/projects/sdcc/files/sdcc/4.5.0/sdcc-src-4.5.0.tar.bz2/download",
+        "buildInfoUrl": "https://github.com/CrispStrobe/sdcc-wasm/blob/64ea6915733cf6d6563dfe9424c8cc71b4731e06/BUILD-INFO.md",
+        "note": "This records the distributor's broad declaration, not a licence determination for every compiler stage or dependency."
+      },
+      "runtimeLicense": {
+        "status": "requires-file-level-review",
+        "evidenceUrl": "https://github.com/CrispStrobe/sdcc-wasm/blob/64ea6915733cf6d6563dfe9424c8cc71b4731e06/static/sdcc-wasm/include/mcs51/stc12.h",
+        "note": "This header declares GPL-2.0-or-later with a linking exception. That evidence does not clear all packed headers, libraries or generated artifacts."
+      },
+      "delivery": "optional-user-download",
+      "bundled": false,
+      "origin": "https://crispstrobe.github.io/sdcc-wasm/",
+      "cacheName": "bw-sdcc-wasm-v1",
+      "files": [
+        "cc1.js",
+        "cc1.wasm",
+        "sdcc.js",
+        "sdcc.wasm",
+        "sdas8051.js",
+        "sdas8051.wasm",
+        "sdld.js",
+        "sdld.wasm",
+        "runtime.json"
+      ],
+      "integrity": {
+        "status": "unverified",
+        "note": "The current loader does not verify artifact digests; the download origin is mutable."
+      },
+      "buildExclusions": {
+        "directories": [
+          "sdcc-wasm"
+        ],
+        "filenames": [
+          "cc1.js",
+          "cc1.wasm",
+          "sdcc.js",
+          "sdcc.wasm",
+          "sdas8051.js",
+          "sdas8051.wasm",
+          "sdld.js",
+          "sdld.wasm"
+        ]
+      }
+    }
+  ]
+}

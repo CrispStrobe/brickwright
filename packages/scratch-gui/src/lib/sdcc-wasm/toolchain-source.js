@@ -35,19 +35,16 @@
  */
 
 import {remoteToolchainsAllowed} from '../distribution-policy.js';
+import runtimePackageInventory from '../runtime-package-inventory.cjs';
 
-export const GPL_TOOLCHAIN_ORIGIN = 'https://crispstrobe.github.io/sdcc-wasm/';
+const sdccPackage = runtimePackageInventory.packages.find(record => record.id === 'sdcc-wasm');
+
+export const GPL_TOOLCHAIN_ORIGIN = sdccPackage.origin;
 export const TOOLCHAIN_MODE_KEY = 'bw-sdcc-toolchain';
-export const TOOLCHAIN_CACHE = 'bw-sdcc-wasm-v1';
+export const TOOLCHAIN_CACHE = sdccPackage.cacheName;
 
 /** Every file `loadToolchain` asks for, so the cache can be filled in one pass. */
-export const TOOLCHAIN_FILES = Object.freeze([
-    'cc1.js', 'cc1.wasm',
-    'sdcc.js', 'sdcc.wasm',
-    'sdas8051.js', 'sdas8051.wasm',
-    'sdld.js', 'sdld.wasm',
-    'runtime.json'
-]);
+export const TOOLCHAIN_FILES = Object.freeze(sdccPackage.files.slice());
 
 const IS_NODE = typeof process === 'object' && typeof process?.versions?.node === 'string';
 

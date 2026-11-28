@@ -14,7 +14,8 @@ The plan/roadmap are already on main. This first implementation seeds LP1 with
 the existing optional SDCC package; it does not add a compiler or change pins.
 
 - New data-only `overlay/scratch-gui/src/lib/runtime-package-inventory.json`
-  and its tracked mirror: declared source/license/distribution/integrity facts,
+  and the tiny `runtime-package-inventory.cjs` Node/webpack interop adapter,
+  with their tracked mirrors: declared source/license/distribution/integrity facts,
   download members, cache identity and known prohibited build markers.
 - `overlay/scratch-gui/src/lib/sdcc-wasm/toolchain-source.js` and its mirror:
   derive existing package constants from that inventory without changing
@@ -49,3 +50,12 @@ Retain existing boot-media and sparse-solver signature controls. Check tree
 shape and exact changed paths before publication. Run the repository's applicable
 automatic PR qualification; do not bypass a failing gate or infer whole-app
 acceptance from focused source controls.
+
+## Incremental checkpoints
+
+The first implementation checkpoint adds the shared SDCC record, its Node/webpack
+interop adapter and the existing loader's inventory-derived constants. Direct
+Node import preserves the current origin, cache key and all nine download members.
+The record has an independent source/license metadata review; complete component
+license review and download digest verification remain pending. Build-guard
+integration and focused regression qualification follow before lane completion.
