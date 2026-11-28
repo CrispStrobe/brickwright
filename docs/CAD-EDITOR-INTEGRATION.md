@@ -79,12 +79,30 @@ active native build keeps its frontend inputs unchanged.
 
 The two editors share rectangle intersection math, touch arithmetic and core
 transform arithmetic already. With CAD hosted through its SDK, future CAD
-improvements flow through a pinned SDK update. The next shared extraction is
-camera gesture intents and precision/readout formatting. Robots keeps its fixed
+improvements flow through a pinned SDK update. Camera pointer intents are shared
+and pinned too (`src/lib/editor-interaction/camera-pointer.js`); precision/readout
+formatting remains a possible next extraction. Robots keeps its fixed
 Technic dimensions, connector snapping and physics model; the SDK retains its
 solid document and millimetre/Z-up coordinate system. CAD-to-Robots geometry
 export already exists in the CAD adapter; enabling simulated custom parts still
 requires explicit authored connectors and collision metadata.
+
+## Release synchronization
+
+After building and pinning its SDK, the CAD repository offers a read-only
+cross-check of the exact SDK hashes and source revision, the shared interaction
+modules and the common Jolt release and SHA-512:
+
+```sh
+# In the clean CAD checkout, after build:brickwright-sdk and sync-cad-sdk:
+npm run verify:brickwright-sync -- /path/to/brickwright
+```
+
+The simulation, renderer and model catalogue stay in the shared CAD SDK; host
+changes provide visibility, SB3 persistence and program commands rather than a
+forked editor. Pin the complete SDK directory, including its lazy catalogue
+chunks, workers, WASM and notices. A pin update does not replace an installed
+Brickwright binary; that application must be rebuilt to ship the new bundle.
 
 ## Shared fixes upstreamed on 15 November 2026
 
