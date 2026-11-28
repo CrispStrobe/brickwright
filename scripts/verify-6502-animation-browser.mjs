@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
 const url = process.argv[2];
+const wired = process.argv.includes('--circuit');
 assert.ok(url, 'Pass the URL of the assembled Brickwright frontend');
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const page = await browser.newPage({viewport: {width: 1600, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
@@ -16,12 +17,23 @@ try {
     await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
     const dialog = page.getByTestId('bw-machine-manager');
     await dialog.getByRole('searchbox', {name: 'Search firmware'}).fill('6502 Animation Lab');
+    await dialog.getByTestId('bw-mm-path-eater6502').selectOption(wired ? 'circuit' : 'functional');
     const row = dialog.locator('[data-machine-media="6502-animation"]');
     await row.getByTestId('bw-mm-item-info').click();
     await row.getByText(/copies four frames|copy four frames/).waitFor();
     assert.match(await row.getByRole('link', {name: 'MIT', exact: true}).getAttribute('href'), /6502-animation\/LICENSE$/);
-    await row.getByRole('button', {name: 'Run', exact: true}).click();
+    assert.equal(await row.getByRole('button', {name: wired ? 'Run' : 'Run on circuit', exact: true}).count(), 0);
+    await row.getByRole('button', {name: wired ? 'Run on circuit' : 'Run', exact: true}).click();
     await dialog.waitFor({state: 'hidden'});
+    if (wired) {
+        await page.waitForFunction(() => {
+            const binding = window.__bwMachineBoard;
+            return window.__bwActiveExample?.id === 'eater6502-bench' && binding?.board &&
+                binding.board === window.__board && /designer board attached/.test(binding.why);
+        });
+    } else {
+        assert.equal(await page.evaluate(() => Boolean(window.__bwMachineBoard?.board)), false);
+    }
 
     const controller = page.locator('[data-bw-stage-dock="controller"]');
     const canvas = controller.getByTestId('bw-machine-canvas');
@@ -66,9 +78,9 @@ try {
     assert.equal(await full.innerText(), 'Full screen');
     assert.equal(await controller.getByTestId('bw-machine-terminal').count(), 0);
     assert.deepEqual(errors, []);
-    console.log('6502 Animation Lab played two complete loops in Controller. Every sampled pixel matched a published guest frame.');
+    console.log(`6502 Animation Lab played two complete loops on the ${wired ? 'circuit' : 'functional machine'}. Every Controller pixel matched a published guest frame.`);
 } catch (error) {
-    console.error(await page.getByTestId('bw-machine-manager').getByRole('alert').allTextContents());
+    console.error(errors, await page.getByTestId('bw-mm-status').allTextContents());
     throw error;
 } finally {
     await browser.close();

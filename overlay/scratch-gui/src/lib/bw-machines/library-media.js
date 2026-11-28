@@ -111,6 +111,7 @@ export const libraryMedia = [
     })),
     {id: '6502-animation', title: '6502 Animation Lab', machine: 'eater6502',
         license: 'MIT', licenseFile: 'LICENSE', infoKey: 'animation6502', framebufferFormat: 'gray6',
+        wiredExample: 'eater6502-bench',
         revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
         romHash: '45504aefefd3adc676028013b568332289876da79afc3f682045d6052e41c396'},
     {id: 'tali-forth-65c02', title: 'Tali Forth 2 with framebuffer', machine: 'eater6502',
