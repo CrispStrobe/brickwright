@@ -702,6 +702,41 @@ const CENSUS = [
            + '07132874… in full — the same commit as lessons.js LINUX_MEDIA_COMMIT; SHA_CONSTANTS below '
            + 'asserts it is 40-hex. The proof also compares the downloaded bytes with a sha256 constant '
            + '(kernelSha256) and fails on a mismatch.'
+    },
+    {
+        file: 'overlay/scratch-gui/src/lib/bw-machines/ace-kim-library.js',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/5e54caab98d7ca6f641d7cc3e21f2ebdab937400/projects/ace-kim/',
+        class: 'sha-const',
+        why: 'The ACE KIM firmware slots load from the media-lab repository at a 40-hex commit constant '
+           + 'in this file, and every slot also carries a sha256 that defaultImageFetcher checks before '
+           + 'the bytes are used.'
+    },
+    {
+        file: 'overlay/scratch-gui/src/lib/bw-machines/kim1-cpm65.js',
+        kind: 'release',
+        text: 'github.com/davidgiven/cpm65/releases/download/dev/',
+        class: 'content-hash',
+        why: 'CP/M-65 for the KIM-1 is published only under the movable upstream "dev" release tag, so the '
+           + 'NAME is mutable. Every profile carries a reviewed sha256 constant in this file, and the ZIP '
+           + 'is refused ("checksum differs from the reviewed upstream release") before anything is '
+           + 'unpacked or mounted. A moved tag or replaced asset fails closed.'
+    },
+    {
+        file: 'test/dos-forth-library.test.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/forth/test/8482c3a6fdfb273851c177e46f1f568b65e223a7/',
+        class: 'sha-const',
+        why: 'The Forth test-suite sources the DOS Forth library test loads, at a 40-hex commit constant '
+           + 'in this file, with a sha256 checked by the library (the test asserts the mismatch refusal).'
+    },
+    {
+        file: 'test/kim1-cpm65.test.mjs',
+        kind: 'release',
+        text: 'github.com/davidgiven/cpm65/releases/download/dev/kim-1-',
+        class: 'content-hash',
+        why: 'Not a fetch: the exact assertion of kim1-cpm65.js\'s release URL, beside its check that every '
+           + 'profile carries a 64-hex sha256. The content-hash binding is the producer row above.'
     }
 ];
 
