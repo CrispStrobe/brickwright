@@ -4,6 +4,7 @@ import test from 'node:test';
 import {fromMediaManifest} from '../overlay/scratch-gui/src/lib/bw-machines/importers.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
 import {createAlicePascalMachine} from '../overlay/scratch-gui/src/lib/bw-machines/alice-pascal.js';
+import {libraryLicenseUrl, libraryMedia} from '../overlay/scratch-gui/src/lib/bw-machines/library-media.js';
 import {localAtBiosMachine} from '../overlay/scratch-gui/src/lib/bw-machines/local-freedos-vga.js';
 
 test('partcl launch sends its 80186 variant and mounted script to the live runner', async () => {
@@ -56,4 +57,13 @@ test('ALICE requires the exact FreeDOS 1.4 boot media before fetching guest file
     await assert.rejects(createAlicePascalMachine(new Blob()), /Choose 120m\/x86BOOT.img/);
     await assert.rejects(createAlicePascalMachine(new Blob([new Uint8Array(1228800)])), /floppy checksum differs/);
     await assert.rejects(createAlicePascalMachine(new Blob([new Uint8Array(23624258)])), /ZIP checksum differs/);
+});
+
+test('OpenGEM is an on-demand 80386 guest with linked desktop and mouse sources', async () => {
+    const item = libraryMedia.find(item => item.id === 'opengem');
+    assert.equal(item.machine, 'i80386');
+    assert.equal(item.license, 'GPL-2.0-or-later');
+    assert.match(libraryLicenseUrl(item), /OPENGEM7-RC3[/]LICENSE[.]TXT$/);
+    assert.equal(item.supportSource.title, 'CuteMouse');
+    await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(1228800)])), /floppy checksum differs/);
 });

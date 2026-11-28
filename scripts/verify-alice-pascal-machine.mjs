@@ -56,7 +56,7 @@ try {
     const row = manager.locator('[data-machine-media="alice-pascal"]');
     const run = row.getByRole('button', {name: 'Run', exact: true});
     assert.ok(await run.isDisabled());
-    await row.getByTestId('bw-mm-alice-floppy').setInputFiles(floppyPath);
+    await row.getByTestId('bw-mm-freedos-guest-media').setInputFiles(floppyPath);
     await run.click();
     await manager.waitFor({state: 'hidden'});
     await canvas.waitFor();

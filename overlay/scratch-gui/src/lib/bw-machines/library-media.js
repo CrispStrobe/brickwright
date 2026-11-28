@@ -1,4 +1,5 @@
-import {aliceLicenseUrl} from './alice-pascal.js';
+import {createOpenGemMachine, cuteMouseSourceUrl, openGemLicenseUrl} from './opengem.js';
+import {aliceLicenseUrl, createAlicePascalMachine} from './alice-pascal.js';
 import {aceKimMedia} from './ace-kim-library.js';
 import {makeT} from '../bw-i18n.js';
 import {activateConfig, defaultImageFetcher} from './activate.js';
@@ -92,7 +93,10 @@ export const libraryMedia = [
     {id: 'minix-2.0', title: 'MINIX 2.0.4', machine: 'i80386', license: 'BSD-3-Clause',
         licenseFile: 'LICENSE', infoKey: 'minix', revision: 'b424a9a6d2826360351d1ed1fbcd7548c4edf9f8'},
     {id: 'alice-pascal', title: 'ALICE Pascal', machine: 'i80386', license: 'Artistic-1.0',
-        licenseFile: aliceLicenseUrl, alicePascal: true},
+        licenseFile: aliceLicenseUrl, freedosGuest: createAlicePascalMachine, freedosHelp: 'aliceHelp'},
+    {id: 'opengem', title: 'OpenGEM 7 RC3', machine: 'i80386', license: 'GPL-2.0-or-later',
+        licenseFile: openGemLicenseUrl, freedosGuest: createOpenGemMachine, freedosHelp: 'openGemHelp',
+        supportSource: {title: 'CuteMouse', url: cuteMouseSourceUrl}},
     {id: 'x86-benchmarks/native-sieve', title: 'Native 386 Sieve', machine: 'i80386', license: 'MIT',
         licenseFile: 'LICENSE', revision: 'c8dc584d39b69b1ed9f98af69e548d9da3d5b240', benchmark: 'native-sieve'},
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},

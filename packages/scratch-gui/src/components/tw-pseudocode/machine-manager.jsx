@@ -22,7 +22,7 @@ import {
 import {localDosboxMachine} from '../../lib/bw-machines/local-dosbox.js';
 import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-package-zip.js';
 import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
-import {createAlicePascalMachine, freedosFloppyZipUrl} from '../../lib/bw-machines/alice-pascal.js';
+import {freedosFloppyZipUrl} from '../../lib/bw-machines/freedos-guest.js';
 import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
@@ -48,7 +48,8 @@ const T = {
         bootDisk: 'Boot disk',
         bootPackage: 'Boot package HDD',
         bootFreeDos: 'Boot FreeDOS VGA',
-        aliceFloppy: 'FreeDOS media',
+        freedosMedia: 'FreeDOS media',
+        openGemHelp: 'Select the official FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. Move the pointer over the Controller screen to use the mouse.',
         aliceHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. ALICE opens DEMO.AP in Controller. Press F1 to run it. Use Save image in Controller to keep guest files.',
         bootBios: 'Boot BIOS only',
         diskImage: 'Disk image',
@@ -74,7 +75,8 @@ const T = {
         bootDisk: 'Festplatte starten',
         bootPackage: 'Paket-Festplatte starten',
         bootFreeDos: 'FreeDOS VGA starten',
-        aliceFloppy: 'FreeDOS-Medium',
+        freedosMedia: 'FreeDOS-Medium',
+        openGemHelp: 'Wähle das ZIP der offiziellen FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. Bewege den Zeiger über den Controller-Bildschirm, um die Maus zu verwenden.',
         aliceHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. ALICE öffnet DEMO.AP im Controller. F1 startet das Programm. Abbild speichern im Controller sichert die Gastdateien.',
         bootBios: 'Nur BIOS starten',
         diskImage: 'Festplattenabbild',
@@ -189,7 +191,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [localNativeBlocks, setLocalNativeBlocks] = React.useState(false);
     const [dosPackageFile, setDosPackageFile] = React.useState(null);
     const [dosPackageBusy, setDosPackageBusy] = React.useState(false);
-    const [aliceFloppy, setAliceFloppy] = React.useState(null);
+    const [guestMedia, setGuestMedia] = React.useState({});
     const mediaLaunch = React.useRef(null);
     React.useEffect(() => () => mediaLaunch.current?.abort(), []);
     const dosPackageOwner = React.useRef({mounted:true,epoch:{},file:null,busy:false});
@@ -549,8 +551,11 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             rowAttributes={{'data-machine-media': item.id}}
                                             info={<>
                                                 {item.summary && <div>{item.summary}</div>}
-                                                {item.alicePascal && <div>{t('aliceHelp')}{' '}
+                                                {item.freedosGuest && <div>{t(item.freedosHelp)}{' '}
                                                     <a href={freedosFloppyZipUrl} target="_blank" rel="noopener noreferrer">FreeDOS 1.4</a>
+                                                </div>}
+                                                {item.supportSource && <div>
+                                                    <a href={item.supportSource.url} target="_blank" rel="noopener noreferrer">{item.supportSource.title}</a>
                                                 </div>}
                                                 {item.aceKim ? aceKimLicenses.map(({label, url}) => <div key={label}>
                                                     <a href={url} target="_blank" rel="noopener noreferrer">{label} · MIT</a>
@@ -561,7 +566,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             actions={
                                                 <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
                                                         item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun) ||
-                                                        (item.alicePascal && !aliceFloppy)} style={btn}
+                                                        (item.freedosGuest && !guestMedia[item.id])} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
@@ -580,12 +585,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                             const kim1Tape = await readKim1LibraryTape(item);
                                                             return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
-                                                        const build = item.alicePascal || item.code?.compilerTarget === 'i8086-smallc'
+                                                        const build = item.freedosGuest || item.code?.compilerTarget === 'i8086-smallc'
                                                             ? new AbortController() : null;
                                                         if (build) mediaLaunch.current = build;
                                                         try {
-                                                            if (item.alicePascal) {
-                                                                const {config, fetcher} = await createAlicePascalMachine(aliceFloppy, build.signal);
+                                                            if (item.freedosGuest) {
+                                                                const {config, fetcher} = await item.freedosGuest(guestMedia[item.id], build.signal);
                                                                 return await onRun(config, {fetcher, signal: build.signal});
                                                             }
                                                             const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
@@ -601,10 +606,13 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                     {t('run')}
                                                 </button>
                                             }>
-                                            {item.alicePascal && <label style={fieldsStyle}>{t('aliceFloppy')}{' '}
-                                                <input type="file" accept=".zip,.img,.ima" data-testid="bw-mm-alice-floppy"
+                                            {item.freedosGuest && <label style={fieldsStyle}>{t('freedosMedia')}{' '}
+                                                <input type="file" accept=".zip,.img,.ima" data-testid="bw-mm-freedos-guest-media"
                                                     disabled={launching !== null}
-                                                    onChange={event => setAliceFloppy(event.target.files?.[0] || null)} />
+                                                    onChange={event => {
+                                                        const selected = event.target.files?.[0] || null;
+                                                        setGuestMedia(current => ({...current, [item.id]: selected}));
+                                                    }} />
                                             </label>}
                                         </MachineEntry>)}
                                     </div>}
