@@ -11,24 +11,56 @@ const MenuComponent = ({
     componentRef,
     place = 'right',
     onRequestClose
-}) => (
-    <ul
-        role="menu"
-        tabIndex={-1}
-        onKeyDown={event => handleMenuKeyDown(event, onRequestClose)}
-        className={classNames(
-            styles.menu,
-            className,
-            {
-                [styles.left]: place === 'left',
-                [styles.right]: place === 'right'
+}) => {
+    const own = React.useRef(null);
+    const setRef = node => {
+        own.current = node;
+        if (componentRef) componentRef(node);
+    };
+    // A top-level menu taller than the window (the File menu with the CAD editor's sections, on an
+    // iPad in landscape) scrolls inside the window; its submenus then open fixed beside their item
+    // (MenuItem's fitSubmenu), since the scrolling list would clip them.
+    React.useLayoutEffect(() => {
+        const list = own.current;
+        if (!list || list.parentElement?.classList.contains(styles.submenu)) return;
+        const fit = () => {
+            const scrolled = list.scrollTop;
+            list.style.maxHeight = '';
+            list.style.overflowY = '';
+            list.style.overflowX = '';
+            delete list.dataset.scrolls;
+            const box = list.getBoundingClientRect(), bottom = window.innerHeight - 8;
+            if (box.height && box.bottom > bottom) {
+                list.style.maxHeight = `${Math.max(120, bottom - box.top)}px`;
+                list.style.overflowY = 'auto';
+                list.style.overflowX = 'hidden';
+                list.dataset.scrolls = 'true';
+                list.scrollTop = scrolled;
             }
-        )}
-        ref={componentRef}
-    >
-        {children}
-    </ul>
-);
+        };
+        fit();
+        window.addEventListener('resize', fit);
+        return () => window.removeEventListener('resize', fit);
+    });
+    return (
+        <ul
+            role="menu"
+            tabIndex={-1}
+            onKeyDown={event => handleMenuKeyDown(event, onRequestClose)}
+            className={classNames(
+                styles.menu,
+                className,
+                {
+                    [styles.left]: place === 'left',
+                    [styles.right]: place === 'right'
+                }
+            )}
+            ref={setRef}
+        >
+            {children}
+        </ul>
+    );
+};
 
 MenuComponent.propTypes = {
     children: PropTypes.node,
@@ -77,14 +109,34 @@ const MenuItem = ({children, className, ariaLabel, expanded = false, disabled = 
         const submenu = ref.current && Array.from(ref.current.children).find(child => child.classList.contains(styles.submenu));
         const list = submenu && submenu.firstElementChild;
         if (!list || getComputedStyle(submenu).display === 'none') return;
-        submenu.style.top = '';
+        submenu.style.position = submenu.style.left = submenu.style.right = submenu.style.top = '';
         list.style.maxHeight = '';
+        // Inside a scrolling top-level menu, open fixed beside the item instead of being clipped.
+        let top = -1;
+        if (ref.current.parentElement?.dataset.scrolls === 'true') {
+            const item = ref.current.getBoundingClientRect(), width = submenu.offsetWidth;
+            let left = submenu.classList.contains(styles.left) ? item.left - width : item.right;
+            if (left + width > window.innerWidth - 8) left = item.left - width;
+            submenu.style.position = 'fixed';
+            submenu.style.left = `${Math.max(8, left)}px`;
+            submenu.style.right = 'auto';
+            top = item.top - 1;
+            submenu.style.top = `${top}px`;
+        }
         const box = submenu.getBoundingClientRect(), bottom = window.innerHeight - 8;
         const shift = box.bottom > bottom ? Math.max(0, Math.min(box.bottom - bottom, box.top - 8)) : 0;
-        if (shift) submenu.style.top = `${-1 - shift}px`;
+        if (shift) submenu.style.top = `${top - shift}px`;
         if (box.bottom - shift > bottom) list.style.maxHeight = `${Math.max(120, bottom - (box.top - shift))}px`;
     });
     React.useLayoutEffect(() => { if (hasSubmenu && open) fitSubmenu(); }, [hasSubmenu, open]);
+    // Scrolling the menu moves the item: a fixed submenu follows it.
+    React.useEffect(() => {
+        const list = hasSubmenu && ref.current?.parentElement;
+        if (!list) return;
+        const follow = () => fitSubmenu();
+        list.addEventListener('scroll', follow, {passive: true});
+        return () => list.removeEventListener('scroll', follow);
+    }, [hasSubmenu]);
     const closeSubmenu = () => {
         setKeyboardOpen(false);
         setKeyboardClosed(true);
