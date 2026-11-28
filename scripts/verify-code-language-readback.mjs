@@ -16,6 +16,7 @@ const app = async () => {
     });
     await page.goto(url, {waitUntil: 'domcontentloaded'});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    // gate-shapes-allow: startup readiness; callers check replaced stage/opcodes, retained source, and the original stage after refusal.
     await page.getByTestId('bw-lang-row').waitFor();
     return page;
 };

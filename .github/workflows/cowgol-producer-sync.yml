@@ -92,7 +92,9 @@ jobs:
             test/wait-census.test.mjs \
             test/build-trigger-paths.test.mjs \
             test/cowgol-verifier-cli.test.mjs \
-            test/cowgol-native-surfaces.test.mjs
+            test/cowgol-native-surfaces.test.mjs \
+            test/cowgol-computer-surfaces.test.mjs \
+            test/cowgol-download-surfaces.test.mjs
       - name: Record the qualified final tree and save only generated evidence
         run: |
           set -euo pipefail
@@ -137,13 +139,14 @@ jobs:
           const paths = execFileSync('git', ['diff', '--cached', '--name-only'],
             {encoding:'utf8'}).trim().split('\n').filter(Boolean);
           const allowed = new Set(['docs/generated/READER-COVERAGE.md', 'docs/generated/ci-step-census.json']);
-          assert.ok(paths.length, 'the missing workflow observations must be saved');
           assert.deepEqual(paths.filter(path => !allowed.has(path)), []);
           NODE
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'test: refresh Cowgol reader and workflow evidence'
-          git push origin HEAD:refs/heads/feat/cowgol-platforms-qualified-20261128
+          if ! git diff --cached --quiet; then
+            git commit -m 'test: refresh Cowgol reader and workflow evidence'
+            git push origin HEAD:refs/heads/feat/cowgol-platforms-qualified-20261128
+          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

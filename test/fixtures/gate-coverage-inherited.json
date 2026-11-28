@@ -245,7 +245,7 @@
     },
     {
       "name": "verify-code-conversion-matrix.mjs",
-      "blobSha": "96721c5a78baa76f81d8ba50312d77fd142e1327",
+      "blobSha": "37bca0087e13c86dca2ef87dcf015d11f1f6889c",
       "purpose": "Language/block conversion round trips, independent assembly drafts, and NQC authoring",
       "prerequisites": "An assembled GUI with its language converters, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit; BW_SKIP_LANGUAGE_PAIRS changes the exercised scope",
       "pendingWiring": null
@@ -259,7 +259,7 @@
     },
     {
       "name": "verify-code-language-readback.mjs",
-      "blobSha": "240960b570375dd803630769ee57b34e350e36a4",
+      "blobSha": "926f9a693f9b1ff0a18f9e26e3752e617700df99",
       "purpose": "Language-to-blocks conversion, retained source, and refusal without replacing the project",
       "prerequisites": "An assembled GUI with Code readers, an app URL, and Playwright Chromium or BW_BROWSER_ENGINE=webkit",
       "pendingWiring": null
@@ -344,7 +344,7 @@
     },
     {
       "name": "verify-costume-toolbar.mjs",
-      "blobSha": "717651e60169e45fa5ae9eae7adb1ca958a853e5",
+      "blobSha": "69d173e33b10ec3880f03de386f61f5a764ec6f3",
       "purpose": "Compact costume toolbar labels and CAD handoff with precision mode disabled",
       "prerequisites": "A served CAD-enabled GUI, an app URL, and Playwright Chromium",
       "pendingWiring": {
@@ -378,7 +378,7 @@
     },
     {
       "name": "verify-gallery-artwork-browser.mjs",
-      "blobSha": "e1a0f6b68e3e37d8ddb3a690d8472b4c48c8aa16",
+      "blobSha": "5f24dfa9aacf7766c0a436dc8dd74e27e95c21be",
       "purpose": "Deferred Robot Lab/Circuit gallery artwork and paginated catalogue loading",
       "prerequisites": "A served GUI with Robot Lab and Circuit gallery assets and Playwright Chromium",
       "pendingWiring": {
@@ -388,7 +388,7 @@
     },
     {
       "name": "verify-imported-machine-profiles.mjs",
-      "blobSha": "d43a6b984752bf7faea770d9b502d9512d91d22b",
+      "blobSha": "a12c9c77a4fa6552a4f9863660e79cfd9b5b1105",
       "purpose": "Imported machine profiles, display surfaces, and fullscreen controls",
       "prerequisites": "An assembled GUI, an app URL, Playwright Chromium, and node_modules/bw-board/vendor/gpascal/gpascal.bin",
       "pendingWiring": null
@@ -493,7 +493,7 @@
     },
     {
       "name": "verify-shared-3d-navigation.mjs",
-      "blobSha": "64802dfefaabd19dbef6b8c7e96ecf0521e1ac80",
+      "blobSha": "b11a9135b69cce7f6844e0d6a9fe007af52ef3d6",
       "purpose": "Shared CAD/Robot Lab navigation gestures and persisted settings",
       "prerequisites": "A served GUI with CAD and Robot Lab, and Playwright Chromium or BW_NAV_BROWSER=firefox",
       "pendingWiring": {
@@ -508,5 +508,53 @@
       "prerequisites": "An assembled GUI with x86 firmware/media, an app URL, and Playwright Chromium",
       "pendingWiring": null
     }
-  ]
+  ],
+  "commentOnlyReviews": {
+    "date": "2026-11-28",
+    "sourceCommit": "1a6c300e7377c7d502a931fea4b219f2a6720a42",
+    "entries": [
+      {
+        "name": "verify-shared-3d-navigation.mjs",
+        "previousBlobSha": "64802dfefaabd19dbef6b8c7e96ecf0521e1ac80",
+        "reviewedBlobSha": "b11a9135b69cce7f6844e0d6a9fe007af52ef3d6",
+        "change": "Site-specific gate-shapes-allow comment explaining the existing synchronization or persistent-state assertion; executable AST unchanged.",
+        "executionReceipt": "None. The source triage makes no browser execution or pass claim."
+      },
+      {
+        "name": "verify-code-conversion-matrix.mjs",
+        "previousBlobSha": "96721c5a78baa76f81d8ba50312d77fd142e1327",
+        "reviewedBlobSha": "37bca0087e13c86dca2ef87dcf015d11f1f6889c",
+        "change": "Site-specific gate-shapes-allow comment explaining the existing synchronization or persistent-state assertion; executable AST unchanged.",
+        "executionReceipt": "None. The source triage makes no browser execution or pass claim."
+      },
+      {
+        "name": "verify-code-language-readback.mjs",
+        "previousBlobSha": "240960b570375dd803630769ee57b34e350e36a4",
+        "reviewedBlobSha": "926f9a693f9b1ff0a18f9e26e3752e617700df99",
+        "change": "Site-specific gate-shapes-allow comment explaining the existing synchronization or persistent-state assertion; executable AST unchanged.",
+        "executionReceipt": "None. The source triage makes no browser execution or pass claim."
+      },
+      {
+        "name": "verify-costume-toolbar.mjs",
+        "previousBlobSha": "717651e60169e45fa5ae9eae7adb1ca958a853e5",
+        "reviewedBlobSha": "69d173e33b10ec3880f03de386f61f5a764ec6f3",
+        "change": "Site-specific gate-shapes-allow comment explaining the existing synchronization or persistent-state assertion; executable AST unchanged.",
+        "executionReceipt": "None. The source triage makes no browser execution or pass claim."
+      },
+      {
+        "name": "verify-gallery-artwork-browser.mjs",
+        "previousBlobSha": "e1a0f6b68e3e37d8ddb3a690d8472b4c48c8aa16",
+        "reviewedBlobSha": "5f24dfa9aacf7766c0a436dc8dd74e27e95c21be",
+        "change": "Site-specific gate-shapes-allow comment explaining the existing synchronization or persistent-state assertion; executable AST unchanged.",
+        "executionReceipt": "None. The source triage makes no browser execution or pass claim."
+      },
+      {
+        "name": "verify-imported-machine-profiles.mjs",
+        "previousBlobSha": "d43a6b984752bf7faea770d9b502d9512d91d22b",
+        "reviewedBlobSha": "a12c9c77a4fa6552a4f9863660e79cfd9b5b1105",
+        "change": "Site-specific gate-shapes-allow comment explaining the existing synchronization or persistent-state assertion; executable AST unchanged.",
+        "executionReceipt": "None. The source triage makes no browser execution or pass claim."
+      }
+    ]
+  }
 }

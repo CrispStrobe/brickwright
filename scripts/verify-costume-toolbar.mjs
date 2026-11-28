@@ -16,6 +16,7 @@ try {
     const workspace = page.getByTestId('bw-paint-workspace');
     const toolbar = page.getByTestId('bw-paint-command-row');
     const action = name => toolbar.getByRole('button', {name, exact: true});
+    // gate-shapes-allow: workspace readiness precedes exact toolbar title/icon-text checks and costume/backdrop count transitions.
     await workspace.waitFor();
     for (const name of ['New Costume', 'Send to CAD', 'Open file…', 'Save file', 'Pixel editor', 'Convert to Bitmap']) {
         const button = action(name);
