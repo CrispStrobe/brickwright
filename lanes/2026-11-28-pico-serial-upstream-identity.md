@@ -70,3 +70,13 @@ complete source set as local discovery with identical internal-file exclusions,
 refusing truncated listings and retaining byte comparison/orphan checks. No
 allowlist expansion, excluded circuit family or stale-source bypass is allowed.
 Qualify the real omitted-file cases before using the corrected official tool.
+
+## Pin-linked SPIKE qualification
+
+The first consumer candidate passes vendor freshness and all 13 gallery CLI
+controls, but `test/lego-spike-roundtrip.test.mjs` deliberately asserts the
+old sb3-creator pin before artifact generation. This lane also owns the exact
+pin acknowledgement and a brief provenance note in that test. Preserve every
+SB3 generation, canonical variable/extension, motor/distance and decompile
+assertion, and rerun the complete existing test at the reviewed backport.
+This is qualification of the unchanged compiler bytes, not a SPIKE behavior change.
