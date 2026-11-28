@@ -8,8 +8,11 @@ on:
     paths:
       - '.github/workflows/service-worker-browser.yml'
       - 'scripts/verify-service-worker.mjs'
+      - 'scripts/lib/optional-toolchain-activation-ready.mjs'
       - 'scripts/prepare-playwright-apt.mjs'
+      - 'test/optional-toolchain-cache-retention.test.mjs'
       - 'overlay/scratch-gui/sw.js'
+      - 'packages/scratch-gui/sw.js'
       - 'overlay/scratch-gui/src/lib/runtime-package-inventory.json'
       - 'package.json'
       - 'package-lock.json'
@@ -18,8 +21,11 @@ on:
     paths:
       - '.github/workflows/service-worker-browser.yml'
       - 'scripts/verify-service-worker.mjs'
+      - 'scripts/lib/optional-toolchain-activation-ready.mjs'
       - 'scripts/prepare-playwright-apt.mjs'
+      - 'test/optional-toolchain-cache-retention.test.mjs'
       - 'overlay/scratch-gui/sw.js'
+      - 'packages/scratch-gui/sw.js'
       - 'overlay/scratch-gui/src/lib/runtime-package-inventory.json'
       - 'package.json'
       - 'package-lock.json'
@@ -67,8 +73,11 @@ jobs:
           const paths = [
             '.github/workflows/service-worker-browser.yml',
             'scripts/verify-service-worker.mjs',
+            'scripts/lib/optional-toolchain-activation-ready.mjs',
             'scripts/prepare-playwright-apt.mjs',
+            'test/optional-toolchain-cache-retention.test.mjs',
             'overlay/scratch-gui/sw.js',
+            'packages/scratch-gui/sw.js',
             'overlay/scratch-gui/src/lib/runtime-package-inventory.json',
             'package.json',
             'package-lock.json'
@@ -121,6 +130,7 @@ jobs:
         timeout-minutes: 3
         run: |
           set -euo pipefail
+          node --test test/optional-toolchain-cache-retention.test.mjs 2>&1 | tee test-results/service-worker-browser/source-tests.log
           node scripts/verify-service-worker.mjs 2>&1 | tee test-results/service-worker-browser/verification.log
       - name: Retain probe inputs and results
         if: ${{ !cancelled() && steps.inputs.outcome == 'success' }}

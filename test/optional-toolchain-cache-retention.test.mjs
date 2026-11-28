@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
+import {optionalToolchainActivationReady} from '../scripts/lib/optional-toolchain-activation-ready.mjs';
 
 const worker = readFileSync(new URL('../overlay/scratch-gui/sw.js', import.meta.url), 'utf8');
 const inventory = JSON.parse(readFileSync(new URL(
@@ -113,4 +114,81 @@ test('the optional retention check fails when the actual worker loses its exact-
 
 test('the worker and its tracked build mirror are byte-identical', () => {
     assert.equal(worker, readFileSync(new URL('../packages/scratch-gui/sw.js', import.meta.url), 'utf8'));
+});
+
+// Match the browser boundary: Playwright serializes the actual callback and
+// polls its immediate return value. No module bindings enter this page realm.
+const serializedActivationPredicate = (state, source = optionalToolchainActivationReady.toString()) =>
+    runInNewContext(`(${source})`, state);
+
+const assertActivationPredicateContract = source => {
+    const previous = {state: 'activated'};
+    const replacement = {state: 'activated'};
+    const activating = {state: 'activating'};
+    const withoutState = {};
+    const cases = [
+        {name: 'missing registration', previous, controller: replacement},
+        {name: 'missing previous worker', active: replacement, controller: replacement},
+        {name: 'missing active worker', previous, controller: replacement, registered: true},
+        {name: 'original worker still active', previous, active: previous, controller: previous},
+        {name: 'replacement activating', previous, active: activating, controller: activating},
+        {name: 'replacement missing state', previous, active: withoutState, controller: withoutState},
+        {name: 'previous controller still owns page', previous, active: replacement, controller: previous},
+        {name: 'unrelated controller', previous, active: replacement, controller: {state: 'activated'}},
+        {name: 'no controller', previous, active: replacement},
+        {name: 'replacement owns page', previous, active: replacement, controller: replacement, ready: true}
+    ];
+    for (const item of cases) {
+        const state = {
+            window: {
+                __toolchainPreviousWorker: item.previous,
+                __toolchainRegistration: item.active || item.registered ? {active: item.active} : undefined
+            },
+            navigator: {serviceWorker: {controller: item.controller}}
+        };
+        const actual = serializedActivationPredicate(state, source)();
+        assert.equal(typeof actual, 'boolean', `${item.name}: the poller needs an immediate Boolean`);
+        assert.equal(actual, item.ready === true, item.name);
+    }
+};
+
+test('the serialized optional-toolchain wait accepts only an activated replacement that controls the page', () => {
+    assertActivationPredicateContract(optionalToolchainActivationReady.toString());
+});
+
+test('the optional-toolchain predicate follows live activation and controller changes', () => {
+    const previous = {state: 'activated'};
+    const replacement = {state: 'installing'};
+    const registration = {active: previous};
+    const serviceWorker = {controller: previous};
+    const ready = serializedActivationPredicate({
+        window: {__toolchainPreviousWorker: previous, __toolchainRegistration: registration},
+        navigator: {serviceWorker}
+    });
+    assert.equal(ready(), false);
+    registration.active = replacement;
+    assert.equal(ready(), false);
+    replacement.state = 'activating';
+    serviceWorker.controller = replacement;
+    assert.equal(ready(), false, 'controller replacement alone does not finish activation cleanup');
+    previous.state = 'redundant';
+    replacement.state = 'activated';
+    assert.equal(ready(), true);
+    serviceWorker.controller = null;
+    assert.equal(ready(), false, 'read current lifecycle state on every poll');
+});
+
+test('an async wait releases a truthiness poller early and fails the synchronous predicate contract', async () => {
+    const source = optionalToolchainActivationReady.toString();
+    const asynchronous = source.replace(/^function /, 'async function ');
+    assert.notEqual(asynchronous, source, 'the counterfactual must change the actual callback');
+    const previous = {state: 'activated'};
+    const pending = serializedActivationPredicate({
+        window: {__toolchainPreviousWorker: previous, __toolchainRegistration: {active: previous}},
+        navigator: {serviceWorker: {controller: previous}}
+    }, asynchronous)();
+    assert.equal(Boolean(pending), true, 'the locked poller sees a Promise as ready before its result');
+    assert.equal(await pending, false, 'the underlying activation condition is still false');
+    assert.throws(() => assertActivationPredicateContract(asynchronous), /immediate Boolean/,
+        'restoring an async callback must make the real predicate contract fail');
 });

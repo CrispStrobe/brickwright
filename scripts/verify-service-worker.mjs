@@ -47,6 +47,7 @@ import {readFileSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import {optionalToolchainActivationReady} from './lib/optional-toolchain-activation-ready.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SW_PATH = resolve(root, 'overlay/scratch-gui/sw.js');
@@ -413,14 +414,10 @@ SCENARIOS['optional-toolchain-survives-update'] = async browser => {
                 throw new Error('the previous worker must control the page before its update');
             }
             window.__toolchainPreviousWorker = registration.active;
+            window.__toolchainRegistration = registration;
             await registration.update();
         });
-        await page.waitForFunction(async () => {
-            const registration = await navigator.serviceWorker.getRegistration();
-            return registration?.active && registration.active !== window.__toolchainPreviousWorker &&
-                registration.active.state === 'activated' &&
-                navigator.serviceWorker.controller === registration.active;
-        }, null, {timeout: COND_TIMEOUT_MS});
+        await page.waitForFunction(optionalToolchainActivationReady, null, {timeout: COND_TIMEOUT_MS});
 
         const keys = await cacheKeys(page);
         if (!keys.includes(cacheName)) throw new Error('worker activation erased the optional compiler installation');
