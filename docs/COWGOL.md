@@ -25,6 +25,11 @@ by the web and native application wrappers.
    both the Cowgol and pseudocode editors. It first checks the selected native
    runtime, imports the accepted source into Blocks, then compiles those Blocks
    with Cowgol. The existing C/BASIC **Run via blocks** action remains available.
+7. The Cowgol action menu also offers **Run in CP/M 2.2 (Z80)** and
+   **Run in CP/M 2.2 with display**. These boot the existing full CP/M computer,
+   mount the compiled program and launch it at the command prompt. With Z80
+   selected, pseudocode and Cowgol also offer the corresponding checked
+   **Blocks via Cowgol** actions.
 
 Syntax highlighting, editable optional tabs, the overflow language menu,
 source downloads, reopen/autosave, conversion, and keyboard Run all recognize
@@ -82,14 +87,14 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | Machine family | Checked-subset route | Native Cowgol route |
 | --- | --- | --- |
 | 8051 / STC | Existing C backend and simulator/flasher | No new bare-metal backend |
-| Arduino Uno / bare ATmega328P | Existing C backend; additional checked Blocks → Cowgol console/digital route | Full Cowgol → cgen → AVR GCC → Intel HEX; fixed 16 MHz Uno runtime |
+| Arduino Uno / bare ATmega328P | Existing C backend; additional checked Blocks → Cowgol console/digital route with literal waits | Full Cowgol → cgen → AVR GCC → Intel HEX; fixed 16 MHz Uno runtime with blocking millisecond delays |
 | Other AVR / Arduino / ATtiny | Existing C backend and supported simulator/flasher | No native Cowgol port qualified |
 | Pico / RP2040 | Existing MicroPython or C backend | No new bare-metal backend |
 | STM32 | Existing C backend | No new bare-metal backend |
 | ESP8266 | Existing blob-free C backend | No new bare-metal backend |
 | micro:bit / Calliope | Existing MicroPython route | No new bare-metal backend |
 | Eater 6502 | Existing C/BASIC routes; additional checked Blocks → Cowgol console/digital route | ROM-safe 65C02 compiler, 32 KiB boot ROM, ACIA console and VIA digital GPIO |
-| Z80 | Existing BASIC/C circuit routes; checked Blocks → Cowgol CP/M console route | Real Z80 CP/M and 8080-compatible CP/M compilers |
+| Z80 | Existing BASIC/C circuit routes; checked Blocks → Cowgol CP/M console route | Real Z80 CP/M and 8080-compatible compilers; direct program bench or full CP/M 2.2 with serial/TMS9918 output |
 | 8086 | Existing assembly/C circuit routes; checked Blocks → Cowgol DOS console route | Real DOS MZ compiler |
 | Arcade / PyBadge | Existing PXT/TypeScript route where available | No new native backend |
 | RISC-V | Checked int32 console C through hosted GCC, or checked Blocks → Cowgol; one sequential flag script | Full Cowgol → cgen → RV32 GCC/picolibc → executable ELF, using console output |
@@ -103,8 +108,8 @@ coordinates and reserved pins in
 
 The matrix keeps native CP/M, DOS, RISC-V, Eater and Uno facts **open** until the
 companion service is deployed. All supply portable text/number output;
-Eater and Uno also supply serial input and checked digital calls. Native canvas,
-timing, and other unimplemented host calls fail to compile/link. Circuit
+Eater and Uno also supply serial input and checked digital calls. Uno supplies
+blocking delays; native clocks, canvas and other unimplemented host calls fail to compile/link. Circuit
 programs can also use the established Blocks route.
 
 ### Checked native Blocks and pseudocode
@@ -120,19 +125,78 @@ The shared producer API is `generateCowgol(project, {target})`. Qualified
 targets are `z80-cpm`, `i8080-cpm`, `dos`, `riscv32`, `eater6502` and
 `atmega328p`. CP/M, DOS and RISC-V accept sequential int32/text console
 programs. Eater adds digital VIA operations; Uno adds digital GPIO and input
-pull-ups. Native Eater can use PB7, but its ordinary C export is cleared with
+pull-ups and literal millisecond waits. Native Eater can use PB7, but its ordinary C export is cleared with
 a diagnostic when that older backend cannot represent the pin. The reversible
 Cowgol reader still has its existing PB7 restriction. Eater active-low input
 is refused because that pin declaration requires a pull-up the VIA runtime
 does not supply; active-low outputs remain supported.
 
-Native timing, graphics, concurrent events, custom procedures and lists remain
+Native waits are available on Uno; the other native profiles still refuse them.
+Graphics, clock queries, concurrent events, custom procedures and lists remain
 unavailable in these profiles. Calls are not silently removed. Source edits,
 edit/revert, target or device-metadata changes, project replacement, Blocks
 edits, cancellation and unmounting revoke pending builds during module loading
 and compiler requests. Stop during the import phase prevents its subsequent
 compiler launch. The full-source actions retain arrays, pointers and other
 Cowgol constructs beyond the checked reader/generator subset.
+
+### CP/M 2.2 computer and Controller display
+
+The action menu provides two full CP/M computer surfaces in addition to the
+existing direct **Cowgol on CP/M** program bench:
+
+| Action | Execution and output |
+| --- | --- |
+| Cowgol on CP/M | Compiled program on the existing Z80 CP/M service bench |
+| Run in CP/M 2.2 (Z80) | Digital Research CCP and BDOS with the existing BIOS and RAM disk; serial console |
+| Run in CP/M 2.2 with display | The same full OS with the TMS9918 BIOS; 256×192 text display in Controller and serial console |
+
+The full-source actions compile the active Cowgol source directly to a Z80
+`.COM`. On the full-OS routes, the exact validated bytes become `COWGOL.COM`
+on drive A:. The runner waits for CP/M's `A>` prompt, types `COWGOL`, and
+executes the program through the real CCP and BDOS. Returning from the program
+reaches a new prompt; `DIR` shows the mounted executable. Each run starts a
+fresh machine and RAM disk. Files created in that guest are not an autosave of
+the Brickwright project.
+
+With **Z80** selected, the pseudocode and Cowgol action menus also offer
+**Blocks via Cowgol in CP/M 2.2** and **Blocks via Cowgol on CP/M display**.
+They apply the same checked sequential int32 console profile as the native
+Blocks bench action. Unsupported GPIO, timing and canvas operations are refused
+before importing the source or replacing the project. The TMS9918 surface
+displays the OS console; it does not add a native turtle or pixel API to Cowgol.
+
+Both full-OS routes use the existing Z80 CPU. An 8080-compatible `.COM` can be
+qualified on that machine, but this is not an 8080 CPU-emulation claim. These
+actions require both the hosted-toolchain and machine-image distribution
+policies to permit them. The OS/BIOS bytes come from the app's existing bundled
+CP/M assets. Pending launches are revoked when the source, Blocks, project,
+selected device or device metadata changes, including during media activation,
+lazy runner/ROM loading and the wait for the CP/M prompt. Stop settles a pending
+launch promptly; an older cancelled launch cannot stop its replacement. Once
+the program command is queued, the debugger owns the running guest. A failed
+OS attachment remains an error in the editor and cannot replay stale media.
+
+`test/cowgol-computer-surfaces.test.mjs` exercises the actual editor methods and
+machine activation, including exact bytes, mounted filename, automatic command,
+Controller configuration, policy gates and stale-result cancellation.
+`test/cowgol-cpm-launch-ownership.test.mjs` exercises the actual panel and runner
+methods across delayed attachment, cancellation, failure and replacement.
+`scripts/verify-cowgol-cpm-system.mjs` is the separate exact-machine witness:
+
+```sh
+node scripts/verify-cowgol-cpm-system.mjs \
+  --com program.com --target z80-cpm --expect "42" \
+  --board ../bw-board --out cpm-system-report.json
+```
+
+Supply a `.COM` built by the qualified Cowgol compiler and the expected output
+from its source. The witness requires the exact pinned `bw-board`, boots the
+real OS through the GUI's Z80 target factory and debug execution loop, checks
+program output and return to the prompt on both surfaces, and reads back the
+TMS9918 text cells and rendered pixels. Missing prerequisites fail; no test is
+silently skipped. This machine execution witness is separate from a rendered
+browser interaction check.
 
 ### Arduino Uno / ATmega328P
 
@@ -155,8 +219,17 @@ older debugger selection used a different AVR part or frequency.
 The runtime implements byte input/output, signed text/number console output,
 digital read/write and output-latch toggle. Unsupported or reserved pins and
 invalid modes stop with a diagnostic. `argv.coh` observes an empty argument
-list. File I/O, timing, analog/PWM and graphics are unavailable. The runtime is
+list. File I/O, clock queries, analog/PWM and graphics are unavailable. The runtime is
 plain AVR C; it does not link the Arduino sketch core or emulate missing APIs.
+
+`bw_delay(milliseconds)` accepts a nonnegative signed int32 count and performs
+16,000 CPU cycles per millisecond plus small loop/call overhead. Zero returns
+without waiting; negative values print a diagnostic and stop. The fixed 16 MHz
+profile keeps interrupts disabled, so this is a blocking minimum delay and
+does not imply a scheduler or `bw_millis` clock. Literal `wait` statements in
+the checked native Blocks profile use this binding, enabling native blink and
+timed digital sequences. Variable durations remain outside that generator's
+literal-wait contract; full Cowgol can calculate its own int32 duration.
 
 The service checks actual AVR ELF identity, symbols, flash initializers and
 SRAM bounds before emitting HEX. The frontend independently checks every HEX
@@ -167,7 +240,9 @@ bootloader overlap and malformed metadata are rejected before handoff.
 
 Execution tests cover cold SRAM, initialized data, arrays, pointers, integer
 division, allocation/free, serial receive/transmit and digital pins on all
-three ports. No physical-board qualification is claimed. Nano, Mega,
+three ports. Measured GPIO transitions qualify 0, 1 and 7 ms waits; a bounded
+observation of 65,536 ms checks that the count does not narrow to 16 bits.
+No physical-board qualification is claimed. Nano, Mega,
 ATmega168P, ATtiny and other AVR targets remain outside this explicitly
 qualified native profile.
 
@@ -188,6 +263,29 @@ These are source/Blocks conversions; the CLI's `compile` alias does not invoke
 the hosted native compiler. Reader and generator refusals exit with status 2
 and preserve an existing output file. Integer-profile qualifications go to
 stderr. See [CLI.md](CLI.md) for all options.
+
+The terminal also exposes the native profiles explicitly:
+
+```sh
+node bin/bwlite.mjs convert blink.bw --to cowgol --target atmega328p -o blink.cow
+node bin/bwlite.mjs cowgol targets
+node bin/bwlite.mjs cowgol build blink.bw --target atmega328p --out blink.hex
+node bin/bwlite.mjs cowgol build program.cow --target z80-cpm --out program.com \
+  --endpoint http://127.0.0.1:8000/compile
+```
+
+`cowgol build` accepts full Cowgol source directly or validates the original
+Blocks graph for `.sb3` and the parsed graph for `.bw`. All seven compiler
+outputs are available; C export requires `.cow`/`.cowgol`. The command validates
+the artifact using the editor's client, then atomically writes it. Errors and
+timeouts preserve prior output, and source/output aliases are refused.
+
+The producer CLI exposes the same checked profile with
+`bw transpile program.bw --to cowgol --target atmega328p`. Its embedded bundle
+supports `bwTranspileCowgol(source, device, {target})` and `bwCowgolTargets()`.
+The latter reports generator capabilities, separately from compiler installation
+or hardware qualification. Native parser warnings and unsupported graph nodes
+remain refusals across these surfaces.
 
 ### RISC-V console
 
@@ -357,3 +455,21 @@ cgen/AVR bundle can be checked independently from a legacy-target bundle.
 
 These checks qualify the conversion and software execution paths. They do not
 claim physical-board testing or a full production GUI build.
+
+The CP/M and terminal surface witness builds through both the real frontend
+client and `bwlite cowgol build`, requires byte-identical artifacts, then boots
+them under CP/M 2.2 with serial and TMS9918 BIOSes:
+
+```sh
+node scripts/verify-cowgol-platforms.mjs \
+  --service ../stc-compiler --bundle ../cowgol-bundle --board ../bw-board \
+  --targets z80-cpm,i8080-cpm,cowgol-cgen --cli --tmpdir ../validation
+```
+
+The source exercises arrays, allocation, integer division/remainder and both
+signed int32 limits. Both CP/M compiler targets execute on the exact pinned
+Z80 machine, produce the complete expected console trace, return to `A>`, and
+appear in `DIR`. The display run also checks actual text cells and rendered
+pixels. C export is compiled and executed on the host. The dedicated Cowgol
+workflow runs this witness and archives its compiler/machine identities and
+artifact/display hashes as `cowgol-native-surfaces`.

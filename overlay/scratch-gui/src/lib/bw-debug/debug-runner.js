@@ -667,6 +667,40 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let xtKeyboard = null;
     let pcSerialInput = null;
     let cpmAutoRun = null;
+    // A source-owned launch remains provisional through lazy attachment and
+    // the CP/M boot prompt. start() only hands ownership back once the command
+    // is queued; afterwards editing the source does not stop a running guest.
+    let mediaLaunch = bootMedia?.launchControl || null;
+    let mediaLaunchSignal = mediaLaunch?.signal || null;
+    let mediaLaunchCancelled = false;
+    let resolveMediaLaunch = null;
+    const mediaLaunchDone = mediaLaunch ? new Promise(resolve => { resolveMediaLaunch = resolve; }) : null;
+    const finishMediaLaunch = (cancelled = false, error = null) => {
+        if (!mediaLaunch) return;
+        const owner = mediaLaunch;
+        mediaLaunch = null;
+        mediaLaunchCancelled = cancelled || owner.cancelled;
+        mediaLaunchSignal?.removeEventListener('abort', cancelMediaLaunch);
+        mediaLaunchSignal = null;
+        owner.release(mediaLaunchCancelled, error);
+        resolveMediaLaunch({accepted: !mediaLaunchCancelled,
+            ...(mediaLaunchCancelled ? {code: error ? 'error' : 'cancelled'} : {})});
+        resolveMediaLaunch = null;
+    };
+    const cancelMediaLaunch = () => {
+        if (!mediaLaunch) return;
+        finishMediaLaunch(true);
+        runner.destroy();
+    };
+    const checkMediaLaunch = () => {
+        if (destroyed || mediaLaunchCancelled) return false;
+        if (mediaLaunch && (mediaLaunch.cancelled || mediaLaunch.signal?.aborted ||
+            (mediaLaunch.isCurrent && !mediaLaunch.isCurrent()))) {
+            cancelMediaLaunch();
+            return false;
+        }
+        return true;
+    };
     /**
      * Board time minus target time, fixed at each (re)start (boardTimeBase).
      * The target's clock restarts at zero on every run; a board that has
@@ -3241,6 +3275,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         cpmAutoRun = null;
         const { createDebugTarget, createDebugSession } =
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
+        if (!checkMediaLaunch()) return null;
 
         const targetOpts = {};
         let readyMsg;
@@ -3261,7 +3296,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         } else if (isCpmSystem) {
             setStatus('attaching', S('cpm-system.booting'));
             const fetchRom = async (p) => {
-                const r = await fetch(new URL(p, document.baseURI).href);
+                const r = await fetch(new URL(p, document.baseURI).href, {signal: mediaLaunchSignal || undefined});
                 if (!r.ok) throw new Error(`Failed to load ${p}: HTTP ${r.status}`);
                 return new Uint8Array(await r.arrayBuffer());
             };
@@ -3320,6 +3355,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.bbcbasic');
         }
 
+        if (!checkMediaLaunch()) return null;
         const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
             designerBoard();
         if (db.board) {
@@ -3331,6 +3367,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // is read directly by the virtual indicator.
         if (blink && !targetOpts.board) targetOpts.board = {advanceTo () {}, setPin () {}};
         const result = await createDebugTarget('z80', targetOpts);
+        if (!checkMediaLaunch()) {
+            result.target?.destroy?.();
+            return null;
+        }
         if (spectrum) {
             const {applyMedia} = await import('bw-board/machine-media.js');
             const {errors} = applyMedia(result, spectrum.entries, {kind: spectrum.kind});
@@ -4047,6 +4087,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     function pumpFrame() {
         rafId = null;
         if (!session || destroyed) return;
+        if (!checkMediaLaunch()) return;
         if (activeRunTo) {
             const result = runToController.pump();
             if (board) board.advanceTo(target.timeNs() + boardBaseNs);
@@ -4074,9 +4115,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             const lastLine = serialLines.at(-1);
             basicStartup?.answer(lastLine, runner.sendSerial);
             if (cpmAutoRun && lastLine === 'A>') {
+                if (!checkMediaLaunch()) return;
                 const command = cpmAutoRun;
                 cpmAutoRun = null;
                 runner.sendSerial(`${command}\r`);
+                finishMediaLaunch();
             }
         }
         if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
@@ -4497,6 +4540,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         /** Build, attach, and run. The ⚑ of the debug world. */
         async start({paused = false} = {}) {
+            if (destroyed) return {accepted: false, code: 'destroyed'};
+            if (!checkMediaLaunch()) return {accepted: false, code: 'cancelled'};
+            mediaLaunchSignal?.addEventListener('abort', cancelMediaLaunch, {once: true});
             if (['preparing','compiling','running'].includes(vm?.runtime?.cadCircuitSimulation?.state().phase)) {
                 throw new Error('Stop the circuit–CAD simulation before starting the debugger');
             }
@@ -4543,6 +4589,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     // right-click during a run working.
                     unsubscribeBps = subscribeBreakpoints(syncBreakpoints);
                 }
+                if (!checkMediaLaunch()) return {accepted: false, code: 'cancelled'};
                 session.start();
                 if (cardiacInitialSnapshot) {
                     const saved = cardiacInitialSnapshot.cardiac || cardiacInitialSnapshot;
@@ -4564,7 +4611,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 publishBasicSerial(true);
                 setStatus(paused ? 'paused' : 'running');
                 if (paused) unschedule(); else schedule();
+                if (mediaLaunch) {
+                    if (!cpmAutoRun) finishMediaLaunch();
+                    return await mediaLaunchDone;
+                }
             } catch (e) {
+                if (!checkMediaLaunch()) return {accepted: false, code: 'cancelled'};
+                finishMediaLaunch(true, e);
                 unschedule();
                 i8086Execution.release(i8086ExecutionResult);
                 i8086ExecutionResult = null;
@@ -4621,6 +4674,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
 
         stop() {
+            if (mediaLaunch) {
+                cpmAutoRun = null;
+                finishMediaLaunch(true);
+            }
             xtKeyboard?.clear();
             pcSerialInput?.clear();
             publishBasicSerial(false);
@@ -5815,6 +5872,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         symbols: () => symbols,
 
         destroy({preserveRuntime = false} = {}) {
+            finishMediaLaunch(true);
+            cpmAutoRun = null;
             publishBasicSerial(false);
             i8086ExecutionLifetime.abort();
             i8086Execution.release(i8086ExecutionResult);

@@ -192,6 +192,7 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
     // The native route must never accept the ordinary C compiler's reply or
     // mistake a generated-C file for a runnable CP/M program.
     if (out.toolchain !== spec.toolchain || out.target !== target || out.language !== 'cowgol' ||
+        out.format !== spec.format || out.artifact_kind !== (target === 'cowgol-cgen' ? 'source' : 'executable') ||
         typeof out.base64 !== 'string' ||
         out.base64.length > Math.ceil(spec.maxBytes / 3) * 4 ||
         !base64Pattern.test(out.base64)) {
@@ -223,6 +224,24 @@ export const cowgolCpmConfig = () => ({
     slots: {}, bootOrder: ['com'], widgets: [],
     provenance: {language: 'cowgol', compilerTarget: 'z80-cpm'}
 });
+
+/** Mount the compiled program on the existing real CP/M 2.2 Z80 machine. */
+export function cowgolCpmSystemConfig ({display = false, target = 'z80-cpm'} = {}) {
+    if (typeof display !== 'boolean' || !['z80-cpm', 'i8080-cpm'].includes(target)) {
+        throw new Error('The CP/M 2.2 machine needs a Z80 or 8080 CP/M program.');
+    }
+    return {
+        id: display ? 'cowgol-cpm22-vdp' : 'cowgol-cpm22',
+        title: display ? 'Cowgol — CP/M 2.2 Z80 / TMS9918' : 'Cowgol — CP/M 2.2 Z80',
+        machine: 'z80', executionMode: 'functional', cpu: {variant: 'z80'},
+        ...(display ? {machineConfig: 'CPM64K_TMS9918'} : {}),
+        slots: {cpmsys: {url: 'local-media:cowgol.com'}}, bootOrder: ['cpmsys'],
+        widgets: display ? [{name: 'TMS9918A', type: 'simplevga', source: 'video',
+            config: {width: 256, height: 192}}] : [],
+        provenance: {language: 'cowgol', compilerTarget: target,
+            program: {name: 'COWGOL.COM'}, cpmLaunch: 'COWGOL.COM'}
+    };
+}
 
 export const cowgolDosConfig = () => ({
     id: 'cowgol-dos', title: 'Cowgol — DOS 8086', machine: 'i8086',

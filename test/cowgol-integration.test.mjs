@@ -10,7 +10,8 @@ import {createCodeDocument, serializeCodeDocument, restoreCodeDocumentState} fro
 const source = 'include "cowgol.coh"; print("Hello"); print_nl();';
 const importer = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 const reply = (changes = {}) => ({ok: true, status: 200, json: async () => ({
-    success: true, language: 'cowgol', target: 'z80-cpm', toolchain: 'cowgol-cpmz', base64: 'yQ==', bytes: 1, origin: 0x100, ...changes
+    success: true, language: 'cowgol', target: 'z80-cpm', toolchain: 'cowgol-cpmz', format: 'bin',
+    artifact_kind: 'executable', base64: 'yQ==', bytes: 1, origin: 0x100, ...changes
 })});
 
 test('Cowgol source survives save/reopen independently of its selected machine', () => {
@@ -54,9 +55,26 @@ test('native artifacts validate compiler identity, exact bytes, origin and DOS s
     assert.equal(dos.filename, 'program.exe');
     await assert.rejects(compileCowgol(source, 'dos', {fetcher: async () => reply()}), /invalid artifact/);
     const c = await compileCowgol(source, 'cowgol-cgen', {fetcher: async () => reply({
-        toolchain: 'cowgol-cgen', target: 'cowgol-cgen', base64: btoa('int main(void) { return 0; }'), bytes: 'int main(void) { return 0; }'.length
+        toolchain: 'cowgol-cgen', target: 'cowgol-cgen', format: 'c', artifact_kind: 'source',
+        base64: btoa('int main(void) { return 0; }'), bytes: 'int main(void) { return 0; }'.length
     })});
     assert.equal(c.filename, 'program.c');
+});
+
+test('CP/M, DOS and compiled C require explicit matching artifact formats and kinds', async () => {
+    for (const [target, fields] of [
+        ['z80-cpm', {}],
+        ['i8080-cpm', {toolchain: 'cowgol-cpm', target: 'i8080-cpm'}],
+        ['dos', {toolchain: 'cowgol-msdos', target: 'dos', base64: 'TVoAAA==', bytes: 4}],
+        ['cowgol-cgen', {toolchain: 'cowgol-cgen', target: 'cowgol-cgen', format: 'c', artifact_kind: 'source'}]
+    ]) {
+        for (const mutation of [{format: undefined}, {format: 'elf'}, {artifact_kind: undefined},
+            {artifact_kind: target === 'cowgol-cgen' ? 'executable' : 'source'}]) {
+            await assert.rejects(compileCowgol(source, target, {
+                fetcher: async () => reply({...fields, ...mutation})
+            }), /invalid artifact/, `${target}: ${JSON.stringify(mutation)}`);
+        }
+    }
 });
 
 test('failed or unavailable hosted compilers never return runnable artifacts', async () => {

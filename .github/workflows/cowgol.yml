@@ -11,10 +11,21 @@ on:
       - 'overlay/scratch-gui/src/lib/sb3-creator-riscv-console.js'
       - 'overlay/scratch-gui/src/lib/bw-matrix/**'
       - 'overlay/scratch-gui/src/lib/code-source-document.js'
+      - 'overlay/scratch-gui/src/lib/bw-machines/**'
+      - 'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'
+      - 'overlay/scratch-gui/static/roms/cpm*.bin'
       - 'test/cowgol-integration.test.mjs'
       - 'test/cowgol-platforms.test.mjs'
       - 'test/cowgol-native-surfaces.test.mjs'
       - 'test/bwlite-cowgol-cli.test.mjs'
+      - 'test/bwlite-cowgol-build.test.mjs'
+      - 'test/cowgol-computer-surfaces.test.mjs'
+      - 'test/cowgol-cpm-launch-ownership.test.mjs'
+      - 'test/debug-panel-runner-ownership.test.mjs'
+      - 'test/machine-library-launch.test.mjs'
+      - 'test/machine-media-order.test.mjs'
+      - 'scripts/bw-cowgol.mjs'
+      - 'scripts/verify-cowgol*.mjs'
       - 'bin/bwlite.mjs'
       - 'test/code-conversion-editor-ownership.test.mjs'
       - 'test/code-tab-run-via-blocks.test.mjs'
@@ -28,10 +39,21 @@ on:
       - 'overlay/scratch-gui/src/lib/sb3-creator-riscv-console.js'
       - 'overlay/scratch-gui/src/lib/bw-matrix/**'
       - 'overlay/scratch-gui/src/lib/code-source-document.js'
+      - 'overlay/scratch-gui/src/lib/bw-machines/**'
+      - 'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'
+      - 'overlay/scratch-gui/static/roms/cpm*.bin'
       - 'test/cowgol-integration.test.mjs'
       - 'test/cowgol-platforms.test.mjs'
       - 'test/cowgol-native-surfaces.test.mjs'
       - 'test/bwlite-cowgol-cli.test.mjs'
+      - 'test/bwlite-cowgol-build.test.mjs'
+      - 'test/cowgol-computer-surfaces.test.mjs'
+      - 'test/cowgol-cpm-launch-ownership.test.mjs'
+      - 'test/debug-panel-runner-ownership.test.mjs'
+      - 'test/machine-library-launch.test.mjs'
+      - 'test/machine-media-order.test.mjs'
+      - 'scripts/bw-cowgol.mjs'
+      - 'scripts/verify-cowgol*.mjs'
       - 'bin/bwlite.mjs'
       - 'test/code-conversion-editor-ownership.test.mjs'
       - 'test/code-tab-run-via-blocks.test.mjs'
@@ -73,7 +95,13 @@ jobs:
           test/cowgol-integration.test.mjs
           test/cowgol-platforms.test.mjs
           test/cowgol-native-surfaces.test.mjs
+          test/cowgol-computer-surfaces.test.mjs
+          test/cowgol-cpm-launch-ownership.test.mjs
+          test/debug-panel-runner-ownership.test.mjs
+          test/machine-library-launch.test.mjs
+          test/machine-media-order.test.mjs
           test/bwlite-cowgol-cli.test.mjs
+          test/bwlite-cowgol-build.test.mjs
           test/bwlite-cli.test.mjs
           test/code-conversion-editor-ownership.test.mjs
           test/code-tab-run-via-blocks.test.mjs
@@ -81,3 +109,54 @@ jobs:
           test/code-source-document.test.mjs
           test/bw-matrix-schema.test.mjs
           test/editor-conversion-menu.test.mjs
+  native-cli-and-cpm-system:
+    # Legacy zmac uses pre-C23 declarations; keep the GCC 13 runner.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            overlay/scratch-gui/src/lib
+            overlay/scratch-gui/static/roms
+            scripts
+            bin
+            packages/scratch-gui/src/lib
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Checkout the qualified compiler service
+        uses: actions/checkout@v4
+        with:
+          repository: CrispStrobe/stc-compiler
+          ref: 933435f42a7c7e6b236b5032e1b1137ae1820e65
+          path: _stc_compiler
+      - name: Checkout its exact Cowgol source
+        uses: actions/checkout@v4
+        with:
+          repository: CrispStrobe/cowgol
+          ref: 4082aaba5c023b17f469f74d7a84504e3dbbebd4
+          path: _cowgol
+      - name: Checkout the exact GUI machine
+        uses: actions/checkout@v4
+        with:
+          repository: CrispStrobe/bw-board
+          ref: d21d6d8b819263eb08231134b7556efa82289a90
+          path: _bw_board
+      - name: Prepare the native compiler and local HTTP service
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential ninja-build lua5.4 bison flex gpp moreutils
+          python3 -m pip install --quiet fastapi pydantic uvicorn
+          python3 _stc_compiler/scripts/build-cowgol-bundle.py --source _cowgol --targets cowgol-cgen z80-cpm i8080-cpm
+      - name: Build through the real CLI and execute under CP/M 2.2 and C
+        run: |
+          mkdir -p test-results
+          node scripts/verify-cowgol-platforms.mjs --service _stc_compiler --bundle _stc_compiler/vendor/cowgol --board _bw_board --targets z80-cpm,i8080-cpm,cowgol-cgen --cli --tmpdir "$RUNNER_TEMP" > test-results/cowgol-native-surfaces.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cowgol-native-surfaces
+          path: test-results/cowgol-native-surfaces.json

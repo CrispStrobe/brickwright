@@ -188,7 +188,7 @@ const extract = (start, end) => {
 };
 const methods = extract('    convertedSource (', '    // source → pseudocode') +
     extract('    stopCodeRun ()', '    disposeCodeRun ()') +
-    extract('    async runViaCowgolOnDevice ()', '    async runBlocksOnRiscv ()') +
+    extract('    async runViaCowgolOnDevice (', '    async runBlocksOnRiscv ()') +
     extract('    async compileCowgolSource (', '    // Read the running project into all languages at once.')
         .replace("await import('../../lib/bw-lang/cowgol-compile.js')", 'await loadCompiler()')
         .replace("await import('../../lib/bw-machines/run-machine.js')", 'await loadMachine()');
@@ -310,7 +310,7 @@ test('native Blocks runtime refusal never calls the compiler or replaces/starts 
     for (const [device, source] of [
         ['z80', 'WHEN flag clicked:\n  wait 1 seconds\n'],
         ['eater6502', 'WHEN flag clicked:\n  clear\n'],
-        ['arduino-uno', 'WHEN flag clicked:\n  wait 1 seconds\n']
+        ['arduino-uno', 'GLOBAL duration = 1\nWHEN flag clicked:\n  wait duration seconds\n']
     ]) {
         const f = editorFixture({device, projectSource: source});
         await f.editor.compileCowgolSource(compiler.cowgolTargetForDevice(device), true, {fromBlocks: true});
@@ -320,6 +320,20 @@ test('native Blocks runtime refusal never calls the compiler or replaces/starts 
         assert.equal(f.machineRuns.length, 0);
         assert.match(f.editor.state.status, /^error:/);
         assert.equal(f.editor.state.busy, false);
+    }
+});
+
+test('Uno and bare ATmega328P editor routes emit native timed digital sequences', async () => {
+    for (const device of ['arduino-uno', 'atmega328p']) {
+        const source = `DEVICE ${device.toUpperCase()}\nPIN lamp = D13 OUTPUT\n` +
+            'WHEN flag clicked:\n  turn on lamp\n  wait 0.001 seconds\n  turn off lamp\n';
+        const f = editorFixture({device, lang: 'pseudocode', source});
+        await f.editor.runViaCowgolOnDevice();
+        assert.equal(f.loads.length, 1, f.editor.state.status);
+        assert.equal(f.builds.length, 1, f.editor.state.status);
+        assert.match(f.builds[0].code, /bw_digital_write\(13, 1\);\s+bw_delay\(1\);\s+bw_digital_write\(13, 0\);/);
+        assert.equal(f.builds[0].target, 'atmega328p');
+        assert.equal(f.events.filter(event => event.type === 'bw-asm-rom-ready').length, 1);
     }
 });
 
