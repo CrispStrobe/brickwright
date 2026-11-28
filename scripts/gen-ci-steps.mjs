@@ -30,6 +30,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseJobs} from './lib/workflow-gates.mjs';
 import {parseStepPointers, judgeSteps, POINTERS_FILE} from './lib/skip-pointers.mjs';
+import {assertBrickwrightRepository, BRICKWRIGHT_PREVIOUS_SLUG, BRICKWRIGHT_SLUG} from './lib/brickwright-repository.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const READINGS = path.join(ROOT, 'docs', 'generated', 'ci-step-census.json');
@@ -128,10 +129,30 @@ export const workflowSource = (runs, workflow, fallback, recordedMainSha) => {
     return {sha: recordedMainSha};
 };
 
+/** Live REST metadata binds the current name to the owned repository. */
+export const repositoryIdentity = metadata => {
+    if (!metadata || !Number.isSafeInteger(metadata.id) || metadata.id <= 0) {
+        throw new Error('Live repository metadata must carry a positive numeric repository ID');
+    }
+    assertBrickwrightRepository(metadata.full_name, metadata.id);
+    return {repo: metadata.full_name, repositoryId: metadata.id};
+};
+
 export const mergeWorkflowReadings = (previous, fresh, workflow) => {
-    if (previous.repo !== fresh.repo || !fresh.workflows[workflow]) throw new Error('Workflow refresh must match the recorded repository and workflow');
+    const renamed = previous.repo === BRICKWRIGHT_PREVIOUS_SLUG && fresh.repo === BRICKWRIGHT_SLUG;
+    if ((previous.repo !== fresh.repo && !renamed) || !fresh.workflows[workflow]) {
+        throw new Error('Workflow refresh must match the recorded repository and workflow');
+    }
+    if ([BRICKWRIGHT_PREVIOUS_SLUG, BRICKWRIGHT_SLUG].includes(previous.repo)) {
+        // The existing identity policy admits historical old-slug readings
+        // without an ID. Canonical readings must identify the same owned repo.
+        assertBrickwrightRepository(previous.repo, previous.repositoryId);
+        assertBrickwrightRepository(fresh.repo, fresh.repositoryId);
+    }
     return {
         ...previous,
+        repo: fresh.repo,
+        ...(fresh.repositoryId === undefined ? {} : {repositoryId: fresh.repositoryId}),
         generatedAt: fresh.generatedAt,
         runs: [...previous.runs.filter(r => r.workflow !== workflow), ...fresh.runs],
         workflowsInTree: [...new Set([...previous.workflowsInTree, workflow])].sort(),
@@ -141,7 +162,8 @@ export const mergeWorkflowReadings = (previous, fresh, workflow) => {
 };
 
 const fetchAll = (selectedWorkflow, recordedMainSha) => {
-    const repo = gh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']).trim();
+    const requestedRepo = gh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']).trim();
+    const {repo, repositoryId} = repositoryIdentity(JSON.parse(gh(['api', `repos/${requestedRepo}`])));
     const inTree = readdirSync(path.join(ROOT, '.github/workflows')).filter(f => f.endsWith('.yml'));
     if (selectedWorkflow && !inTree.includes(selectedWorkflow)) throw new Error(`Unknown workflow: ${selectedWorkflow}`);
     const wfs = selectedWorkflow ? [selectedWorkflow] : inTree;
@@ -191,7 +213,7 @@ const fetchAll = (selectedWorkflow, recordedMainSha) => {
             console.warn(`${wf}: not present at ${source.sha} — sourced from the working tree`);
         }
     }
-    return {repo, runs, newestMain, yamlAtSha, sourceShas, wfs};
+    return {repo, repositoryId, runs, newestMain, yamlAtSha, sourceShas, wfs};
 };
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -211,10 +233,10 @@ if (isMain) {
             ? execFileSync('git', ['show', `${baselineRef}:docs/generated/ci-step-census.json`], {cwd: ROOT, encoding: 'utf8'})
             : readFileSync(READINGS, 'utf8')) : null;
         const previous = previousText ? JSON.parse(previousText) : null;
-        const {repo, runs, newestMain, yamlAtSha, sourceShas, wfs} = fetchAll(selectedWorkflow, previous?.headSha);
+        const {repo, repositoryId, runs, newestMain, yamlAtSha, sourceShas, wfs} = fetchAll(selectedWorkflow, previous?.headSha);
         const workflows = census(runs, yamlAtSha);
         for (const wf of wfs) workflows[wf].sourceSha = sourceShas[wf];
-        const fresh = {generatedAt: new Date().toISOString(), repo, headSha: newestMain?.sha, newestMainRun: newestMain?.run, runs: runs.map(r => ({run: r.run, workflow: r.workflow, branch: r.branch, sha: r.sha})), workflowsInTree: wfs, workflows};
+        const fresh = {generatedAt: new Date().toISOString(), repo, repositoryId, headSha: newestMain?.sha, newestMainRun: newestMain?.run, runs: runs.map(r => ({run: r.run, workflow: r.workflow, branch: r.branch, sha: r.sha})), workflowsInTree: wfs, workflows};
         const body = selectedWorkflow ? mergeWorkflowReadings(previous, fresh, selectedWorkflow) : fresh;
         // A scoped refresh preserves the existing presentation as well as the
         // observations; changing one declaration must not reindent every row.

@@ -78,7 +78,8 @@ jobs:
             test/ci-workflow-inputs.test.mjs \
             test/wait-census.test.mjs \
             test/build-trigger-paths.test.mjs \
-            test/cowgol-verifier-cli.test.mjs
+            test/cowgol-verifier-cli.test.mjs \
+            test/cowgol-native-surfaces.test.mjs
       - name: Record the qualified final tree and save only generated evidence
         run: |
           set -euo pipefail

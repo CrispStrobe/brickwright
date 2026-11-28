@@ -54,7 +54,7 @@ test('native device routing advertises only explicitly qualified machine profile
         assert.equal(compiler.cowgolTargetForDevice(device), target);
         assert.equal(compiler.cowgolTargetForDevice(device.toUpperCase()), target);
     }
-    for (const device of ['arduino-mega', 'atmega168', 'attiny85', 'pico', 'i80486', 'constructor', '__proto__', '', null]) {
+    for (const device of ['arduino-mega', 'atmega168', 'atmega2560', 'attiny85', 'pico', 'i80486', 'constructor', '__proto__', '', null]) {
         assert.equal(compiler.cowgolTargetForDevice(device), null, String(device));
     }
 });
@@ -67,9 +67,10 @@ test('the capability matrix records the qualified AVR profiles without widening 
         assert.equal(capability.native.status, 'open', device);
         assert.equal(capability.native.sim, false, 'a pending deployment is not a shipped machine route');
     }
-    for (const device of ['arduino-mega', 'atmega2560', 'attiny85']) {
+    for (const device of ['arduino-mega', 'attiny85']) {
         assert.equal(isNativeNull(cell('cowgol', device).native), true, device);
     }
+    assert.equal(cell('cowgol', 'atmega2560'), null, 'an unregistered device has no capability cell');
 });
 
 test('AVR compilation requests HEX and hands the identical validated text to the fixed firmware loader', async () => {
