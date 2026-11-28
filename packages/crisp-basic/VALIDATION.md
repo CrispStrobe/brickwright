@@ -1,5 +1,52 @@
 # Validation records
 
+## Explicit output-latch toggle
+
+This milestone adds `PROCdigitalToggle(pin)` as an atomic host operation,
+with runtime package `0.1.0-dev.6`, simulation ABI/contract version 2 and the
+unchanged version-1 worker envelope. The owning producer is
+[`sb3-creator@b465a543aa04aac9800635034b87e7438d62adc0`](https://github.com/CrispStrobe/sb3-creator/commit/b465a543aa04aac9800635034b87e7438d62adc0)
+on `feature/crispbasic-generator`; `vendor-pins.json`, both compiler mirrors
+and the derived authoring inventory identify that revision. The board,
+Circuit and BBCSDL pins are unchanged, as is the existing gallery.
+
+### Observed local qualification before hosted rebuild
+
+| Check | Observed result |
+| --- | --- |
+| Owning producer generation, reverse/CLI, legacy, source maps and traces | 306 passed, zero failures or skips |
+| Runtime source, reference host and worker protocol/lifecycle | 111 passed, zero failures or skips |
+| Circuit host/session/model/guard, runner, conversion and editor | 134 passed, zero failures or skips |
+| Exact producer identity, sync mirroring and SPIKE artifact | 10 passed, zero failures or skips |
+| Producer sync check and duplicated-fact mirror check | Passed |
+
+The 134 integration checks include the 21 board-host tests. Counts in this table
+are separate suites, not additions to the historical totals below. The identity
+check compares all 21 mapped producer files at the explicit supplier checkout.
+The producer's owning command is `node --test test/crispbasic-*.test.mjs
+test/basic-sweep.test.mjs test/basic-linemap.test.mjs test/basic-trace.test.mjs`.
+The runtime source/reference/protocol command is `npm test` in this package.
+
+The real pinned solver now demonstrates the distinction directly: request high,
+observe the clamped net low, toggle the retained request to low, then toggle it
+back to high while the solved read stays low. It also checks initial zero,
+write/mode retention, fresh runs, no clock advancement, trace exhaustion before
+mutation, synchronous cancellation and revoked ownership. Runtime bridge tests
+verify one operation-6 request, duplicate refusal, typed void replies, stale
+ABI-1 rejection and the catchable unavailable result for old custom hosts.
+
+The new actual-C/WASM tests and complete production-browser gate require the
+hosted rebuild; no local native/WASM rebuild or browser execution is claimed
+here. The complete GUI gate now contains eleven scenarios, adding generated
+ACTIVE LOW latch-toggle execution against a clamped circuit and retaining the
+error-banner/newline regression with unsupported `wait until`. Hosted results
+and artifact identities will be recorded after those jobs complete.
+
+Reverse conversion remains a qualified refusal. Toggle does not establish a
+portable-library round trip, an instruction-to-time model, peripheral support
+or physical-device equivalence. The older generator refusal and ABI-1 results
+below describe their own exact revisions and are retained as history.
+
 ## Explicit portable generator boundary
 
 The owning producer is qualified at

@@ -26,6 +26,7 @@ function adapterFor(host, overrides = {}) {
     return {
         pinMode: (...args) => host.pinMode(...args),
         digitalWrite: (...args) => host.digitalWrite(...args),
+        digitalToggle: (...args) => host.digitalToggle(...args),
         digitalRead: (...args) => host.digitalRead(...args),
         delay: (...args) => host.delay(...args),
         millis: () => host.millis(),
@@ -78,6 +79,103 @@ END
     assert.equal(host.capabilities.basicBridge, false, 'the standalone host still has no interpreter');
     assert.equal(host.capabilities.hardware, false);
     assert.equal(host.capabilities.circuitPhysics, false);
+});
+
+test('ordinary toggle preserves the latch across modes and evaluates the pin argument once', async t => {
+    let host;
+    const session = sessionFor(t, {simulation: {createHost() {
+        host = createSimulationHost({pins: [42]});
+        return host;
+    }}});
+    const result = await session.run(`calls%=0
+PROCpinMode(42, "output")
+PROCdigitalToggle(FNpin)
+PRINT STR$(FNdigitalRead(42))
+PROCdigitalToggle(FNpin)
+PROCdigitalWrite(42, 1)
+PROCpinMode(42, "input-pullup")
+PROCpinMode(42, "output")
+PROCdigitalToggle(FNpin)
+PRINT STR$(calls%)+":"+STR$(FNdigitalRead(42))+":"+STR$(FNmillis)
+END
+DEF FNpin
+calls%+=1
+=42
+`, {filename: 'toggle.bas'});
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '1\r\n3:0:0\r\n');
+    assert.deepEqual(host.trace.filter(event => event.type === 'digital-toggle'), [
+        {sequence: 2, atMs: 0, type: 'digital-toggle', pin: 42, value: 1},
+        {sequence: 4, atMs: 0, type: 'digital-toggle', pin: 42, value: 0},
+        {sequence: 8, atMs: 0, type: 'digital-toggle', pin: 42, value: 0}
+    ]);
+    assert.equal(host.trace.filter(event => event.type === 'digital-read').length, 2,
+        'only the two authored reads sense the pin');
+});
+
+test('a delayed atomic toggle preserves recursive PROC locals through suspension', async t => {
+    let host, calls = 0;
+    const session = sessionFor(t, {simulation: {createHost() {
+        host = createSimulationHost();
+        return adapterFor(host, {async digitalToggle(pin) {
+            calls++;
+            await delay(3);
+            host.digitalToggle(pin);
+        }});
+    }}});
+    const result = await session.run(`PROCpinMode(0, "output")
+PROCwalk(2)
+PRINT STR$(FNdigitalRead(0))+":"+STR$(FNmillis)
+END
+DEF PROCwalk(depth%)
+LOCAL saved%
+saved%=depth%+40
+PROCdigitalToggle(0)
+IF depth%>0 THEN PROCwalk(depth%-1)
+PRINT STR$(saved%)
+ENDPROC
+`);
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '40\r\n41\r\n42\r\n1:0\r\n');
+    assert.equal(calls, 3);
+    assert.deepEqual(host.trace.filter(event => event.type === 'digital-toggle').map(event => event.value), [1, 0, 1]);
+});
+
+test('a five-operation adapter refuses toggle as catchable unavailable without sensing or writing', async t => {
+    let host;
+    const session = sessionFor(t, {simulation: {createHost() {
+        host = createSimulationHost();
+        const adapter = adapterFor(host);
+        delete adapter.digitalToggle;
+        return adapter;
+    }}});
+    const unhandled = await session.run('100 REM old adapter\n\n450 PROCdigitalToggle(0)\n', {filename: 'old-adapter.bas'});
+    assert.equal(unhandled.status, 'error', JSON.stringify(unhandled.error));
+    assert.equal(unhandled.error.code, 208);
+    assert.equal(unhandled.error.simulationCode, 'unavailable');
+    assert.equal(unhandled.error.basicLine, 450);
+    assert.equal(unhandled.error.line, 3);
+    assert.equal(unhandled.error.filename, 'old-adapter.bas');
+    assert.deepEqual(host.trace, []);
+    const caught = await session.run('ON ERROR PRINT STR$(ERR):END\nPROCdigitalToggle(0)\n');
+    assert.equal(caught.status, 'completed', JSON.stringify(caught.error));
+    assert.equal(caught.text, '208\r\n');
+    assert.deepEqual(host.trace, []);
+});
+
+test('a user toggle definition retains ordinary BASIC precedence with and without simulation', async t => {
+    const source = 'PROCdigitalToggle(42)\nEND\nDEF PROCdigitalToggle(pin)\nPRINT STR$(pin+1)\nENDPROC\n';
+    const ordinary = sessionFor(t);
+    assert.equal((await ordinary.run('PROCdigitalToggle(42)\nEND\n')).status, 'error');
+    const authored = await ordinary.run(source);
+    assert.equal(authored.status, 'completed', JSON.stringify(authored.error));
+    assert.equal(authored.text, '43\r\n');
+    let host;
+    const enabled = sessionFor(t, {simulation: {createHost() { host = createSimulationHost(); return host; }}});
+    const result = await enabled.run(source);
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '43\r\n');
+    assert.deepEqual(host.trace, []);
 });
 
 test('delayed simulation replies preserve recursive FN locals and enclosing PROC frames', async t => {
@@ -164,18 +262,20 @@ test('nested argument requests cannot replace the outer callsite in a simulation
         host.digitalWrite(0, 1);
         return host;
     }}});
-    const result = await session.run(`100 REM outer call follows
-200 PROCdigitalWrite(FNpin, 1)
+    for (const call of ['PROCdigitalWrite(FNpin, 1)', 'PROCdigitalToggle(FNpin)']) {
+        const result = await session.run(`100 REM outer call follows
+200 ${call}
 300 END
 400 DEF FNpin
 450 =FNdigitalRead(0)
 `, {filename: 'nested.bas'});
-    assert.equal(result.status, 'error', JSON.stringify(result.error));
-    assert.equal(result.error.code, 205);
-    assert.equal(result.error.simulationCode, 'pin-not-output');
-    assert.equal(result.error.basicLine, 200);
-    assert.equal(result.error.line, 2);
-    assert.equal(result.error.filename, 'nested.bas');
+        assert.equal(result.status, 'error', JSON.stringify(result.error));
+        assert.equal(result.error.code, 205);
+        assert.equal(result.error.simulationCode, 'pin-not-output');
+        assert.equal(result.error.basicLine, 200);
+        assert.equal(result.error.line, 2);
+        assert.equal(result.error.filename, 'nested.bas');
+    }
 });
 
 test('EVAL simulation errors map simple, sequential and nested expressions to their enclosing source', async t => {
@@ -288,7 +388,7 @@ test('library loading leaves maximum authored line numbers available', async t =
     assert.equal(result.text, '0\r\n');
 });
 
-test('CLEAR and RUN retain the installed library without resetting the parent simulation clock', async t => {
+test('CLEAR and RUN retain the installed library, clock and output latch', async t => {
     const session = sessionFor(t, {simulation: {createHost: () => createSimulationHost()}});
     const clear = await session.run('PROCdelay(2)\nCLEAR\nPRINT STR$(FNmillis)\nEND\n');
     assert.equal(clear.status, 'completed', JSON.stringify(clear.error));
@@ -296,6 +396,14 @@ test('CLEAR and RUN retain the installed library without resetting the parent si
     const run = await session.run('IF FNmillis = 0 THEN PROCdelay(1):RUN\nPRINT STR$(FNmillis)\nEND\n');
     assert.equal(run.status, 'completed', JSON.stringify(run.error));
     assert.equal(run.text, '1\r\n');
+    const clearLatch = await session.run('PROCpinMode(0, "output")\nPROCdigitalToggle(0)\nCLEAR\n' +
+        'PROCdigitalToggle(0)\nPRINT STR$(FNdigitalRead(0))\nEND\n');
+    assert.equal(clearLatch.status, 'completed', JSON.stringify(clearLatch.error));
+    assert.equal(clearLatch.text, '0\r\n');
+    const runLatch = await session.run('IF FNmillis = 0 THEN PROCpinMode(0,"output"):PROCdigitalToggle(0):PROCdelay(1):RUN\n' +
+        'PROCdigitalToggle(0)\nPRINT STR$(FNdigitalRead(0))+":"+STR$(FNmillis)\nEND\n');
+    assert.equal(runLatch.status, 'completed', JSON.stringify(runLatch.error));
+    assert.equal(runLatch.text, '0:1\r\n');
 });
 
 test('fractional, out-of-range, string and malformed arguments cannot reach host side effects', async t => {
@@ -309,6 +417,12 @@ test('fractional, out-of-range, string and malformed arguments cannot reach host
         'PROCdigitalWrite(0, 0.5)',
         'PROCdigitalWrite(0, 2)',
         'PROCdigitalWrite(0, "1")',
+        'PROCdigitalToggle(0.5)',
+        'PROCdigitalToggle(-1)',
+        'PROCdigitalToggle(65536)',
+        'PROCdigitalToggle("0")',
+        'PROCdigitalToggle(0, 1)',
+        'PROCdigitalToggle(0',
         'PRINT STR$(FNdigitalRead(0.5))',
         'PROCdelay(0.5)',
         'PROCdelay(-1)',
@@ -334,6 +448,8 @@ test('configured logical IDs and input/output state errors remain catchable and 
     for (const [source, code, simulationCode] of [
         ['PROCpinMode(0, "output")', 201, 'invalid-pin'],
         ['PROCdigitalWrite(42, 1)', 205, 'pin-not-output'],
+        ['PROCdigitalToggle(42)', 205, 'pin-not-output'],
+        ['PROCdigitalToggle(0)', 201, 'invalid-pin'],
         ['PRINT STR$(FNdigitalRead(42))', 206, 'floating-input']
     ]) {
         const result = await session.run(source + '\nEND\n');
@@ -346,12 +462,16 @@ test('configured logical IDs and input/output state errors remain catchable and 
 test('the private intrinsic validates its complete fixed argument list before sending a request', async t => {
     for (const source of [
         'PRINT FN_crispSimulation(0, 0, 0)',
-        'PRINT FN_crispSimulation(6, 0, 0)',
+        'PRINT FN_crispSimulation(7, 0, 0)',
         'PRINT FN_crispSimulation(1, 0, "output", 0)',
         'PRINT FN_crispSimulation(1, 0, "output"',
         'PRINT FN_crispSimulation(3, 0, 1)',
         'PRINT FN_crispSimulation(4, 0.5, 0)',
         'PRINT FN_crispSimulation(5, 1, 0)',
+        'PRINT FN_crispSimulation(6, 0, 1)',
+        'PRINT FN_crispSimulation(6, 65536, 0)',
+        'PRINT FN_crispSimulation(6, 0.5, 0)',
+        'PRINT FN_crispSimulation(6, "0", 0)',
         'PRINT FN_crispSimulation("1", 0, "output")'
     ]) {
         let host;
@@ -382,9 +502,30 @@ test('a cumulative request budget also stops reads that produce no trace', async
     assert.equal(host.state, 'disposed');
 });
 
+test('each toggle consumes one request and parent limits stop before a further latch mutation', async t => {
+    let host;
+    const session = sessionFor(t, {simulation: {maxRequests: 3, createHost() {
+        host = createSimulationHost();
+        return host;
+    }}});
+    const result = await session.run('ON ERROR PRINT "caught":END\nPROCpinMode(0, "output")\n' +
+        'REPEAT\nPROCdigitalToggle(0)\nUNTIL FALSE\n');
+    assert.equal(result.status, 'simulation-limit', JSON.stringify(result.error));
+    assert.equal(result.error.code, 'request-limit');
+    assert.equal(result.text, '');
+    assert.deepEqual(host.trace, [
+        {sequence: 1, atMs: 0, type: 'pin-mode', pin: 0, mode: 'output'},
+        {sequence: 2, atMs: 0, type: 'digital-toggle', pin: 0, value: 1},
+        {sequence: 3, atMs: 0, type: 'digital-toggle', pin: 0, value: 0}
+    ]);
+    assert.equal(host.state, 'disposed');
+});
+
 test('simulation trace and time budgets terminate in the parent outside ON ERROR', async t => {
     for (const [options, source, code, expectedTrace] of [
         [{maxTraceEvents: 1}, 'PROCpinMode(0, "output")\nPROCdigitalWrite(0, 1)', 'trace-limit',
+            [{sequence: 1, atMs: 0, type: 'pin-mode', pin: 0, mode: 'output'}]],
+        [{maxTraceEvents: 1}, 'PROCpinMode(0, "output")\nPROCdigitalToggle(0)', 'trace-limit',
             [{sequence: 1, atMs: 0, type: 'pin-mode', pin: 0, mode: 'output'}]],
         [{maxTimeMs: 4}, 'PROCdelay(5)', 'time-limit', []]
     ]) {
@@ -448,6 +589,43 @@ test('cancellation aborts a pending adapter and suppresses its late reply before
     assert.equal(runs.length, 2);
     assert.equal(runs[1].disposed, 1);
     assert.deepEqual(terminals, ['cancelled', 'completed']);
+});
+
+test('cancelling a deferred toggle aborts its host before disposal and a fresh run starts from zero', {timeout: 15000}, async t => {
+    const entered = deferred(), release = deferred();
+    const runs = [];
+    const session = sessionFor(t, {simulation: {createHost({signal}) {
+        const host = createSimulationHost();
+        const run = {host, signal, disposed: 0};
+        runs.push(run);
+        return adapterFor(host, {
+            async digitalToggle(pin) {
+                if (runs.length === 1) { entered.resolve(); await release.promise; }
+                // Deferred adapters must check ownership before side effects.
+                if (!signal.aborted) host.digitalToggle(pin);
+            },
+            dispose() {
+                assert.equal(signal.aborted, true);
+                run.disposed++;
+                host.dispose();
+            }
+        });
+    }}});
+    const pending = session.run('PROCpinMode(0, "output")\nPROCdigitalToggle(0)\nPRINT "late"\nEND\n');
+    await waitForRequest(entered.promise, pending);
+    assert.equal(session.cancel(), true);
+    const stopped = await pending;
+    assert.equal(stopped.status, 'cancelled');
+    assert.equal(stopped.text, '');
+    assert.equal(runs[0].signal.aborted, true);
+    assert.equal(runs[0].disposed, 1);
+    release.resolve();
+    const next = await session.run('PROCpinMode(0, "output")\nPROCdigitalToggle(0)\n' +
+        'PRINT STR$(FNdigitalRead(0))\nEND\n');
+    assert.equal(next.status, 'completed', JSON.stringify(next.error));
+    assert.equal(next.text, '1\r\n');
+    assert.deepEqual(runs[0].host.trace, [{sequence: 1, atMs: 0, type: 'pin-mode', pin: 0, mode: 'output'}]);
+    assert.equal(runs[1].disposed, 1);
 });
 
 test('the deadline includes a never-resolving simulation reply and aborts its host', {timeout: 10000}, async t => {

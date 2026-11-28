@@ -9,9 +9,12 @@ and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
 access. The Brickwright Code tab now adapts this runtime, with interactive input,
 Stop/Reset, mapped diagnostics and the existing partial VDU renderer. Version
-`0.1.0-dev.5` connects the opt-in BASIC simulation bridge to the active Brickwright
+`0.1.0-dev.6` connects the opt-in BASIC simulation bridge to the active Brickwright
 Circuit board through a GUI-owned adapter. Digital pin operations use the pinned
 electrical solver, and integer-millisecond delays advance its clock cooperatively.
+The portable generator emits an explicit `PROCdigitalToggle` operation backed
+by retained output latches, including when the solved electrical level differs
+from the requested output. Reverse conversion of portable calls remains refused.
 Full graphics, source debugging and physical-board targets remain subsequent work.
 
 ## Try it
@@ -272,7 +275,7 @@ sessions can execute concurrently, and repeated runs share no BASIC variables.
 
 Omitting `simulation` leaves the bridge disabled. `simulation: {}` creates a
 fresh deterministic reference host for every run and installs the ordinary
-`PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay` and `FNmillis`
+`PROCpinMode`, `PROCdigitalWrite`, `PROCdigitalToggle`, `FNdigitalRead`, `PROCdelay` and `FNmillis`
 library in a separate interpreter library area:
 
 ```js
@@ -294,9 +297,16 @@ END
 ```
 
 The C/WASM artifact must be rebuilt for this API: the worker checks
-`crisp_simulation_abi() === 1` before enabling it. Older artifacts produce an
+`crisp_simulation_abi() === 2` before enabling it. Older artifacts produce an
 actionable host error. The native backend has no simulation bridge and explicitly
 rejects a `simulation` option instead of silently ignoring it.
+
+The simulation capability advertises `contractVersion: 2` and bridge support
+for `digitalToggle`; worker records retain framing version `1`. Toggle requires
+an output and inverts its retained electrical request in one operation, without
+sensing the net or advancing time. Latches start at `0`, survive mode changes,
+and are cleared by reference-host reset or a fresh run. Each successful toggle
+creates one trace record with the resulting latch value.
 
 `simulation.createHost({signal, runId})` may synchronously return a custom fresh
 host; its operation methods may return values or Promises. Each host belongs to
@@ -307,6 +317,11 @@ work must check cancellation/disposal before changing state. The session ignores
 late replies and terminates its worker; it cannot undo an adapter's external
 side effects. [SIMULATION.md](SIMULATION.md) defines the full ownership and
 cancellation contract.
+
+Custom hosts implementing only the original five operations remain supported.
+If they omit `digitalToggle`, a toggle call raises catchable `ERR208`
+(`unavailable`); no read/write fallback is attempted. The bridge's advertised
+toggle capability does not promise that a custom host implements it.
 
 The default request budget is 4096, configurable from 1 to 1000000, including
 `FNmillis` requests that do not create trace records. Request, trace, scheduled

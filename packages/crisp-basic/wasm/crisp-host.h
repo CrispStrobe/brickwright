@@ -22,7 +22,9 @@ void crisp_host_exit(int code);
 
 /* Dedicated simulation ABI. No names, pointers, strings or host addresses
  * cross this boundary. Operations: 1 pinMode, 2 digitalWrite, 3 digitalRead,
- * 4 delay, 5 millis. pinMode uses 0=input, 1=output, 2=input-pullup.
+ * 4 delay, 5 millis, 6 digitalToggle. pinMode uses 0=input, 1=output,
+ * 2=input-pullup. digitalToggle inverts the host's retained output latch;
+ * like digitalRead it takes a pin ID and a fixed zero second argument.
  * Success is 0 for void operations, 0/1 for read, integer milliseconds for
  * millis. Negative replies identify ordinary, catchable domain errors below.
  * Resource/protocol failures belong to the parent and never become replies.

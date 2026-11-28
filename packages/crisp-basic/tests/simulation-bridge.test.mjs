@@ -36,6 +36,7 @@ function hostFor(overrides = {}) {
     const host = {
         pinMode(...args) { calls.push(['pinMode', ...args]); },
         digitalWrite(...args) { calls.push(['digitalWrite', ...args]); },
+        digitalToggle(...args) { calls.push(['digitalToggle', ...args]); },
         digitalRead(...args) { calls.push(['digitalRead', ...args]); return 1; },
         delay(...args) { calls.push(['delay', ...args]); },
         millis(...args) { calls.push(['millis', ...args]); return 23; },
@@ -45,27 +46,53 @@ function hostFor(overrides = {}) {
     return {host, calls};
 }
 
-test('bridge routes only the five scalar operations and acknowledges void methods', async t => {
+test('bridge routes only the six scalar operations and acknowledges void methods', async t => {
     const {host, calls} = hostFor();
     let context;
     const session = sessionFor(t, {simulation: {createHost: value => { context = value; return host; }}});
     const result = await session.run(scriptedSource([
         request(1, [7, 0]), request(1, [7, 1]), request(1, [7, 2]),
-        request(2, [7, 1]), request(3, [7, 0]), request(4, [100, 0]), request()
+        request(2, [7, 1]), request(3, [7, 0]), request(4, [100, 0]), request(), request(6, [7, 0])
     ]));
     assert.equal(result.status, 'completed', JSON.stringify(result.error));
     assert.deepEqual(calls, [
         ['pinMode', 7, 'input'], ['pinMode', 7, 'output'], ['pinMode', 7, 'input-pullup'],
-        ['digitalWrite', 7, 1], ['digitalRead', 7], ['delay', 100], ['millis'], ['dispose']
+        ['digitalWrite', 7, 1], ['digitalRead', 7], ['delay', 100], ['millis'], ['digitalToggle', 7], ['dispose']
     ]);
     const replies = JSON.parse(result.text);
-    assert.deepEqual(replies.map(reply => reply.value), [0, 0, 0, 0, 1, 0, 23]);
-    assert.deepEqual(replies.map(reply => reply.requestId), [1, 2, 3, 4, 5, 6, 7]);
+    assert.deepEqual(replies.map(reply => reply.value), [0, 0, 0, 0, 1, 0, 23, 0]);
+    assert.deepEqual(replies.map(reply => reply.requestId), [1, 2, 3, 4, 5, 6, 7, 8]);
     assert.ok(replies.every(reply => reply.type === 'simulation-reply' && reply.version === 1 && reply.ok === true));
     assert.ok(replies.every(reply => reply.runId === context.runId));
     assert.ok(context.signal instanceof AbortSignal);
     assert.equal(context.signal.aborted, true);
     assert.equal(Object.isFrozen(context), true);
+    assert.equal(session.capabilities.simulation.contractVersion, 2);
+    assert.equal(session.capabilities.simulation.digitalToggle, true);
+});
+
+test('an original five-operation adapter remains usable and refuses only an unavailable toggle', async t => {
+    const {host, calls} = hostFor();
+    delete host.digitalToggle;
+    const result = await sessionFor(t, {simulation: {createHost: () => host}}).run(scriptedSource([
+        request(2, [7, 1]), request(6, [7, 0]), request(3, [7, 0]), request()
+    ]));
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.deepEqual(JSON.parse(result.text).map(reply => reply.ok ? reply.value : reply.error),
+        [0, {code: 'unavailable'}, 1, 23]);
+    assert.deepEqual(calls, [['digitalWrite', 7, 1], ['digitalRead', 7], ['millis'], ['dispose']],
+        'unavailable toggle must not synthesize a read and write');
+});
+
+test('a provided nonfunction toggle is rejected before any operation', async t => {
+    for (const digitalToggle of [undefined, null, 0, false, {}]) {
+        const {host, calls} = hostFor({digitalToggle});
+        const result = await sessionFor(t, {simulation: {createHost: () => host}})
+            .run(scriptedSource([request()]));
+        assert.equal(result.status, 'host-error', JSON.stringify(result.error));
+        assert.match(result.error.message, /digitalToggle.*function/);
+        assert.deepEqual(calls, [['dispose']]);
+    }
 });
 
 test('a request without an explicitly enabled bridge is rejected', async t => {
@@ -109,7 +136,7 @@ for (const [name, step] of [
     ['future request ID', {record: {requestId: 2}}],
     ['fractional request ID', {record: {requestId: 1.5}}],
     ['string request ID', {record: {requestId: '1'}}],
-    ['unknown operation', {record: {operation: 6}}],
+    ['unknown operation', {record: {operation: 7}}],
     ['string operation', {record: {operation: '5'}}],
     ['missing arguments', {omit: ['args']}],
     ['too many arguments', {record: {args: [0, 0, 0]}}],
@@ -119,6 +146,9 @@ for (const [name, step] of [
     ['string argument', {record: {operation: 4, args: ['0', 0]}}],
     ['fractional argument', {record: {operation: 4, args: [0.5, 0]}}],
     ['out of range pin', {record: {operation: 3, args: [65536, 0]}}],
+    ['out of range toggle pin', {record: {operation: 6, args: [65536, 0]}}],
+    ['fractional toggle pin', {record: {operation: 6, args: [0.5, 0]}}],
+    ['unused nonzero toggle argument', {record: {operation: 6, args: [0, 1]}}],
     ['invalid mode enum', {record: {operation: 1, args: [0, 3]}}],
     ['invalid digital value', {record: {operation: 2, args: [0, 2]}}],
     ['negative delay', {record: {operation: 4, args: [-1, 0]}}],
@@ -151,6 +181,18 @@ test('a duplicate request cannot repeat an already acknowledged mutation', async
     ]));
     assert.equal(result.status, 'host-error', JSON.stringify(result.error));
     assert.deepEqual(calls, [['digitalWrite', 0, 1], ['dispose']]);
+});
+
+test('a duplicate toggle request cannot invert a latch twice', async t => {
+    const host = createSimulationHost();
+    const result = await sessionFor(t, {simulation: {createHost: () => host}}).run(scriptedSource([
+        request(1, [0, 1]), request(6, [0, 0]), request(6, [0, 0], {requestId: 2})
+    ]));
+    assert.equal(result.status, 'host-error', JSON.stringify(result.error));
+    assert.deepEqual(host.trace, [
+        {sequence: 1, atMs: 0, type: 'pin-mode', pin: 0, mode: 'output'},
+        {sequence: 2, atMs: 0, type: 'digital-toggle', pin: 0, value: 1}
+    ]);
 });
 
 test('completion while a host operation is pending is a protocol failure', async t => {
@@ -222,10 +264,13 @@ for (const [name, operation, value] of [
     ['string millis', 5, '1'],
     ['object result', 5, {value: 1}],
     ['NaN result', 5, NaN],
-    ['unexpected void result', 4, 1]
+    ['unexpected void result', 4, 1],
+    ['unexpected toggle result', 6, 1],
+    ['boolean toggle result', 6, false]
 ]) {
     test(`bridge rejects ${name} from the adapter`, async t => {
-        const {host} = hostFor({millis: () => value, digitalRead: () => value, delay: () => value});
+        const {host} = hostFor({millis: () => value, digitalRead: () => value, delay: () => value,
+            digitalToggle: () => value});
         const result = await sessionFor(t, {simulation: {createHost: () => host}})
             .run(scriptedSource([request(operation)]));
         assert.equal(result.status, 'host-error', JSON.stringify(result.error));
@@ -453,7 +498,7 @@ const moduleURL = new URL(`data:text/javascript,${encodeURIComponent(`
 export default async function ({crispHost}) {
     return {
         HEAPU8: new Uint8Array(8192),
-        _malloc: () => 1, _free() {}, _crisp_simulation_abi: () => 1,
+        _malloc: () => 1, _free() {}, _crisp_simulation_abi: () => 2,
         async ccall(name, resultType, argumentTypes, args) {
             if (name !== 'crisp_run' || args.length !== 3 || args[2] !== 1) throw new Error('Missing bridge enable flag');
             const value = await crispHost.simulationRequest(5, 0, 0);
@@ -471,7 +516,27 @@ test('the production worker carries a delayed host reply through its JavaScript 
     assert.deepEqual([...result.output], [65]);
 });
 
-for (const [name, abiExport] of [['missing', ''], ['stale', '_crisp_simulation_abi: () => 0,']]) {
+test('the production worker sends one atomic toggle request with a void acknowledgement', async t => {
+    const toggleModule = new URL(`data:text/javascript,${encodeURIComponent(`
+        export default async function ({crispHost}) {
+            return {_crisp_simulation_abi: () => 2, HEAPU8: new Uint8Array(8192),
+                _malloc: () => 1, _free() {}, async ccall() {
+                    crispHost.output(await crispHost.simulationRequest(6, 42, 0));
+                    return 0;
+                }};
+        }`)}`);
+    const {host, calls} = hostFor();
+    const result = await sessionFor(t, {workerURL: actualWorker, moduleURL: toggleModule,
+        simulation: {createHost: () => host}}).run('END\n');
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.deepEqual([...result.output], [0]);
+    assert.deepEqual(calls, [['digitalToggle', 42], ['dispose']]);
+});
+
+for (const [name, abiExport] of [
+    ['missing', ''], ['unsupported zero', '_crisp_simulation_abi: () => 0,'],
+    ['stale five-operation', '_crisp_simulation_abi: () => 1,']
+]) {
     test(`a ${name} simulation ABI is rejected before the interpreter is called`, async t => {
         const incompatible = new URL(`data:text/javascript,${encodeURIComponent(`
             export default async function ({crispHost}) {
@@ -482,6 +547,7 @@ for (const [name, abiExport] of [['missing', ''], ['stale', '_crisp_simulation_a
         const result = await sessionFor(t, {workerURL: actualWorker, moduleURL: incompatible,
             simulation: {createHost: () => host}}).run('END\n');
         assert.equal(result.status, 'host-error', JSON.stringify(result.error));
+        assert.match(result.error.message, /simulation bridge version 2/);
         assert.equal(result.output.length, 0);
         assert.deepEqual(calls, [['dispose']]);
     });
@@ -520,7 +586,7 @@ test('a malformed reply produces exactly one terminal record even as the pending
     const fixtureModule = new URL(`data:text/javascript,${encodeURIComponent(`
         import {parentPort} from 'node:worker_threads';
         export default async function ({crispHost}) {
-            return {_crisp_simulation_abi: () => 1, HEAPU8: new Uint8Array(8192), _malloc: () => 1,
+            return {_crisp_simulation_abi: () => 2, HEAPU8: new Uint8Array(8192), _malloc: () => 1,
                 async ccall() { await crispHost.simulationRequest(5, 0, 0); return 0; },
                 _free() { parentPort.postMessage({type: 'fixture-freed'}); }};
         }`)}`);

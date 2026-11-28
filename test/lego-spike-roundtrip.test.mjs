@@ -367,9 +367,11 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> 1c29f69f (2026-11-25): electronics benches and the CP3/CP4 lesson.
     // -> 0b2224b7 (2026-11-28): explicit CrispBasic generation and reverse-conversion
     // guards; preserve the existing Microtronic gallery entry at this supplier pin.
+    // -> b465a543 (2026-11-28): atomic CrispBASIC output-latch toggle; the SPIKE
+    // emitter and gallery are unchanged. Re-run every artifact assertion below.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '0b2224b75baa6492fcc77118a54780174b116f42');
+        'b465a543aa04aac9800635034b87e7438d62adc0');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);

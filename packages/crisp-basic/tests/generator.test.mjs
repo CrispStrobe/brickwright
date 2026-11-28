@@ -91,6 +91,43 @@ test('portable blocks execute logical polarity and raw normalized digital writes
     assert.equal(f.host.state, 'disposed');
 });
 
+for (const lineNumbers of [false, true]) {
+    for (const activeLow of [false, true]) {
+        test(`portable ${lineNumbers ? 'numbered' : 'structured'} toggle uses the electrical latch with ACTIVE ${activeLow ? 'LOW' : 'HIGH'}`, async t => {
+            const generated = generate(`DEVICE UNO
+PIN lamp = D13 OUTPUT${activeLow ? ' ACTIVE LOW' : ''}
+WHEN flag clicked:
+  toggle lamp
+  toggle lamp
+  turn off lamp
+  toggle lamp
+  set lamp high
+  toggle lamp
+  print read lamp
+`, {...portable, lineNumbers});
+            const f = referenceSession(t);
+            const result = await f.session.run(generated.basic);
+            completed(result);
+            assert.equal(result.text, activeLow ? '         1\r\n' : '         0\r\n');
+            assert.deepEqual(f.host.trace.map(({sequence, ...event}) => event), [
+                {atMs: 0, type: 'pin-mode', pin: 13, mode: 'output'},
+                {atMs: 0, type: 'digital-toggle', pin: 13, value: 1},
+                {atMs: 0, type: 'digital-toggle', pin: 13, value: 0},
+                {atMs: 0, type: 'digital-write', pin: 13, value: activeLow ? 1 : 0},
+                {atMs: 0, type: 'digital-toggle', pin: 13, value: activeLow ? 0 : 1},
+                {atMs: 0, type: 'digital-write', pin: 13, value: 1},
+                {atMs: 0, type: 'digital-toggle', pin: 13, value: 0},
+                {atMs: 0, type: 'digital-read', pin: 13, value: 0}
+            ]);
+            const toggleIds = Object.entries(generated.creator.project.targets[0].blocks)
+                .filter(([, block]) => block.opcode === 'stc12_toggle').map(([id]) => id);
+            const toggleLines = generated.basic.split('\n').flatMap((line, index) =>
+                line.includes('PROCdigitalToggle') ? [generated.lineMap[lineNumbers ? Number(line.match(/^\d+/)[0]) : index + 1]] : []);
+            assert.deepEqual(toggleLines, toggleIds, 'every emitted toggle retains its owning block');
+        });
+    }
+}
+
 test('portable Boolean operators normalize sensed and numeric truth values before digital writes', async t => {
     const generated = generate(pinSource('  set lamp to 91\n  set lamp to 92\n  set lamp to 93'), portable, project => {
         const blocks = project.targets[0].blocks;
@@ -230,15 +267,16 @@ test('generated simulation calls require explicit bridge enablement', async t =>
 });
 
 test('generated portable calls are refused by To blocks while legacy hardware comments stay inert', () => {
-    const generated = generate(pinSource('  turn on lamp\n  wait 0.001 seconds\n  print read button'));
+    const generated = generate(pinSource('  turn on lamp\n  toggle lamp\n  wait 0.001 seconds\n  print read button'));
     const reverse = basicToPseudocode(generated.basic);
     assert.equal(reverse.ok, false);
     assert.equal(reverse.pseudocode, '');
     assert.ok(reverse.diagnostics.length >= 3);
     assert.ok(reverse.diagnostics.every(diagnostic => Number.isInteger(diagnostic.line) && diagnostic.line > 0));
+    assert.ok(reverse.diagnostics.some(diagnostic => diagnostic.operation === 'PROCdigitalToggle'));
     const legacy = generated.creator.generateBASIC(generated.creator.project, {profile: 'bbc', lineNumbers: false});
     assert.equal(legacy.ok, true);
-    assert.doesNotMatch(legacy.basic, /PROCdigitalWrite|PROCpinMode|FNdigitalRead|PROCdelay|FNmillis/);
+    assert.doesNotMatch(legacy.basic, /PROCdigitalWrite|PROCdigitalToggle|PROCpinMode|FNdigitalRead|PROCdelay|FNmillis/);
     const commented = basicToPseudocode('REM PROCdigitalWrite(13,1):PROCdelay(99)\nPRINT 7\nEND\n');
     assert.notEqual(commented.ok, false);
     const rebuilt = new SB3Creator(); rebuilt.parse(commented.pseudocode);
@@ -286,7 +324,7 @@ WHEN flag clicked:
     assert.equal(board._externalClock, null);
 });
 
-test('generated output reads the solved clamped net and toggle refuses instead of inverting that read', async t => {
+test('generated toggle inverts the requested latch while the real clamped net keeps reading low', async t => {
     const board = new BoardImpl(5);
     board.setNetlist([
         {id: 'uno', kind: 'arduino_uno', terminals: ['d13', 'gnd']},
@@ -295,7 +333,8 @@ test('generated output reads the solved clamped net and toggle refuses instead o
         {id: 'drive', terminals: [{part: 'uno', terminal: 'd13'}, {part: 'clamp', terminal: 'a'}]},
         {id: 'ground', terminals: [{part: 'uno', terminal: 'gnd'}, {part: 'clamp', terminal: 'b'}]}
     ]);
-    const source = 'DEVICE UNO\nPIN lamp = D13 OUTPUT\nWHEN flag clicked:\n  turn on lamp\n  print read lamp\n';
+    const source = 'DEVICE UNO\nPIN lamp = D13 OUTPUT\nWHEN flag clicked:\n  turn on lamp\n  print read lamp\n' +
+        '  toggle lamp\n  print read lamp\n  toggle lamp\n  print read lamp\n';
     const generated = generate(source);
     let host;
     const session = sessionFor(t, {simulation: {createHost({signal}) {
@@ -304,13 +343,14 @@ test('generated output reads the solved clamped net and toggle refuses instead o
     }}});
     const result = await session.run(generated.basic);
     completed(result);
-    assert.equal(result.text, '         0\r\n');
+    assert.equal(result.text, '         0\r\n         0\r\n         0\r\n');
     assert.deepEqual(host.trace.filter(event => /digital-/.test(event.type)).map(({type, value}) => ({type, value})), [
-        {type: 'digital-write', value: 1}, {type: 'digital-read', value: 0}
+        {type: 'digital-write', value: 1}, {type: 'digital-read', value: 0},
+        {type: 'digital-toggle', value: 0}, {type: 'digital-read', value: 0},
+        {type: 'digital-toggle', value: 1}, {type: 'digital-read', value: 0}
     ]);
-    const toggled = new SB3Creator(); toggled.parse(source + '  toggle lamp\n');
-    const refused = toggled.generateBASIC(toggled.project, portable);
-    assert.equal(refused.ok, false);
-    assert.match(refused.reasons.join('\n'), /toggle.*latch|latch.*toggle/i);
-    assert.equal(refused.basic, undefined);
+    assert.equal(board.getTime(), 0n);
+    assert.equal(host.state, 'disposed');
+    assert.ok(board.getPinStates().every(pin => pin.mode === 'input'));
+    assert.equal(board._externalClock, null);
 });

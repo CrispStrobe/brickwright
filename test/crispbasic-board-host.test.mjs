@@ -102,14 +102,61 @@ test('Pico output uses its 3.3 V model despite a 5 V bench supply', () => {
     host.dispose();
 });
 
-test('electrical read reports output contention instead of returning the latch', () => {
+test('toggle inverts the retained request even when the electrical net is clamped low', () => {
     const board = circuit({clamp: true});
     const {host} = hostFor(board);
+    assert.equal(host.capabilities.digitalToggle, true);
+    assert.equal(host.capabilities.outputLatch, 'per-run-retained-electrical-level');
     host.pinMode(13, 'output');
     host.digitalWrite(13, 1);
     assert.ok(board.readAnalog('d13') < 0.3, 'the one-ohm load pulls the physical node low');
     assert.equal(host.digitalRead(13), 0);
+    const requested = () => board.getPinStates().find(pin => pin.pin.toLowerCase() === 'd13').driveHigh;
+    assert.equal(requested(), true, 'the requested output and solved read disagree');
+    host.digitalToggle(13);
+    assert.equal(requested(), false, 'toggle must change the high latch to low despite the low read');
+    assert.equal(host.digitalRead(13), 0);
+    host.digitalToggle(13);
+    assert.equal(requested(), true);
+    assert.equal(host.digitalRead(13), 0, 'the clamp still controls the sensed electrical level');
+    assert.equal(board.getTime(), 0n);
+    assert.equal(host.solverSteps, 0);
+    assert.deepEqual(host.trace.filter(event => event.type === 'digital-toggle'), [
+        {sequence: 4, atMs: 0, type: 'digital-toggle', pin: 13, terminal: 'd13', value: 0},
+        {sequence: 6, atMs: 0, type: 'digital-toggle', pin: 13, terminal: 'd13', value: 1}
+    ]);
     host.dispose();
+});
+
+test('toggle begins from zero, retains written state through mode changes, and starts fresh each run', () => {
+    const board = circuit();
+    const {host} = hostFor(board);
+    host.pinMode(13, 'output');
+    host.digitalToggle(13);
+    assert.equal(host.digitalRead(13), 1);
+    host.digitalWrite(13, 1);
+    host.pinMode(13, 'input-pullup');
+    const before = host.trace;
+    const states = board.getPinStates();
+    assert.throws(() => host.digitalToggle(13), hasCode('pin-not-output'));
+    assert.deepEqual(board.getPinStates(), states);
+    assert.deepEqual(host.trace, before);
+    host.pinMode(13, 'output');
+    assert.equal(host.digitalRead(13), 1);
+    host.digitalToggle(13);
+    assert.equal(host.digitalRead(13), 0);
+    host.digitalToggle(13);
+    host.dispose();
+    const released = board.getPinStates();
+    assert.throws(() => host.digitalToggle(13), hasCode('disposed'));
+    assert.deepEqual(board.getPinStates(), released);
+    const next = hostFor(board).host;
+    next.pinMode(13, 'output');
+    assert.equal(next.digitalRead(13), 0, 'a new run does not inherit the old high latch');
+    next.digitalToggle(13);
+    assert.equal(next.digitalRead(13), 1);
+    assert.equal(board.getTime(), 0n);
+    next.dispose();
 });
 
 test('run time has a fresh origin without resetting existing controls or solver state', async () => {
@@ -136,12 +183,31 @@ test('domain errors leave time, trace and electrical state unchanged', async () 
     assert.throws(() => host.pinMode(13, 'OUTPUT'), hasCode('invalid-mode'));
     assert.throws(() => host.digitalWrite(13, 1), hasCode('pin-not-output'));
     assert.throws(() => host.digitalWrite(13, 0.5), hasCode('invalid-level'));
+    assert.throws(() => host.digitalToggle(13), hasCode('pin-not-output'));
+    for (const id of [12, 13.5, '13', NaN, Infinity]) {
+        assert.throws(() => host.digitalToggle(id), hasCode('invalid-pin'));
+    }
     await assert.rejects(host.delay(0.5), hasCode('invalid-time'));
     assert.equal(host.trace.length, 0);
     assert.equal(board.getTime(), 0n);
     host.pinMode(13, 'output');
     host.digitalWrite(13, 1);
     assert.equal(host.digitalRead(13), 1, 'domain errors remain recoverable');
+    host.dispose();
+});
+
+test('toggle reserves its trace before changing a retained high output request', () => {
+    const board = circuit();
+    const {host} = hostFor(board, {maxTraceEvents: 2});
+    host.pinMode(13, 'output');
+    host.digitalWrite(13, 1);
+    const states = board.getPinStates();
+    const trace = host.trace;
+    assert.throws(() => host.digitalToggle(13), hasCode('trace-limit'));
+    assert.deepEqual(board.getPinStates(), states);
+    assert.deepEqual(host.trace, trace);
+    assert.equal(board.getTime(), 0n);
+    assert.throws(() => host.digitalToggle(13), hasCode('trace-limit'), 'a budget failure is terminal');
     host.dispose();
 });
 
@@ -199,7 +265,8 @@ test('cancel between solver batches releases ownership and a late continuation h
     lease.release();
 });
 
-test('synchronous board observers can cancel a write without reentrant cleanup or a success trace', () => {
+for (const operation of ['digitalWrite', 'digitalToggle']) {
+test(`synchronous board observers can cancel ${operation} without reentrant cleanup or a success trace`, () => {
     const board = circuit();
     board.setPower(false);
     const {host, abort} = hostFor(board);
@@ -212,7 +279,7 @@ test('synchronous board observers can cancel a write without reentrant cleanup o
             assert.equal(host.state, 'disposed', 'cancellation is visible during the original call');
         }
     });
-    assert.throws(() => host.digitalWrite(13, 1), hasCode('disposed'));
+    assert.throws(() => host[operation](13, 1), hasCode('disposed'));
     assert.equal(observed, true);
     assert.equal(board.powered, false);
     assert.ok(board.getPinStates().every(pin => pin.mode === 'input'));
@@ -221,6 +288,7 @@ test('synchronous board observers can cancel a write without reentrant cleanup o
     const lease = board.claimExternalClock();
     lease.release();
 });
+}
 
 test('pending delay forbids a second operation and yields before completing a long advance', async () => {
     const board = circuit();
@@ -229,6 +297,7 @@ test('pending delay forbids a second operation and yields before completing a lo
         yieldTask: () => { turns++; return Promise.resolve(); }});
     const pending = host.delay(7);
     assert.throws(() => host.digitalRead(2), hasCode('unavailable'));
+    assert.throws(() => host.digitalToggle(13), hasCode('unavailable'));
     await assert.rejects(host.delay(1), hasCode('unavailable'));
     await pending;
     assert.equal(turns, 3);
@@ -245,6 +314,7 @@ test('replacement netlist or clock invalidates the host and stale cleanup does n
     lease.run(() => board.setPin('d13', 'pushpull', true));
     const before = board.getPinStates();
     assert.throws(() => host.digitalWrite(13, 0), hasCode('unavailable'));
+    assert.throws(() => host.digitalToggle(13), hasCode('unavailable'));
     host.dispose();
     assert.deepEqual(board.getPinStates(), before);
     assert.ok(lease.isActive());

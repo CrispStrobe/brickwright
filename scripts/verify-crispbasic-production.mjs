@@ -24,7 +24,7 @@ const mime = new Map([
 ]);
 const report = {format: 'crispbasic-production-qualification', version: 1,
     commit: process.env.GITHUB_SHA || null, buildDirectory: relative(root, build),
-    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 10,
+    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 11,
     scenarios: [], serverFailures: []};
 let browser, server, origin;
 
@@ -219,10 +219,10 @@ async function successfulOutput (page, source, expected) {
 // The native Circuit JSON importer owns construction of this model and its
 // solver board. Fixed nets keep the electrical expectation independent of
 // visual wire routing and use the same documented digital Uno terminals.
-function circuitJSON (suffix = '') {
+function circuitJSON (suffix = '', {clamp = false} = {}) {
     const id = value => `${value}${suffix}`;
     const terminal = (part, name) => ({part: id(part), terminal: name});
-    return {vcc: 5,
+    const circuit = {vcc: 5,
         parts: [
             {id: id('uno'), kind: 'arduino_uno', x: 80, y: 80, rotation: 0, params: {}, terminals: ['d13', 'd2', 'gnd']},
             {id: id('resistor'), kind: 'resistor', x: 360, y: 100, rotation: 0, params: {ohms: 220}, terminals: ['a', 'b']},
@@ -234,9 +234,16 @@ function circuitJSON (suffix = '') {
             {id: id('sense'), terminals: [terminal('uno', 'd2'), terminal('button', 'a')]},
             {id: id('ground'), terminals: [terminal('uno', 'gnd'), terminal('led', 'cathode'), terminal('button', 'b')]}
         ]};
+    if (clamp) {
+        circuit.parts.push({id: id('clamp'), kind: 'resistor', x: 360, y: 320, rotation: 0,
+            params: {ohms: 1}, terminals: ['a', 'b']});
+        circuit.nets[0].terminals.push(terminal('clamp', 'a'));
+        circuit.nets[3].terminals.push(terminal('clamp', 'b'));
+    }
+    return circuit;
 }
 
-async function openCircuit (page, suffix = '', {beforeImport} = {}) {
+async function openCircuit (page, suffix = '', {beforeImport, clamp = false} = {}) {
     await page.getByRole('tab', {name: /Circuit/}).click();
     await page.waitForFunction(() => Boolean(window.__circuit && window.__board), null, {timeout: 60000});
     await page.getByText('File', {exact: true}).click();
@@ -245,7 +252,7 @@ async function openCircuit (page, suffix = '', {beforeImport} = {}) {
     const fileChooser = await chooser;
     if (beforeImport) await beforeImport();
     await fileChooser.setFiles({name: `crispbasic${suffix}.json`, mimeType: 'application/json',
-        buffer: Buffer.from(JSON.stringify(circuitJSON(suffix)))});
+        buffer: Buffer.from(JSON.stringify(circuitJSON(suffix, {clamp})))});
     await page.waitForFunction(id => {
         const runtime = window.__brickwrightStore?.getState?.()?.scratchGui?.vm?.runtime;
         const board = runtime?.circuitBoard;
@@ -381,26 +388,96 @@ WHEN flag clicked:
         await page.screenshot({path: resolve(artifacts, 'portable-generator-refusal.png'), fullPage: true});
     });
 
-scenario('production portable toggle generation refuses and disables Run while default hardware comments remain inert',
+scenario('production portable toggle drives the retained latch while the clamped net remains low',
     async (page, evidence, record) => {
         await codeTab(page, {basic: false});
-        await editSource(page, 'DEVICE UNO\nPIN lamp = D13 OUTPUT\nWHEN flag clicked:\n  print "TOGGLE REFUSAL"\n  toggle lamp\n');
+        await editSource(page, `DEVICE UNO
+PIN lamp = D13 OUTPUT ACTIVE LOW
+WHEN flag clicked:
+  print "LATCH TOGGLE"
+  set lamp high
+  print read lamp
+  ask "written high" and wait
+  toggle lamp
+  print read lamp
+  ask "toggled low" and wait
+  toggle lamp
+  print read lamp
+  ask "toggled high" and wait
+`);
         await page.getByRole('button', {name: /To blocks/}).first().click();
         await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
-            ?.toJSON().includes('TOGGLE REFUSAL'));
+            ?.toJSON().includes('LATCH TOGGLE'));
         await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await openCircuit(page, '', {clamp: true});
         await codeTab(page);
         await page.getByRole('button', {name: /From blocks/}).first().click();
         await page.waitForFunction(() => /REM toggle lamp/.test(
             document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.innerText || ''));
         record.legacySource = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
-        assert.doesNotMatch(record.legacySource, /PROCdigitalWrite|FNdigitalRead/);
-        assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), false);
-
+        assert.doesNotMatch(record.legacySource, /PROCdigitalToggle|PROCdigitalWrite|FNdigitalRead/);
         await page.getByTestId('bw-basic-portable-library').check();
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), record.legacySource);
         await page.getByRole('button', {name: /From blocks/}).first().click();
-        await page.getByTestId('bw-basic-generation-warnings').filter({hasText: /toggle.*output latch/}).waitFor();
+        await page.waitForFunction(() => /PROCdigitalToggle\(13\)/.test(
+            document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.innerText || ''));
+        record.generatedSource = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        assert.equal((record.generatedSource.match(/PROCdigitalToggle\(13\)/g) || []).length, 2);
+        assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), false);
+        assert.equal(evidence.requests.length, 0, 'generation must not start the runtime');
+        await page.getByTestId('bw-crispbasic-connect-circuit').check();
+        await page.getByTestId('bw-basic-run').click();
+        record.observations = [];
+        for (const [prompt, requested] of [['written high', true], ['toggled low', false], ['toggled high', true]]) {
+            await page.getByTestId('bw-basic-output').filter({hasText: prompt}).waitFor();
+            await page.getByTestId('bw-crispbasic-input').waitFor({state: 'visible'});
+            const observed = await boardState(page);
+            const pin = observed.pins.find(value => value.pin.toLowerCase() === 'd13');
+            assert.equal(pin.mode, 'pushpull');
+            assert.equal(pin.driveHigh, requested, prompt);
+            assert.equal(observed.owner, true);
+            assert.equal(observed.lease, true);
+            Object.assign(observed, await page.evaluate(() => ({
+                voltage: window.__board.readAnalog('d13'), sensed: window.__board.readPin('d13')
+            })));
+            assert.ok(observed.voltage < 0.3, JSON.stringify(observed));
+            assert.equal(observed.sensed, 0, 'sensing must report the clamp, independently of the latch');
+            if (record.observations.length) assert.equal(observed.timeNs, record.observations[0].timeNs,
+                'toggle and INPUT must not advance the owned circuit clock');
+            record.observations.push(observed);
+            await page.getByTestId('bw-crispbasic-input').fill('continue');
+            await page.getByTestId('bw-crispbasic-send').click();
+        }
+        await finished(page);
+        assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+        assert.equal(await page.getByTestId('bw-basic-output').textContent(),
+            'LATCH TOGGLE\r\n         1\r\nwritten high\r\n? \r\n         1\r\ntoggled low\r\n? \r\n         1\r\ntoggled high\r\n? \r\n');
+        record.released = await boardState(page);
+        assert.equal(record.released.owner, false);
+        assert.equal(record.released.lease, false);
+        assert.equal(record.released.inputs, true);
+        await noInterpreterWorkers(page);
+        const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.getByTestId('bw-code-status').filter({hasText: /To blocks cannot preserve/}).waitFor();
+        assert.match(await page.getByTestId('bw-code-status').textContent(), /PROCdigitalToggle/);
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), record.generatedSource);
+        assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
+        await page.screenshot({path: resolve(artifacts, 'portable-latch-toggle.png'), fullPage: true});
+    });
+
+scenario('production undefined polling refuses and disables Run even after an error-banner newline',
+    async (page, evidence, record) => {
+        await codeTab(page, {basic: false});
+        await editSource(page, 'DEVICE UNO\nPIN button = D2 INPUT\nWHEN flag clicked:\n  print "POLLING REFUSAL"\n  wait until read button\n');
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
+            ?.toJSON().includes('POLLING REFUSAL'));
+        await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await codeTab(page);
+        await page.getByTestId('bw-basic-portable-library').check();
+        await page.getByRole('button', {name: /From blocks/}).first().click();
+        await page.getByTestId('bw-basic-generation-warnings').filter({hasText: /wait until.*polling interval/}).waitFor();
         assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), true);
         await page.getByTestId('bw-code-editor').locator('.cm-content').click();
         await page.keyboard.press('ControlOrMeta+End');
@@ -410,7 +487,7 @@ scenario('production portable toggle generation refuses and disables Run while d
         const source = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
         const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
         await page.getByRole('button', {name: /To blocks/}).first().click();
-        await page.getByTestId('bw-code-status').filter({hasText: /CrispBASIC: toggle/}).waitFor();
+        await page.getByTestId('bw-code-status').filter({hasText: /CrispBASIC: wait until/}).waitFor();
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), source);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
         assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), true);
@@ -418,7 +495,7 @@ scenario('production portable toggle generation refuses and disables Run while d
         assert.equal(evidence.requests.length, 0);
         record.refusedSource = source;
         record.diagnostic = await page.getByTestId('bw-basic-generation-warnings').textContent();
-        await page.screenshot({path: resolve(artifacts, 'portable-toggle-refusal.png'), fullPage: true});
+        await page.screenshot({path: resolve(artifacts, 'portable-polling-refusal.png'), fullPage: true});
     });
 
 scenario('production file import preserves error lines, Latin-1 and recursive input suspension', async page => {

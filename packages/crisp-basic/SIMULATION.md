@@ -1,4 +1,4 @@
-# CrispBASIC simulation host and BASIC bridge, version 1
+# CrispBASIC simulation host and BASIC bridge, contract version 2
 
 `src/simulation-host.mjs` defines a deterministic JavaScript reference host for
 logical digital pins. WASM sessions can now connect BASIC to this host through
@@ -18,6 +18,11 @@ interpreter. A configured WASM session separately advertises
 `TIME` and `WAIT` behavior is unchanged; these operations are not redirected to
 the reference clock. The native backend has no simulation bridge and explicitly
 rejects a supplied `simulation` option.
+
+Runtime `0.1.0-dev.6` uses simulation ABI `2` and advertises
+`capabilities.simulation.contractVersion: 2`. The worker record framing remains
+version `1`. Contract version 2 adds the explicit output-latch toggle operation;
+it does not change the clock or electrical-read semantics.
 
 ## JavaScript reference host API
 
@@ -45,6 +50,7 @@ independent pins, clocks, queues and traces.
 | --- | --- |
 | `pinMode(pin, mode)` | Set `input`, `output`, or `input-pullup`. |
 | `digitalWrite(pin, value)` | Store numeric `0` or `1` in an output latch. Input-mode writes fail. |
+| `digitalToggle(pin)` | Invert the retained output latch in one operation; requires output mode. |
 | `digitalRead(pin)` | Read the output latch, explicit input stimulus, or released input's pull-up. A floating input fails. |
 | `delay(milliseconds)` | Advance simulated integer milliseconds and apply all queued stimuli through the destination time, inclusive. |
 | `millis()` | Return elapsed simulated milliseconds. Reading time does not advance it. |
@@ -78,6 +84,14 @@ stored while the pin is output does not change its latch; that input becomes
 visible after switching to input mode. This is a logical fixture rule, not a
 claim that driving a physical output against an external level is safe or that
 the host resolves circuit contention.
+
+`digitalToggle` changes the retained electrical request from `0` to `1` or from
+`1` to `0`, independently of input stimuli and any ACTIVE LOW interpretation in
+the generating program. It never calls `digitalRead` or advances the clock.
+Successful writes replace the same latch; mode changes retain it. `reset()` and
+each fresh run initialize it to `0`. The built-in reference and Circuit hosts
+advertise `digitalToggle: true` and
+`outputLatch: 'per-run-retained-electrical-level'` in their capabilities.
 
 Levels must be numbers `0` or `1`. Strings, booleans, non-finite numbers,
 fractions and other numeric values are rejected without coercion.
@@ -114,6 +128,7 @@ Each trace record has `sequence` (starting at 1), `atMs`, and `type`:
 | --- | --- |
 | `pin-mode` | `pin`, `mode` |
 | `digital-write` | `pin`, `value` |
+| `digital-toggle` | `pin`, `value` (the resulting output latch) |
 | `digital-read` | `pin`, `value` |
 | `input` | `pin`, `value` (`null` means released) |
 | `delay` | `fromMs`, `milliseconds`; `atMs` is the destination time |
@@ -123,6 +138,9 @@ no trace record. During a delay, input records retain their event timestamps
 and precede the final delay record. `millis`, rejected calls, `reset`, and
 `dispose` do not append records. Repeated writes and mode selections are
 recorded even when the stored value is unchanged.
+Each successful toggle appends exactly one `digital-toggle` record at the
+current `atMs`, without synthetic read/write records. It consumes one trace slot
+and, when called from BASIC, one request.
 
 All argument, time, queue and trace-budget checks happen before modifying
 state. A delay reserves enough trace space for **every** due stimulus and its
@@ -181,6 +199,7 @@ interpreter library area:
 | --- | --- |
 | `PROCpinMode(pin, mode$)` | `pinMode(pin, mode)` using the three mode strings above |
 | `PROCdigitalWrite(pin, value)` | `digitalWrite(pin, value)` |
+| `PROCdigitalToggle(pin)` | `digitalToggle(pin)`; the resulting latch is recorded in the trace, not returned |
 | `FNdigitalRead(pin)` | `digitalRead(pin)` returning `0` or `1` |
 | `PROCdelay(milliseconds)` | `delay(milliseconds)` in simulated milliseconds |
 | `FNmillis` | `millis()` |
@@ -214,7 +233,16 @@ tracks host ownership without retaining finished objects: an object used by one
 run cannot be handed to any later or concurrent run, even after `reset()` or
 when using another session. Create another host instead.
 
-The five operation methods can return immediate values or Promises. Void
+An adapter may additionally supply `digitalToggle(pin)`. Legacy custom hosts
+implementing only the original five operation methods remain usable for those
+operations. If `digitalToggle` is absent, calling `PROCdigitalToggle` produces
+catchable `ERR208` (`unavailable`); the bridge never substitutes a read/write
+sequence. A present but non-callable `digitalToggle` is a host error during
+factory validation. A custom implementation must invert its own retained
+electrical output request, require output mode, and honor the same ownership
+and resource bounds as its other pin mutations.
+
+The operation methods can return immediate values or Promises. Void
 operations may return `undefined` or `0`; reads return exactly numeric `0` or
 `1`; `millis()` returns a nonnegative integer through `2147483647`. Other values
 are host errors. Custom hosts should throw the exported `SimulationError` with
@@ -248,6 +276,11 @@ scalar arguments/results. There is one outstanding request at a time. Both
 ends validate the complete record and reject malformed, duplicate, concurrent,
 out-of-order or wrong-run traffic. Ordinary VDU output never carries control
 requests. Output buffered before a request is flushed before suspension.
+
+Operation `6` is `digitalToggle`: its arguments are exactly `[pin, 0]`, and a
+successful reply is numeric `0`, as for the other void operations. Operations
+`1..5` retain their existing meanings. The ABI and contract version are `2`;
+the unchanged scalar record framing is still version `1`.
 
 The worker calls an `EM_ASYNC_JS` hook through Asyncify to retain the complete C
 stack while awaiting the parent's reply, including recursive FN/PROC and error
@@ -309,18 +342,22 @@ with the same number.
 ### Build, capabilities and remaining adapters
 
 Simulation requires a rebuilt artifact exporting `crisp_simulation_abi()` with
-value `1`. Before enabling the library, the worker checks that marker; an old or
+value `2`. Before enabling the library, the worker checks that marker; an old or
 incompatible artifact produces an actionable host error. The C entry point also
 receives an explicit 0/1 capability flag. A default session neither installs the
 library nor enables the private intrinsic. Inspect
 `session.capabilities.simulation` for availability, enabled state, contract
-version and request budget.
+version and request budget. Its `digitalToggle: true` describes the bridge's
+support for that operation; a custom host may still return `unavailable` as
+described above.
 
 The GUI-owned [Brickwright board adapter](BOARD-SIMULATION.md) maps logical IDs
 to the active Circuit board and uses cooperative solver advancement, electrical
 reads and exclusive run ownership. Enable it with the Code tab's **Connect
 Circuit** option. Existing generator hardware comments remain comments;
-authored library calls are the supported route in this milestone. PicoBB and
+the explicit **Generate portable Circuit calls** choice also emits supported
+calls, including latch toggle. [GENERATOR.md](GENERATOR.md) defines that
+generation contract and the still-refused reverse conversion. PicoBB and
 other physical targets still need independent execution and pin/timing evidence.
 
 ## Validation
@@ -335,12 +372,13 @@ node --test tests/wasm-simulation.test.mjs
 ```
 
 Tests use fixed expected pin/time traces and cover floating inputs, pull-ups,
-output latches, timestamp ties, explicit zero-delay ordering, atomic budget
-failures, invalid values, reset determinism, immutable snapshots, independent
+output latches and atomic toggles, timestamp ties, explicit zero-delay ordering,
+atomic budget failures, invalid values, reset determinism, immutable snapshots, independent
 instances and final disposal. The reference-host and protocol tests do not
 require Emscripten or GUI packages. The WASM simulation suite requires the real
 rebuilt engine and covers fixed traces, library/source identity, recursive
-suspension, typed errors and parent-owned limits. Missing compiled artifacts
+suspension, typed errors, old-host toggle refusal, ABI mismatch and parent-owned
+limits. Missing compiled artifacts
 are failures, never passing skips. The executed checks and current revision's
 qualification status are recorded in [VALIDATION.md](VALIDATION.md); the
 existence of a test is not a claim that it passed in the current environment.

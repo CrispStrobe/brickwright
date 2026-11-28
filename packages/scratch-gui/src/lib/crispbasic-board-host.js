@@ -117,9 +117,10 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
     let cleanupDone = false, cleanupFinished = false, disposalFailed = false, disposalFailure;
     const capabilities = Object.freeze({
         schemaVersion: 1, backend: 'brickwright-board-simulation', hardware: false,
-        basicBridge: false, circuitPhysics: true, digitalPins: true,
+        basicBridge: false, circuitPhysics: true, digitalPins: true, digitalToggle: true,
         analogPins: false, pwm: false, interrupts: false,
         clock: 'explicit-integer-milliseconds', digitalRead: 'solved-electrical-level',
+        outputLatch: 'per-run-retained-electrical-level',
         floatingInputs: 'solver-default', pinModes: MODES, ...mapping,
         limits: Object.freeze({maxTimeMs, maxSolverSteps, maxTraceEvents, maxStepsPerBatch})
     });
@@ -278,6 +279,18 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
             checkInstant();
             target.latch = value;
             record('digital-write', {pin: id, terminal: target.terminal, value});
+        },
+        digitalToggle(id) {
+            const target = pin(id);
+            if (target.mode !== 'output') fail('pin-not-output', `Pin ${id} is not configured as an output`);
+            reserve();
+            // A clamped net can read low while the output request is high.
+            // Toggle the retained electrical request, never the solved net.
+            const value = 1 - target.latch;
+            synchronous(() => board.setPin(target.terminal, 'pushpull', value === 1));
+            checkInstant();
+            target.latch = value;
+            record('digital-toggle', {pin: id, terminal: target.terminal, value});
         },
         digitalRead(id) {
             const target = pin(id);

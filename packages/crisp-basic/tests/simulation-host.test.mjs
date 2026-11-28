@@ -54,6 +54,33 @@ test('output latch and input stimulus are independent, with no circuit contentio
     assert.equal(host.digitalRead(0), 1); // Mode changes retain the latch.
 });
 
+test('toggle inverts the retained electrical latch once without reading stimulus or moving time', () => {
+    const host = createSimulationHost({pins: [42]});
+    host.pinMode(42, 'output');
+    host.digitalToggle(42); // The defined initial latch is zero.
+    host.setInput(42, 0);
+    host.digitalToggle(42);
+    host.digitalWrite(42, 1);
+    host.pinMode(42, 'input-pullup');
+    refuses(() => host.digitalToggle(42), 'pin-not-output');
+    host.pinMode(42, 'output');
+    host.digitalToggle(42); // Mode changes retained the last written one.
+    assert.equal(host.digitalRead(42), 0);
+    assert.equal(host.millis(), 0);
+    assert.deepEqual(host.trace.filter(event => event.type === 'digital-toggle'), [
+        {sequence: 2, atMs: 0, type: 'digital-toggle', pin: 42, value: 1},
+        {sequence: 4, atMs: 0, type: 'digital-toggle', pin: 42, value: 0},
+        {sequence: 8, atMs: 0, type: 'digital-toggle', pin: 42, value: 0}
+    ]);
+    assert.equal(host.trace.filter(event => event.type === 'digital-read').length, 1,
+        'toggle never implements its mutation through digitalRead');
+    host.reset();
+    refuses(() => host.digitalToggle(42), 'pin-not-output');
+    host.pinMode(42, 'output');
+    host.digitalToggle(42);
+    assert.equal(host.digitalRead(42), 1, 'reset clears the retained latch');
+});
+
 test('scheduled stimuli apply in chronological and stable equal-time order', () => {
     const host = createSimulationHost();
     host.scheduleInput(1, 1, 20);
@@ -104,6 +131,7 @@ test('pin mode and write refusal at a trace limit do not change the completed tr
     const finished = host.trace;
     refuses(() => host.pinMode(0, 'input'), 'trace-limit');
     refuses(() => host.digitalWrite(0, 0), 'trace-limit');
+    refuses(() => host.digitalToggle(0), 'trace-limit');
     refuses(() => host.digitalRead(0), 'trace-limit');
     assert.deepEqual(host.trace, finished);
     host.reset();
@@ -131,6 +159,7 @@ test('invalid pins, modes, levels and durations never coerce or silently clamp',
     const host = createSimulationHost({pins: [3, 42]});
     for (const pin of [-1, 0, '3', 3.5, NaN, Infinity, undefined]) {
         refuses(() => host.pinMode(pin, 'output'), 'invalid-pin');
+        refuses(() => host.digitalToggle(pin), 'invalid-pin');
     }
     for (const mode of ['OUTPUT', 1, null, 'analog']) refuses(() => host.pinMode(3, mode), 'invalid-mode');
     for (const value of [2, -1, true, false, '0', NaN, undefined]) {
@@ -172,6 +201,8 @@ test('capabilities and trace snapshots cannot mutate the host', () => {
     assert.equal(host.capabilities.basicBridge, false);
     assert.equal(host.capabilities.hardware, false);
     assert.equal(host.capabilities.circuitPhysics, false);
+    assert.equal(host.capabilities.digitalToggle, true);
+    assert.equal(host.capabilities.outputLatch, 'per-run-retained-electrical-level');
 });
 
 test('reset retains configuration, clears stimuli and reproduces the same trace', () => {
@@ -209,7 +240,7 @@ test('separate hosts have independent state; disposal is final and idempotent', 
     assert.equal(first.pendingInputs, 0);
     assert.deepEqual(first.trace, finalTrace);
     for (const call of [() => first.pinMode(0, 'input'), () => first.digitalWrite(0, 0),
-        () => first.digitalRead(0), () => first.setInput(0, 0), () => first.scheduleInput(0, 0, 0),
+        () => first.digitalToggle(0), () => first.digitalRead(0), () => first.setInput(0, 0), () => first.scheduleInput(0, 0, 0),
         () => first.delay(0), () => first.millis(), () => first.reset()]) refuses(call, 'disposed');
     assert.equal(second.state, 'ready');
 });

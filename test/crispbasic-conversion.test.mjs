@@ -54,6 +54,7 @@ function fixture(text) {
 
 for (const text of [
     '100 REM original\n\n300 PROCdigitalWrite(13,1)\n',
+    'PROCdigitalToggle(13)\n',
     'PRINT FNdigitalRead(2)\n',
     'PROCdelay(25)\nPRINT FNmillis\n',
     'DEF PROCpinMode(p,m$)\nENDPROC\n',
@@ -81,26 +82,26 @@ test('derived languages cannot bypass portable To blocks refusal', async () => {
 });
 
 test('generation-error comments cannot replace blocks or derive another language', async () => {
-    const {editor, effects} = fixture('REM === Cannot show as BASIC ===\nREM toggle is unsupported\n');
+    const {editor, effects} = fixture('REM === Cannot show as BASIC ===\nREM wait until is unsupported\n');
     editor.state.basicGenerationFailed = true;
-    editor.state.basicWarnings = ['toggle needs an output latch; generation refused'];
+    editor.state.basicWarnings = ['wait until needs a polling interval; generation refused'];
     const buffers = editor.state.buffers;
     await editor.compile();
     const result = await editor.deriveBuffer(editor.activeCode(), 'basic', 'python');
     assert.deepEqual(effects, []);
     assert.equal(editor.state.buffers, buffers);
     assert.equal(editor.state.conversionReport.preserved, false);
-    assert.match(result.error, /output latch/);
+    assert.match(result.error, /polling interval/);
 });
 
 test('editing a generation-error buffer preserves refusal until its banner is removed', async () => {
-    const placeholder = 'REM === Cannot show as BASIC ===\nREM toggle is unsupported\n';
+    const placeholder = 'REM === Cannot show as BASIC ===\nREM wait until is unsupported\n';
     const {editor, effects} = fixture(placeholder);
     editor.state.basicGenerationFailed = true;
-    editor.state.basicWarnings = ['toggle needs an output latch; generation refused'];
+    editor.state.basicWarnings = ['wait until needs a polling interval; generation refused'];
     editor.setActiveCode(`${placeholder}\n`);
     assert.equal(editor.state.basicGenerationFailed, true, 'a newline does not turn an error buffer into authored code');
-    assert.deepEqual(editor.state.basicWarnings, ['toggle needs an output latch; generation refused']);
+    assert.deepEqual(editor.state.basicWarnings, ['wait until needs a polling interval; generation refused']);
     const buffers = editor.state.buffers;
     await editor.runBasic();
     await editor.compile();
@@ -109,9 +110,9 @@ test('editing a generation-error buffer preserves refusal until its banner is re
     assert.equal(editor.state.buffers, buffers);
     assert.equal(editor.state.buffers.basic, `${placeholder}\n`);
     assert.equal(editor.state.conversionReport.preserved, false);
-    assert.match(result.error, /output latch/);
+    assert.match(result.error, /polling interval/);
 
-    editor.setActiveCode('REM toggle was replaced by explicit writes\nPRINT 7\nEND\n');
+    editor.setActiveCode('REM wait until was replaced by explicit timed polling\nPRINT 7\nEND\n');
     assert.equal(editor.state.basicGenerationFailed, false, 'replacing the banner admits authored correction');
     assert.deepEqual(editor.state.basicWarnings, []);
     await editor.runBasic();
@@ -160,7 +161,8 @@ test('Brickwright CLI refuses portable BASIC and saved error banners without ove
         const input = join(dir, 'portable.bas'), output = join(dir, 'existing.bw');
         for (const [source, diagnostic] of [
             ['PROCdelay(25)\n', /To blocks.*PROCdelay/],
-            ['REM === Cannot show as BASIC ===\nREM CrispBASIC: toggle requires an output latch\n\n', /generation was refused/]
+            ['PROCdigitalToggle(13)\n', /To blocks.*PROCdigitalToggle/],
+            ['REM === Cannot show as BASIC ===\nREM CrispBASIC: wait until requires a polling interval\n\n', /generation was refused/]
         ]) {
             writeFileSync(input, source);
             writeFileSync(output, 'KEEP EXISTING PROJECT\n');

@@ -56,6 +56,18 @@ Serialized projects recover existing pin metadata, and referenced finite
 numeric scalar state is initialized. Ambiguous variable scopes or unsupported
 initial values refuse instead of producing an uninitialized BASIC variable.
 
+Toggle on a declared digital OUTPUT emits one `PROCdigitalToggle(id)` call. It
+inverts the host's retained electrical output request, independently of ACTIVE
+LOW and the solved net. Each fresh run starts the latch at `0`; successful
+writes and toggles update it, and pin-mode changes retain it. Toggle advances no
+simulated time and creates one `digital-toggle` trace record. Input toggles and
+undeclared or unsupported pins refuse generation with diagnostics.
+
+The `crispbasic-v2` source banner identifies this output-latch contract. It
+requires the rebuilt simulation ABI `2` runtime. A legacy custom host without
+`digitalToggle` can still execute the original operations, but a toggle call
+raises catchable `ERR208` (`unavailable`). There is no sensed-read fallback.
+
 | Device | Logical map accepted by generation |
 | --- | --- |
 | Arduino Uno/Nano | D0..D13 → 0..13; A0..A5 → 14..19 |
@@ -82,23 +94,25 @@ authored `TIME` and `WAIT` retain their established runtime semantics. Simulatio
 time moves only through delays; `wait until` refuses because no implicit polling
 interval is defined. A repeat-until loop can contain an explicit wait.
 
-Toggle also refuses. `FNdigitalRead` observes the electrical solution, not an
-output latch. Under a clamp or load it can disagree with the stored output
-request. Inverting that read does not implement latch toggle. Use explicit
-writes or a program-owned state variable.
+`FNdigitalRead` continues to observe the electrical solution. Under a clamp or
+load it can disagree with the stored output request. `PROCdigitalToggle` uses
+the separate latch, so a high request clamped electrically low toggles to a low
+request. The latch operation does not substitute a read followed by a write.
 
 ## To blocks
 
-Live portable calls and definitions currently return a hard conversion refusal
-with an empty pseudocode result. Diagnostics name the operation and physical
+Live portable calls and definitions, including `PROCdigitalToggle`, currently
+return a hard conversion refusal with an empty pseudocode result. Diagnostics
+name the operation and physical
 source line, plus the numbered BASIC line when present. Both the ordinary
 **To blocks** path and intermediate language derivation honor this refusal
 before parsing or replacing a project. The terminal CLI also preserves an
 existing output file on refusal.
 
 This qualifies a refusal boundary, not a portable-library round trip. Supporting
-reverse conversion later requires preserving pin polarity, simulated-clock
-units, reset offsets, validation and expression evaluation. Unknown functions
+reverse conversion later requires preserving pin polarity, retained output
+latches, simulated-clock units, reset offsets, validation and expression
+evaluation. Unknown functions
 must not become zero and library procedures must not become unresolved custom
 blocks. Existing supported BASIC still converts with its subset warnings.
 
@@ -111,10 +125,14 @@ Computed source through EVAL has no qualified reverse meaning and also refuses.
 The owning producer checks generation, refusals, its CLI and legacy BBC/6502
 output. Brickwright tests the exact vendored source against the real C/WASM
 engine, a fixed logical trace and the real pinned electrical solver. A clamped
-output fixture explicitly demonstrates a solved read differing from the latch.
-Editor tests assert that refusals preserve source and block ownership. Two
-production Chromium scenarios exercise the new generation control, connected
-execution, reverse refusal and disabled Run after toggle refusal.
+output fixture explicitly demonstrates a solved read differing from the latch
+and checks toggle against the retained request. The producer covers both source
+forms and both polarities, mixed writes/toggles, saved metadata and block maps.
+Editor tests assert that refusals preserve source and block ownership.
+Production Chromium scenarios exercise the generation control, connected
+execution, generated active-low latch toggle under a clamp, and reverse refusal.
+A separate unsupported `wait until` case retains the disabled-Run and
+editor-newline refusal regression now that toggle is supported.
 
 See [VALIDATION.md](VALIDATION.md) for observed results, exact revisions and
 remaining qualification limits. This change does not qualify all Scratch

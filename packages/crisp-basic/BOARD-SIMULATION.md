@@ -37,7 +37,7 @@ package-pin numbering scheme.
 
 ## Drive and sense semantics
 
-The five BASIC calls are unchanged:
+The portable library provides six BASIC calls:
 
 | Call | Circuit behavior |
 | --- | --- |
@@ -45,6 +45,7 @@ The five BASIC calls are unchanged:
 | `PROCpinMode(pin, "input-pullup")` | Use the solver's input pull-up mode. |
 | `PROCpinMode(pin, "output")` | Apply the retained output latch using the solver's push-pull drive. |
 | `PROCdigitalWrite(pin, level)` | Set numeric `0` or `1`; requires output mode. |
+| `PROCdigitalToggle(pin)` | Invert the retained electrical output latch and apply it to the solver; requires output mode. |
 | `FNdigitalRead(pin)` | Read the solved electrical level, including when configured as an output. |
 | `PROCdelay(milliseconds)` | Cooperatively advance the circuit by the requested integer milliseconds. |
 | `FNmillis` | Read integer milliseconds elapsed since this BASIC run acquired the board. |
@@ -57,6 +58,16 @@ reads therefore sense the net; the standalone reference host instead reads its
 logical latch. An unconnected circuit input follows the solver's regularized
 electrical solution; the reference host's `floating-input` stimulus rule does
 not establish a circuit floating-net detector.
+
+Toggle uses the output request, even when a clamp makes the solved net disagree
+with that request. For example, a high latch held electrically low toggles to a
+low latch. It never inverts `FNdigitalRead`. ACTIVE LOW is a generator-level
+logical interpretation; it does not change this electrical latch operation.
+Successful writes and toggles update the same retained latch. A successful
+toggle consumes one request and one `digital-toggle` trace record containing
+`pin`, `terminal` and the resulting `value`; it performs no read and advances no
+time. Pin, mode and trace-budget refusals occur before driving the solver.
+Unexpected solver failures retain the ordinary host-error and cleanup behavior.
 
 These operations exercise the solver's existing electrical models. They do not
 qualify MCU-specific thresholds, timing or physical-device fidelity. Analog
@@ -137,7 +148,9 @@ stale callbacks cannot remove its guards or restore an earlier owner's methods.
 
 The BASIC Reset control clears BASIC output and ends the active connection. It
 does not rewind capacitors, motors, circuit controls or the solver clock. Use
-the Circuit's own reset when a fresh electrical history is required.
+the Circuit's own reset when a fresh electrical history is required. The next
+BASIC run receives new zero latches; it cannot inherit the previous run's
+output request.
 
 ## Example
 
@@ -159,14 +172,20 @@ END
 
 The electrical pull-up reads high while the switch is open and low when it is
 closed. An external resistor/LED on D13 must be wired into the same Circuit
-board. The code generator's existing hardware comments remain comments; this
-milestone executes authored library calls without changing generator semantics.
+board. The code generator's default hardware comments remain comments. Select
+**Generate portable Circuit calls** and then **From blocks** for the explicit
+portable generation mode, including `toggle` as `PROCdigitalToggle`. See
+[GENERATOR.md](GENERATOR.md) for its pin maps, polarity rules and refusals.
 
 ## Qualification scope
 
 Focused tests use the actual pinned solver, the actual compiled BASIC runtime
 and the editor's production lifecycle/control seams. They check fixed
 electrical/time results as well as cancellation, ownership and resource bounds.
+The latch tests include a high output request clamped to a low electrical read,
+mixed writes and toggles, retained state across modes, fresh-run state, and
+refusals before mutation. Generated active-low toggle is also exercised in the
+production scenario set.
 The production gate additionally builds the full webpack workbench and drives
 its real editor and Circuit file controls in Chromium. See
 [VALIDATION.md](VALIDATION.md) for the exact revision, commands and observed

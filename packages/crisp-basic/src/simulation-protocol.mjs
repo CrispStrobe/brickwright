@@ -1,6 +1,6 @@
 // Original code, BSD-3-Clause. Private, bounded worker protocol. Keep scalar
 // operation/error numbers synchronized with wasm/crisp-host.h and crispbasic.c.
-export const SIMULATION_ABI = 1;
+export const SIMULATION_ABI = 2;
 export const DEFAULT_SIMULATION_REQUESTS = 4096;
 export const MAX_SIMULATION_REQUESTS = 1000000;
 export const SIMULATION_MODES = Object.freeze(['input', 'output', 'input-pullup']);
@@ -24,7 +24,8 @@ export function validSimulationArguments(operation, args) {
     switch (operation) {
     case 1: return first <= 65535 && second <= 2;
     case 2: return first <= 65535 && second <= 1;
-    case 3: return first <= 65535 && second === 0;
+    case 3:
+    case 6: return first <= 65535 && second === 0;
     case 4: return second === 0;
     case 5: return first === 0 && second === 0;
     default: return false;
@@ -42,7 +43,7 @@ export function validSimulationRequest(record, runId, requestId) {
 export function validSimulationValue(operation, value) {
     if (operation === 3) return value === 0 || value === 1;
     if (operation === 5) return integer(value);
-    return [1, 2, 4].includes(operation) && value === 0;
+    return [1, 2, 4, 6].includes(operation) && value === 0;
 }
 
 export function validSimulationReply(record, runId, requestId, operation) {

@@ -44,7 +44,7 @@ policy, parity and browser suites.
 - Byte input with explicit EOF and blocking or timed waits.
 - Monotonic milliseconds and asynchronous sleep.
 - Structured unhandled BASIC errors and intentional `QUIT` status.
-- An opt-in, asynchronous scalar request/reply hook for five simulation operations.
+- An opt-in, asynchronous scalar request/reply hook for six simulation operations.
 
 `crisp_run(source, length, simulation_enabled)` receives prepared Latin-1
 numbered source directly in memory. The third argument must be `0` or `1`.
@@ -55,10 +55,14 @@ a source file nor accepts a path. A module instance may run once; the owner
 discards it after the result. The C host validates source size, line numbers,
 control bytes and token-record sizes before execution.
 
-The worker checks the exported `crisp_simulation_abi()` marker equals `1` before
+The worker checks the exported `crisp_simulation_abi()` marker equals `2` before
 enabling simulation. This rejects stale generated modules with an actionable
 host error. `crisp_host_simulation_request(operation, argument1, argument2)`
-allows only pinMode, digitalWrite, digitalRead, delay and millis. All crossing
+allows only pinMode, digitalWrite, digitalRead, delay, millis and digitalToggle.
+Operation `6` is digitalToggle, with arguments `[pin, 0]` and void success `0`.
+Its ordinary `PROCdigitalToggle(pin)` library wrapper retains user `DEF`
+overrides and source identity. The simulation capability's `contractVersion`
+is `2`; worker record framing remains version `1`. All crossing
 values are int32 scalars; modes are enums and domain failures use the fixed
 negative codes in `crisp-host.h`. JavaScript validates replies before int32
 conversion. The parent handles resource/protocol failures without a BASIC reply.
@@ -116,7 +120,13 @@ origin, even on a reused session object.
 Simulation is disabled unless the embedding app supplies the session's
 `simulation` options. The default factory creates a fresh reference host per
 run. A custom synchronous `createHost({signal, runId})` factory must return a new
-object with the five operation methods and synchronous `dispose()`. Operations
+object with the original five operation methods and synchronous `dispose()`.
+It may additionally provide `digitalToggle(pin)`. Missing toggle support yields
+catchable `ERR208` (`unavailable`) when called, preserving older hosts for their
+existing operations; no read/write fallback is permitted. A supplied
+non-callable toggle method is a host error. The session's `digitalToggle`
+capability describes bridge support, while each custom host owns its actual
+implementation. Operations
 may return Promises, but no adapter code may block the parent event loop. The
 parent aborts the signal before disposal, rejects host reuse through weak
 ownership tracking and ignores late settlements. Deferred adapter work must

@@ -287,6 +287,16 @@ export class WasmSession {
             if (typeof host[name] !== 'function') throw new TypeError(`Simulation host requires ${name}()`);
             methods[name] = host[name].bind(host);
         }
+        // Version-1 adapters remain usable for their original operations. A
+        // missing toggle is an explicit domain refusal, never a sensed-read
+        // approximation of a latch. Supplied methods must still be callable.
+        if ('digitalToggle' in host) {
+            const toggle = host.digitalToggle;
+            if (typeof toggle !== 'function') throw new TypeError('Simulation host digitalToggle must be a function');
+            methods.digitalToggle = toggle.bind(host);
+        } else {
+            methods.digitalToggle = () => { throw new SimulationError('unavailable', 'Host does not implement digitalToggle'); };
+        }
         if (host.state === 'disposed') throw new Error('Simulation host is already disposed');
         active.simulationMethods = methods;
     }
@@ -327,10 +337,11 @@ export class WasmSession {
             case 3: return host.digitalRead(first);
             case 4: return host.delay(first);
             case 5: return host.millis();
+            case 6: return host.digitalToggle(first);
             }
         }).then(value => {
             if (!current()) return;
-            const scalar = [1, 2, 4].includes(event.operation) && value === undefined ? 0 : value;
+            const scalar = [1, 2, 4, 6].includes(event.operation) && value === undefined ? 0 : value;
             if (!validSimulationValue(event.operation, scalar)) {
                 fail('Simulation host returned an invalid result');
                 return;

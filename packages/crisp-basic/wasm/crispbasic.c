@@ -54,13 +54,14 @@ static const unsigned char simulation_source[] =
     "2 DEF PROCdigitalWrite(_crispPin,_crispValue):LOCAL _crispResult:_crispResult=FN_crispSimulation(2,_crispPin,_crispValue):ENDPROC\n"
     "3 DEF FNdigitalRead(_crispPin)=FN_crispSimulation(3,_crispPin,0)\n"
     "4 DEF PROCdelay(_crispMilliseconds):LOCAL _crispResult:_crispResult=FN_crispSimulation(4,_crispMilliseconds,0):ENDPROC\n"
-    "5 DEF FNmillis=FN_crispSimulation(5,0,0)\n";
+    "5 DEF FNmillis=FN_crispSimulation(5,0,0)\n"
+    "6 DEF PROCdigitalToggle(_crispPin):LOCAL _crispResult:_crispResult=FN_crispSimulation(6,_crispPin,0):ENDPROC\n";
 static unsigned char simulation_library[4096];
 static int simulation_enabled;
 static heapptr simulation_callsite;
 static heapptr simulation_eval_origin;
 
-int crisp_simulation_abi(void) { return 1; }
+int crisp_simulation_abi(void) { return 2; }
 
 static int in_simulation_library(const signed char *address)
 {
@@ -169,10 +170,10 @@ int crisp_simulation_function(VAR *result)
      * validate the final argument without evaluating another expression. */
     VAR second = expr();
     braket();
-    int operation = simulation_integer(operation_value, 1, 5,
+    int operation = simulation_integer(operation_value, 1, 6,
         CRISP_SIM_INVALID_OPERATION, origin);
     int argument1 = 0, argument2 = 0;
-    if (operation <= 3) argument1 = simulation_integer(first, 0, 65535, CRISP_SIM_INVALID_PIN, origin);
+    if (operation <= 3 || operation == 6) argument1 = simulation_integer(first, 0, 65535, CRISP_SIM_INVALID_PIN, origin);
     else if (operation == 4) argument1 = simulation_integer(first, 0, INT_MAX, CRISP_SIM_INVALID_TIME, origin);
     else (void)simulation_integer(first, 0, 0, CRISP_SIM_INVALID_OPERATION, origin);
     if (operation == 1) {
