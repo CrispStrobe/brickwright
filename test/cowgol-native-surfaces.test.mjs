@@ -9,6 +9,7 @@ import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import readCowgol from '../overlay/scratch-gui/src/lib/sb3-creator-cowgol-reader.js';
 import * as compiler from '../overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js';
 import {cell, isNativeNull} from '../overlay/scratch-gui/src/lib/bw-matrix/capabilities.js';
+import * as assetLibrary from '../overlay/scratch-gui/src/lib/bw-asset-library.js';
 
 const encode = value => Buffer.from(value).toString('base64');
 const requestSource = 'include "brickwright.coh"; bw_print_number(42);';
@@ -42,13 +43,13 @@ const replaceHex = (reply, text) => {
 
 test('native device routing advertises only explicitly qualified machine profiles', () => {
     for (const [device, target] of Object.entries({
-        z80: 'z80-cpm', i8086: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
+        z80: 'z80-cpm', i8086: 'dos', i80386: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
         'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano'
     })) {
         assert.equal(compiler.cowgolTargetForDevice(device), target);
         assert.equal(compiler.cowgolTargetForDevice(device.toUpperCase()), target);
     }
-    for (const device of ['arduino-mega', 'atmega168p', 'attiny85', 'pico', 'i80386', 'constructor', '__proto__', '', null]) {
+    for (const device of ['arduino-mega', 'atmega168p', 'attiny85', 'pico', 'i80486', 'constructor', '__proto__', '', null]) {
         assert.equal(compiler.cowgolTargetForDevice(device), null, String(device));
     }
 });
@@ -298,7 +299,7 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
 }
 
 test('the actual native Blocks method sends real checked Cowgol to every qualified compiler/loader', async () => {
-    for (const device of ['z80', 'i8086', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
+    for (const device of ['z80', 'i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
         const f = editorFixture({device});
         const target = compiler.cowgolTargetForDevice(device);
         const generated = new SB3Creator().generateCowgol(f.currentProject(), {target});
@@ -309,7 +310,7 @@ test('the actual native Blocks method sends real checked Cowgol to every qualifi
         assert.equal(f.builds[0].code, generated.cowgol);
         assert.match(f.builds[0].code, /bw_checked_add/);
         assert.notEqual(f.builds[0].code, f.editor.activeCode());
-        if (device === 'z80' || device === 'i8086') {
+        if (device === 'z80' || device === 'i8086' || device === 'i80386') {
             assert.equal(f.machineRuns.length, 1, device);
             assert.equal(f.machineRuns[0].config.machine, device);
         } else {
@@ -319,6 +320,54 @@ test('the actual native Blocks method sends real checked Cowgol to every qualifi
         assert.equal(f.editor.state.busy, false);
         assert.equal(f.editor._cowgolCompile, null);
     }
+});
+
+test('checked DEVICE I80386 imports through the actual editor and reaches its native DOS loader', async () => {
+    const source = `DEVICE I80386\n${pseudocode}`;
+    const f = editorFixture({device: 'i80386', lang: 'pseudocode', source, actualDevice: true});
+    await f.editor.runViaCowgolOnDevice();
+    assert.equal(f.loads.length, 1, f.editor.state.status);
+    assert.equal(f.builds.length, 1, f.editor.state.status);
+    assert.equal(f.builds[0].target, 'dos');
+    assert.match(f.builds[0].code, /DEVICE I80386/);
+    assert.match(f.builds[0].code, /bw_checked_add/);
+    assert.equal(f.machineRuns.length, 1, f.editor.state.status);
+    assert.equal(f.machineRuns[0].config.machine, 'i80386');
+    assert.equal(f.machineRuns[0].config.machineConfig, 'dos-service');
+    assert.equal(f.editor.state.buffers.c, '', 'an unavailable device C view must not break the Cowgol import');
+    assert.equal(f.currentProject().stc.device, 'i80386');
+});
+
+test('From blocks keeps the I80386 Cowgol and pseudocode views when ordinary C is unavailable', async () => {
+    const method = extract('    async fromBlocks () {', '    /** Imperative API: highlight a source line');
+    const Editor = new Function('loadAssets', 'standaloneBasicDrafts', 'dosLangBuffersFor', 'captureCodeArtwork',
+        'hiddenCodeDrafts', 'conversionFailure', `return class {${method.replace(
+            "await import('../../lib/bw-asset-library.js')", 'await loadAssets()')}}`)(
+        async () => assetLibrary, () => ({}), async (project, lang) => {
+            assert.equal(lang, 'cowgol');
+            const generated = new SB3Creator().generateCowgol(project);
+            assert.equal(generated.ok, true, generated.reasons?.join('; '));
+            return {cowgol: generated.cowgol};
+        }, () => null, () => ({}), error => ({message: error.message, issues: []}));
+    const editor = new Editor();
+    const project = parseProject(pseudocode, 'i80386');
+    const before = JSON.stringify(project);
+    Object.assign(editor, {
+        state: {lang: 'cowgol', buffers: {cowgol: 'previous draft'}},
+        props: {vm: {toJSON: () => JSON.stringify(project), runtime: {stc: project.stc, targets: []}}},
+        lib: async () => ({default: SB3Creator}), selectedBasicProfile: () => null, genOpts: () => ({}),
+        codeDevice: () => 'i80386', L: {stReading: 'reading', stError: message => `error: ${message}`},
+        setState (change) { Object.assign(this.state, typeof change === 'function' ? change(this.state) : change); }
+    });
+    await editor.fromBlocks();
+    assert.equal(editor.state.busy, false);
+    assert.equal(editor.state.conversionReport.preserved, true, editor.state.status);
+    assert.match(editor.state.buffers.pseudocode, /DEVICE I80386/i);
+    assert.match(editor.state.buffers.cowgol, /DEVICE I80386/);
+    assert.match(editor.state.buffers.cowgol, /bw_print_number/);
+    assert.equal(editor.state.buffers.c, '');
+    assert.ok(editor.state.conversionReport.unsupported.some(message => /no device C backend/.test(message)));
+    assert.equal(JSON.stringify(project), before);
 });
 
 test('authored AVR source bypasses the subset and delivers exact firmware through the editor', async () => {

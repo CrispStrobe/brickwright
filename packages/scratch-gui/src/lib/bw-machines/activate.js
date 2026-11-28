@@ -235,8 +235,10 @@ export async function activateConfig(config, opts = {}) {
         bootMedia.cpmLaunch = program.slice(0, -4);
         bootMedia.cpmFiles = Object.fromEntries(await loadMounts(cfg.provenance.cpmMount || {}, 'CP/M'));
     }
-    if (TARGET_KIND[cfg.machine] === 'i8086') bootMedia.x86Variant = cfg.cpu.variant;
-    if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe', 'disk'].includes(bootSlotId)) {
+    const dos386 = cfg.machine === 'i80386' && machinePreset === 'dos-service';
+    if (dos386) bootMedia.machinePreset = 'dos-service';
+    if (TARGET_KIND[cfg.machine] === 'i8086' || dos386) bootMedia.x86Variant = cfg.cpu.variant;
+    if ((TARGET_KIND[cfg.machine] === 'i8086' || dos386) && ['com', 'exe', 'disk'].includes(bootSlotId)) {
         bootMedia.dosVariant = cfg.cpu.variant;
         if (cfg.provenance?.program?.max >= 100_000_000) bootMedia.dosFastStart = true;
         if (typeof cfg.provenance?.program?.args === 'string') bootMedia.dosArgs = cfg.provenance.program.args;

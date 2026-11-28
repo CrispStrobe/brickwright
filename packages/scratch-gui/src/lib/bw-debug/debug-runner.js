@@ -3545,10 +3545,14 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // deliberately small bench. Load those two independent modules in
             // parallel, after publishing the attaching state so a cold chunk
             // fetch never looks like a dead Run button.
-            const [{createDebugSession}, {createI8086DosBench}] = await Promise.all([
+            const [{createDebugSession}, benchModule] = await Promise.all([
                 import(/* webpackChunkName: "bw-debug-i8086" */ 'bw-board/debug-session.js'),
-                import(/* webpackChunkName: "bw-debug-i8086" */ './i8086-dos-bench.js')
+                variant === '80386'
+                    ? import(/* webpackChunkName: "bw-debug-i80386-dos" */ './i80386-dos-bench.js')
+                    : import(/* webpackChunkName: "bw-debug-i8086" */ './i8086-dos-bench.js')
             ]);
+            const createDosBench = variant === '80386'
+                ? benchModule.createI80386DosBench : benchModule.createI8086DosBench;
             const img = await resolveMediaImage(bootMedia);
             // The slot is authoritative when the loader named one; the MZ
             // signature decides otherwise. Guessing 'com' for an .EXE would
@@ -3559,7 +3563,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     : bootMedia.slot === 'com' ? 'com'
                         : (img.bytes[0] === 0x4d && img.bytes[1] === 0x5a) ? 'exe' : 'com';
             let exited = null;
-            const bench = await createI8086DosBench({
+            const bench = await createDosBench({
                 executionSignal: i8086ExecutionLifetime.signal,
                 bytes: img.bytes, format, args: bootMedia.dosArgs, variant: variant || bootMedia.dosVariant,
                 files: bootMedia.dosFiles ? new Map(bootMedia.dosFiles) : undefined,
@@ -3585,7 +3589,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     setStatus('ready', S('run.exited', {code}));
                 }
             });
-            i8086ExecutionResult = bench;
+            if (variant !== '80386') i8086ExecutionResult = bench;
             if (i8086ExecutionLifetime.signal.aborted) throw new Error('8086 attachment was disposed');
             // No adapter: a DOS program has no pins, no serial UART and no
             // board to drive, so there is nothing for one to bridge. Passing
@@ -3840,6 +3844,14 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
      * network clone and never the private $AT_BIOS_ROM.
      */
     async function attachI80386() {
+        if (bootMedia?.machinePreset === 'dos-service') {
+            if (bootMedia.profile !== 'dos' || !['com', 'exe'].includes(bootMedia.slot) ||
+                bootMedia.nativeBlocks || bootMedia.chips || bootMedia.i80386Media ||
+                bootMedia.x86Variant !== '80386' || bootMedia.dosVariant !== '80386') {
+                throw new Error('the 386 DOS service needs a COM or EXE on its fixed real-mode profile');
+            }
+            return attachI8086('80386');
+        }
         if (bootMedia?.machinePreset === 'freedos-vga') {
             return attachI80386FreedosVgaProfile();
         }

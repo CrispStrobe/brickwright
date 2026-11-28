@@ -126,3 +126,57 @@ reports retain machine/compiler identities, exact artifact bytes or hashes,
 console traces and display hashes. Native capabilities remain deployment-open;
 physical Nano flashing, a full production GUI build, protected-mode 286,
 80386 DOS loading and board-specific ARM runtime ports remain separate work.
+
+
+## 80386, booted DOS and compiler-demo surfaces
+
+The next owner-requested continuation adds the remaining real-mode x86 CPU
+and a full operating-system route for the existing DOS artifact:
+
+- The separate `i80386` / `dos-service` machine executes COM/MZ on the actual
+  pinned experimental 386 core. The DOS adapter updates segment caches and
+  preserves upper registers and architectural FLAGS. Console and 720x400
+  Controller display both accept live DOS ASCII input. Protected-mode and
+  nonstandard segment execution are refused; instruction scheduling is
+  functional rather than a hardware timing claim.
+- Exact `DEVICE I80386` parses as a console-only producer contract and selects
+  native DOS in the editor, keyboard Run and checked artifact download. Its
+  unsupported device-C view remains a diagnostic in both import and From
+  blocks. GPIO, peripheral and timer semantics remain unavailable.
+- A separate boot surface prepares `COWGOL.EXE` and `AUTOEXEC.BAT` on the
+  checksum-pinned shipped MS-DOS 2.0 disk. All three 8086/186/286 CPUs run it
+  on console and Controller display. The machine provides BIOS services;
+  the actual guest kernel owns INT 21h, loads the MZ and returns to COMMAND.COM.
+  File capacity, image identity, exact readback and pending-launch ownership
+  are enforced. This is not a 386 disk-boot or ROM-BIOS qualification.
+- The compiler-service demo exposes its existing Uno/Nano Cowgol targets,
+  fixes their HEX format and labels, and preserves shared C/Arduino routing.
+  Producer CLI help now includes the existing Nano target.
+
+Published dependencies:
+
+| Repository | Commit |
+| --- | --- |
+| Compiler/runtime | `4082aaba5c023b17f469f74d7a84504e3dbbebd4` (unchanged) |
+| Compiler service | `cd23ac280c6292a9d27bdbbecf04566fee3c9be8` |
+| Producer | `adf1e4e8e736276b3c98b42f912147bf38b091c9` |
+| Machine oracle | `d21d6d8b819263eb08231134b7556efa82289a90` (unchanged) |
+
+The producer commit directly extends the previous feature pin. The deliberate
+feature-pin sync uses the script's existing `--allow-stale --pin` option,
+not a default-branch update. All 28 mapped producer sources match exactly
+after standard import rewrites; only the two intended converter files change,
+and the producer gallery tree is unchanged. The tracked app mirrors are
+synchronized. The SPIKE round-trip supplier assertion was already older than
+the prior Cowgol checkpoint; it now names the current pin and the complete
+artifact test passes again.
+
+Local qualification passes 230 dedicated editor/CLI/ownership tests, the
+separate SPIKE artifact regression, complete editor JSX parsing and mirror
+checks. The real HTTP/CLI witness passes eight DOS-service runs, six booted
+MS-DOS runs, both full CP/M OS/display compiler variants and host C execution.
+The DOS reports prove guest output, CPU semantics, active keyboard input,
+text cells, pixel hashes and exit/shell behavior. The dedicated CI requires
+all prerequisites and archives these results alongside the existing Uno/Nano
+HTTP/CLI cold-boot qualification. Compiler and machine pins remain unchanged;
+new native surfaces remain deployment-open until app/service release.

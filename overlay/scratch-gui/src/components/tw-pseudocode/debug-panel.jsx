@@ -544,11 +544,11 @@ class DebugPanel extends React.Component {
         // instrument, exactly as before — this only adds a surface, never removes
         // one. The video-widget declaration rides the media-load event's
         // `widgets` field (the machine-manager activate action supplies it).
-        const io = nextKind === 'i8086' ? runner.i8086MediaIo : null;
+        const io = ['i8086', 'i80386'].includes(nextKind) ? runner.i8086MediaIo : null;
         const displayName = io?.display && `PC ${io.display === 'hercules' ? 'Hercules' : io.display.toUpperCase()}`;
         const screen = (Array.isArray(widgets)
             ? widgets.find(w => w && w.source === 'video') : null) ||
-            (['i80286', 'i80386'].includes(nextKind) ? {name: 'AT VGA', type: 'simplevga', source: 'video',
+            (['i80286', 'i80386'].includes(nextKind) && !io?.dosKeyboard ? {name: 'AT VGA', type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null) ||
             (displayName ? {name: displayName, type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null);

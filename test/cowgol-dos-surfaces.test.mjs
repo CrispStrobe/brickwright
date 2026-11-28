@@ -19,7 +19,8 @@ test('DOS CPU and display choices survive the actual media activation boundary',
             assert.equal(ref.url, 'local-media:cowgol.exe');
             return {bytes};
         }, dispatch () {}});
-        assert.equal(detail.kind, 'i8086');
+        assert.equal(detail.kind, variant === '80386' ? 'i80386' : 'i8086');
+        if (variant === '80386') assert.equal(detail.machinePreset, 'dos-service');
         assert.equal(detail.slotId, 'exe');
         assert.equal(detail.profile, 'dos');
         assert.equal(detail.x86Variant, variant);
@@ -33,16 +34,17 @@ test('DOS CPU and display choices survive the actual media activation boundary',
 
 test('a DOS machine choice is explicit and cannot turn the separate 386 AT into an 8086 alias', () => {
     assert.equal(cowgolDosConfig().cpu.variant, '8086');
-    for (const variant of ['80386', 'i8086', '8088', 'constructor', '', null, 8086]) {
-        assert.throws(() => cowgolDosConfig({variant}), /8086, 80186 or 80286/);
+    for (const variant of ['80486', 'i8086', '8088', 'constructor', '', null, 8086]) {
+        assert.throws(() => cowgolDosConfig({variant}), /8086, 80186, 80286 or 80386/);
     }
     for (const display of ['yes', 0, null]) assert.throws(() => cowgolDosConfig({display}), /Boolean display/);
     for (const variant of COWGOL_DOS_VARIANTS) {
         assert.equal(cowgolDosVariantForDevice(`i${variant}`), variant);
         assert.equal(cowgolDosVariantForDevice(variant), variant);
     }
-    for (const device of ['i80386', 'arduino-uno', 'constructor', null]) assert.equal(cowgolDosVariantForDevice(device), null);
-    assert.equal(compiler.cowgolTargetForDevice('i80386'), null);
+    for (const device of ['i80486', 'arduino-uno', 'constructor', null]) assert.equal(cowgolDosVariantForDevice(device), null);
+    assert.equal(compiler.cowgolTargetForDevice('i80386'), 'dos');
+    assert.equal(cowgolDosConfig({variant: '80386'}).machineConfig, 'dos-service');
     const config = cowgolDosConfig({display: true});
     config.widgets[0].config.width = 1;
     assert.equal(cowgolDosConfig({display: true}).widgets[0].config.width, 720);
@@ -63,20 +65,28 @@ const deferred = () => {
     return {promise, resolve};
 };
 
-function fixture ({hold = null, lang = 'cowgol', toolchains = true, replyChange = {}} = {}) {
+function fixture ({hold = null, lang = 'cowgol', toolchains = true, replyChange = {}, selectedDevice = 'i8086',
+    images = false, diskError = null} = {}) {
     const code = 'include "cowgol.coh"; var data: uint8[] := {1, 2}; print("DOS");';
     const bytes = Uint8Array.of(0x4d, 0x5a);
-    const built = [], dispatched = [], imports = [];
+    const built = [], dispatched = [], imports = [], prepared = [];
+    const diskBytes = Uint8Array.of(0xeb, 0x3c, 0x90, 0x55, 0xaa);
     const entered = deferred(), release = deferred();
     const pause = async phase => { if (hold === phase) { entered.resolve(); await release.promise; } };
     const creator = new SB3Creator();
-    creator.parse('DEVICE I8086\nGLOBAL total = 2\nWHEN flag clicked:\n  change total by 3\n  say total\n');
+    creator.parse(`DEVICE ${selectedDevice.toUpperCase()}\nGLOBAL total = 2\nWHEN flag clicked:\n  change total by 3\n  say total\n`);
     const project = creator.project;
     let stage = {};
-    let device = 'i8086';
+    let device = selectedDevice;
     const loadCompiler = async () => {
         await pause('compiler-module');
         return {...compiler, cowgolDosConfig, cowgolDosVariantForDevice, COWGOL_DOS_VARIANTS,
+            prepareCowgolDosDisk: async (bytes, options) => {
+                prepared.push({bytes, signal: options.signal});
+                await pause('disk');
+                if (diskError) throw new Error(diskError);
+                return diskBytes;
+            },
             compileCowgol: (source, target, options) => compiler.compileCowgol(source, target, {...options,
                 fetcher: async (_url, request) => {
                     built.push(JSON.parse(request.body));
@@ -92,12 +102,13 @@ function fixture ({hold = null, lang = 'cowgol', toolchains = true, replyChange 
     const Editor = new Function('loadCompiler', 'runMachineConfig', 'remoteToolchainsAllowed',
         'remoteMachineImagesAllowed', 'cowgolTargetForDevice', 'cowgolCanonicalDevice', 'cowgolDosVariantForDevice',
         'COWGOL_DOS_VARIANTS', `return class {${methods}}`)(loadCompiler, activate, () => toolchains,
-        () => false, compiler.cowgolTargetForDevice, compiler.cowgolCanonicalDevice, cowgolDosVariantForDevice, COWGOL_DOS_VARIANTS);
+        () => images, compiler.cowgolTargetForDevice, compiler.cowgolCanonicalDevice, cowgolDosVariantForDevice, COWGOL_DOS_VARIANTS);
     const editor = new Editor();
     Object.assign(editor, {
         state: {lang, buffers: {[lang]: code}, busy: false, running: false},
         L: {cowgolCompiling: 'compiling', cowgolStale: 'stale', cowgolCpmTargetRequired: 'CP/M target required',
-            cowgolDosTargetRequired: 'DOS target required', stError: message => `error: ${message}`},
+            cowgolDosTargetRequired: 'DOS target required', cowgolDosImagesUnavailable: 'MS-DOS images unavailable',
+            stError: message => `error: ${message}`},
         activeCode () { return this.state.buffers[this.state.lang]; },
         codeDevice: () => device,
         setState (change) { Object.assign(this.state, typeof change === 'function' ? change(this.state) : change); },
@@ -105,7 +116,8 @@ function fixture ({hold = null, lang = 'cowgol', toolchains = true, replyChange 
         lib: async () => ({default: SB3Creator}),
         compile: async options => { imports.push(options); await pause('import'); return true; }
     });
-    return {editor, code, bytes, built, dispatched, imports, entered, release,
+    return {editor, code, bytes, diskBytes, built, dispatched, imports, prepared, entered, release,
+        refuseImages: () => { images = false; },
         changeDevice: () => { device = 'z80'; }, changeStage: () => { stage = {}; },
         editBlocks: () => { project.targets[0].name = 'edited'; },
         editMetadata: () => { project.stc.clock = 1_000_000; }};
@@ -127,6 +139,48 @@ test('full Cowgol uses the selected real DOS CPU and exact bytes on console and 
     }
 });
 
+test('full and checked Cowgol boot the prepared MS-DOS disk on each qualified CPU and display', async () => {
+    for (const lang of ['cowgol', 'pseudocode']) for (const variant of ['8086', '80186', '80286']) {
+        for (const surface of ['dos-system', 'dos-system-display']) {
+            const f = fixture({lang, images: true});
+            if (lang === 'cowgol') await f.editor.compileCowgolSource('dos', true, {surface, variant});
+            else await f.editor.runViaCowgolOnDevice({surface, variant});
+            assert.equal(f.built.length, 1, f.editor.state.status);
+            assert.equal(f.prepared.length, 1, f.editor.state.status);
+            assert.deepEqual(f.prepared[0].bytes, f.bytes);
+            assert.ok(f.prepared[0].signal instanceof AbortSignal);
+            assert.equal(f.dispatched.length, 1, f.editor.state.status);
+            const detail = f.dispatched[0];
+            assert.equal(detail.kind, 'i8086');
+            assert.equal(detail.slotId, 'disk');
+            assert.equal(detail.profile, 'dos');
+            assert.equal(detail.dosVariant, variant);
+            assert.deepEqual(detail.bytes, f.diskBytes);
+            assert.equal(detail.widgets.length, surface === 'dos-system-display' ? 1 : 0);
+            assert.ok(detail.launchControl, 'OS disk activation retains source ownership');
+            assert.equal(f.editor.state.busy, false);
+        }
+    }
+});
+
+test('OS image policy, unsupported CPU and disk preparation failure cannot launch a stale or foreign disk', async () => {
+    for (const lang of ['cowgol', 'pseudocode']) for (const images of [false, true]) {
+        const f = fixture({lang, images});
+        const variant = images ? '80386' : '8086';
+        if (lang === 'cowgol') await f.editor.compileCowgolSource('dos', true, {surface: 'dos-system', variant});
+        else await f.editor.runViaCowgolOnDevice({surface: 'dos-system', variant});
+        assert.equal(f.built.length, 0);
+        assert.equal(f.prepared.length, 0);
+        assert.equal(f.dispatched.length, 0);
+        assert.equal(f.imports.length, 0, 'an unsupported boot must fail before replacing the project');
+    }
+    const failed = fixture({images: true, diskError: 'base image checksum mismatch'});
+    await failed.editor.compileCowgolSource('dos', true, {surface: 'dos-system'});
+    assert.equal(failed.dispatched.length, 0);
+    assert.match(failed.editor.state.status, /checksum mismatch/);
+    assert.equal(failed.editor.state.busy, false);
+});
+
 test('checked I8086 source runs on an explicitly selected DOS variant without an invented DEVICE alias', async () => {
     for (const variant of COWGOL_DOS_VARIANTS) {
         const f = fixture({lang: 'pseudocode'});
@@ -138,8 +192,26 @@ test('checked I8086 source runs on an explicitly selected DOS variant without an
     }
 });
 
+test('a selected 80386 defaults to the separate 386 DOS machine for full and checked source', async () => {
+    for (const lang of ['cowgol', 'pseudocode']) {
+        const f = fixture({lang, selectedDevice: 'i80386'});
+        if (lang === 'cowgol') await f.editor.compileCowgolSource('dos', true, {surface: 'dos-display'});
+        else await f.editor.runViaCowgolOnDevice({surface: 'dos-display'});
+        assert.equal(f.built.length, 1, f.editor.state.status);
+        assert.equal(f.dispatched.length, 1, f.editor.state.status);
+        assert.equal(f.dispatched[0].kind, 'i80386');
+        assert.equal(f.dispatched[0].machinePreset, 'dos-service');
+        assert.equal(f.dispatched[0].dosVariant, '80386');
+        assert.deepEqual(f.dispatched[0].bytes, f.bytes);
+        if (lang === 'pseudocode') {
+            assert.deepEqual(f.imports, [{strict: true, targetDevice: 'i80386', cowgolTarget: 'dos'}]);
+            assert.match(f.built[0].code, /bw_checked_add/);
+        } else assert.equal(f.built[0].code, f.code);
+    }
+});
+
 test('unsupported DOS CPU choices and foreign artifacts cannot reach the machine', async () => {
-    for (const variant of ['80386', '8088', 'constructor', '']) {
+    for (const variant of ['80486', '8088', 'constructor', '']) {
         const f = fixture();
         await f.editor.compileCowgolSource('dos', true, {variant});
         assert.equal(f.built.length, 0, `invalid variant ${variant} must fail before compilation`);
@@ -173,6 +245,19 @@ for (const phase of ['compiler-module', 'network', 'media']) {
             change(f);
             f.release.resolve();
             await pending;
+            assert.equal(f.dispatched.length, 0, reason);
+            if (reason !== 'unmount') assert.equal(f.editor.state.busy, false, reason);
+        }
+    });
+}
+
+for (const phase of ['compiler-module', 'network', 'disk', 'media']) {
+    test(`booted MS-DOS launch revokes source and image ownership during ${phase}`, async () => {
+        for (const [reason, change] of Object.entries({...revoke, policy: f => f.refuseImages()})) {
+            const f = fixture({hold: phase, images: true});
+            const pending = f.editor.compileCowgolSource('dos', true, {surface: 'dos-system-display', variant: '80186'});
+            await f.entered.promise;
+            change(f); f.release.resolve(); await pending;
             assert.equal(f.dispatched.length, 0, reason);
             if (reason !== 'unmount') assert.equal(f.editor.state.busy, false, reason);
         }

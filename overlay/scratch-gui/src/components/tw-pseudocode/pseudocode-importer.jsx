@@ -235,14 +235,20 @@ const L10N = {
         cowgolCpmImagesUnavailable: 'CP/M 2.2 machine images are unavailable in this build.',
         cowgolCpmTargetRequired: 'The CP/M 2.2 machine needs a Z80 or 8080 CP/M program.',
         cowgolRunDos: '▶ Cowgol on DOS',
-        cowgolRunDosDisplay: '▶ Cowgol on DOS display (8086)',
+        cowgolRunDosDisplay: '▶ Cowgol on DOS display',
         cowgolRunDosVariant: variant => `▶ Cowgol on DOS (${variant})`,
         cowgolRunDosVariantDisplay: variant => `▶ Cowgol on DOS display (${variant})`,
         cowgolRunBlocksDosVariant: variant => `▶ Blocks via Cowgol on DOS (${variant})`,
         cowgolRunBlocksDosVariantDisplay: variant => `▶ Blocks via Cowgol on DOS display (${variant})`,
         cowgolRunBlocksDosDisplay: '▶ Blocks via Cowgol on DOS display',
-        cowgolRunDosDisplayTitle: 'Run the DOS program on the selected 8086, 80186 or 80286 machine with its text display in Controller',
+        cowgolRunDosDisplayTitle: 'Run the DOS program on the selected 8086, 80186, 80286 or real-mode 80386 machine with its text display in Controller',
         cowgolDosTargetRequired: 'The DOS display needs a DOS program.',
+        cowgolRunDosSystem: variant => `▶ Cowgol in MS-DOS 2.0 (${variant})`,
+        cowgolRunDosSystemDisplay: variant => `▶ Cowgol on MS-DOS 2.0 display (${variant})`,
+        cowgolRunBlocksDosSystem: variant => `▶ Blocks via Cowgol in MS-DOS 2.0 (${variant})`,
+        cowgolRunBlocksDosSystemDisplay: variant => `▶ Blocks via Cowgol on MS-DOS 2.0 display (${variant})`,
+        cowgolRunDosSystemTitle: 'Boot MS-DOS 2.0 from a fresh disk containing COWGOL.EXE and run it through the operating system',
+        cowgolDosImagesUnavailable: 'MS-DOS 2.0 machine images are unavailable in this build.',
         cowgolRunRiscv: '▶ Cowgol on RISC-V',
         cowgolRunEater: '▶ Cowgol on Eater 6502',
         cowgolRunAvr: '▶ Cowgol on Arduino Uno',
@@ -629,14 +635,20 @@ const L10N = {
         cowgolCpmImagesUnavailable: 'CP/M-2.2-Maschinenabbilder sind in diesem Build nicht verfügbar.',
         cowgolCpmTargetRequired: 'Die CP/M-2.2-Maschine benötigt ein Z80- oder 8080-CP/M-Programm.',
         cowgolRunDos: '▶ Cowgol unter DOS',
-        cowgolRunDosDisplay: '▶ Cowgol auf DOS-Bildschirm (8086)',
+        cowgolRunDosDisplay: '▶ Cowgol auf DOS-Bildschirm',
         cowgolRunDosVariant: variant => `▶ Cowgol unter DOS (${variant})`,
         cowgolRunDosVariantDisplay: variant => `▶ Cowgol auf DOS-Bildschirm (${variant})`,
         cowgolRunBlocksDosVariant: variant => `▶ Blöcke mit Cowgol unter DOS (${variant})`,
         cowgolRunBlocksDosVariantDisplay: variant => `▶ Blöcke mit Cowgol auf DOS-Bildschirm (${variant})`,
         cowgolRunBlocksDosDisplay: '▶ Blöcke mit Cowgol auf DOS-Bildschirm',
-        cowgolRunDosDisplayTitle: 'Das DOS-Programm auf der gewählten 8086-, 80186- oder 80286-Maschine mit Textbildschirm im Controller ausführen',
+        cowgolRunDosDisplayTitle: 'Das DOS-Programm auf der gewählten 8086-, 80186-, 80286- oder 80386-Maschine im Real Mode mit Textbildschirm im Controller ausführen',
         cowgolDosTargetRequired: 'Der DOS-Bildschirm benötigt ein DOS-Programm.',
+        cowgolRunDosSystem: variant => `▶ Cowgol in MS-DOS 2.0 (${variant})`,
+        cowgolRunDosSystemDisplay: variant => `▶ Cowgol auf MS-DOS-2.0-Bildschirm (${variant})`,
+        cowgolRunBlocksDosSystem: variant => `▶ Blöcke mit Cowgol in MS-DOS 2.0 (${variant})`,
+        cowgolRunBlocksDosSystemDisplay: variant => `▶ Blöcke mit Cowgol auf MS-DOS-2.0-Bildschirm (${variant})`,
+        cowgolRunDosSystemTitle: 'MS-DOS 2.0 von einer neuen Diskette mit COWGOL.EXE starten und das Programm über das Betriebssystem ausführen',
+        cowgolDosImagesUnavailable: 'MS-DOS-2.0-Maschinenabbilder sind in diesem Build nicht verfügbar.',
         cowgolRunRiscv: '▶ Cowgol auf RISC-V',
         cowgolRunEater: '▶ Cowgol auf Eater 6502',
         cowgolRunAvr: '▶ Cowgol auf Arduino Uno',
@@ -6063,11 +6075,16 @@ class PseudocodeImporter extends React.Component {
         const device = this.codeDevice();
         const target = cowgolTargetForDevice(device);
         if (!target || !['cowgol', 'pseudocode'].includes(lang)) return;
-        if (variant !== undefined && (target !== 'dos' || !['8086', '80186', '80286'].includes(variant))) {
-            this.setState({status: this.L.stError('Select a qualified DOS CPU: 8086, 80186 or 80286.')});
+        const dosSystem = surface === 'dos-system' || surface === 'dos-system-display';
+        if (variant !== undefined && (target !== 'dos' || !['8086', '80186', '80286', '80386'].includes(variant))) {
+            this.setState({status: this.L.stError('Select a qualified DOS CPU: 8086, 80186, 80286 or 80386.')});
             return;
         }
-        if (surface !== 'bench' && !(surface === 'dos-display' ? target === 'dos' :
+        if (dosSystem && (variant === '80386' || (variant === undefined && device === 'i80386'))) {
+            this.setState({status: this.L.stError('MS-DOS 2.0 disk boot supports 8086, 80186 and 80286. Select one of these CPUs.')});
+            return;
+        }
+        if (surface !== 'bench' && !(dosSystem ? target === 'dos' && remoteMachineImagesAllowed() : surface === 'dos-display' ? target === 'dos' :
             ['cpm-system', 'cpm-vdp'].includes(surface) && target === 'z80-cpm' && remoteMachineImagesAllowed())) return;
         const request = {};
         this._cowgolBlocksImport = request;
@@ -6145,13 +6162,14 @@ class PseudocodeImporter extends React.Component {
     async compileCowgolSource (target, run = false, {fromBlocks = false, fromEditor = false, surface = 'bench', variant} = {}) {
         if (this.state.busy || this.state.running) return;
         const cpmSystem = surface === 'cpm-system' || surface === 'cpm-vdp';
-        const dosDisplay = surface === 'dos-display';
-        if (surface !== 'bench' && (!run || !(cpmSystem ? ['z80-cpm', 'i8080-cpm'].includes(target) : dosDisplay && target === 'dos'))) {
-            this.setState({status: this.L.stError(dosDisplay ? this.L.cowgolDosTargetRequired : this.L.cowgolCpmTargetRequired)});
+        const dosSystem = surface === 'dos-system' || surface === 'dos-system-display';
+        const dosDisplay = surface === 'dos-display' || surface === 'dos-system-display';
+        if (surface !== 'bench' && (!run || !(cpmSystem ? ['z80-cpm', 'i8080-cpm'].includes(target) : (dosDisplay || dosSystem) && target === 'dos'))) {
+            this.setState({status: this.L.stError(dosDisplay || dosSystem ? this.L.cowgolDosTargetRequired : this.L.cowgolCpmTargetRequired)});
             return;
         }
-        if (cpmSystem && !remoteMachineImagesAllowed()) {
-            this.setState({status: this.L.stError(this.L.cowgolCpmImagesUnavailable)});
+        if ((cpmSystem || dosSystem) && !remoteMachineImagesAllowed()) {
+            this.setState({status: this.L.stError(dosSystem ? this.L.cowgolDosImagesUnavailable : this.L.cowgolCpmImagesUnavailable)});
             return;
         }
         const source = this.activeCode();
@@ -6173,13 +6191,15 @@ class PseudocodeImporter extends React.Component {
             JSON.stringify(this.props.vm.runtime.stc || null) === deviceRevision;
         this.setState({busy: true, status: this.L.cowgolCompiling});
         try {
-            const {compileCowgol, cowgolCpmConfig, cowgolCpmSystemConfig, cowgolDosConfig, cowgolDosVariantForDevice, cowgolRiscvDetail, cowgolEaterDetail, cowgolAvrDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
+            const {compileCowgol, cowgolCpmConfig, cowgolCpmSystemConfig, cowgolDosConfig, cowgolDosDiskConfig, prepareCowgolDosDisk, cowgolDosVariantForDevice, cowgolRiscvDetail, cowgolEaterDetail, cowgolAvrDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
             if (!current()) return;
             // Reject an unsupported explicit CPU before sending any source.
             if (variant !== undefined) {
                 if (target !== 'dos') throw new Error('A DOS CPU can only be selected for a DOS program.');
                 cowgolDosConfig({variant, display: dosDisplay});
             }
+            const dosVariant = target === 'dos' ? variant ?? cowgolDosVariantForDevice(device) ?? '8086' : null;
+            if (dosSystem) cowgolDosDiskConfig({variant: dosVariant, display: dosDisplay});
             let code = source;
             if (fromBlocks || fromEditor) {
                 const SB3Creator = (await this.lib()).default;
@@ -6217,7 +6237,23 @@ class PseudocodeImporter extends React.Component {
                 if (owns() && this.state.status === this.L.cowgolCompiling) this.setState({status: this.L.cowgolStale});
                 return;
             }
-            if (cpmSystem) {
+            if (dosSystem) {
+                if (!remoteMachineImagesAllowed()) return;
+                const bytes = await prepareCowgolDosDisk(out.bytes, {signal: request.signal});
+                if (!current() || !remoteMachineImagesAllowed()) return;
+                const config = cowgolDosDiskConfig({variant: dosVariant, display: dosDisplay});
+                const launched = await runMachineConfig(config, {
+                    fetcher: ref => {
+                        if (ref.url !== 'local-media:cowgol-dos.img') throw new Error('Unexpected Cowgol DOS disk media.');
+                        return {bytes};
+                    },
+                    isCurrent: () => current() && remoteMachineImagesAllowed(), signal: request.signal
+                });
+                if (launched?.mode === 'cancelled') {
+                    if (owns() && this.state.status === this.L.cowgolCompiling) this.setState({status: this.L.cowgolStale});
+                    return;
+                }
+            } else if (cpmSystem) {
                 const config = cowgolCpmSystemConfig({display: surface === 'cpm-vdp', target});
                 const launched = await runMachineConfig(config, {
                     fetcher: ref => {
@@ -6239,7 +6275,7 @@ class PseudocodeImporter extends React.Component {
                 window.__bwPendingMedia = {type: 'asm', detail};
                 window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
             } else if (run && target === 'dos') {
-                const config = cowgolDosConfig({variant: variant ?? cowgolDosVariantForDevice(device) ?? '8086', display: dosDisplay});
+                const config = cowgolDosConfig({variant: dosVariant, display: dosDisplay});
                 const launched = await runMachineConfig(config, {
                     fetcher: () => ({bytes: out.bytes}), isCurrent: current, signal: request.signal
                 });
@@ -6523,9 +6559,9 @@ class PseudocodeImporter extends React.Component {
                     }
                 }
                 catch (error) {
-                    if (error.code !== 'RISCV_CONSOLE_UNSUPPORTED') throw error;
+                    if (!['RISCV_CONSOLE_UNSUPPORTED', 'DOS_CONSOLE_C_UNSUPPORTED'].includes(error.code)) throw error;
                     nb.c = '';
-                    targetWarnings.push(`RISC-V C export: ${error.message}`);
+                    targetWarnings.push(`${error.code === 'RISCV_CONSOLE_UNSUPPORTED' ? 'RISC-V C export' : 'C export'}: ${error.message}`);
                 }
             }
             if (lang !== 'basic') {
@@ -6586,8 +6622,8 @@ class PseudocodeImporter extends React.Component {
             let cWarning = '';
             try { cSource = new SB3Creator().generateC(project); }
             catch (error) {
-                if (error.code !== 'RISCV_CONSOLE_UNSUPPORTED') throw error;
-                cWarning = `RISC-V C export: ${error.message}`;
+                if (!['RISCV_CONSOLE_UNSUPPORTED', 'DOS_CONSOLE_C_UNSUPPORTED'].includes(error.code)) throw error;
+                cWarning = `${error.code === 'RISCV_CONSOLE_UNSUPPORTED' ? 'RISC-V C export' : 'C export'}: ${error.message}`;
             }
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
@@ -7629,7 +7665,8 @@ class PseudocodeImporter extends React.Component {
                                     data-testid="bw-cowgol-blocks-dos-display-run">
                                     {this.L.cowgolRunBlocksDosDisplay}
                                 </button>
-                                {['80186', '80286'].map(variant => <React.Fragment key={variant}>
+                                {['8086', '80186', '80286', '80386'].filter(variant =>
+                                    variant !== (this.codeDevice() === 'i80386' ? '80386' : '8086')).map(variant => <React.Fragment key={variant}>
                                     <button type="button" onClick={() => this.runViaCowgolOnDevice({variant})}
                                         disabled={this.state.running || this.state.busy}
                                         data-testid={`bw-cowgol-blocks-dos-${variant}-run`}>
@@ -7640,6 +7677,20 @@ class PseudocodeImporter extends React.Component {
                                         title={this.L.cowgolRunDosDisplayTitle}
                                         data-testid={`bw-cowgol-blocks-dos-${variant}-display-run`}>
                                         {this.L.cowgolRunBlocksDosVariantDisplay(variant)}
+                                    </button>
+                                </React.Fragment>)}
+                                {remoteMachineImagesAllowed() && ['8086', '80186', '80286'].map(variant => <React.Fragment key={`disk-${variant}`}>
+                                    <button type="button" onClick={() => this.runViaCowgolOnDevice({surface: 'dos-system', variant})}
+                                        disabled={this.state.running || this.state.busy}
+                                        title={this.L.cowgolRunDosSystemTitle}
+                                        data-testid={`bw-cowgol-blocks-dos-system-${variant}-run`}>
+                                        {this.L.cowgolRunBlocksDosSystem(variant)}
+                                    </button>
+                                    <button type="button" onClick={() => this.runViaCowgolOnDevice({surface: 'dos-system-display', variant})}
+                                        disabled={this.state.running || this.state.busy}
+                                        title={this.L.cowgolRunDosSystemTitle}
+                                        data-testid={`bw-cowgol-blocks-dos-system-${variant}-display-run`}>
+                                        {this.L.cowgolRunBlocksDosSystemDisplay(variant)}
                                     </button>
                                 </React.Fragment>)}
                             </React.Fragment>
@@ -7701,7 +7752,8 @@ class PseudocodeImporter extends React.Component {
                                             data-testid="bw-cowgol-dos-display-run">
                                             {this.L.cowgolRunDosDisplay}
                                         </button>
-                                        {['80186', '80286'].map(variant => <React.Fragment key={variant}>
+                                        {['8086', '80186', '80286', '80386'].filter(variant =>
+                                    variant !== (this.codeDevice() === 'i80386' ? '80386' : '8086')).map(variant => <React.Fragment key={variant}>
                                             <button type="button" onClick={() => this.compileCowgolSource('dos', true, {variant})}
                                                 disabled={this.state.running || this.state.busy}
                                                 data-testid={`bw-cowgol-dos-${variant}-run`}>
@@ -7712,6 +7764,20 @@ class PseudocodeImporter extends React.Component {
                                                 title={this.L.cowgolRunDosDisplayTitle}
                                                 data-testid={`bw-cowgol-dos-${variant}-display-run`}>
                                                 {this.L.cowgolRunDosVariantDisplay(variant)}
+                                            </button>
+                                        </React.Fragment>)}
+                                        {remoteMachineImagesAllowed() && ['8086', '80186', '80286'].map(variant => <React.Fragment key={`disk-${variant}`}>
+                                            <button type="button" onClick={() => this.compileCowgolSource('dos', true, {surface: 'dos-system', variant})}
+                                                disabled={this.state.running || this.state.busy}
+                                                title={this.L.cowgolRunDosSystemTitle}
+                                                data-testid={`bw-cowgol-dos-system-${variant}-run`}>
+                                                {this.L.cowgolRunDosSystem(variant)}
+                                            </button>
+                                            <button type="button" onClick={() => this.compileCowgolSource('dos', true, {surface: 'dos-system-display', variant})}
+                                                disabled={this.state.running || this.state.busy}
+                                                title={this.L.cowgolRunDosSystemTitle}
+                                                data-testid={`bw-cowgol-dos-system-${variant}-display-run`}>
+                                                {this.L.cowgolRunDosSystemDisplay(variant)}
                                             </button>
                                         </React.Fragment>)}
                                     </React.Fragment>}

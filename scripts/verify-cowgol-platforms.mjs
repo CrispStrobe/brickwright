@@ -51,7 +51,9 @@ and the Uno/Nano AVR profiles are explicit opt-ins and fail if their bundle/runt
 The AVR test also requires the exact pinned GUI engine and compiler checkout.
 CP/M programs run under the actual CP/M 2.2 OS on both serial and Controller
 surfaces; both compiler targets execute on the pinned Z80 CPU. DOS executes on
-8086, 80186 and real-mode 80286 with console and Controller text output.`);
+8086, 80186, real-mode 80286 and real-mode 80386 with console and Controller
+text output. The same DOS artifact also boots under real MS-DOS 2.0 on the
+8086/80186/80286 machines, using machine-provided BIOS services.`);
     process.exit(0);
 }
 
@@ -261,11 +263,18 @@ try {
                     encoding: 'utf8', timeout: 90_000, maxBuffer: 1024 * 1024,
                     env: {...process.env, TMPDIR: work}
                 }));
-            assert.equal(report.runs.length, 6, 'Execute three DOS CPUs on both console and Controller surfaces');
+            assert.equal(report.runs.length, 8, 'Execute four DOS CPUs on both console and Controller surfaces');
+            const diskReport = JSON.parse(execFileSync(process.execPath,
+                [path.join(root, 'scripts/verify-cowgol-dos-disk.mjs'), '--exe', artifact, '--board', board,
+                    '--expect-output', fullOutput, ...fullOutput.trimEnd().split('\n').map(text => `--expect=${text}`)], {
+                    encoding: 'utf8', timeout: 90_000, maxBuffer: 1024 * 1024,
+                    env: {...process.env, TMPDIR: work}
+                }));
+            assert.equal(diskReport.runs.length, 6, 'Boot MS-DOS on three CPUs with console and Controller output');
             output = report.runs[0].output.replace(/\r/g, '');
             execution = {machine: 'PC DOS services', boots: report.runs.length, exitCode: 0,
                 artifactSha256: report.artifact.sha256, sources: report.sources, probes: report.probes,
-                runs: report.runs};
+                runs: report.runs, operatingSystem: diskReport};
         } else if (target === 'riscv32') {
             const {RiscV32Machine} = await import(pathToFileURL(path.join(board, 'src/riscv32-machine.js')).href);
             const machine = new RiscV32Machine({memSize: 1 << 22, resetPc: out.image.entry});

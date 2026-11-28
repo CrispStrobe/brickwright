@@ -31,6 +31,9 @@ export function codeLanguageAvailable (lang, device, {remoteImages = true, riscv
         // The checked subset runs through blocks, independently of a native
         // Cowgol compiler. Keep it available on extension-owned devices too.
         if (device === 'spike') return true;
+        // The standalone 386 computer has an explicit real-mode DOS Cowgol
+        // loader, independent of the MCU-oriented conversion matrix.
+        if (device === 'i80386') return true;
         const capability = cell(lang, device);
         return Boolean(capability && (capability.native?.sim || capability.native?.silicon ||
             capability.lowered.some(route => route.sim || route.silicon))) ||

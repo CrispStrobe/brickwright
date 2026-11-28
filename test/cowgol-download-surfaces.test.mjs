@@ -78,7 +78,7 @@ function fixture ({device = 'arduino-uno', lang = 'pseudocode', text = source,
 }
 
 test('checked editor exports compile the active draft for each qualified machine without loading or running it', async () => {
-    for (const device of ['z80', 'i8086', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
+    for (const device of ['z80', 'i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
         const f = fixture({device});
         const before = f.vm.toJSON(), stc = f.vm.runtime.stc, buffers = f.editor.state.buffers;
         const target = compiler.cowgolTargetForDevice(device);
@@ -140,7 +140,7 @@ test('actual DEVICE headers resolve only the documented Uno and classic Nano ali
     assert.match(conflict.editor.state.status, /different machine/);
     assert.equal(conflict.builds.length, 0);
     assert.equal(conflict.downloads.length, 0);
-    for (const alias of ['nano-every', 'nano33', 'uno-r4', 'mega', 'atmega168p', 'i80386']) {
+    for (const alias of ['nano-every', 'nano33', 'uno-r4', 'mega', 'atmega168p', 'i80486']) {
         const f = fixture({text: `DEVICE ${alias}\n${source}`, actualDevice: true});
         assert.equal(f.editor.codeDevice(), alias);
         await f.editor.downloadViaCowgolOnDevice();

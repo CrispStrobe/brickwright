@@ -1,5 +1,6 @@
 import {remoteToolchainsAllowed} from '../distribution-policy.js';
 export {cowgolDosConfig, cowgolDosVariantForDevice, COWGOL_DOS_VARIANTS} from './cowgol-dos.js';
+export {cowgolDosDiskConfig, prepareCowgolDosDisk, COWGOL_DOS_DISK_VARIANTS} from './cowgol-dos-disk.js';
 
 export const COWGOL_COMPILE_ENDPOINT = 'https://stc-compiler.vercel.app/compile';
 export const COWGOL_COMPILE_TARGETS = Object.freeze({
@@ -15,7 +16,7 @@ export const COWGOL_COMPILE_TARGETS = Object.freeze({
 
 /** Exact qualified boards, rather than all boards with a related processor. */
 const DEVICE_TARGETS = Object.freeze({
-    z80: 'z80-cpm', i8086: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
+    z80: 'z80-cpm', i8086: 'dos', i80386: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
     'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano'
 });
 /** Source-language aliases for these exact boards, not processor-family aliases. */

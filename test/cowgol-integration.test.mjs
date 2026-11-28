@@ -33,7 +33,7 @@ test('Cowgol is exposed for every established lowered machine route', () => {
     }
     assert.equal(codeLanguageAvailable('cowgol', null), true);
     assert.equal(codeLanguageAvailable('cowgol', 'spike'), true);
-    assert.equal(codeLanguageAvailable('cowgol', 'i80386'), false);
+    assert.equal(codeLanguageAvailable('cowgol', 'i80386'), true);
 });
 
 test('CP/M compile posts full Cowgol source without routing through the subset reader', async () => {

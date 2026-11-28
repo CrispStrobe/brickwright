@@ -34,6 +34,10 @@ by the web and native application wrappers.
 8. **Download Blocks via Cowgol** validates the active pseudocode or checked
    Cowgol draft and downloads the selected machine artifact. It leaves the
    current project and authored buffers intact and does not start a machine.
+9. The DOS action menu also offers **Cowgol in MS-DOS 2.0** and the matching
+   display actions on 8086, 80186 and 80286. These boot a fresh OS disk and
+   launch `COWGOL.EXE` through the actual DOS kernel. Checked source has the
+   corresponding **Blocks via Cowgol** actions.
 
 Syntax highlighting, editable optional tabs, the overflow language menu,
 source downloads, reopen/autosave, conversion, and keyboard Run all recognize
@@ -100,7 +104,8 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | micro:bit / Calliope | Existing MicroPython route | No new bare-metal backend |
 | Eater 6502 | Existing C/BASIC routes; additional checked Blocks → Cowgol console/digital route | ROM-safe 65C02 compiler, 32 KiB boot ROM, ACIA console and VIA digital GPIO |
 | Z80 | Existing BASIC/C circuit routes; checked Blocks → Cowgol CP/M console route | Real Z80 CP/M and 8080-compatible compilers; direct program bench or full CP/M 2.2 with serial/TMS9918 output |
-| 8086 / 80186 / 80286 | Checked `DEVICE I8086` console programs can select any of the three execution CPUs | Real DOS MZ compiler; DOS service bench with serial console and 720×400 Controller text output; 80286 executes in real mode |
+| 8086 / 80186 / 80286 | Checked `DEVICE I8086` console programs select the execution CPU | DOS MZ on the service bench or a fresh booted MS-DOS 2.0 disk; console and 720×400 Controller text output; 80286 executes in real mode |
+| 80386 | Exact `DEVICE I80386` console source, or checked `I8086` source with an explicit 386 execution selection | The same 16-bit DOS MZ on the actual 386 core, in ordinary real mode; separate DOS-service console/display/keyboard route |
 | Arcade / PyBadge | Existing PXT/TypeScript route where available | No new native backend |
 | RISC-V | Checked int32 console C through hosted GCC, or checked Blocks → Cowgol; one sequential flag script | Full Cowgol → cgen → RV32 GCC/picolibc → executable ELF, using console output |
 
@@ -119,7 +124,7 @@ programs can also use the established Blocks route.
 
 ### Checked native Blocks and pseudocode
 
-Select Z80, 8086, RISC-V, Eater 6502, Arduino Uno, bare ATmega328P or classic Nano, then use
+Select Z80, 8086, 80386, RISC-V, Eater 6502, Arduino Uno, bare ATmega328P or classic Nano, then use
 **Run Blocks via Cowgol** in the pseudocode or Cowgol tab. To start with an
 existing Blocks program, use **From blocks** first. The selected machine is
 retained when the source has no device declaration. A conflicting declaration,
@@ -205,24 +210,88 @@ browser interaction check.
 
 ### DOS CPU variants and Controller text display
 
-Full-source Cowgol actions select the **8086**, **80186**, or **80286** DOS
-service bench, with a console or Controller text display. Checked
-`DEVICE I8086` source offers the same CPU/display choices through **Blocks via
-Cowgol**. The execution CPU is an explicit action option; these actions do not
-add new device aliases to the other C, GPIO or conversion backends.
+Full-source Cowgol actions select the **8086**, **80186**, **80286** or
+**80386** DOS service bench, with a console or Controller text display.
+Checked `DEVICE I8086` source offers the same choices through **Blocks via
+Cowgol**. Exact `DEVICE I80386` source retains its execution selection and
+uses the separate 386 route by default, including keyboard Run and checked
+artifact downloads. The compiler target remains `dos`, producing a 16-bit
+MZ executable; this does not introduce 32-bit code generation.
 
-All six routes load the identical validated MZ executable. The Controller
+All eight routes load identical validated executable bytes. The Controller
 shows the actual 80×25 mode-3 text screen, rendered at 720×400 pixels. Its
-keyboard uses the DOS ASCII input queue, including when a program is already
-waiting for input. Programs exit through the DOS service and notify the
-existing debugger. This route supplies DOS calls directly; it does not boot a
-DOS disk. The 80286 executes in real mode, and 80386 is not included.
+keyboard supplies DOS ASCII input, including when a program is already
+waiting. Programs exit through the service and notify the existing debugger.
+These service routes do not boot an OS disk. The 80286 and 80386 execute in
+ordinary real mode.
 
-`scripts/verify-cowgol-dos.mjs` exercises the real GUI DOS bench and debugger
-loop on the exact pinned machine. It checks all three CPU variants on both
-surfaces, complete program output, exit status, screen cells and pixels, live
-keyboard input, and variant-specific shift/flag behavior. The HTTP/CLI witness
-can build full Cowgol for this check:
+The 80386 route uses the actual pinned `ExperimentalI80386` core and its
+32-bit debugger. Its private DOS adapter updates segment-cache bases and
+preserves architectural FLAGS and the upper halves of registers across the
+16-bit service boundary. The machine configuration must explicitly name
+`machineConfig: "dos-service"`, a functional 80386 CPU and exactly one COM or
+EXE slot. It cannot reuse an AT BIOS/disk configuration or native-block
+execution. Entering protected mode, virtual-8086 mode, paging or a nonstandard
+segment layout is refused. Instruction scheduling is functional, not measured
+386 cycle timing; the route inherits the 386 debugger's forward-execution
+limitations.
+
+`DEVICE I80386` supplies a console contract only. GPIO/peripheral declarations
+and unsupported timing remain refused. Its ordinary device C backend remains
+unavailable; **To blocks** and **From blocks** retain the Cowgol/pseudocode
+views, clear that unavailable C view and show its diagnostic. The new source
+contract does not grant 8086 circuit hardware to the 386 machine.
+
+`scripts/verify-cowgol-dos.mjs` exercises the real GUI benches and debugger
+loop on the exact pinned machines. It checks all four CPUs on both surfaces,
+complete program output, exit status, screen cells and pixels, live keyboard
+input, and variant-specific shift/flag behavior. The 386 witness additionally
+executes operand-size-prefixed 32-bit arithmetic, proves upper EAX and IOPL
+preservation, observes display changes after live input, and tests refusal
+after an actual `MOV CR0` mode switch.
+
+### Booted MS-DOS 2.0
+
+**Cowgol in MS-DOS 2.0** and **Cowgol on MS-DOS 2.0 display** are separate
+OS-boot actions for 8086, 80186 and 80286. Checked pseudocode/Cowgol offers
+matching **Blocks via Cowgol** actions. Each CPU/display choice is explicit.
+
+The helper verifies the SHA-256 and size of the app's existing 360 KiB
+MS-DOS 2.0 FAT12 image, copies the compiled MZ into `COWGOL.EXE`, and writes
+`AUTOEXEC.BAT` to launch it. Readback must preserve both files exactly. The
+pinned disk has room for a **319,488-byte executable**, after reserving one
+cluster for the startup command. A larger program can still use the direct
+DOS-service route subject to its own loader limits.
+
+`IO.SYS`, `MSDOS.SYS` and `COMMAND.COM` execute in the guest. The machine
+adapter supplies BIOS services; this qualification does not include a ROM
+BIOS or hardware disk controller. The guest DOS kernel handles INT 21h,
+loads the MZ and returns to the command shell when it exits. The Controller
+shows the same 720×400 text screen and accepts live keyboard input. Each run
+starts with a fresh disk; guest writes are not project autosaves. The 386
+OS-boot route remains outside this qualification.
+
+These actions require both hosted-toolchain and machine-image policies.
+Missing or changed OS images, disk capacity errors and failed attachments
+remain visible errors. Source/project/Blocks/device edits, Stop and image
+policy changes revoke pending work across compilation, image preparation,
+activation and attachment. A late result cannot start an obsolete program.
+
+`scripts/verify-cowgol-dos-disk.mjs` verifies six real boots. It checks the
+unchanged system files, exact injected executable, the INT 21h vector moving
+from the service trap into guest RAM, full program output, actual text pixels,
+return to the live shell, zero guest `ERRORLEVEL`, and a subsequently typed
+command. To check a separately compiled program:
+
+```sh
+node scripts/verify-cowgol-dos-disk.mjs \
+  --exe program.exe --expect "42" --board ../bw-board \
+  --out dos-boot-report.json
+```
+
+The combined HTTP/CLI witness builds full Cowgol once through each frontend
+entry point, requires identical artifacts, and runs all eight DOS-service and
+six OS-boot configurations:
 
 ```sh
 node scripts/verify-cowgol-platforms.mjs \
@@ -444,7 +513,11 @@ combined call workspace are checked before their 16-bit object representation
 can wrap; the checks are present in both compiler source and bootstrap.
 The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V, Eater ROM, Uno, Nano and C routes,
 checks source/includes and artifact limits, and packages them for Docker,
-Hugging Face and Vercel. Missing toolchains return an explicit failure.
+Hugging Face and Vercel. Missing toolchains return an explicit failure. Its
+browser demo also exposes all eight targets, including distinct Uno and
+classic Nano profiles, and selects the required C/BIN/ELF/HEX format. Cowgol
+keeps its fixed clock contract when switching between targets. Authored source
+is preserved across language changes.
 
 Brickwright vendors the shared producer at the exact SHA in `vendor-pins.json`
 through the existing flatten-and-rewrite sync and refreshes tracked mirrors.
@@ -474,7 +547,11 @@ compiles and executes the checked console C on that same RV32 machine.
 
 `test/cowgol-download-surfaces.test.mjs` verifies current-draft export without
 project mutation and stale-download cancellation. `test/cowgol-dos-surfaces.test.mjs`
-verifies the six DOS selections, Controller display/keyboard and ownership.
+verifies all four DOS CPU selections, booted MS-DOS actions, Controller
+display/keyboard and ownership. `test/cowgol-i80386-surfaces.test.mjs` covers
+the distinct 386 schema, runner selection and asynchronous attachment.
+`test/cowgol-dos-disk.test.mjs` checks base-image integrity, disk capacity,
+exact file preparation and cancellation before FAT mutation.
 `test/cowgol-native-surfaces.test.mjs` runs the actual editor methods with the
 real shared generator, validates AVR artifacts, and exercises cancellation and
 ownership at each asynchronous boundary. `test/bwlite-cowgol-cli.test.mjs`
