@@ -49,8 +49,8 @@ test('the compiled ROM boots on the extracted bench and walks the latch', async 
 
 test('the C tab offers ▶ Run C on Z80, compiled by the one hosted compile', () => {
     const src = readFileSync(path.join(SRC, 'components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
-    assert.match(src, /this\.state\.lang === 'c' && asmTargetForDevice\(this\.currentDevice\(\)\) === 'z80' \?/);
-    assert.match(src, /data-testid="bw-run-c-z80"/);
+    assert.match(src, /this\.state\.lang === 'c' && !this\.state\.libraryProgram && asmTargetForDevice\(this\.currentDevice\(\)\) === 'z80' \?/);
+    assert.match(src, /data-testid=\{menu \? "bw-run-c-z80-menu" : "bw-run-c-z80"\}/);
     const body = src.slice(src.indexOf('async runCOnZ80 ()'));
     const fn = body.slice(0, body.indexOf('\n    /**'));
     assert.match(fn, /await this\.hostedCompileC\(source, 'z80', 'bin'\)/);

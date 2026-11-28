@@ -815,3 +815,17 @@ test('published 65C02 frames need a writable counter outside the framebuffer', a
     cfg.provenance.program.framebuffer = {...framebuffer, publishAt: 0x4000};
     await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /publication address must be in RAM/);
 });
+
+test('the Z80 echo lesson sends the bundled ROM and its isolated MC6850 map to the runner', async () => {
+    const {lessonMachines} = await import('../overlay/scratch-gui/src/lib/bw-machines/lessons.js');
+    const {createHash} = await import('node:crypto');
+    const {readFile} = await import('node:fs/promises');
+    const lesson = lessonMachines('en').find(item => item.config.id === 'lesson-z80-acia-echo');
+    assert.equal(lesson.wiredExample, 'z80-bench');
+    const bytes = await readFile(new URL('../overlay/scratch-gui/' + lesson.config.slots.rom.url, import.meta.url));
+    const sha256 = createHash('sha256').update(bytes).digest('hex');
+    const {detail} = await runMachineConfig(lesson.config, {fetcher: async () => ({bytes, sha256}), dispatch () {}});
+    assert.deepEqual(detail.bytes, bytes);
+    assert.equal(detail.kind, 'z80');
+    assert.deepEqual(detail.machineConfigZ80.ports, [{kind: 'acia6850', name: 'acia', at: 0x80}]);
+});

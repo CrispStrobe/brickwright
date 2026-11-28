@@ -162,6 +162,9 @@ const TABLE = {
         'bbcVideo.title': 'BBC-style video on 6502',
         'bbcVideo.summary': 'Focus the Controller display and press 0–6 to change modes. The 6502 draws both the text and the colour bars into screen RAM.',
         'bbcVideo.licence': 'Original Brickwright demonstration ROM (BSD-3-Clause).',
+        'z80echo.title': 'Z80 ACIA Echo',
+        'z80echo.summary': 'Type a line in Controller. The ROM returns each byte through the MC6850 at ports $80 and $81.',
+        'z80echo.licence': 'Original Brickwright demonstration ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC on 6502',
         'msbasic.summary': 'Run BASIC on the virtual 6502 or open the Ben Eater breadboard with the same ROM. ' +
             'At the OK prompt, try PRINT 2+2 in Controller’s ACIA terminal.',
@@ -204,6 +207,9 @@ const TABLE = {
         'bbcVideo.title': 'BBC-artige Bildausgabe auf dem 6502',
         'bbcVideo.summary': 'Die Controller-Anzeige anklicken und mit 0–6 den Modus wechseln. Der 6502 zeichnet Text und Farbbalken direkt in den Bildspeicher.',
         'bbcVideo.licence': 'Brickwright-Demo-ROM (BSD-3-Clause).',
+        'z80echo.title': 'Z80-ACIA-Echo',
+        'z80echo.summary': 'Gib im Controller eine Zeile ein. Das ROM sendet jedes Byte über den MC6850 an den Ports $80 und $81 zurück.',
+        'z80echo.licence': 'Brickwright-Demo-ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC auf 6502',
         'msbasic.summary': 'Starte BASIC auf dem virtuellen 6502 oder öffne das Ben-Eater-Steckbrett mit demselben ROM. ' +
             'Gib nach der OK-Meldung PRINT 2+2 im ACIA-Terminal des Controllers ein.',
@@ -368,6 +374,29 @@ export function lessonMachines (locale) {
         source: cpmConfig.provenance.sourceCode,
         sourceLabel: t('cpm.source'),
         size: '25 KB'
+    });
+
+    rows.push({
+        config: newMachineConfig({
+            id: 'lesson-z80-acia-echo',
+            title: t('z80echo.title'),
+            executionMode: 'functional',
+            machine: 'z80',
+            machineConfig: {
+                clockHz: 4_000_000,
+                regions: [{kind: 'rom', start: 0, end: 0x7fff}, {kind: 'ram', start: 0x8000, end: 0xffff}],
+                ports: [{kind: 'acia6850', name: 'acia', at: 0x80}]
+            },
+            slots: {rom: {url: 'static/roms/z80-acia-echo.bin',
+                sha256: 'c8f55d2f7ba7fad1263406f1edcdfab61252d5eadbad2a58ce5038e3204f98be'}},
+            bootOrder: ['rom']
+        }),
+        wiredExample: 'z80-bench',
+        summary: t('z80echo.summary'),
+        licence: t('z80echo.licence'),
+        source: 'static/roms/z80-acia-echo.asm',
+        sourceLabel: t('msbasic.source'),
+        size: '28 B'
     });
 
     // Microsoft BASIC for 6502 (self-contained): the MIT 32 KB ROM ships in

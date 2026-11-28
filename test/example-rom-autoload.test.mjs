@@ -30,16 +30,19 @@ function extractBlock () {
     // Take the WHOLE try/catch, not just the body: the catch is what makes a
     // missing image non-fatal, and a harness that supplied its own would be
     // testing the harness.
-    const start = src.lastIndexOf('let wiredMedia = null;', anchor);
+    const setupStart = src.indexOf('const circuitFirmware = opts?.circuitFirmware;');
+    const setupEnd = src.indexOf('const microtronicPart', setupStart);
+    const start = src.lastIndexOf('let wiredMedia = circuitFirmware || null;', anchor);
     const tryStart = src.lastIndexOf('try {', anchor);
     const warn = src.indexOf("console.warn('[brickwright] example ROM load failed'", anchor);
     assert.ok(start > 0 && tryStart > start && warn > anchor, 'the block no longer sits in its own try/catch');
     const end = src.indexOf('}', src.indexOf('\n', warn)) + 1;
-    return src.slice(start, end);
+    assert.ok(setupStart > 0 && setupEnd > setupStart, 'the wired boot decision is missing');
+    return src.slice(setupStart, setupEnd) + src.slice(start, end);
 }
 
 /** Run the block against a fake example, circuit and window. */
-async function runBlock ({ex, parts, romBytes, romOk = true, supportsWiredExampleBoot = false}) {
+async function runBlock ({ex, parts, romBytes, romOk = true, supportsWiredExampleBoot = false, circuitFirmware}) {
     const events = [];
     const win = {
         dispatchEvent: (e) => events.push(e),
@@ -55,9 +58,9 @@ async function runBlock ({ex, parts, romBytes, romOk = true, supportsWiredExampl
     // eslint-disable-next-line no-new-func
     const warnings = [];
     const fakeConsole = {warn: (...a) => warnings.push(a.join(' '))};
-    const fn = new Function('ex', 'data', 'fetch', 'window', 'CustomEvent', 'console', 'supportsWiredExampleBoot',
+    const fn = new Function('ex', 'data', 'fetch', 'window', 'CustomEvent', 'console', 'supportsWiredExampleBoot', 'opts',
         `return (async function () { ${body}; return wiredMedia; }).call({state: {Designer: {supportsWiredExampleBoot}}});`);
-    const wiredMedia = await fn(ex, {parts}, fetch, win, win.CustomEvent, fakeConsole, supportsWiredExampleBoot);
+    const wiredMedia = await fn(ex, {parts}, fetch, win, win.CustomEvent, fakeConsole, supportsWiredExampleBoot, {circuitFirmware});
     return {events, fetched, warnings, wiredMedia};
 }
 
@@ -101,6 +104,20 @@ describe('an example that declares a ROM loads it', () => {
         assert.deepEqual(warnings, []);
         assert.deepEqual(wiredMedia, {slotId: 'rom', bytes: Uint8Array.of(0xA9, 0x01, 0x8D),
             kind: 'eater6502', profile: null, name: 'rom.bin'});
+    });
+
+    test('a paired Z80 lesson passes its selected ROM to the designer without fetching a second image', async () => {
+        const circuitFirmware = {kind: 'z80', slotId: 'rom', bytes: Uint8Array.of(0x3e, 3)};
+        const {events, fetched, wiredMedia, warnings} = await runBlock({
+            ex: {id: 'z80-pd-bench', files: {rom: 'z80-pd-bench/rom.bin'}},
+            parts: [{kind: 'z80'}],
+            supportsWiredExampleBoot: true,
+            circuitFirmware
+        });
+        assert.deepEqual(events, []);
+        assert.deepEqual(fetched, []);
+        assert.deepEqual(warnings, []);
+        assert.equal(wiredMedia, circuitFirmware);
     });
 
     test('an example with no ROM dispatches nothing', async () => {
