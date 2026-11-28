@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import downloadBlob from '../download-blob.js';
 import {createKim1Tty} from './kim1-tty.js';
+import {saveXkimDiskImage} from './kim1-xkim-download.js';
 import {
-    readXkimFatImage, XKIM_FAT_IMAGE_LIMIT, XKIM_FILE_COUNT, XKIM_FILE_LIMIT, XKIM_SHORT_NAME, XKIM_TOTAL_LIMIT
+    readXkimFatImage, writeXkimFatImage, XKIM_FAT_IMAGE_LIMIT, XKIM_FILE_COUNT, XKIM_FILE_LIMIT,
+    XKIM_SHORT_NAME, XKIM_TOTAL_LIMIT
 } from './kim1-xkim-fat.js';
 
 export const XKIM_SOURCE = 'https://github.com/CorshamTech/xKIM/tree/0ce44974504514563e86cdf84ac8a9848b8bcdb5';
@@ -22,12 +24,13 @@ export async function readXkimMedia (romFile, files, diskImage) {
         }
         names.add(name);
     }
-    const [image, mounted] = await Promise.all([
-        romFile.arrayBuffer(),
-        diskImage ? diskImage.arrayBuffer().then(buffer => readXkimFatImage(new Uint8Array(buffer))) :
-            Promise.all(files.map(async file => ({name: file.name, bytes: new Uint8Array(await file.arrayBuffer())})))
-    ]);
-    return {rom: new Uint8Array(image), files: mounted};
+    const rom = new Uint8Array(await romFile.arrayBuffer());
+    if (diskImage) {
+        const source = new Uint8Array(await diskImage.arrayBuffer());
+        return {rom, files: readXkimFatImage(source), diskImage: {name: diskImage.name, source}};
+    }
+    const mounted = await Promise.all(files.map(async file => ({name: file.name, bytes: new Uint8Array(await file.arrayBuffer())})));
+    return {rom, files: mounted};
 }
 
 export function createXkimMemoryMap (rom) {
@@ -50,19 +53,26 @@ export async function createXkimArchive (files) {
     return archive.generateAsync({type: 'blob', compression: 'STORE'});
 }
 
-export function createXkimTerminal ({rom, files}) {
+export function createXkimTerminal ({rom, files, diskImage, timerLine = 'none'}) {
     return createKim1Tty({
         setup: control => {
             control('setMemoryCard', createXkimMemoryMap(rom));
             control('mountCorshamFiles', files);
+            control('setCorshamTimerLine', timerLine);
         },
         boot: 'E000 G', bootPrompt: /Extended KIM Monitor[\s\S]*>\s*$/,
         // xKIM takes one key at its main prompt and a line at the file prompt.
         encodeInput: (line, transcript) =>
             !line || /(?:filename|display to console|load from console):\s*$/i.test(transcript) ? line + '\r' : line,
         exportFiles: async snapshot => downloadBlob('xkim-files.zip', await createXkimArchive(snapshot)),
+        exportImage: diskImage && ((snapshot, isOpen) => {
+            const updated = writeXkimFatImage(diskImage.source, snapshot);
+            const stem = diskImage.name?.replace(/\.[^.]+$/, '') || 'xkim';
+            return saveXkimDiskImage(stem + '-updated.img', updated, isOpen);
+        }),
         title: 'xKIM · Corsham files',
         inputLabel: 'xKIM command',
-        help: 'C shows the clock in UTC. D lists files. T displays a file. S saves a memory range as Intel HEX and L reloads it. Export files downloads the current session files.'
+        help: 'C shows the clock in UTC. D lists files. T displays a file. S saves a memory range as Intel HEX and L reloads it. Export files downloads the current session files. ' +
+            (diskImage ? 'Save image makes an updated copy of the mounted disk.' : '')
     });
 }

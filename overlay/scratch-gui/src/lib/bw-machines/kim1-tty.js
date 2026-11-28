@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-export async function createKim1Tty ({setup, boot, bootPrompt, commandPrompt, exportFiles, encodeInput = line => line + '\r', title, inputLabel, help}) {
+export async function createKim1Tty ({setup, boot, bootPrompt, commandPrompt, exportFiles, exportImage, encodeInput = line => line + '\r', title, inputLabel, help}) {
     const {createKim1Machine, controlKim1Machine, stepKim1Machine} =
         await import(/* webpackChunkName: "bw-kim1-tty" */ 'bw-board/kim1-machine.js');
     const machine = createKim1Machine('; KIM-1 expanded RAM\n0200: EA');
@@ -71,6 +71,7 @@ export async function createKim1Tty ({setup, boot, bootPrompt, commandPrompt, ex
     return {
         title, inputLabel, help, focusOnOpen: true,
         exportFiles: exportFiles && (() => exportFiles(machine.corshamDisk.exportFiles())),
+        exportImage: exportImage && (() => exportImage(machine.corshamDisk.exportFiles(), () => !closed)),
         start () { if (!closed && timer === null && phase === 'monitor') schedule(); },
         subscribe (listener) {
             listeners.add(listener);

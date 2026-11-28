@@ -17,16 +17,16 @@ export default function MachineTerminal({session, isFullScreen, onToggleFullScre
         setExportError('');
         return () => { exportOwner.current = null; };
     }, [session]);
-    const exportFiles = async () => {
+    const runExport = async action => {
         if (exportOwner.current) return;
         const request = {};
         exportOwner.current = request;
         setExportBusy(true);
         setExportError('');
         try {
-            await session.exportFiles();
+            await action();
         } catch (error) {
-            if (exportOwner.current === request) setExportError(error.message);
+            if (exportOwner.current === request) setExportError(error.message || String(error));
         } finally {
             if (exportOwner.current === request) {
                 exportOwner.current = null;
@@ -44,7 +44,8 @@ export default function MachineTerminal({session, isFullScreen, onToggleFullScre
                 background: '#0d1117', color: '#d0d7de'}}>
             <MachineScreenHeader locale={locale} title={session.title} help={session.help}
                 isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen}
-                onExportFiles={session.exportFiles ? exportFiles : undefined} exportBusy={exportBusy} />
+                onExportFiles={session.exportFiles && (() => runExport(session.exportFiles))}
+                onExportImage={session.exportImage && (() => runExport(session.exportImage))} exportBusy={exportBusy} />
             {exportError && <div role="alert" style={{padding: '4px 8px'}}>{exportError}</div>}
             {session.raw ? (
                 <div style={{flex: 1, minHeight: 0, overflow: 'auto'}}>

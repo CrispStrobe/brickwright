@@ -2,14 +2,14 @@ import React from 'react';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 
 const t = makeT({
-    en: {help: 'Screen help', fullScreen: 'Full screen', exitFullScreen: 'Exit full screen', exportFiles: 'Export files'},
-    de: {help: 'Hilfe zum Bildschirm', fullScreen: 'Vollbild', exitFullScreen: 'Vollbild verlassen', exportFiles: 'Dateien exportieren'}
+    en: {help: 'Screen help', fullScreen: 'Full screen', exitFullScreen: 'Exit full screen', exportFiles: 'Export files', exportImage: 'Save image'},
+    de: {help: 'Hilfe zum Bildschirm', fullScreen: 'Vollbild', exitFullScreen: 'Vollbild verlassen', exportFiles: 'Dateien exportieren', exportImage: 'Abbild speichern'}
 });
 
 const button = {background: '#374151', color: '#fff', border: 0, borderRadius: 4,
-    padding: '4px 9px', cursor: 'pointer'};
+    padding: '4px 9px', cursor: 'pointer', whiteSpace: 'nowrap'};
 
-export default function MachineScreenHeader({title, help, isFullScreen, onToggleFullScreen, onExportFiles, exportBusy, locale = browserLocale()}) {
+export default function MachineScreenHeader({title, help, isFullScreen, onToggleFullScreen, onExportFiles, onExportImage, exportBusy, locale = browserLocale()}) {
     const [helpOpen, setHelpOpen] = React.useState(false);
     return (
         <header style={{position: 'relative', display: 'flex', alignItems: 'center', gap: 4,
@@ -19,6 +19,11 @@ export default function MachineScreenHeader({title, help, isFullScreen, onToggle
             {onExportFiles && (
                 <button type="button" style={button} disabled={exportBusy} onClick={onExportFiles}>
                     {t(locale, 'exportFiles')}
+                </button>
+            )}
+            {onExportImage && (
+                <button type="button" style={button} disabled={exportBusy} onClick={onExportImage}>
+                    {t(locale, 'exportImage')}
                 </button>
             )}
             {help && (
