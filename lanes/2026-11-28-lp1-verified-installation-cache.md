@@ -58,3 +58,15 @@ Maintain byte-identical tracked mirrors and a complete repository tree.
 Independently review the implementation. Applicable hosted qualification and
 upstream identity remain required for landing; inherited failures are recorded
 with evidence and never waived or rerun unchanged.
+
+## Discovered fetch-pinning prerequisite
+
+Hosted qualification at `eadf983a7f327e51b073562e4ffe537f21a76abc` finds the
+new integrity manifest's SHA-addressed raw GitHub origin absent from the
+repository's fetch-site census. This is an LP1b integration omission.
+
+This lane also owns the bounded declaration in `test/fetch-pinning.test.mjs`:
+register the inventory origin as a SHA-constant fetch site and extract its
+commit segment for the existing exact 40-hex assertion. Do not change detector
+scope, exclusions, waivers or the mutation prover. Run the scanner and retain
+the existing proof that an unpinned fetch is rejected before publication.
