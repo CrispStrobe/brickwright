@@ -374,9 +374,10 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // guards (the feature lane's 0b2224b7, merged onto sb3-creator main).
     // -> e8b8e255 (2026-11-28): bw-board master pin and the redesigned RF benches
     // (#254, #255); the SPIKE emitter is unchanged.
+    // -> 580c70b4 (2026-11-28): game-export runtime fixes (#259); the SPIKE emitter is unchanged.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        'e8b8e255f7ab2d8ad9cb081b9c2c2fd8b2637bf1');
+        '580c70b4c94f66eb1c152208d36e1c2d6602650f');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
