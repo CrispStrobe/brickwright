@@ -35,6 +35,7 @@ import {showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import downloadBlob from '../../lib/download-blob.js';
 import animationResourceMenuItems from 'scratch-vm/src/util/bw-animation-resource-menu.js';
 import {conversionFailure} from '../../lib/bw-conversion-error.js';
+import {PORTABLE_GPIO_PROFILES} from 'bw-board/portable-gpio.js';
 import {getCostumeDocument, inspectArtwork, applyArtwork, syncAnimationResources} from '../../lib/bw-artwork-bundle.js';
 import {captureCodeArtwork, codeArtworkMatches, retainCodeArtwork,
     captureCodeArtworkRevision, codeArtworkRevisionMatches} from '../../lib/bw-code-artwork.js';
@@ -230,6 +231,9 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC reached the output limit.',
         basicCrispSimulationLimit: 'CrispBASIC reached a circuit simulation limit.',
         basicConnectCircuit: 'Connect Circuit',
+        basicCircuitControllers: count => `Supported Circuit controllers (${count})`,
+        basicCircuitHost: 'CrispBASIC runs in this browser and controls the simulated pins. Use the logical pin numbers below; only pins exposed by the loaded circuit are available.',
+        basicCircuitBenchVoltage: 'bench voltage',
         basicPortableLibrary: 'Generate portable Circuit calls',
         basicPortableHint: 'Regenerate from blocks to apply this choice. Portable calls need Connect Circuit to run; To blocks currently refuses them. Toggle reverses the requested output level. Unsupported hardware operations are reported as generation errors.',
         basicCrispError: 'CrispBASIC could not finish this program.',
@@ -589,6 +593,9 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC hat die Ausgabegrenze erreicht.',
         basicCrispSimulationLimit: 'CrispBASIC hat eine Grenze der Schaltungssimulation erreicht.',
         basicConnectCircuit: 'Schaltung verbinden',
+        basicCircuitControllers: count => `Unterstützte Schaltungscontroller (${count})`,
+        basicCircuitHost: 'CrispBASIC läuft in diesem Browser und steuert die simulierten Pins. Verwende die logischen Pinnummern unten; verfügbar sind nur die Pins der geladenen Schaltung.',
+        basicCircuitBenchVoltage: 'Spannung der Schaltung',
         basicPortableLibrary: 'Portable Schaltungsaufrufe erzeugen',
         basicPortableHint: 'Diese Auswahl mit „Aus Blöcken“ anwenden. Portable Aufrufe benötigen „Schaltung verbinden“; „Zu Blöcken“ lehnt sie derzeit ab. Umschalten kehrt den angeforderten Ausgangspegel um. Nicht unterstützte Hardwareoperationen werden als Erzeugungsfehler gemeldet.',
         basicCrispError: 'CrispBASIC konnte dieses Programm nicht beenden.',
@@ -7015,6 +7022,16 @@ class PseudocodeImporter extends React.Component {
                         data-testid="bw-crispbasic-capabilities">
                         {this.L.basicCrispScope}
                         {this.state.basicPortableLibrary ? <p style={{margin: '4px 0 0'}}>{this.L.basicPortableHint}</p> : null}
+                        <details style={{marginTop: 4}} data-testid="bw-crispbasic-controller-list">
+                            <summary style={{cursor: 'pointer'}}>{this.L.basicCircuitControllers(PORTABLE_GPIO_PROFILES.length)}</summary>
+                            <p style={{margin: '4px 0'}}>{this.L.basicCircuitHost}</p>
+                            <ul style={{margin: 0, paddingLeft: 20}}>
+                                {PORTABLE_GPIO_PROFILES.map(profile => <li key={profile.kind}>
+                                    <strong>{profile.label}</strong>{' — '}{profile.numbering}{' ('}
+                                    {profile.nominalVoltage === null ? this.L.basicCircuitBenchVoltage : `${profile.nominalVoltage} V`}{')'}
+                                </li>)}
+                            </ul>
+                        </details>
                     </div>
                 ) : null}
                 {this.state.lang === 'basic' && this.state.basicWarnings.length ? (

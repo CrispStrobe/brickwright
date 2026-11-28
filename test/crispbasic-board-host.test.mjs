@@ -15,7 +15,7 @@ const hasCode = code => error => error instanceof SimulationError && error.code 
 
 function circuit({kind = 'arduino_uno', output = 'd13', input = 'd2', vcc = 5, clamp = false} = {}) {
     const board = new BoardImpl(vcc);
-    const ground = kind === 'pi_pico' ? 'gnd_1' : 'gnd';
+    const ground = kind === 'pi_pico' ? 'gnd_1' : kind === 'microbit_breakout' ? 'gnd_l' : 'gnd';
     const parts = [
         part('controller', kind, [output, input, ground]),
         part('R', 'resistor', ['a', 'b'], {ohms: 1000}),
@@ -57,8 +57,61 @@ test('logical IDs use controller numbering and reject analog-only, absent, and d
     assert.throws(() => resolveCrispBasicPinMap({parts: [], nets: []}), /exactly one GPIO controller/);
     assert.throws(() => resolveCrispBasicPinMap({parts: [part('one', 'arduino_uno', ['d13']),
         part('two', 'pi_pico', ['gp0'])], nets: []}), /exactly one GPIO controller/);
-    assert.throws(() => map('microbit', ['p0']), /does not support/);
+    assert.deepEqual(map('microbit', ['P0', 'P2', '3V', 'GND']).pins, [0, 2]);
+    assert.deepEqual(map('microbit_breakout', ['P8', 'P12', 'P16']).pins, [8, 12, 16]);
+    assert.deepEqual(map('esp8266', ['GPIO2', 'GPIO6', 'GPIO16']).pins, [2]);
+    assert.deepEqual(map('stm32f030', ['PA0', 'PA9', 'PB1', 'PF0', 'PA13']).pins, [0, 9, 17]);
+    assert.throws(() => map('pybadge', ['a0']), /does not support/);
+    assert.throws(() => map('microbit', ['P0', 'p0']), /duplicate logical pin/);
+    assert.throws(() => map('attiny88', ['PA0', 'PA3']), /no supported digital pins/);
 });
+
+const expandedControllers = [
+    {kind: 'microbit', output: 'p0', input: 'p1', outputId: 0, inputId: 1, voltage: 3.3},
+    {kind: 'microbit_breakout', output: 'p8', input: 'p16', outputId: 8, inputId: 16, voltage: 3.3},
+    {kind: 'calliopemini', output: 'p3', input: 'p2', outputId: 3, inputId: 2, voltage: 3.3},
+    {kind: 'circuit_playground_express', output: 'a7', input: 'a1', outputId: 7, inputId: 1, voltage: 3.3},
+    {kind: 'esp8266', output: 'gpio2', input: 'gpio12', outputId: 2, inputId: 12, voltage: 3.3},
+    {kind: 'esp32_4848s040', output: 'gpio40', input: 'gpio44', outputId: 40, inputId: 44, voltage: 3.3},
+    {kind: 'attiny85', output: 'pb0', input: 'pb1', outputId: 8, inputId: 9, voltage: 5},
+    {kind: 'attiny88', output: 'pd7', input: 'pc2', outputId: 31, inputId: 18, voltage: 5},
+    {kind: 'attiny88_qfn32', output: 'pa0', input: 'pa3', outputId: 0, inputId: 3, voltage: 5},
+    {kind: 'stm32f030', output: 'pb1', input: 'pa9', outputId: 17, inputId: 9, voltage: 3.3},
+    {kind: 'eater6502', output: 'via1.pb7', input: 'via1.pa3', outputId: 15, inputId: 3, voltage: 5}
+];
+
+for (const target of expandedControllers) {
+    test(`${target.kind}: portable host controls the actual circuit, solved input and retained latch`, async () => {
+        const board = circuit(target);
+        const {host} = hostFor(board);
+        assert.equal(host.capabilities.profile.kind, target.kind);
+        assert.equal(host.capabilities.profile.nominalVoltage, target.voltage);
+        assert.ok(host.capabilities.profile.label && host.capabilities.profile.numbering && host.capabilities.profile.help);
+        assert.equal(host.capabilities.profile.execution, 'host-driven-circuit');
+        assert.equal(host.capabilities.profile.nativeInterpreter, false);
+        host.pinMode(target.outputId, 'output');
+        host.digitalWrite(target.outputId, 1);
+        await host.delay(3);
+        assert.ok(board.ledBrightness('LED') > 0.01, 'a real solved LED carries current');
+        assert.ok(board.readAnalog(target.output) > target.voltage - 0.2);
+        assert.ok(board.readAnalog(target.output) <= target.voltage, '3.3 V GPIO cannot inherit the 5 V bench');
+        host.pinMode(target.inputId, 'input-pullup');
+        assert.equal(host.digitalRead(target.inputId), 1);
+        board.setControl('KEY', 1);
+        assert.equal(host.digitalRead(target.inputId), 0, 'the real button grounds the input');
+        host.digitalToggle(target.outputId);
+        assert.equal(host.digitalRead(target.outputId), 0);
+        host.digitalToggle(target.outputId);
+        assert.equal(host.digitalRead(target.outputId), 1);
+        assert.equal(host.millis(), 3);
+        host.dispose();
+        assert.equal(host.state, 'disposed');
+        assert.equal(board.readAnalog(target.output), 0);
+        assert.ok(board.getPinStates().every(pin => pin.mode === 'input'));
+        const lease = board.claimExternalClock();
+        lease.release();
+    });
+}
 
 test('BASIC drive lights the real LED, input reads the button, and cleanup releases drives', async () => {
     const board = circuit();

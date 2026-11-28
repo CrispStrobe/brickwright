@@ -1,74 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // GUI-owned electrical adapter. The standalone CrispBASIC package has no
 // dependency on bw-board or on the editor's circuit ownership protocol.
-import {getDevice} from 'bw-board/devices.js';
+import {resolvePortableGpioController} from 'bw-board/portable-gpio.js';
 
 const MS_NS = 1000000n;
 const SAFE_NS = BigInt(Number.MAX_SAFE_INTEGER);
 const MODES = Object.freeze(['input', 'output', 'input-pullup']);
-const SUPPORTED = new Set(['mcu', 'arduino_uno', 'arduino_nano', 'arduino_mega', 'pi_pico']);
-const unavailable = message => Object.assign(new Error(message), {code: 'unavailable'});
-
-function logicalPin(kind, terminal) {
-    let match;
-    if (kind === 'mcu') {
-        match = /^p([0-7])\.([0-7])$/i.exec(terminal);
-        return match ? Number(match[1]) * 8 + Number(match[2]) : null;
-    }
-    if (kind === 'pi_pico') {
-        match = /^gp(\d+)$/i.exec(terminal);
-        const pin = match ? Number(match[1]) : -1;
-        return (pin >= 0 && pin <= 22) || pin === 25 || (pin >= 26 && pin <= 28) ? pin : null;
-    }
-    const mega = kind === 'arduino_mega';
-    match = /^d(\d+)$/i.exec(terminal);
-    if (match && Number(match[1]) <= (mega ? 53 : 13)) return Number(match[1]);
-    match = /^a(\d+)$/i.exec(terminal);
-    // Nano A6/A7 have no digital GPIO. They never enter this bridge's map.
-    if (match && Number(match[1]) <= (mega ? 15 : 5)) return (mega ? 54 : 14) + Number(match[1]);
-    return null;
-}
-
-/** Logical IDs are board GPIO numbers, never physical header positions.
- * Only one controller is admitted: bw-board's unqualified GPIO namespace is
- * shared, and qualifying a board pin would use the bench supply voltage rather
- * than that controller model's logic voltage.
- */
-export function resolveCrispBasicPinMap(board) {
-    if (!board || !Array.isArray(board.parts) || !Array.isArray(board.nets)) {
-        throw unavailable('Open a supported circuit in the Circuit tab first');
-    }
-    const controllers = board.parts.filter(part => part &&
-        (SUPPORTED.has(part.kind) || getDevice(part.kind)?.gpioFollowsPinStates));
-    if (controllers.length !== 1) {
-        throw unavailable('BASIC circuit simulation requires exactly one GPIO controller');
-    }
-    const controller = controllers[0];
-    if (!SUPPORTED.has(controller.kind)) {
-        throw unavailable(`BASIC circuit simulation does not support ${controller.kind}`);
-    }
-    if (controller.kind !== 'mcu' && !getDevice(controller.kind)?.gpioFollowsPinStates) {
-        throw unavailable(`The circuit engine has not registered ${controller.kind}`);
-    }
-    if (!Array.isArray(controller.terminals)) throw unavailable('The circuit controller has no terminal map');
-    const seen = new Set();
-    const pinMap = [];
-    for (const terminal of controller.terminals) {
-        if (typeof terminal !== 'string') throw unavailable('The circuit controller has an invalid terminal');
-        const pin = logicalPin(controller.kind, terminal);
-        if (pin === null) continue;
-        if (seen.has(pin)) throw unavailable(`The circuit controller has duplicate logical pin ${pin}`);
-        seen.add(pin);
-        pinMap.push(Object.freeze({pin, terminal}));
-    }
-    if (!pinMap.length || pinMap.length > 256) throw unavailable('The circuit controller has no supported digital pins');
-    pinMap.sort((a, b) => a.pin - b.pin);
-    return Object.freeze({
-        controller: Object.freeze({id: controller.id, kind: controller.kind}),
-        pins: Object.freeze(pinMap.map(entry => entry.pin)),
-        pinMap: Object.freeze(pinMap)
-    });
-}
+// The engine owns verified board numbering, terminal availability and logic
+// voltage. Keep the application adapter focused on run/clock ownership.
+export const resolveCrispBasicPinMap = resolvePortableGpioController;
 
 /** Fresh run host, constructed only after the GUI has acquired the Designer.
  * Keeps the circuit's component state and controls; FNmillis starts at zero
