@@ -79,8 +79,12 @@ Removing the scalar bodies from old/new workflows produces identical bytes
 (SHA-1 `7ea55689207c97723b19575544aef69b5cca5528`). No browser product
 journey, condition, timeout or tolerance changes.
 
-This source checkpoint preserves both LP1 slices and the independent
-CrispBASIC and Cowgol claims. It is saved separately while the existing LP1b
-thorough browser run continues. The hosted service-worker journey and other
-integration failures still control landing; focused source success does not
-waive them.
+Independent review approved the three exact implementation blobs above and
+confirmed the unchanged workflow and auditor boundaries. The initial repair
+checkpoint is saved at `ba8f205ea7bd389c67a599779f0856255adf60cf`.
+The reviewed repair is carried into PR #1856 and the stacked PR #1857 while
+preserving each slice's runtime bytes and the independent CrispBASIC and
+Cowgol claims. The existing LP1b thorough browser run uses a separate
+label-event concurrency group and is left running. The hosted service-worker
+journey and other integration failures still control landing; focused source
+success does not waive them.
