@@ -230,6 +230,8 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC reached the output limit.',
         basicCrispSimulationLimit: 'CrispBASIC reached a circuit simulation limit.',
         basicConnectCircuit: 'Connect Circuit',
+        basicPortableLibrary: 'Generate portable Circuit calls',
+        basicPortableHint: 'Regenerate from blocks to apply this choice. Portable calls need Connect Circuit to run; To blocks currently refuses them. Toggle and unsupported hardware operations are reported as generation errors.',
         basicCrispError: 'CrispBASIC could not finish this program.',
         basicInputLine: 'Program input', basicInputKey: 'One character (empty for Enter)',
         basicInputSend: 'Send', basicInputEnd: 'End input',
@@ -587,6 +589,8 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC hat die Ausgabegrenze erreicht.',
         basicCrispSimulationLimit: 'CrispBASIC hat eine Grenze der Schaltungssimulation erreicht.',
         basicConnectCircuit: 'Schaltung verbinden',
+        basicPortableLibrary: 'Portable Schaltungsaufrufe erzeugen',
+        basicPortableHint: 'Diese Auswahl mit „Aus Blöcken“ anwenden. Portable Aufrufe benötigen „Schaltung verbinden“; „Zu Blöcken“ lehnt sie derzeit ab. Umschalten und nicht unterstützte Hardwareoperationen werden als Erzeugungsfehler gemeldet.',
         basicCrispError: 'CrispBASIC konnte dieses Programm nicht beenden.',
         basicInputLine: 'Programmeingabe', basicInputKey: 'Ein Zeichen (leer für Eingabetaste)',
         basicInputSend: 'Senden', basicInputEnd: 'Eingabe beenden',
@@ -1292,6 +1296,7 @@ class PseudocodeImporter extends React.Component {
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
             basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false, basicConnectCircuit: false,
+            basicPortableLibrary: false,
             basicFilename: 'editor.bas', basicOutputRunId: 0,
             basicWarnings: [], basicGenerationFailed: false,
             basicInputMethod: null, basicInputValue: '', basicInputError: '', basicDiagnostic: null,
@@ -2816,9 +2821,14 @@ class PseudocodeImporter extends React.Component {
     setActiveCode (text) {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
-        this.setState(s => ({buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [s.lang]: text},
-            basicFilename: s.lang === 'basic' ? s.basicFilename : 'editor.bas',
-            basicWarnings: [], basicGenerationFailed: false}));
+        this.setState(s => {
+            const generationFailed = s.lang === 'basic' && this.basicGenerationPlaceholder(text);
+            return {buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [s.lang]: text},
+                basicFilename: s.lang === 'basic' ? s.basicFilename : 'editor.bas',
+                basicWarnings: generationFailed ? (s.basicWarnings.length ? s.basicWarnings :
+                    ['Remove or replace the generation-error banner before running or converting BASIC.']) : [],
+                basicGenerationFailed: generationFailed};
+        });
     }
 
     // Lazily import the compiler through the registering door, which injects this
@@ -2852,7 +2862,14 @@ class PseudocodeImporter extends React.Component {
             if (from === 'c') pseudo = (await this.readC(src)).pseudocode;
             else if (from === 'python') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(src).pseudocode;
             else if (from === 'javascript') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(src).pseudocode;
-            else if (from === 'basic') pseudo = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src).pseudocode;
+            else if (from === 'basic') {
+                if (this.state.basicGenerationFailed || this.basicGenerationPlaceholder(src)) {
+                    throw new Error((this.state.basicWarnings || []).join('\n') || 'BASIC generation was refused. Remove or replace the generation-error banner.');
+                }
+                const result = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
+                if (result.ok === false) throw new Error((result.reasons || []).join('\n') || 'BASIC conversion refused.');
+                pseudo = result.pseudocode;
+            }
             else if (DOS_LANG[from]) pseudo = (await DOS_LANG[from].load()).default(src).pseudocode;
             const creator = new SB3();
             creator.parse(pseudo);
@@ -2864,7 +2881,9 @@ class PseudocodeImporter extends React.Component {
             else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts());
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
-                const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+                const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile,
+                    lineNumbers: this.state.basicLineNumbers,
+                    ...(this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' && this.state.basicPortableLibrary ? {mode: 'crispbasic'} : {})});
                 code = r.ok ? r.basic : `REM === Cannot show as BASIC ===\n${r.reasons.map(s => 'REM ' + s).join('\n')}`;
                 basicWarnings = [...(r.reasons || []), ...(r.warnings || [])];
                 basicGenerationFailed = !r.ok;
@@ -5140,9 +5159,17 @@ class PseudocodeImporter extends React.Component {
         return null;
     }
 
+    basicGenerationPlaceholder (text) {
+        // This is an explanatory failure buffer, not an empty BASIC program.
+        // Whitespace edits (or a saved/reopened buffer) must not clear refusal;
+        // removing/replacing the banner is an explicit authored correction.
+        return /^[ \t]*(?:\d+[ \t]*)?REM[ \t]*===[ \t]*Cannot[ \t]*show[ \t]*as[ \t]*BASIC[ \t]*===/mi.test(String(text || ''));
+    }
+
     async runBasic () {
         const code = this.activeCode();
-        if (!code.trim() || this.state.running || this.state.basicResetting || this.state.basicGenerationFailed) return;
+        if (!code.trim() || this.state.running || this.state.basicResetting || this.state.basicGenerationFailed ||
+            this.basicGenerationPlaceholder(code)) return;
         if (this.state.basicProfile === 'bbc' && this.state.basicEngine !== 'z80') return this.runCrispBasic(code);
         if (this.state.basicProfile === 'bbc' && this.state.basicEngine === 'z80') {
             // The retro runner types each line at a console prompt. An
@@ -5556,7 +5583,11 @@ class PseudocodeImporter extends React.Component {
                 const res = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(source);
                 source = res.pseudocode; parseWarnings = res.warnings || [];
             } else if (lang === 'basic') {
+                if (this.state.basicGenerationFailed || this.basicGenerationPlaceholder(source)) {
+                    throw new Error((this.state.basicWarnings || []).join('\n') || 'BASIC generation was refused. Remove or replace the generation-error banner.');
+                }
                 const res = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(source);
+                if (res.ok === false) throw new Error((res.reasons || []).join('\n') || 'BASIC conversion refused.');
                 source = res.pseudocode; parseWarnings = res.warnings || [];
             } else if (DOS_LANG[lang]) {
                 const res = (await DOS_LANG[lang].load()).default(source);
@@ -5736,7 +5767,9 @@ class PseudocodeImporter extends React.Component {
             let basicWarnings = [];
             let basicGenerationFailed = false;
             {
-                const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+                const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile,
+                    lineNumbers: this.state.basicLineNumbers,
+                    ...(this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' && this.state.basicPortableLibrary ? {mode: 'crispbasic'} : {})});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
                 basicWarnings = [...(br.reasons || []), ...(br.warnings || [])];
                 basicGenerationFailed = !br.ok;
@@ -5785,7 +5818,16 @@ class PseudocodeImporter extends React.Component {
             const {assetLibraryRecords, withoutAssetLibraries} = await import('../../lib/bw-asset-library.js');
             const savedProject = JSON.parse(this.props.vm.toJSON());
             const project = withoutAssetLibraries(savedProject, assetLibraryRecords(this.props.vm, savedProject));
-            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+            // VM serialization can retain device declarations only in the
+            // Stage persistence comment. Restore them before any generator,
+            // including legacy BASIC, reads this detached project snapshot.
+            if (!project.stc) {
+                const stc = SB3Creator.readStc(project);
+                if (stc) project.stc = stc;
+            }
+            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile,
+                lineNumbers: this.state.basicLineNumbers,
+                ...(this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' && this.state.basicPortableLibrary ? {mode: 'crispbasic'} : {})});
             const mpResult = new SB3Creator().generateMicroPython(project);
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
@@ -6571,7 +6613,7 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         ) : null}
                         {this.state.lang === 'basic' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runBasic()} disabled={this.state.running || this.state.basicResetting || this.state.basicGenerationFailed}
+                            <button onClick={() => this.runBasic()} disabled={this.state.running || this.state.basicResetting || this.state.basicGenerationFailed || this.basicGenerationPlaceholder(this.state.buffers.basic)}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
                                 data-testid="bw-basic-run">
                                 {this.L.runBasic}
@@ -6950,6 +6992,15 @@ class PseudocodeImporter extends React.Component {
                                 </select>
                             </label>
                         ) : null}
+                        {this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                            <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
+                                <input type="checkbox" checked={Boolean(this.state.basicPortableLibrary)}
+                                    disabled={this.state.running || this.state.basicResetting}
+                                    onChange={event => this.setState({basicPortableLibrary: event.target.checked})}
+                                    data-testid="bw-basic-portable-library" />
+                                {this.L.basicPortableLibrary}
+                            </label>
+                        ) : null}
                         <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
                             <input type="checkbox" checked={this.state.basicLineNumbers}
                                 disabled={this.state.basicProfile === 'ms' || this.state.running || this.state.basicResetting}
@@ -6963,6 +7014,7 @@ class PseudocodeImporter extends React.Component {
                     <div style={{padding: '6px 12px', fontSize: 12, color: '#475569', flexShrink: 0}}
                         data-testid="bw-crispbasic-capabilities">
                         {this.L.basicCrispScope}
+                        {this.state.basicPortableLibrary ? <p style={{margin: '4px 0 0'}}>{this.L.basicPortableHint}</p> : null}
                     </div>
                 ) : null}
                 {this.state.lang === 'basic' && this.state.basicWarnings.length ? (

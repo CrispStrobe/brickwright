@@ -24,7 +24,7 @@ const mime = new Map([
 ]);
 const report = {format: 'crispbasic-production-qualification', version: 1,
     commit: process.env.GITHUB_SHA || null, buildDirectory: relative(root, build),
-    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 8,
+    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 10,
     scenarios: [], serverFailures: []};
 let browser, server, origin;
 
@@ -293,6 +293,132 @@ scenario('production CodeMirror generates BBC BASIC from blocks and loads the in
         assert.ok(evidence.workers.length >= 1, 'no real module interpreter worker was observed');
         assert.equal(await page.evaluate(() => crossOriginIsolated), false);
         await page.screenshot({path: resolve(artifacts, 'generated-basic.png'), fullPage: true});
+    });
+
+scenario('production portable generation drives the Circuit and To blocks preserves the refused source and project',
+    async (page, evidence, record) => {
+        // Compile through the ordinary Code importer before loading the Circuit,
+        // so any project replacement precedes the board captured by the run.
+        await codeTab(page, {basic: false});
+        await editSource(page, `DEVICE UNO
+PIN lamp = D13 OUTPUT
+PIN button = D2 INPUT ACTIVE LOW
+WHEN flag clicked:
+  print "PORTABLE GENERATOR"
+  ask "start gate" and wait
+  print (timer * 1000)
+  turn on lamp
+  wait 0.025 seconds
+  print (timer * 1000)
+  print read button
+  ask "finish gate" and wait
+  turn off lamp
+`);
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
+            ?.toJSON().includes('PORTABLE GENERATOR'));
+        await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await openCircuit(page);
+        await codeTab(page);
+        const portable = page.getByTestId('bw-basic-portable-library');
+        const connected = page.getByTestId('bw-crispbasic-connect-circuit');
+        assert.equal(await portable.isChecked(), false, 'portable generation must be an explicit choice');
+        assert.equal(await connected.isChecked(), false);
+        const sourceBeforeChoice = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        await portable.check();
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), sourceBeforeChoice,
+            'a generator preference change must preserve the current source until explicit regeneration');
+        assert.equal(await connected.isChecked(), false, 'generation must not acquire a circuit connection');
+        await page.getByRole('button', {name: /From blocks/}).first().click();
+        await page.waitForFunction(() => /PROCdigitalWrite\(13,1\)/.test(
+            document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.innerText || ''));
+        const source = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        assert.match(source, /PROCpinMode\(13,"output"\)/);
+        assert.match(source, /PROCpinMode\(2,"input-pullup"\)/);
+        assert.match(source, /PROCdelay\(25\)/);
+        assert.match(source, /FNdigitalRead\(2\)/);
+        assert.match(source, /FNmillis/);
+        assert.equal(evidence.requests.length, 0, 'generation must not fetch or start the interpreter');
+        await connected.check();
+        await page.getByTestId('bw-basic-run').click();
+        await page.getByTestId('bw-crispbasic-input').waitFor({state: 'visible'});
+        const before = await boardState(page);
+        assert.equal(before.owner, true);
+        assert.equal(before.lease, true);
+        await page.getByTestId('bw-crispbasic-input').fill('start');
+        await page.getByTestId('bw-crispbasic-send').click();
+        await page.getByTestId('bw-basic-output').filter({hasText: 'finish gate'}).waitFor();
+        await page.getByTestId('bw-crispbasic-input').waitFor({state: 'visible'});
+        const observed = await boardState(page);
+        assert.equal(observed.owner, true);
+        assert.equal(observed.lease, true);
+        assert.equal(BigInt(observed.timeNs) - BigInt(before.timeNs), 25000000n);
+        observed.currentMa = await page.evaluate(() => -window.__board.branchCurrent('led', 'anode') * 1000);
+        assert.ok(observed.currentMa > 10 && observed.currentMa < 16, JSON.stringify(observed));
+        await delay(40);
+        assert.equal((await boardState(page)).timeNs, observed.timeNs, 'INPUT must hold the owned simulation clock');
+        await page.getByTestId('bw-crispbasic-input').fill('finish');
+        await page.getByTestId('bw-crispbasic-send').click();
+        await finished(page);
+        assert.equal(await page.getByTestId('bw-basic-output').textContent(),
+            'PORTABLE GENERATOR\r\nstart gate\r\n? \r\n         0\r\n        25\r\n         0\r\nfinish gate\r\n? \r\n');
+        assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+        const released = await boardState(page);
+        assert.equal(released.owner, false);
+        assert.equal(released.lease, false);
+        assert.equal(released.inputs, true);
+        await noInterpreterWorkers(page);
+
+        const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.getByTestId('bw-code-status').filter({hasText: /To blocks cannot preserve/}).waitFor();
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), source);
+        assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
+        assert.match(await page.getByTestId('bw-conversion-report').textContent(), /unsupported|not preserved|refus/i);
+        record.portable = {source, before, observed, released,
+            refusal: await page.getByTestId('bw-code-status').textContent(),
+            projectSha256: createHash('sha256').update(projectBefore).digest('hex')};
+        await page.screenshot({path: resolve(artifacts, 'portable-generator-refusal.png'), fullPage: true});
+    });
+
+scenario('production portable toggle generation refuses and disables Run while default hardware comments remain inert',
+    async (page, evidence, record) => {
+        await codeTab(page, {basic: false});
+        await editSource(page, 'DEVICE UNO\nPIN lamp = D13 OUTPUT\nWHEN flag clicked:\n  print "TOGGLE REFUSAL"\n  toggle lamp\n');
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
+            ?.toJSON().includes('TOGGLE REFUSAL'));
+        await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await codeTab(page);
+        await page.getByRole('button', {name: /From blocks/}).first().click();
+        await page.waitForFunction(() => /REM toggle lamp/.test(
+            document.querySelector('[data-testid="bw-code-editor"] .cm-content')?.innerText || ''));
+        record.legacySource = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        assert.doesNotMatch(record.legacySource, /PROCdigitalWrite|FNdigitalRead/);
+        assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), false);
+
+        await page.getByTestId('bw-basic-portable-library').check();
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), record.legacySource);
+        await page.getByRole('button', {name: /From blocks/}).first().click();
+        await page.getByTestId('bw-basic-generation-warnings').filter({hasText: /toggle.*output latch/}).waitFor();
+        assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), true);
+        await page.getByTestId('bw-code-editor').locator('.cm-content').click();
+        await page.keyboard.press('ControlOrMeta+End');
+        await page.keyboard.press('Enter');
+        assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), true,
+            'a newline edit must not turn a generation-refusal banner into an executable program');
+        const source = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
+        const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
+        await page.getByRole('button', {name: /To blocks/}).first().click();
+        await page.getByTestId('bw-code-status').filter({hasText: /CrispBASIC: toggle/}).waitFor();
+        assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), source);
+        assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
+        assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), true);
+        assert.equal(evidence.workers.length, 0);
+        assert.equal(evidence.requests.length, 0);
+        record.refusedSource = source;
+        record.diagnostic = await page.getByTestId('bw-basic-generation-warnings').textContent();
+        await page.screenshot({path: resolve(artifacts, 'portable-toggle-refusal.png'), fullPage: true});
     });
 
 scenario('production file import preserves error lines, Latin-1 and recursive input suspension', async page => {

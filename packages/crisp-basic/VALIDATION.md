@@ -1,5 +1,52 @@
 # Validation records
 
+## Explicit portable generator boundary
+
+The owning producer is qualified at
+[`sb3-creator@0b2224b75baa6492fcc77118a54780174b116f42`](https://github.com/CrispStrobe/sb3-creator/commit/0b2224b75baa6492fcc77118a54780174b116f42)
+on `feature/crispbasic-generator`. Its
+[hosted qualification run, 46104135534](https://github.com/CrispStrobe/sb3-creator/actions/runs/46104135534),
+passed all **299 tests**, with zero failures or skips. The suite includes 39
+portable-generation tests, 23 reader/CLI tests, and 237 existing generation,
+source-map and trace checks. The exact adopted revision appears in
+`vendor-pins.json`, both compiler mirrors and the generated authoring inventory.
+
+This producer branch starts at the previous consumer pin. Its only gallery
+reconciliation preserves Brickwright's existing `busch-microtronic-wired-io`
+entry and three files, byte-for-byte identical to their already-published
+producer source from `312fa6b0feb72fd18fef8a6b865f708642acad9f`. No consumer
+gallery entry is deleted or changed. The official pin sync, subsequent sync
+check and mirrored-fact check pass. All 21 mapped producer files match the
+adopted source after the sync's documented import rewrites. The SPIKE artifact
+test passes at the new exact pin.
+
+### Local checks before consumer CI
+
+The final pinned compiler passed the complete 176-test Brickwright integration
+suite, including 11 conversion/editor/CLI guards and 13 new actual-WASM
+generator cases. Ten separate producer-identity, mirror-sync and SPIKE tests
+also passed. The local interpreter is the authenticated, unchanged WASM from
+run 46078751114 recorded below; its recipe matches the current runtime inputs.
+No native rebuild or local Chromium execution is claimed by these checks.
+
+The generator cases verify logical polarity and raw electrical writes,
+single-evaluation numeric and Boolean normalization, saved pin metadata and
+numeric scalar state, structured and numbered timing, half-up millisecond
+rounding, timer reset, and block-mapped refusal before an invalid delay advances
+time. They also verify the independent bridge opt-in and the reverse refusal.
+The editor guards retain refusal after whitespace edits to a generated error
+banner or reopening it from a file; removing the banner permits authored BASIC.
+The actual pinned Uno/solver fixture reaches exactly 25000000 ns and the
+expected LED current. A separate clamp fixture demonstrates output latch `1`
+with solved read `0`; toggle generation refuses with no executable source.
+
+The production gate adds two scenarios to the previous eight: the actual
+portable-generation control through connected execution and a non-mutating
+**To blocks** refusal, plus default-comment preservation and portable toggle
+refusal with Run disabled. Consumer hosted results are recorded after the
+complete ten-scenario gate has executed. The historical production result below
+qualifies the earlier implementation, not these additions.
+
 ## Production GUI qualification
 
 This milestone adds a complete production webpack build and a Chromium gate

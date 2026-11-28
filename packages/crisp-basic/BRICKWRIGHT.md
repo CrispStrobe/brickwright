@@ -40,13 +40,26 @@ loading its ROM, with the offending editor line and instructions to regenerate
 numbered BASIC or select CrispBASIC. Switching engines never silently rewrites
 the edited program.
 
-The generated source comes from the existing
+By default, generated source comes from the existing
 `generateBASIC(project, {profile: 'bbc', lineNumbers: false})` implementation.
 The adapter executes the current text directly; it does not round-trip it
 through the subset reader first. The **To blocks** operation retains
 `basicToPseudocode`'s conversion warnings. Generator warnings, including
-commented hardware stubs, remain visible, and a generation-refusal placeholder
-cannot run until the user edits it.
+commented hardware stubs, remain visible. A generation-refusal placeholder
+cannot run, return to blocks or derive another language while its generation-error
+banner remains. Whitespace edits preserve the refusal; removing or replacing the
+banner admits an explicit authored correction.
+
+For portable digital/time programs, explicitly select **Generate portable
+Circuit calls**, then **From blocks**. This requests the pinned producer's
+`mode: 'crispbasic'`; it does not enable circuit access or rewrite edited source.
+Select **Connect Circuit** separately to run the generated calls against a
+supported board in the current circuit. Timing uses integer simulated
+milliseconds; toggle and unsupported operations refuse. Live portable calls
+currently refuse **To blocks**, naming their source lines and preserving the
+existing project. Ordinary supported BASIC retains its existing conversion path.
+[GENERATOR.md](GENERATOR.md) documents maps, numeric conversion and the reverse
+boundary.
 
 **Stop** terminates an active run, including a tight loop or blocked input.
 **Reset** also clears the output/VDU state after cleanup. `INPUT` displays a
@@ -134,7 +147,8 @@ snapshots and exports leave the run active. Failed or reentrant cleanup blocks
 the mutation until it can safely proceed. No synthetic bench substitutes for an
 unavailable or rejected circuit. [BOARD-SIMULATION.md](BOARD-SIMULATION.md)
 specifies supported controllers, electrical semantics, limits and a runnable
-example. The generator still emits its existing hardware comments.
+example. Default generation retains its hardware comments; the explicit
+portable mode emits the supported library calls described above.
 
 The standalone reference host retains `basicBridge: false`, `hardware: false`
 and `circuitPhysics: false`; the Circuit host advertises circuit physics, and
@@ -208,7 +222,9 @@ the emitted build below a URL prefix and drives the complete editor and Circuit
 through their production controls. Test reports, screenshots and logs are
 retained with the workflow's production evidence artifact.
 
-The eight scenarios cover generated and imported BASIC, physical error lines,
+The ten scenarios cover generated and imported BASIC, the explicit portable
+generation choice, digital/timing execution, reverse refusal without project
+mutation, toggle refusal with Run disabled, physical error lines,
 Latin-1 input/output, repeated VDU pixels, Stop/Reset/reuse, live Circuit GPIO
 and timing, circuit-file replacement during blocked input, and explicit missing
 board/runtime failures. Replacement is exercised while the original connection

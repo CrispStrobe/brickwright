@@ -184,14 +184,22 @@ the emitted workbench's actual editor and Circuit controls, including live
 file replacement, while a separate gate authenticates the runtime asset bytes.
 See [VALIDATION.md](VALIDATION.md) for the tested revision and observed results.
 
-Next, add deliberate generator support for the portable library through the
-owning `sb3-creator` producer and its pinned integration. Make the mode explicit,
-retain existing default/retro output, normalize digital writes to `0` or `1`,
-and convert timing units deliberately. Unsupported operations must produce
-diagnostics rather than apparently executable hardware comments. Qualify the
-reverse **To blocks** conversion too; it must preserve the calls' meaning or
-refuse them clearly. A solved electrical read is not an output latch, so a
-toggle cannot safely be implemented by blindly inverting `FNdigitalRead`.
+The owning `sb3-creator` producer now has an explicit `mode: 'crispbasic'`,
+integrated through the exact pin and both generated mirrors. The Code tab's
+**Generate portable Circuit calls** choice selects it independently of the
+runtime's **Connect Circuit** option. Existing default/retro output remains
+unchanged. Digital writes normalize to `0` or `1`; delays convert seconds to
+integer simulated milliseconds; timer reset moves a program-owned offset.
+Unsupported operations refuse generation with diagnostics and no executable
+partial source. The reverse **To blocks** boundary is qualified as a clear
+refusal for live portable calls, before project mutation; ordinary supported
+BASIC still converts. Existing hardware comments remain comments, including
+colon-separated text within `REM`. See [GENERATOR.md](GENERATOR.md).
+
+A solved electrical read is not an output latch. Toggle is deliberately
+refused rather than implemented by blindly inverting `FNdigitalRead`. The next
+generator extension is a meaning-preserving reverse representation, or an
+explicit latch model with corresponding producer, runtime and solver tests.
 Extend board and peripheral capabilities only with corresponding solver tests.
 No physical-pin connection is claimed.
 
@@ -244,8 +252,9 @@ running this same BBCSDL core twice is not independent evidence.
 
 The extraction unit is `packages/crisp-basic/`. Runtime, build inputs, tests,
 examples, license notices and this roadmap live together. The root workflow
-sets up the SDK/build tools and invokes package commands. No current pin of
-another Brickwright package is moved, and the existing external BBCSDL
+sets up the SDK/build tools and invokes package commands. The portable generator
+adoption changes only the existing `sb3-creator` pin; the board, Circuit and
+interpreter pins retain their identities. The existing external BBCSDL
 reference build keeps its role. The npm development dependencies are locked Playwright and esbuild for browser
 qualification and JSX transformation; runtime code has no npm dependencies.
 Brickwright integration tests also use the repository's existing pinned
