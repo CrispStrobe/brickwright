@@ -16,7 +16,7 @@ const targets = {
         assemblerSource: 'bbasmb_arm_32', dataSource: 'bbdata_arm_32.s',
         // Matches upstream console/raspi: ARMv7-A, Thumb-2, hard-float ABI.
         // VFPv3-D16 is explicit so a cross compiler cannot choose a newer FPU.
-        flags: ['-march=armv7-a', '-mthumb', '-munaligned-access', '-mfloat-abi=hard', '-mfpu=vfpv3-d16', '-DARMHF'],
+        flags: ['-march=armv7-a', '-mthumb', '-munaligned-access', '-mfloat-abi=hard', '-mfpu=vfpv3-d16'],
         nasm: false
     }
 };
@@ -26,7 +26,7 @@ export function hostNativeTarget(platform = process.platform, architecture = pro
 }
 
 export function nativeTarget(name = hostNativeTarget()) {
-    const configuration = targets[name];
+    const configuration = Object.hasOwn(targets, name) ? targets[name] : undefined;
     if (!configuration) {
         throw new Error(`Unsupported native target ${name}; choose ${Object.keys(targets).join(', ')}. Use WASM on other hosts.`);
     }

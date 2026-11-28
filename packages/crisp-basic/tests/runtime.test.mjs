@@ -4,7 +4,6 @@ import {createHash} from 'node:crypto';
 import {constants} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import {createNativeSession} from '../index.mjs';
 import {verifyNativeBinary} from '../scripts/native-targets.mjs';
@@ -77,6 +76,20 @@ DEF FNdouble(value%) = value% * 2
     assert.equal(session.state, 'idle');
     assert.ok(result.output instanceof Uint8Array);
     assert.equal(result.text, Buffer.from(result.output).toString('latin1'));
+});
+
+test('native floating SYS arguments retain their hard-float register positions including a leading zero', async t => {
+    const session = sessionFor(t);
+    const result = await session.run(`zero# = 0
+negative# = -1
+SYS "atan2", zero#, negative# TO angle#
+PRINT STR$(ABS(angle# - PI) < 1E-12)
+SYS "ldexp", 1.5, 3 TO scaled#
+PRINT STR$(scaled#)
+END
+`);
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '-1\r\n12\r\n');
 });
 
 test('raw VDU bytes are preserved without ANSI translation or UTF-8 replacement', async t => {

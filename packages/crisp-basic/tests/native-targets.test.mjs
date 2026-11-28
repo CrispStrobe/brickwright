@@ -14,6 +14,8 @@ test('target selection keeps ARM32 and ARM64 layouts distinct and refuses unknow
     assert.equal(nativeTarget('linux-arm64').dataSource, 'bbdata_arm_64.s');
     assert.throws(() => nativeTarget('linux-riscv64'), /Unsupported native target/);
     assert.throws(() => nativeTarget('win32-x64'), /Unsupported native target/);
+    assert.throws(() => nativeTarget('__proto__'), /Unsupported native target/);
+    assert.throws(() => nativeTarget('toString'), /Unsupported native target/);
 });
 
 test('binary verification rejects a wrong CPU, ELF class, byte order or ARM soft-float ABI', () => {

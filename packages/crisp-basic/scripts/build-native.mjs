@@ -63,6 +63,10 @@ for (const name of [...core, ...host]) {
     const object = join(work, name + '.o');
     const flags = core.includes(name) ? ['-O2', '-ffast-math', '-fno-finite-math-only'] : ['-Os'];
     if (name === 'bbeval') flags.push('-fmath-errno');
+    // Upstream's ARMHF switch belongs to the SYS argument packer only.
+    // Defining it for bbccon would enable its obsolete soft-float fallback,
+    // corrupting subsequent floating arguments when the first is zero.
+    if (target.name === 'linux-armv7' && name === 'bbexec') flags.push('-DARMHF');
     run(cc, ['-Wall', '-Wno-array-bounds', '-Wno-unused-result', ...target.flags, ...includes, ...flags,
         '-c', join(work, 'src', name + '.c'), '-o', object]);
     objects.push(object);
