@@ -9,7 +9,9 @@ and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
 access. The Brickwright Code tab now adapts this runtime, with interactive input,
 Stop/Reset, mapped diagnostics and the existing partial VDU renderer. Version
-`0.1.0-dev.6` connects the opt-in BASIC simulation bridge to the active Brickwright
+`0.1.0-dev.7` extends the native build to Linux ARM64 and adds a portable WASM
+command-line runner with capability discovery and deterministic simulation fixtures.
+It retains the opt-in BASIC simulation bridge to the active Brickwright
 Circuit board through a GUI-owned adapter. Digital pin operations use the pinned
 electrical solver, and integer-millisecond delays advance its clock cooperatively.
 The portable generator emits an explicit `PROCdigitalToggle` operation backed
@@ -21,8 +23,9 @@ Full graphics, source debugging and physical-board targets remain subsequent wor
 
 ### Native CLI
 
-Requirements: Linux x86-64, Node 22 or newer, Git, GCC and NASM. On Debian/Ubuntu
-the native build tools are available as `build-essential` and `nasm`.
+Requirements: Linux x86-64 or ARM64, Node 22 or newer, Git and GCC/binutils.
+The x86-64 build also requires NASM. On Debian/Ubuntu the native build tools
+are available as `build-essential` and (for x64) `nasm`.
 
 ```sh
 cd packages/crisp-basic
@@ -53,6 +56,9 @@ when building the native backend for comparison.
 cd packages/crisp-basic
 npm run build:wasm
 node examples/run-wasm.mjs
+node bin/crispbasic.mjs --backend wasm examples/hello.bas
+node bin/crispbasic.mjs --backend wasm --capabilities
+node bin/crispbasic.mjs --backend wasm --simulation examples/simulation.json examples/simulation.bas --json
 npm run test:wasm
 ```
 
@@ -63,6 +69,14 @@ data layout; the x86-64 header/data are never substituted. No SDL, filesystem,
 native symbol resolver, inline assembler or dynamic JavaScript evaluator is
 linked. Unexpected WASM imports fail the build. See [wasm/README.md](wasm/README.md)
 for the C host boundary and deployment layout.
+
+The same built WASM artifact runs in a Node worker without a host-native
+interpreter binary. `--backend native` remains the CLI default for compatibility;
+`--backend wasm` selects the restricted worker explicitly. `--capabilities`
+requires no source file or compiled artifact. A versioned JSON simulation
+fixture supplies logical pin IDs, time limits and scheduled input levels;
+`--json` retains its final trace alongside the result. See [CLI.md](CLI.md)
+for commands, fixture semantics and platform qualification.
 
 ### Brickwright Code tab
 
@@ -82,9 +96,9 @@ reads, clock ownership and cancellation. Physical hardware is not connected.
 
 | Command | Prerequisites and coverage |
 | --- | --- |
-| `npm test` | Source preparation, deterministic simulation contract and bridge protocol/lifecycle tests; no compiled backend needed |
+| `npm test` | Source preparation, CLI capability/fixture validation, deterministic simulation contract and bridge protocol/lifecycle tests; no compiled backend needed |
 | `npm run test:native` | Native build; execution, CLI and process cleanup |
-| `npm run test:wasm` | WASM build; execution, host restrictions, simulation library and worker lifecycle |
+| `npm run test:wasm` | WASM build; execution, CLI, host restrictions, simulation library and worker lifecycle |
 | `npm run test:parity` | Both builds; the same corpus checked against fixed expected bytes |
 | `npm run test:all` | All of the above |
 | `npm run test:browser` | WASM build, Playwright and Chromium; real browser workers |
@@ -105,6 +119,9 @@ module and `CRISP_BASIC_CHROMIUM` an existing browser executable. No root
 Brickwright GUI dependency installation is needed. The dedicated
 [workflow](../../.github/workflows/crispbasic.yml) tests both backends, parity,
 and real Chromium workers on Ubuntu with Node 22 and the pinned SDK installer.
+Native qualification runs the same interpreter suite on Linux x64 and ARM64.
+The same built WASM artifact also receives focused CLI qualification on
+Linux ARM64, macOS ARM64 and Windows x64, without rebuilding the interpreter.
 The recorded local results and their limits are in [VALIDATION.md](VALIDATION.md).
 
 ## A first program
@@ -162,7 +179,7 @@ the bytes, including CR/LF and VDU control bytes; it is not a graphics renderer.
 | Explicit BASIC `QUIT n` | `n` modulo 256 |
 | BASIC error, invalid source, or host failure | 1 |
 | Deadline reached | 124 |
-| Output limit reached | 125 |
+| Output or simulation resource limit reached | 125 |
 | Cancelled / Ctrl-C | 130 |
 | Closed downstream output pipe | 141 |
 

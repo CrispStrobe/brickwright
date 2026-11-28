@@ -1,6 +1,6 @@
 {
   "name": "@crispstrobe/crispbasic",
-  "version": "0.1.0-dev.6",
+  "version": "0.1.0-dev.7",
   "private": true,
   "description": "CrispBASIC: a portable BBC BASIC-compatible runtime with native and restricted headless WASM backends.",
   "type": "module",
@@ -21,12 +21,12 @@
   },
   "scripts": {
     "build:native": "node scripts/build-native.mjs",
-    "test": "node --test tests/source.test.mjs tests/simulation-host.test.mjs tests/simulation-bridge.test.mjs",
+    "test": "node --test tests/source.test.mjs tests/cli-options.test.mjs tests/simulation-host.test.mjs tests/simulation-bridge.test.mjs",
     "test:native": "node --test tests/runtime.test.mjs tests/cli.test.mjs",
     "test:all": "npm test && npm run test:native && npm run test:wasm && npm run test:parity",
     "start": "node bin/crispbasic.mjs",
     "build:wasm": "node scripts/build-wasm.mjs",
-    "test:wasm": "node --test tests/wasm-runtime.test.mjs tests/wasm-policy.test.mjs tests/wasm-simulation.test.mjs",
+    "test:wasm": "node --test tests/wasm-runtime.test.mjs tests/wasm-policy.test.mjs tests/wasm-simulation.test.mjs tests/wasm-cli.test.mjs",
     "test:parity": "node --test tests/parity.test.mjs",
     "test:browser": "node scripts/test-browser.mjs",
     "test:brickwright": "node --test ../../test/crispbasic-*.test.mjs tests/brickwright.test.mjs tests/generator.test.mjs"

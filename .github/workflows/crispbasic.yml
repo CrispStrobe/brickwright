@@ -194,6 +194,34 @@ jobs:
         working-directory: .
         run: node scripts/verify-crispbasic-browser.mjs
 
+  portable-cli:
+    name: Portable CLI ${{ matrix.runner }}
+    needs: wasm
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04-arm, macos-15, windows-2025]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/crisp-basic
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Restore this exact commit's qualified portable interpreter
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: crispbasic-wasm-${{ github.sha }}
+          path: packages/crisp-basic/.build/wasm
+      - name: Qualify capability discovery and real WASM CLI execution
+        # No native interpreter, compiler, npm dependencies or GUI build is
+        # needed on these hosts. POSIX signal delivery is tested on POSIX;
+        # parent-owned timeout/output/request limits run on every platform.
+        run: node --test tests/cli-options.test.mjs tests/wasm-cli.test.mjs
+
   production:
     # This gate consumes the exact runtime already qualified above. It builds
     # and drives the complete webpack app; the focused React harness remains
