@@ -1,0 +1,139 @@
+name: service-worker-browser
+
+# The verifier serves its own fixture and reads the shipped worker directly.
+# Keep its complete scenario and mutation proof independent of GUI journeys.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/service-worker-browser.yml'
+      - 'scripts/verify-service-worker.mjs'
+      - 'scripts/prepare-playwright-apt.mjs'
+      - 'overlay/scratch-gui/sw.js'
+      - 'overlay/scratch-gui/src/lib/runtime-package-inventory.json'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/service-worker-browser.yml'
+      - 'scripts/verify-service-worker.mjs'
+      - 'scripts/prepare-playwright-apt.mjs'
+      - 'overlay/scratch-gui/sw.js'
+      - 'overlay/scratch-gui/src/lib/runtime-package-inventory.json'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  service-worker:
+    name: service worker browser scenarios and mutations
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Set up supported Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: Record exact checkout and probe inputs
+        id: inputs
+        timeout-minutes: 1
+        env:
+          BW_REVIEWED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {readFileSync, mkdirSync, writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
+          const git = (...args) => execFileSync('git', args, {encoding: 'utf8'}).trim();
+          const digest = (algorithm, bytes) => createHash(algorithm).update(bytes).digest('hex');
+          const checkout = git('rev-parse', 'HEAD');
+          const tree = git('rev-parse', 'HEAD^{tree}');
+          if (checkout !== process.env.GITHUB_SHA) throw new Error('checkout differs from the workflow event SHA');
+          const paths = [
+            '.github/workflows/service-worker-browser.yml',
+            'scripts/verify-service-worker.mjs',
+            'scripts/prepare-playwright-apt.mjs',
+            'overlay/scratch-gui/sw.js',
+            'overlay/scratch-gui/src/lib/runtime-package-inventory.json',
+            'package.json',
+            'package-lock.json'
+          ];
+          const files = paths.map(path => {
+            const bytes = readFileSync(path);
+            const blob = digest('sha1', Buffer.concat([Buffer.from('blob ' + bytes.length + '\0'), bytes]));
+            if (blob !== git('rev-parse', 'HEAD:' + path)) throw new Error('tracked input differs: ' + path);
+            return {path, bytes: bytes.length, sha256: digest('sha256', bytes), gitBlob: blob};
+          });
+          const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
+          const record = {
+            schema: 'brickwright.service-worker-browser-inputs.v1',
+            recordedAtUtc: new Date().toISOString(),
+            repository: process.env.GITHUB_REPOSITORY,
+            repositoryId: process.env.GITHUB_REPOSITORY_ID,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            event: process.env.GITHUB_EVENT_NAME,
+            ref: process.env.GITHUB_REF,
+            reviewedHead: process.env.BW_REVIEWED_HEAD_SHA,
+            checkout, tree, node: process.versions.node,
+            playwright: lock.packages['node_modules/playwright'].version,
+            playwrightCore: lock.packages['node_modules/playwright-core'].version,
+            files
+          };
+          mkdirSync('test-results/service-worker-browser', {recursive: true});
+          const json = JSON.stringify(record, null, 2) + '\n';
+          writeFileSync('test-results/service-worker-browser/inputs.json', json);
+          console.log(json);
+          NODE
+      - name: Install locked root dependencies
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Prepare official Ubuntu package mirror
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          sudo env "PATH=$PATH" node scripts/prepare-playwright-apt.mjs
+      - name: Install locked Playwright Chromium
+        timeout-minutes: 22
+        run: |
+          set -euo pipefail
+          test -x ./node_modules/.bin/playwright
+          ./node_modules/.bin/playwright --version
+          sudo env "PATH=$PATH" timeout --kill-after=15s 300 ./node_modules/.bin/playwright install-deps chromium
+          ok=0
+          for i in 1 2 3; do
+            if timeout --kill-after=15s 300 ./node_modules/.bin/playwright install chromium; then ok=1; break; fi
+            echo "playwright chromium install attempt $i failed/timed out; retrying"
+            sleep 5
+          done
+          [ "$ok" = 1 ] || { echo "::error::playwright chromium install failed after 3 attempts"; exit 1; }
+      - name: Verify all service worker scenarios and mutations
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          node scripts/verify-service-worker.mjs 2>&1 | tee test-results/service-worker-browser/verification.log
+      - name: Retain probe inputs and results
+        if: ${{ !cancelled() && steps.inputs.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: service-worker-browser-${{ github.sha }}-${{ github.run_attempt }}
+          path: test-results/service-worker-browser/
+          if-no-files-found: error
+          retention-days: 7

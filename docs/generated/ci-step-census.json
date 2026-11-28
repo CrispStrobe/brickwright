@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T06:34:29.078Z",
+  "generatedAt": "2026-11-28T16:09:46.599Z",
   "repo": "CrispStrobe/brickwright-lite",
   "headSha": "a87a7b447",
   "newestMainRun": 36409366028,
@@ -2051,6 +2051,7 @@
     "robot-model-webkit-comparison.yml",
     "rust-notices.yml",
     "samd-native-game-qualification.yml",
+    "service-worker-browser.yml",
     "spike-linux-package.yml",
     "target-performance.yml",
     "tauri.yml",
@@ -8188,11 +8189,37 @@
         }
       },
       "sourceSha": "92a9ab6e7"
+    },
+    "service-worker-browser.yml": {
+      "runs": 0,
+      "stepsInFile": [
+        "Check out the candidate",
+        "Set up supported Node",
+        "Record exact checkout and probe inputs",
+        "Install locked root dependencies",
+        "Prepare official Ubuntu package mirror",
+        "Install locked Playwright Chromium",
+        "Verify all service worker scenarios and mutations",
+        "Retain probe inputs and results"
+      ],
+      "inFileInNoRun": [
+        "Check out the candidate",
+        "Set up supported Node",
+        "Record exact checkout and probe inputs",
+        "Install locked root dependencies",
+        "Prepare official Ubuntu package mirror",
+        "Install locked Playwright Chromium",
+        "Verify all service worker scenarios and mutations",
+        "Retain probe inputs and results"
+      ],
+      "steps": {},
+      "jobs": {},
+      "sourceSha": "working-tree"
     }
   },
   "lastRefresh": {
-    "workflow": "samd-native-game-qualification.yml",
-    "at": "2026-10-29T06:34:29.078Z",
-    "sourceSha": "e859cecd3"
+    "workflow": "service-worker-browser.yml",
+    "at": "2026-11-28T16:09:46.599Z",
+    "sourceSha": "working-tree"
   }
 }
