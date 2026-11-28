@@ -200,6 +200,20 @@ test('source-validation errors are preserved and still release the session', asy
     assert.equal(f.calls.at(-1)[0], 'dispose');
 });
 
+for (const status of ['error', 'host-error']) test(`a ${status} result retains its original diagnosis when cleanup also fails`, async () => {
+    const cleanup = deferred(), f = fixture({cleanup});
+    const run = f.runner.run('END');await f.entered.promise;
+    const primary = {kind: status === 'error' ? 'basic' : 'host', message: 'original execution failure'};
+    f.done.resolve({...completed, status, error: primary});
+    cleanup.reject(new Error('secondary cleanup failure'));
+    const result = await run;
+    assert.equal(result.status, status);
+    assert.deepEqual(result.error, primary);
+    assert.equal(result.cleanupError.message, 'secondary cleanup failure');
+    assert.equal(f.runner.state, 'idle');
+    await f.runner.dispose();
+});
+
 test('an external view callback failure stops the active interpreter', async () => {
     const f = fixture();
     f.runner._options.onEvent = event => { if (event.type === 'view' && event.rawOutput) throw new Error('renderer failed'); };

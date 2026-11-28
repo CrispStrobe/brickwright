@@ -33,6 +33,7 @@ export async function prepareCrispBasicCadClock({runtime, board, signal,
     documentId = () => globalThis.__bwCad?.editor?.session.state.document.id,
     onFrame = () => {}, cleanupTimeoutMs = 30000} = {}) {
     if (!(signal instanceof AbortSignal)) throw new TypeError('The CAD clock requires an AbortSignal');
+    if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 60000) throw new TypeError('Invalid CAD cleanup timeout');
     if (signal.aborted) throw stopped();
     const config = validateConnections(connections);
     if (!config.enabled || (!config.drives.length && !config.servos.length)) {
@@ -69,7 +70,6 @@ export async function prepareCrispBasicCadClock({runtime, board, signal,
     try {
         check();
         if (!acquired || ['snapshot', 'step', 'release', 'releasePaused'].some(name => typeof acquired[name] !== 'function')) {
-            try {acquired?.release?.();} catch { /* Preserve the invalid-clock error. */ }
             throw new Error('The CAD Editor returned an invalid mechanical clock');
         }
         const mechanics = {
@@ -85,7 +85,11 @@ export async function prepareCrispBasicCadClock({runtime, board, signal,
         check();
         return coupled.programClock;
     } catch (error) {
-        try {if (coupled) await coupled.stop();else if (typeof acquired?.releasePaused === 'function') await release();} catch { /* Preserve the preparation error. */ }
+        try {
+            if (coupled) await coupled.stop();
+            else if (typeof acquired?.releasePaused === 'function') await release();
+            else acquired?.release?.();
+        } catch { /* Preserve the preparation error. */ }
         throw error;
     }
 }

@@ -241,6 +241,30 @@ test('CAD preparation refuses a different design before acquiring its clock', as
     assert.equal(board._externalClock, undefined);
 });
 
+test('a legacy CAD lease without paused release is refused and released exactly once', async () => {
+    const board = motorBoard(), mechanics = inertia(), controller = new AbortController();
+    delete mechanics.releasePaused;
+    const runtime = {circuitBoard: board, cadSimulation: {acquireExternalClock: async () => mechanics}};
+    await assert.rejects(prepareCrispBasicCadClock({runtime, board, signal: controller.signal,
+        connections, documentId: () => 'rotor'}), /invalid mechanical clock/);
+    assert.equal(mechanics.releases, 1);
+    assert.equal(board._externalClock, undefined);
+});
+
+test('a design changed during acquisition releases its paused world exactly once and preserves the preparation error', async () => {
+    const board = motorBoard(), mechanics = inertia(), controller = new AbortController();
+    let document = 'rotor';
+    mechanics.releasePaused = async () => {throw new Error('secondary release failure');};
+    let releases = 0;
+    const release = mechanics.releasePaused;
+    mechanics.releasePaused = () => {releases++;return release();};
+    const runtime = {circuitBoard: board, cadSimulation: {acquireExternalClock: async () => {document = 'different';return mechanics;}}};
+    await assert.rejects(prepareCrispBasicCadClock({runtime, board, signal: controller.signal,
+        connections, documentId: () => document}), /different CAD design/);
+    assert.equal(releases, 1);
+    assert.equal(board._externalClock, undefined);
+});
+
 test('the editor Circuit session carries the same CAD lease through run, project edit and cleanup', async () => {
     const oldStorage = globalThis.localStorage, oldCad = globalThis.__bwCad;
     globalThis.localStorage = {getItem: key => key === 'bw-cad-circuit-bindings' ? JSON.stringify(connections) : null};
