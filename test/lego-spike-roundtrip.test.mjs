@@ -368,11 +368,13 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> 0e75fbde (2026-11-26): KIM-1 and Busch gallery entries and expected behavior. The compiler source is unchanged.
     // -> f823a41b (2026-11-26): 6502 circuit and Controller gallery integration.
     // -> 1b414786 (2026-11-27): update multimeter guidance for LM358 input bias.
-    // -> 0b2224b7 (2026-11-28): explicit CrispBasic generation and reverse-conversion
-    // guards; preserve the existing Microtronic gallery entry at this supplier pin.
+    // -> bf9edad9 (2026-11-28): game export (costume pixels, touching colour), owned
+    // JavaScript console, gallery reconciliation. The SPIKE emitter is unchanged.
+    // -> e3f17df5 (2026-11-28): explicit CrispBASIC generation and reverse-conversion
+    // guards (the feature lane's 0b2224b7, merged onto sb3-creator main).
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '1b414786039b9cc412a498a8307126ee6422066b');
+        'e3f17df5ac24604112f05fe124d8e11fbc14fca2');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
