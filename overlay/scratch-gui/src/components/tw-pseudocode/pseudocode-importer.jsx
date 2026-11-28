@@ -2908,10 +2908,13 @@ class PseudocodeImporter extends React.Component {
         this.setState({busy: true, conversionReport: null});
         try {
             const blob = await this.props.vm.saveProjectSb3();
-            const {exportGame, loadSb3, zipExport} = await import(
-                /* webpackChunkName: "bw-game-export" */ '../../lib/sb3-creator-game-export.js');
+            const [{exportGame, loadSb3, zipExport}, {rasterizeInPage}] = await Promise.all([
+                import(/* webpackChunkName: "bw-game-export" */ '../../lib/sb3-creator-game-export.js'),
+                import(/* webpackChunkName: "bw-game-export" */ '../../lib/sb3-creator-game-raster.js')]);
             const title = (this.props && this.props.projectTitle) || 'brickwright-game';
-            const out = await exportGame(await loadSb3(await blob.arrayBuffer()), {target, title});
+            // Costumes are rasterized with this page's own canvas: pixel collisions and
+            // touching colour in the exported game, with no extra dependency.
+            const out = await exportGame(await loadSb3(await blob.arrayBuffer()), {target, title, rasterize: rasterizeInPage});
             if (!out.ok) {
                 this.setState({busy: false, status: this.L.gameRefused(out.reasons.join('; '))});
                 return;

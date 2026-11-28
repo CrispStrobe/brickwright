@@ -112,7 +112,10 @@ const FILES = [
     ['src/game/model.js', path.join(lib, 'sb3-creator-game-model.js')],
     ['src/game/emit.js', path.join(lib, 'sb3-creator-game-emit.js')],
     ['src/game/export.js', path.join(lib, 'sb3-creator-game-export.js')],
-    ['src/game/runtime/sources.generated.js', path.join(lib, 'sb3-creator-game-sources.js')]
+    ['src/game/runtime/sources.generated.js', path.join(lib, 'sb3-creator-game-sources.js')],
+    // Costume rasters for pixel collisions and touching colour; the app rasterizes
+    // with its own canvas (rasterizeInPage), so no browser dependency is added.
+    ['src/game/raster.js', path.join(lib, 'sb3-creator-game-raster.js')]
 ];
 
 // Downstream-only modules imported by synced compiler files. EMPTY, with no stated

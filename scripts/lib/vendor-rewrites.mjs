@@ -131,6 +131,7 @@ export const SB3_CREATOR_FILES = Object.freeze([
     ['sb3-creator-game-emit.js', 'src/game/emit.js'],
     ['sb3-creator-game-export.js', 'src/game/export.js'],
     ['sb3-creator-game-sources.js', 'src/game/runtime/sources.generated.js'],
+    ['sb3-creator-game-raster.js', 'src/game/raster.js'],
 ]);
 
 /**
@@ -163,7 +164,8 @@ export const SB3_CREATOR_IMPORT_REWRITES = Object.freeze([
     // export.js imports its siblings by their upstream names.
     ['model.js', 'sb3-creator-game-model.js'],
     ['emit.js', 'sb3-creator-game-emit.js'],
-    ['runtime/sources.generated.js', 'sb3-creator-game-sources.js']
+    ['runtime/sources.generated.js', 'sb3-creator-game-sources.js'],
+    ['raster.js', 'sb3-creator-game-raster.js']
 ]);
 
 /** Every rename the file map implies — the superset the sync does NOT fully cover. */
