@@ -82,6 +82,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {hddBeforeFixtureControl, hddBeforeConcurrencyControl, hddHistoricalHashBody, studyBeforeConcurrencyPolicy} from './helpers/reviewed-concurrency-projections.mjs';
 import {hddBeforeRepositoryIdentityControl, hddWorkflowBeforeRepositoryIdentity} from './helpers/reviewed-repository-identity.mjs';
+import {hddBeforeCrispBasicNoticeControl} from './helpers/reviewed-basic-oracle-notice.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PINS = path.join(ROOT, 'vendor-pins.json');
@@ -1268,7 +1269,7 @@ test('repository identity source inverse retains sealed stages and rejects hunk 
     const review=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-repository-identity-review.json'),'utf8'));
     const file=review.file,source=readFileSync(path.join(ROOT,file),'utf8');
     const held=hddBeforeRepositoryIdentityControl(file,source);
-    for(const [text,profile] of [[source,review.after],[held,review.before]]){
+    for(const [text,profile] of [[hddBeforeCrispBasicNoticeControl(file,source),review.after],[held,review.before]]){
         assert.equal(Buffer.byteLength(text),profile.bytes);
         assert.equal(createHash('sha256').update(text).digest('hex'),profile.sha256);
     }

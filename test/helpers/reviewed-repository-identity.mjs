@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {hddBeforeCrispBasicNoticeControl} from './reviewed-basic-oracle-notice.mjs';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 
@@ -47,5 +48,5 @@ export const hddWorkflowBeforeRepositoryIdentity = (file, text) => {
 // is rejected by the unchanged downstream historical source profile.
 export const hddBeforeRepositoryIdentityControl = (file, text) => {
     if (file !== review.file) return text;
-    return invert(text, review.changes, 'repository identity source');
+    return invert(hddBeforeCrispBasicNoticeControl(file, text), review.changes, 'repository identity source');
 };
