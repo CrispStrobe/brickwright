@@ -2,12 +2,12 @@
 // No test double can substitute for the bridge, inductor, current or rotor state.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createWasmSession} from '../browser.mjs';
-import {SimulationError} from '../src/simulation-host.mjs';
-import {createCrispBasicBoardHost} from '../../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
-import {createCrispBasicRobotFixture, observeCrispBasicRobotMotor} from '../../../scripts/lib/crispbasic-robot-fixture.mjs';
+import {createWasmSession} from '../../packages/crisp-basic/browser.mjs';
+import {SimulationError} from '../../packages/crisp-basic/src/simulation-host.mjs';
+import {createCrispBasicBoardHost} from '../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
+import {createCrispBasicRobotFixture, observeCrispBasicRobotMotor} from '../../scripts/lib/crispbasic-robot-fixture.mjs';
 
-const moduleURL = new URL('../.build/wasm/crispbasic.mjs', import.meta.url);
+const moduleURL = new URL('../../packages/crisp-basic/.build/wasm/crispbasic.mjs', import.meta.url);
 const MS = 1000000n;
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const closeTo = (actual, expected, tolerance, message) => assert.ok(Math.abs(actual - expected) <= tolerance,

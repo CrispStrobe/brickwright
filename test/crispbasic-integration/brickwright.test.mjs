@@ -4,17 +4,17 @@ import assert from 'node:assert/strict';
 import {mkdtemp, rm} from 'node:fs/promises';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import test, {before, after} from 'node:test';
-import SB3Creator from '../../../overlay/scratch-gui/src/lib/sb3-creator.js';
-import basicToPseudocode from '../../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
-import {createCrispBasicRunner} from '../../../overlay/scratch-gui/src/lib/crispbasic-runner.js';
-import {createCrispBasicBoardHost} from '../../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
+import SB3Creator from '../../overlay/scratch-gui/src/lib/sb3-creator.js';
+import basicToPseudocode from '../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
+import {createCrispBasicRunner} from '../../overlay/scratch-gui/src/lib/crispbasic-runner.js';
+import {createCrispBasicBoardHost} from '../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
-import {packageCrispBasic} from '../../../scripts/package-crispbasic.mjs';
-import {createCrispBasicCircuitFixture} from '../../../scripts/lib/crispbasic-circuit-fixture.mjs';
+import {packageCrispBasic} from '../../scripts/package-crispbasic.mjs';
+import {createCrispBasicCircuitFixture} from '../../scripts/lib/crispbasic-circuit-fixture.mjs';
 
 let directory, assetBaseURL;
 before(async () => {
-    directory = await mkdtemp(fileURLToPath(new URL('../.build/brickwright-', import.meta.url)));
+    directory = await mkdtemp(fileURLToPath(new URL('../../packages/crisp-basic/.build/brickwright-', import.meta.url)));
     await packageCrispBasic({destination: directory});
     assetBaseURL = pathToFileURL(directory + '/').href;
 });

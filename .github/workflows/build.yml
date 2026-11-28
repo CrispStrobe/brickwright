@@ -608,7 +608,7 @@ jobs:
           fi
           echo "vendor-pins.json history: $(git rev-list --count HEAD -- vendor-pins.json) commits"
           mkdir -p "$RUNNER_TEMP/vendor-history"
-          for repo in bw-board sb3-creator bw-circuit-ui; do
+          for repo in bw-board sb3-creator bw-circuit-ui crispbasic; do
             git clone --quiet --bare --filter=blob:none "https://github.com/CrispStrobe/$repo.git" "$RUNNER_TEMP/vendor-history/$repo.git"
             echo "$repo: $(git --git-dir="$RUNNER_TEMP/vendor-history/$repo.git" rev-list --all | wc -l) commits"
           done
@@ -1198,7 +1198,7 @@ jobs:
           fi
           echo "vendor-pins.json history: $(git rev-list --count HEAD -- vendor-pins.json) commits"
           mkdir -p "$RUNNER_TEMP/vendor-history"
-          for repo in bw-board sb3-creator bw-circuit-ui; do
+          for repo in bw-board sb3-creator bw-circuit-ui crispbasic; do
             git clone --quiet --bare --filter=blob:none "https://github.com/CrispStrobe/$repo.git" "$RUNNER_TEMP/vendor-history/$repo.git"
             echo "$repo: $(git --git-dir="$RUNNER_TEMP/vendor-history/$repo.git" rev-list --all | wc -l) commits"
           done

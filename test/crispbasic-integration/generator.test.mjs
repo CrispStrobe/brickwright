@@ -3,15 +3,15 @@
 // unavailable inputs are failures, never skipped or replaced with source stubs.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import SB3Creator from '../../../overlay/scratch-gui/src/lib/sb3-creator.js';
-import basicToPseudocode from '../../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
-import {createWasmSession} from '../browser.mjs';
-import {createSimulationHost, SimulationError} from '../src/simulation-host.mjs';
-import {createCrispBasicBoardHost} from '../../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
-import {createCrispBasicCircuitFixture} from '../../../scripts/lib/crispbasic-circuit-fixture.mjs';
+import SB3Creator from '../../overlay/scratch-gui/src/lib/sb3-creator.js';
+import basicToPseudocode from '../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
+import {createWasmSession} from '../../packages/crisp-basic/browser.mjs';
+import {createSimulationHost, SimulationError} from '../../packages/crisp-basic/src/simulation-host.mjs';
+import {createCrispBasicBoardHost} from '../../overlay/scratch-gui/src/lib/crispbasic-board-host.js';
+import {createCrispBasicCircuitFixture} from '../../scripts/lib/crispbasic-circuit-fixture.mjs';
 import {BoardImpl} from 'bw-board/board.js';
 
-const moduleURL = new URL('../.build/wasm/crispbasic.mjs', import.meta.url);
+const moduleURL = new URL('../../packages/crisp-basic/.build/wasm/crispbasic.mjs', import.meta.url);
 const portable = {profile: 'bbc', mode: 'crispbasic', lineNumbers: false};
 const pinSource = body => `DEVICE UNO
 PIN lamp = D13 OUTPUT ACTIVE LOW

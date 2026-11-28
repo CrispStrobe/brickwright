@@ -39,6 +39,7 @@
         "gen:package-notices": "node scripts/package-upstream-notices.mjs",
         "verify:package-notices": "node scripts/package-upstream-notices.mjs --check",
         "sync:emuwasm": "node scripts/sync-emu8051-wasm.mjs",
+        "sync:crispbasic": "node scripts/sync-crispbasic.mjs",
         "sync:emuwasm:check": "node scripts/sync-emu8051-wasm.mjs --check",
         "check:mirrors": "node scripts/check-mirrors.mjs",
         "package:store-compliance": "node scripts/package-store-compliance.mjs",
@@ -154,6 +155,7 @@
         "package:crispbasic": "node scripts/package-crispbasic.mjs",
         "package:crispbasic:compiler": "node scripts/package-crispbasic-compiler.mjs",
         "package:crispbasic:compiler:check": "node scripts/package-crispbasic-compiler.mjs --check",
+        "test:crispbasic-integration": "node --test test/crispbasic-*.test.mjs test/crispbasic-integration/*.test.mjs",
         "package:crispbasic:check": "node scripts/package-crispbasic.mjs --check",
         "verify:crispbasic-production": "node scripts/verify-crispbasic-production-assets.mjs && node scripts/verify-crispbasic-production.mjs"
     },

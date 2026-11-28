@@ -77,7 +77,9 @@ const syncs = readdirSync(path.join(ROOT, 'scripts')).filter(f => /^sync-.*\.mjs
     .filter(f => /\brecordPin\(/.test(readFileSync(path.join(ROOT, 'scripts', f), 'utf8')));
 
 test('every sync that records a pin pre-checks the move before it writes, and says the rule where its usage lives', () => {
-    assert.deepEqual([...syncs].sort(), ['sync-examples.mjs', 'sync-flasher.mjs', 'sync-sb3creator.mjs'],
+    // sync-crispbasic.mjs (2026-11-28) copies the whole CrispStrobe/crispbasic
+    // package tree; like the flasher it moves its pin only by hand, with --pin.
+    assert.deepEqual([...syncs].sort(), ['sync-crispbasic.mjs', 'sync-examples.mjs', 'sync-flasher.mjs', 'sync-sb3creator.mjs'],
         'copy-sync authorities changed: board/UI pins now belong to pin-packages.mjs, not a sync');
     for (const f of syncs) {
         const text = readFileSync(path.join(ROOT, 'scripts', f), 'utf8');
@@ -104,7 +106,7 @@ test('the tool that exists to move the pins passes --pin to every pin-recording 
 
 // ---- live: a scoped sync against a checkout at another sha leaves the pin alone --
 
-const CHECKOUT = {'sync-sb3creator.mjs': ['sb3-creator', 'SB3_CREATOR_DIR', ''], 'sync-examples.mjs': ['sb3-creator', 'SB3_CREATOR_DIR', ''], 'sync-flasher.mjs': ['stc-compiler-flasher', 'STC_COMPILER_DIR', '']};
+const CHECKOUT = {'sync-sb3creator.mjs': ['sb3-creator', 'SB3_CREATOR_DIR', ''], 'sync-examples.mjs': ['sb3-creator', 'SB3_CREATOR_DIR', ''], 'sync-flasher.mjs': ['stc-compiler-flasher', 'STC_COMPILER_DIR', ''], 'sync-crispbasic.mjs': ['crispbasic', 'CRISPBASIC_DIR', '']};
 
 for (const f of syncs) {
     const [repo, envVar, scope] = CHECKOUT[f] || [null, null, ''];

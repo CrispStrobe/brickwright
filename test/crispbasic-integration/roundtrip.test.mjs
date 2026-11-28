@@ -3,16 +3,16 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
-import SB3Creator from '../../../overlay/scratch-gui/src/lib/sb3-creator.js';
-import basicToPseudocode from '../../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
+import SB3Creator from '../../overlay/scratch-gui/src/lib/sb3-creator.js';
+import basicToPseudocode from '../../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
 import {
     isCrispBasicPseudocode, validateCrispBasicPseudocode,
     isCrispBasicProject, validateCrispBasicProject
-} from '../../../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
-import {createWasmSession} from '../browser.mjs';
-import {createSimulationHost} from '../src/simulation-host.mjs';
+} from '../../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
+import {createWasmSession} from '../../packages/crisp-basic/browser.mjs';
+import {createSimulationHost} from '../../packages/crisp-basic/src/simulation-host.mjs';
 
-const moduleURL = new URL('../.build/wasm/crispbasic.mjs', import.meta.url);
+const moduleURL = new URL('../../packages/crisp-basic/.build/wasm/crispbasic.mjs', import.meta.url);
 const portable = {profile: 'bbc', mode: 'crispbasic'};
 const numberOutput = value => `${String(value).padStart(10)}\r\n`;
 const sequenced = events => events.map((event, index) => ({sequence: index + 1, ...event}));
@@ -75,7 +75,7 @@ async function equivalent(original, lineNumbers, options) {
 
 test('portable round-trip qualification requires a real, valid WASM artifact', async () => {
     await readFile(moduleURL);
-    assert.equal(WebAssembly.validate(await readFile(new URL('../.build/wasm/crispbasic.wasm', import.meta.url))), true);
+    assert.equal(WebAssembly.validate(await readFile(new URL('../../packages/crisp-basic/.build/wasm/crispbasic.wasm', import.meta.url))), true);
 });
 
 const pinSource = `DEVICE ARDUINO-UNO

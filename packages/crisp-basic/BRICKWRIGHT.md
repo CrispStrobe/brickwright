@@ -200,7 +200,7 @@ They do not require installing all Scratch GUI dependencies:
 npm ci --ignore-scripts
 npm --prefix packages/crisp-basic ci --ignore-scripts
 npm run package:crispbasic
-npm --prefix packages/crisp-basic run test:brickwright
+npm run test:crispbasic-integration
 node scripts/verify-crispbasic-browser.mjs
 ```
 

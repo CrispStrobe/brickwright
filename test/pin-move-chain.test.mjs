@@ -86,10 +86,19 @@ import {hddBeforeCrispBasicNoticeControl} from './helpers/reviewed-basic-oracle-
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PINS = path.join(ROOT, 'vendor-pins.json');
-const REPOS = ['bw-board', 'sb3-creator', 'bw-circuit-ui'];
+// crispbasic joined 2026-11-28: CrispStrobe/crispbasic is the upstream of the
+// whole packages/crisp-basic tree (scripts/sync-crispbasic.mjs,
+// test/crispbasic-vendor-identity.test.mjs). Like the other three it is a
+// GLOBAL pin: no tracked file outside the exempt roles may carry a crispbasic
+// commit other than the current pin.
+const REPOS = ['bw-board', 'sb3-creator', 'bw-circuit-ui', 'crispbasic'];
 const SCOPED_PINS = ['stc-compiler-flasher', 'devices', 'stc12', 'arrays-values', 'microbitplus', 'circuitplayground', 'wedo2unified', 'spikeprime',
     'ev3comprehensive', 'legoboostunified', 'legonxt', 'legopoweredup'];
-const ENV_DIR = {'bw-board': 'BW_BOARD_DIR', 'sb3-creator': 'SB3_CREATOR_DIR', 'bw-circuit-ui': 'BW_CIRCUIT_UI_DIR'};
+const ENV_DIR = {'bw-board': 'BW_BOARD_DIR', 'sb3-creator': 'SB3_CREATOR_DIR', 'bw-circuit-ui': 'BW_CIRCUIT_UI_DIR', crispbasic: 'CRISPBASIC_DIR'};
+// The floor below which a "history" is not one. crispbasic was extracted with
+// its history (37 commits on 2026-11-28), so 100 would refuse a real clone;
+// 30 still refuses a depth-1 or single-commit stand-in.
+const MIN_HISTORY = {crispbasic: 30};
 const PROVENANCE = 'overlay/scratch-gui/static/roms/i8086-bios.provenance.json';
 const HEX40 = /\b[0-9a-f]{40}\b/g;
 
@@ -795,7 +804,7 @@ const repoHistory = () => {
         const head = git(dir, 'rev-parse', 'HEAD').trim();
         assert.match(head, /^[0-9a-f]{40}$/, `${dir} is set for ${repo} but git could not read a HEAD there`);
         const shas = git(dir, 'rev-list', '--all').split('\n').filter(Boolean);
-        assert.ok(shas.length > 100, `${dir} holds only ${shas.length} commits for ${repo} — not its history`);
+        assert.ok(shas.length > (MIN_HISTORY[repo] ?? 100), `${dir} holds only ${shas.length} commits for ${repo} — not its history`);
         for (const s of shas) history.set(s, repo);
         where[repo] = `${dir} (${shas.length} commits)`;
     }
@@ -1406,7 +1415,7 @@ test('WeDo2 receipt correlation rejects wrong identity, lengths, hashes and sour
         `module.exports = makeExt(${JSON.stringify(source.replace('ExampleAuthor', 'SomeoneElse!!'))});`));
 });
 
-test('the pins file names three global repos plus explicitly scoped artifact pins', () => {
+test('the pins file names four global repos plus explicitly scoped artifact pins', () => {
     const pins = currentPins();
     assert.deepEqual(Object.keys(pins).sort(), [...REPOS, ...SCOPED_PINS].sort());
     for (const [repo, sha] of Object.entries(pins)) assert.match(sha, /^[0-9a-f]{40}$/, `${repo} pin is not a full sha`);

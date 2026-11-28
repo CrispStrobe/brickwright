@@ -1,7 +1,8 @@
 # CrispBASIC
 
-CrispBASIC is a BBC BASIC-compatible runtime project maintained in Brickwright's
-`packages/crisp-basic` directory. It is intended to become an independent repository.
+CrispBASIC is a BBC BASIC-compatible runtime. It was developed in Brickwright's
+`packages/crisp-basic` directory and now lives in
+<https://github.com/CrispStrobe/crispbasic>. Brickwright vendors it unmodified at a pinned commit.
 
 **CrispBASIC runs real BASIC through the pinned BBCSDL C interpreter in native
 processes and restricted WebAssembly workers.** Both use the original tokenizer
@@ -126,7 +127,7 @@ reads, clock ownership and cancellation. Physical hardware is not connected.
 | `npm run test:parity` | Both builds; the same corpus checked against fixed expected bytes |
 | `npm run test:all` | All of the above |
 | `npm run test:browser` | WASM build, Playwright and Chromium; real browser workers |
-| `npm run test:brickwright` | WASM build and root dependencies; actual generator, GUI adapter, controls and packaging |
+| `npm run test:crispbasic-integration` (Brickwright root) | WASM build and Brickwright dependencies; actual generator, GUI adapter, controls and packaging |
 
 Missing required binaries are failures, never passing skips. To install only
 the package's browser test dependencies and run the browser suite:
@@ -141,7 +142,7 @@ On Linux, `npx playwright install --with-deps chromium` also installs browser
 system dependencies. `CRISP_BASIC_PLAYWRIGHT` can select an existing Playwright
 module and `CRISP_BASIC_CHROMIUM` an existing browser executable. No root
 Brickwright GUI dependency installation is needed. The dedicated
-[workflow](../../.github/workflows/crispbasic.yml) tests both backends, parity,
+[workflow](https://github.com/CrispStrobe/crispbasic/blob/main/.github/workflows/ci.yml) tests both backends, parity,
 and real Chromium workers on Ubuntu with Node 22 and the pinned SDK installer.
 Native qualification runs the same interpreter suite on Linux x64 and ARM64.
 The separate CPU-emulation workflow cross-builds ARMv7 and ARM64 executables
