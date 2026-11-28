@@ -42,14 +42,16 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
     if (model?.board && model.board !== board) throw new Error('The Circuit is changing; wait for it to finish loading');
     const parts = board.parts, nets = board.getNets();
     let disposed = false, host = null, creatingHost = false, requested = false, ready = false, rejectWait, disposalError = null;
-    let cadClock = null, cadPreparation = null;
+    let cadClock = null, cadPreparation = null, cadPreparationTask = null, cadPreparing = false;
+    let cleanupTask = null, ownerReleased = false;
     const owner = {board, stop: () => invalidate('The BASIC circuit run was stopped')};
     runtime.bwCrispBasicSimulation = owner;
     const windowListeners = [], runtimeListeners = [], modelGuards = [];
     const clean = action => {
         try { action(); } catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
     };
-    const cleanupPending = () => creatingHost || Boolean(host && !host.cleanupComplete);
+    const cleanupPending = () => creatingHost || cadPreparing || Boolean(host && !host.cleanupComplete) ||
+        Boolean(cadClock && !cadClock.cleanupComplete);
     const restoreModelGuards = () => {
         // Keep the guard during a solver callback or pin-release callback:
         // retrying a refused edit in that same stack must not take a snapshot.
@@ -76,6 +78,13 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         !runtime.bwRunBoard && !runtime.bwCircuitRunPreparing && !runtime.bwProgramClock &&
         runtime.circuitBoard === board && board.parts === parts && board.getNets() === nets &&
         (!runtime.circuitModel || runtime.circuitModel === model) && !model?.netlistError;
+    const finishOwner = () => {
+        if (ownerReleased) return;
+        ownerReleased = true;
+        restoreModelGuards();
+        clean(() => { if (runtime.bwCrispBasicSimulation === owner) delete runtime.bwCrispBasicSimulation; });
+        clean(() => { if (requested) eventTarget.dispatchEvent(new CustomEvent(OWNER_EVENT, {detail: {board: null, owner}})); });
+    };
     const release = () => {
         if (disposed) return;
         disposed = true;
@@ -83,14 +92,25 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         for (const [name, fn] of windowListeners) clean(() => eventTarget.removeEventListener(name, fn));
         for (const [name, fn] of runtimeListeners) clean(() => runtime.off(name, fn));
         clean(() => board.offChange?.(boardChanged));
-        // Host cleanup is synchronous and idempotent; it releases only its
-        // own pin/clock lease before the Designer may resume its animation.
+        // Pin release is synchronous. A CAD worker may still be finishing an
+        // already-submitted step; retain Designer/model ownership until its
+        // paused-world handoff has reconciled that final frame.
         clean(() => host?.dispose());
         clean(() => cadPreparation?.abort());
         if (!host && !creatingHost) clean(() => cadClock?.release());
-        restoreModelGuards();
-        clean(() => { if (runtime.bwCrispBasicSimulation === owner) delete runtime.bwCrispBasicSimulation; });
-        clean(() => { if (requested) eventTarget.dispatchEvent(new CustomEvent(OWNER_EVENT, {detail: {board: null, owner}})); });
+        if (cleanupPending()) {
+            cleanupTask = Promise.resolve().then(async () => {
+                // Also cover cancellation while initial CAD sensing is in
+                // flight, before a programClock could be returned to us.
+                try { await cadPreparationTask; } catch { /* Preparation reports its original error. */ }
+                try { await host?.whenDisposed(); }
+                catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
+                try { await cadClock?.release(); }
+                catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
+                finishOwner();
+            });
+            cleanupTask.catch(error => { if (!disposalError) disposalError = cleanupFailure(error); });
+        } else finishOwner();
     };
     const dispose = () => {
         release();
@@ -100,6 +120,11 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         try { host?.dispose(); }
         catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
         restoreModelGuards();
+        if (disposalError) throw disposalError;
+    };
+    const whenDisposed = async () => {
+        try { dispose(); } catch { /* Wait for other owned cleanup before reporting it. */ }
+        await cleanupTask;
         if (disposalError) throw disposalError;
     };
     const invalidate = message => {
@@ -197,8 +222,12 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
             cadPreparation = new AbortController();
             const {prepareCrispBasicCadClock} = await import(/* webpackChunkName: "crispbasic-cad-clock" */ './crispbasic-cad-clock.js');
             if (!valid()) throw stopped();
-            cadClock = await prepareCrispBasicCadClock({runtime, board, signal: cadPreparation.signal});
-            if (!valid()) {cadClock.release();throw stopped();}
+            cadPreparing = true;
+            try {
+                cadPreparationTask = prepareCrispBasicCadClock({runtime, board, signal: cadPreparation.signal});
+                cadClock = await cadPreparationTask;
+            } finally {cadPreparing = false;}
+            if (!valid()) {await cadClock.release();throw stopped();}
         }
         return {
             board,
@@ -216,7 +245,12 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
                     if (disposed) dispose();
                 }
             },
-            dispose
+            dispose,
+            whenDisposed,
+            get cleanupComplete() {return ownerReleased;}
         };
-    } catch (error) { dispose(); throw error; }
+    } catch (error) {
+        try { await whenDisposed(); } catch { /* Preserve the preparation failure. */ }
+        throw error;
+    }
 }

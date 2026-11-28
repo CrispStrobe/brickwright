@@ -56,13 +56,15 @@ function inertia({time = 0, angle = 0, omega = 0} = {}) {
             time += .005;
             return snapshot();
         },
-        release() {releases++;}
+        release() {releases++;},
+        releasePaused() {releases++;}
     };
 }
 
-async function fixture({board = motorBoard(), mechanics = inertia(), ...options} = {}) {
+async function fixture({board = motorBoard(), mechanics = inertia(), cleanupTimeoutMs, ...options} = {}) {
     const controller = new AbortController();
-    const coupled = await createCoupledSession({board, mechanics, connections, clockMode: 'program', signal: controller.signal});
+    const coupled = await createCoupledSession({board, mechanics, connections, clockMode: 'program', signal: controller.signal,
+        ...(cleanupTimeoutMs ? {cleanupTimeoutMs} : {})});
     const host = createCrispBasicBoardHost({board, signal: controller.signal, SimulationError,
         clock: coupled.programClock, yieldTask: turn, ...options});
     const drive = forward => {
@@ -230,12 +232,12 @@ test('CAD acquisition cancellation settles now and releases a late lease exactly
     assert.equal(board._externalClock, undefined);
 });
 
-test('CAD preparation refuses a different design and releases its acquired clock', async () => {
+test('CAD preparation refuses a different design before acquiring its clock', async () => {
     const board = motorBoard(), mechanics = inertia(), controller = new AbortController();
     const runtime = {circuitBoard: board, cadSimulation: {acquireExternalClock: async () => mechanics}};
     await assert.rejects(prepareCrispBasicCadClock({runtime, board, signal: controller.signal,
         connections, documentId: () => 'different'}), /different CAD design/);
-    assert.equal(mechanics.releases, 1);
+    assert.equal(mechanics.releases, 0);
     assert.equal(board._externalClock, undefined);
 });
 
@@ -267,6 +269,103 @@ test('the editor Circuit session carries the same CAD lease through run, project
         assert.throws(() => host.digitalRead(2), /disposed|cancelled/);
     } finally {
         session?.dispose();
+        if (oldStorage === undefined) delete globalThis.localStorage;else globalThis.localStorage = oldStorage;
+        if (oldCad === undefined) delete globalThis.__bwCad;else globalThis.__bwCad = oldCad;
+    }
+});
+
+test('Stop keeps the board reserved while a submitted CAD step settles and copies its final rotor state', async () => {
+    const mechanics = inertia(), advance = mechanics.step.bind(mechanics), release = mechanics.release.bind(mechanics);
+    let entered, deliver, finishRelease;
+    const submitted = new Promise(resolve => {entered = resolve;});
+    const reply = new Promise(resolve => {deliver = resolve;});
+    const released = new Promise(resolve => {finishRelease = resolve;});
+    mechanics.step = async (...args) => {
+        const frame = await advance(...args);
+        entered();
+        await reply;
+        return frame;
+    };
+    mechanics.release = async () => {await released;release();};
+    const f = await fixture({mechanics});f.drive(true);
+    const delay = f.host.delay(10);await submitted;
+    const observed = assert.rejects(delay, /stopped|disposed|cancelled/);
+    f.controller.abort();await observed;
+    assert.equal(f.host.cleanupComplete, false);
+    assert.ok(f.board.getPinStates().every(pin => pin.mode === 'input'), 'GPIO releases before the worker handoff');
+    assert.throws(() => f.board.claimExternalClock(), /clock|owner|owned/i);
+    assert.equal(f.coupled.snapshot().time, 0);
+    deliver();finishRelease();await f.host.whenDisposed();
+    assert.equal(f.host.cleanupComplete, true);
+    assert.equal(f.board.timeNs, 5n * MS, 'Stop does not complete the remaining BASIC delay');
+    assert.equal(f.coupled.snapshot().time, .005);
+    assert.equal(mechanics.steps.length, 1, 'release must not submit another mechanical step');
+    const motor = f.board.getDeviceState('motor');
+    assert.ok(Math.abs(motor.velocity - mechanics.snapshot().speeds.axle * Math.PI / 180) < 1e-12);
+    assert.equal(motor.externalShaft, undefined);
+    f.board.claimExternalClock().release();
+});
+
+test('a nonresponsive CAD release is bounded, reports failure and cannot publish a late frame', async () => {
+    const mechanics = inertia();let release;
+    mechanics.release = () => new Promise(resolve => {release = resolve;});
+    const f = await fixture({mechanics, cleanupTimeoutMs: 20});
+    f.drive(true);await f.host.delay(5);
+    const frame = f.coupled.snapshot();
+    f.host.dispose();
+    await assert.rejects(f.host.whenDisposed(), /Timed out releasing the CAD clock/);
+    assert.equal(f.host.cleanupComplete, true);
+    const owner = f.board.claimExternalClock();
+    owner.run(() => f.board.setPin('d8', 'pushpull', true));
+    release();await turn();
+    assert.deepEqual(f.coupled.snapshot(), frame);
+    assert.equal(owner.isActive(), true);
+    assert.ok(f.board.readAnalog('d8') > 4);
+    owner.release();
+});
+
+test('an invalid final CAD clock fails cleanup without copying impossible rotor feedback', async () => {
+    const mechanics = inertia(), snapshot = mechanics.snapshot;
+    mechanics.release = async () => {mechanics.snapshot = () => ({...snapshot(), time: 1, angles: {axle: 999}});};
+    const f = await fixture({mechanics});f.drive(true);await f.host.delay(5);
+    const frame = f.coupled.snapshot();f.host.dispose();
+    await assert.rejects(f.host.whenDisposed(), /released CAD clock returned an invalid simulation clock/);
+    assert.deepEqual(f.coupled.snapshot(), frame);
+    assert.equal(f.board.getDeviceState('motor').externalShaft, undefined);
+    f.board.claimExternalClock().release();
+});
+
+test('the editor retains its reservation and edit guard until the paused-world handoff finishes', async () => {
+    const oldStorage = globalThis.localStorage, oldCad = globalThis.__bwCad;
+    globalThis.localStorage = {getItem: key => key === 'bw-cad-circuit-bindings' ? JSON.stringify(connections) : null};
+    globalThis.__bwCad = {editor: {session: {state: {document: {id: 'rotor'}}}}};
+    const board = motorBoard(), mechanics = inertia(), runtime = new EventEmitter();
+    let release;
+    mechanics.releasePaused = () => new Promise(resolve => {release = resolve;});
+    const originalSave = () => 'saved';
+    Object.assign(runtime, {circuitBoard: board, threads: [], circuitModel: {board, netlistError: null, _saveHistory: originalSave},
+        cadSimulation: {acquireExternalClock: async () => mechanics}});
+    const eventTarget = new EventTarget(), controller = new AbortController();let released = 0;
+    eventTarget.addEventListener('bw-circuit-clock-owner', event => {
+        if (event.detail.board) event.detail.ready();else released++;
+    });
+    let session;
+    try {
+        session = await createCrispBasicCircuitSession({runtime, eventTarget, signal: controller.signal, cad: true});
+        const host = session.createHost({signal: controller.signal}, SimulationError);
+        await host.delay(5);
+        controller.abort();
+        assert.ok(runtime.bwCrispBasicSimulation, 'another run cannot acquire the board during release');
+        assert.equal(released, 0);
+        assert.throws(() => runtime.circuitModel._saveHistory(), /cleanup has finished/);
+        release();await session.whenDisposed();
+        assert.equal(session.cleanupComplete, true);
+        assert.equal(runtime.bwCrispBasicSimulation, undefined);
+        assert.equal(released, 1);
+        assert.equal(runtime.circuitModel._saveHistory, originalSave);
+        assert.equal(runtime.circuitModel._saveHistory(), 'saved');
+    } finally {
+        release?.();await session?.whenDisposed();
         if (oldStorage === undefined) delete globalThis.localStorage;else globalThis.localStorage = oldStorage;
         if (oldCad === undefined) delete globalThis.__bwCad;else globalThis.__bwCad = oldCad;
     }

@@ -19,7 +19,10 @@ const acquire = (action, signal) => new Promise((resolve, reject) => {
     try {
         Promise.resolve(action()).then(value => {
             if (!finish(resolve, value)) {
-                try {value?.release();} catch { /* Never affect a newer owner. */ }
+                try {
+                    const released = typeof value?.releasePaused === 'function' ? value.releasePaused() : value?.release();
+                    Promise.resolve(released).catch(() => {});
+                } catch { /* Never affect a newer owner. */ }
             }
         }, error => finish(reject, error));
     } catch (error) {finish(reject, error);}
@@ -28,7 +31,7 @@ const acquire = (action, signal) => new Promise((resolve, reject) => {
 export async function prepareCrispBasicCadClock({runtime, board, signal,
     connections = readConnections(),
     documentId = () => globalThis.__bwCad?.editor?.session.state.document.id,
-    onFrame = () => {}} = {}) {
+    onFrame = () => {}, cleanupTimeoutMs = 30000} = {}) {
     if (!(signal instanceof AbortSignal)) throw new TypeError('The CAD clock requires an AbortSignal');
     if (signal.aborted) throw stopped();
     const config = validateConnections(connections);
@@ -43,14 +46,30 @@ export async function prepareCrispBasicCadClock({runtime, board, signal,
         if (runtime.circuitBoard !== board) throw new Error('The Circuit changed while CAD was loading');
         if (documentId() !== config.cadDocumentId) throw new Error('These connections belong to a different CAD design');
     };
+    check();
     // No board or CAD reset: both retain their current physical state. Their
     // acquired origins can differ; only elapsed time belongs to this new run.
     const acquired = await acquire(() => runtime.cadSimulation.acquireExternalClock(), signal);
-    let released = false, coupled = null;
-    const release = () => {if (!released) {released = true;acquired?.release();}};
+    let released = false, releaseTask, coupled = null;
+    const rays = config.sensors.map(sensor => ({id: sensor.partId, ...sensor}));
+    const release = () => {
+        if (released) return releaseTask;
+        released = true;
+        const result = acquired.releasePaused(rays);
+        if (result && typeof result.then === 'function') {
+            let timer;
+            const deadline = new Promise((resolve, reject) => {
+                timer = setTimeout(() => reject(new Error('Timed out releasing the CAD clock')), cleanupTimeoutMs);
+            });
+            releaseTask = Promise.race([result, deadline]).finally(() => clearTimeout(timer));
+            releaseTask.catch(() => {});
+        } else releaseTask = result;
+        return releaseTask;
+    };
     try {
         check();
-        if (!acquired || ['snapshot', 'step', 'release'].some(name => typeof acquired[name] !== 'function')) {
+        if (!acquired || ['snapshot', 'step', 'release', 'releasePaused'].some(name => typeof acquired[name] !== 'function')) {
+            try {acquired?.release?.();} catch { /* Preserve the invalid-clock error. */ }
             throw new Error('The CAD Editor returned an invalid mechanical clock');
         }
         const mechanics = {
@@ -62,11 +81,11 @@ export async function prepareCrispBasicCadClock({runtime, board, signal,
             release
         };
         coupled = await createCoupledSession({board, mechanics, connections: config, signal,
-            clockMode: 'program', onFrame});
+            clockMode: 'program', onFrame, cleanupTimeoutMs});
         check();
         return coupled.programClock;
     } catch (error) {
-        try {if (coupled) coupled.stop();else release();} catch { /* Preserve the preparation error. */ }
+        try {if (coupled) await coupled.stop();else if (typeof acquired?.releasePaused === 'function') await release();} catch { /* Preserve the preparation error. */ }
         throw error;
     }
 }

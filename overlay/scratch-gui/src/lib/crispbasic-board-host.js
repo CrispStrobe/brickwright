@@ -57,6 +57,7 @@ export function createCrispBasicBoardHost({board, signal, SimulationError, clock
     let interfered = false, externalPowerChange = false;
     let lastTime = origin, solverSteps = 0, elapsedMs = 0, terminalFailure = null;
     let cleanupDone = false, cleanupFinished = false, disposalFailed = false, disposalFailure;
+    let cleanupTask = null;
     const capabilities = Object.freeze({
         schemaVersion: 1, backend: 'brickwright-board-simulation', hardware: false,
         basicBridge: false, circuitPhysics: true, digitalPins: true, digitalToggle: true,
@@ -172,8 +173,16 @@ export function createCrispBasicBoardHost({board, signal, SimulationError, clock
             // A user who has just turned the circuit off keeps that choice.
             if (board.powered && !externalPowerChange) attempt(() => lease.run(() => board.setPower(oldPower)));
         }
-        attempt(() => lease?.release());
-        cleanupFinished = true;
+        let released;
+        attempt(() => { released = lease?.release(); });
+        if (released && typeof released.then === 'function') {
+            cleanupTask = Promise.resolve(released).then(() => {
+                cleanupFinished = true;
+            }, error => {
+                cleanupFinished = true;
+                if (!disposalFailed) { disposalFailed = true; disposalFailure = error; }
+            });
+        } else cleanupFinished = true;
         if (disposalFailed) throw disposalFailure;
     };
     const abort = () => { try { dispose(); } catch { /* The parent invokes dispose too; no deferred effect may survive. */ } };
@@ -203,6 +212,15 @@ export function createCrispBasicBoardHost({board, signal, SimulationError, clock
         // must wait until all synchronous pin/clock cleanup has unwound;
         // dispose() still reports any retained failure after completion.
         get cleanupComplete() { return cleanupFinished; },
+        // The WASM host contract deliberately requires synchronous dispose().
+        // GPIO is released in that call; the GUI separately awaits CAD's paused
+        // worker and keeps the shared Circuit reserved until it has settled.
+        async whenDisposed() {
+            if (internal) await Promise.resolve();
+            try {dispose();} catch { /* Report it after the clock settles too. */ }
+            await cleanupTask;
+            if (disposalFailed) throw disposalFailure;
+        },
         capabilities,
         get trace() { return Object.freeze(trace.slice()); },
         get solverSteps() { return solverSteps; },

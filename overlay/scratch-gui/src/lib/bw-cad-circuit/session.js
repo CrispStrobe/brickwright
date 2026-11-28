@@ -7,8 +7,9 @@ export const COUPLING_STEP_NS = 5000000n;
 const TAU = Math.PI * 2;
 const motorKinds = new Set(['dc_motor', 'gearmotor', 'dc_motor_encoder']);
 const finite = (value, min, max) => Number.isFinite(value) && value >= min && value <= max;
-export async function createCoupledSession({board, mechanics, connections, firmware = null, onFrame = () => {}, onError = () => {}, signal, clockMode = 'cad'}) {
+export async function createCoupledSession({board, mechanics, connections, firmware = null, onFrame = () => {}, onError = () => {}, signal, clockMode = 'cad', cleanupTimeoutMs = 30000}) {
     if (!['cad', 'program'].includes(clockMode)) throw new Error('Unsupported coupled clock mode');
+    if (!Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 60000) throw new TypeError('Invalid CAD cleanup timeout');
     const programDriven = clockMode === 'program';
     if (programDriven && firmware) throw new Error('A program clock cannot also run controller firmware');
     const config = validateConnections(connections);
@@ -33,6 +34,7 @@ export async function createCoupledSession({board, mechanics, connections, firmw
     });
     const releases = []; let lease, stopped = false, generation = 0, pending = Promise.resolve(), budgetMs = 0, frame = mechanics.snapshot(), failed = null;
     let completedSteps = 0, programStepPending = false, stopError = null, cancelStep = null;
+    let stopTask = null, cleanupComplete = false;
     const nextBoundary = () => boardOrigin + BigInt(completedSteps + 1) * COUPLING_STEP_NS;
     // Intermediate control samples omit body poses. Public snapshots always keep
     // the most recent complete frame, including while a worker reply is pending.
@@ -63,20 +65,63 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         for(const sensor of config.sensors){if(!Object.hasOwn(frame.distances || {},sensor.partId))throw new Error('A CAD distance measurement is missing');sensorPorts.get(sensor.partId).sample(frame.distances[sensor.partId]);}
     };
     const stop = () => {
-        if (stopped) {if (stopError) throw stopError;return;} stopped = true; generation++;
+        if (stopped) {if (stopError) throw stopError;return stopTask;} stopped = true; generation++;
         cancelStep?.();
-        const clean = action => {try {action();} catch (error) {if (!stopError) stopError = error;}};
+        const clean = action => {try {return action();} catch (error) {if (!stopError) stopError = error;}};
         const ownsBoard=lease?.isActive() === true;
         // BASIC's host releases its own pins and restores the acquired power
         // state. Preserve the last completed mechanical pose and velocity;
         // stopping must not fabricate an extra physics step or brake a rotor.
         if(ownsBoard && !programDriven)for (const drive of drives) {try {const position=sample(drive,frame);board.setMechanicalShaftState(drive.partId,{angleRad:position.angleRad,velocityRadS:0});} catch { /* A board reset may already have released the shaft. */ }}
-        releases.reverse().forEach(release => clean(release));
-        clean(() => lease?.release());clean(() => mechanics.release());
-        if(ownsBoard && !programDriven) {
-            clean(() => {for (const pin of board.getPinStates()) if (!['input','input-pullup'].includes(pin.mode)) board.setPin(pin.pin,'input',false);});
-            clean(() => board.setPower(false));
+        const finish = () => {
+            if (cleanupComplete) return;
+            releases.reverse().forEach(release => clean(release));
+            clean(() => lease?.release());
+            if(ownsBoard && !programDriven) {
+                clean(() => {for (const pin of board.getPinStates()) if (!['input','input-pullup'].includes(pin.mode)) board.setPin(pin.pin,'input',false);});
+                clean(() => board.setPower(false));
+            }
+            cleanupComplete = true;
+            if (stopError) throw stopError;
+        };
+        const reconcile = () => {
+            // Stop can arrive after actuator-step was submitted. Its electrical
+            // interval was already solved, so accept exactly that worker result
+            // before detaching the shaft. Never run a new step or write into a
+            // replacement board. A partial (<5 ms) interval stays unrounded.
+            if (!programDriven || stopError || !lease?.isActive() || board.parts !== originalParts || board.nets !== originalNets) return;
+            const next = mechanics.snapshot();
+            const elapsed = Number(board.timeNs - boardOrigin) / 1e9;
+            if (!next || !Number.isFinite(next.time) || next.time < frame.time - 1e-9 || next.time > mechanicalOrigin + elapsed + 1e-9 ||
+                Math.abs((next.time - mechanicalOrigin) / .005 - Math.round((next.time - mechanicalOrigin) / .005)) > 1e-7) {
+                throw new Error('The released CAD clock returned an invalid simulation clock');
+            }
+            const updates = drives.map(drive => sample(drive,next));
+            validateFeedback(next);
+            lease.run(() => {
+                for (const {partId, angleRad, velocityRadS} of updates) board.setMechanicalShaftState(partId,{angleRad,velocityRadS});
+                frame = fullFrame = next;
+                for (let index = 0; index < drives.length; index++) drives[index].rotor = updates[index];
+                publish();
+            });
+            onFrame(fullFrame);
+        };
+        const released = clean(() => mechanics.release());
+        if (released && typeof released.then === 'function') {
+            let timer;
+            const deadline = new Promise((resolve, reject) => {
+                timer = setTimeout(() => reject(new Error('Timed out releasing the CAD clock')), cleanupTimeoutMs);
+            });
+            stopTask = Promise.race([released, deadline]).then(() => clean(reconcile), error => {
+                if (!stopError) stopError = error;
+            }).then(() => {clearTimeout(timer);finish();});
+            // Stop is also called by abort listeners. The awaiting owner still
+            // receives this rejection; EventTarget must never see an unhandled one.
+            stopTask.catch(() => {});
+            return stopTask;
         }
+        clean(reconcile);
+        finish();
         if (stopError) throw stopError;
     };
     // The session is not returned to its caller until initial sensing finishes.
@@ -118,7 +163,7 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         if(rays.length)frame=fullFrame=await senseInitial();
         if (signal?.aborted) throw new Error('Coupled simulation was stopped');
         publish();
-    } catch (error) { try {stop();} catch { /* Keep the preparation failure. */ } throw error; }
+    } catch (error) { try {await stop();} catch { /* Keep the preparation failure. */ } throw error; }
     const programReply = action => new Promise((resolve, reject) => {
         let settled = false;
         const finish = (callback, value) => {
@@ -182,6 +227,8 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         run: action => lease.run(action),
         isActive: () => !stopped && lease.isActive(),
         release: stop,
+        get cleanupComplete() {return cleanupComplete;},
+        whenReleased: () => stopTask || Promise.resolve(),
         get nextBoundaryNs() {return nextBoundary();},
         get timeMs() {return (frame.time - mechanicalOrigin) * 1000;},
         async completeStep(runBoard) {
