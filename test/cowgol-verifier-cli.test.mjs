@@ -33,10 +33,25 @@ test('Cowgol verifier CLIs handle help and reject invalid input before machine l
     const board = join(dir, 'absent-board');
     let casesRun = 0;
     const run = (script, args) => {
-        const result = spawnSync(process.execPath, [resolve(ROOT, script), '--board', board, ...args], {
+        const options = {
             cwd: dir, encoding: 'utf8', timeout: 10_000,
             env: {...process.env, COWGOL_BW_BOARD: board}
-        });
+        };
+        // Keep the real Node entry points explicit for the bounded gate census.
+        let result;
+        switch (script) {
+        case 'scripts/verify-cowgol-cpm-system.mjs':
+            result = spawnSync(process.execPath, [resolve(ROOT, 'scripts/verify-cowgol-cpm-system.mjs'), '--board', board, ...args], options);
+            break;
+        case 'scripts/verify-cowgol-dos.mjs':
+            result = spawnSync(process.execPath, [resolve(ROOT, 'scripts/verify-cowgol-dos.mjs'), '--board', board, ...args], options);
+            break;
+        case 'scripts/verify-cowgol-dos-disk.mjs':
+            result = spawnSync(process.execPath, [resolve(ROOT, 'scripts/verify-cowgol-dos-disk.mjs'), '--board', board, ...args], options);
+            break;
+        default:
+            assert.fail('Unregistered Cowgol verifier: ' + script);
+        }
         assert.equal(result.error, undefined, script + ': subprocess must complete');
         assert.equal(result.signal, null, script + ': subprocess must not be killed');
         casesRun++;
