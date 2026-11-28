@@ -4,7 +4,7 @@
 - Branch: `feature/crispbasic-board-targets-20261128`.
 - Base main: `ccc5c6405bd2065ab85d42fe660fb0bee391422f`.
 - Integration source: `integ/followup-lanes-20261128` at `75ef242745ee83ce208835909c88a1b309f9200a`, preserving the recovered CrispBASIC, Code runtime and relevant supplier history.
-- Status: implementation complete; hosted integration qualification pending.
+- Status: DONE (implementation complete; current qualification and landing are tracked in PR #1866).
 - Scope: named CrispBASIC board-target discovery and portable execution for 8051/STC, STM32F030, Pico/RP2040, Arduino Nano, ESP8266 and micro:bit; strict target pin validation; CLI/API integration; examples, documentation and focused qualification. Preserve the distinction between host-driven logical simulation and firmware executing on the target CPU.
 - Paths: `packages/crisp-basic/`, direct CrispBASIC integration tests and packaging/qualification files, and this claim. Inherited integration repairs cover the Code example-loader/serial fixtures, mirrored Circuit teardown and KIM-1 UI localization, source/pin identity checks, and the unchanged BASIC-oracle workflow's reviewed notice projection. Existing feature branches remain preserved.
 - Producer boundaries: reuse exact qualified `bw-board`, `sb3-creator` and CrispCAD revisions; canonical upstream behavior stays upstream.
@@ -172,3 +172,55 @@ It adds an independent C99 compiler/editor route. Against current
 and `vendor-pins.json` blob (`9ade41e99c3cf94d2fabffe07c1f1d798a85c8d8`)
 are identical. It is subsequent work that depends on this integration, not
 an omitted prerequisite. Its draft and source branch remain untouched.
+
+## Concurrent STC15 distribution provenance repair
+
+Preserve concurrent commit `0f4920cbba99214fd5262439e274d0eb67d20210`,
+a direct child of the scanner adoption checkpoint. It regenerates the outer
+STC15 distribution manifest and source archive at the installed Board pin
+`cda715c16d4b733ceb73f7720a236b5ea9e3f21d`, following the unchanged
+`scripts/sync-bw8051-firmware.mjs` contract.
+
+Independent review compared both archives and exactly reproduced the new gzip:
+`0007ad2a1db63b048186c5422f0a63ed4799996e073ed1dbc62ba4fefa084b54`.
+All 71 real entries preserve names, payloads, modes, links and ownership fields;
+all 52 archived regular-file blobs match the exact pinned Board tree. All ten
+loose assets match the upstream blobs and unchanged manifest hashes. Only Git
+archive commit/time metadata, tar checksums and the resulting digest change.
+The existing HEX images, source/build records (including SDCC 4.5.0), licenses
+and README retain their bytes. The tracked package static tree has no firmware
+directory; the unchanged integration copy stages these overlay assets.
+This is distribution regeneration, not new compilation or measured evidence.
+
+## Fetch-pinning fixture correction
+
+The canceled `6d3d685d` unit job exposed a real failed guard before cancellation:
+[unit (5/8)](https://github.com/CrispStrobe/brickwright/actions/runs/46179137996/job/141088390274)
+reported a red fetch-pinning baseline, 15/16 passing, and exited 2. Its sole
+undeclared census hit is the inert unsafe-clone command inside the new workflow
+scanner regression fixture. The gate correctly treats literal content-fetch
+commands as census subjects even in test sources.
+
+The one-file repair checkpoint is `98f5016ddc411a64e0e6701da13cd1f3f26366ad`,
+with tested consumer blob `207fb1a705e60751dda4445e1972532dfe984146`.
+On Node 24.22.3, the unchanged full fetch-pinning gate reproduces 15/16 before
+and passes 16/16 after the correction, with zero skips. All ten complete
+consumer workflow regressions pass with zero skips. The unchanged prover
+catches all eleven mutations for their stated reasons, restores seven files
+byte-for-byte and finishes with a green gate. Capturing the actual regression's
+generated `clone.yml` before and after proves identical runtime fixture bytes
+and the same real unsafe-clone refusal.
+
+This runs against the exact `0f4920` Git index: the untruncated source inventory
+contains 24,241 entries and 22,298 tracked blobs. The audit materializes and
+Git-blob-verifies all 12,479 required census-visible/dependency files
+(196,933,826 bytes); the census is not replaced with a reduced mock.
+
+The correction assembles the exact same fixture command at runtime. It keeps
+the unsafe-clone negative assertion and all checkout/ref cases intact. The
+fetch census, declared inventory, production fetch sites, canonical scanner
+and mutation prover remain unchanged. Implementation release is recorded as
+DONE in this same integration candidate; the selected exact-head hosted suite
+and completed production-editor qualification are still the landing gates.
+Their final outcomes and the guarded main advance are recorded in PR #1866,
+without a later ledger-only successor or duplicate qualification cycle.

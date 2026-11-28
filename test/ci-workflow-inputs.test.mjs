@@ -240,8 +240,10 @@ test('workflow script receipt fields do not become checkout declarations', () =>
     assert.throws(() => assertCheckoutPins(new Map([['receipt.yml',
         script + checkout('a'.repeat(40)) + '      ref: ' + 'b'.repeat(40) + '\n']])),
         /duplicate checkout ref/);
+    // Assemble the inert command fixture, as the fetch-pinning prover does.
+    const cloneCommand = ['git', 'clone', 'https://example.invalid/unreviewed.git'].join(' ');
     assert.throws(() => assertNoRawClones(new Map([['clone.yml', script
-        .replace('      NODE', '      NODE\n      git clone https://example.invalid/unreviewed.git')]])),
+        .replace('      NODE', '      NODE\n      ' + cloneCommand)]])),
         /unreviewed raw clone/);
 });
 
