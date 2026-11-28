@@ -1,3 +1,4 @@
+import {aceKimMedia} from './ace-kim-library.js';
 import {makeT} from '../bw-i18n.js';
 import {activateConfig, defaultImageFetcher} from './activate.js';
 import {fromMediaManifest} from './importers.js';
@@ -55,6 +56,7 @@ export const libraryMedia = [
         infoKey: 'ubasic',
         code: {language: 'basic', path: 'samples/demo.bas', dosSourceName: 'PROG.BAS'}},
     ...ackSamples,
+    aceKimMedia,
     ...[
         ['ram-check', 'KIM-4 RAM Check', '8170c7f0a8af2b7988bd4d3b176efcca2decd020ace6d900d7d961b24239dfea'],
         ['video', 'K-1008 Checkerboard', 'bd193b042c262ef7379b5a99178d8b8575808b75baa0e17f001c85d6d3b79ddf'],

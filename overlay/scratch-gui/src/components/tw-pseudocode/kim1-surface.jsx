@@ -26,7 +26,7 @@ export default function Kim1Surface({vm, partId, variant, locale, Editor}) {
     const control = detail => window.dispatchEvent(new CustomEvent('bw-kim1-control', {
         detail: {board, partId, ...detail}
     }));
-    return <Kim1Panel board={board} part={part} lang={locale} variant={variant} Editor={Editor}
+    return <Kim1Panel board={board} part={part} lang={locale} variant={variant} showAceKim={false} Editor={Editor}
         onProgramChange={(id, program) => control({program})}
         onRunClock={() => control({run: true})} />;
 }

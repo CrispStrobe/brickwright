@@ -1,3 +1,4 @@
+import {addAceKimFace} from '../../lib/controller-machine-faces.js';
 import '../../lib/bw-color-mode.css';
 import classNames from 'classnames';
 import omit from 'lodash.omit';
@@ -563,11 +564,12 @@ const GUIComponent = props => {
     const controllerPanel = controllerPanelRef.current;
     const [machineConsole, setMachineConsole] = React.useState(null);
     const [machineTerminal, setMachineTerminal] = React.useState(null);
-    const cpmTerminal = React.useRef(null);
+    const [aceKimMachine, setAceKimMachine] = React.useState(null);
+    const ownedControllerSession = React.useRef(null);
     React.useEffect(() => {
         const stop = () => {
-            cpmTerminal.current?.();
-            cpmTerminal.current = null;
+            ownedControllerSession.current?.();
+            ownedControllerSession.current = null;
         };
         const events = ['bw-stop-all', 'bw-cp1-stop-request', 'bw-cardiac-stop-request',
             'bw-machine-media-load', 'bw-machine-extracted', 'bw-start-journey'];
@@ -1036,13 +1038,28 @@ const GUIComponent = props => {
                     props.vm.stopAll();
                     window.bwStopMachineVideo?.();
                     const unmirror = window.bwMirrorMachineTerminal(session, true);
-                    cpmTerminal.current = () => {
+                    ownedControllerSession.current = () => {
                         session.dispose();
                         unmirror();
                     };
                     window.dispatchEvent(new CustomEvent('bw-settings-change',
                         {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
                     session.start();
+                }}
+                onRunAceKim={machine => {
+                    props.vm.stopAll();
+                    window.bwStopMachineVideo?.();
+                    setAceKimMachine(machine);
+                    ownedControllerSession.current = () => setAceKimMachine(null);
+                    addAceKimFace(controllerPanel);
+                    controllerPanel.setMode('play');
+                    window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                        detail: {data: serializeControllerPanel(controllerPanel)}
+                    }));
+                    window.dispatchEvent(new CustomEvent('bw-settings-change',
+                        {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
+                    window.dispatchEvent(new CustomEvent('bw-settings-change',
+                        {detail: {key: 'bw-debug-dock', value: 'controller'}}));
                 }}
                 wiredPresets={showMachines.presets}
                 onOpenExample={(exampleId, codeOnly, options) => new Promise((resolve, reject) => {
@@ -1559,6 +1576,7 @@ const GUIComponent = props => {
                                             vm={vm}
                                             machineConsole={machineConsole}
                                             machineTerminal={machineTerminal}
+                                            aceKimMachine={aceKimMachine}
                                             sendBasicLine={vm?.runtime?.bwBasicSerial}
                                             cp1WidgetSlot={cp1Attached ? setCp1ControllerSlot : undefined}
                                             cardiacWidgetSlot={cardiacAttached ? setCardiacControllerSlot : undefined}

@@ -4,6 +4,7 @@ export const MACHINE_WIDGET_HEIGHT = 416;
 export const hasCardiacFace = panel => panel.getWidgets().some(isCardiacFace);
 export const isCardiacFace = widget => widget.type === 'machine' && widget.config.face === CARDIAC_FACE;
 
+export const isAceKimFace = widget => widget.type === 'machine' && widget.config.face === 'ace-kim';
 export const isKim1VideoFace = widget => widget.type === 'machine' && widget.config.face === 'kim1-video';
 export const isKim1Face = widget => widget.type === 'machine' && widget.config.face === 'kim1';
 
@@ -19,6 +20,7 @@ function addMachineFace(panel, face, label, partId, height = MACHINE_WIDGET_HEIG
 }
 
 export const addCardiacFace = panel => addMachineFace(panel, CARDIAC_FACE, 'CARDIAC');
+export const addAceKimFace = panel => addMachineFace(panel, 'ace-kim', 'ACE KIM', undefined, 310);
 export const addKim1Face = (panel, partId) => addMachineFace(panel, 'kim1', 'KIM-1', partId);
 
 export const addKim1VideoFace = (panel, partId) => addMachineFace(panel, 'kim1-video', 'K-1008', partId, 300);

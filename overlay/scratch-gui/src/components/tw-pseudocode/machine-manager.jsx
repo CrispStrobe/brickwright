@@ -29,6 +29,7 @@ import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-mac
 import {
     libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readKim1LibraryTape, readLibraryCode, readMediaManifest
 } from '../../lib/bw-machines/library-media.js';
+import {aceKimLicenses, createLibraryAceKim} from '../../lib/bw-machines/ace-kim-library.js';
 import {kim1CpmProfiles, readKim1CpmArchive, createKim1CpmTerminal} from '../../lib/bw-machines/kim1-cpm65.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
@@ -138,7 +139,7 @@ function MachineEntry({title, info, infoPrefix, actions, children, rowAttributes
     );
 }
 
-export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample, onRunKim1Cpm}) {
+export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample, onRunKim1Cpm, onRunAceKim}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
     // viewport, which this app floors at 1024px wide — so on a 430pt phone the
     // modal centred at x=512 and its buttons sat off the side of the screen.
@@ -169,8 +170,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [circuits, setCircuits] = React.useState(null);
     const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
     const [cpmFile, setCpmFile] = React.useState(null);
-    const cpmRequest = React.useRef(null);
-    React.useEffect(() => () => { cpmRequest.current = null; }, []);
+    const controllerRequest = React.useRef(null);
+    React.useEffect(() => () => { controllerRequest.current = null; }, []);
     const [launching, setLaunching] = React.useState(null);
     const [status, setStatus] = React.useState('');
     const [text, setText] = React.useState('');
@@ -205,7 +206,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const closeManager = event => {
         invalidateDosPackage();
-        cpmRequest.current = null;
+        controllerRequest.current = null;
         if (onClose) onClose(event);
     };
     const run = async (cfg, opts) => {
@@ -533,16 +534,27 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             rowAttributes={{'data-machine-media': item.id}}
                                             info={<>
                                                 {item.summary && <div>{item.summary}</div>}
-                                                {item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
+                                                {item.aceKim ? aceKimLicenses.map(({label, url}) => <div key={label}>
+                                                    <a href={url} target="_blank" rel="noopener noreferrer">{label} · MIT</a>
+                                                </div>) : item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
                                                     {item.license}
                                                 </a> : (/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`)}
                                             </>}
                                             actions={
-                                                <button type="button" disabled={launching !== null || (item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun)} style={btn}
+                                                <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
+                                                        item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun)} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
                                                                 {detail: {run: item.benchmark}}));
+                                                            return true;
+                                                        }
+                                                        if (item.aceKim) {
+                                                            const request = {};
+                                                            controllerRequest.current = request;
+                                                            const machine = await createLibraryAceKim();
+                                                            if (controllerRequest.current !== request) return false;
+                                                            onRunAceKim(machine);
                                                             return true;
                                                         }
                                                         if (item.kim1Tape) {
@@ -575,11 +587,11 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             <button type="button" style={btn} disabled={launching !== null || !cpmFile}
                                                 onClick={() => launch('kim1-cpm65', async () => {
                                                     const request = {};
-                                                    cpmRequest.current = request;
+                                                    controllerRequest.current = request;
                                                     const media = await readKim1CpmArchive(cpmProfile.id, cpmFile);
-                                                    if (cpmRequest.current !== request) return false;
+                                                    if (controllerRequest.current !== request) return false;
                                                     const session = await createKim1CpmTerminal(media);
-                                                    if (cpmRequest.current !== request) {
+                                                    if (controllerRequest.current !== request) {
                                                         session.dispose();
                                                         return false;
                                                     }
