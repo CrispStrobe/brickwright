@@ -1,0 +1,1560 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-28T19:52:29.110439+00:00",
+  "repository": "CrispStrobe/crispbasic",
+  "checkoutAtRecording": "70271ea77d0a4a8446c63e83bcd92ddc22669d2a",
+  "kind": "fresh-local-bundler-and-wasm-validation",
+  "compiler": "Debian GCC 14.2.0-19; Emscripten 3.1.64 a1fe3902bf73a3802eae0357d273d0e37ea79898",
+  "sourceInputs": [
+    {
+      "path": "scripts/build-sdl-native.mjs",
+      "sha256": "09415f9bfa4839b067d177f2a5f127be3bfd51339cd25455923e61d7ccb19010"
+    },
+    {
+      "path": "scripts/build-sdl-web.mjs",
+      "sha256": "9fe7e72b744ef4af464a96ee978f11837ec00ccf725a1af86097d6ded124652c"
+    },
+    {
+      "path": "scripts/run-sdl-native.mjs",
+      "sha256": "0acc6542e2b347c7c8354a3e97519579081b64bea23bed0261631f6bcde27a50"
+    },
+    {
+      "path": "scripts/test-sdl-web-browser.mjs",
+      "sha256": "86b28cf83b8a2cdcd09f18321c41db26ddbd8c63c3a26c7a7c5afb348cd7fa5a"
+    },
+    {
+      "path": "sdl/upstream.lock.json",
+      "sha256": "1fffc5b5ba1f10479cb22b060e3c1a0dadab6ad7020585c24c466c4cfb39a21d"
+    },
+    {
+      "path": "sdl/patch-upstream.mjs",
+      "sha256": "69d3f9fc5a5b377fcb04ea1a06c7414ffbacc11c0cffbd5e61c04b0f7bad4642"
+    },
+    {
+      "path": "sdl/patch-web.mjs",
+      "sha256": "64c99eba5c22fbc0890bbd5ce52155c10507f4a367330e02c8aba62441a190a8"
+    },
+    {
+      "path": "sdl/source-loader.h",
+      "sha256": "107d4fe193830d0ace10cbe6e09fc62533e44b6352ee9d00b89cd4fc02a4cda3"
+    },
+    {
+      "path": "sdl/launcher.c",
+      "sha256": "ab54cee8c620286e480b48a994b197ee4ac12b7c6af6757a46328a01fe149c71"
+    },
+    {
+      "path": "sdl/web-host.c",
+      "sha256": "82fdd63f9422c8f6773dbf0ed0965a0c7883a7412adee13d95a20bfe6c6a78ad"
+    },
+    {
+      "path": "src/bundle.mjs",
+      "sha256": "7272280ad02de159c93e12b371225a210314088f510c7044f64fe59a07fa201d"
+    },
+    {
+      "path": "src/bundle-sdl.mjs",
+      "sha256": "18805772e641e29b82e82cfbe98b78e2747173d89e054bf045713a59221ab68d"
+    },
+    {
+      "path": "src/bundle-sdl-web.mjs",
+      "sha256": "d01de75e00b3cf0debab697369c66430a09e20c0cae322f9fdd3afd409b0b761"
+    },
+    {
+      "path": "src/bundle-sdl-web-page.mjs",
+      "sha256": "19a85c65f650643106118f5ebdec01836321f588e95ed2aab3fc4a9975f214d0"
+    },
+    {
+      "path": "tests/bundle-sdl.test.mjs",
+      "sha256": "33f6b4b61f0b37d68690f52b19c8f4e57c755831dec05afb9c7a0a25def389e8"
+    },
+    {
+      "path": "tests/bundle-sdl-web.test.mjs",
+      "sha256": "873f5c3bd473775bea48b10b54277759b44e1701827e9ca8eae7580b797e9592"
+    },
+    {
+      "path": "scripts/build-wasm.mjs",
+      "sha256": "220052eacf1010a16e6f5250643cbd05952536c9929c495621199bfe88715ca8"
+    },
+    {
+      "path": "wasm/toolchain.lock.json",
+      "sha256": "dd32df49ba277e7f3a27705fa9ae830a28fd7bfb84bdefe8d5f1a0821bf9c2ef"
+    },
+    {
+      "path": "bin/crispbasic.mjs",
+      "sha256": "cf50f6be72a5dff0379105a44f83d6dced1a402222eb1f10ba027b33ab21f004"
+    },
+    {
+      "path": "src/bundle-cli.mjs",
+      "sha256": "087a0898df6ce51c863f3eb6171cdbda57a9043b3d3dc61e5ca8e4e2e73c00a7"
+    },
+    {
+      "path": "src/bundle-page.mjs",
+      "sha256": "fd0a68eec8874ec8e1b018cefcb070f1c7e8d0053c0e470d41fc346757c3dd53"
+    },
+    {
+      "path": "src/serve-bundle.mjs",
+      "sha256": "31e4aeb1e9067d5c4466aad432bbcac098b467c4386e64b83d7930e9f4005041"
+    },
+    {
+      "path": "src/source.mjs",
+      "sha256": "5b48812da607a53c7d1f540afb4563e8d597dcbe817e78926cfbd8405ab5ee61"
+    },
+    {
+      "path": "src/wasm-worker.mjs",
+      "sha256": "46ad82ccacec126ad17ab196f2a5aa2688031d33e29afb346ebb3dc1cd6f675c"
+    },
+    {
+      "path": "src/wasm-session.mjs",
+      "sha256": "fc44c87ccae6cfa7127533eecec4b1a6266f43bfc8665c2b00415b5da8b9baeb"
+    },
+    {
+      "path": "scripts/native-targets.mjs",
+      "sha256": "5c6abd8fbbcb9837554e0cd6a5df65bbaf6ceeff7378589ec6d6676665e49832"
+    },
+    {
+      "path": "tests/bundle.test.mjs",
+      "sha256": "61ca16539c98d1e05f8d45602a4c2d450aa3b19c38299d2cac96b97713b4e603"
+    },
+    {
+      "path": "tests/serve-bundle.test.mjs",
+      "sha256": "bb76ee019b0237d1d32b1676ef0f6ac2caf09321c61cec01de760a740e53d636"
+    },
+    {
+      "path": "scripts/test-browser.mjs",
+      "sha256": "e1760a20cd7d5a9a7fcd9a3599562cf633d7c462a42defcfef882b35d327372a"
+    },
+    {
+      "path": "scripts/test-bundle-browser.mjs",
+      "sha256": "171649fc755c33346fdbc5bab595f15d6da98625e3922d83a807e318b4c4da02"
+    }
+  ],
+  "native": [
+    {
+      "target": "linux-x64",
+      "execution": "native x86-64",
+      "videoDriver": "offscreen",
+      "renderer": "software",
+      "audioDriver": "dummy",
+      "buildReceipt": {
+        "schemaVersion": 1,
+        "format": "crispbasic-sdl-runtime",
+        "target": "linux-x64",
+        "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+        "profile": "bbcsdl-full-native",
+        "architecture": "x64",
+        "compiler": "gcc (Debian 14.2.0-19) 14.2.0",
+        "cpuRequirement": "x64",
+        "crossCompiled": false,
+        "launcher": {
+          "path": "launcher",
+          "sha256": "f5fc17676e69d3fc151e822dbfcdbcd8db5fe9a4b656d571b74980b7e4a66bba"
+        },
+        "files": [
+          {
+            "path": "bbcsdl",
+            "sha256": "ce850e2bc07918774f911e108a0fa0a70d41a08e5da0109fa403853923269ab7",
+            "bytes": 347504,
+            "executable": true
+          },
+          {
+            "path": "libstb.so",
+            "sha256": "a015ec498d74a1d50f932153c791f3a1bd6248af3dcc5c74011b10cfec2e061e",
+            "bytes": 133688,
+            "executable": false
+          },
+          {
+            "path": "libSDL2-2.0.so.0",
+            "sha256": "ee3ccdd9b5fead3ea6b55622df02b962ef7f0afd6dc193139e5b9c088f56a43f",
+            "bytes": 1996112,
+            "executable": false
+          },
+          {
+            "path": "libSDL2_ttf-2.0.so.0",
+            "sha256": "24b2e45ef1a95a6d70a5fcc8a6431b7d7529f157bece9ca7d6ecdf1a7a223ba6",
+            "bytes": 79720,
+            "executable": false
+          },
+          {
+            "path": "libSDL2_net-2.0.so.0",
+            "sha256": "b596d583581a5b29bfec69b3959d4009b676f1d4f1989381a99fb39a89dc02e9",
+            "bytes": 22368,
+            "executable": false
+          },
+          {
+            "path": "notices/BBCSDL-LICENSE.txt",
+            "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1",
+            "bytes": 891,
+            "executable": false
+          },
+          {
+            "path": "notices/CrispBASIC-LICENSE.txt",
+            "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
+            "bytes": 1520,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-dev.txt",
+            "sha256": "a7cfc1e6aa0cfba5121b3faead3e2d351028ec153bba6059065f670ad5944ad6",
+            "bytes": 26481,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-ttf-dev.txt",
+            "sha256": "5beabc12114e161d6686313f9cceae608ddb4ad539b16c38ea2c313d200b4c22",
+            "bytes": 3615,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-net-dev.txt",
+            "sha256": "50e8849ddcb560b3f2895dfed7fca60f427c4e5669feb6864c5766887a753e13",
+            "bytes": 1452,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/SDL2_gfxPrimitives_font.h",
+            "sha256": "563802eb958d1f5292c604388195aac033b10ffcec399f6dedf86b1cfb6690d8",
+            "bytes": 55904,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/stb_image.h",
+            "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c",
+            "bytes": 279537,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/dr_mp3.h",
+            "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83",
+            "bytes": 144339,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/SDL_stbimage.h",
+            "sha256": "1773e6ba734859b296e4da8f6f0781e5ea29c54491dce73296df5a9caf6f0168",
+            "bytes": 20943,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/SDL2_gfxPrimitives.c",
+            "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5",
+            "bytes": 139996,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/SDL2_rotozoom.c",
+            "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7",
+            "bytes": 42710,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/flood.c",
+            "sha256": "ad343be3fe530c4802e54923243fdc99fee45d34bbc51f42edfabac0b4e7dc8f",
+            "bytes": 17583,
+            "executable": false
+          }
+        ],
+        "systemDependencies": [
+          "Linux ELF loader and glibc compatible with the build toolchain",
+          "zlib",
+          "FreeType and HarfBuzz",
+          "SDL platform graphics/audio/input dependencies and drivers (as linked by the selected SDL build)"
+        ],
+        "excludedOptionalLibraries": [
+          "Box2D and application-specific shared libraries; include explicitly when required"
+        ],
+        "resourcePolicy": "Explicit application assets are relative to @dir$; additional runtime lib/ files may be included in the runtime pack"
+      },
+      "buildReceiptSha256": "fd2ce5f673f05811578ed52be46e8cc7ade79c8b01872b98925ede172f7a8e50",
+      "suite": {
+        "name": "Full SDL source/bundle byte parity",
+        "status": "passed",
+        "scope": "Actual interpreter and bundled executable execution including inline assembly/USR",
+        "counts": {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "log": "sdl-native-test.log",
+        "logSha256": "ed1b6aa2713d4b666f17df2e31abba5de0cc49de7fb2f2d86cab1490dbd5936a",
+        "sanitizedLog": "sdl-validation-logs/sdl-native-test.log",
+        "sanitizedLogSha256": "ed1b6aa2713d4b666f17df2e31abba5de0cc49de7fb2f2d86cab1490dbd5936a"
+      }
+    },
+    {
+      "target": "linux-arm64",
+      "execution": "QEMU 10.0.13 Cortex-A53",
+      "videoDriver": "dummy",
+      "renderer": "software",
+      "audioDriver": "dummy",
+      "buildReceipt": {
+        "schemaVersion": 1,
+        "format": "crispbasic-sdl-runtime",
+        "target": "linux-arm64",
+        "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+        "profile": "bbcsdl-full-native",
+        "architecture": "arm64",
+        "compiler": "aarch64-linux-gnu-gcc (Debian 14.2.0-19) 14.2.0",
+        "cpuRequirement": "arm64",
+        "crossCompiled": true,
+        "launcher": {
+          "path": "launcher",
+          "sha256": "c2f74053bf1d1bda905aab34d44ebb79dfe994fcea0b370c32c712d9cf60c7ba"
+        },
+        "files": [
+          {
+            "path": "bbcsdl",
+            "sha256": "68baf3493576e29bb009fa3713c117b1be3aedf58de13e3f241b25086c97669c",
+            "bytes": 439760,
+            "executable": true
+          },
+          {
+            "path": "libstb.so",
+            "sha256": "9b9fdb254610de830f70d7dfbc5bf5c261a6ec52cc110a6d858edc5bd13e74e7",
+            "bytes": 151208,
+            "executable": false
+          },
+          {
+            "path": "libSDL2-2.0.so.0",
+            "sha256": "6e4be9d6b75dc75e7ed44b61d681649e4fc0389182f50350f980ee8105bf62fa",
+            "bytes": 1995520,
+            "executable": false
+          },
+          {
+            "path": "libSDL2_ttf-2.0.so.0",
+            "sha256": "219b184b19d61d69cf53402d4a930507743947aae6f390ac8f5435a01cf436fc",
+            "bytes": 67448,
+            "executable": false
+          },
+          {
+            "path": "libSDL2_net-2.0.so.0",
+            "sha256": "2a72f358bf2481ae2d00a428b30aac8aca4e3ca6b16d1ae3974bc6f92c182962",
+            "bytes": 67440,
+            "executable": false
+          },
+          {
+            "path": "notices/BBCSDL-LICENSE.txt",
+            "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1",
+            "bytes": 891,
+            "executable": false
+          },
+          {
+            "path": "notices/CrispBASIC-LICENSE.txt",
+            "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
+            "bytes": 1520,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-dev.txt",
+            "sha256": "a7cfc1e6aa0cfba5121b3faead3e2d351028ec153bba6059065f670ad5944ad6",
+            "bytes": 26481,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-ttf-dev.txt",
+            "sha256": "5beabc12114e161d6686313f9cceae608ddb4ad539b16c38ea2c313d200b4c22",
+            "bytes": 3615,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-net-dev.txt",
+            "sha256": "50e8849ddcb560b3f2895dfed7fca60f427c4e5669feb6864c5766887a753e13",
+            "bytes": 1452,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/SDL2_gfxPrimitives_font.h",
+            "sha256": "563802eb958d1f5292c604388195aac033b10ffcec399f6dedf86b1cfb6690d8",
+            "bytes": 55904,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/stb_image.h",
+            "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c",
+            "bytes": 279537,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/dr_mp3.h",
+            "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83",
+            "bytes": 144339,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/SDL_stbimage.h",
+            "sha256": "1773e6ba734859b296e4da8f6f0781e5ea29c54491dce73296df5a9caf6f0168",
+            "bytes": 20943,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/SDL2_gfxPrimitives.c",
+            "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5",
+            "bytes": 139996,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/SDL2_rotozoom.c",
+            "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7",
+            "bytes": 42710,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/flood.c",
+            "sha256": "ad343be3fe530c4802e54923243fdc99fee45d34bbc51f42edfabac0b4e7dc8f",
+            "bytes": 17583,
+            "executable": false
+          }
+        ],
+        "systemDependencies": [
+          "Linux ELF loader and glibc compatible with the build toolchain",
+          "zlib",
+          "FreeType and HarfBuzz",
+          "SDL platform graphics/audio/input dependencies and drivers (as linked by the selected SDL build)"
+        ],
+        "excludedOptionalLibraries": [
+          "Box2D and application-specific shared libraries; include explicitly when required"
+        ],
+        "resourcePolicy": "Explicit application assets are relative to @dir$; additional runtime lib/ files may be included in the runtime pack"
+      },
+      "buildReceiptSha256": "7e8ef2d1af3f0c2186c31246464a35fb1fb3a0a500084679c5b2eeaca862f0ba",
+      "suite": {
+        "name": "Full SDL source/bundle byte parity",
+        "status": "passed",
+        "scope": "Actual interpreter and bundled executable execution including inline assembly/USR",
+        "counts": {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "log": "sdl-arm64-test.log",
+        "logSha256": "0f05d2dcbdb4db9be4956f704094a98a2b048b981c959a1578f85d8acf27ea50",
+        "sanitizedLog": "sdl-validation-logs/sdl-arm64-test.log",
+        "sanitizedLogSha256": "0f05d2dcbdb4db9be4956f704094a98a2b048b981c959a1578f85d8acf27ea50"
+      }
+    },
+    {
+      "target": "linux-armv7",
+      "execution": "QEMU 10.0.13 Cortex-A7",
+      "videoDriver": "dummy",
+      "renderer": "software",
+      "audioDriver": "dummy",
+      "buildReceipt": {
+        "schemaVersion": 1,
+        "format": "crispbasic-sdl-runtime",
+        "target": "linux-armv7",
+        "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+        "profile": "bbcsdl-full-native",
+        "architecture": "arm",
+        "compiler": "arm-linux-gnueabihf-gcc (Debian 14.2.0-19) 14.2.0",
+        "cpuRequirement": "ARMv7-A with NEON and hard-float ABI (upstream SDL audio mixer)",
+        "crossCompiled": true,
+        "launcher": {
+          "path": "launcher",
+          "sha256": "b49dd82ad5f7dd6e9f9908fb2a28af730a5b06b39d75465e73102ac5e9b98b83"
+        },
+        "files": [
+          {
+            "path": "bbcsdl",
+            "sha256": "3a9cf882555e7b06e565301a255e69bd1724729c2ab6e5071fdcc8e839c47ffe",
+            "bytes": 240044,
+            "executable": true
+          },
+          {
+            "path": "libstb.so",
+            "sha256": "5486ed0ccfa459aa5956a69a1f424b6338c66783e505d1064cdcec7dc58dfb18",
+            "bytes": 152500,
+            "executable": false
+          },
+          {
+            "path": "libSDL2-2.0.so.0",
+            "sha256": "c6d74d64017e281a2748f72ef81b31859d8fe81ae703bb2fb2f99f54aec04962",
+            "bytes": 1329104,
+            "executable": false
+          },
+          {
+            "path": "libSDL2_ttf-2.0.so.0",
+            "sha256": "db79993c7dda5f18af8c8fad572e5fe6932106f021b08797a07a1a3af7c3432f",
+            "bytes": 66832,
+            "executable": false
+          },
+          {
+            "path": "libSDL2_net-2.0.so.0",
+            "sha256": "761e83aebc122a81da84758530883d110000061a5f8a98eae8df30216c54c4b9",
+            "bytes": 13576,
+            "executable": false
+          },
+          {
+            "path": "notices/BBCSDL-LICENSE.txt",
+            "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1",
+            "bytes": 891,
+            "executable": false
+          },
+          {
+            "path": "notices/CrispBASIC-LICENSE.txt",
+            "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
+            "bytes": 1520,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-dev.txt",
+            "sha256": "a7cfc1e6aa0cfba5121b3faead3e2d351028ec153bba6059065f670ad5944ad6",
+            "bytes": 26481,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-ttf-dev.txt",
+            "sha256": "5beabc12114e161d6686313f9cceae608ddb4ad539b16c38ea2c313d200b4c22",
+            "bytes": 3615,
+            "executable": false
+          },
+          {
+            "path": "notices/libsdl2-net-dev.txt",
+            "sha256": "50e8849ddcb560b3f2895dfed7fca60f427c4e5669feb6864c5766887a753e13",
+            "bytes": 1452,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/SDL2_gfxPrimitives_font.h",
+            "sha256": "563802eb958d1f5292c604388195aac033b10ffcec399f6dedf86b1cfb6690d8",
+            "bytes": 55904,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/stb_image.h",
+            "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c",
+            "bytes": 279537,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/dr_mp3.h",
+            "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83",
+            "bytes": 144339,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/include/SDL_stbimage.h",
+            "sha256": "1773e6ba734859b296e4da8f6f0781e5ea29c54491dce73296df5a9caf6f0168",
+            "bytes": 20943,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/SDL2_gfxPrimitives.c",
+            "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5",
+            "bytes": 139996,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/SDL2_rotozoom.c",
+            "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7",
+            "bytes": 42710,
+            "executable": false
+          },
+          {
+            "path": "notices/upstream/src/flood.c",
+            "sha256": "ad343be3fe530c4802e54923243fdc99fee45d34bbc51f42edfabac0b4e7dc8f",
+            "bytes": 17583,
+            "executable": false
+          }
+        ],
+        "systemDependencies": [
+          "Linux ELF loader and glibc compatible with the build toolchain",
+          "zlib",
+          "FreeType and HarfBuzz",
+          "SDL platform graphics/audio/input dependencies and drivers (as linked by the selected SDL build)"
+        ],
+        "excludedOptionalLibraries": [
+          "Box2D and application-specific shared libraries; include explicitly when required"
+        ],
+        "resourcePolicy": "Explicit application assets are relative to @dir$; additional runtime lib/ files may be included in the runtime pack"
+      },
+      "buildReceiptSha256": "58f4aa540b38d0bfac3e4e95e5258f2b56f7209923cba2b4377a973c561d9b5d",
+      "suite": {
+        "name": "Full SDL source/bundle byte parity",
+        "status": "passed",
+        "scope": "Actual interpreter and bundled executable execution including inline ARM assembly/USR",
+        "counts": {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "log": "sdl-armv7-test.log",
+        "logSha256": "97ef4d43f74c3985c32ca5dce4cc5d5a94ec080225a9a130b93570d77537af60",
+        "sanitizedLog": "sdl-validation-logs/sdl-armv7-test.log",
+        "sanitizedLogSha256": "97ef4d43f74c3985c32ca5dce4cc5d5a94ec080225a9a130b93570d77537af60"
+      }
+    }
+  ],
+  "web": {
+    "build": "passed",
+    "buildReceipt": {
+      "schemaVersion": 1,
+      "hostABI": 1,
+      "format": "crispbasic-sdl-web-runtime",
+      "backend": "bbcsdl-sdl-wasm",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.64 (a1fe3902bf73a3802eae0357d273d0e37ea79898)",
+      "toolchain": {
+        "version": "3.1.64",
+        "commit": "a1fe3902bf73a3802eae0357d273d0e37ea79898",
+        "repository": "https://github.com/emscripten-core/emscripten",
+        "installerRepository": "https://github.com/emscripten-core/emsdk",
+        "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+        "notices": [
+          {
+            "source": "LICENSE",
+            "path": "wasm/licenses/EMSCRIPTEN-LICENSE.txt",
+            "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+          },
+          {
+            "source": "AUTHORS",
+            "path": "wasm/licenses/EMSCRIPTEN-AUTHORS.txt",
+            "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+          },
+          {
+            "source": "system/lib/libc/musl/COPYRIGHT",
+            "path": "wasm/licenses/MUSL-COPYRIGHT.txt",
+            "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+          },
+          {
+            "source": "system/lib/compiler-rt/LICENSE.TXT",
+            "path": "wasm/licenses/COMPILER-RT-LICENSE.txt",
+            "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+          },
+          {
+            "source": "license comments from system/lib/libc/musl/src/math and system/lib/dlmalloc.c",
+            "path": "wasm/licenses/LIBC-SOURCE-NOTICES.txt",
+            "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+          }
+        ]
+      },
+      "settings": [
+        "-O2",
+        "-pthread",
+        "-sUSE_SDL=2",
+        "-sUSE_SDL_TTF=2",
+        "-sUSE_SDL_NET=2",
+        "-Wno-pthreads-mem-growth",
+        "-sMODULARIZE=1",
+        "-sEXPORT_NAME=createCrispBasicSDL",
+        "-sENVIRONMENT=web,worker",
+        "-sPTHREAD_POOL_SIZE=2",
+        "-sALLOW_MEMORY_GROWTH=1",
+        "-sINITIAL_MEMORY=134217728",
+        "-sMAXIMUM_MEMORY=1073741824",
+        "-sSTACK_SIZE=5242880",
+        "-sASSERTIONS=1",
+        "-sEXPORTED_RUNTIME_METHODS=[\"FS\",\"ENV\",\"HEAPU8\",\"PThread\"]",
+        "-sEXPORTED_FUNCTIONS=[\"_main\",\"_crisp_sdl_output\",\"_crisp_sdl_output_length\",\"_crisp_sdl_output_overflow\",\"_crisp_sdl_finished\",\"_crisp_sdl_exit_code\",\"_crisp_sdl_startup_failed\",\"_crisp_sdl_write_key\",\"_crisp_sdl_stop\"]",
+        "-lidbfs.js"
+      ],
+      "memoryFlags": [
+        "-fno-delete-null-pointer-checks"
+      ],
+      "sourceInputs": [
+        {
+          "path": "src/bbmain.c",
+          "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+        },
+        {
+          "path": "src/bbexec.c",
+          "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+        },
+        {
+          "path": "src/bbeval.c",
+          "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+        },
+        {
+          "path": "src/bbcmos.c",
+          "sha256": "e5cf8f4009f0b62ffcf6370cc63947be9ebf10fa4ee5741ef7587d23ba68b406"
+        },
+        {
+          "path": "src/bbccli.c",
+          "sha256": "4e9d24dec62c616609dfbf41b85ab77659a22e8f941a63b3b4c710d248828fc2"
+        },
+        {
+          "path": "src/bbcvdu.c",
+          "sha256": "4104a4086ef65261e21bf9c2ad32d15547859dfa6d50c702ea2edd383c5cb085"
+        },
+        {
+          "path": "src/bbcvtx.c",
+          "sha256": "a75516e4c67152bba8bad5978eed3f2ef5e455b404da8d1997e56403229c089b"
+        },
+        {
+          "path": "src/flood.c",
+          "sha256": "ad343be3fe530c4802e54923243fdc99fee45d34bbc51f42edfabac0b4e7dc8f"
+        },
+        {
+          "path": "src/sort.c",
+          "sha256": "89c921df33df5455dcd46ce6e3afa1bb803897683fd0a5f5d1ae46afa51da105"
+        },
+        {
+          "path": "src/bbdata_wasm32.c",
+          "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+        },
+        {
+          "path": "src/bbcsdl.c",
+          "sha256": "70a852f1a4816eab8b120e9def7cfe40f89355ca62faa554f05cd92cf480ed13"
+        },
+        {
+          "path": "src/bbasmb_wasm32.c",
+          "sha256": "13753da062f9b39b4b81df13fdcea2f1594b091160df40b400237a3553d4b694"
+        },
+        {
+          "path": "src/SDL2_gfxPrimitives.c",
+          "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5"
+        },
+        {
+          "path": "src/SDL2_rotozoom.c",
+          "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7"
+        },
+        {
+          "path": "include/SDL2_gfxPrimitives.h",
+          "sha256": "9672af33715cd47a5c7bc6e5ff24df986dface43e11ad338eaf63f95342afedc"
+        },
+        {
+          "path": "include/SDL2_gfxPrimitives_font.h",
+          "sha256": "563802eb958d1f5292c604388195aac033b10ffcec399f6dedf86b1cfb6690d8"
+        },
+        {
+          "path": "include/SDL2_rotozoom.h",
+          "sha256": "a2e7e498bdf73142044476103c2da0f8ea78a31e877aed93e3dd7a65c18bf8db"
+        },
+        {
+          "path": "include/SDL_stbimage.h",
+          "sha256": "1773e6ba734859b296e4da8f6f0781e5ea29c54491dce73296df5a9caf6f0168"
+        },
+        {
+          "path": "include/stb_image.h",
+          "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c"
+        },
+        {
+          "path": "include/dr_mp3.h",
+          "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83"
+        },
+        {
+          "path": "include/version.h",
+          "sha256": "b92b5c623228270938a4a05ad0ca4051ad25adc883965e2228d3667d5d404b4d"
+        },
+        {
+          "path": "bin/wasm/BBC.h",
+          "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+        },
+        {
+          "path": "bin/wasm/bbcsdl.h",
+          "sha256": "ff4be4ddcc4d30f81f32827224bca450c217e8fe7f61eadd4777219807653e62"
+        },
+        {
+          "path": "licence.txt",
+          "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+        }
+      ],
+      "localSourceInputs": [
+        {
+          "path": "scripts/build-sdl-web.mjs",
+          "sha256": "9fe7e72b744ef4af464a96ee978f11837ec00ccf725a1af86097d6ded124652c"
+        },
+        {
+          "path": "sdl/upstream.lock.json",
+          "sha256": "1fffc5b5ba1f10479cb22b060e3c1a0dadab6ad7020585c24c466c4cfb39a21d"
+        },
+        {
+          "path": "sdl/patch-upstream.mjs",
+          "sha256": "69d3f9fc5a5b377fcb04ea1a06c7414ffbacc11c0cffbd5e61c04b0f7bad4642"
+        },
+        {
+          "path": "sdl/patch-web.mjs",
+          "sha256": "64c99eba5c22fbc0890bbd5ce52155c10507f4a367330e02c8aba62441a190a8"
+        },
+        {
+          "path": "sdl/source-loader.h",
+          "sha256": "107d4fe193830d0ace10cbe6e09fc62533e44b6352ee9d00b89cd4fc02a4cda3"
+        },
+        {
+          "path": "sdl/web-host.c",
+          "sha256": "82fdd63f9422c8f6773dbf0ed0965a0c7883a7412adee13d95a20bfe6c6a78ad"
+        }
+      ],
+      "module": "crispbasic-sdl.js",
+      "wasm": "crispbasic-sdl.wasm",
+      "files": [
+        {
+          "path": "crispbasic-sdl.js",
+          "bytes": 289254,
+          "sha256": "cb270b678844569e9a955b78014f0347b99cf286b2297a2246d1b5a04f65dd45"
+        },
+        {
+          "path": "crispbasic-sdl.wasm",
+          "bytes": 2199568,
+          "sha256": "8a1ef8e06b8a77b0c0125c53e68f16e1ec0ba62ea131f269ecde4156cf8e3876"
+        },
+        {
+          "path": "licenses/0-CrispBASIC.txt",
+          "bytes": 1520,
+          "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad"
+        },
+        {
+          "path": "licenses/1-BBCSDL.txt",
+          "bytes": 891,
+          "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+        },
+        {
+          "path": "licenses/2-EMSCRIPTEN-LICENSE.txt.txt",
+          "bytes": 5093,
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+        },
+        {
+          "path": "licenses/3-EMSCRIPTEN-AUTHORS.txt.txt",
+          "bytes": 28933,
+          "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+        },
+        {
+          "path": "licenses/4-MUSL-COPYRIGHT.txt.txt",
+          "bytes": 6204,
+          "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+        },
+        {
+          "path": "licenses/5-COMPILER-RT-LICENSE.txt.txt",
+          "bytes": 16708,
+          "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+        },
+        {
+          "path": "licenses/6-LIBC-SOURCE-NOTICES.txt.txt",
+          "bytes": 44123,
+          "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+        },
+        {
+          "path": "licenses/7-SDL2.txt",
+          "bytes": 884,
+          "sha256": "9928507f684c1965d07f2b6ef4b4723d5efc2f6b4ab731f743a413c51c319927"
+        },
+        {
+          "path": "licenses/8-SDL2_ttf.txt",
+          "bytes": 878,
+          "sha256": "1852c8549e3d154687197d46abababd3e8faae035f19991b2ca850fa3a43ad57"
+        },
+        {
+          "path": "licenses/9-SDL2_net.txt",
+          "bytes": 1003,
+          "sha256": "b235497af93fbcb56462dd4622af3c6ebac6e11cc83aa616a1d8327cb78efcbd"
+        },
+        {
+          "path": "licenses/10-FreeType.txt",
+          "bytes": 6741,
+          "sha256": "f4b133e25df1f86ad3ffea453aa0e613f0474f34778dbbb3e437e7b2724937d8"
+        },
+        {
+          "path": "licenses/11-HarfBuzz.txt",
+          "bytes": 1829,
+          "sha256": "4345e1735f8bc6d812fed5180cabb5a5e88a4109d332652f2a45c13cfa5ee692"
+        },
+        {
+          "path": "licenses/12-zlib.txt",
+          "bytes": 1002,
+          "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+        },
+        {
+          "path": "licenses/13-stb_image.h_source_notices.txt",
+          "bytes": 279537,
+          "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c"
+        },
+        {
+          "path": "licenses/14-dr_mp3.h_source_notices.txt",
+          "bytes": 144339,
+          "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83"
+        },
+        {
+          "path": "licenses/15-SDL2_gfxPrimitives.c_source_notices.txt",
+          "bytes": 139996,
+          "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5"
+        },
+        {
+          "path": "licenses/16-SDL2_rotozoom.c_source_notices.txt",
+          "bytes": 42710,
+          "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7"
+        }
+      ],
+      "notices": [
+        {
+          "name": "CrispBASIC",
+          "path": "licenses/0-CrispBASIC.txt"
+        },
+        {
+          "name": "BBCSDL",
+          "path": "licenses/1-BBCSDL.txt"
+        },
+        {
+          "name": "EMSCRIPTEN-LICENSE.txt",
+          "path": "licenses/2-EMSCRIPTEN-LICENSE.txt.txt"
+        },
+        {
+          "name": "EMSCRIPTEN-AUTHORS.txt",
+          "path": "licenses/3-EMSCRIPTEN-AUTHORS.txt.txt"
+        },
+        {
+          "name": "MUSL-COPYRIGHT.txt",
+          "path": "licenses/4-MUSL-COPYRIGHT.txt.txt"
+        },
+        {
+          "name": "COMPILER-RT-LICENSE.txt",
+          "path": "licenses/5-COMPILER-RT-LICENSE.txt.txt"
+        },
+        {
+          "name": "LIBC-SOURCE-NOTICES.txt",
+          "path": "licenses/6-LIBC-SOURCE-NOTICES.txt.txt"
+        },
+        {
+          "name": "SDL2",
+          "path": "licenses/7-SDL2.txt"
+        },
+        {
+          "name": "SDL2_ttf",
+          "path": "licenses/8-SDL2_ttf.txt"
+        },
+        {
+          "name": "SDL2_net",
+          "path": "licenses/9-SDL2_net.txt"
+        },
+        {
+          "name": "FreeType",
+          "path": "licenses/10-FreeType.txt"
+        },
+        {
+          "name": "HarfBuzz",
+          "path": "licenses/11-HarfBuzz.txt"
+        },
+        {
+          "name": "zlib",
+          "path": "licenses/12-zlib.txt"
+        },
+        {
+          "name": "stb_image.h source notices",
+          "path": "licenses/13-stb_image.h_source_notices.txt"
+        },
+        {
+          "name": "dr_mp3.h source notices",
+          "path": "licenses/14-dr_mp3.h_source_notices.txt"
+        },
+        {
+          "name": "SDL2_gfxPrimitives.c source notices",
+          "path": "licenses/15-SDL2_gfxPrimitives.c_source_notices.txt"
+        },
+        {
+          "name": "SDL2_rotozoom.c source notices",
+          "path": "licenses/16-SDL2_rotozoom.c_source_notices.txt"
+        }
+      ],
+      "assets": [],
+      "capabilities": {
+        "graphics": true,
+        "sound": true,
+        "filesystem": "browser-virtual",
+        "sys": "upstream-wasm-wrapper-table",
+        "assembler": false,
+        "box2d": false,
+        "sharedMemory": true,
+        "requiresCrossOriginIsolation": true
+      },
+      "limitations": [
+        "Upstream BBCSDL WebAssembly does not provide machine-code inline assembly, CALL or USR.",
+        "Box2D231.o is not in the pinned upstream source tree; its SYS export is unavailable and fails explicitly.",
+        "Operating system APIs and files are browser-local; native shared objects cannot be loaded.",
+        "Fonts, BASIC libraries and application data are explicit bundle assets."
+      ]
+    },
+    "buildReceiptSha256": "61207fb3f5f5629af1c3a82e28fb96bce69520ec7f3e25b3f3ba4f21f5aeab5d",
+    "packaging": {
+      "name": "Full SDL offline page packaging",
+      "status": "passed",
+      "scope": "Verified real build receipt, packaging and input refusals",
+      "counts": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": "sdl-web-packaging-test.log",
+      "logSha256": "8d31721960b2019e14679514de76198cfcf342b7677252b8a47cd88c35aa7244",
+      "sanitizedLog": "sdl-validation-logs/sdl-web-packaging-test.log",
+      "sanitizedLogSha256": "8d31721960b2019e14679514de76198cfcf342b7677252b8a47cd88c35aa7244"
+    },
+    "browser": {
+      "status": "blocked-before-page-execution",
+      "browser": "Debian Chromium 156.0.8078.79",
+      "reason": "Managed sandbox denies Chromium Unix socket creation: process_singleton_posix.cc:297 socket() failed: Operation not permitted (1)",
+      "suite": {
+        "name": "Full SDL browser parity",
+        "status": "blocked",
+        "scope": "No browser page or BASIC execution occurred; all failures came from before hook",
+        "counts": {
+          "tests": 13,
+          "pass": 0,
+          "fail": 13,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "log": "sdl-web-browser-test.log",
+        "logSha256": "adba9b77eff4841bf760f77b95a46bb041b4fbbcbd70bcf5661071f7cda34244",
+        "sanitizedLog": "sdl-validation-logs/sdl-web-browser-test.log",
+        "sanitizedLogSha256": "de84ff4c1a04e413ae9d25026ed9df84bf9958df137ece805ae311e3c3f04b28"
+      }
+    }
+  },
+  "headlessWasm": {
+    "build": "passed",
+    "buildReceiptSha256": "be18956e4d51754038da2308b393ac372d66d490bb67c7080f26bf4f2c5da6a9",
+    "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+    "wasmSha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2",
+    "execution": {
+      "name": "Headless WASM runtime",
+      "status": "passed",
+      "scope": "Actual interpreter lifecycle/policy/simulation/CLI/board target tests",
+      "counts": {
+        "tests": 188,
+        "pass": 188,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": "headless-wasm-test.log",
+      "logSha256": "68f73d87df72f70c4e11ff77bd776aba35daff4f545c9dff29966f842e016c73",
+      "sanitizedLog": "sdl-validation-logs/headless-wasm-test.log",
+      "sanitizedLogSha256": "68f73d87df72f70c4e11ff77bd776aba35daff4f545c9dff29966f842e016c73"
+    },
+    "browser": {
+      "name": "Headless browser worker/offline pages",
+      "status": "blocked",
+      "scope": "Blocked by same Chromium Unix-socket startup refusal; no actual page execution",
+      "counts": {
+        "tests": 30,
+        "pass": 0,
+        "fail": 30,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": "headless-browser-test.log",
+      "logSha256": "69c7cc0953fc4039a419860e1d193a0273e88d7386a754d93a52f14282039dff",
+      "sanitizedLog": "sdl-validation-logs/headless-browser-test.log",
+      "sanitizedLogSha256": "f0438e1013fccb2fda2c963f33789f151f8701faef29b99eb71d00a39e6fc4fa"
+    },
+    "buildReceipt": {
+      "schemaVersion": 1,
+      "backend": "bbcsdl-wasm",
+      "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+      "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.64 (a1fe3902bf73a3802eae0357d273d0e37ea79898)",
+      "settings": [
+        "-O2",
+        "--no-entry",
+        "-sMODULARIZE=1",
+        "-sEXPORT_ES6=1",
+        "-sENVIRONMENT=web,worker,node",
+        "-sASYNCIFY=1",
+        "-sASYNCIFY_STACK_SIZE=1048576",
+        "-sSTACK_SIZE=2097152",
+        "-sINITIAL_MEMORY=67108864",
+        "-sALLOW_MEMORY_GROWTH=0",
+        "-sFILESYSTEM=0",
+        "-sDYNAMIC_EXECUTION=0",
+        "-sALLOW_TABLE_GROWTH=0",
+        "-sASSERTIONS=1",
+        "-sSTACK_OVERFLOW_CHECK=2",
+        "-sABORTING_MALLOC=0",
+        "-sEXPORTED_FUNCTIONS=[\"_crisp_run\",\"_crisp_simulation_abi\",\"_malloc\",\"_free\"]",
+        "-sEXPORTED_RUNTIME_METHODS=[\"ccall\"]"
+      ],
+      "memoryFlags": [
+        "-fno-delete-null-pointer-checks"
+      ],
+      "sourceInputs": [
+        {
+          "path": "src/bbmain.c",
+          "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+        },
+        {
+          "path": "src/bbexec.c",
+          "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+        },
+        {
+          "path": "src/bbeval.c",
+          "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+        },
+        {
+          "path": "licence.txt",
+          "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+        },
+        {
+          "path": "bin/wasm/BBC.h",
+          "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+        },
+        {
+          "path": "src/bbdata_wasm32.c",
+          "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+        }
+      ],
+      "toolchain": {
+        "version": "3.1.64",
+        "commit": "a1fe3902bf73a3802eae0357d273d0e37ea79898",
+        "repository": "https://github.com/emscripten-core/emscripten",
+        "installerRepository": "https://github.com/emscripten-core/emsdk",
+        "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+        "notices": [
+          {
+            "source": "LICENSE",
+            "path": "wasm/licenses/EMSCRIPTEN-LICENSE.txt",
+            "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+          },
+          {
+            "source": "AUTHORS",
+            "path": "wasm/licenses/EMSCRIPTEN-AUTHORS.txt",
+            "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"
+          },
+          {
+            "source": "system/lib/libc/musl/COPYRIGHT",
+            "path": "wasm/licenses/MUSL-COPYRIGHT.txt",
+            "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+          },
+          {
+            "source": "system/lib/compiler-rt/LICENSE.TXT",
+            "path": "wasm/licenses/COMPILER-RT-LICENSE.txt",
+            "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+          },
+          {
+            "source": "license comments from system/lib/libc/musl/src/math and system/lib/dlmalloc.c",
+            "path": "wasm/licenses/LIBC-SOURCE-NOTICES.txt",
+            "sha256": "c3d34474a05af8ffa34329409bee4f082b7d754ebc32cbd33402672ee1a6dc1b"
+          }
+        ]
+      },
+      "imports": [
+        {
+          "module": "env",
+          "name": "invoke_ii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_v",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vi",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_i",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_iiiiiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viiii",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_simulation_request",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_error",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_exit",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_output",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_input_event",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_read_byte",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "crisp_host_now_ms",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__asyncjs__crisp_host_sleep_ms",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_memcpy_js",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "emscripten_resize_heap",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_throw_longjmp",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "__handle_stack_overflow",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_j",
+          "kind": "function"
+        },
+        {
+          "module": "env",
+          "name": "invoke_ji",
+          "kind": "function"
+        }
+      ],
+      "localSourceInputs": [
+        {
+          "path": "scripts/build-wasm.mjs",
+          "sha256": "220052eacf1010a16e6f5250643cbd05952536c9929c495621199bfe88715ca8"
+        },
+        {
+          "path": "upstream.lock.json",
+          "sha256": "d43e383babe40a615710a8867ed7524375dc57f1d6b4587f404e9a36d6940f35"
+        },
+        {
+          "path": "wasm/build-inputs.mjs",
+          "sha256": "606833467f420a57d7e09cb61a9b614512bc9f686fbfe37e74159b91dd4fe71f"
+        },
+        {
+          "path": "wasm/toolchain.lock.json",
+          "sha256": "dd32df49ba277e7f3a27705fa9ae830a28fd7bfb84bdefe8d5f1a0821bf9c2ef"
+        },
+        {
+          "path": "wasm/patch-upstream.mjs",
+          "sha256": "f8df8ae9b22ed1b98587989b13e5509e44ab93a329c616a963deb41318b0ab9e"
+        },
+        {
+          "path": "native/patch-upstream.mjs",
+          "sha256": "ff1b7671373f115cfefcf2ad048b54083ae1c7579943f06bce8bb8c32a66a3e8"
+        },
+        {
+          "path": "wasm/crisp-host.h",
+          "sha256": "ed4a4785f9410e40b01dc8c48a5b1cae75b6741af40ef5019a024087c205f9f7"
+        },
+        {
+          "path": "wasm/crispbasic.c",
+          "sha256": "58f92c07d73751fce2eab255b0f89bb0eaacbc81a26588f41b295e998687f2a4"
+        },
+        {
+          "path": "wasm/emscripten-host.c",
+          "sha256": "3ca91c0cd19ee998bf287d0acadbfe3e8f22c6e248ad03d4513c6dd2777edc7d"
+        }
+      ],
+      "moduleSha256": "f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655",
+      "wasmSha256": "710bc365ab67166c92b410ec25f662cec3548d2f24b56747dff7d5cb63c9cea2"
+    }
+  },
+  "cli": {
+    "native": {
+      "path": ".build/sdl-cli-hello",
+      "target": "linux-x64",
+      "profile": "sdl",
+      "bytes": 3376729,
+      "sha256": "c8ed7f4e7ad3c15bf321658c3578e0245e325425cc9cd104f7597d6746c13dfd",
+      "capabilities": {
+        "graphics": true,
+        "graphicsReadback": true,
+        "sound": true,
+        "envelope": true,
+        "mouse": true,
+        "files": true,
+        "time": true,
+        "timeString": true,
+        "eval": true,
+        "inlineAssembler": "x64",
+        "indirection": true,
+        "nativeSystemCalls": true,
+        "osCommands": true,
+        "timeout": false,
+        "outputLimit": false,
+        "physicalPins": false,
+        "description": "Full upstream Linux SDL host, subject to target architecture, operating system, drivers and supplied libraries/resources"
+      },
+      "metadata": {
+        "schemaVersion": 1,
+        "format": "crispbasic-sdl-bundle",
+        "profile": "bbcsdl-full-native",
+        "target": "linux-x64",
+        "title": "hello.bas",
+        "filename": "hello.bas",
+        "upstreamCommit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+        "cpuRequirement": "x64",
+        "sourceSha256": "8475d55fbe33af62de82bef1e26e85d74ef387ca10d716410d1ce2a507358d78",
+        "sourceMap": {
+          "1": 1,
+          "2": 2,
+          "3": 3,
+          "4": 4,
+          "5": 5
+        },
+        "implementation": "Pinned full BBCSDL interpreter and SDL host; original BASIC source is embedded and tokenized by BBCSDL",
+        "lifetime": "END/fallthrough exits the application; QUIT preserves the exit status; ON ERROR remains active",
+        "extraction": {
+          "privateDirectory": true,
+          "cleanupAfterExit": true,
+          "parent": "TMPDIR or /tmp",
+          "callerWorkingDirectory": "preserved",
+          "applicationResources": "@dir$",
+          "executableTemporaryFiles": true
+        },
+        "capabilities": {
+          "graphics": true,
+          "graphicsReadback": true,
+          "sound": true,
+          "envelope": true,
+          "mouse": true,
+          "files": true,
+          "time": true,
+          "timeString": true,
+          "eval": true,
+          "inlineAssembler": "x64",
+          "indirection": true,
+          "nativeSystemCalls": true,
+          "osCommands": true,
+          "timeout": false,
+          "outputLimit": false,
+          "physicalPins": false,
+          "description": "Full upstream Linux SDL host, subject to target architecture, operating system, drivers and supplied libraries/resources"
+        },
+        "systemDependencies": [
+          "Linux ELF loader and glibc compatible with the build toolchain",
+          "zlib",
+          "FreeType and HarfBuzz",
+          "SDL platform graphics/audio/input dependencies and drivers (as linked by the selected SDL build)"
+        ],
+        "excludedOptionalLibraries": [
+          "Box2D and application-specific shared libraries; include explicitly when required"
+        ],
+        "resources": [],
+        "notices": [
+          {
+            "path": "notices/BBCSDL-LICENSE.txt",
+            "text": "Copyright (c) 2021, Richard T. Russell, http://www.rtrussell.co.uk/\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n   claim that you wrote the original software.  If you use this software\n   in a product, an acknowledgment in the product documentation would be\n   appreciated but is not required.\n\n2. Altered source versions must be plainly marked as such, and must not be\n   misrepresented as being the original software.\n\n3. This notice may not be removed or altered from any source distribution.\n"
+          },
+          {
+            "path": "notices/CrispBASIC-LICENSE.txt",
+            "text": "BSD 3-Clause License\n\nCopyright (c) 2026, Christian Str\u00f6bele (CrispStrobe)\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice,\n   this list of conditions and the following disclaimer.\n\n2. Redistributions in binary form must reproduce the above copyright notice,\n   this list of conditions and the following disclaimer in the documentation\n   and/or other materials provided with the distribution.\n\n3. Neither the name of the copyright holder nor the names of its\n   contributors may be used to endorse or promote products derived from\n   this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\nARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE\nLIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\nCONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\nSUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\nINTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\nCONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\nARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\n"
+          },
+          {
+            "path": "notices/libsdl2-dev.txt",
+            "text": "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: SDL\nUpstream-Contact: Sam Lantinga <slouken@libsdl.org>\nSource: https://github.com/libsdl-org/SDL/releases\nFiles-Excluded: Android.mk\n                android-project\n                src/hidapi/windows/ddk_build\n                src/render/metal/SDL_shaders_metal_*.h\n                src/video/os2/SDL_gradd.h\n                test/unifont-*\n                VisualC\n                VisualC-GDK\n                VisualC-WinRT\n                Xcode\n                Xcode-iOS\n\nFiles: *\nCopyright:\n 1997-2025 Sam Lantinga <slouken@libsdl.org>\n 2012 Raspberry Pi Foundation\n 2012-2018 RISC OS Open Ltd\n 2018-2019 EXL\n 2020-2022 Valve Corporation\n 2022 Collabora Ltd.\n 2023 Max Maisel\nLicense: zlib/libpng and zlib-libpng-like-permissive\n\nFiles: include/SDL_egl.h\n       include/SDL_opengl_glext.h\n       include/SDL_opengles2_khrplatform.h\nCopyright: 1997-2021 Sam Lantinga\n           2008-2014 The Khronos Group Inc.\nLicense: zlib/libpng and Expat-like and Apache-2.0\n\nFiles: include/SDL_opengles2_gl2.h\n       include/SDL_opengles2_gl2ext.h\n       include/SDL_opengles2_gl2platform.h\nCopyright: 1997-2016 Sam Lantinga <slouken@libsdl.org>\nLicense: SGI-Free-Software-License-B\n\nFiles: include/SDL_hidapi.h\n       src/hidapi/*\nCopyright: 2009-2010 Alan Ott, Signal 11 Software\n           1997-2021 Sam Lantinga\n           2021 Valve Corporation\nLicense: BSD-3-clause or GPL-3 or hidapi-orig, and zlib/libpng\n\nFiles: src/libm/*\nCopyright: 1993 by Sun Microsystems, Inc. All rights reserved.\nLicense: SunPro\n\nFiles: src/main/windows/SDL_windows_main.c\nCopyright: 1998 Sam Lantinga\nLicense: PublicDomain_Sam_Lantinga\nComment: SDL_main.c, placed in the public domain by Sam Lantinga  4/13/98\n\nFiles: src/main/winrt/SDL_winrt_main_NonXAML.cpp\nCopyright: 2014 David Ludwig\nLicense: PublicDomain_David_Ludwig\n\nFiles: src/render/SDL_yuv_sw.c\nCopyright: 1995 Erik Corry\n           1995 The Regents of the University of California\n           1995 Brown University\nLicense: BrownUn_UnCalifornia_ErikCorry\n\nFiles: src/stdlib/SDL_qsort.c\nCopyright: 1998 Gareth McCaughan\nLicense: Gareth_McCaughan\n\nFiles: src/test/SDL_test_md5.c include/SDL_test_md5.h\nCopyright: 1997-2012 Sam Lantinga <slouken@libsdl.org>\n           1990-1991 RSA Data Security, Inc.\nLicense: zlib/libpng and RSA_Data_Security\n\nFiles:\n src/video/arm/pixman-arm-asm.h\n src/video/arm/pixman-arm-neon-asm.S\n src/video/arm/pixman-arm-neon-asm.h\nCopyright:\n 2009-2010 Nokia Corporation\nLicense: Mozilla-permissive and Expat and zlib/libpng\n\nFiles:\n src/video/khronos/vk_video/*.h\n src/video/khronos/vulkan/*.h\nCopyright:\n 2014-2024 The Khronos Group Inc.\n 2015-2023 Valve Corporation\n 2015-2023 LunarG, Inc.\nLicense: Apache-2.0\n\nFiles: src/video/haiku/SDL_bkeyboard.cc\n       src/video/haiku/SDL_bkeyboard.h\nCopyright: 1997-2012 Sam Lantinga\nLicense: LGPL-2.1+\n\nFiles:\n src/video/yuv2rgb/*\nCopyright:\n 2016 Adrien Descamps\nLicense: BSD-3-clause\n\nFiles: test/testautomation_*\nCopyright: Edgar Simo \"bobbens\"\nLicense: PublicDomain_Edgar_Simo\n\nFiles: test/testautomation_rwops.c\n       include/SDL_test_fuzzer.h\n       include/SDL_test_harness.h\nCopyright: 2011 Markus Kauppila <markus.kauppila@gmail.com>\nLicense: zlib/libpng\n\nFiles: test/testhaptic.c\nCopyright: 1997-2011 Sam Lantinga <slouken@libsdl.org>\n           2008 Edgar Simo Serra\nLicense: BSD-3-clause\n\nFiles: test/testrumble.c\nCopyright: 1997-2011 Sam Lantinga <slouken@libsdl.org>\n           2011 Edgar Simo Serra\nLicense: BSD-3-clause\n\nFiles: test/nacl/*\nCopyright: 2013 The Chromium Authors\nLicense: BSD-3-clause-chromium\n\nFiles: test/shapes/*\nCopyright: none\nLicense: zlib/libpng\nComment: No specific information about the images\n\nFiles: wayland-protocols/*.xml\nCopyright:\n 2008-2011 Kristian H\u00f8gsberg\n 2010-2013 Intel Corporation\n 2012-2016 Collabora, Ltd.\n 2014 Stephen \"Lyude\" Chandler Paul\n 2015-2016 Jan Arne Petersen\n 2015 Samsung Electronics Co., Ltd\n 2015-2018 Red Hat, Inc.\n 2018 Purism SPC\n 2018 The Chromium Authors\n 2022 Kenny Levinsen\n 2023 Simon Ser\n 2023-2024 Matthias Klumpp\n 2024 David Edmundson\nLicense: Expat and MIT-open-group\n\nFiles: debian/*\nCopyright: 2015-2020, Gianfranco Costamagna <locutusofborg@debian.org>\n           2011-2013, Manuel A. Fernandez Montecelo <mafm@debian.org>\n           2011-2013, Felix Geyer <fgeyer@debian.org>\n           2011, Roman Vasiyarov <rvasiyarov@gmail.com>\n           2010, Jon Dowland <jmtd@debian.org>\n           2009, Barry deFreese <bdefreese@debian.org>\n           2007-2008, Aurelien Jarno <aurel32@debian.org>\n           2007-2008, Sam Hocevar (Debian packages) <sam+deb@zoy.org>\n           2002-2007, Josselin Mouette <joss@debian.org>\n           2001, Christian T. Steigies <cts@debian.org>\n           2001, Branden Robinson <branden@debian.org>\n           2012, Canonical Ltd.\n           2018-2023, Simon McVittie\n           2022-2024, Collabora Ltd.\nLicense: LGPL-2.1+\n\nFiles: debian/tests/cmake-findsdl2/FindSDL2.cmake\nCopyright: 2003-2009 Kitware, Inc.\nLicense: BSD-3-clause-kitware\nComment:\n Taken from the openjk package. Similar files exist in hedgewars, spring,\n megaglest, etc.\n\nLicense: SGI-Free-Software-License-B\n SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)\n Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.\n .\n Permission is hereby granted, free of charge, to any person obtaining a\n copy of this software and associated documentation files (the \"Software\"),\n to deal in the Software without restriction, including without limitation\n the rights to use, copy, modify, merge, publish, distribute, sublicense,\n and/or sell copies of the Software, and to permit persons to whom the\n Software is furnished to do so, subject to the following conditions:\n .\n The above copyright notice including the dates of first publication and\n either this permission notice or a reference to\n http://oss.sgi.com/projects/FreeB/\n shall be included in all copies or substantial portions of the Software.\n ,\n THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS\n OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL\n SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF\n OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n SOFTWARE.\n .\n Except as contained in this notice, the name of Silicon Graphics, Inc.\n shall not be used in advertising or otherwise to promote the sale, use or\n other dealings in this Software without prior written authorization from\n Silicon Graphics, Inc.\n\nLicense: Expat\n Permission is hereby granted, free of charge, to any person obtaining a\n copy of this software and associated documentation files (the \"Software\"),\n to deal in the Software without restriction, including without limitation\n the rights to use, copy, modify, merge, publish, distribute, sublicense,\n and/or sell copies of the Software, and to permit persons to whom the\n Software is furnished to do so, subject to the following conditions:\n .\n The above copyright notice and this permission notice (including the next\n paragraph) shall be included in all copies or substantial portions of the\n Software.\n .\n THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL\n THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER\n DEALINGS IN THE SOFTWARE.\n\nLicense: Expat-like\n Permission is hereby granted, free of charge, to any person obtaining a\n copy of this software and/or associated documentation files (the\n \"Materials\"), to deal in the Materials without restriction, including\n without limitation the rights to use, copy, modify, merge, publish,\n distribute, sublicense, and/or sell copies of the Materials, and to\n permit persons to whom the Materials are furnished to do so, subject to\n the following conditions:\n .\n The above copyright notice and this permission notice shall be included\n in all copies or substantial portions of the Materials.\n .\n THE MATERIALS ARE PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY\n CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,\n TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE\n MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.\n\nLicense: zlib/libpng\n This software is provided 'as-is', without any express or implied\n warranty.  In no event will the authors be held liable for any damages\n arising from the use of this software.\n .\n Permission is granted to anyone to use this software for any purpose,\n including commercial applications, and to alter it and redistribute it\n freely, subject to the following restrictions:\n .\n 1. The origin of this software must not be misrepresented; you must not\n    claim that you wrote the original software. If you use this software\n    in a product, an acknowledgment in the product documentation would be\n    appreciated but is not required.\n 2. Altered source versions must be plainly marked as such, and must not be\n    misrepresented as being the original software.\n 3. This notice may not be removed or altered from any source distribution.\n\nLicense: zlib-libpng-like-permissive\n  This software is provided 'as-is', without any express or implied\n  warranty.  In no event will the authors be held liable for any damages\n  arising from the use of this software.\n  .\n  Permission is granted to anyone to use this software for any purpose,\n  including commercial applications, and to alter it and redistribute it\n  freely.\n\nLicense: LGPL-2.1+\n This program is free software; you can redistribute it and/or modify\n it under the terms of the GNU Lesser General Public License as published by\n the Free Software Foundation; either version 2.1 of the License, or (at\n your option) any later version.\n .\n On Debian systems, the complete text of version 2.1 of the GNU Lesser General\n Public License can be found in '/usr/share/common-licenses/LGPL-2.1'.\n\nLicense: Apache-2.0\n Licensed under the Apache License, Version 2.0 (the \"License\");\n you may not use this file except in compliance with the License.\n You may obtain a copy of the License at\n .\n      http://www.apache.org/licenses/LICENSE-2.0\n .\n Unless required by applicable law or agreed to in writing, software\n distributed under the License is distributed on an \"AS IS\" BASIS,\n WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n See the License for the specific language governing permissions and\n limitations under the License.\n .\n On Debian systems, a copy of the Apache License version 2.0\n can be found in /usr/share/common-licenses/Apache-2.0.\n\nLicense: BSD-3-clause-chromium\n Copyright (c) 2011 Google Inc. All rights reserved.\n .\n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions are\n met:\n .\n    * Redistributions of source code must retain the above copyright\n notice, this list of conditions and the following disclaimer.\n    * Redistributions in binary form must reproduce the above\n copyright notice, this list of conditions and the following disclaimer\n in the documentation and/or other materials provided with the\n distribution.\n    * Neither the name of Google Inc. nor the names of its\n contributors may be used to endorse or promote products derived from\n this software without specific prior written permission.\n .\n THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nLicense: BSD-3-clause-kitware\n Copyright 2003-2009 Kitware, Inc.\n .\n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions\n are met:\n .\n * Redistributions of source code must retain the above copyright\n   notice, this list of conditions and the following disclaimer.\n .\n * Redistributions in binary form must reproduce the above copyright\n   notice, this list of conditions and the following disclaimer in the\n   documentation and/or other materials provided with the distribution.\n .\n * Neither the names of Kitware, Inc., the Insight Software Consortium,\n   nor the names of their contributors may be used to endorse or promote\n   products derived from this software without specific prior written\n   permission.\n .\n THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nLicense: BSD-3-clause\n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions are met:\n     * Redistributions of source code must retain the above copyright\n       notice, this list of conditions and the following disclaimer.\n     * Redistributions in binary form must reproduce the above copyright\n       notice, this list of conditions and the following disclaimer in the\n       documentation and/or other materials provided with the distribution.\n     * Neither the name of the LibQxt project nor the\n       names of its contributors may be used to endorse or promote products\n       derived from this software without specific prior written permission.\n .\n THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY\n DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nComment:\n  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>\n  .\n  This software is provided 'as-is', without any express or implied\n  warranty.  In no event will the authors be held liable for any damages\n  arising from the use of this software.\n  .\n  Permission is granted to anyone to use this software for any purpose,\n  including commercial applications, and to alter it and redistribute it\n  freely.\n  .\n  .\n  Copyright (c) 2011, Edgar Simo Serra\n  All rights reserved.\n  .\n  Redistribution and use in source and binary forms, with or without\n  modification, are permitted provided that the following conditions are met:\n  .\n    * Redistributions of source code must retain the above copyright notice,\n      this list of conditions and the following disclaimer.\n    * Redistributions in binary form must reproduce the above copyright notice,\n      this list of conditions and the following disclaimer in the documentation\n      and/or other materials provided with the distribution.\n    * Neither the name of the Simple Directmedia Layer (SDL) nor the names of\n      its contributors may be used to endorse or promote products derived from\n      this software without specific prior written permission.\n  .\n  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE\n  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\n  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nLicense: BrownUn_UnCalifornia_ErikCorry\n /* This code was derived from code carrying the following copyright notices:\n  * Copyright (c) 1995 The Regents of the University of California.\n  * All rights reserved.\n  *\n  * Permission to use, copy, modify, and distribute this software and its\n  * documentation for any purpose, without fee, and without written agreement is\n  * hereby granted, provided that the above copyright notice and the following\n  * two paragraphs appear in all copies of this software.\n  *\n  * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR\n  * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT\n  * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF\n  * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n  *\n  * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,\n  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY\n  * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS\n  * ON AN \"AS IS\" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO\n  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.\n  *\n  * Copyright (c) 1995 Erik Corry\n  * All rights reserved.\n  *\n  * Permission to use, copy, modify, and distribute this software and its\n  * documentation for any purpose, without fee, and without written agreement is\n  * hereby granted, provided that the above copyright notice and the following\n  * two paragraphs appear in all copies of this software.\n  *\n  * IN NO EVENT SHALL ERIK CORRY BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT,\n  * SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF\n  * THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF ERIK CORRY HAS BEEN ADVISED\n  * OF THE POSSIBILITY OF SUCH DAMAGE.\n  *\n  * ERIK CORRY SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT\n  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A\n  * PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS ON AN \"AS IS\"\n  * BASIS, AND ERIK CORRY HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT,\n  * UPDATES, ENHANCEMENTS, OR MODIFICATIONS.\n  *\n  * Portions of this software Copyright (c) 1995 Brown University.\n  * All rights reserved.\n  *\n  * Permission to use, copy, modify, and distribute this software and its\n  * documentation for any purpose, without fee, and without written agreement\n  * is hereby granted, provided that the above copyright notice and the\n  * following two paragraphs appear in all copies of this software.\n  *\n  * IN NO EVENT SHALL BROWN UNIVERSITY BE LIABLE TO ANY PARTY FOR\n  * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT\n  * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF BROWN\n  * UNIVERSITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n  *\n  * BROWN UNIVERSITY SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT\n  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A\n  * PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS ON AN \"AS IS\"\n  * BASIS, AND BROWN UNIVERSITY HAS NO OBLIGATION TO PROVIDE MAINTENANCE,\n  * SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.\n  */\n\nLicense: GPL-3\n On Debian systems, the complete text of the GNU General\n Public License version 3 can be found in\n /usr/share/common-licenses/GPL-3.\n\nLicense: Gareth_McCaughan\n  You may use it in anything you like; you may make money\n  out of it; you may distribute it in object form or as\n  part of an executable without including source code;\n  you don't have to credit me. (But it would be nice if\n  you did.)\n\nLicense: SunPro\n  Developed at SunPro, a Sun Microsystems, Inc. business.\n  Permission to use, copy, modify, and distribute this\n  software is freely granted, provided that this notice\n  is preserved.\n\nLicense: PublicDomain_Sam_Lantinga\n Placed in the public domain by Sam Lantinga  4/13/98\n\nLicense: PublicDomain_David_Ludwig\n placed in the public domain by David Ludwig  3/13/14\n\nLicense: PublicDomain_Edgar_Simo\n Written by Edgar Simo \"bobbens\"\n .\n Released under Public Domain.\n\nLicense: RSA_Data_Security\n ***********************************************************************\n ** utl_md5.c -- the source code for MD5 routines                      **\n ** RSA Data Security, Inc. MD5 Message-Digest Algorithm              **\n ** Created: 2/17/90 RLR                                              **\n ** Revised: 1/91 SRD,AJ,BSK,JT Reference C ver., 7/10 constant corr. **\n ***********************************************************************\n ***********************************************************************\n ** Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.  **\n **                                                                   **\n ** License to copy and use this software is granted provided that    **\n ** it is identified as the \"RSA Data Security, Inc. MD5 Message-     **\n ** Digest Algorithm\" in all material mentioning or referencing this  **\n ** software or this function.                                        **\n **                                                                   **\n ** License is also granted to make and use derivative works          **\n ** provided that such works are identified as \"derived from the RSA  **\n ** Data Security, Inc. MD5 Message-Digest Algorithm\" in all          **\n ** material mentioning or referencing the derived work.              **\n **                                                                   **\n ** RSA Data Security, Inc. makes no representations concerning       **\n ** either the merchantability of this software or the suitability    **\n ** of this software for any particular purpose.  It is provided \"as  **\n ** is\" without express or implied warranty of any kind.              **\n **                                                                   **\n ** These notices must be retained in any copies of any part of this  **\n ** documentation and/or software.                                    **\n ***********************************************************************\n\nLicense: MIT-open-group\n Permission to use, copy, modify, distribute, and sell this\n software and its documentation for any purpose is hereby granted\n without fee, provided that the above copyright notice appear in\n all copies and that both that copyright notice and this permission\n notice appear in supporting documentation, and that the name of\n the copyright holders not be used in advertising or publicity\n pertaining to distribution of the software without specific,\n written prior permission.  The copyright holders make no\n representations about the suitability of this software for any\n purpose.  It is provided \"as is\" without express or implied\n warranty.\n .\n THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS\n SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND\n FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY\n SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\n WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN\n AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,\n ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF\n THIS SOFTWARE.\nComment: SPDX: MIT-open-group\n\nLicense: Mozilla-permissive\n Permission to use, copy, modify, distribute, and sell this software and its\n documentation for any purpose is hereby granted without fee, provided that\n the above copyright notice appear in all copies and that both that\n copyright notice and this permission notice appear in supporting\n documentation, and that the name of Mozilla Corporation not be used in\n advertising or publicity pertaining to distribution of the software without\n specific, written prior permission.  Mozilla Corporation makes no\n representations about the suitability of this software for any purpose.  It\n is provided \"as is\" without express or implied warranty.\n .\n THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS\n SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND\n FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY\n SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\n WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN\n AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING\n OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS\n SOFTWARE.\nComment:\n Same as MIT-open-group but with \"Mozilla Corporation\" instead of\n \"The copyright holders\"\n\nLicense: hidapi-orig\n This software may be used by anyone for any reason so\n long as the copyright notice in the source files\n remains intact.\n"
+          },
+          {
+            "path": "notices/libsdl2-ttf-dev.txt",
+            "text": "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: SDL_ttf\nUpstream-Contact: Sam Lantinga <slouken@libsdl.org>\nSource: http://www.libsdl.org/projects/SDL_ttf/\nFiles-Excluded: Makefile.in\n                VisualC\n                VisualC-WinRT\n                Xcode\n                acinclude/libtool.m4\n                acinclude/lt*.m4\n                aclocal.m4\n                compile\n                config.guess\n                config.sub\n                configure\n                depcomp\n                external\n                install-sh\n                ltmain.sh\n                missing\n\n\nFiles: *\nCopyright: 2001-2025 Sam Lantinga <slouken@libsdl.org>\nLicense: zlib/libpng\n\n\nFiles: debian/*\nCopyright: 2012-2013, Manuel A. Fernandez Montecelo <mafm@debian.org>\n           2024 Collabora Ltd.\n           2025 Simon McVittie\nLicense: zlib/libpng\n\n\nFiles: debian/tests/*\nCopyright: 2019 Collabora Ltd.\nLicense: zlib/libpng\n\n\nFiles: acinclude/ax_cxx_compile_stdcxx.m4\nCopyright:\n 2008 Benjamin Kosnik\n 2012 Zack Weinberg\n 2013 Roy Stogner\n 2014, 2015 Google Inc.\n 2015 Paul Norman\n 2015 Moritz Klammler\n 2016 Krzesimir Nowak\nLicense: FSFAP\n\n\nFiles: acinclude/tar.m4\nCopyright:\n 2004-2020 Free Software Foundation, Inc.\nLicense: FSFULLR\n\n\nFiles: acinclude/pkg.m4\nCopyright:\n 2004 Scott James Remnant\n 2012-2015 Dan Nicholson\nLicense: GPL-2+ with Autoconf exception\n\n\nLicense: zlib/libpng\n This software is provided 'as-is', without any express or implied\n warranty.  In no event will the authors be held liable for any damages\n arising from the use of this software.\n .\n Permission is granted to anyone to use this software for any purpose,\n including commercial applications, and to alter it and redistribute it\n freely, subject to the following restrictions:\n .\n 1. The origin of this software must not be misrepresented; you must not\n    claim that you wrote the original software. If you use this software\n    in a product, an acknowledgment in the product documentation would be\n    appreciated but is not required.\n 2. Altered source versions must be plainly marked as such, and must not be\n    misrepresented as being the original software.\n 3. This notice may not be removed or altered from any source distribution.\n\n\nLicense: GPL-2+ with Autoconf exception\n This program is free software; you can redistribute it and/or modify\n it under the terms of the GNU General Public License as published by\n the Free Software Foundation; either version 2 of the License, or\n (at your option) any later version.\n .\n This program is distributed in the hope that it will be useful, but\n WITHOUT ANY WARRANTY; without even the implied warranty of\n MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n General Public License for more details.\n .\n As a special exception to the GNU General Public License, if you\n distribute this file as part of a program that contains a\n configuration script generated by Autoconf, you may include it under\n the same distribution terms that you use for the rest of that\n program.\nComment:\n On Debian systems, see /usr/share/common-licenses/GPL-2 for a copy of\n the GNU GPL version 2.\n\n\nLicense: FSFAP\n Copying and distribution of this file, with or without modification, are\n permitted in any medium without royalty provided the copyright notice\n and this notice are preserved.  This file is offered as-is, without any\n warranty.\n\n\nLicense: FSFULLR\n This file is free software; the Free Software Foundation\n gives unlimited permission to copy and/or distribute it,\n with or without modifications, as long as this notice is preserved.\n"
+          },
+          {
+            "path": "notices/libsdl2-net-dev.txt",
+            "text": "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: SDL_net\nUpstream-Contact: Sam Lantinga <slouken@libsdl.org>\n                  Roy Wood <roy@centricsystems.ca>\n                  Masahiro Minami <elsur@aaa.letter.co.jp>\nSource: https://www.libsdl.org/projects/SDL_net/\nFiles-Excluded: VisualC\n                Xcode\n\n\nFiles: *\nCopyright:\n 1997-2022 Sam Lantinga <slouken@libsdl.org>\n 2012 Simeon Maxein\nLicense: zlib/libpng\n\n\nFiles: debian/*\nCopyright:\n 2011-2013 Manuel A. Fernandez Montecelo <mafm@debian.org>\n 2022 Collabora Ltd.\nLicense: zlib/libpng\n\n\nLicense: zlib/libpng\n This software is provided 'as-is', without any express or implied\n warranty.  In no event will the authors be held liable for any damages\n arising from the use of this software.\n .\n Permission is granted to anyone to use this software for any purpose,\n including commercial applications, and to alter it and redistribute it\n freely, subject to the following restrictions:\n .\n 1. The origin of this software must not be misrepresented; you must not\n    claim that you wrote the original software. If you use this software\n    in a product, an acknowledgment in the product documentation would be\n    appreciated but is not required.\n 2. Altered source versions must be plainly marked as such, and must not be\n    misrepresented as being the original software.\n 3. This notice may not be removed or altered from any source distribution.\n"
+          }
+        ],
+        "runtimeFiles": [
+          {
+            "path": "bbcsdl",
+            "sha256": "ce850e2bc07918774f911e108a0fa0a70d41a08e5da0109fa403853923269ab7",
+            "bytes": 347504
+          },
+          {
+            "path": "libstb.so",
+            "sha256": "a015ec498d74a1d50f932153c791f3a1bd6248af3dcc5c74011b10cfec2e061e",
+            "bytes": 133688
+          },
+          {
+            "path": "libSDL2-2.0.so.0",
+            "sha256": "ee3ccdd9b5fead3ea6b55622df02b962ef7f0afd6dc193139e5b9c088f56a43f",
+            "bytes": 1996112
+          },
+          {
+            "path": "libSDL2_ttf-2.0.so.0",
+            "sha256": "24b2e45ef1a95a6d70a5fcc8a6431b7d7529f157bece9ca7d6ecdf1a7a223ba6",
+            "bytes": 79720
+          },
+          {
+            "path": "libSDL2_net-2.0.so.0",
+            "sha256": "b596d583581a5b29bfec69b3959d4009b676f1d4f1989381a99fb39a89dc02e9",
+            "bytes": 22368
+          },
+          {
+            "path": "notices/BBCSDL-LICENSE.txt",
+            "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1",
+            "bytes": 891
+          },
+          {
+            "path": "notices/CrispBASIC-LICENSE.txt",
+            "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
+            "bytes": 1520
+          },
+          {
+            "path": "notices/libsdl2-dev.txt",
+            "sha256": "a7cfc1e6aa0cfba5121b3faead3e2d351028ec153bba6059065f670ad5944ad6",
+            "bytes": 26481
+          },
+          {
+            "path": "notices/libsdl2-ttf-dev.txt",
+            "sha256": "5beabc12114e161d6686313f9cceae608ddb4ad539b16c38ea2c313d200b4c22",
+            "bytes": 3615
+          },
+          {
+            "path": "notices/libsdl2-net-dev.txt",
+            "sha256": "50e8849ddcb560b3f2895dfed7fca60f427c4e5669feb6864c5766887a753e13",
+            "bytes": 1452
+          },
+          {
+            "path": "notices/upstream/include/SDL2_gfxPrimitives_font.h",
+            "sha256": "563802eb958d1f5292c604388195aac033b10ffcec399f6dedf86b1cfb6690d8",
+            "bytes": 55904
+          },
+          {
+            "path": "notices/upstream/include/stb_image.h",
+            "sha256": "014f53d9ea4e5804a94ca38e59c3929c69dd81c25a5678a15abb2770eb05fb6c",
+            "bytes": 279537
+          },
+          {
+            "path": "notices/upstream/include/dr_mp3.h",
+            "sha256": "caacf31d77ccf57288531398d64f55409ad530446308bccb7d0fdc2c96782c83",
+            "bytes": 144339
+          },
+          {
+            "path": "notices/upstream/include/SDL_stbimage.h",
+            "sha256": "1773e6ba734859b296e4da8f6f0781e5ea29c54491dce73296df5a9caf6f0168",
+            "bytes": 20943
+          },
+          {
+            "path": "notices/upstream/src/SDL2_gfxPrimitives.c",
+            "sha256": "d1a82878ad09c7af32b2b3767f23c56e719ac2943d99c8e1513bcbdc5af463e5",
+            "bytes": 139996
+          },
+          {
+            "path": "notices/upstream/src/SDL2_rotozoom.c",
+            "sha256": "daf7b8effebd1b47663ea03d20d14c60f2a9f151eed033a749314d5758dab6a7",
+            "bytes": 42710
+          },
+          {
+            "path": "notices/upstream/src/flood.c",
+            "sha256": "ad343be3fe530c4802e54923243fdc99fee45d34bbc51f42edfabac0b4e7dc8f",
+            "bytes": 17583
+          }
+        ]
+      }
+    },
+    "web": {
+      "path": ".build/sdl-cli-hello.html",
+      "target": "web",
+      "profile": "sdl",
+      "backend": "bbcsdl-sdl-wasm",
+      "bytes": 4093670,
+      "sha256": "8d05cbb1ba9de5d951373bf185f2442347f391f44d12d183f7da40a5caa210bf",
+      "capabilities": {
+        "graphics": true,
+        "sound": true,
+        "filesystem": "browser-virtual",
+        "sys": "upstream-wasm-wrapper-table",
+        "assembler": false,
+        "box2d": false,
+        "sharedMemory": true,
+        "requiresCrossOriginIsolation": true
+      }
+    },
+    "nativeOutputMatchesDirectSource": true,
+    "nativeOutputSha256": "70ac969d3b6a0157e49f6f02147f0f35a915e44494131ce8a7a460f1179827d9",
+    "contractTests": {
+      "name": "Bundler defaults and loopback server",
+      "status": "passed",
+      "scope": "Packaging/API input handling and local HTTP serving",
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "log": "bundle-defaults-test.log",
+      "logSha256": "6a15bd382a59df06c82118d09e509e4af5e1c24c29e0abf5de9bdb65b984f75f",
+      "sanitizedLog": "sdl-validation-logs/bundle-defaults-test.log",
+      "sanitizedLogSha256": "6a15bd382a59df06c82118d09e509e4af5e1c24c29e0abf5de9bdb65b984f75f"
+    }
+  },
+  "limits": [
+    "No physical hardware was exercised. ARM results use CPU emulation.",
+    "Dummy/offscreen SDL drivers do not establish physical desktop, keyboard or speaker behavior.",
+    "Browser packaging/build success is not browser execution evidence; fresh browser execution must be supplied by a permitted browser environment or hosted CI.",
+    "Tests used unmodified repository source; toolchains and dependency sysroots were provisioned only inside scratch.",
+    "The sourceInputs hashes identify the tested bundler/build inputs independently of later compiler-only commits."
+  ],
+  "nativeSummary": {
+    "tests": 36,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0
+  },
+  "hostedEvidenceAtObservation": {
+    "head": "8430c861b5cd467349e0b07efdd61baec92ff51f",
+    "fullSdlPullRequestRun": 46182516404,
+    "fullSdlPushRun": 46182511250,
+    "status": "queued",
+    "note": "These IDs are a point-in-time observation, not a claim of current status or a substitute for final-head CI."
+  },
+  "logSanitization": "Committed log copies preserve test results and diagnostics. Absolute workspace/tool module paths are replaced with placeholders and ANSI color escapes are removed. Original and sanitized SHA-256 values are recorded separately.",
+  "integratedInputVerification": {
+    "sourceInputsChecked": 30,
+    "mismatches": [],
+    "note": "The final integrated compiler-only changes leave all recorded bundler and WASM input hashes unchanged."
+  }
+}

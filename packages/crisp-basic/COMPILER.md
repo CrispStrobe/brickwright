@@ -54,6 +54,11 @@ interpreter frontend. Optional BASIC line numbers must be consistent and
 increasing. Keywords retain BBC BASIC's uppercase spelling; names retain their
 case. Decimal exponent syntax uses uppercase `E`.
 
+Reserved words are recognized even for unsupported features, so names such as
+`CLS` and `OPENOUT` cannot accidentally compile as ordinary variables. BBC word
+boundaries are retained: `CLSx`, `RND2` and `ENDvalue` are valid variable names;
+`LEFT$` is a string variable when it is not immediately followed by `(`.
+
 | Area | Compiled syntax and behavior |
 | --- | --- |
 | Variables | Default numeric variables, double variables ending in `#`, 32-bit integer variables ending in `%`, and strings ending in `$`. Extended-profile native programs also accept `%%` integer variables. |
@@ -121,6 +126,18 @@ host's arithmetic as universal:
 | `native-bbcsdl` | Extended `long double` on x64; binary64 on ARM/ARM64/WASM, selected in generated C | Native BBCSDL on the matching host |
 | `binary64` | 64-bit IEEE `double`, including its math and number formatting paths | BBCSDL WASM's binary64 evaluator |
 | `extended` | Explicit host `long double` | Native x64 BBCSDL |
+
+The native AArch64 profile also preserves the qualified interpreter build's
+saturating conversion of out-of-range real expression operands to signed
+64-bit integers. This is distinct from the explicit `binary64` profile, whose
+WASM reference reports a range error. Native ARMv7 has its own qualified GCC
+ARM EABI conversion for real values assigned to `%` variables, including
+wrapped results near or beyond 2^64, and register-specific behavior for
+negative shift counts. The generated C implements these results with defined
+unsigned operations and explicit range checks, without depending on undefined
+C casts or shifts. Differential tests retain the boundary and overflow cases
+on each host, with explicit expected results for that host. The portable
+`binary64` profile used on Pico and Uno keeps the WASM conversion semantics.
 
 Pico and Uno select `binary64`. `#` variables store a double in every profile,
 including BBCSDL's stored-zero representation. Integer expression values have

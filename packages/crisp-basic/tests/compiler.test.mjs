@@ -69,6 +69,20 @@ test('full lexical pass diagnoses even unreachable unsupported features', () => 
     assert.throws(() => compileSource('END\nSYS "dangerous"\n'), CompileError);
 });
 
+test('unsupported reserved words cannot silently become variable assignments', () => {
+    for (const statement of [
+        'CLS=2', 'CLS%=2', 'SOUNDx=2', 'OPENOUT=3', 'ERL=4', 'ERR=5',
+        'MODE=1', 'COLOURx=2', 'MOUSE=1', 'WAIT=1', 'PTR=1',
+        'PRINT ADVAL(1)', 'PRINT POINT(0,0)', 'PRINT TAB(1)'
+    ]) {
+        assert.throws(
+            () => compileSource(`10 END\n200 ${statement}\n`, {filename: 'reserved.bas'}),
+            error => error instanceof CompileError && error.line === 2 && error.basicLine === 200,
+            statement
+        );
+    }
+});
+
 test('multiple NEXT variables close the matching nested FOR loops', () => {
     const source = 'FOR i%=1 TO 2\nFOR j%=1 TO 3\nPRINT i%;j%\nNEXT j%,i%\nEND\n';
     assert.doesNotThrow(() => compileSource(source));

@@ -301,12 +301,34 @@ static int64_t cb_int64(long double value) {
     long double r;
     if(!isfinite(value)) cb_fail("integer conversion overflow");
     r=truncl(value);
+#ifdef CB_NATIVE_AARCH64
+    /* The qualified native AArch64 BBCSDL build saturates real-to-integer
+     * expression conversions. Spell that result explicitly, without using
+     * an out-of-range C cast. The portable binary64 profile instead keeps
+     * the WASM reference's checked conversion, including on Pico and Uno. */
+    if(r >= 9223372036854775808.0L)return INT64_MAX;
+    if(r < -9223372036854775808.0L)return INT64_MIN;
+#else
     if(r < -9223372036854775808.0L || r >= 9223372036854775808.0L)
         cb_fail("number too big for integer conversion");
+#endif
     return (int64_t)r;
 }
 static int64_t cb_as_int64(cb_value value){if(value.string)cb_fail("number required");return value.integer?value.whole:cb_int64(value.number);}
 static int32_t cb_as_int32(cb_value value){uint32_t bits=(uint32_t)(uint64_t)cb_as_int64(value);return bits<=INT32_MAX?(int32_t)bits:(int32_t)((int64_t)bits-INT64_C(4294967296));}
+#ifdef CB_NATIVE_ARMV7
+static int64_t cb_armv7_assignment_integer(cb_value value) {
+    long double real,magnitude;uint64_t bits;
+    if(value.integer)return value.whole;
+    real=truncl(cb_number(value));magnitude=real<0?-real:real;
+    if(!isfinite(magnitude))cb_fail("integer conversion overflow");
+    /* Match the native ARM EABI magnitude conversion without an undefined
+     * out-of-range signed cast. Expression conversions still use cb_int64. */
+    bits=magnitude>=18446744073709551616.0L?UINT64_MAX:(uint64_t)magnitude;
+    if(real<0)bits=UINT64_C(0)-bits;
+    return bits<=INT64_MAX?(int64_t)bits:-INT64_C(1)-(int64_t)(UINT64_MAX-bits);
+}
+#endif
 static cb_value cb_zero(int kind) {
     return kind==2 ? cb_string_value((const unsigned char *)"",0) : cb_integer_value(0);
 }
@@ -318,7 +340,11 @@ static void cb_set(cb_var *variable, cb_value value) {
     if((variable->kind==2)!=value.string)cb_fail("type mismatch in assignment");
     if(!value.string) {
         if(variable->kind==1) {
+#ifdef CB_NATIVE_ARMV7
+            int64_t integer=cb_armv7_assignment_integer(value);
+#else
             int64_t integer=cb_as_int64(value);
+#endif
             if(integer<INT32_MIN||integer>INT32_MAX)cb_fail("number too big for integer assignment");
             value=cb_integer_value(integer);
         }
@@ -436,6 +462,18 @@ static cb_value cb_multiply(cb_value a,cb_value b) {
     }
     cb_release(a);cb_release(b);return cb_number_value(x*y);
 }
+#ifdef CB_NATIVE_ARMV7
+/* ARM register shifts read the low byte of their count. These helpers make
+ * the qualified native interpreter's negative-count behavior explicit. */
+static uint32_t cb_arm_lsl(uint32_t value,uint32_t count){count&=255u;return count<32?value<<count:0;}
+static uint32_t cb_arm_lsr(uint32_t value,uint32_t count){count&=255u;return count<32?value>>count:0;}
+static uint32_t cb_arm_asr(uint32_t value,uint32_t count){
+    count&=255u;
+    if(!count)return value;
+    if(count>=32)return value&UINT32_C(0x80000000)?UINT32_MAX:0;
+    return(value>>count)|(value&UINT32_C(0x80000000)?UINT32_MAX<<(32-count):0);
+}
+#endif
 static cb_value cb_binary(const char *operation,cb_value a,cb_value b) {
     cb_value result;long double x,y,n=0;int comparison;
     if(!strcmp(operation,"+")&&a.string&&b.string) {
@@ -496,6 +534,23 @@ static cb_value cb_binary(const char *operation,cb_value a,cb_value b) {
         int64_t ix=cb_as_int64(a),shift=cb_as_int64(b),answer;
         uint64_t bits=(uint64_t)ix;
         unsigned int amount=(unsigned int)((uint64_t)shift&63u);
+#ifdef CB_NATIVE_ARMV7
+        if(shift<0) {
+            uint32_t count=(uint32_t)(uint64_t)shift,lo=(uint32_t)bits,hi=(uint32_t)(bits>>32);
+            if(operation[0]=='<') {
+                lo=cb_arm_lsl(lo,count);
+                answer=lo<=INT32_MAX?(int64_t)lo:(int64_t)lo-INT64_C(4294967296);
+            } else if(operation[2]=='>')answer=cb_arm_lsr(lo,count);
+            else {
+                lo=cb_arm_lsr(lo,count)|cb_arm_lsl(hi,32u-count);
+                if(!((count-32u)&UINT32_C(0x80000000)))lo|=cb_arm_asr(hi,count-32u);
+                hi=cb_arm_asr(hi,count);
+                bits=((uint64_t)hi<<32)|lo;
+                answer=bits<=INT64_MAX?(int64_t)bits:-INT64_C(1)-(int64_t)(UINT64_MAX-bits);
+            }
+            cb_release(a);cb_release(b);return cb_integer_value(answer);
+        }
+#endif
         if(operation[0]=='<') {
             uint32_t low=shift>63?0:(uint32_t)(bits<<amount);
             answer=low<=INT32_MAX?(int64_t)low:(int64_t)low-INT64_C(4294967296);

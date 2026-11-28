@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: SDL asset paths reject traversal, absolute paths, controls and empty segments
+ok 1 - SDL asset paths reject traversal, absolute paths, controls and empty segments
+  ---
+  duration_ms: 1.455216
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: graphics draw and pixel readback
+ok 2 - full SDL source/bundle bytes: graphics draw and pixel readback
+  ---
+  duration_ms: 1545.324215
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: sound and envelope through real SDL audio queue
+ok 3 - full SDL source/bundle bytes: sound and envelope through real SDL audio queue
+  ---
+  duration_ms: 1353.046552
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: EVAL raw memory and native SDL system call
+ok 4 - full SDL source/bundle bytes: EVAL raw memory and native SDL system call
+  ---
+  duration_ms: 760.628428
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: ON ERROR trap keeps batch lifetime
+ok 5 - full SDL source/bundle bytes: ON ERROR trap keeps batch lifetime
+  ---
+  duration_ms: 765.964389
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: interactive-state APIs and VDU bytes
+ok 6 - full SDL source/bundle bytes: interactive-state APIs and VDU bytes
+  ---
+  duration_ms: 1126.479227
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: relative external file write and read
+ok 7 - full SDL source/bundle bytes: relative external file write and read
+  ---
+  duration_ms: 768.200599
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: QUIT preserves exit code
+ok 8 - full SDL source/bundle bytes: QUIT preserves exit code
+  ---
+  duration_ms: 740.04579
+  type: 'test'
+  ...
+# Subtest: full SDL source/bundle bytes: linux-armv7 inline assembly and USR execution
+ok 9 - full SDL source/bundle bytes: linux-armv7 inline assembly and USR execution
+  ---
+  duration_ms: 1021.726349
+  type: 'test'
+  ...
+# Subtest: full SDL embeds application resources accessed through @dir$
+ok 10 - full SDL embeds application resources accessed through @dir$
+  ---
+  duration_ms: 439.403663
+  type: 'test'
+  ...
+# Subtest: direct source runner preserves original @dir$ and matches the bundle
+ok 11 - direct source runner preserves original @dir$ and matches the bundle
+  ---
+  duration_ms: 805.108255
+  type: 'test'
+  ...
+# Subtest: full SDL packaging rejects duplicate assets and overwriting an input
+ok 12 - full SDL packaging rejects duplicate assets and overwriting an input
+  ---
+  duration_ms: 43.301477
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9515.983189

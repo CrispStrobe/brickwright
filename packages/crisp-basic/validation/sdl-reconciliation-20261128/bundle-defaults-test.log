@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: the public bundle API defaults to the SDL pack for each target family
+ok 1 - the public bundle API defaults to the SDL pack for each target family
+  ---
+  duration_ms: 8.193267
+  type: 'test'
+  ...
+# Subtest: bundle dispatch rejects mismatched profile options before opening runtime files
+ok 2 - bundle dispatch rejects mismatched profile options before opening runtime files
+  ---
+  duration_ms: 0.677112
+  type: 'test'
+  ...
+# Subtest: bundle retains Latin-1 source, line mapping, runtime bytes and notices
+ok 3 - bundle retains Latin-1 source, line mapping, runtime bytes and notices
+  ---
+  duration_ms: 9.139756
+  type: 'test'
+  ...
+# Subtest: bundler verifies ELF target and rejects old hosts and already bundled inputs
+ok 4 - bundler verifies ELF target and rejects old hosts and already bundled inputs
+  ---
+  duration_ms: 9.164895
+  type: 'test'
+  ...
+# Subtest: bundle checks build receipts, never overwrites sources, and preserves existing outputs
+ok 5 - bundle checks build receipts, never overwrites sources, and preserves existing outputs
+  ---
+  duration_ms: 5.666814
+  type: 'test'
+  ...
+# Subtest: source diagnostics retain physical line positions and malformed overlays fail closed
+ok 6 - source diagnostics retain physical line positions and malformed overlays fail closed
+  ---
+  duration_ms: 0.557051
+  type: 'test'
+  ...
+# Subtest: offline page embeds assets safely without external script or stylesheet references
+ok 7 - offline page embeds assets safely without external script or stylesheet references
+  ---
+  duration_ms: 12.231704
+  type: 'test'
+  ...
+# Subtest: serve CLI dispatch prints a live loopback URL and exits cleanly on SIGTERM
+ok 8 - serve CLI dispatch prints a live loopback URL and exits cleanly on SIGTERM
+  ---
+  duration_ms: 154.876984
+  type: 'test'
+  ...
+# Subtest: offline SDL server binds loopback and serves one file with isolation headers
+ok 9 - offline SDL server binds loopback and serves one file with isolation headers
+  ---
+  duration_ms: 29.046837
+  type: 'test'
+  ...
+# Subtest: offline server refuses invalid ports and directories
+ok 10 - offline server refuses invalid ports and directories
+  ---
+  duration_ms: 1.441436
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 447.15982

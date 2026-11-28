@@ -1,0 +1,68 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @crispstrobe/crispbasic@0.1.0-dev.8 test:compiler:wasm-parity
+> node --test tests/compiler-wasm-parity.test.mjs tests/compiler-for-wasm.test.mjs tests/compiler-wasm-regressions.test.mjs
+
+✔ independent C99 / BBCSDL FOR binary64: FOR compares fractional sums before integer variable storage (580.688513ms)
+✔ independent C99 / BBCSDL FOR binary64: FOR preserves real-valued integral increments (494.625309ms)
+✔ independent C99 / BBCSDL FOR binary64: zero STEP retains target-profile handling (710.577817ms)
+✔ independent C99 / BBCSDL binary64: keyword delimiters preserve legal variable names (533.394064ms)
+✔ independent C99 / BBCSDL binary64: default numeric storage preserves exact integer values (392.558802ms)
+✔ independent C99 / BBCSDL binary64: VAL preserves exact integer tags and explicit real syntax (431.921863ms)
+✔ independent C99 / BBCSDL binary64: decimal source and VAL share BBC digit scaling and exponent conversion (276.131954ms)
+✔ independent C99 / BBCSDL binary64: scalar types and numeric print fields (449.000366ms)
+✔ independent C99 / BBCSDL binary64: integer arithmetic and signed division (607.43629ms)
+✔ independent C99 / BBCSDL binary64: FOR WHILE REPEAT and CASE (433.974051ms)
+✔ independent C99 / BBCSDL binary64: FOR post-test entry and evaluated bounds (304.338677ms)
+✔ independent C99 / BBCSDL binary64: nested block and inline conditionals (437.491605ms)
+✔ independent C99 / BBCSDL binary64: dynamic LOCAL and parameter restoration (302.999625ms)
+✔ independent C99 / BBCSDL binary64: recursive functions and string returns (626.500695ms)
+✔ independent C99 / BBCSDL binary64: left to right effects and CASE evaluates once (304.380268ms)
+✔ independent C99 / BBCSDL binary64: multidimensional arrays and inclusive bounds (440.471449ms)
+✔ independent C99 / BBCSDL binary64: string bytes slicing search and conversion (453.343003ms)
+✔ independent C99 / BBCSDL binary64: mathematical functions (370.576004ms)
+✔ independent C99 / BBCSDL binary64: TIME assignment and centiseconds (419.46852ms)
+✔ independent C99 / BBCSDL binary64: line INPUT and numeric INPUT (708.272437ms)
+✔ independent C99 / BBCSDL binary64: INPUT LINE preserves commas (253.192563ms)
+✔ independent C99 / BBCSDL binary64: numbered compact source (256.599436ms)
+✔ independent C99 / BBCSDL binary64: embedded NUL string comparison (423.815595ms)
+✔ independent C99 / BBCSDL binary64: empty program (169.151417ms)
+✔ independent C99 / BBCSDL binary64: seeded RND integer results and parameter conversion (404.464059ms)
+✔ independent C99 / BBCSDL binary64: signed zero retains numeric profile semantics (693.153944ms)
+✔ independent C99 / BBCSDL binary64: integer exponentiation preserves arithmetic tags and order (362.400465ms)
+✔ independent C99 / BBCSDL binary64: fresh numeric zeros and double storage normalization (412.728582ms)
+✔ independent C99 / BBCSDL binary64: integer results from builtins retain exact tags (459.085095ms)
+✔ independent C99 / BBCSDL binary64: shifts retain int64 intermediates and default result widths (391.794093ms)
+✔ independent C99 / BBCSDL binary64: integer assignment truncates in-range fractional boundaries (295.49259ms)
+✔ independent C99 / BBCSDL binary64: FOR exact positive and negative integer bounds terminate (693.183117ms)
+✔ binary64 decimal conversion preserves BBCSDL overflow: PRINT 1.7976931348623157E308 (434.788881ms)
+✔ binary64 decimal conversion preserves BBCSDL overflow: PRINT VAL("1.7976931348623157E308") (291.459137ms)
+✔ binary64 decimal conversion preserves BBCSDL overflow: PRINT VAL("E512") (346.452882ms)
+✔ independent C99 / BBCSDL binary64 range error: a%=2147483648 (207.864589ms)
+✔ independent C99 / BBCSDL binary64 range error: a%=-2147483649 (247.478961ms)
+✔ independent C99 / BBCSDL binary64 range error: a%=2147483647:a%+=1 (308.278073ms)
+✔ independent C99 / BBCSDL binary64 range error: a%=-2147483648:a%-=1 (522.961248ms)
+✔ independent C99 / BBCSDL binary64 range error: a%=4294967296.0 (404.315997ms)
+✔ independent C99 / BBCSDL binary64 range error: FOR i%=2147483647 TO 2147483647:PRINT ;i%:NEXT (336.710777ms)
+✔ independent C99 / BBCSDL binary64 range error: FOR i%=-2147483648 TO -2147483648 STEP -1:PRINT ;i%:NEXT (266.786613ms)
+✔ independent C99 / BBCSDL binary64 real assignment conversion: 1E100 (228.024327ms)
+✔ independent C99 / BBCSDL binary64 real assignment conversion: -1E100 (315.641792ms)
+✔ independent C99 / BBCSDL binary64 real assignment conversion: 18446744073709551616.0 (270.769114ms)
+✔ independent C99 / BBCSDL binary64 real assignment conversion: -18446744073709551616.0 (473.798446ms)
+✔ independent C99 / BBCSDL binary64 real assignment conversion: 18446744073709549568.0 (283.061452ms)
+✔ independent C99 / BBCSDL binary64 real assignment conversion: -18446744073709549568.0 (267.856642ms)
+✔ independent C99 / BBCSDL binary64 integer conversion: PRINT (9223372036854775808.0>>0) (274.693797ms)
+✔ independent C99 / BBCSDL binary64 integer conversion: PRINT (1E100<<1) (306.980283ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12518.902988
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice

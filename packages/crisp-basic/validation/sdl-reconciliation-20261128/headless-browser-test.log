@@ -1,0 +1,970 @@
+TAP version 13
+# Subtest: browser entry runs genuine BASIC without cross-origin isolation
+not ok 1 - browser entry runs genuine BASIC without cross-origin isolation
+  ---
+  duration_ms: 677.305768
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:112:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser VDU events preserve bytes and agree with the completed result
+not ok 2 - browser VDU events preserve bytes and agree with the completed result
+  ---
+  duration_ms: 0.670602
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:129:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser runtime errors map numbered and unnumbered source to editor lines
+not ok 3 - browser runtime errors map numbered and unnumbered source to editor lines
+  ---
+  duration_ms: 0.21206
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:151:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser source validation rejects invalid source with its original position
+not ok 4 - browser source validation rejects invalid source with its original position
+  ---
+  duration_ms: 0.044888
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:181:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: asynchronous browser INPUT preserves nested PROC and recursive FN frames
+not ok 5 - asynchronous browser INPUT preserves nested PROC and recursive FN frames
+  ---
+  duration_ms: 0.052199
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:197:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser fixed input and explicit EOF have distinct outcomes
+not ok 6 - browser fixed input and explicit EOF have distinct outcomes
+  ---
+  duration_ms: 0.038899
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:236:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser output budget stops a printing loop at the exact byte limit
+not ok 7 - browser output budget stops a printing loop at the exact byte limit
+  ---
+  duration_ms: 0.036856
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:254:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser deadline terminates a running tight loop while the page stays responsive
+not ok 8 - browser deadline terminates a running tight loop while the page stays responsive
+  ---
+  duration_ms: 0.058528
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:269:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser AbortSignal cancels an executing tight loop and the session remains reusable
+not ok 9 - browser AbortSignal cancels an executing tight loop and the session remains reusable
+  ---
+  duration_ms: 0.058689
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:291:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser reset cancels suspended input and awaits its worker before another run
+not ok 10 - browser reset cancels suspended input and awaits its worker before another run
+  ---
+  duration_ms: 0.063536
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:314:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: repeated browser runs start with fresh interpreter memory
+not ok 11 - repeated browser runs start with fresh interpreter memory
+  ---
+  duration_ms: 0.031768
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:335:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: concurrent browser sessions keep input and interpreter memory separate
+not ok 12 - concurrent browser sessions keep input and interpreter memory separate
+  ---
+  duration_ms: 0.024927
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:353:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: concurrent browser disposal calls both settle the active run and close the session
+not ok 13 - concurrent browser disposal calls both settle the active run and close the session
+  ---
+  duration_ms: 0.04632
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:379:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser simulation replies preserve recursive frames, local error traps and fixed pin traces
+not ok 14 - browser simulation replies preserve recursive frames, local error traps and fixed pin traces
+  ---
+  duration_ms: 0.025288
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:409:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser reset aborts a pending simulation adapter and ignores its reply during the next run
+not ok 15 - browser reset aborts a pending simulation adapter and ignores its reply during the next run
+  ---
+  duration_ms: 0.023426
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:473:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser simulation request limits remain outside BASIC ON ERROR and release the host
+not ok 16 - browser simulation request limits remain outside BASIC ON ERROR and release the host
+  ---
+  duration_ms: 0.347845
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:527:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser deadlines cover stalled simulation replies while the page remains responsive
+not ok 17 - browser deadlines cover stalled simulation replies while the page remains responsive
+  ---
+  duration_ms: 0.036005
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:558:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: browser simulation diagnostics retain the authored EVAL location across delayed replies
+not ok 18 - browser simulation diagnostics retain the authored EVAL location across delayed replies
+  ---
+  duration_ms: 0.064878
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:592:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+    <launched> pid=36
+    [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-4l40Vz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=36
+      - [pid=36][err] [36:36:1128/204538.066782:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=36][err] [1128/204538.069278:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=36] <gracefully close start>
+      - [pid=36] <kill>
+      - [pid=36] <will force kill>
+      - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=36] starting temporary directories cleanup
+      - [pid=36] finished temporary directories cleanup
+      - [pid=36] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    before.timeout (${CRISPBASIC_CHECKOUT}/scripts/test-browser.mjs:72:30)
+  ...
+# Subtest: offline page byte parity: overlapping string accumulator moves
+not ok 19 - offline page byte parity: overlapping string accumulator moves
+  ---
+  duration_ms: 649.328863
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: structured loops, procedures, functions, arrays and strings
+not ok 20 - offline page byte parity: structured loops, procedures, functions, arrays and strings
+  ---
+  duration_ms: 0.76829
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: numbered source and real tokenization
+not ok 21 - offline page byte parity: numbered source and real tokenization
+  ---
+  duration_ms: 0.143056
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: Latin-1 string bytes
+not ok 22 - offline page byte parity: Latin-1 string bytes
+  ---
+  duration_ms: 0.192321
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: nested function stack and local scope
+not ok 23 - offline page byte parity: nested function stack and local scope
+  ---
+  duration_ms: 0.063916
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: DATA, READ and RESTORE
+not ok 24 - offline page byte parity: DATA, READ and RESTORE
+  ---
+  duration_ms: 0.043195
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: fixed line input and byte input
+not ok 25 - offline page byte parity: fixed line input and byte input
+  ---
+  duration_ms: 0.063456
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: raw VDU bytes
+not ok 26 - offline page byte parity: raw VDU bytes
+  ---
+  duration_ms: 0.056245
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: handled BASIC errors
+not ok 27 - offline page byte parity: handled BASIC errors
+  ---
+  duration_ms: 0.101463
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: explicit program exit
+not ok 28 - offline page byte parity: explicit program exit
+  ---
+  duration_ms: 0.105059
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline page byte parity: empty source
+not ok 29 - offline page byte parity: empty source
+  ---
+  duration_ms: 0.038068
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:29:5'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+# Subtest: offline interactive input, cancellation, rerun and byte download API
+not ok 30 - offline interactive input, cancellation, rerun and byte download API
+  ---
+  duration_ms: 0.045669
+  type: 'test'
+  location: '${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:57:1'
+  failureType: 'hookFailed'
+  error: |-
+    browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+    
+    <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+    <launched> pid=37
+    [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+    [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+    Call log:
+      - <launching> ${WORKSPACE}/toolchains/chromium-root/usr/lib/chromium/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=${WORKSPACE}/tmp/playwright_chromiumdev_profile-7rbffE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37
+      - [pid=37][err] [37:37:1128/204538.101540:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+      - [pid=37][err] [1128/204538.101791:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+      - [pid=37] <gracefully close start>
+      - [pid=37] <kill>
+      - [pid=37] <will force kill>
+      - [pid=37] <process did exit: exitCode=null, signal=SIGABRT>
+      - [pid=37] starting temporary directories cleanup
+      - [pid=37] finished temporary directories cleanup
+      - [pid=37] <gracefully close end>
+    
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    TestContext.<anonymous> (${CRISPBASIC_CHECKOUT}/scripts/test-bundle-browser.mjs:20:30)
+  ...
+1..30
+# tests 30
+# suites 0
+# pass 0
+# fail 30
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 921.467226

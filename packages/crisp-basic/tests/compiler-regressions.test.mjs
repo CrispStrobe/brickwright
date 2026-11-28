@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import test from 'node:test';
 import {createNativeSession} from '../index.mjs';
 import {CompileError, compileSource} from '../src/compiler/index.mjs';
-import {nativeOptions} from './native-test-target.mjs';
+import {nativeOptions, target} from './native-test-target.mjs';
 import {registerCompilerParity} from './compiler-parity-runner.mjs';
 import {workspace, build, execute} from './compiler-regression-helpers.mjs';
 import {registerCompilerNumericErrors} from './compiler-numeric-errors.mjs';
@@ -303,6 +303,7 @@ for (const statement of [
     'PRINT ~4294967296',
     'PRINT STR$~(4294967296)',
     'PRINT SQR(-1)',
+    'PRINT RND2',
     'DIM a%(1):DIM a%(2)'
 ]) {
     test(`compiled runtime keeps an interpreter failure: ${statement}`, async (t) => {
@@ -358,4 +359,9 @@ __attribute__((constructor)) static void initialize(void){atexit(report);}
     assert.equal(counts[1], counts[0], 'completed calls must release CASE selectors and parameter frames');
 });
 
-registerCompilerNumericErrors({name: 'native', createSession: () => createNativeSession(nativeOptions())});
+registerCompilerNumericErrors({
+    name: 'native',
+    createSession: () => createNativeSession(nativeOptions()),
+    saturatingIntegerConversions: target.name === 'linux-arm64',
+    armv7Native: target.name === 'linux-armv7'
+});

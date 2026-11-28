@@ -56,7 +56,8 @@ export function registerCompilerFor(configuration) {
         for (const step of ['0', '0.0', '-0.0']) {
             const source = `FOR i%=1 TO 2 STEP ${step}\nPRINT "entered"\nEXIT FOR\nNEXT\nEND\n`;
             const reference = await session.run(source, {filename: 'zero-step.bas'});
-            const binary64NegativeZero = configuration.numericProfile === 'binary64' && step === '-0.0';
+            const binary64NegativeZero =
+                (configuration.numericProfile === 'binary64' || configuration.nativeBinary64) && step === '-0.0';
             assert.equal(reference.status, binary64NegativeZero ? 'completed' : 'error');
             if (!binary64NegativeZero) {
                 assert.equal(reference.error.code, 35);

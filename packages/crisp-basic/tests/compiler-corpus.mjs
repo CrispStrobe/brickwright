@@ -2,6 +2,17 @@
 // come from BBCSDL at test time; the compiler never consumes interpreter code.
 export const compilerCorpus = [
     {
+        name: 'keyword delimiters preserve legal variable names',
+        source: `CLSx=11:RND2=12:ENDvalue=13:TRUEvalue=14
+LEFT$="left":MID$="middle":RIGHT$="right":STRING$="string"
+INSTR=15:POINT=16:TAB=17
+PRINT CLSx;RND2;ENDvalue;TRUEvalue
+PRINT LEFT$;MID$;RIGHT$;STRING$
+PRINT INSTR;POINT;TAB
+END
+`
+    },
+    {
         name: 'default numeric storage preserves exact integer values',
         source: `a=9007199254740993
 PRINT a-9007199254740992
@@ -315,6 +326,9 @@ PRINT 4294967296>>0;",";4294967296>>32;",";4294967296>>>0
 PRINT -1>>63;",";-1>>64;",";-1>>>0;",";-1>>>32
 PRINT 1<<32;",";1<<63;",";1<<64;",";1<<-1
 PRINT 1<<-64;",";1<<-65;",";-1>>>-64
+PRINT -1>>-1;",";-4294967296>>-1;",";-1>>-224;",";-1>>-255;",";-1>>-256;",";-1>>-257
+PRINT 1<<-255;",";1<<-256;",";1<<-257;",";-1>>>-255;",";-1>>>-256;",";-1>>>-257
+PRINT 1<<-4294967295;",";-1>>-4294967295;",";-1>>>-4294967295
 PRINT -4294967296>>32;",";-4294967296>>63
 END
 `

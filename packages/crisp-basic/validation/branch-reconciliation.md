@@ -63,3 +63,41 @@ The extraction branches diverge from #1866 by 59/60 commits ahead and eleven beh
 ## Landing approach
 
 Preserve existing branches and normal merge ancestry. Bring #1866's current fixes into #1867, qualify #1866 before landing its contained histories, qualify the extracted compiler, then update the immutable compiler pin and qualify the composed editor integration. Reconcile extraction-only commits and moved tests against the final package source. Keep separately preserved WIP checkpoints out of the production path unless their implementation and qualification are actually complete. Queued, superseded and earlier-head checks are not current-head passes.
+
+## Bounded WIP source audit
+
+Both snapshots are explicitly titled “WIP snapshot … agent paused by usage limit” and have the same parent, `a7abfb94b28f2ad8067ab0a9c9ebe2cc5d64f2ef`. Their broad branch ancestry is not the scope of their WIP additions.
+
+### Pico interpreter checkpoint
+
+[Commit bb9ae4f6](https://github.com/CrispStrobe/brickwright/commit/bb9ae4f6eebac63b8a7eef6027c1fa3c980631a6) adds exactly two files, 360 lines:
+
+- [`packages/crisp-basic/pico/picobb-library.mjs`](https://github.com/CrispStrobe/brickwright/blob/bb9ae4f6eebac63b8a7eef6027c1fa3c980631a6/packages/crisp-basic/pico/picobb-library.mjs): a BBC BASIC portable-pin library appended at reserved lines 65280 onward, plus ASCII/line-limit validation and serial command preparation.
+- [`scripts/lib/crispbasic-picobb-rp2040.mjs`](https://github.com/CrispStrobe/brickwright/blob/bb9ae4f6eebac63b8a7eef6027c1fa3c980631a6/scripts/lib/crispbasic-picobb-rp2040.mjs): a prospective PicoBB firmware/emulator harness that records UART, GPIO and circuit observations.
+
+The snapshot contains no `pico/picobb.lock.json`, despite the library comment promising one, and no promised `overlay/scratch-gui/src/lib/bw-machines/crispbasic-picobb-library.js` mirror. There is no firmware builder, new CLI route, GUI caller, test or workflow invocation for either export. Git references to `crispBasicPicoProgram` occur only in these two files; `runCrispBasicOnEmulatedPico` occurs only at its own definition. The helper accepts an arbitrary caller-provided UF2 and checks its flash base, but contains no firmware hash/manifest verification. Thus it is unfinished work toward the separate Pico interpreter route, not a delivered or qualified alternative to the compiler's pico-sdk route.
+
+The existing native and ARM tests ran, but [its runtime workflow](https://github.com/CrispStrobe/brickwright/actions/runs/46171504253) failed at “Verify source round trips, controller profiles and coupled CAD physics”; downstream production and portable jobs were skipped. This does not attribute that inherited integration failure to the two new files, nor establish execution of the new harness. Preserve the checkpoint and finish its pin/build/delivery/tests together if that separate route is resumed. It cannot be claimed as superseded by the C99 compiler, but leaving it out of production loses no previously wired route.
+
+### Older compiler checkpoint
+
+[Commit c8b0befe](https://github.com/CrispStrobe/brickwright/commit/c8b0befe3b2f356737c50df084ac5f3b7255dd91) changes exactly five package files: `bin/crispbasic.mjs`, `native/crispbasic.c`, `scripts/build-native.mjs`, `src/bundle.mjs`, and `src/compiler/lexer.mjs`.
+
+The CLI imports `src/cli-tools.mjs`, which does not exist in that commit. The lexer is the only file in `src/compiler/`; there is no parser, code generator or C runtime. The CLI therefore cannot invoke either advertised command. It contains no new tests. [Its runtime workflow](https://github.com/CrispStrobe/brickwright/actions/runs/46171499842) also failed at the source-roundtrip/controller/CAD stage; successful existing native/ARM jobs did not qualify a compiler.
+
+The extracted PR #1 supersedes its headless native/web packaging design with wired commands, verified runtime inputs, artifact tests, and additional full SDL profiles. Its differing experimental overlay format and `--web`/`--emit` spellings were never a completed released interface.
+
+One semantic idea remains useful: the WIP lexer tracks the complete BBC keyword set, keyword delimiters and abbreviations. It is explicitly a translated adaptation of permitted BBCSDL lexical code, not proprietary compiler code. The completed independent compiler does not use it. A bounded source probe during this audit found that the independent compiler accepted `CLS=2:PRINT CLS:END`, `OPENOUT=3:PRINT OPENOUT:END`, and `PRINT RND2:END`; this raises a reserved-word/delimiter compatibility risk that was passed to the compiler-validation owner for actual interpreter comparison and an independent fix. The probe establishes acceptance only, not interpreter parity. Do not transplant the abandoned compiler wholesale to retain this semantic lesson.
+
+
+## Reconciled candidate
+
+The standalone compiler candidate contains every original CrispBASIC branch head through normal merge ancestry. The prepared switchover was composed in `8430c861b5cd467349e0b07efdd61baec92ff51f`, retaining compiler/MCU validation gates and importing the four supplier-provenance corrections from Brickwright. The six dependent integration suites were relocated in the coordinated Brickwright adoption branch and executed against the real WASM interpreter.
+
+The lexical concern above was confirmed against BBCSDL and corrected independently in `4486adb6d5a93ed7e33bc999f2e44f25040003d1`. Native AArch64 and ARMv7 numeric edge cases were fixed in `d93388c2a9bed8a294be37c3e28560523fd84aa4` and `3c54195cfc696edac2c6d9e776360bb2e9592256`. Those commits and the durable compiler evidence at `eff597d992898d5d604bb95486c1b10e13d5c4ce` are included. The compiler receipt records 347 passing test executions across core, all three native architectures and binary64/WASM, without skips.
+
+Fresh bundled execution passes 36 native SDL tests across x64, ARM64 and ARMv7. The web runtime builds and passes its five packaging checks; local Chromium was blocked before page execution by the managed workspace socket restriction. The separate SDL receipt records that limitation explicitly. Fresh MCU verification executes four fixtures on two cold boots of both Uno and Pico, for 16 successful runs with regenerated artifact hashes.
+
+Brickwright #1867 first incorporates #1866 at `bd2e5e6d16150bc6e6147dcdffc1cb5382206a80`. The extraction-only and test-relocation commits are composed on `review/compile-basic-adoption-20261128`, excluding unrelated aggregate ancestry. A real supplier synchronization repairs the live firmware manifest/archive at `0f4920cbba99214fd5262439e274d0eb67d20210`; all 71 archive source payloads/modes/links and the firmware bytes remain unchanged, and the complete pin-history checks pass. Its ancestry is included by the consumer candidate at `7a6576b4bd2cfa40b4b64d63e0582048989817bb`.
+
+The historical tables above are an audit snapshot, not final PR status. Final heads and merge results must be read from GitHub. Pending hosted checks are never recorded as successful local execution or as a passed hosted gate. The unfinished Pico interpreter checkpoint and unrelated Cowgol/MakeCode drafts remain separately preserved.
