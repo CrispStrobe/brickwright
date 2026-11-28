@@ -125,6 +125,7 @@ export async function runMachineConfig(config, opts = {}) {
             const bytes = activated.media?.[slot]?.bytes;
             if (bytes) (detail.i80386Media ||= {})[slot] = bytes;
         }
+        if (bm.i80386HddGeometry) detail.i80386HddGeometry = bm.i80386HddGeometry;
     }
     // An inline machineConfig ({regions,chips}) — the Eater 6502 case — carries
     // the program's hardware as `chips`; a string preset (PCXT8086) is built by

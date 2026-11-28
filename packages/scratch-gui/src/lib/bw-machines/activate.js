@@ -184,6 +184,7 @@ export async function activateConfig(config, opts = {}) {
     // `snapshot`, when the config has one, to open at the shell prompt.
     const extraSlots = [...new Set(['bios', 'vga-rom', 'initrd', 'snapshot',
         ...(cfg.machine === 'i80386' && machinePreset === 'freedos-vga' ? ['hdd', 'floppy'] : []),
+        ...(cfg.machine === 'i80386' && bootSlotId === 'floppy' ? ['hdd'] : []),
         ...(spectrumRoms ? [...spectrumRoms, 'tape', 'snapshot'] : [])])].filter(id => id !== bootSlotId && cfg.slots[id]);
     // ALL AT ONCE. The boot image and every companion are fetched in parallel:
     // one after the other, the Linux lesson's three files (9.5 MB) cost the sum
@@ -216,7 +217,10 @@ export async function activateConfig(config, opts = {}) {
     if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.program?.name)) {
         bootMedia.name = cfg.provenance.program.name;
     }
-    if (cfg.machine === 'i80386') bootMedia.nativeBlocks = cfg.nativeBlocks === true;
+    if (cfg.machine === 'i80386') {
+        bootMedia.nativeBlocks = cfg.nativeBlocks === true;
+        if (media.hdd && cfg.slots.hdd.geometry) bootMedia.i80386HddGeometry = {...cfg.slots.hdd.geometry};
+    }
     if (bootRef.geometry) bootMedia.geometry = {...bootRef.geometry};
     // A ROM image states its own load address via the config; carry it so the
     // reset vector reads from real bytes (debug-runner's romAt path).

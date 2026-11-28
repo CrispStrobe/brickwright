@@ -391,7 +391,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
-        const {i8086Assembly} = e.detail || {};
+        const {i8086Assembly, i80386HddGeometry} = e.detail || {};
         const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt, picoBasicConsole, picoBasicCommands, picoFlashStorage} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
@@ -460,6 +460,7 @@ class DebugPanel extends React.Component {
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
             machinePreset: kind === 'i80386' || kind === 'z80' ? machinePreset || null : null,
             i80386Media: kind === 'i80386' ? i80386Media || null : null,
+            i80386HddGeometry: kind === 'i80386' ? i80386HddGeometry || null : null,
             machineConfig6502: kind === 'eater6502' ? machineConfig6502 || null : null,
             // HARDWARE THE PROGRAM ASKED FOR, and it has to be listed here
             // explicitly: this destructure is a fixed field list, so a new

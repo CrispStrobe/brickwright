@@ -3867,13 +3867,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // (40K) exactly as the CLI qualification does, leaving every other
         // region untouched. functionalInstructionCycles matches the receipt.
         const base = PCAT80386_EXPERIMENTAL_4M_HDD_FREEDOS_VGA;
-        const hdGeom = (bootMedia && bootMedia.geometry) ||
+        const hddBytes = isHdd ? bootImg.bytes : bootMedia?.i80386Media?.hdd;
+        const hdGeom = (isHdd ? bootMedia.geometry : bootMedia?.i80386HddGeometry) ||
             { cylinders: 306, heads: 4, sectors: 17 };
         // Type-47 CMOS drive-C geometry, byte-for-byte as the CLI qualification
         // sets it, so the Bochs BIOS builds a real FDPT for drive 0 and FreeDOS
-        // mounts the partition as C:. Only applied for a hard-disk boot; a
-        // floppy boot instead selects the floppy and its drive density.
-        const hdCmos = isHdd ? (g => [
+        // mounts the partition as C:. A boot floppy can share the AT with the
+        // hard disk, in which case the CMOS boot order tries A: first.
+        const hdCmos = hddBytes ? (g => [
+            [0x12, 0xf0],
+            [0x3d, 0x21],
             [0x19, 47],
             [0x1b, g.cylinders & 0xff], [0x1c, (g.cylinders >> 8) & 0xff],
             [0x1d, g.heads & 0xff],
@@ -3891,17 +3894,18 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 ...base.regions.filter(r => !(r.kind === 'rom' && r.start === 0xc0000)),
                 { kind: 'rom', start: 0xc0000, end: 0xc9fff },
             ],
-            chips: withI80386MouseCmos(base.chips,
-                isHdd ? [[0x3d, 0x21], [0x12, 0xf0], ...hdCmos] : isFloppy ? i80386FloppyCmos(floppyGeom) : []),
+            chips: withI80386MouseCmos(base.chips, [
+                ...(isFloppy ? i80386FloppyCmos(floppyGeom) : []),
+                ...hdCmos
+            ]),
         };
 
         const targetOpts = { config };
         if (bootMedia?.nativeBlocks === true) targetOpts.nativeBlocks = true;
-        // A hard-disk boot attaches its image as the ATA16 drive at construction
-        // (the adapter reads opts.ataImage/ataGeometry). A floppy is inserted
-        // into the µPD765 after construction, below.
-        if (isHdd) {
-            targetOpts.ataImage = bootImg.bytes;
+        // The adapter attaches the hard disk at construction. The boot floppy
+        // is inserted into the FDC before reset.
+        if (hddBytes) {
+            targetOpts.ataImage = hddBytes;
             targetOpts.ataGeometry = hdGeom;
         }
         const db = designerBoard();

@@ -191,3 +191,29 @@ test('Sopwith uses a locally supplied original ZIP and the XT 1.2 MB boot disk',
     assert.match(item.supportSource.url, /original-files[/]gplsrc[.]zip$/);
     await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(720 * 1024)])), /120m/);
 });
+
+test('386 floppy boot passes a companion hard disk and its own geometry', async () => {
+    const floppy = new Uint8Array(2);
+    const hdd = new Uint8Array(3);
+    const floppyGeometry = {cylinders: 80, heads: 2, sectors: 15, bytesPerSector: 512};
+    const hddGeometry = {cylinders: 500, heads: 8, sectors: 17};
+    const config = fromMediaManifest({
+        title: 'AT floppy and hard disk', machine: 'i80386', bios: {kind: 'bochs-lgpl'},
+        slots: {
+            floppy: {url: 'local-media:floppy', geometry: floppyGeometry},
+            hdd: {url: 'local-media:hdd', geometry: hddGeometry}
+        },
+        bootOrder: ['floppy', 'hdd']
+    });
+    await runMachineConfig(config, {
+        fetcher: async ({url}) => ({bytes: url.endsWith(':hdd') ? hdd : floppy}),
+        awaitBoot: true,
+        dispatch: detail => {
+            assert.equal(detail.slotId, 'floppy');
+            assert.deepEqual(detail.geometry, floppyGeometry);
+            assert.deepEqual(detail.i80386HddGeometry, hddGeometry);
+            assert.equal(detail.i80386Media.hdd, hdd);
+            detail.bootCompletion.resolve();
+        }
+    });
+});
