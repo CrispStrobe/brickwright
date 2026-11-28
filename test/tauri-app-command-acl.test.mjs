@@ -103,7 +103,7 @@ const audit = ({handler, build, main, mobile, ack, runtime, peers, editor}) => {
 
     const entries = all.filter(entry => entry.cfg !== PEER_CFG);
     const registered = entries.map(entry => entry.name);
-    assert.equal(registered.length, 44, 'review a deliberate command-count change');
+    assert.equal(registered.length, 47, 'review a deliberate command-count change');
     assert.equal(new Set(registered).size, registered.length, 'handler commands must be unique');
     assert.equal(new Set(manifested).size, manifested.length, 'manifest commands must be unique');
     assert.deepEqual(uniqueSorted(manifested), uniqueSorted(registered),

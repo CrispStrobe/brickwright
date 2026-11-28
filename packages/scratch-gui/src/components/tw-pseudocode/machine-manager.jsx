@@ -608,7 +608,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                         rowAttributes={{'data-testid': 'bw-mm-xkim'}}
                                         info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
                                             {' '}Choose loose 8.3 files or a FAT12/16/32 image up to 128 MiB. For an image, only compatible root files are imported.
-                                            {' '}The guest changes session copies. Export files in Controller keeps them in a ZIP.</>}
+                                            {' '}Controller can export the session files as ZIP or save an updated copy of the FAT image.</>}
                                         actions={<>
                                             <label style={fieldsStyle}>ROM
                                                 <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}

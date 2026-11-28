@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {readXkimFatImage, XKIM_FAT_IMAGE_LIMIT} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim-fat.js';
+import {readXkimFatImage, writeXkimFatImage, XKIM_FAT_IMAGE_LIMIT} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim-fat.js';
 import {readXkimMedia} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim.js';
 
 const encoder = new TextEncoder();
@@ -75,12 +75,15 @@ function makeFat (bits, partition = false) {
     bytes.set(payload.subarray(0, sectorSize), start + clusterOffset(3));
     bytes.set(payload.subarray(sectorSize), start + clusterOffset(7));
     entry(0, 'VOLUME     ', 0x08, 0, 0);
-    entry(1, 'SUBDIR     ', 0x10, 2, 0);
+    fat(8, eoc);
+    entry(1, 'SUBDIR     ', 0x10, 8, 0);
     entry(2, 'LONGNAME   ', 0x0f, 0, 0);
-    entry(3, 'HELLO~1 TXT', 0x20, 3, 600);
+    fat(9, eoc);
+    entry(3, 'HELLO~1 TXT', 0x20, 9, 1);
     entry(4, 'PROGRAM BIN', 0x20, 3, 600);
-    entry(5, 'EMPTY      ', 0x20, 0, 0);
-    return {bytes, payload, fat, entry, eoc};
+    fat(10, eoc);
+    entry(5, 'EMPTY      ', 0x20, 10, 0);
+    return {bytes, payload, fat, entry, eoc, start, clusterOffset};
 }
 
 for (const [bits, partition] of [[12, false], [16, true], [32, false]]) {
@@ -128,4 +131,72 @@ test('xKIM requires an unambiguous primary FAT partition and enforces the file-c
         entry(index, `FILE${String(index).padStart(4, '0')}TXT`, 0x20, 0, 0);
     }
     assert.throws(() => readXkimFatImage(bytes), /exceed 64 files/);
+});
+
+for (const [bits, partition] of [[12, false], [16, true], [32, false]]) {
+    test(`xKIM saves changed and new files into a copy of FAT${bits}`, () => {
+        const {bytes, start, clusterOffset, entry} = makeFat(bits, partition);
+        entry(6, 'OTHER   TXT', 0x20, 0, 0);
+        const before = bytes.slice();
+        const files = [
+            {name: 'PROGRAM.BIN', bytes: Uint8Array.of(42)},
+            {name: 'EMPTY', bytes: Uint8Array.of(43)},
+            {name: 'ADDED.HEX', bytes: new Uint8Array(900).fill(0xf3)}
+        ];
+        const updated = writeXkimFatImage(bytes, files);
+        const result = new Map(readXkimFatImage(updated).map(file => [file.name, file.bytes]));
+        const expected = new Map(files.map(file => [file.name, file.bytes]));
+        expected.set('OTHER.TXT', new Uint8Array());
+        assert.deepEqual(result, expected);
+        assert.deepEqual(bytes, before);
+        assert.deepEqual(updated.subarray(0, start + 512), before.subarray(0, start + 512));
+        const directory = start + clusterOffset(8);
+        assert.deepEqual(updated.subarray(directory, directory + 1024), before.subarray(directory, directory + 1024));
+        assert.deepEqual(writeXkimFatImage(updated, readXkimFatImage(updated)), updated);
+    });
+}
+
+test('xKIM grows a full FAT32 root across clusters and updates valid FSInfo hints', () => {
+    const {bytes, entry} = makeFat(32);
+    const disk = new DataView(bytes.buffer);
+    disk.setUint16(48, 1, true);
+    disk.setUint16(50, 6, true);
+    for (const offset of [512, 7 * 512]) {
+        disk.setUint32(offset, 0x41615252, true);
+        disk.setUint32(offset + 484, 0x61417272, true);
+        disk.setUint32(offset + 488, 65500, true);
+        disk.setUint32(offset + 492, 2, true);
+        disk.setUint32(offset + 508, 0xaa550000, true);
+    }
+    for (let index = 6; index < 16; index++) entry(index, `FILE000${index % 10}TXT`, 0x20, 0, 0);
+    // Fill deleted slots in the previous root cluster with a volume entry, so there are no free slots.
+    const firstRootOffset = (32 + 2 * Math.ceil(65532 * 4 / 512)) * 512;
+    for (let offset = firstRootOffset; offset < firstRootOffset + 512; offset += 32) {
+        bytes[offset] = 65;
+        bytes[offset + 11] = 8;
+    }
+    const added = {name: 'NEW.TXT', bytes: Uint8Array.of(1)};
+    const updated = writeXkimFatImage(bytes, [added]);
+    const result = new DataView(updated.buffer);
+    for (const offset of [512, 7 * 512]) {
+        assert.equal(result.getUint32(offset + 488, true), 65521);
+        assert.equal(result.getUint32(offset + 492, true), 11);
+    }
+    assert.deepEqual(readXkimFatImage(updated).at(-1), added);
+});
+
+test('xKIM leaves the original untouched if the directory is full or the replacement shares a cluster', () => {
+    const {bytes, entry, fat} = makeFat(12);
+    const changed = {name: 'PROGRAM.BIN', bytes: new Uint8Array()};
+    entry(6, 'CROSSLNKBIN', 0x20, 7, 88);
+    const crossed = bytes.slice();
+    assert.throws(() => writeXkimFatImage(bytes, [changed]), /share allocated clusters/);
+    assert.deepEqual(bytes, crossed);
+    entry(6, 'ALLOCATED  ', 0x08, 0, 0);
+    for (let index = 7; index < 80; index++) entry(index, 'ALLOCATED  ', 0x08, 0, 0);
+    assert.throws(() => writeXkimFatImage(bytes, [{name: 'SAVE.HEX', bytes: Uint8Array.of(1)}]), /root directory is full/);
+    for (let cluster = 2; cluster <= 65; cluster++) {
+        if (![3, 7, 8, 9].includes(cluster)) fat(cluster, 0xff7);
+    }
+    assert.throws(() => writeXkimFatImage(bytes, [{...changed, bytes: new Uint8Array(1100)}]), /not enough free space/);
 });

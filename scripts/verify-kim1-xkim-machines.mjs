@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {basename} from 'node:path';
 import JSZip from 'jszip';
 import {chromium} from 'playwright';
+import {readXkimFatImage} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim-fat.js';
 
-const [url, rom, fatImage] = process.argv.slice(2);
+const [url, rom, fatImage, outputImage] = process.argv.slice(2);
 assert.ok(url && rom, 'Pass the frontend URL and a locally built upstream xKIM ROM.');
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const page = await browser.newPage({viewport: {width: 1600, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
-page.setDefaultTimeout(35000);
+page.setDefaultTimeout(90000);
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
@@ -113,6 +115,25 @@ try {
     assert.equal(await archive.file('SAVE.HEX').async('string'), ':010200005AA3\r\n:00000001FF');
     assert.equal(await archive.file('HELLO.TXT').async('string'), 'HELLO FROM BRICKWRIGHT\r\n');
 
+    const saveImage = terminal.getByRole('button', {name: 'Save image', exact: true});
+    let updatedImage;
+    if (fatImage) {
+        const pending = page.waitForEvent('download');
+        await saveImage.click();
+        const saved = await pending;
+        const name = basename(fatImage).replace(/\.[^.]+$/, '') + '-updated.img';
+        assert.equal(saved.suggestedFilename(), name);
+        const bytes = await readFile(await saved.path());
+        const files = new Map(readXkimFatImage(bytes).map(file => [file.name, file.bytes]));
+        assert.equal(Buffer.from(files.get('SAVE.HEX')).toString(), ':010200005AA3\r\n:00000001FF');
+        assert.equal(Buffer.from(files.get('HELLO.TXT')).toString(), 'HELLO FROM BRICKWRIGHT\r\n');
+        assert.equal(readXkimFatImage(await readFile(fatImage)).some(file => file.name === 'SAVE.HEX'), false);
+        if (outputImage) await saved.saveAs(outputImage);
+        updatedImage = outputImage || await saved.path();
+    } else {
+        assert.equal(await saveImage.count(), 0);
+    }
+
     await terminal.getByTestId('bw-machine-fullscreen').click();
     await terminal.getByRole('button', {name: 'Exit full screen', exact: true}).click();
     await page.getByTestId('bw-ctl-mode-edit').click();
@@ -126,15 +147,25 @@ try {
     await terminal.waitFor({state: 'hidden'});
     await openLibrary();
     await row.getByLabel('xKIM ROM').setInputFiles(rom);
+    if (updatedImage) {
+        await row.getByLabel('xKIM storage type').selectOption('fat');
+        await row.getByLabel('xKIM FAT image').setInputFiles(updatedImage);
+    }
     await run.click();
     await waitFor(/Extended KIM Monitor v1[.]8[\s\S]*>\s*$/);
     assert.equal(await surface.inputValue(), 'terminal');
     assert.doesNotMatch(await output.textContent(), /HELLO FROM BRICKWRIGHT/);
+    if (updatedImage) {
+        await submit('T');
+        await waitFor(/Enter filename:\s*$/);
+        await submit('SAVE.HEX');
+        await waitFor(/:010200005AA3[\s\S]*:00000001FF[\s\S]*>\s*$/);
+    }
     await page.getByTitle('Stop', {exact: true}).click();
     await terminal.waitFor({state: 'hidden'});
     await unrelatedWidget.waitFor();
     assert.deepEqual(errors, []);
-    console.log(`xKIM booted from ${fatImage ? 'a FAT image' : 'loose files'}, read the UTC clock, saved and reloaded Intel HEX, and exported the exact session files through Controller.`);
+    console.log(`xKIM booted from ${fatImage ? 'a FAT image' : 'loose files'}, read the UTC clock, saved and reloaded Intel HEX, and exported the session files through Controller.${updatedImage ? ' The saved FAT image mounted and exposed the new file.' : ''}`);
 } catch (error) {
     console.error(await page.getByTestId('bw-serial-console').allTextContents());
     console.error(await page.getByTestId('bw-machine-manager').allTextContents());
