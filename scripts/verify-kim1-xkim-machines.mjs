@@ -51,6 +51,13 @@ try {
     const waitFor = pattern => output.filter({hasText: pattern}).waitFor();
     const submit = async line => {await input.fill(line); await input.press('Enter');};
     await waitFor(/Extended KIM Monitor v1[.]8[\s\S]*>\s*$/);
+    const beforeClock = Math.floor(Date.now() / 1000) * 1000;
+    await submit('C');
+    const clockPattern = /Date: (\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}):(\d{2})/;
+    await waitFor(new RegExp(clockPattern.source + '[\\s\\S]*>\\s*$'));
+    const [, month, day, year, hour, minute, second] = (await output.textContent()).match(clockPattern);
+    const guestClock = Date.UTC(+year, +month - 1, +day, +hour, +minute, +second);
+    assert.ok(guestClock >= beforeClock && guestClock <= Date.now(), 'xKIM clock matches current UTC');
     await submit('D');
     await waitFor(/Disk Directory[\s\S]*HELLO[.]TXT[\s\S]*README[.]ME[\s\S]*>\s*$/);
     await submit('T');
@@ -127,7 +134,7 @@ try {
     await terminal.waitFor({state: 'hidden'});
     await unrelatedWidget.waitFor();
     assert.deepEqual(errors, []);
-    console.log(`xKIM booted from ${fatImage ? 'a FAT image' : 'loose files'}, saved and reloaded Intel HEX, and exported the exact session files through Controller.`);
+    console.log(`xKIM booted from ${fatImage ? 'a FAT image' : 'loose files'}, read the UTC clock, saved and reloaded Intel HEX, and exported the exact session files through Controller.`);
 } catch (error) {
     console.error(await page.getByTestId('bw-serial-console').allTextContents());
     console.error(await page.getByTestId('bw-machine-manager').allTextContents());

@@ -63,6 +63,6 @@ export function createXkimTerminal ({rom, files}) {
         exportFiles: async snapshot => downloadBlob('xkim-files.zip', await createXkimArchive(snapshot)),
         title: 'xKIM · Corsham files',
         inputLabel: 'xKIM command',
-        help: 'D lists files. T displays a file. S saves a memory range as Intel HEX and L reloads it. Export files downloads the current session files.'
+        help: 'C shows the clock in UTC. D lists files. T displays a file. S saves a memory range as Intel HEX and L reloads it. Export files downloads the current session files.'
     });
 }
