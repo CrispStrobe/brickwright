@@ -18555,7 +18555,7 @@ const Ct = class Ct extends hh {
   }
 };
 QN(Ct, "DxfClassMap"), n(Ct, "_cache", /* @__PURE__ */ new Map());
-let z = Ct;
+let W = Ct;
 var eP = Object.defineProperty, tP = (i, t) => eP(i, "name", { value: t, configurable: !0 });
 const Bt = class Bt extends hh {
   constructor() {
@@ -18576,9 +18576,9 @@ const Bt = class Bt extends hh {
       }
       if (c.dxfSubClassIsEmpty) {
         const h = [...a.subClasses.values()].at(-1);
-        h && Bt.addClassProperties(h, c.typeName), c.dxfSubClassName && a.subClasses.set(c.dxfSubClassName, new z(c.dxfSubClassName));
+        h && Bt.addClassProperties(h, c.typeName), c.dxfSubClassName && a.subClasses.set(c.dxfSubClassName, new W(c.dxfSubClassName));
       } else if (c.dxfSubClassName) {
-        const h = new z(c.dxfSubClassName);
+        const h = new W(c.dxfSubClassName);
         Bt.addClassProperties(h, c.typeName), a.subClasses.set(h.name, h);
       }
       c = c.baseTypeName ? ra(c.baseTypeName) : void 0;
@@ -19112,7 +19112,7 @@ const Vu = class Vu extends ie {
     const e = this.style.clone(), r = this.getStyleOverrideMap();
     if (r == null)
       return e;
-    const s = z.create(ke);
+    const s = W.create(ke);
     for (const [a, o] of r) {
       const l = s.dxfProperties.get(a);
       l?.setValue(a, e, o);
@@ -19124,7 +19124,7 @@ const Vu = class Vu extends ie {
     return this.text.length > 0 ? this.text.includes("<>") ? this.text.replace(/<>/g, s) : this.text : `${r.prefix}${s}${r.suffix}`;
   }
   getStyleOverrideMap() {
-    const e = /* @__PURE__ */ new Map(), r = z.create(ke);
+    const e = /* @__PURE__ */ new Map(), r = W.create(ke);
     for (const [s, a] of this.extendedData.getExtendedDataByName())
       if (!(s !== rt.defaultName.toUpperCase() && !s.startsWith(`${rt.defaultName.toUpperCase()}_${ke.styleOverrideEntryName}`)))
         for (let o = 0; o < a.records.length - 1; o++) {
@@ -19134,7 +19134,7 @@ const Vu = class Vu extends ie {
     return e.size > 0 ? e : null;
   }
   setDimensionOverride(e) {
-    const r = this.style, s = z.create(ke), a = /* @__PURE__ */ new Map();
+    const r = this.style, s = W.create(ke), a = /* @__PURE__ */ new Map();
     for (const [o, l] of s.dxfProperties) {
       const c = l.getRawValue(r), h = l.getRawValue(e);
       h != null && h !== c && a.set(o, h);
@@ -19144,7 +19144,7 @@ const Vu = class Vu extends ie {
   setStyleOverrideMap(e) {
     const r = `${rt.defaultName}_${ke.styleOverrideEntryName}`, s = [];
     if (e != null) {
-      const l = z.create(ke);
+      const l = W.create(ke);
       for (const [c, h] of e) {
         const d = l.dxfProperties.get(c);
         d != null && (d.storedValue = h, s.push(...d.toXDataRecords()));
@@ -33392,7 +33392,7 @@ const qC = class qC {
       }
   }
   writeCommonEntityData(t) {
-    const e = z.create(ie);
+    const e = W.create(ie);
     if (this._writer.write(B.Subclass, p.entity), this.version <= w.AC1009 ? this._writer.write(8, t.layer?.name ?? "0") : this._writer.writeIfNotDefault(8, t.layer?.name ?? "0", "0"), this._writer.writeIfNotDefault(6, t.lineType?.name ?? "ByLayer", "ByLayer"), t.bookColor !== null ? (this._writer.write(62, t.bookColor.color.getApproxIndex()), this._writer.writeTrueColor(420, t.bookColor.color), this._writer.write(430, t.bookColor.name)) : t.color.isTrueColor ? this.version <= w.AC1009 ? this._writer.write(62, t.color.getApproxIndex()) : this._writer.writeTrueColor(420, t.color) : this._writer.write(62, t.color.index), t.transparency.value >= 0 && this._writer.write(440, Dt.toAlphaValue(t.transparency)), this._writer.writeIfNotDefault(48, t.lineTypeScale, 1, e), this._writer.writeIfNotDefault(60, t.isInvisible ? 1 : 0, 0, e), t.owner instanceof re) {
       const r = t.owner;
       r.layout !== null && this._writer.write(67, r.layout.isPaperSpace ? 1 : 0);
@@ -33661,14 +33661,14 @@ const qC = class qC {
     this._writer.write(B.Subclass, p.leader), this._writer.write(270, t.contentType, r), this._writer.writeHandle(340, t.style), this._writer.writeHandle(341, t.leaderLineType), this._writer.writeCmColor(91, t.lineColor, r), this._writer.write(170, t.pathType, r), this._writer.write(171, t.lineColor, r), this._writer.writeHandle(343, t.textStyle), this._writer.write(173, t.textLeftAttachment, r), this._writer.write(95, t.textRightAttachment, r), t.contextData && (this._writer.write(300, "CONTEXT_DATA{"), this._writeAnnotContext(t.contextData, e), this._writer.write(301, "}")), this._writer.write(44, t.scaleFactor, r), this._writer.write(294, t.textDirectionNegative, r), this._writer.write(274, t.textAligninIPE, r), this._writer.write(178, t.textAttachmentDirection, r), this._writer.write(175, t.textAttachmentDirection, r), this._writer.write(176, t.textAttachmentDirection, r);
   }
   _writeAnnotContext(t, e) {
-    const r = z.create(on);
+    const r = W.create(on);
     this._writer.writeVector(10, t.contentBasePoint, r), this._writer.write(41, t.textHeight, r), this._writer.write(140, t.arrowheadSize, r), this._writer.write(145, t.landingGap, r), this._writer.write(174, t.textLeftAttachment, r), this._writer.write(175, t.textRightAttachment, r), this._writer.write(176, t.textAlignment, r), this._writer.write(177, t.blockContentConnection, r), this._writer.write(290, t.hasTextContents, r), this._writer.writeVector(110, t.contentBasePoint, r), this._writer.writeVector(111, t.baseDirection, r), this._writer.writeVector(112, t.baseVertical, r), this._writer.write(297, t.normalReversed, r), this._writer.writeVector(12, t.textLocation, r), this._writer.writeVector(13, t.direction, r);
     for (const s of t.leaderRoots)
       this._writer.write(302, "LEADER{"), this._writeLeaderRoot(s), this._writer.write(303, "}");
     this._writer.writeHandle(340, t.textStyle);
   }
   _writeLeaderRoot(t) {
-    const e = z.create(t.constructor, "LeaderRoot");
+    const e = W.create(t.constructor, "LeaderRoot");
     this._writer.write(290, t.contentValid, e), this._writer.writeVector(10, t.connectionPoint, e), this._writer.writeVector(11, t.direction, e);
     for (const r of t.lines)
       this._writer.write(304, "LEADER_LINE{"), this._writeLeaderLine(r), this._writer.write(305, "}");
@@ -33927,7 +33927,7 @@ const QC = class QC extends vs {
     }
   }
   _writeBlock(t) {
-    const e = z.create(ea);
+    const e = W.create(ea);
     this._writer.write(B.Start, t.objectName), this.writeCommonObjectData(t), this.writeCommonEntityData(t), this._writer.write(B.Subclass, p.blockBegin), t.xRefPath && this._writer.write(1, t.xRefPath, e), this._writer.write(2, t.name, e), this._writer.write(70, t.flags, e), this.version >= w.AC1015 && t.isUnloaded && this._writer.write(71, t.isUnloaded ? 1 : 0, e), this._writer.writeVector(10, t.basePoint, e), this._writer.write(3, t.name, e), this._writer.write(4, t.comments, e);
   }
   _processEntities(t) {
@@ -34019,11 +34019,11 @@ const rB = class rB extends vs {
     e instanceof Ca && (this._writer.write(100, p.dictionaryWithDefault), this._writer.writeHandle(340, e.defaultEntry));
   }
   writeDictionaryVariable(e) {
-    const r = z.create(jt);
+    const r = W.create(jt);
     this._writer.write(100, p.dictionaryVariables), this._writer.write(1, e.value, r), this._writer.write(280, e.objectSchemaNumber, r);
   }
   writeGeoData(e) {
-    const r = z.create(Sn);
+    const r = W.create(Sn);
     switch (this._writer.write(100, p.geoData, r), this.version) {
       case w.Unknown:
       case w.MC0_0:
@@ -34074,21 +34074,21 @@ const rB = class rB extends vs {
       this._writer.writeHandle(340, r);
   }
   writeImageDefinition(e) {
-    const r = z.create(Dn);
+    const r = W.create(Dn);
     this._writer.write(100, p.rasterImageDef), this._writer.write(90, e.classVersion, r), this._writer.write(1, e.fileName, r), this._writer.writeVector(10, e.size, r), this._writer.write(280, e.isLoaded ? 1 : 0, r), this._writer.write(281, e.units, r);
   }
   writeLayout(e) {
-    const r = z.create($t);
+    const r = W.create($t);
     this.writePlotSettings(e), this._writer.write(100, p.layout), this._writer.write(1, e.name, r), this._writer.write(71, e.tabOrder, r), this._writer.writeVector(10, e.minLimits, r), this._writer.writeVector(11, e.maxLimits, r), this._writer.writeVector(12, e.insertionBasePoint, r), this._writer.writeVector(13, e.origin, r), this._writer.writeVector(14, e.minExtents, r), this._writer.writeVector(15, e.maxExtents, r), this._writer.writeVector(16, e.xAxis, r), this._writer.writeVector(17, e.yAxis, r), this._writer.write(146, e.elevation, r), this._writer.write(76, 0, r), this._writer.writeHandle(330, e.associatedBlock, r);
   }
   writeMLineStyle(e) {
-    const r = z.create(Ri);
+    const r = W.create(Ri);
     this._writer.write(100, p.mLineStyle), this._writer.write(2, e.name, r), this._writer.write(70, e.flags, r), this._writer.write(3, e.description, r), this._writer.write(62, e.fillColor.getApproxIndex(), r), this._writer.write(51, e.startAngle, r), this._writer.write(52, e.endAngle, r), this._writer.write(71, e.elements.length, r);
     for (const s of e.elements)
       this._writer.write(49, s.offset, r), this._writer.write(62, s.color.index, r), this._writer.write(6, s.lineType?.name ?? "ByLayer", r);
   }
   writeMultiLeaderStyle(e) {
-    const r = z.create(Kr);
+    const r = W.create(Kr);
     this._writer.write(100, p.mLeaderStyle), this._writer.write(179, 2), this._writer.write(170, e.contentType, r), this._writer.write(171, e.multiLeaderDrawOrder, r), this._writer.write(172, e.leaderDrawOrder, r), this._writer.write(90, e.maxLeaderSegmentsPoints, r), this._writer.write(40, e.firstSegmentAngleConstraint, r), this._writer.write(41, e.secondSegmentAngleConstraint, r), this._writer.write(173, e.pathType, r), this._writer.writeCmColor(91, e.lineColor, r), this._writer.writeHandle(340, e.leaderLineType), this._writer.write(92, e.leaderLineWeight, r), this._writer.write(290, e.enableLanding, r), this._writer.write(42, e.landingGap, r), this._writer.write(291, e.enableDogleg, r), this._writer.write(43, e.landingDistance, r), this._writer.write(3, e.description, r), this._writer.writeHandle(341, e.arrowhead), this._writer.write(44, e.arrowheadSize, r), this._writer.write(300, e.defaultTextContents, r), this._writer.writeHandle(342, e.textStyle), this._writer.write(174, e.textLeftAttachment, r), this._writer.write(178, e.textRightAttachment, r), this._writer.write(175, e.textAngle, r), this._writer.write(176, e.textAlignment, r), this._writer.writeCmColor(93, e.textColor, r), this._writer.write(45, e.textHeight, r), this._writer.write(292, e.textFrame, r), this._writer.write(297, e.textAlignAlwaysLeft, r), this._writer.write(46, e.alignSpace, r), this._writer.writeHandle(343, e.blockContent), this._writer.writeCmColor(94, e.blockContentColor, r), this._writer.write(47, e.blockContentScale.x, r), this._writer.write(49, e.blockContentScale.y, r), this._writer.write(140, e.blockContentScale.z, r), this._writer.write(293, e.enableBlockContentScale, r), this._writer.write(141, e.blockContentRotation, r), this._writer.write(294, e.enableBlockContentRotation, r), this._writer.write(177, e.blockContentConnection, r), this._writer.write(142, e.scaleFactor, r), this._writer.write(295, e.overwritePropertyValue, r), this._writer.write(296, e.isAnnotative, r), this._writer.write(143, e.breakGapSize, r), this._writer.write(271, e.textAttachmentDirection, r), this._writer.write(272, e.textBottomAttachment, r), this._writer.write(273, e.textTopAttachment, r), this._writer.write(298, !1);
   }
   writeObject(e) {
@@ -34184,11 +34184,11 @@ const rB = class rB extends vs {
     }
   }
   _writeBlockRepresentationData(e) {
-    const r = z.create(Ni);
+    const r = W.create(Ni);
     this._writer.write(B.Subclass, p.blockRepresentationData), this._writer.write(70, e.value70, r), this._writer.writeHandle(340, e.block, r);
   }
   _writeEvaluationGraph(e) {
-    const r = z.create(Ur);
+    const r = W.create(Ur);
     this._writer.write(B.Subclass, p.evalGraph), this._writer.write(96, e.value96, r), this._writer.write(97, e.value97, r);
     for (let s = 0; s < e.nodes.length; s++) {
       const a = e.nodes[s];
@@ -34200,19 +34200,19 @@ const rB = class rB extends vs {
     }
   }
   writePdfUnderlayDefinition(e) {
-    const r = z.create(Si);
+    const r = W.create(Si);
     this._writer.write(100, p.underlayDefinition), this._writer.write(1, e.file, r), this._writer.write(2, e.page, r);
   }
   writePlotSettings(e) {
-    const r = z.create(Si);
+    const r = W.create(Si);
     this._writer.write(100, p.plotSettings), this._writer.write(1, e.pageName, r), this._writer.write(2, e.systemPrinterName, r), this._writer.write(4, e.paperSize, r), this._writer.write(6, e.plotViewName, r), this._writer.write(7, e.styleSheet, r), this._writer.write(40, e.unprintableMargin.left, r), this._writer.write(41, e.unprintableMargin.bottom, r), this._writer.write(42, e.unprintableMargin.right, r), this._writer.write(43, e.unprintableMargin.top, r), this._writer.write(44, e.paperWidth, r), this._writer.write(45, e.paperHeight, r), this._writer.write(46, e.plotOriginX, r), this._writer.write(47, e.plotOriginY, r), this._writer.write(48, e.windowLowerLeftX, r), this._writer.write(49, e.windowLowerLeftY, r), this._writer.write(140, e.windowUpperLeftX, r), this._writer.write(141, e.windowUpperLeftY, r), this._writer.write(142, e.numeratorScale, r), this._writer.write(143, e.denominatorScale, r), this._writer.write(70, e.flags, r), this._writer.write(72, e.paperUnits, r), this._writer.write(73, e.paperRotation, r), this._writer.write(74, e.plotType, r), this._writer.write(75, e.scaledFit, r), this._writer.write(76, e.shadePlotMode, r), this._writer.write(77, e.shadePlotResolutionMode, r), this._writer.write(78, e.shadePlotDPI, r), this._writer.write(147, e.printScale, r), this._writer.write(148, e.paperImageOrigin.x, r), this._writer.write(149, e.paperImageOrigin.y, r);
   }
   writeRasterVariables(e) {
-    const r = z.create(An);
+    const r = W.create(An);
     this._writer.write(100, p.rasterVariables), this._writer.write(90, e.classVersion, r), this._writer.write(70, e.isDisplayFrameShown ? 1 : 0, r), this._writer.write(71, e.displayQuality, r), this._writer.write(72, e.displayQuality, r);
   }
   _writeWipeoutVariables(e) {
-    const r = z.create(Nn);
+    const r = W.create(Nn);
     this._writer.write(B.Subclass, p.wipeoutVariables), this._writer.write(70, e.displayImageFrame ? 1 : 0, r);
   }
   writeScale(e) {
@@ -34258,11 +34258,11 @@ const rB = class rB extends vs {
     this._writer.write(B.Subclass, p.annotScaleObjectContextData), this._writer.writeHandle(340, e.scale);
   }
   _writeBlockReferenceObjectContextData(e) {
-    const r = z.create(Rn);
+    const r = W.create(Rn);
     this._writeAnnotScaleObjectContextData(e), this._writer.write(50, e.rotation, r), this._writer.writeVector(10, e.insertionPoint, r), this._writer.write(41, e.xScale, r), this._writer.write(42, e.yScale, r), this._writer.write(43, e.zScale, r);
   }
   _writeMTextAttributeObjectContextData(e) {
-    const r = z.create(En);
+    const r = W.create(En);
     this._writeAnnotScaleObjectContextData(e), this._writer.write(70, e.attachmentPoint, r), this._writer.write(50, e.rotation, r), this._writer.writeVector(10, e.alignmentPoint, r), this._writer.writeVector(11, e.insertPoint, r), this._writer.write(290, e.value290, r);
   }
   _writeCellStyleMap(e) {
@@ -34271,7 +34271,7 @@ const rB = class rB extends vs {
       this._writer.write(300, "CELLSTYLE"), this._writer.write(1, "TABLEFORMAT_BEGIN"), this._writer.write(90, r.cellStyleType), this._writer.write(170, r.cellAlignment), this._writer.write(91, r.styleClass), this._writer.write(92, r.tableCellStylePropertyFlags), this._writer.write(62, r.textColor.index), this._writer.write(300, "CONTENTFORMAT"), this._writer.write(1, "CONTENTFORMAT_BEGIN"), this._writer.write(90, r.propertyFlags), this._writer.write(91, r.propertyOverrideFlags), this._writer.write(92, r.valueDataType), this._writer.write(93, r.valueUnitType), this._writer.write(300, r.valueFormatString), this._writer.write(40, he.radToDeg(r.rotation)), this._writer.write(140, r.textHeight), this._writer.write(94, r.alignment), this._writer.write(62, r.color.index), r.textStyle && this._writer.write(340, r.textStyle.handle), this._writer.write(144, r.scale), this._writer.write(309, "CONTENTFORMAT_END"), this._writer.write(171, r.marginOverrideFlags), this._writer.write(309, "TABLEFORMAT_END"), this._writer.write(1, "CELLSTYLE_BEGIN"), this._writer.write(90, r.id), this._writer.write(91, r.styleClass), this._writer.write(300, r.name), this._writer.write(309, "CELLSTYLE_END");
   }
   _writeTableStyle(e) {
-    const r = z.create(At);
+    const r = W.create(At);
     this._writer.write(B.Subclass, p.tableStyle), this._writer.write(3, e.description, r), this._writer.write(70, e.flowDirection, r), this._writer.write(71, e.flags, r), this._writer.write(40, e.horizontalCellMargin, r), this._writer.write(41, e.verticalCellMargin, r), this._writer.write(280, e.suppressTitle ? 1 : 0, r), this._writer.write(281, e.suppressHeaderRow ? 1 : 0, r), this._writeCellStyle(e.dataCellStyle), this._writeCellStyle(e.titleCellStyle), this._writeCellStyle(e.headerCellStyle);
   }
   _writeCellStyle(e) {
@@ -34281,7 +34281,7 @@ const rB = class rB extends vs {
     this._writer.write(274 + r, e.lineWeight), this._writer.write(284 + r, e.isInvisible ? 0 : 1), this._writer.write(64 + r, e.color.getApproxIndex());
   }
   _writeDimensionAssociation(e) {
-    const r = z.create(Tr);
+    const r = W.create(Tr);
     this._writer.write(100, p.dimensionAssociation), this._writer.writeHandle(330, e.dimension, r), this._writer.write(90, e.associativityFlags, r), this._writer.write(70, e.isTransSpace, r), this._writer.write(71, e.rotatedDimensionType, r), (e.associativityFlags & it.FirstPointReference) !== 0 && this._writeOsnapPointRef(e.firstPointRef), (e.associativityFlags & it.SecondPointReference) !== 0 && this._writeOsnapPointRef(e.secondPointRef), (e.associativityFlags & it.ThirdPointReference) !== 0 && this._writeOsnapPointRef(e.thirdPointRef), (e.associativityFlags & it.FourthPointReference) !== 0 && this._writeOsnapPointRef(e.fourthPointRef);
   }
   _writeField(e) {
@@ -34314,7 +34314,7 @@ const rB = class rB extends vs {
       this._writer.writeHandle(331, r.entity), this._writer.write(5, r.sortHandle);
   }
   _writeSpatialFilter(e) {
-    const r = z.create(Pn);
+    const r = W.create(Pn);
     this._writer.write(100, p.filter), this._writer.write(100, p.spatialFilter), this._writer.write(70, e.boundaryPoints.length, r);
     for (const a of e.boundaryPoints)
       this._writer.writeVector(10, a, r);
@@ -34986,7 +34986,7 @@ const lB = class lB {
   }
   readCadValue(t) {
     this._reader.readNext();
-    const e = new Md(t), r = z.create(t.constructor, "CadValue");
+    const e = new Md(t), r = W.create(t.constructor, "CadValue");
     for (; this._reader.code !== 304; ) {
       switch (this._reader.code) {
         case 1:
@@ -35110,7 +35110,7 @@ const lB = class lB {
         return s.styleName = this._reader.valueAsString, !0;
       case 50: {
         const a = new Cr();
-        return s.setDimensionObject(a), a.rotation = this._reader.valueAsAngle, e.subClasses.has(p.linearDimension) || e.subClasses.set(p.linearDimension, z.create(Cr)), !0;
+        return s.setDimensionObject(a), a.rotation = this._reader.valueAsAngle, e.subClasses.has(p.linearDimension) || e.subClasses.set(p.linearDimension, W.create(Cr)), !0;
       }
       case 40:
         return s.cadObject instanceof yr && this.currentSubclass === p.arcDimension ? (s.cadObject.startAngle = this._reader.valueAsDouble, !0) : this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(s.cadObject.subclassMarker));
@@ -35122,27 +35122,27 @@ const lB = class lB {
         if (s.setDimensionFlags(this._reader.valueAsShort), s.cadObject instanceof zl && this._builder.version < w.AC1012) {
           switch (s.cadObject.flags & 7) {
             case Be.Linear:
-              s.setDimensionObject(new Cr()), e.subClasses.set(p.alignedDimension, z.create(sr)), e.subClasses.set(p.linearDimension, z.create(Cr));
+              s.setDimensionObject(new Cr()), e.subClasses.set(p.alignedDimension, W.create(sr)), e.subClasses.set(p.linearDimension, W.create(Cr));
               break;
             case Be.Aligned:
-              s.setDimensionObject(new sr()), e.subClasses.set(p.alignedDimension, z.create(sr));
+              s.setDimensionObject(new sr()), e.subClasses.set(p.alignedDimension, W.create(sr));
               break;
             case Be.Angular:
-              s.setDimensionObject(new _i()), e.subClasses.set(p.angular2LineDimension, z.create(_i));
+              s.setDimensionObject(new _i()), e.subClasses.set(p.angular2LineDimension, W.create(_i));
               break;
             case Be.Diameter:
-              s.setDimensionObject(new wi()), e.subClasses.set(p.diametricDimension, z.create(wi));
+              s.setDimensionObject(new wi()), e.subClasses.set(p.diametricDimension, W.create(wi));
               break;
             case Be.Radius:
-              s.setDimensionObject(new gi()), e.subClasses.set(p.radialDimension, z.create(gi));
+              s.setDimensionObject(new gi()), e.subClasses.set(p.radialDimension, W.create(gi));
               break;
             case Be.Angular3Point:
-              s.setDimensionObject(new mi()), e.subClasses.set(p.angular3PointDimension, z.create(mi));
+              s.setDimensionObject(new mi()), e.subClasses.set(p.angular3PointDimension, W.create(mi));
               break;
             case Be.Ordinate:
             case Be.OrdinateTypeX:
             case Be.Ordinate | Be.OrdinateTypeX:
-              s.setDimensionObject(new bi()), e.subClasses.set(p.ordinateDimension, z.create(bi));
+              s.setDimensionObject(new bi()), e.subClasses.set(p.ordinateDimension, W.create(bi));
               break;
             case Be.BlockReference:
             case Be.TextUserDefinedLocation:
@@ -35162,19 +35162,19 @@ const lB = class lB {
           case p.dimension:
             return this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(p.dimension));
           case p.alignedDimension:
-            return s.setDimensionObject(new sr()), e.subClasses.set(this._reader.valueAsString, z.create(sr)), !0;
+            return s.setDimensionObject(new sr()), e.subClasses.set(this._reader.valueAsString, W.create(sr)), !0;
           case p.diametricDimension:
-            return s.setDimensionObject(new wi()), e.subClasses.set(this._reader.valueAsString, z.create(wi)), !0;
+            return s.setDimensionObject(new wi()), e.subClasses.set(this._reader.valueAsString, W.create(wi)), !0;
           case p.angular2LineDimension:
-            return s.setDimensionObject(new _i()), e.subClasses.set(this._reader.valueAsString, z.create(_i)), !0;
+            return s.setDimensionObject(new _i()), e.subClasses.set(this._reader.valueAsString, W.create(_i)), !0;
           case p.angular3PointDimension:
-            return s.setDimensionObject(new mi()), e.subClasses.set(this._reader.valueAsString, z.create(mi)), !0;
+            return s.setDimensionObject(new mi()), e.subClasses.set(this._reader.valueAsString, W.create(mi)), !0;
           case p.arcDimension:
-            return s.setDimensionObject(new yr()), e.subClasses.set(this._reader.valueAsString, z.create(yr)), !0;
+            return s.setDimensionObject(new yr()), e.subClasses.set(this._reader.valueAsString, W.create(yr)), !0;
           case p.radialDimension:
-            return s.setDimensionObject(new gi()), e.subClasses.set(this._reader.valueAsString, z.create(gi)), !0;
+            return s.setDimensionObject(new gi()), e.subClasses.set(this._reader.valueAsString, W.create(gi)), !0;
           case p.ordinateDimension:
-            return s.setDimensionObject(new bi()), e.subClasses.set(this._reader.valueAsString, z.create(bi)), !0;
+            return s.setDimensionObject(new bi()), e.subClasses.set(this._reader.valueAsString, W.create(bi)), !0;
           case p.linearDimension:
             return !0;
           default:
@@ -35309,7 +35309,7 @@ const lB = class lB {
       case 70:
         if (this._builder.version === w.AC1009 || this._builder.version === w.Unknown) {
           const a = this._reader.valueAsInt, o = (a & 64) !== 0 ? new ut() : (a & 16) !== 0 ? new vr() : (a & 8) !== 0 ? new xr() : new Vt();
-          return Object.assign(o, s.cadObject), o.flags = a, s.setPolyLineObject(o), e.subClasses.set(o.subclassMarker, z.create(o.constructor)), !0;
+          return Object.assign(o, s.cadObject), o.flags = a, s.setPolyLineObject(o), e.subClasses.set(o.subclassMarker, W.create(o.constructor)), !0;
         }
         return this.tryAssignCurrentValue(t.cadObject, e.subClasses.get(s.cadObject.subclassMarker));
       case 10:
@@ -35319,13 +35319,13 @@ const lB = class lB {
       case 100:
         switch (this._reader.valueAsString) {
           case p.polyline:
-            return s.setPolyLineObject(new Vt()), e.subClasses.set(p.polyline, z.create(Vt)), !0;
+            return s.setPolyLineObject(new Vt()), e.subClasses.set(p.polyline, W.create(Vt)), !0;
           case p.polyline3d:
-            return s.setPolyLineObject(new xr()), e.subClasses.set(p.polyline3d, z.create(xr)), !0;
+            return s.setPolyLineObject(new xr()), e.subClasses.set(p.polyline3d, W.create(xr)), !0;
           case p.polyfaceMesh:
-            return s.setPolyLineObject(new ut()), e.subClasses.set(p.polyfaceMesh, z.create(ut)), !0;
+            return s.setPolyLineObject(new ut()), e.subClasses.set(p.polyfaceMesh, W.create(ut)), !0;
           case p.polygonMesh:
-            return s.setPolyLineObject(new vr()), e.subClasses.set(p.polygonMesh, z.create(vr)), !0;
+            return s.setPolyLineObject(new vr()), e.subClasses.set(p.polygonMesh, W.create(vr)), !0;
           default:
             return !1;
         }
@@ -35471,7 +35471,7 @@ const lB = class lB {
   }
   _readMultiLeaderObjectContextData(t) {
     this._reader.readNext();
-    const e = z.create(on), r = t.cadObject;
+    const e = W.create(on), r = t.cadObject;
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
       switch (this._reader.code) {
@@ -35494,7 +35494,7 @@ const lB = class lB {
     }
   }
   _readMultiLeaderLeader(t) {
-    const e = new Th(), r = z.create(e.constructor, "LeaderRoot");
+    const e = new Th(), r = W.create(e.constructor, "LeaderRoot");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -35519,7 +35519,7 @@ const lB = class lB {
     return e;
   }
   _readMultiLeaderLine(t) {
-    const e = t.leaderLine, r = z.create(e.constructor, "LeaderLine");
+    const e = t.leaderLine, r = W.create(e.constructor, "LeaderLine");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -35711,15 +35711,15 @@ ${l}` : l), !0;
           case p.vertex:
             return !0;
           case p.polylineVertex:
-            return s.setVertexObject(new Ai()), e.subClasses.set(p.polylineVertex, z.create(Ai)), !0;
+            return s.setVertexObject(new Ai()), e.subClasses.set(p.polylineVertex, W.create(Ai)), !0;
           case p.polyline3dVertex:
-            return s.setVertexObject(new hs()), e.subClasses.set(p.polyline3dVertex, z.create(hs)), !0;
+            return s.setVertexObject(new hs()), e.subClasses.set(p.polyline3dVertex, W.create(hs)), !0;
           case p.polyfaceMeshVertex:
-            return s.setVertexObject(new Js()), e.subClasses.set(p.polyfaceMeshVertex, z.create(Js)), !0;
+            return s.setVertexObject(new Js()), e.subClasses.set(p.polyfaceMeshVertex, W.create(Js)), !0;
           case p.polyfaceMeshFace:
-            return s.setVertexObject(new yi()), e.subClasses.set(p.polyfaceMeshFace, z.create(yi)), !0;
+            return s.setVertexObject(new yi()), e.subClasses.set(p.polyfaceMeshFace, W.create(yi)), !0;
           case p.polygonMeshVertex:
-            return s.setVertexObject(new Yn()), e.subClasses.set(p.polygonMeshVertex, z.create(Yn)), !0;
+            return s.setVertexObject(new Yn()), e.subClasses.set(p.polygonMeshVertex, W.create(Yn)), !0;
           default:
             return !1;
         }
@@ -37925,7 +37925,7 @@ const TB = class TB extends Aa {
     return t;
   }
   _readTableCellData(t) {
-    const e = z.create(t.constructor, "TABLECELL_BEGIN");
+    const e = W.create(t.constructor, "TABLECELL_BEGIN");
     this._reader.readNext();
     let r = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -37948,7 +37948,7 @@ const TB = class TB extends Aa {
     }
   }
   _readFormattedTableCell(t) {
-    const e = z.create(t.constructor, "FORMATTEDTABLEDATACELL_BEGIN");
+    const e = W.create(t.constructor, "FORMATTEDTABLEDATACELL_BEGIN");
     this._reader.readNext();
     let r = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -37972,7 +37972,7 @@ const TB = class TB extends Aa {
     }
   }
   _readCellTableFormat(t) {
-    const e = z.create(t.constructor, "CELLTABLEFORMAT");
+    const e = W.create(t.constructor, "CELLTABLEFORMAT");
     for (this._reader.readNext(); this._reader.code === 1; )
       this._reader.valueAsString.toUpperCase() === "TABLEFORMAT_BEGIN" ? this._readStyleOverride(new Ht(t.styleOverride)) : this._reader.valueAsString.toUpperCase() === "CELLSTYLE_BEGIN" ? this._readCellStyle(new Ht()) : this.tryAssignCurrentValue(t, e) || this._builder.notify(`Unhandled dxf code ${this._reader.code} value ${this._reader.valueAsString} at readCellTableFormat ${this._reader.position}.`, D.None), this._reader.readNext();
   }
@@ -38017,7 +38017,7 @@ const TB = class TB extends Aa {
     }
   }
   _readLinkedTableCell(t) {
-    const e = z.create(t.constructor, "LINKEDTABLEDATACELL_BEGIN");
+    const e = W.create(t.constructor, "LINKEDTABLEDATACELL_BEGIN");
     this._reader.readNext();
     let r = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38043,7 +38043,7 @@ const TB = class TB extends Aa {
     }
   }
   _readLinkedTableCellContent() {
-    const t = new Us(), e = new md(t), r = z.create(t.constructor, "CONTENT");
+    const t = new Us(), e = new md(t), r = W.create(t.constructor, "CONTENT");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start && (this._reader.code === 1 ? this._reader.valueAsString.toUpperCase() === "FORMATTEDCELLCONTENT_BEGIN" ? (this._readFormattedCellContent(), s = !0) : this._reader.valueAsString.toUpperCase() === "CELLCONTENT_BEGIN" && this._readCellContent(e) : this.tryAssignCurrentValue(t, r) || this._builder.notify(`Unhandled dxf code ${this._reader.code} value ${this._reader.valueAsString} at readLinkedTableCellContent ${this._reader.position}.`, D.None), !s); )
@@ -38051,7 +38051,7 @@ const TB = class TB extends Aa {
     return e;
   }
   _readCellContent(t) {
-    const e = t.content, r = z.create(e.constructor, "CELLCONTENT_BEGIN");
+    const e = t.content, r = W.create(e.constructor, "CELLCONTENT_BEGIN");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38080,7 +38080,7 @@ const TB = class TB extends Aa {
     }
   }
   _readFormattedCellContent() {
-    const t = new Gn(), e = new Gl(t), r = z.create(t.constructor, "FORMATTEDCELLCONTENT");
+    const t = new Gn(), e = new Gl(t), r = W.create(t.constructor, "FORMATTEDCELLCONTENT");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38101,7 +38101,7 @@ const TB = class TB extends Aa {
     }
   }
   _readContentFormat(t) {
-    const e = t.format, r = z.create(Gn, "CONTENTFORMAT_BEGIN");
+    const e = t.format, r = W.create(Gn, "CONTENTFORMAT_BEGIN");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38150,7 +38150,7 @@ const TB = class TB extends Aa {
   _readStyleOverride(t) {
     const e = t.format;
     e.hasData = !0;
-    const r = z.create(e.constructor, "TABLEFORMAT_STYLE"), s = z.create(Gn, "TABLEFORMAT_BEGIN");
+    const r = W.create(e.constructor, "TABLEFORMAT_STYLE"), s = W.create(Gn, "TABLEFORMAT_BEGIN");
     this._reader.readNext();
     let a = !1, o = ht.Unknown;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38189,7 +38189,7 @@ const TB = class TB extends Aa {
     }
   }
   _readGridFormat(t, e) {
-    const r = z.create(e.constructor, "CellBorder");
+    const r = W.create(e.constructor, "CellBorder");
     this._reader.readNext();
     let s = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -38291,7 +38291,7 @@ const TB = class TB extends Aa {
     }
   }
   _readDataMapValue() {
-    const t = new Di(), e = z.create(t.constructor, "DATAMAP_VALUE");
+    const t = new Di(), e = W.create(t.constructor, "DATAMAP_VALUE");
     this._reader.readNext();
     let r = !1;
     for (; this._reader.dxfCode !== B.Start; ) {
@@ -47259,54 +47259,57 @@ jscad primitives booleans transforms extrusions hulls geometries geom2 geom3 cub
   const t = i.map((l) => l[0]), e = i.map((l) => l[1]), r = Math.max(...t) - Math.min(...t), s = Math.max(...e) - Math.min(...e), a = (Math.max(...e) + Math.min(...e)) / 2, o = Math.max(r, s);
   return i.map(([l, c]) => [l / o, (c - a) / o]).reverse();
 })();
-const W = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => W(i, "point", { optional: !0, plane: "XY" }), XS = [
-  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [W("command", "command", { optional: !0 })], headless: !0 },
+const z = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => z(i, "point", { optional: !0, plane: "XY" }), XS = [
+  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [z("command", "command", { optional: !0 })], headless: !0 },
   { name: "list", aliases: ["ls"], description: "List objects and sketches", usage: "list", category: "terminal", editsModel: !1, arguments: [], headless: !0 },
   { name: "clear", aliases: ["cls"], description: "Clear the terminal transcript", usage: "clear", category: "terminal", editsModel: !1, arguments: [] },
-  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [W("name", "alias", { optional: !0 }), W("command", "command", { optional: !0 })] },
-  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [W("name", "alias")] },
+  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [z("name", "alias", { optional: !0 }), z("command", "command", { optional: !0 })] },
+  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [z("name", "alias")] },
   { name: "repeat", aliases: [], description: "Repeat the last command or script", usage: "repeat", category: "terminal", editsModel: !0, arguments: [] },
-  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [W("size", "vector", { min: 0.01, max: 1e5 }), W("center", "point", { optional: !0 })], headless: !0 },
-  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [W("radius", "number", { min: 0.01, max: 5e4 }), W("center", "point", { optional: !0 })], headless: !0 },
-  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [W("radius", "number", { min: 0.01, max: 5e4 }), W("height", "number", { min: 0.01, max: 1e5 }), W("center", "point", { optional: !0 })], headless: !0 },
+  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [z("size", "vector", { min: 0.01, max: 1e5 }), z("center", "point", { optional: !0 })], headless: !0 },
+  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [z("radius", "number", { min: 0.01, max: 5e4 }), z("center", "point", { optional: !0 })], headless: !0 },
+  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [z("radius", "number", { min: 0.01, max: 5e4 }), z("height", "number", { min: 0.01, max: 1e5 }), z("center", "point", { optional: !0 })], headless: !0 },
   { name: "line", aliases: ["l"], description: "Draw an XY sketch line", usage: "line [start] [end]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("start"), optional: !1 }, { ...Qo("end"), optional: !1 }], headless: !0 },
   { name: "rectangle", aliases: ["rect"], description: "Draw an XY sketch rectangle", usage: "rectangle [corner] [opposite]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("corner"), optional: !1 }, { ...Qo("opposite"), optional: !1 }], headless: !0 },
-  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("center"), optional: !1 }, W("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [W("sketch", "sketch"), W("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [W("base", "point", { optional: !0 }), W("destination", "point")], headless: !0 },
-  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [W("degrees", "vector")], headless: !0 },
-  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [W("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
-  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("center"), optional: !1 }, z("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [z("sketch", "sketch"), z("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [z("base", "point", { optional: !0 }), z("destination", "point")], headless: !0 },
+  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [z("degrees", "vector")], headless: !0 },
+  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [z("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
+  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
   { name: "code", aliases: ["script"], description: "Open the persistent code workspace", usage: "code", category: "panel", editsModel: !1, arguments: [] },
-  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [W("record", "json")], headless: !0 },
-  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [W("format", "keyword", { optional: !0, values: ["step"] }), W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "import", aliases: [], description: "Import a STEP file as exact bodies with the B-rep kernel", usage: "import step [file]", category: "exchange", editsModel: !0, arguments: [W("format", "keyword", { values: ["step"] }), W("file", "file", { optional: !0 })], headless: !0, kernel: "exact" },
-  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [W("mode", "keyword", { values: ["exact"] }), W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "check", aliases: ["dfm"], description: "Check bodies for manufacturing (FDM, CNC milling, laser-cut sheet) on the exact B-rep where they have one; read-only", usage: 'check fdm|cnc|laser [all|"name"|id ...] [--tool <mm>] [--axes +z,+x] [--min-wall <mm>] [--nozzle <mm>] [--min-hole <mm>] [--min-radius <mm>] [--max-radius <mm>] [--edge-break none|external|internal|all] [--mesh]', category: "analysis", editsModel: !1, arguments: [W("process", "keyword", { values: ["fdm", "cnc", "laser"] }), W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "edges", aliases: [], description: "List the exact B-rep edges of bodies, numbered for fillet and chamfer", usage: 'edges ["name"|id ...]', category: "analysis", editsModel: !1, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>] | fillet <radius> "name"|id edges <number|reference> ...', category: "feature", editsModel: !0, arguments: [W("radius", "number", { min: 0.01, max: 1e4 }), W("targets", "bodies", { optional: !0, repeated: !0 }), W("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>] | chamfer <distance> "name"|id edges <number|reference> ...', category: "feature", editsModel: !0, arguments: [W("distance", "number", { min: 0.01, max: 1e4 }), W("targets", "bodies", { optional: !0, repeated: !0 }), W("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [W("thickness", "number", { min: 0.01, max: 1e4 }), W("targets", "bodies", { optional: !0, repeated: !0 }), W("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [W("mode", "keyword", { values: ["exact"] }), W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "upgrade-lofts", aliases: [], description: "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step", usage: 'upgrade-lofts [all|"name"|id ...]', category: "edit", editsModel: !0, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "hole", aliases: [], description: "Add a standard hole: ISO 273 clearance, tapped, counterbore, countersink or heat-set insert pocket", usage: 'hole <clearance|tapped|counterbore|countersink|heat-set> <M2…M20> [close|normal|loose] [<depth>|through <thickness>] [at X,Y,Z] [axis X,Y,Z] [in "body"|id]', category: "feature", editsModel: !0, arguments: [W("type", "keyword", { values: ["clearance", "tapped", "counterbore", "countersink", "heat-set"] }), W("thread", "keyword", { values: ["M2", "M2.5", "M3", "M4", "M5", "M6", "M8", "M10", "M12", "M16", "M20"] }), W("options", "keyword", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "fasten", aliases: [], description: "Place ISO fasteners in standard holes: the screw, washers and nut each hole needs", usage: "fasten [hole|body|M3 ...] [socket-head|button-head|countersunk|hex-bolt|heat-set-insert] [screw|bolt] [length <mm>] [envelope|threaded]", category: "feature", editsModel: !0, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "part", aliases: [], description: "Insert a standard part with ISO dimensions: screw, nut, washer or heat-set insert", usage: "part <socket-head|button-head|countersunk|hex-bolt|set-screw|hex-nut|washer|heat-set-insert> <M2…M20> [length] [at X,Y,Z] [axis X,Y,Z] [envelope|threaded]", category: "create", editsModel: !0, arguments: [W("family", "keyword", { values: ["socket-head", "button-head", "countersunk", "hex-bolt", "set-screw", "hex-nut", "washer", "heat-set-insert"] }), W("thread", "keyword"), W("options", "keyword", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "fasteners", aliases: [], description: "List the ISO fastener tables: clearance holes, tap drills, heads, nuts, washers, inserts", usage: "fasteners [M2…M20]", category: "analysis", editsModel: !1, arguments: [W("thread", "keyword", { optional: !0 })], headless: !0 },
-  { name: "split", aliases: [], description: "Split a body at a plane into two bodies (both kernels; the exact path cuts the B-rep)", usage: 'split ["name"|id] <x|y|z|-x|-y|-z|X,Y,Z> [offset] [both|positive|negative]', category: "feature", editsModel: !0, arguments: [W("targets", "bodies", { optional: !0 }), W("normal", "keyword"), W("offset", "number", { optional: !0, min: -1e5, max: 1e5 }), W("keep", "keyword", { optional: !0, values: ["both", "positive", "negative"] })], headless: !0 },
-  { name: "materials", aliases: ["mass"], description: "Report the material, colour, volume and mass of each body, per material and per colour, and fused or overlapping materials; read-only", usage: 'materials [all|"name"|id ...] [--exact]', category: "analysis", editsModel: !1, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "blends", aliases: [], description: "Inspect the fillets, rounds, chamfers and freeform blends of bodies on their exact B-rep, with their radii and tangency; read-only", usage: 'blends [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "evidence", aliases: [], description: "STEP evidence: exact measures and a topology summary of a STEP file, or of the model's bodies written as STEP and read back; read-only", usage: 'evidence step [all|"name"|id ...] | evidence step --file <file.step>', category: "analysis", editsModel: !1, arguments: [W("format", "keyword", { values: ["step"] }), W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "group", aliases: [], description: "Group top-level bodies under a name (an assembly)", usage: 'group "name" [bodies…] [in "group"]', category: "edit", editsModel: !0, arguments: [W("name", "keyword"), W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "ungroup", aliases: [], description: "Dissolve a group; its bodies move to the parent group", usage: 'ungroup "group"', category: "edit", editsModel: !0, arguments: [W("group", "keyword")], headless: !0 },
+  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [z("record", "json")], headless: !0 },
+  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [z("format", "keyword", { optional: !0, values: ["step"] }), z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "import", aliases: [], description: "Import a STEP file as exact bodies with the B-rep kernel", usage: "import step [file]", category: "exchange", editsModel: !0, arguments: [z("format", "keyword", { values: ["step"] }), z("file", "file", { optional: !0 })], headless: !0, kernel: "exact" },
+  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [z("mode", "keyword", { values: ["exact"] }), z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "check", aliases: ["dfm"], description: "Check bodies for manufacturing (FDM, CNC milling, laser-cut sheet, injection moulding) on the exact B-rep where they have one; read-only", usage: 'check fdm|cnc|laser|molding [all|"name"|id ...] [--tool <mm>] [--axes +z,+x] [--depth-ratio <n>] [--dogbones] [--pull +z] [--draft <deg>] [--min-wall <mm>] [--max-wall <mm>] [--variation <fraction>] [--nozzle <mm>] [--min-hole <mm>] [--min-radius <mm>] [--max-radius <mm>] [--edge-break none|external|internal|all] [--mesh]', category: "analysis", editsModel: !1, arguments: [z("process", "keyword", { values: ["fdm", "cnc", "laser", "molding"] }), z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "edges", aliases: [], description: "List the exact B-rep edges of bodies, numbered for fillet and chamfer", usage: 'edges ["name"|id ...]', category: "analysis", editsModel: !1, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>] | fillet <radius> "name"|id edges <number|reference> ...', category: "feature", editsModel: !0, arguments: [z("radius", "number", { min: 0.01, max: 1e4 }), z("targets", "bodies", { optional: !0, repeated: !0 }), z("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>] | chamfer <distance> "name"|id edges <number|reference> ...', category: "feature", editsModel: !0, arguments: [z("distance", "number", { min: 0.01, max: 1e4 }), z("targets", "bodies", { optional: !0, repeated: !0 }), z("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [z("thickness", "number", { min: 0.01, max: 1e4 }), z("targets", "bodies", { optional: !0, repeated: !0 }), z("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [z("mode", "keyword", { values: ["exact"] }), z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "upgrade-lofts", aliases: [], description: "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step", usage: 'upgrade-lofts [all|"name"|id ...]', category: "edit", editsModel: !0, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "hole", aliases: [], description: "Add a standard hole: ISO 273 clearance, tapped, counterbore, countersink or heat-set insert pocket", usage: 'hole <clearance|tapped|counterbore|countersink|heat-set> <M2…M20> [close|normal|loose] [<depth>|through <thickness>] [at X,Y,Z] [axis X,Y,Z] [in "body"|id]', category: "feature", editsModel: !0, arguments: [z("type", "keyword", { values: ["clearance", "tapped", "counterbore", "countersink", "heat-set"] }), z("thread", "keyword", { values: ["M2", "M2.5", "M3", "M4", "M5", "M6", "M8", "M10", "M12", "M16", "M20"] }), z("options", "keyword", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "fasten", aliases: [], description: "Place ISO fasteners in standard holes: the screw, washers and nut each hole needs", usage: "fasten [hole|body|M3 ...] [socket-head|button-head|countersunk|hex-bolt|heat-set-insert] [screw|bolt] [length <mm>] [envelope|threaded]", category: "feature", editsModel: !0, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "part", aliases: [], description: "Insert a standard part with ISO dimensions: screw, nut, washer or heat-set insert", usage: "part <socket-head|button-head|countersunk|hex-bolt|set-screw|hex-nut|washer|heat-set-insert> <M2…M20> [length] [at X,Y,Z] [axis X,Y,Z] [envelope|threaded]", category: "create", editsModel: !0, arguments: [z("family", "keyword", { values: ["socket-head", "button-head", "countersunk", "hex-bolt", "set-screw", "hex-nut", "washer", "heat-set-insert"] }), z("thread", "keyword"), z("options", "keyword", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "fasteners", aliases: [], description: "List the ISO fastener tables: clearance holes, tap drills, heads, nuts, washers, inserts", usage: "fasteners [M2…M20]", category: "analysis", editsModel: !1, arguments: [z("thread", "keyword", { optional: !0 })], headless: !0 },
+  { name: "split", aliases: [], description: "Split a body at a plane into two bodies (both kernels; the exact path cuts the B-rep)", usage: 'split ["name"|id] <x|y|z|-x|-y|-z|X,Y,Z> [offset] [both|positive|negative]', category: "feature", editsModel: !0, arguments: [z("targets", "bodies", { optional: !0 }), z("normal", "keyword"), z("offset", "number", { optional: !0, min: -1e5, max: 1e5 }), z("keep", "keyword", { optional: !0, values: ["both", "positive", "negative"] })], headless: !0 },
+  { name: "materials", aliases: ["mass"], description: "Report the material, colour, volume and mass of each body, per material and per colour, and fused or overlapping materials; read-only", usage: 'materials [all|"name"|id ...] [--exact]', category: "analysis", editsModel: !1, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "blends", aliases: [], description: "Inspect the fillets, rounds, chamfers and freeform blends of bodies on their exact B-rep, with their radii and tangency; read-only", usage: 'blends [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "evidence", aliases: [], description: "STEP evidence: exact measures and a topology summary of a STEP file, or of the model's bodies written as STEP and read back; read-only", usage: 'evidence step [all|"name"|id ...] | evidence step --file <file.step>', category: "analysis", editsModel: !1, arguments: [z("format", "keyword", { values: ["step"] }), z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "group", aliases: [], description: "Group top-level bodies under a name (an assembly)", usage: 'group "name" [bodies…] [in "group"]', category: "edit", editsModel: !0, arguments: [z("name", "keyword"), z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "ungroup", aliases: [], description: "Dissolve a group; its bodies move to the parent group", usage: 'ungroup "group"', category: "edit", editsModel: !0, arguments: [z("group", "keyword")], headless: !0 },
   { name: "groups", aliases: [], description: "List the assembly: groups, bodies, exploded views and configurations", usage: "groups", category: "analysis", editsModel: !1, arguments: [], headless: !0 },
-  { name: "suppress", aliases: [], description: "Leave bodies out of the model (not built, exported, simulated or drawn) until unsuppressed", usage: "suppress [bodies…]", category: "edit", editsModel: !0, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "unsuppress", aliases: [], description: "Put suppressed bodies back into the model", usage: "unsuppress [bodies…|all]", category: "edit", editsModel: !0, arguments: [W("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
-  { name: "config", aliases: ["configuration"], description: "Configurations: named parameter values and suppressed bodies, saved and switched in one Undo step", usage: 'config [save|use|delete "name"]', category: "edit", editsModel: !0, arguments: [W("action", "keyword", { optional: !0, values: ["save", "use", "delete"] }), W("name", "keyword", { optional: !0 })], headless: !0 },
-  { name: "explode", aliases: [], description: "Exploded views: plan one from the bodies, list or delete them (the model does not move)", usage: 'explode [auto [axis|radial] [+z|X,Y,Z] [spacing <mm>] [group "name"] [name "view"] | delete "view"]', category: "edit", editsModel: !0, arguments: [W("action", "keyword", { optional: !0, values: ["auto", "delete"] })], headless: !0 },
-  { name: "mechanism", aliases: [], description: "Sweep a joint (and the gears it drives) through its range and report collisions at every sampled pose; read-only", usage: "mechanism [joint] [range <from> <to>] [steps <n>] [clearance <mm>]", category: "analysis", editsModel: !1, arguments: [W("joint", "keyword", { optional: !0 })], headless: !0 },
-  { name: "planetary", aliases: [], description: "Insert a planetary gear set: sun, planets and ring gear on hinges with gear meshes", usage: "planetary [sun <teeth>] [planet <teeth>] [planets <n>] [module <mm>] [width <mm>] [backlash <mm>]", category: "create", editsModel: !0, arguments: [], headless: !0 },
-  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [W("action", "keyword", { optional: !0, values: ["export"] }), W("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
+  { name: "suppress", aliases: [], description: "Leave bodies out of the model (not built, exported, simulated or drawn) until unsuppressed", usage: "suppress [bodies…]", category: "edit", editsModel: !0, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "unsuppress", aliases: [], description: "Put suppressed bodies back into the model", usage: "unsuppress [bodies…|all]", category: "edit", editsModel: !0, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "config", aliases: ["configuration"], description: "Configurations: named parameter values and suppressed bodies, saved and switched in one Undo step", usage: 'config [save|use|delete "name"]', category: "edit", editsModel: !0, arguments: [z("action", "keyword", { optional: !0, values: ["save", "use", "delete"] }), z("name", "keyword", { optional: !0 })], headless: !0 },
+  { name: "explode", aliases: [], description: "Exploded views: plan one from the bodies, list or delete them (the model does not move)", usage: 'explode [auto [axis|radial] [+z|X,Y,Z] [spacing <mm>] [group "name"] [name "view"] | delete "view"]', category: "edit", editsModel: !0, arguments: [z("action", "keyword", { optional: !0, values: ["auto", "delete"] })], headless: !0 },
+  { name: "mechanism", aliases: [], description: "Sweep a joint (and the gears it drives) through its range and report collisions at every sampled pose; read-only", usage: "mechanism [joint] [range <from> <to>] [steps <n>] [clearance <mm>]", category: "analysis", editsModel: !1, arguments: [z("joint", "keyword", { optional: !0 })], headless: !0 },
+  { name: "instance", aliases: ["link"], description: "Place linked instances of a body: copies that share its definition, so editing the part changes every instance", usage: 'instance "body" [count <n>] [step X,Y,Z] [rotate X,Y,Z]', category: "edit", editsModel: !0, arguments: [z("targets", "bodies")], headless: !0 },
+  { name: "unlink", aliases: [], description: "Make linked instances independent copies of their part", usage: "unlink [instances…]", category: "edit", editsModel: !0, arguments: [z("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "mate", aliases: ["mates"], description: "Mates between faces of two bodies (coincident, concentric, distance), solved into the bodies' placements; list faces, solve, delete", usage: 'mate [coincident|concentric "A" <face> "B" <face> [aligned] | distance <mm> "A" <face> "B" <face> [aligned] | faces "body" | solve | delete <number>]', category: "edit", editsModel: !0, arguments: [z("action", "keyword", { optional: !0, values: ["coincident", "concentric", "distance", "faces", "solve", "delete"] })], headless: !0 },
+  { name: "planetary", aliases: [], description: "Insert a planetary gear set: sun, planets and ring gear on hinges with gear meshes; the carrier is held, or turns with the ring or the sun fixed", usage: "planetary [sun <teeth>] [planet <teeth>] [planets <n>] [module <mm>] [width <mm>] [backlash <mm>] [fixed carrier|ring|sun]", category: "create", editsModel: !0, arguments: [], headless: !0 },
+  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [z("action", "keyword", { optional: !0, values: ["export"] }), z("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
 ], F_ = [
   { command: "shapes", label: "Find a shape", alias: "shape browser primitives" },
   { command: "model-library", label: "Model library", alias: "parts catalog" },
