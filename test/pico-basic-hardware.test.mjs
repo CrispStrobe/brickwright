@@ -12,6 +12,47 @@ const requireGui = createRequire(new URL('../packages/scratch-gui/package.json',
 const {Terminal} = requireGui('@xterm/xterm');
 const cursor = () => new Terminal({cols: 80, rows: 24, scrollback: 0, allowProposedApi: true});
 
+
+/** Observe actual delivered serial chunks. Timers bound failures; they never
+ * stand in for a parser callback or assume a number of event-loop turns. */
+function observeTerminal (terminal) {
+    let text = '';
+    let disposed = false;
+    const waiters = new Set();
+    const unsubscribe = terminal.subscribe(bytes => {
+        text += Buffer.from(bytes).toString();
+        for (const waiter of [...waiters]) waiter.check();
+    });
+    return {
+        get text () { return text; },
+        until (predicate, timeoutMs = 1000) {
+            if (disposed) return Promise.reject(new Error('Terminal observer disposed'));
+            if (predicate(text)) return Promise.resolve(text);
+            return new Promise((resolve, reject) => {
+                let timeout;
+                const waiter = {
+                    finish (error) {
+                        clearTimeout(timeout);
+                        waiters.delete(waiter);
+                        if (error) reject(error);
+                        else resolve(text);
+                    },
+                    check () { if (predicate(text)) waiter.finish(); }
+                };
+                waiters.add(waiter);
+                timeout = setTimeout(() => waiter.finish(
+                    new Error('Expected serial output was not delivered; received ' + JSON.stringify(text))), timeoutMs);
+                waiter.check();
+            });
+        },
+        dispose () {
+            disposed = true;
+            unsubscribe();
+            for (const waiter of [...waiters]) waiter.finish(new Error('Terminal observer disposed'));
+        }
+    };
+}
+
 function serialFixture (dialect) {
     const spec = picoBasicConsoleSpec(dialect);
     const prompt = '> '.slice(0, spec.promptWidth);
@@ -59,23 +100,23 @@ for (const dialect of ['bbc', 'piccolo', 'stefan']) {
         const fake = serialFixture(dialect);
         const session = createPicoBasicConsole({transport: fake.transport, cursor: cursor(), dialect, bootTimeout: 1000});
         const commands = picoBasicCommands(dialect === 'piccolo' ? 'print "wait"' : '10 INPUT A\n20 PRINT A*2', dialect);
-        const output = [];
-        session.terminal.subscribe(bytes => output.push(Buffer.from(bytes).toString()));
+        const output = observeTerminal(session.terminal);
         try {
             const run = session.run(commands);
             const spec = picoBasicConsoleSpec(dialect);
-            if (spec.wake) fake.receive('Waiting for connec');
-            else fake.receive(spec.banner.slice(0, 5));
-            await tick();
-            assert.deepEqual(fake.writes, []);
+            const partialBanner = spec.wake ? 'Waiting for connec' : spec.banner.slice(0, 5);
+            fake.receive(partialBanner);
+            await output.until(text => text.includes(partialBanner));
+            assert.deepEqual(fake.writes, [], 'consuming an incomplete banner must not start an upload');
             if (spec.wake) fake.receive('tion\r\n');
             else fake.receive(spec.banner.slice(5) + '\r\n' + '> '.slice(0, spec.promptWidth));
             await run;
             assert.deepEqual(fake.writes, [...(spec.wake ? [''] : []), 'NEW', ...commands]);
             assert.equal(session.terminal.send(Buffer.from('21\r')), true);
-            for (let i = 0; i < 10 && !output.join('').includes('42'); i++) await tick();
-            assert.match(output.join(''), /42/);
+            await output.until(text => /\r\n42\r\n/.test(text));
+            assert.match(output.text, /\r\n42\r\n/);
         } finally {
+            output.dispose();
             await session.close();
         }
         assert.equal(fake.closed, true);
@@ -138,16 +179,15 @@ for (const profile of basicProfilesFor('pico')) {
             // Instruction-level emulation may take longer to boot than a physical Pico under CI load.
             const session = createPicoBasicConsole({transport, cursor: cursor(), dialect: profile.dialect,
                 bootTimeout: 120_000});
-            let transcript = '';
-            session.terminal.subscribe(bytes => { transcript += Buffer.from(bytes).toString(); });
+            const transcript = observeTerminal(session.terminal);
             const source = profile.dialect === 'piccolo' ? 'print "HW-PROOF ";6*7' : '10 PRINT "HW-PROOF ";6*7';
             try {
                 await session.run(picoBasicCommands(source, profile.dialect));
-                const deadline = Date.now() + 5000;
-                const visible = () => transcript.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '');
-                while (!/\nHW-PROOF\s+42/.test(visible()) && Date.now() < deadline) await tick();
-                assert.match(visible(), /\nHW-PROOF\s+42/);
+                const visible = text => text.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '');
+                await transcript.until(text => /\nHW-PROOF\s+42/.test(visible(text)), 5000);
+                assert.match(visible(transcript.text), /\nHW-PROOF\s+42/);
             } finally {
+                transcript.dispose();
                 await session.close();
             }
         });
