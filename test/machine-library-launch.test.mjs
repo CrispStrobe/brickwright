@@ -217,3 +217,13 @@ test('386 floppy boot passes a companion hard disk and its own geometry', async 
         }
     });
 });
+
+test('uHex requires the selected FreeDOS package and pins the original download', async () => {
+    const entry = libraryMedia.find(row => row.id === 'uhex-dos');
+    assert.equal(entry.machine, 'i80386');
+    assert.equal(entry.guestPackage.localOnly, true);
+    assert.match(entry.guestPackage.url, /repositories\/1\.4\/edit\/uhex\.zip$/);
+    assert.equal(entry.license, 'BSD-2-Clause');
+    const {createUhexMachine} = await import('../overlay/scratch-gui/src/lib/bw-machines/uhex-dos.js');
+    await assert.rejects(createUhexMachine(new Blob([]), undefined, new Blob([])), /120m\/x86BOOT/);
+});

@@ -39,6 +39,7 @@ import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 const T = {
     en: {
         wiredFirmware: 'Wired firmware',
+        uhexHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img and the uHex ZIP. In Controller, edit the bytes in SAMPLE.BIN and press Alt+S to save. Press Esc to close uHex, then click Save image.',
         path: 'Execution path', allPaths: 'All paths', functionalPath: 'Functional (fast)', circuitPath: 'Circuits',
         circuitExamples: 'Circuit examples', runOnCircuit: 'Run on circuit',
         local386: 'Local 386 media',
@@ -72,6 +73,7 @@ const T = {
     },
     de: {
         wiredFirmware: 'Firmware für die Schaltung',
+        uhexHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img und das uHex-ZIP. Bearbeite SAMPLE.BIN im Controller und speichere mit Alt+S. Beende uHex mit Esc und wähle Abbild speichern.',
         path: 'Ausführungspfad', allPaths: 'Alle Pfade', functionalPath: 'Funktional (schnell)', circuitPath: 'Schaltungen',
         circuitExamples: 'Schaltungsbeispiele', runOnCircuit: 'Auf Schaltung starten',
         local386: 'Lokale 386-Medien',

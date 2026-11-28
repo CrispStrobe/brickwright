@@ -1,3 +1,4 @@
+import {createUhexMachine, uhexDownloadUrl, uhexProjectUrl} from './uhex-dos.js';
 import {berkeleyLogoDosUrl, berkeleyLogoProjectUrl, createBerkeleyLogoMachine} from './berkeley-logo.js';
 import {createOpenGemMachine, cuteMouseSourceUrl, openGemLicenseUrl} from './opengem.js';
 import {aliceLicenseUrl, createAlicePascalMachine} from './alice-pascal.js';
@@ -92,6 +93,9 @@ export const libraryMedia = [
         freedosGuest: createSopwithMachine, freedosHelp: 'sopwithHelp',
         guestPackage: {url: sopwithDosUrl, title: 'Sopwith Author’s Edition ZIP', localOnly: true},
         supportSource: {title: 'Sopwith source ZIP', url: sopwithSourceUrl}},
+    {id: 'uhex-dos', title: 'uHex 1.0.4a (DOS)', machine: 'i80386', license: 'BSD-2-Clause',
+        licenseFile: uhexProjectUrl, freedosGuest: createUhexMachine, freedosHelp: 'uhexHelp',
+        guestPackage: {url: uhexDownloadUrl, title: 'FreeDOS uHex ZIP', localOnly: true}},
     {id: 'zmiy', title: 'Zmiy 0.85.2', machine: 'i8086', license: 'BSD-2-Clause',
         licenseFile: zmiyProjectUrl, freedosGuest: createZmiyMachine, freedosHelp: 'zmiyHelp',
         guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP', localOnly: true}},
