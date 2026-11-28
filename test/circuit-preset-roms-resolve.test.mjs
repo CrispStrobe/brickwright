@@ -1,9 +1,9 @@
-import {packageSourceFile} from './helpers/package-source.mjs';
+import {packageSourceFile, importPackageSource} from './helpers/package-source.mjs';
 /**
  * EVERY PRESET ROM BUTTON IN THE SHIPPED UI RESOLVES TO A FILE.
  *
  * CircuitDesigner.jsx offers fifteen circuit presets that load a ROM, and the
- * loader builds the path at the call site: `static/roms/${p.rom}`. SEVEN of the
+ * loader uses an explicit example path when supplied, otherwise `static/roms/${p.rom}`. SEVEN of the
  * fifteen were not there — cga-gfx, vga, hercules, ega, keyboard, desk and
  * blink. Seven buttons in the shipped editor did nothing but 404. Found by
  * brickwright-lite-ea on 2026-09-07 while measuring P6.
@@ -23,18 +23,79 @@ import {packageSourceFile} from './helpers/package-source.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, dirname, resolve, relative, sep } from 'node:path';
+import {parseExpressionAt} from 'acorn';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DESIGNER = packageSourceFile('bw-circuit-ui/components/CircuitDesigner.jsx');
-const ROMS = join(repo, 'overlay', 'scratch-gui', 'static', 'roms');
+const GUI = join(repo, 'overlay', 'scratch-gui');
+const ROMS = join(GUI, 'static', 'roms');
+const source = readFileSync(DESIGNER, 'utf8');
+const {make6502LcdHelloRom} = await importPackageSource('bw-circuit-ui/model/m6502-lcd-preset.js');
 
-/** Every preset that names a ROM, as {id, rom}, parsed from the component. */
-function presets() {
-    const src = readFileSync(DESIGNER, 'utf8');
-    return [...src.matchAll(/\{\s*id:\s*'([^']+)'[^}]*?rom:\s*'([^']+)'/gs)]
-        .map(([, id, rom]) => ({ id, rom }));
+/** Parse the actual expression so nested fields and conditional ROM names stay visible. */
+function presets(src = source) {
+    const declaration = /\bconst presets\s*=\s*/.exec(src);
+    assert.ok(declaration, 'the machine preset declaration is missing');
+    const expression = parseExpressionAt(src, declaration.index + declaration[0].length,
+        {ecmaVersion: 'latest'});
+    const found = new Map();
+    const visit = node => {
+        if (!node || typeof node !== 'object') return;
+        if (node.type === 'ObjectExpression') {
+            const properties = new Map(node.properties.filter(p => p.type === 'Property' && !p.computed)
+                .map(p => [p.key.name || p.key.value, p.value]));
+            if (properties.has('id') && properties.has('rom')) {
+                const create = new Function('lcd', 'make6502LcdHelloRom',
+                    'return (' + src.slice(node.start, node.end) + ');');
+                // Both supported LCD connector widths choose different real
+                // source branches: four-bit bytes are generated, eight-bit
+                // bytes are fetched. Every static preset is deduplicated.
+                for (const bits of [4, 8]) {
+                    const preset = create({bits, at: 0x6000}, make6502LcdHelloRom);
+                    const key = JSON.stringify([preset.id, preset.rom, preset.path]);
+                    found.set(key, preset);
+                }
+            }
+        }
+        for (const value of Object.values(node)) {
+            if (Array.isArray(value)) value.forEach(visit);
+            else if (value && typeof value === 'object') visit(value);
+        }
+    };
+    visit(expression);
+    return [...found.values()];
+}
+
+/** Execute the loader's own URL expression, including explicit example paths. */
+function loaderPath(p) {
+    const start = source.indexOf('const loadPreset =');
+    assert.ok(start >= 0, 'the machine preset loader is missing');
+    const declaration = /\bconst url\s*=\s*/.exec(source.slice(start));
+    assert.ok(declaration, 'the machine preset URL expression is missing');
+    const expression = parseExpressionAt(source, start + declaration.index + declaration[0].length,
+        {ecmaVersion: 'latest'});
+    const url = new Function('p', 'document', 'URL',
+        'return (' + source.slice(expression.start, expression.end) + ');')(
+        p, {baseURI: pathToFileURL(GUI + sep).href}, URL);
+    const file = fileURLToPath(url);
+    assert.ok(file.startsWith(GUI + sep), 'a preset resolved outside the shipped editor');
+    return file;
+}
+
+function assertPresetAssets(found) {
+    const missing = found.filter(p => {
+        if (p.makeBytes) {
+            assert.equal(typeof p.makeBytes, 'function', p.id + ' has no ROM generator');
+            const bytes = p.makeBytes();
+            assert.ok(bytes instanceof Uint8Array && bytes.length > 0, p.id + ' generated an empty ROM');
+            return false;
+        }
+        return !existsSync(loaderPath(p));
+    }).map(p => p.id + ' -> ' + relative(GUI, loaderPath(p)));
+    assert.deepEqual(missing, [],
+        'preset button(s) would 404 in the shipped editor:\n  ' + missing.join('\n  '));
 }
 
 /** The floor is measured, not aspirational: 15 presets name a ROM on 2026-09-07. */
@@ -43,7 +104,7 @@ const PRESET_FLOOR = 15;
 test('the preset list is actually parsed — a parse that finds nothing cannot pass', () => {
     // lego-ac's addition, and it is the species this repo keeps finding: a
     // check that quantifies over an empty set is green about nothing. Rename a
-    // field or reformat the literal and the regex above stops matching; without
+    // field and the parser may stop collecting it; without
     // this floor, every assertion below would then pass vacuously and the gate
     // would report health while seeing zero presets.
     const found = presets();
@@ -51,19 +112,39 @@ test('the preset list is actually parsed — a parse that finds nothing cannot p
         `parsed ${found.length} presets, floor is ${PRESET_FLOOR} — the parse broke, `
         + 'or presets were removed; either way the rest of this file is not testing what it says');
     for (const p of found) {
-        assert.ok(p.id && p.rom, 'a parsed preset with an empty id or rom means the regex is drifting');
+        assert.ok(p.id && p.rom, 'a parsed preset with an empty id or rom means the parser is drifting');
     }
 });
 
 test('every preset ROM resolves the way the loader builds the path', () => {
-    // `static/roms/${p.rom}` — the loader's own construction, not a list of
-    // literals. That difference IS the defect: a by-name census cannot see a
-    // path that does not exist until runtime.
-    const missing = presets()
-        .filter((p) => !existsSync(join(ROMS, p.rom)))
-        .map((p) => `${p.id} -> static/roms/${p.rom}`);
-    assert.deepEqual(missing, [],
-        `preset button(s) would 404 in the shipped editor:\n  ${missing.join('\n  ')}`);
+    assertPresetAssets(presets());
+});
+
+test('the loader honors explicit example paths and still checks the default ROM directory', () => {
+    const found = presets();
+    for (const id of ['vdphello', 'aurora65']) {
+        const preset = found.find(p => p.id === id);
+        assert.ok(preset && preset.path, id + ' no longer names its example ROM path');
+        assert.equal(loaderPath(preset), join(GUI, preset.path));
+        // A valid fallback ROM must not hide a missing explicit resource.
+        assert.throws(() => assertPresetAssets([{...preset, rom: 'basic.rom',
+            path: 'examples/missing-preset-fixture/rom.bin'}]), /would 404/);
+    }
+    const fallback = found.find(p => p.id === 'basic');
+    assert.ok(fallback && !fallback.path, 'the default ROM-path control is missing');
+    assert.equal(loaderPath(fallback), join(ROMS, fallback.rom));
+    assert.throws(() => assertPresetAssets([{...fallback, rom: 'missing-preset-fixture.bin'}]), /would 404/);
+});
+
+test('a generated four-bit LCD preset supplies bytes without a static ROM file', () => {
+    const generated = presets().find(p => p.id === 'lcdhello' && p.makeBytes);
+    assert.ok(generated, 'the four-bit LCD ROM generator is missing');
+    assert.equal(existsSync(loaderPath(generated)), false,
+        'a static image now exists for the generated preset — re-aim this control');
+    assertPresetAssets([generated]);
+    assert.throws(() => assertPresetAssets([{...generated, makeBytes: () => new Uint8Array()}]),
+        /generated an empty ROM/);
+    assert.throws(() => assertPresetAssets([{...generated, makeBytes: null}]), /would 404/);
 });
 
 test('the vendored demo ROMs carry provenance naming their upstream and bytes', () => {

@@ -37,7 +37,7 @@ test('every example with no circuit file is device-only, and gets an explanation
     for (const e of noCircuit) {
         const {message} = noCircuitMessage(e);
         assert.doesNotMatch(message, /lists no circuit file/, `${e.id}: still reads as a fault report`);
-        assert.match(message, /micro:bit|SPIKE hub/, `${e.id}: the explanation does not name the device`);
+        assert.match(message, /micro:bit|SPIKE hub|CARDIAC machine/, `${e.id}: the explanation does not name the device`);
     }
 });
 
@@ -51,6 +51,30 @@ test('mb05-lesson is the case the owner hit, and it qualifies WITHOUT a deviceOn
     assert.equal(entry.authored, 'microbit');
     assert.equal(isDeviceOnlyExample(entry), true);
     assert.match(noCircuitMessage(entry).message, /the device is the whole board/);
+});
+
+test('CARDIAC strip programs are self-contained, while the wired adapter example still needs its circuit', () => {
+    const standalone = entries.filter(e => e.target === 'cardiac' && !e.files?.circuit);
+    assert.ok(standalone.length >= 5, 'the five CARDIAC strip examples are missing');
+    for (const example of standalone) {
+        assert.ok(example.files.cardiac, example.id + ' has no CARDIAC program');
+        assert.equal(isDeviceOnlyExample(example), true, example.id);
+        assert.match(noCircuitMessage(example).message, /CARDIAC machine.*input and output strips/);
+    }
+    const wired = entries.find(e => e.id === 'cardiac-night-light');
+    assert.ok(wired?.files.circuit, 'the CARDIAC adapter example no longer supplies a circuit');
+    assert.equal(isDeviceOnlyExample(wired), false);
+    const example = standalone[0];
+    for (const broken of [
+        {...example, target: 'unknown-machine'},
+        {...example, files: {}},
+        {...example, files: {cardiac: ''}},
+        {...example, files: {cardiac: true}},
+        {...example, files: {...example.files, circuit: 'missing/circuit.json'}}
+    ]) {
+        assert.equal(isDeviceOnlyExample(broken), false);
+        assert.equal(noCircuitMessage(broken).deviceOnly, false);
+    }
 });
 
 test('an example that really is missing its circuit still gets the fault (mutation)', () => {

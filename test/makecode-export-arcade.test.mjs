@@ -129,12 +129,27 @@ test('the CLI reads version 2 and animated version 3 palettes for exact Arcade i
     }
 });
 
+test('Scratch thoughts use a visible Arcade text bubble and disclose the visual approximation', () => {
+    const {ts, unsupported, warnings} = exportOf('SPRITE s:\nWHEN flag clicked:\n  think "hmm"\n  wait 1 seconds\n');
+    assert.match(ts, /sSprite\.sayText\("hmm"\)/);
+    assert.match(ts, /pause\(1 \* 1000\)/);
+    assert.deepEqual(unsupported, []);
+    assert.ok(warnings.includes('Scratch thoughts use Arcade text bubbles'), JSON.stringify(warnings));
+});
+
 test('what has no Arcade counterpart is named and left as a comment where it stood', () => {
-    // (Backdrops were the example here until they were mapped — task A4; the
-    // mapped constructs are held by test/makecode-export-arcade-constructs.)
-    const {ts, unsupported} = exportOf('SPRITE s:\nWHEN flag clicked:\n  think hmm\n  wait 1 seconds\n');
-    assert.ok(unsupported.some(u => /looks_think/.test(u)), JSON.stringify(unsupported));
-    assert.match(ts, /\/\/ looks_think/);
+    const creator = new SB3Creator();
+    creator.parse('SPRITE s:\nWHEN flag clicked:\n  say "before"\n  think "hmm"\n  say "after"\n');
+    const sprite = creator.project.targets.find(target => !target.isStage);
+    const block = Object.values(sprite.blocks).find(value => value.opcode === 'looks_think');
+    assert.ok(block, 'the mutation must replace a real statement in the parsed program');
+    block.opcode = 'bw_unmapped_fixture';
+    const {ts, unsupported} = projectToArcade(creator.project, {
+        costumeSvg: (target, costume) => creator.assets.get(costume.assetId)?.data || null
+    });
+    assert.deepEqual(unsupported, ['bw_unmapped_fixture']);
+    assert.match(ts, /sSprite\.sayText\("before"\)[\s\S]*\/\/ bw_unmapped_fixture[\s\S]*sSprite\.sayText\("after"\)/,
+        'the unsupported statement must stay visible between the two mapped statements');
 });
 
 // ── Round-trip shapes MakeCode rejected (task F5 of docs/OPEN-TASKS-2026-09-29.md) ──
