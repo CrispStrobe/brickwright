@@ -61,7 +61,7 @@ From the repository root, install the pinned dependencies, stage a valid WASM
 build and the pinned CAD SDK, then run:
 
 ```sh
-node --test test/crispbasic-cad-physics.test.mjs
+node --test packages/crisp-basic/tests/crispbasic-cad-physics.test.mjs
 ```
 
 The tests execute the saved project with the real interpreter, solver and

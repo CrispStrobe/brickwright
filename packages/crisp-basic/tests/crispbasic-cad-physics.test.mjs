@@ -2,7 +2,7 @@
 // shipped geometry/Jolt worker. No clock, motor or physics implementation stub.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCrispBasicCadFixture} from '../scripts/lib/crispbasic-cad-fixture.mjs';
+import {createCrispBasicCadFixture} from '../../../scripts/lib/crispbasic-cad-fixture.mjs';
 
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const near = (actual, expected, tolerance = 1e-9) => assert.ok(Math.abs(actual - expected) <= tolerance,

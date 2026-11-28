@@ -318,7 +318,7 @@ its final paused world. The next run starts `FNmillis` at zero and reacquires
 the same poses, velocities and completed mechanical clock. Tests use the actual
 interpreter, solver and shipped CAD worker to observe motor polarity, free-body
 motion, repeated runs and Stop after a real command submission. Run
-`node --test test/crispbasic-cad-physics.test.mjs` after staging the pinned SDK.
+`node --test packages/crisp-basic/tests/crispbasic-cad-physics.test.mjs` after staging the pinned SDK.
 The production editor scenarios load the saved project through its File menu.
 Independent clock owners remain mutually exclusive. Robot Lab worlds and
 physical hardware are separate targets.
