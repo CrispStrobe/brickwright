@@ -74,7 +74,8 @@ export async function createCrispBasicPackage(packageRoot = CRISPBASIC_PACKAGE) 
     }
     for (const path of ['browser.mjs', 'src/source.mjs', 'src/wasm-session.mjs',
         'src/wasm-worker.mjs', 'src/wasm-capabilities.mjs', 'src/simulation-host.mjs',
-        'src/simulation-protocol.mjs', 'THIRD-PARTY-NOTICES.md']) {
+        'src/simulation-protocol.mjs', 'src/cli-simulation.mjs', 'src/board-targets.mjs',
+        'src/board-target-catalog.mjs', 'THIRD-PARTY-NOTICES.md']) {
         await copy(path);
     }
     await copy('LICENSE', 'LICENSE.txt');

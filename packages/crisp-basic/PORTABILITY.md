@@ -167,6 +167,20 @@ simulators. Analog I/O, PWM, interrupts and peripheral protocols are outside
 this digital library. [BOARD-SIMULATION.md](BOARD-SIMULATION.md) specifies
 thresholds, ownership, cleanup and limits.
 
+### Named targets in the standalone CLI
+
+The CLI and standalone JavaScript API expose all 18 profiles through named
+logical targets. `--list-targets` prints their exact aliases, terminal maps and
+execution capabilities. `--backend wasm --target pico` (or `rp2040`) selects
+the Pico profile; `nano`, `8051`, `stc15`, `stm32`, `8266` and `microbit` select
+the documented concrete counterparts. A fixture can restrict the admitted
+pins and schedule inputs, including by terminal name; it cannot add pads.
+
+This runs the real interpreter on the host's WASM worker. It does not execute
+firmware on those chips or replace the Circuit solver. See
+[BOARD-TARGETS.md](BOARD-TARGETS.md) for commands, scope and real-interpreter
+examples.
+
 ### A CLI logical-pin fixture is a different host
 
 The standalone WASM CLI can execute the same library against deterministic
@@ -187,7 +201,7 @@ integration tests when electrical behavior matters.
 ## BASIC ↔ pseudocode: use the explicit portable subset
 
 The shared producer is `CrispStrobe/sb3-creator` at
-[`b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a`](https://github.com/CrispStrobe/sb3-creator/tree/b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a).
+[`edd30b11967747774cfddd01f8eb888509866c5c`](https://github.com/CrispStrobe/sb3-creator/tree/edd30b11967747774cfddd01f8eb888509866c5c).
 Brickwright consumes that exact revision through its compiler sync. The
 converter preserves a qualified source subset; it is not a general equivalence
 claim for every BBC BASIC program or for ordinary Scratch VM execution.

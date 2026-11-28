@@ -30,7 +30,12 @@ export function extractCrispBasicEditorMethods(sourceText) {
 export function createCrispBasicEditorHarness(sourceText) {
     const locale = extract(sourceText, 'const L10N = {', 'const pickLocale = ');
     const labels = extract(sourceText, 'const LANG_LABEL = ', '\n');
-    const methods = extractCrispBasicEditorMethods(sourceText);
+    // The shell edits the same authored Code document as the full component.
+    // Keep these adapters out of extractCrispBasicEditorMethods: its Node caller
+    // already receives them from the shared codeDocumentEditorClass fixture.
+    const methods = extractCrispBasicEditorMethods(sourceText) +
+        extract(sourceText, '    codeRuntimeFor (lang, target) {', '    authoredCodeState (') +
+        extract(sourceText, '    withRetainedDrafts (', '    restoreStandaloneBasic (');
     const controls = extract(sourceText,
         "                        {this.state.lang === 'basic' && this.activeCode().trim() ? (",
         "                        {this.state.lang === 'fe' && this.activeCode().trim() ? (");
@@ -42,6 +47,9 @@ import {createCrispBasicRunner} from '/adapter.js';
 import VduTerminal from '/terminal.js';
 import {basicProfileFor, hiddenCodeDrafts, standaloneBasicDrafts}
     from '/test-gui/lib/bw-matrix/code-languages.js';
+import {createCodeDocument, editCodeDocument, selectCodeDocumentLanguage,
+    restoreCodeDocumentState, codeTargetFromSource, OWNED_CONSOLE_EXECUTION}
+    from '/test-gui/lib/code-source-document.js';
 // This focused shell has no CAD pane. Its full-editor counterpart qualifies CAD.
 const process = {env: {BW_ENABLE_CAD: false}};
 ${locale}

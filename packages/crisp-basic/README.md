@@ -31,7 +31,11 @@ uses the shipped Scout project and the real physics worker.
 
 See [PORTABILITY.md](PORTABILITY.md) for supported host platforms, all 18
 electrical controller profiles, two-way source conversion, canvas behavior and
-the real motor-circuit and CAD robot examples.
+the real motor-circuit and CAD robot examples. [BOARD-TARGETS.md](BOARD-TARGETS.md)
+adds named standalone logical targets for 8051/STC, STM32F030, Pico/RP2040,
+classic Nano, ESP8266, micro:bit and the other admitted Circuit profiles.
+Use `--list-targets` to discover exact pads and `--backend wasm --target NAME`
+to execute against a fresh profile-constrained logical host.
 
 ## Try it
 

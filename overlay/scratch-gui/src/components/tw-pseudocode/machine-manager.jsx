@@ -13,6 +13,7 @@
 import React from 'react';
 import {readLibraryFloppy} from '../../lib/bw-machines/local-floppy.js';
 import {makeT} from '../../lib/bw-i18n.js';
+import {kim1T} from '../../lib/bw-machines/kim1-l10n.js';
 import {currentBox, overlayStyleFor, subscribeVisualViewport} from '../../lib/visual-viewport.js';
 import {
     fromMediaManifest, fromDosboxConf
@@ -218,6 +219,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [freeMedia, setFreeMedia] = React.useState({});
     const [freeNativeBlocks, setFreeNativeBlocks] = React.useState(false);
     const t = k => tr(locale, k);
+    const kim = key => kim1T(locale, key);
 
     const refresh = React.useCallback(async () => {
         try { setMachines(await store.list()); }
@@ -461,8 +463,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         lessons: lessons.filter(lesson => lesson.config.machine === kind),
         saved: matchingMachines.filter(machine => machine.machine === kind),
         media: matchingMedia.filter(item => item.machine === kind),
-        cpm65: kind === 'kim1' && onRunKim1Tty && matchesTitle('CP/M-65 for KIM-1'),
-        xkim: kind === 'kim1' && onRunKim1Tty && matchesTitle('Corsham xKIM'),
+        cpm65: kind === 'kim1' && onRunKim1Tty && matchesTitle(kim('cpmTitle')),
+        xkim: kind === 'kim1' && onRunKim1Tty && matchesTitle(kim('xkimTitle')),
         examples: showCircuitPrograms ? matchingCircuits.filter(example => example.machine === kind) : [],
         local: kind === 'i80386' && (
             !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
@@ -666,7 +668,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         if (item.aceKim) {
                                                             const request = {};
                                                             controllerRequest.current = request;
-                                                            const machine = await createLibraryAceKim();
+                                                            const machine = await createLibraryAceKim(locale);
                                                             if (controllerRequest.current !== request) return false;
                                                             onRunAceKim(machine);
                                                             return true;
@@ -725,12 +727,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             </label>}
                                         </MachineEntry>)}
                                     </div>}
-                                    {group.cpm65 && <MachineEntry title="CP/M-65 for KIM-1" infoPrefix={infoPrefix}
+                                    {group.cpm65 && <MachineEntry title={kim('cpmTitle')} infoPrefix={infoPrefix}
                                         rowAttributes={{'data-testid': 'bw-mm-kim1-cpm65'}}
-                                        info={<>Choose the matching <a href={cpmProfile.url} target="_blank" rel="noreferrer">upstream ZIP</a>.
-                                            {' '}The archive stays in this session. CP/M-65 itself is BSD-2-Clause, and the disk includes separately licensed utilities.</>}
+                                        info={<>{kim('cpmChooseArchive')} <a href={cpmProfile.url} target="_blank" rel="noreferrer">{kim('cpmArchiveLink')}</a>.
+                                            {' '}{kim('cpmArchiveInfo')}</>}
                                         actions={<>
-                                            <select aria-label="CP/M-65 drive" value={cpmProfile.id} disabled={launching !== null}
+                                            <select aria-label={kim('cpmDrive')} value={cpmProfile.id} disabled={launching !== null}
                                                 onChange={event => {
                                                     setCpmProfile(kim1CpmProfiles.find(profile => profile.id === event.target.value));
                                                     setCpmFile(null);
@@ -738,16 +740,16 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 }}>
                                                 {kim1CpmProfiles.map(profile => <option key={profile.id} value={profile.id}>{profile.label}</option>)}
                                             </select>
-                                            <input key={cpmProfile.id} type="file" accept=".zip" aria-label="CP/M-65 ZIP"
+                                            <input key={cpmProfile.id} type="file" accept=".zip" aria-label={kim('cpmZip')}
                                                 style={{maxWidth: 175}} disabled={launching !== null}
                                                 onChange={event => setCpmFile(event.target.files?.[0] || null)} />
                                             <button type="button" style={btn} disabled={launching !== null || !cpmFile}
                                                 onClick={() => launch('kim1-cpm65', async () => {
                                                     const request = {};
                                                     controllerRequest.current = request;
-                                                    const media = await readKim1CpmArchive(cpmProfile.id, cpmFile);
+                                                    const media = await readKim1CpmArchive(cpmProfile.id, cpmFile, locale);
                                                     if (controllerRequest.current !== request) return false;
-                                                    const session = await createKim1CpmTerminal(media);
+                                                    const session = await createKim1CpmTerminal(media, locale);
                                                     if (controllerRequest.current !== request) {
                                                         session.dispose();
                                                         return false;
@@ -756,42 +758,42 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                     return true;
                                                 })}>{t('run')}</button>
                                         </>} />}
-                                    {group.xkim && <MachineEntry title="Corsham xKIM" infoPrefix={infoPrefix}
+                                    {group.xkim && <MachineEntry title={kim('xkimTitle')} infoPrefix={infoPrefix}
                                         rowAttributes={{'data-testid': 'bw-mm-xkim'}}
-                                        info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
-                                            {' '}Choose loose 8.3 files or a FAT12/16/32 image up to 128 MiB. For an image, only compatible root files are imported.
-                                            {' '}Controller can export the session files as ZIP or save an updated copy of the FAT image.
-                                            {' '}Choose IRQ or NMI to connect the shield’s TIMER_OUT pin to the KIM-1 expansion connector.</>}
+                                        info={<>{kim('xkimChooseRom')} <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">{kim('xkimSource')}</a>.
+                                            {' '}{kim('xkimMediaHelp')}
+                                            {' '}{kim('xkimExportHelp')}
+                                            {' '}{kim('xkimTimerHelp')}</>}
                                         actions={<>
                                             <label style={fieldsStyle}>ROM
-                                                <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}
+                                                <input type="file" accept=".rom,.bin" aria-label={kim('xkimRom')} disabled={launching !== null}
                                                     style={{maxWidth: 140}} onChange={event => setXkimRom(event.target.files?.[0] || null)} />
                                             </label>
-                                            <select value={xkimMediaKind} aria-label="xKIM storage type" disabled={launching !== null}
+                                            <select value={xkimMediaKind} aria-label={kim('xkimStorageType')} disabled={launching !== null}
                                                 onChange={event => { setXkimMedia([]); setXkimMediaKind(event.target.value); }}>
-                                                <option value="files">Loose files</option>
-                                                <option value="fat">FAT image</option>
+                                                <option value="files">{kim('xkimLooseFiles')}</option>
+                                                <option value="fat">{kim('xkimFatImage')}</option>
                                             </select>
                                             <input key={xkimMediaKind} type="file" multiple={xkimMediaKind === 'files'}
-                                                aria-label={xkimMediaKind === 'files' ? 'xKIM Corsham files' : 'xKIM FAT image'}
+                                                aria-label={kim(xkimMediaKind === 'files' ? 'xkimFiles' : 'xkimImage')}
                                                 disabled={launching !== null} style={{maxWidth: 140}}
                                                 onChange={event => setXkimMedia(Array.from(event.target.files || []))} />
-                                            <select value={xkimTimerLine} aria-label="xKIM timer output" disabled={launching !== null}
+                                            <select value={xkimTimerLine} aria-label={kim('xkimTimerOutput')} disabled={launching !== null}
                                                 onChange={event => setXkimTimerLine(event.target.value)}>
-                                                <option value="none">Timer unwired</option>
-                                                <option value="irq">Timer → IRQ</option>
-                                                <option value="nmi">Timer → NMI</option>
+                                                <option value="none">{kim('xkimTimerNone')}</option>
+                                                <option value="irq">{kim('xkimTimerIrq')}</option>
+                                                <option value="nmi">{kim('xkimTimerNmi')}</option>
                                             </select>
                                             <button type="button" style={btn} disabled={launching !== null || !xkimRom}
                                                 onClick={() => launch('kim1-xkim', async () => {
                                                     const request = {};
                                                     controllerRequest.current = request;
-                                                    if (xkimMediaKind === 'fat' && !xkimMedia[0]) throw new Error('Choose an xKIM FAT image.');
+                                                    if (xkimMediaKind === 'fat' && !xkimMedia[0]) throw new Error(kim('xkimChooseImage'));
                                                     const media = await readXkimMedia(
-                                                        xkimRom, xkimMediaKind === 'files' ? xkimMedia : [], xkimMediaKind === 'fat' ? xkimMedia[0] : null
+                                                        xkimRom, xkimMediaKind === 'files' ? xkimMedia : [], xkimMediaKind === 'fat' ? xkimMedia[0] : null, locale
                                                     );
                                                     if (controllerRequest.current !== request) return false;
-                                                    const session = await createXkimTerminal({...media, timerLine: xkimTimerLine});
+                                                    const session = await createXkimTerminal({...media, timerLine: xkimTimerLine, locale});
                                                     if (controllerRequest.current !== request) {
                                                         session.dispose();
                                                         return false;

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "pins": [
+    "P1.0",
+    "P1.1"
+  ],
+  "maxRequests": 32,
+  "maxTimeMs": 100,
+  "maxTraceEvents": 32,
+  "maxScheduledInputs": 4,
+  "inputs": [
+    {
+      "pin": "P1.1",
+      "value": 0,
+      "atMs": 25
+    },
+    {
+      "pin": "P1.1",
+      "value": null,
+      "atMs": 30
+    }
+  ]
+}

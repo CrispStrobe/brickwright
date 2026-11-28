@@ -6,6 +6,7 @@ import vm from 'node:vm';
 import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {hddWorkflowBeforeRepositoryIdentity} from './helpers/reviewed-repository-identity.mjs';
+import {basicOracleBeforeCrispBasicNotice} from './helpers/reviewed-basic-oracle-notice.mjs';
 const root = fileURLToPath(new URL('../',import.meta.url));
 const readOriginalControlSummary = stdout => JSON.parse(stdout.trim());
 const runControlChildren = async (specs,deadlineMs) => {
@@ -125,7 +126,7 @@ test('internal V8 tag is excluded from five isolated pushes and current main-onl
     const source = new Map();
     const check = (name, workflow) => {
         assert.equal(workflow.split(block).length,2,`${name}: one exact branch and tag filter`);
-        assert.equal(createHash('sha256').update(heldBeforeConcurrencyPolicy(name,workflow).replace(block,'  push:\n')).digest('hex'),
+        assert.equal(createHash('sha256').update(basicOracleBeforeCrispBasicNotice(name, heldBeforeConcurrencyPolicy(name,workflow)).replace(block,'  push:\n')).digest('hex'),
             reviewed.get(name),`${name}: every preexisting trigger, path, job and step is byte-held`);
         const branches=workflow.match(/^    branches: \['([^']+)'\]$/gm) || [];
         const tags=workflow.match(/^    tags-ignore: \['([^']+)'\]$/gm) || [];

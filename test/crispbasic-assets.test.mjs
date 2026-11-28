@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {dirname, join, resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {createCrispBasicPackage, packageCrispBasic} from '../scripts/package-crispbasic.mjs';
 import {verifyCrispBasicProductionAssets} from '../scripts/verify-crispbasic-production-assets.mjs';
 import {WASM_LOCAL_INPUTS, WASM_UPSTREAM_INPUTS} from '../packages/crisp-basic/wasm/build-inputs.mjs';
@@ -29,6 +29,7 @@ async function fixture(t) {
     const sources = new Set([...WASM_LOCAL_INPUTS, 'package.json', 'browser.mjs',
         'src/source.mjs', 'src/wasm-session.mjs', 'src/wasm-worker.mjs',
         'src/wasm-capabilities.mjs', 'src/simulation-host.mjs', 'src/simulation-protocol.mjs',
+        'src/cli-simulation.mjs', 'src/board-targets.mjs', 'src/board-target-catalog.mjs',
         'LICENSE', 'THIRD-PARTY-NOTICES.md']);
     for (const source of sources) {
         await write(packageRoot, source, await readFile(join(root, 'packages/crisp-basic', source)));
@@ -68,6 +69,19 @@ test('packaging produces a complete relocatable payload and a deterministic byte
     assert.ok(manifest.files['LICENSE.txt']);
     assert.ok(manifest.files['src/simulation-host.mjs']);
     assert.ok(manifest.files['src/simulation-protocol.mjs']);
+    assert.ok(manifest.files['src/board-targets.mjs']);
+    assert.ok(manifest.files['src/board-target-catalog.mjs']);
+    assert.ok(manifest.files['src/cli-simulation.mjs']);
+    const browser = await import(pathToFileURL(join(options.destination, 'browser.mjs')).href);
+    assert.equal(browser.resolveBoardTarget('rp2040').id, 'pi_pico',
+        'the relocated browser API imports every target dependency');
+    const host = browser.createTargetSimulationHost('nano');
+    try {
+        host.pinMode(13, 'output');
+        host.digitalWrite(13, 1);
+        assert.equal(host.digitalRead(13), 1);
+        assert.equal(host.capabilities.target.id, 'arduino_nano');
+    } finally { host.dispose(); }
     assert.equal(Object.keys(manifest.files).some(path => path.startsWith('.') || path.includes('native-session')), false);
     for (const [path, expected] of Object.entries(manifest.files)) {
         const bytes = await readFile(join(options.destination, path));
@@ -182,7 +196,7 @@ test('production evidence binds emitted entry, chunks and exact runtime to the r
     assert.deepEqual(report.entries, ['gui.12345678.js']);
     assert.equal(report.chunkCount, 1);
     assert.equal(report.assets['chunks/editor.js'].sha256, sha(Buffer.from('/* synthetic lazy chunk */')));
-    assert.equal(report.crispbasic.assetCount, 20);
+    assert.equal(report.crispbasic.assetCount, 23);
     assert.equal(report.crispbasic.files['wasm/crispbasic.wasm'].sha256, options.build.wasmSha256);
 });
 

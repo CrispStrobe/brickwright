@@ -8,6 +8,7 @@ import MachineConsole from './machine-console.jsx';
 import 'bw-circuit-ui/components/kim1-panel.css';
 import MachineScreenHeader from './machine-screen-header.jsx';
 import MachineTerminal from './machine-terminal.jsx';
+import {kim1T} from '../../lib/bw-machines/kim1-l10n.js';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import {addAceKimFace, isAceKimFace, addCardiacFace, addKim1Face, addKim1VideoFace, addMicrotronicFace, isCardiacFace, isKim1Face, isKim1VideoFace, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
@@ -2143,9 +2144,8 @@ class ControllerPanelView extends React.Component {
                                         style={{background: '#f6f8f4', border: '1px solid #c5d5d8', borderRadius: 8,
                                             height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
                                         {mode === 'play' && isAceKimFace(w) && aceKimMachine ?
-                                            <MachineScreenHeader locale={this.props.locale} title="ACE KIM · 65C02"
-                                                help={german ? 'ESC öffnet den Monitor. INS bearbeitet das Byte an der angezeigten Adresse.' :
-                                                    'Press Esc to open the monitor. Press Ins to edit the byte at the displayed address.'}
+                                            <MachineScreenHeader locale={this.props.locale} title={kim1T(this.props.locale, 'aceTitle')}
+                                                help={kim1T(this.props.locale, 'aceHelp')}
                                                 isFullScreen={this.props.isFullScreen} onToggleFullScreen={toggleMachineFullScreen} /> :
                                             <header data-testid={`bw-ctl-machine-header-${w.name}`}
                                             title={mode === 'edit' ? (german ? 'Zum Verschieben ziehen' : 'Drag to move') : undefined}

@@ -2,7 +2,7 @@
 
 The shared implementation belongs to `CrispStrobe/sb3-creator`. Brickwright's
 `vendor-pins.json` adopts
-[`b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a`](https://github.com/CrispStrobe/sb3-creator/tree/b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a),
+[`edd30b11967747774cfddd01f8eb888509866c5c`](https://github.com/CrispStrobe/sb3-creator/tree/edd30b11967747774cfddd01f8eb888509866c5c),
 and the existing sync derives both tracked compiler mirrors. This revision
 provides explicit portable generation and a qualified BASIC-to-pseudocode
 source conversion. The ordinary BASIC-to-Blocks reader keeps its refusal

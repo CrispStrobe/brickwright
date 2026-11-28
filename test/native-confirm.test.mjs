@@ -29,6 +29,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import test from 'node:test';
 import {registeredArraysSource, renderRegisteredArraysCarrier} from '../scripts/lib/arrays-carrier.mjs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 
 import {blinkFamily} from '../overlay/scratch-gui/src/lib/bw-asm/blink-machines.js';
 
@@ -247,21 +248,35 @@ const SITES = [
             new RegExp(`(async ${method} \\(id\\) \\{[\\s\\S]*?)!\\(await confirmAsync\\(this\\.L\\.asmExampleReplace\\)\\)`),
             '$1!window.confirm(this.L.asmExampleReplace)')}],
         async drive (helper, src) {
-            let replaced = false;
+            const current = 'twenty minutes of typing';
             const examples = () => [{id: 'ex', source: 'NEW', label: 'Example'}];
-            const self = {
-                state: {buffers: {[buffer]: 'twenty minutes of typing'}},
-                props: {locale: 'en'},
-                L: {asmExampleReplace: 'Replace?', asmExampleLoaded: () => 'loaded'},
-                _asmExamples: examples, currentDevice: () => 'uno',
-                setState () { replaced = true; }
+            // The loaders now author a Code document. Exercise their real
+            // document adapters, including functional setState, rather than
+            // counting any update as a successful source replacement.
+            const Editor = codeDocumentEditorClass(src[IMPORTER],
+                methodSource(IMPORTER, method, src[IMPORTER]), {
+                    confirmAsync: helper.confirmAsync, pickLocale: () => 'en',
+                    riscvCExamplesFor: examples, arduinoSketchExamplesFor: examples, blinkFamily
+                });
+            const self = new Editor();
+            self.props = {locale: 'en'};
+            self.L = {asmExampleReplace: 'Replace?', asmExampleLoaded: () => 'loaded'};
+            self._asmExamples = examples;
+            const device = method === 'loadRiscvCExample' ? 'riscv32' : buffer === 'asm' ? 'i8086' : 'arduino-uno';
+            self.currentDevice = () => device;
+            self.state = {lang: buffer, buffers: {[buffer]: current}};
+            self.state = {...self.state, ...self.authoredCodeState(buffer, current, device)};
+            self.setState = update => {
+                const patch = typeof update === 'function' ? update(self.state) : update;
+                self.state = {...self.state, ...patch};
             };
-            const load = asMethod(methodSource(IMPORTER, method, src[IMPORTER]), {
-                confirmAsync: helper.confirmAsync, pickLocale: () => 'en',
-                riscvCExamplesFor: examples, arduinoSketchExamplesFor: examples, blinkFamily
-            });
-            await load.call(self, 'ex');
+            await self[method]('ex');
             await settle();
+            const replaced = self.state.buffers[buffer] === 'NEW';
+            assert.equal(self.state.buffers[buffer], replaced ? 'NEW' : current);
+            assert.equal(self.state.codeDocument.lang, buffer);
+            assert.equal(self.state.codeDocument.code, replaced ? 'NEW' : current);
+            assert.equal(self.state.codeDocument.target, device);
             return replaced;
         }
     })),

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "pins": [
+    "GPIO12",
+    "GPIO0"
+  ],
+  "maxRequests": 32,
+  "maxTimeMs": 100,
+  "maxTraceEvents": 32,
+  "maxScheduledInputs": 4,
+  "inputs": [
+    {
+      "pin": "GPIO0",
+      "value": 0,
+      "atMs": 25
+    },
+    {
+      "pin": "GPIO0",
+      "value": null,
+      "atMs": 30
+    }
+  ]
+}
