@@ -41,6 +41,7 @@ import {runMachineConfig} from '../../lib/bw-machines/run-machine.js';
 import {picoBasicCommands, picoBasicConsoleSpec} from '../../lib/bw-machines/pico-basic-source.js';
 import {feProgramToC} from '../../lib/bw-lang/fe-target-c.js';
 import {forthProgramToC} from '../../lib/bw-lang/forth-target-c.js';
+import {cowgolTargetForDevice} from '../../lib/bw-lang/cowgol-compile.js';
 import {fetchTclProgramC} from '../../lib/bw-lang/tcl-target-c.js';
 import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import downloadBlob from '../../lib/download-blob.js';
@@ -226,6 +227,10 @@ const L10N = {
         cowgolRunDos: '▶ Cowgol on DOS',
         cowgolRunRiscv: '▶ Cowgol on RISC-V',
         cowgolRunEater: '▶ Cowgol on Eater 6502',
+        cowgolRunAvr: '▶ Cowgol on Arduino Uno',
+        cowgolDownloadAvr: 'Download ATmega328P .HEX',
+        cowgolRunNativeBlocks: '▶ Run Blocks via Cowgol',
+        cowgolRunNativeBlocksTitle: 'Check this source, convert it to Blocks, then compile its supported operations with Cowgol for the selected machine',
         cowgolDownloadEater: 'Download Eater 6502 ROM',
         cowgolDownloadRiscv: 'Download RISC-V .ELF',
         runBlocksRiscv: '▶ Run on RISC-V via Blocks',
@@ -235,7 +240,7 @@ const L10N = {
         cowgolExportC: 'Export compiled C',
         cowgolCompiling: 'Compiling with Cowgol on the hosted service…',
         cowgolStale: 'The source, project or selected machine changed. The compiled program was not applied.',
-        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS, RISC-V and Eater 6502 compilation and C export use the hosted Cowgol compiler. RISC-V supports console output. Eater 6502 boots a ROM for the 1 MHz board with serial console and VIA digital pins. Timing and graphics have no native binding. Run via blocks uses the selected machine’s supported operations.',
+        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS, RISC-V, Eater 6502 and Arduino Uno compilation and C export use the hosted Cowgol compiler. RISC-V supports console output. Eater 6502 boots a ROM for the 1 MHz board with serial console and VIA digital pins. Uno runs at 16 MHz with serial console and digital GPIO. Run Blocks via Cowgol checks the selected native runtime and integer overflow. Timing and graphics have no native binding. Run via blocks uses the selected machine’s supported operations.',
         nqcCompile: '⚙ Compile .rcx', nqcSend: '🧱 Send to RCX',
         nqcEmpty: 'Type some NQC first.',
         nqcNoCompiler: 'This build has no local NQC compiler.',
@@ -594,6 +599,10 @@ const L10N = {
         cowgolRunDos: '▶ Cowgol unter DOS',
         cowgolRunRiscv: '▶ Cowgol auf RISC-V',
         cowgolRunEater: '▶ Cowgol auf Eater 6502',
+        cowgolRunAvr: '▶ Cowgol auf Arduino Uno',
+        cowgolDownloadAvr: 'ATmega328P-.HEX herunterladen',
+        cowgolRunNativeBlocks: '▶ Blöcke mit Cowgol ausführen',
+        cowgolRunNativeBlocksTitle: 'Diesen Quelltext prüfen, in Blöcke umwandeln und die unterstützten Operationen mit Cowgol für die gewählte Maschine kompilieren',
         cowgolDownloadEater: 'Eater-6502-ROM herunterladen',
         cowgolDownloadRiscv: 'RISC-V-.ELF herunterladen',
         runBlocksRiscv: '▶ Über Blöcke auf RISC-V ausführen',
@@ -603,7 +612,7 @@ const L10N = {
         cowgolExportC: 'Kompiliertes C exportieren',
         cowgolCompiling: 'Cowgol wird auf dem Compiler-Dienst kompiliert…',
         cowgolStale: 'Quelltext, Projekt oder ausgewählte Maschine wurde geändert. Das kompilierte Programm wurde nicht angewendet.',
-        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS-, RISC-V- und Eater-6502-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V unterstützt Konsolenausgabe. Eater 6502 startet ein ROM für das 1-MHz-Board mit serieller Konsole und digitalen VIA-Pins. Zeit- und Zeichenaufrufe haben keine native Laufzeitbindung. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
+        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS-, RISC-V-, Eater-6502- und Arduino-Uno-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V unterstützt Konsolenausgabe. Eater 6502 startet ein ROM für das 1-MHz-Board mit serieller Konsole und digitalen VIA-Pins. Uno läuft mit 16 MHz, serieller Konsole und digitalen GPIOs. Blöcke mit Cowgol ausführen prüft die native Laufzeit und Ganzzahlüberläufe. Zeit- und Zeichenaufrufe haben keine native Laufzeitbindung. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
         nqcCompile: '⚙ .rcx kompilieren', nqcSend: '🧱 An RCX senden',
         nqcEmpty: 'Zuerst NQC eingeben.',
         nqcNoCompiler: 'Dieser Build hat keinen lokalen NQC-Compiler.',
@@ -1473,10 +1482,11 @@ class PseudocodeImporter extends React.Component {
         const device = this.currentDevice();
         if (!this.allowsCodeLanguage(lang)) return;
         const target = asmTargetForDevice(device);
+        const cowgolTarget = cowgolTargetForDevice(device);
         const actions = {
             pseudocode: target === 'riscv32' && (() => this.runViaBlocksOnDevice()),
-            cowgol: () => ['riscv32', 'eater6502'].includes(target) ?
-                this.compileCowgolSource(target, true) : this.runCowgolAsBlocks(),
+            cowgol: () => cowgolTarget ?
+                this.compileCowgolSource(cowgolTarget, true) : this.runCowgolAsBlocks(),
             tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
             forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
             fe: () => target === 'riscv32' ? this.runFeOnRiscv() : this.runFeOnDosInterp(),
@@ -4992,6 +5002,7 @@ class PseudocodeImporter extends React.Component {
 
     stopCodeRun () {
         if (this._cowgolCompile) this._cowgolCompile.abort();
+        this._cowgolBlocksImport = null;
         if (this._riscvBlocksBuild) {
             this._riscvBlocksBuild = null;
             this.setState({busy: false});
@@ -6000,6 +6011,30 @@ class PseudocodeImporter extends React.Component {
             // compile() already reports the refusal and preserves the loaded project.
         }
     }
+    /** Explicit native alternative to each board's established C/BASIC route. */
+    async runViaCowgolOnDevice () {
+        if (this.state.busy || this.state.running || !remoteToolchainsAllowed()) return;
+        const source = this.activeCode();
+        const lang = this.state.lang;
+        const device = this.codeDevice();
+        const target = cowgolTargetForDevice(device);
+        if (!target || !['cowgol', 'pseudocode'].includes(lang)) return;
+        const request = {};
+        this._cowgolBlocksImport = request;
+        // Qualify the native runtime BEFORE applying the imported project.
+        // Missing DEVICE retains this selection; a conflicting one is refused.
+        try {
+            const applied = await this.compile({strict: true, targetDevice: device, cowgolTarget: target});
+            if (applied && !this._unmounted && this._cowgolBlocksImport === request && this.state.lang === lang &&
+                this.activeCode() === source && this.codeDevice() === device) {
+                return this.compileCowgolSource(target, true, {fromBlocks: true});
+            }
+        } catch (error) {
+            // The checked importer reports its refusal without applying it.
+        } finally {
+            if (this._cowgolBlocksImport === request) this._cowgolBlocksImport = null;
+        }
+    }
     async runBlocksOnRiscv () {
         if (!remoteToolchainsAllowed()) {
             this.setState({status: this.L.runCRiscvUnavailable('Hosted compilation is unavailable in this build.')});
@@ -6050,29 +6085,47 @@ class PseudocodeImporter extends React.Component {
             }
         }
     }
-    async compileCowgolSource (target, run = false) {
+    async compileCowgolSource (target, run = false, {fromBlocks = false} = {}) {
         if (this.state.busy || this.state.running) return;
         const source = this.activeCode();
         const buffers = this.state.buffers;
+        const lang = this.state.lang;
+        if (!fromBlocks && lang !== 'cowgol') return;
         const device = this.codeDevice();
         const stage = this.props.vm.runtime.getTargetForStage();
+        const projectRevision = this.props.vm.toJSON();
+        const deviceRevision = JSON.stringify(this.props.vm.runtime.stc || null);
         const request = new AbortController();
         this._cowgolCompile = request;
         const owns = () => !this._unmounted && this._cowgolCompile === request;
-        const current = () => owns() && !request.signal.aborted && this.state.lang === 'cowgol' &&
-            this.state.buffers === buffers && this.codeDevice() === device &&
-            this.props.vm.runtime.getTargetForStage() === stage;
+        const current = () => owns() && !request.signal.aborted && this.state.lang === lang &&
+            this.state.buffers === buffers && this.activeCode() === source && this.codeDevice() === device &&
+            this.props.vm.runtime.getTargetForStage() === stage &&
+            this.props.vm.toJSON() === projectRevision &&
+            JSON.stringify(this.props.vm.runtime.stc || null) === deviceRevision;
         this.setState({busy: true, status: this.L.cowgolCompiling});
         try {
-            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig, cowgolRiscvDetail, cowgolEaterDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
+            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig, cowgolRiscvDetail, cowgolEaterDetail, cowgolAvrDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
             if (!current()) return;
-            const out = await compileCowgol(source, target, {signal: request.signal});
+            let code = source;
+            if (fromBlocks) {
+                const SB3Creator = (await this.lib()).default;
+                if (!current()) return;
+                const project = JSON.parse(projectRevision);
+                project.stc = this.props.vm.runtime.stc || project.stc;
+                const generated = new SB3Creator().generateCowgol(project, {target});
+                if (!generated.ok) throw new Error(generated.reasons?.join(' · ') || 'Native Cowgol generation was refused.');
+                code = generated.cowgol;
+            }
+            if (!current()) return;
+            const out = await compileCowgol(code, target, {signal: request.signal});
             if (!current()) {
                 if (owns() && this.state.status === this.L.cowgolCompiling) this.setState({status: this.L.cowgolStale});
                 return;
             }
-            if (run && (target === 'riscv32' || target === 'eater6502')) {
-                const detail = target === 'riscv32' ? cowgolRiscvDetail(out.image) : cowgolEaterDetail(out.bytes);
+            if (run && ['riscv32', 'eater6502', 'atmega328p'].includes(target)) {
+                const detail = target === 'riscv32' ? cowgolRiscvDetail(out.image)
+                    : target === 'atmega328p' ? cowgolAvrDetail(out.bytes) : cowgolEaterDetail(out.bytes);
                 try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
                 window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
                 window.__bwPendingMedia = {type: 'asm', detail};
@@ -6092,7 +6145,7 @@ class PseudocodeImporter extends React.Component {
             }
             if (current()) this.setState({status: `${out.toolchain}: ${out.bytes.length} bytes`});
         } catch (error) {
-            if (current()) this.setState({status: this.L.stError(error.message)});
+            if (current()) this.setState({status: this.L.stError(error.message), output: error.log || null});
         } finally {
             if (owns()) {
                 this._cowgolCompile = null;
@@ -6100,7 +6153,7 @@ class PseudocodeImporter extends React.Component {
             }
         }
     }
-    async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null} = {}) {
+    async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) {
         if (pseudocode == null && this.state.lang === 'basic' && this.standaloneBasicProfile()) return;
         const conversionRequest = {};
         this._conversionRequest = conversionRequest;
@@ -6198,6 +6251,10 @@ class PseudocodeImporter extends React.Component {
             // pseudocode parser warnings must still block a strict run.
             if (strict && ((lang !== 'cowgol' && parseWarnings.length) || creator.warnings.length)) {
                 throw new Error([...parseWarnings, ...creator.warnings].join(' · '));
+            }
+            if (cowgolTarget) {
+                const qualified = creator.generateCowgol(creator.project, {target: cowgolTarget});
+                if (!qualified.ok) throw new Error(qualified.reasons?.join(' · ') || 'Native Cowgol generation was refused.');
             }
             const context = codeArtworkMatches(this.props.vm, this._codeArtwork) ? this._codeArtwork : null;
             if (lang === 'pseudocode' && this._makeCodeProject && this._makeCodeProject.files &&
@@ -6338,7 +6395,16 @@ class PseudocodeImporter extends React.Component {
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts());
             if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
             if (lang !== 'c') {
-                try { nb.c = new SB3Creator().generateC(proj); }
+                try {
+                    const cCreator = new SB3Creator();
+                    nb.c = cCreator.generateC(proj);
+                    // A native Cowgol profile can cover pins its older C
+                    // backend cannot (Eater PB7). Do not publish partial C.
+                    if (cowgolTarget && cCreator._cWarnings?.length) {
+                        nb.c = '';
+                        targetWarnings.push(`C export: ${cCreator._cWarnings.join(' · ')}`);
+                    }
+                }
                 catch (error) {
                     if (error.code !== 'RISCV_CONSOLE_UNSUPPORTED') throw error;
                     nb.c = '';
@@ -7400,6 +7466,15 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.runBlocksRiscv}
                             </button>
                         ) : null}
+                        {['pseudocode', 'cowgol'].includes(this.state.lang) && cowgolTargetForDevice(this.codeDevice()) &&
+                            this.activeCode().trim() && remoteToolchainsAllowed() ? (
+                            <button type="button" onClick={() => this.runViaCowgolOnDevice()}
+                                disabled={this.state.running || this.state.busy} style={actionBtn}
+                                title={this.L.cowgolRunNativeBlocksTitle}
+                                data-testid={menu ? 'bw-cowgol-native-blocks-run-menu' : 'bw-cowgol-native-blocks-run'}>
+                                {this.L.cowgolRunNativeBlocks}
+                            </button>
+                        ) : null}
                         {this.state.lang === 'cowgol' && this.activeCode().trim() ? (
                             <React.Fragment>
                                 <button type="button" onClick={() => this.runCowgolAsBlocks()}
@@ -7432,7 +7507,17 @@ class PseudocodeImporter extends React.Component {
                                         data-testid={menu ? 'bw-cowgol-eater-run-menu' : 'bw-cowgol-eater-run'}>
                                         {this.L.cowgolRunEater}
                                     </button>}
+                                {remoteToolchainsAllowed() && (!this.codeDevice() || cowgolTargetForDevice(this.codeDevice()) === 'atmega328p') &&
+                                    <button type="button" onClick={() => this.compileCowgolSource('atmega328p', true)}
+                                        disabled={this.state.running || this.state.busy} style={actionBtn}
+                                        data-testid={menu ? 'bw-cowgol-avr-run-menu' : 'bw-cowgol-avr-run'}>
+                                        {this.L.cowgolRunAvr}
+                                    </button>}
                                 {menu && remoteToolchainsAllowed() && <React.Fragment>
+                                    <button type="button" onClick={() => this.compileCowgolSource('atmega328p')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolDownloadAvr}
+                                    </button>
                                     <button type="button" onClick={() => this.compileCowgolSource('eater6502')}
                                         disabled={this.state.running || this.state.busy}>
                                         {this.L.cowgolDownloadEater}

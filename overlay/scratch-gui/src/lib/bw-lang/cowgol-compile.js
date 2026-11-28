@@ -7,8 +7,75 @@ export const COWGOL_COMPILE_TARGETS = Object.freeze({
     dos: {format: 'bin', toolchain: 'cowgol-msdos', filename: 'program.exe', maxBytes: 1024 * 1024},
     riscv32: {format: 'elf', toolchain: 'cowgol-riscv32', filename: 'program.elf', maxBytes: 4 * 1024 * 1024},
     eater6502: {format: 'bin', toolchain: 'cowgol-eater6502', filename: 'program.bin', maxBytes: 0x8000},
+    atmega328p: {format: 'hex', toolchain: 'cowgol-atmega328p', filename: 'program.hex', maxBytes: 128 * 1024},
     'cowgol-cgen': {format: 'c', toolchain: 'cowgol-cgen', filename: 'program.c', maxBytes: 8 * 1024 * 1024}
 });
+
+/** Exact qualified boards, rather than all boards with a related processor. */
+const DEVICE_TARGETS = Object.freeze({
+    z80: 'z80-cpm', i8086: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
+    'arduino-uno': 'atmega328p', atmega328p: 'atmega328p'
+});
+export const cowgolTargetForDevice = device => {
+    const key = String(device || '').toLowerCase();
+    return Object.prototype.hasOwnProperty.call(DEVICE_TARGETS, key) ? DEVICE_TARGETS[key] : null;
+};
+
+/** Same arbitrary-firmware path as an AVR sketch; the image fixes chip and clock. */
+export const cowgolAvrDetail = bytes => ({
+    format: 'firmware', target: 'atmega328p', kind: 'avr8js',
+    firmware: {name: 'program.hex', bytes: null, text: new TextDecoder().decode(bytes),
+        fCpu: 16_000_000, device: 'atmega328p'},
+    rom: null, image: null, listing: null
+});
+
+/** Check addressed flash bytes as well as the SRAM facts from the AVR ELF. */
+function validateAvrHex (bytes, out) {
+    const fail = () => { throw new Error('Cowgol compiler returned an invalid ATmega328P HEX image or memory layout.'); };
+    const layout = out.memory_layout;
+    const names = ['flash_end', 'flash_limit', 'data_start', 'data_end', 'bss_end',
+        'heap_start', 'heap_end', 'stack_start', 'stack_reserve', 'ram_end', 'halted_addr', 'status_addr'];
+    if (out.format !== 'hex' || out.artifact_kind !== 'executable' || out.mcu !== 'atmega328p' ||
+        out.origin !== 0 || out.entry !== 0 || out.f_cpu !== 16_000_000 || out.uart_baud !== 9600 ||
+        !layout || names.some(name => !Number.isSafeInteger(layout[name])) ||
+        bytes.some(byte => byte > 127)) return fail();
+    const {flash_end: flashEnd, flash_limit: flashLimit, data_start: dataStart, data_end: dataEnd,
+        bss_end: bssEnd, heap_start: heapStart, heap_end: heapEnd, stack_start: stackStart,
+        stack_reserve: stackReserve, ram_end: ramEnd, halted_addr: halted, status_addr: status} = layout;
+    if (flashLimit !== 0x7e00 || flashEnd < 4 || flashEnd > flashLimit || flashEnd % 2 !== 0 ||
+        dataStart !== 0x100 || dataEnd < dataStart || bssEnd < dataEnd || bssEnd > 0x700 ||
+        out.memory_end !== bssEnd || heapStart < dataEnd || heapEnd - heapStart !== 512 || heapEnd > bssEnd ||
+        stackStart !== 0x700 || stackReserve !== 512 || ramEnd !== 0x900 ||
+        halted < dataEnd || halted >= bssEnd || status < dataEnd || status >= bssEnd || halted === status ||
+        (halted >= heapStart && halted < heapEnd) || (status >= heapStart && status < heapEnd)) return fail();
+    const text = new TextDecoder().decode(bytes);
+    const lines = text.trimEnd().split(/\r?\n/);
+    let next = 0;
+    let ended = false;
+    const reset = [];
+    for (const line of lines) {
+        if (ended || !/^:(?:[0-9a-fA-F]{2}){5,}$/.test(line)) return fail();
+        const record = [];
+        for (let i = 1; i < line.length; i += 2) record.push(parseInt(line.slice(i, i + 2), 16));
+        const [count, high, low, type] = record;
+        const address = (high << 8) | low;
+        if (record.length !== count + 5 || (record.reduce((sum, byte) => sum + byte, 0) & 255)) return fail();
+        if (type === 1) {
+            if (count !== 0 || address !== 0) return fail();
+            ended = true;
+        } else if (type === 0) {
+            // avr-objcopy emits one contiguous flash image, including .data's
+            // ROM initializers. SRAM, EEPROM and bootloader records are refused.
+            if (!count || address !== next || address + count > flashLimit) return fail();
+            for (let i = 0; i < count && reset.length < 4; i++) reset.push(record[4 + i]);
+            next += count;
+        } else return fail();
+    }
+    const resetAddress = ((reset[3] << 8) | reset[2]) * 2;
+    const codeEnd = flashEnd - (dataEnd - dataStart);
+    if (!ended || next !== flashEnd || reset[0] !== 0x0c || reset[1] !== 0x94 ||
+        resetAddress < 104 || resetAddress + 2 > codeEnd) return fail();
+}
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 // The RV32 console has 4 MiB RAM. Keep the upper 32 KiB for its C stack.
@@ -105,7 +172,7 @@ export const cowgolEaterDetail = bytes => ({
 export async function compileCowgol (code, target, {fetcher = globalThis.fetch, signal,
     endpoint = COWGOL_COMPILE_ENDPOINT} = {}) {
     if (!remoteToolchainsAllowed()) throw new Error('Hosted Cowgol compilation is unavailable in this build.');
-    const spec = COWGOL_COMPILE_TARGETS[target];
+    const spec = Object.prototype.hasOwnProperty.call(COWGOL_COMPILE_TARGETS, target) ? COWGOL_COMPILE_TARGETS[target] : null;
     if (!spec) throw new Error(`Unsupported Cowgol compiler target: ${target}`);
     if (typeof code !== 'string' || !code.trim()) throw new Error('Write a Cowgol program first.');
     if (new TextEncoder().encode(code).byteLength > 256 * 1024) throw new Error('Cowgol source exceeds 256 KiB.');
@@ -145,6 +212,7 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
         return {...out, bytes, image, target, filename: spec.filename};
     }
     if (target === 'eater6502') validateEaterRom(bytes, out);
+    if (target === 'atmega328p') validateAvrHex(bytes, out);
     return {...out, bytes, target, filename: spec.filename};
 }
 

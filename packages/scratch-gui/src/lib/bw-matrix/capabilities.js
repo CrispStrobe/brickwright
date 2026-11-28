@@ -909,6 +909,16 @@ export const languageById = function (id) {
  * @param {?object} native a cell's native half
  * @returns {boolean} true when it is a null-with-reason rather than a fact
  */
+// Native firmware ports can be qualified for one board without claiming its
+// whole CPU family. Existing device overrides still change only where/note.
+const COWGOL_UNO = open('hex', 'Cowgol cgen + AVR GCC (ATmega328P)', 'hosted', 'L5', {
+    note: 'Canonical 16 MHz Uno: UART console and D2–D19 digital GPIO; native source and checked Blocks; companion service deployment required'
+});
+export const DEVICE_NATIVE = Object.freeze({
+    'arduino-uno': {cowgol: COWGOL_UNO},
+    atmega328p: {cowgol: COWGOL_UNO}
+});
+
 export const isNativeNull = function (native) {
     return !native || typeof native.reason === 'string';
 };
@@ -948,9 +958,10 @@ export const cell = function (langId, deviceId) {
     // A device may override facts of its family's cell (e.g. one STC part
     // whose C compiles hosted rather than locally). Reach is computed after.
     const override = (device.overrides && device.overrides[lang.id]) || null;
-    const native = isNativeNull(raw.native) ?
-        {...raw.native, ...NO_REACH} :
-        {...raw.native, ...override, ...reachOf(raw.native, device)};
+    const nativeFact = DEVICE_NATIVE[device.id]?.[lang.id] || raw.native;
+    const native = isNativeNull(nativeFact) ?
+        {...nativeFact, ...NO_REACH} :
+        {...nativeFact, ...override, ...reachOf(nativeFact, device)};
     const lowered = raw.lowered.map(l => {
         const landing = fam[l.via] && fam[l.via].native;
         const reach = l.status === STATUS.SHIPPED ? reachOf(landing, device) : NO_REACH;

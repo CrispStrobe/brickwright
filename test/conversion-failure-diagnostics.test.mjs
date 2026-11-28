@@ -28,13 +28,13 @@ test('serialized and object VM diagnostics retain every SB3 path and omit unrela
 
 test('actual Code compile catch displays a real VM serialized validation rejection and preserves the loaded project', async () => {
     const source = await fs.readFile(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-    const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null} = {})';
+    const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {})';
     const body = balancedFrom(source, source.indexOf(signature) + signature.length, '{', '}', 'Code compile');
     const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
     // DOS_LANG / generateDosLangs: the fe and Tcl tabs compile() also reads and
     // regenerates; none here.
     const compile = new AsyncFunction('TWO_WAY', 'LANG_LABEL', 'codeArtworkMatches', 'conversionFailure', 'DOS_LANG', 'generateDosLangs',
-        `return async function ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null} = {}) ${body}`);
+        `return async function ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) ${body}`);
     const execute = await compile(new Set(['pseudocode']), {pseudocode: 'Pseudocode'}, codeArtworkMatches, conversionFailure,
         {}, async () => ({}));
     class InvalidCostumes extends Creator {

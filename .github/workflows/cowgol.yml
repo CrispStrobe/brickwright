@@ -13,6 +13,9 @@ on:
       - 'overlay/scratch-gui/src/lib/code-source-document.js'
       - 'test/cowgol-integration.test.mjs'
       - 'test/cowgol-platforms.test.mjs'
+      - 'test/cowgol-native-surfaces.test.mjs'
+      - 'test/bwlite-cowgol-cli.test.mjs'
+      - 'bin/bwlite.mjs'
       - 'test/code-conversion-editor-ownership.test.mjs'
       - 'test/code-tab-run-via-blocks.test.mjs'
       - 'vendor-pins.json'
@@ -27,6 +30,9 @@ on:
       - 'overlay/scratch-gui/src/lib/code-source-document.js'
       - 'test/cowgol-integration.test.mjs'
       - 'test/cowgol-platforms.test.mjs'
+      - 'test/cowgol-native-surfaces.test.mjs'
+      - 'test/bwlite-cowgol-cli.test.mjs'
+      - 'bin/bwlite.mjs'
       - 'test/code-conversion-editor-ownership.test.mjs'
       - 'test/code-tab-run-via-blocks.test.mjs'
       - 'vendor-pins.json'
@@ -50,14 +56,24 @@ jobs:
             overlay/scratch-gui/src
             scripts
             test
+            bin
+            packages/scratch-gui/src/lib
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Prepare the shared converter and its ZIP dependency
+        run: |
+          npm install --prefix .cowgol-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1
+          ln -s .cowgol-deps/node_modules node_modules
+          cp -R overlay/scratch-gui/src/lib/. packages/scratch-gui/src/lib/
       - name: Editor, persistence, machine visibility and native handoff
         run: >-
           node --test
           test/cowgol-integration.test.mjs
           test/cowgol-platforms.test.mjs
+          test/cowgol-native-surfaces.test.mjs
+          test/bwlite-cowgol-cli.test.mjs
+          test/bwlite-cli.test.mjs
           test/code-conversion-editor-ownership.test.mjs
           test/code-tab-run-via-blocks.test.mjs
           test/code-device-languages.test.mjs

@@ -466,7 +466,7 @@ test('rejected stale native and Blocks compilations preserve the current editor 
 });
 
 test('selected RISC-V and Eater have native actions, downloads and keyboard routing', () => {
-    assert.ok(/cowgol: \(\) => \['riscv32', 'eater6502'\]\.includes\(target\) \?\s+this\.compileCowgolSource\(target, true\)/.test(importer),
+    assert.ok(/cowgol: \(\) => cowgolTarget \?\s+this\.compileCowgolSource\(cowgolTarget, true\)/.test(importer),
         'Keyboard Run must select the native compiler for both new platforms');
     for (const marker of ['bw-cowgol-riscv-run', 'bw-blocks-riscv-run', 'cowgolDownloadRiscv']) assert.ok(importer.includes(marker), marker);
     for (const marker of ['bw-cowgol-eater-run', 'cowgolDownloadEater']) assert.ok(importer.includes(marker), marker);

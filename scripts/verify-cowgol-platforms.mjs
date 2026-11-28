@@ -8,7 +8,7 @@
 // node scripts/verify-cowgol-platforms.mjs \
 //   --service ../stc-compiler --bundle ../cowgol-bundle --board ../bw-board \
 //   --riscv-gcc-stage ../riscv-gcc-stage --tmpdir ../validation
-// Add --targets riscv32,cowgol-cgen,eater6502 when that native ROM is installed.
+// Add eater6502 or atmega328p to --targets when those native profiles are installed.
 import assert from 'node:assert/strict';
 import {spawn, execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -18,11 +18,13 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
 import {compileCowgol, COWGOL_COMPILE_TARGETS} from '../overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js';
+import {AVR8JS_SPEC} from './lib/avr8js-spec.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const {values} = parseArgs({options: {
     service: {type: 'string'}, bundle: {type: 'string'}, board: {type: 'string'},
-    'riscv-gcc-stage': {type: 'string'}, tmpdir: {type: 'string'},
+    'riscv-gcc-stage': {type: 'string'}, 'avr-gcc-stage': {type: 'string'},
+    'avr-runner': {type: 'string'}, 'avr8js-root': {type: 'string'}, tmpdir: {type: 'string'},
     targets: {type: 'string'}, python: {type: 'string'}, cc: {type: 'string'},
     help: {type: 'boolean', short: 'h'}
 }});
@@ -32,8 +34,11 @@ if (values.help) {
   --bundle PATH            Built bundle (COWGOL_BUNDLE; default SERVICE/vendor/cowgol)
   --board PATH             Exact pinned bw-board checkout (COWGOL_BW_BOARD; default ../bw-board)
   --riscv-gcc-stage PATH   Existing executable GCC stage (COWGOL_RISCV_GCC_STAGE)
+  --avr-gcc-stage PATH     Existing executable AVR stage (COWGOL_AVR_GCC_STAGE)
+  --avr-runner PATH        Cowgol tests/avr-run.mjs (COWGOL_AVR_RUNNER; default ../cowgol/tests/avr-run.mjs)
+  --avr8js-root PATH       Exact GUI-pinned avr8js checkout (AVR8JS_ROOT; default ../avr8js-oracle)
   --tmpdir PATH            Temporary parent directory (TMPDIR; default this repository)
-  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502 (default first two)
+  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502,atmega328p (default first two)
   --python COMMAND        Python executable (PYTHON; default python3)
   --cc COMMAND            Host C compiler executable (CC; default cc)
 
@@ -41,7 +46,8 @@ The service binds an ephemeral 127.0.0.1 port. Every compiler request uses that
 local endpoint through Brickwright's real compileCowgol client. Temporary
 artifacts and the child server are removed on success and on ordinary failure.
 C export is compiled with the bundle's real portable console binding. Eater6502
-is explicit opt-in and fails if its frontend/service/bundle route is absent.`);
+and ATmega328P are explicit opt-ins and fail if their bundle/runtime is absent.
+The AVR test also requires the exact pinned GUI engine and compiler checkout.`);
     process.exit(0);
 }
 
@@ -54,7 +60,7 @@ const compiler = values.cc || process.env.CC || 'cc';
 const targets = [...new Set((values.targets || 'riscv32,cowgol-cgen').split(',').map(item => item.trim()).filter(Boolean))];
 assert.ok(targets.length, 'Select at least one platform');
 for (const target of targets) {
-    assert.ok(['riscv32', 'cowgol-cgen', 'eater6502'].includes(target), `Unsupported verification target: ${target}`);
+    assert.ok(['riscv32', 'cowgol-cgen', 'eater6502', 'atmega328p'].includes(target), `Unsupported verification target: ${target}`);
     assert.ok(COWGOL_COMPILE_TARGETS[target], `The frontend does not yet expose ${target}`);
 }
 for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifest.json')]) {
@@ -64,13 +70,17 @@ for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifes
 const git = (directory, ...args) => execFileSync('git', ['-C', directory, ...args], {encoding: 'utf8', timeout: 10_000}).trim();
 const manifest = JSON.parse(readFileSync(path.join(bundle, 'manifest.json'), 'utf8'));
 const boardPin = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'))['bw-board'];
-if (targets.some(target => target !== 'cowgol-cgen')) {
+if (targets.some(target => ['riscv32', 'eater6502'].includes(target))) {
     assert.equal(git(board, 'rev-parse', 'HEAD'), boardPin, 'The machine checkout must match vendor-pins.json');
     assert.equal(git(board, 'status', '--porcelain', '--untracked-files=no'), '', 'The pinned machine must have no tracked edits');
 }
 mkdirSync(temporaryParent, {recursive: true});
 const work = mkdtempSync(path.join(temporaryParent, 'bw-cowgol-platforms-'));
 const riscvStage = path.resolve(values['riscv-gcc-stage'] || process.env.COWGOL_RISCV_GCC_STAGE || path.join(work, 'riscv-gcc'));
+const avrStage = path.resolve(values['avr-gcc-stage'] || process.env.COWGOL_AVR_GCC_STAGE || path.join(work, 'avr'));
+const avrRunner = path.resolve(values['avr-runner'] || process.env.COWGOL_AVR_RUNNER || path.join(root, '../cowgol/tests/avr-run.mjs'));
+const avrRoot = path.resolve(values['avr8js-root'] || process.env.AVR8JS_ROOT || path.join(root, '../avr8js-oracle'));
+const avrPin = AVR8JS_SPEC.split('#')[1];
 
 const fullSource = `include "cowgol.coh";
 include "brickwright.coh";
@@ -112,6 +122,9 @@ sys.path.insert(0, sys.argv[1])
 import app, uvicorn
 app.RISCV_GCC_STAGE = sys.argv[2]
 app.RISCV_GCC_STAGE_BIN = str(pathlib.Path(sys.argv[2]) / "bin")
+app.AVR_STAGE = sys.argv[3]
+app.AVR_STAGE_BIN = str(pathlib.Path(sys.argv[3]) / "bin")
+app._AVR_STAMP = str(pathlib.Path(sys.argv[3]) / ".bundle-fingerprint")
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.bind(("127.0.0.1", 0))
 print("BW_COWGOL_ENDPOINT=http://127.0.0.1:%d/compile" % sock.getsockname()[1], flush=True)
@@ -124,7 +137,7 @@ let serviceLog = '';
 let endpoint;
 const results = [];
 try {
-    server = spawn(python, ['-u', '-c', serverCode, service, riscvStage], {
+    server = spawn(python, ['-u', '-c', serverCode, service, riscvStage, avrStage], {
         cwd: service, env: {...process.env, TMPDIR: work, COWGOL_BUNDLE: bundle, PYTHONDONTWRITEBYTECODE: '1'},
         stdio: ['ignore', 'pipe', 'pipe']
     });
@@ -172,6 +185,35 @@ try {
             assert.equal(machine.exitCode, 0, 'RV32 program must exit successfully');
             output = machine.output;
             execution = {entry: out.image.entry, segments: out.image.segments.length, exitCode: machine.exitCode};
+        } else if (target === 'atmega328p') {
+            assert.ok(existsSync(avrRunner), 'The real AVR machine runner must exist');
+            assert.equal(git(avrRoot, 'rev-parse', 'HEAD'), avrPin, 'Use exactly the AVR engine pinned by the GUI');
+            assert.equal(git(avrRoot, 'status', '--porcelain', '--untracked-files=no'), '', 'The AVR engine must have no tracked edits');
+            const runnerCheckout = path.dirname(path.dirname(avrRunner));
+            assert.equal(git(runnerCheckout, 'rev-parse', 'HEAD'), manifest.source_commit,
+                'The AVR runner must match the compiled Cowgol runtime revision');
+            assert.equal(git(runnerCheckout, 'status', '--porcelain', '--untracked-files=no'), '',
+                'The AVR runner checkout must have no tracked edits');
+            const firmware = path.join(work, 'uno.hex');
+            const layout = path.join(work, 'uno-layout.json');
+            writeFileSync(firmware, out.bytes);
+            writeFileSync(layout, JSON.stringify(out.memory_layout));
+            const observed = JSON.parse(execFileSync(process.execPath,
+                [avrRunner, firmware, layout, JSON.stringify({runs: 2})], {
+                    encoding: 'utf8', timeout: 30_000, maxBuffer: 1024 * 1024,
+                    env: {...process.env, AVR8JS_ROOT: avrRoot}
+                }));
+            assert.equal(observed.runs.length, 2, 'Execute two cold-SRAM boots');
+            for (const run of observed.runs) {
+                assert.equal(run.stopped, true, 'AVR program must halt within the cycle budget');
+                assert.equal(run.status, 0, 'AVR program must exit successfully');
+                assert.equal(run.flashUnchanged, true, 'AVR execution must preserve flash');
+                assert.ok(run.minSP >= out.memory_layout.stack_start, 'Observed stack must stay inside its reservation');
+                assert.equal(run.text, fullOutput);
+            }
+            output = observed.runs[0].text;
+            execution = {flashBytes: out.memory_layout.flash_end, sramBytes: out.memory_end - 0x100,
+                cycles: observed.runs[0].cycles, minSP: observed.runs[0].minSP, boots: 2, exitCode: 0};
         } else if (target === 'cowgol-cgen') {
             assert.equal(out.artifact_kind, 'source');
             assert.equal(out.c, new TextDecoder().decode(out.bytes), 'Downloaded C and response text must agree');
@@ -215,7 +257,9 @@ try {
     console.log(JSON.stringify({
         serviceCommit: git(service, 'rev-parse', 'HEAD'),
         serviceTrackedEdits: git(service, 'status', '--porcelain', '--untracked-files=no') !== '',
-        cowgolCommit: manifest.source_commit, boardCommit: targets.some(target => target !== 'cowgol-cgen') ? boardPin : null,
+        cowgolCommit: manifest.source_commit,
+        boardCommit: targets.some(target => ['riscv32', 'eater6502'].includes(target)) ? boardPin : null,
+        avrCommit: targets.includes('atmega328p') ? avrPin : null,
         results
     }, null, 2));
 } catch (error) {

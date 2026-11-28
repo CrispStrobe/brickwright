@@ -17,8 +17,9 @@ const help = `Brickwright Lite CLI
   bwlite check PROGRAM.bw
   bwlite devices [PROGRAM.bw]
   bwlite retarget PROGRAM.bw DEVICE [--out FILE]
-  bwlite convert FILE.bw|.c|.py|.js|.bas|.sb3 --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic [--device DEVICE] [--out FILE]
-  bwlite transpile PROGRAM.bw --to c|micropython|python|sb3 [--device DEVICE] [--out FILE]
+  bwlite read FILE.bw|.c|.py|.js|.bas|.cow|.cowgol|.sb3 [--device DEVICE] [--out FILE]
+  bwlite convert FILE.bw|.c|.py|.js|.bas|.cow|.cowgol|.sb3 --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic|cowgol [--device DEVICE] [--out FILE]
+  bwlite transpile PROGRAM.bw --to c|micropython|python|sb3|cowgol [--device DEVICE] [--out FILE]
   bwlite spike probe [--port USB_DEVICE]
   bwlite spike run PROGRAM.bw [--port USB_DEVICE]
   bwlite spike bridge --port USB_DEVICE [--listen IP] [--tcp-port N]
@@ -78,9 +79,14 @@ const loadPseudocode = async file => {
     else if (/\.py$/i.test(file)) reader = (await import(`${lib}${/^\s*from\s+(machine|microbit)\s+import/m.test(source) ? 'sb3-creator-micropython' : 'sb3-creator-python'}.js`)).default;
     else if (/\.js$/i.test(file)) reader = (await import(`${lib}sb3-creator-javascript.js`)).default;
     else if (/\.(bas|basic)$/i.test(file)) reader = (await import(`${lib}sb3-creator-basic.js`)).default;
+    else if (/\.(cow|cowgol)$/i.test(file)) reader = (await import(`${lib}sb3-creator-cowgol-reader.js`)).default;
     else if (/\.bw$/i.test(file)) return source;
-    else throw new Error('Input must be .bw, .c, .py, .js, .bas, or .sb3');
+    else throw new Error('Input must be .bw, .c, .py, .js, .bas, .cow, .cowgol, or .sb3');
     const result = reader(source);
+    if (result?.ok === false) {
+        const language = /\.(cow|cowgol)$/i.test(file) ? 'Cowgol' : 'Source';
+        throw new Error(`${language} import refused: ${(result.reasons || []).join('; ') || 'unsupported source'}`);
+    }
     for (const warning of result.warnings || []) console.error(`warning: ${warning}`);
     return result.pseudocode ?? result;
 };
@@ -183,8 +189,8 @@ if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0
                 if (!verdict.isValid) process.exitCode = 1;
             } else {
                 const to = command === 'read' ? 'pseudocode' : value('--to');
-                if (!['pseudocode', 'sb3', 'c', 'host-c', 'python', 'javascript', 'micropython', 'basic'].includes(to)) {
-                    throw new Error('Use --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic');
+                if (!['pseudocode', 'sb3', 'c', 'host-c', 'python', 'javascript', 'micropython', 'basic', 'cowgol'].includes(to)) {
+                    throw new Error('Use --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic|cowgol');
                 }
                 let result;
                 if (to === 'pseudocode') result = source;
@@ -193,6 +199,15 @@ if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0
                 else if (to === 'host-c') result = creator.generateHostC();
                 else if (to === 'python') result = creator.generatePython();
                 else if (to === 'javascript') result = creator.generateJavaScript();
+                else if (to === 'cowgol') {
+                    // A partially parsed pseudocode program must not become a
+                    // successful Cowgol artifact with the missing statements gone.
+                    if (creator.warnings.length) throw new Error(`Cowgol generation refused: ${creator.warnings.join('; ')}`);
+                    const generated = creator.generateCowgol();
+                    if (!generated.ok) throw new Error(`Cowgol generation refused: ${(generated.reasons || []).join('; ') || 'unsupported program'}`);
+                    for (const warning of generated.warnings || []) console.error(`warning: ${warning}`);
+                    result = generated.cowgol;
+                }
                 else if (to === 'micropython') {
                     const generated = creator.generateMicroPython();
                     if (!generated.ok) throw new Error(`MicroPython refused: ${generated.reasons.join('; ')}`);

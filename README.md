@@ -307,7 +307,9 @@ bwlite spike probe
 bwlite spike run scripts/spike/example-usb-stream.bw
 bwlite convert program.bw --to sb3 --out program.sb3
 bwlite convert program.bw --to c   --out program.c
+bwlite convert program.bw --to cowgol --out program.cow
 bwlite read program.c --out recovered.bw
+bwlite read program.cow --out recovered.bw
 bwlite 8051 build program.bw --out program.ihx
 bwlite 8051 flash program.ihx --port /dev/cu.usbserial-XXXX
 bwlite toolchain status
@@ -316,13 +318,17 @@ bwlite circuit test 05-counter --device stc12c5a60s2
 bwlite circuit test --json > circuit-report.json
 ```
 
-`convert` reads `.bw`, `.sb3`, `.c`, `.py`, `.js` and `.bas`, and writes
-pseudocode, SB3, C, host C, Python, JavaScript, MicroPython or BASIC — using the
+`convert` reads `.bw`, `.sb3`, `.c`, `.py`, `.js`, `.bas`, `.cow` and `.cowgol`, and writes
+pseudocode, SB3, C, host C, Python, JavaScript, MicroPython, BASIC or Cowgol — using the
 same pinned `SB3Creator` and language readers as the Code tab. `8051 build`
 uses installed SDCC; `8051 flash` uses installed `stcgal` and an explicit
 serial port (and the STC's usual cold power-cycle into its ISP bootloader).
 `machine` manages emulator configurations and boot plans; `toolchain`, `fpga`
 and `makecode` forward to their repository CLIs.
+
+Cowgol conversion uses the checked Blocks/pseudocode subset. Unsupported
+input or generation fails before replacing the requested output; the native
+compiler routes remain separate from `convert` and `check`.
 
 `circuit test` loads, powers and advances every selected gallery bench with the
 same circuit engine the app uses. The JSON report gives a separate functional

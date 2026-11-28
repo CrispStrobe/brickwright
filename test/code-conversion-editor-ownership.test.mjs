@@ -18,7 +18,7 @@ const extract = (start, end) => {
 };
 const methods = extract('    convertedSource (', '    // source → pseudocode') +
     extract('    async runViaBlocksOnDevice () {', '    async runCowgolAsBlocks () {') +
-    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null} = {}) {',
+    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) {',
     '    // Read the running project into all languages at once.') +
     extract('    async loadAsmExample (id) {', '    openArtefactFile (file) {') +
     extract('    publishAppliedDevice (stc) {',

@@ -16,11 +16,15 @@ by the web and native application wrappers.
    the existing circuit debugger and its build/emulate/flash actions. RISC-V
    instead compiles the accepted console Blocks project and loads the RV32 image.
 5. **Cowgol on CP/M**, **Cowgol on DOS**, **Cowgol on RISC-V**, and
-   **Cowgol on Eater 6502** compile the original source on the hosted service
+   **Cowgol on Eater 6502** or **Cowgol on Arduino Uno** compile the original source on the hosted service
    and hand the executable to the
    existing machine loaders. Downloads include Z80 and 8080 CP/M `.COM`, DOS
-   `.EXE`, RISC-V `.ELF`, Eater 6502 ROM `.BIN`, and compiled C source. These
+   `.EXE`, RISC-V `.ELF`, Eater 6502 ROM `.BIN`, ATmega328P `.HEX`, and compiled C source. These
    actions require the companion compiler-service deployment.
+6. On a qualified native machine, **Run Blocks via Cowgol** is available in
+   both the Cowgol and pseudocode editors. It first checks the selected native
+   runtime, imports the accepted source into Blocks, then compiles those Blocks
+   with Cowgol. The existing C/BASIC **Run via blocks** action remains available.
 
 Syntax highlighting, editable optional tabs, the overflow language menu,
 source downloads, reopen/autosave, conversion, and keyboard Run all recognize
@@ -61,6 +65,13 @@ variables, arrays, arbitrary pointers/casts, recursion, concurrent events,
 unsupported sprite assets, analog/PWM modes, and unported peripheral calls
 are refused. String literals must fit Cowgol's 127 UTF-8-byte limit.
 
+The explicit **Run Blocks via Cowgol** action uses a separate `native-int32`
+generation profile. It checks intermediate addition, subtraction and
+multiplication at runtime and stops with a diagnostic on overflow. It lowers
+Boolean conditions to control flow so the unused branch does not read a pin or
+execute an arithmetic helper. This stronger execution contract does not change
+the ordinary, reversible **From blocks** output or broaden the reader to full Cowgol.
+
 The native host ABI is larger than the conversion subset. Its pixel/rectangle/
 circle/text drawing and analog callbacks do not imply reverse conversion for
 those operations. Ordinary Cowgol byte-stream `print` is also not silently
@@ -71,16 +82,17 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | Machine family | Checked-subset route | Native Cowgol route |
 | --- | --- | --- |
 | 8051 / STC | Existing C backend and simulator/flasher | No new bare-metal backend |
-| AVR / Arduino / ATtiny | Existing C backend and supported simulator/flasher | No new bare-metal backend |
+| Arduino Uno / bare ATmega328P | Existing C backend; additional checked Blocks → Cowgol console/digital route | Full Cowgol → cgen → AVR GCC → Intel HEX; fixed 16 MHz Uno runtime |
+| Other AVR / Arduino / ATtiny | Existing C backend and supported simulator/flasher | No native Cowgol port qualified |
 | Pico / RP2040 | Existing MicroPython or C backend | No new bare-metal backend |
 | STM32 | Existing C backend | No new bare-metal backend |
 | ESP8266 | Existing blob-free C backend | No new bare-metal backend |
 | micro:bit / Calliope | Existing MicroPython route | No new bare-metal backend |
-| Eater 6502 | Existing C/BASIC routes | ROM-safe 65C02 compiler, 32 KiB boot ROM, ACIA console and VIA digital GPIO |
-| Z80 | Existing BASIC/C circuit routes | Real Z80 CP/M and 8080-compatible CP/M compilers |
-| 8086 | Existing assembly/C circuit routes | Real DOS MZ compiler |
+| Eater 6502 | Existing C/BASIC routes; additional checked Blocks → Cowgol console/digital route | ROM-safe 65C02 compiler, 32 KiB boot ROM, ACIA console and VIA digital GPIO |
+| Z80 | Existing BASIC/C circuit routes; checked Blocks → Cowgol CP/M console route | Real Z80 CP/M and 8080-compatible CP/M compilers |
+| 8086 | Existing assembly/C circuit routes; checked Blocks → Cowgol DOS console route | Real DOS MZ compiler |
 | Arcade / PyBadge | Existing PXT/TypeScript route where available | No new native backend |
-| RISC-V | Checked int32 console C through hosted GCC; one sequential flag script | Full Cowgol → cgen → RV32 GCC/picolibc → executable ELF, using console output |
+| RISC-V | Checked int32 console C through hosted GCC, or checked Blocks → Cowgol; one sequential flag script | Full Cowgol → cgen → RV32 GCC/picolibc → executable ELF, using console output |
 
 Availability follows actual existing lowered routes. A selected backend still
 enforces its own supported operations; accepting a Cowgol turtle program does
@@ -89,11 +101,93 @@ from a matching CPU name. The shared producer documents exact accepted digital
 coordinates and reserved pins in
 [COWGOL-CONVERSION.md](https://github.com/CrispStrobe/sb3-creator/blob/feat/cowgol-integration-20261128/docs/COWGOL-CONVERSION.md).
 
-The matrix keeps native CP/M, DOS, RISC-V and Eater facts **open** until the
-companion service is deployed. All four supply portable text/number output;
-Eater also supplies serial input and checked VIA digital calls. Native canvas,
+The matrix keeps native CP/M, DOS, RISC-V, Eater and Uno facts **open** until the
+companion service is deployed. All supply portable text/number output;
+Eater and Uno also supply serial input and checked digital calls. Native canvas,
 timing, and other unimplemented host calls fail to compile/link. Circuit
 programs can also use the established Blocks route.
+
+### Checked native Blocks and pseudocode
+
+Select Z80, 8086, RISC-V, Eater 6502, Arduino Uno or bare ATmega328P, then use
+**Run Blocks via Cowgol** in the pseudocode or Cowgol tab. To start with an
+existing Blocks program, use **From blocks** first. The selected machine is
+retained when the source has no device declaration. A conflicting declaration,
+unsupported native operation, noncanonical clock, or unsupported memory map
+is refused before the current project is replaced.
+
+The shared producer API is `generateCowgol(project, {target})`. Qualified
+targets are `z80-cpm`, `i8080-cpm`, `dos`, `riscv32`, `eater6502` and
+`atmega328p`. CP/M, DOS and RISC-V accept sequential int32/text console
+programs. Eater adds digital VIA operations; Uno adds digital GPIO and input
+pull-ups. Native Eater can use PB7, but its ordinary C export is cleared with
+a diagnostic when that older backend cannot represent the pin. The reversible
+Cowgol reader still has its existing PB7 restriction. Eater active-low input
+is refused because that pin declaration requires a pull-up the VIA runtime
+does not supply; active-low outputs remain supported.
+
+Native timing, graphics, concurrent events, custom procedures and lists remain
+unavailable in these profiles. Calls are not silently removed. Source edits,
+edit/revert, target or device-metadata changes, project replacement, Blocks
+edits, cancellation and unmounting revoke pending builds during module loading
+and compiler requests. Stop during the import phase prevents its subsequent
+compiler launch. The full-source actions retain arrays, pointers and other
+Cowgol constructs beyond the checked reader/generator subset.
+
+### Arduino Uno / ATmega328P
+
+Choose **Cowgol on Arduino Uno** to build the original source and start the
+existing AVR debugger with the exact validated Intel HEX. Keyboard Run uses
+this route on Uno and bare ATmega328P; the menu also offers **Download
+ATmega328P .HEX**. The firmware handoff fixes the CPU and clock even when an
+older debugger selection used a different AVR part or frequency.
+
+| Resource | Native AVR contract |
+| --- | --- |
+| MCU and clock | ATmega328P, 16 MHz |
+| Program flash | `$0000–$7DFF`; final 512 bytes reserved for the Uno bootloader |
+| SRAM | `$0100–$08FF`; static data ends by `$0700` |
+| Allocation | Bounded 512-byte arena, included in static SRAM; allocation failure returns null |
+| C stack reservation | `$0700–$08FF`, 512 bytes; not a proof of arbitrary call-depth safety |
+| Serial | USART0, 9600 baud, 8N1; D0/RX and D1/TX reserved |
+| Digital pins | D2–D13 and A0–A5 (native IDs 14–19); input, output and input pull-up |
+
+The runtime implements byte input/output, signed text/number console output,
+digital read/write and output-latch toggle. Unsupported or reserved pins and
+invalid modes stop with a diagnostic. `argv.coh` observes an empty argument
+list. File I/O, timing, analog/PWM and graphics are unavailable. The runtime is
+plain AVR C; it does not link the Arduino sketch core or emulate missing APIs.
+
+The service checks actual AVR ELF identity, symbols, flash initializers and
+SRAM bounds before emitting HEX. The frontend independently checks every HEX
+checksum, record length, contiguous flash address, final EOF, reset JMP and
+reported memory layout. The reset must enter code after the interrupt vector
+table, before any ROM copy of initialized data. Extra address spaces, EEPROM,
+bootloader overlap and malformed metadata are rejected before handoff.
+
+Execution tests cover cold SRAM, initialized data, arrays, pointers, integer
+division, allocation/free, serial receive/transmit and digital pins on all
+three ports. No physical-board qualification is claimed. Nano, Mega,
+ATmega168P, ATtiny and other AVR targets remain outside this explicitly
+qualified native profile.
+
+### Command-line conversion
+
+`bwlite` now accepts `.cow` and `.cowgol` with `read`, `check`, `convert`,
+`transpile`, `compile`, `devices` and `retarget`. `--to cowgol` exports the
+reversible checked subset, and the existing `--device` option retargets that
+subset through the usual pin-aware pipeline. For example:
+
+```sh
+node bin/bwlite.mjs check program.cow
+node bin/bwlite.mjs convert program.cow --to pseudocode
+node bin/bwlite.mjs convert program.sb3 --to cowgol -o program.cow
+```
+
+These are source/Blocks conversions; the CLI's `compile` alias does not invoke
+the hosted native compiler. Reader and generator refusals exit with status 2
+and preserve an existing output file. Integer-profile qualifications go to
+stderr. See [CLI.md](CLI.md) for all options.
 
 ### RISC-V console
 
@@ -167,8 +261,9 @@ bindings own both VIA output latches; direct writes to the VIA must not be
 mixed with their saved latch state.
 
 The native runtime owns the VIA and clears its timer mode, so PB7 is available
-as native pin 15. The checked conversion route still excludes PB7 because its
-existing C/BASIC runtime reserves that pin for a timer. A native Cowgol program
+as native pin 15. The ordinary reversible conversion profile still excludes PB7 because its
+existing C/BASIC runtime reserves that pin for a timer. The explicit native
+Blocks profile can use PB7 from pseudocode. A native Cowgol program
 using pin 15 can therefore compile successfully while **To blocks** refuses it.
 Pull-ups, analog/PWM, clocks/waits, graphics and file I/O have no native binding.
 Empty command-line arguments are supported. RAM, zero-page workspace, ROM,
@@ -191,7 +286,7 @@ host ABI, an embedded C console profile, portable CP/M/DOS console headers,
 and the Eater ROM backend/runtime. Array sizes, record sizes, static frames and
 combined call workspace are checked before their 16-bit object representation
 can wrap; the checks are present in both compiler source and bootstrap.
-The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V, Eater ROM and C routes,
+The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V, Eater ROM, Uno and C routes,
 checks source/includes and artifact limits, and packages them for Docker,
 Hugging Face and Vercel. Missing toolchains return an explicit failure.
 
@@ -221,6 +316,12 @@ tests run compiled `.COM` and `.EXE` files in independent CP/M and DOS emulators
 and RV32 ELF images and Eater ROMs on the pinned Brickwright machines. The producer additionally
 compiles and executes the checked console C on that same RV32 machine.
 
+`test/cowgol-native-surfaces.test.mjs` runs the actual editor methods with the
+real shared generator, validates AVR artifacts, and exercises cancellation and
+ownership at each asynchronous boundary. `test/bwlite-cowgol-cli.test.mjs`
+invokes real CLI subprocesses, executes converted JavaScript, round-trips SB3,
+and checks that refusals do not overwrite prior outputs.
+
 The reproducible HTTP check uses Brickwright's actual client against a child
 local service, then executes the returned artifact on the pinned machine:
 
@@ -237,6 +338,22 @@ source to a deployed service. The JSON result records exact compiler and
 machine commits. Add `--targets riscv32,cowgol-cgen,eater6502` to include the
 Eater ROM, its serial output, cold-RAM startup and a no-ROM-write audit. Use
 `--help` for paths and explicit target selection.
+
+To include Uno, supply a bundle with `atmega328p` and a clean avr8js checkout
+at the exact SHA in `scripts/lib/avr8js-spec.mjs`:
+
+```sh
+node scripts/verify-cowgol-platforms.mjs \
+  --service ../stc-compiler --bundle ../cowgol-bundle-avr \
+  --targets atmega328p,cowgol-cgen --avr8js-root ../avr8js-oracle \
+  --avr-runner ../cowgol/tests/avr-run.mjs --tmpdir ../validation
+```
+
+The AVR runner must come from a clean Cowgol checkout matching the bundle's
+compiler revision. This check crosses the actual HTTP route, boots the exact
+downloaded HEX twice with cold SRAM, checks stack use and immutable flash, and
+records flash/SRAM size, cycles, and the exact AVR emulator commit. A reduced
+cgen/AVR bundle can be checked independently from a legacy-target bundle.
 
 These checks qualify the conversion and software execution paths. They do not
 claim physical-board testing or a full production GUI build.
