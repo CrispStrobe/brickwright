@@ -23,6 +23,8 @@ const writeError = text => { if (!closedStreams.has(process.stderr)) process.std
 const HELP = `CrispBASIC ${VERSION} — BBC BASIC-compatible runtime
 
 Usage: crispbasic [options] program.bas
+       crispbasic bundle [--web] [--target T] [-o OUT] program.bas
+       crispbasic compile [--emit c|exe] [--target T] [-o OUT] program.bas
        crispbasic [--backend native|wasm] [--simulation FILE] --capabilities
 
   --backend NAME      native (default, Linux x64/ARM64/ARMv7) or wasm (Node worker)
@@ -59,6 +61,12 @@ const EXIT = {completed: 0, error: 1, 'host-error': 1, timeout: 124,
     'output-limit': 125, 'simulation-limit': 125, cancelled: 130};
 
 async function main() {
+    // Standalone-program tools live in their own module; the run CLI below is unchanged.
+    if (['bundle', 'compile'].includes(process.argv[2])) {
+        const {runTool} = await import('../src/cli-tools.mjs');
+        process.exitCode = await runTool(process.argv[2], process.argv.slice(3), {writeOut, writeError});
+        return;
+    }
     const {values, positionals} = parseArgs({
         options: {
             backend: {type: 'string'}, capabilities: {type: 'boolean'}, simulation: {type: 'string'},

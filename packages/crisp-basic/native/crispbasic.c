@@ -67,12 +67,22 @@ static void json_string(FILE *stream, const char *value)
     fputc('"', stream);
 }
 
+#ifdef CRISP_BUNDLE
+/* Standalone bundle: the program is appended to this executable (see
+ * src/bundle.mjs). There is no parent process and no descriptor-3 protocol;
+ * an unhandled error is reported on stderr in the CLI's own format. */
+static const char *bundle_filename = "program.bas";
+static unsigned int *bundle_map = NULL; /* pairs: BASIC line, editor line */
+static unsigned long bundle_map_count = 0;
+static FILE *protocol(void) { return NULL; }
+#else
 static FILE *protocol(void)
 {
     /* dup keeps each event independent from the lifetime of descriptor 3. */
     int fd = dup(3);
     return fd < 0 ? NULL : fdopen(fd, "w");
 }
+#endif
 
 static void input_event(const char *method)
 {
@@ -84,6 +94,16 @@ static void input_event(const char *method)
 
 static void result_event(void)
 {
+#ifdef CRISP_BUNDLE
+    if (failed) {
+        unsigned int line = 0;
+        for (unsigned long i = 0; i < bundle_map_count; ++i)
+            if (bundle_map[2 * i] == (unsigned int)failure_line) { line = bundle_map[2 * i + 1]; break; }
+        if (line) fprintf(stderr, "CrispBASIC: %s:%u: %s\n", bundle_filename, line, failure_message);
+        else fprintf(stderr, "CrispBASIC: %s: %s\n", bundle_filename, failure_message);
+    }
+    return;
+#endif
     FILE *stream = protocol();
     if (!stream) return;
     fprintf(stream, "{\"type\":\"result\",\"version\":1,\"status\":\"%s\",\"exitCode\":%d",
@@ -213,10 +233,8 @@ static int source_error(int code, const char *message, unsigned short line)
 
 /* Loading through the actual upstream tokenizer preserves BBCSDL semantics.
  * The JS frontend supplies explicit, increasing line numbers and Latin-1. */
-static int load_source(const char *filename)
+static int load_source_stream(FILE *source)
 {
-    FILE *source = fopen(filename, "rb");
-    if (!source) return source_error(214, "Cannot open BASIC source", 0);
     char *line = NULL;
     size_t capacity = 0, total = 0;
     unsigned int previous = 0;
@@ -279,12 +297,101 @@ static int load_source(const char *filename)
     return ok;
 }
 
+#ifndef CRISP_BUNDLE
+static int load_source(const char *filename)
+{
+    FILE *source = fopen(filename, "rb");
+    if (!source) return source_error(214, "Cannot open BASIC source", 0);
+    return load_source_stream(source);
+}
+#else
+#define BUNDLE_MAGIC "CRISPBASICBUNDLE"
+static unsigned char *bundle_payload = NULL;
+
+static unsigned long long le64(const unsigned char *p)
+{
+    unsigned long long v = 0;
+    for (int i = 7; i >= 0; --i) v = (v << 8) | p[i];
+    return v;
+}
+
+/* Payload: "CRISPBASIC-BUNDLE 1\n", "filename <name>\n", "map <n>\n" then n
+ * "basic editor\n" lines, "source <bytes>\n" <numbered source>, "notices <bytes>\n"
+ * <text>. Trailer: payload length (u64 LE) then the 16-byte magic. */
+static int load_bundle(void)
+{
+    FILE *self = fopen("/proc/self/exe", "rb");
+    if (!self) return source_error(214, "Cannot open bundled executable", 0);
+    unsigned char trailer[24];
+    if (fseek(self, -24, SEEK_END) || fread(trailer, 1, 24, self) != 24 ||
+        memcmp(trailer + 8, BUNDLE_MAGIC, 16)) {
+        fclose(self);
+        return source_error(214, "No CrispBASIC program is bundled in this executable", 0);
+    }
+    unsigned long long length = le64(trailer);
+    long end = ftell(self);
+    if (length > SOURCE_LIMIT * 4ULL || (long long)length > end - 24 ||
+        fseek(self, end - 24 - (long)length, SEEK_SET)) {
+        fclose(self);
+        return source_error(214, "Corrupt CrispBASIC bundle", 0);
+    }
+    bundle_payload = malloc(length + 1);
+    if (!bundle_payload || fread(bundle_payload, 1, length, self) != length) {
+        fclose(self);
+        return source_error(214, "Cannot read CrispBASIC bundle", 0);
+    }
+    fclose(self);
+    bundle_payload[length] = 0;
+    char *p = (char *)bundle_payload, *limit = (char *)bundle_payload + length;
+    char *eol = memchr(p, '\n', limit - p);
+    if (!eol || strncmp(p, "CRISPBASIC-BUNDLE 1\n", 20)) return source_error(214, "Unsupported CrispBASIC bundle", 0);
+    p = eol + 1;
+    eol = memchr(p, '\n', limit - p);
+    if (!eol || strncmp(p, "filename ", 9)) return source_error(214, "Corrupt CrispBASIC bundle", 0);
+    *eol = 0; bundle_filename = p + 9; p = eol + 1;
+    char *after;
+    if (strncmp(p, "map ", 4)) return source_error(214, "Corrupt CrispBASIC bundle", 0);
+    bundle_map_count = strtoul(p + 4, &after, 10);
+    if (*after != '\n' || bundle_map_count > BASIC_LINE_MAX) return source_error(214, "Corrupt CrispBASIC bundle", 0);
+    p = after + 1;
+    bundle_map = calloc(bundle_map_count ? bundle_map_count * 2 : 1, sizeof *bundle_map);
+    if (!bundle_map) return source_error(0, "No room", 0);
+    for (unsigned long i = 0; i < bundle_map_count; ++i) {
+        bundle_map[2 * i] = (unsigned int)strtoul(p, &after, 10);
+        if (*after != ' ') return source_error(214, "Corrupt CrispBASIC bundle", 0);
+        bundle_map[2 * i + 1] = (unsigned int)strtoul(after + 1, &after, 10);
+        if (*after != '\n') return source_error(214, "Corrupt CrispBASIC bundle", 0);
+        p = after + 1;
+    }
+    if (strncmp(p, "source ", 7)) return source_error(214, "Corrupt CrispBASIC bundle", 0);
+    unsigned long size = strtoul(p + 7, &after, 10);
+    if (*after != '\n' || size > (unsigned long)(limit - after - 1)) return source_error(214, "Corrupt CrispBASIC bundle", 0);
+    p = after + 1;
+    if (getenv("CRISPBASIC_BUNDLE_NOTICES")) {
+        char *notices = p + size;
+        if (strncmp(notices, "notices ", 8) == 0) {
+            unsigned long n = strtoul(notices + 8, &after, 10);
+            if (*after == '\n' && n <= (unsigned long)(limit - after - 1)) fwrite(after + 1, 1, n, stderr);
+        }
+        exit(0);
+    }
+    if (size == 0) return 1; /* An empty program runs and completes. */
+    FILE *source = fmemopen(p, size, "rb");
+    if (!source) return source_error(214, "Cannot read bundled BASIC source", 0);
+    return load_source_stream(source);
+}
+#endif
+
 int main(int argc, char **argv)
 {
+#ifdef CRISP_BUNDLE
+    (void)argc; (void)argv;
+#else
     if (argc != 2) {
         fprintf(stderr, "Usage: crispbasic-native numbered-program.bas\n");
         return 2;
     }
+#endif
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stdin, NULL, _IONBF, 0);
     /* Isolated local native backend, including upstream's native SYS/CALL.
@@ -311,7 +418,11 @@ int main(int argc, char **argv)
     *szCmdLine = 0;
     platform = sizeof(void *) == 8 ? 0x41 : 1; /* Linux; upstream bit 6 denotes 64-bit. */
     liston = 0x30;
+#ifdef CRISP_BUNDLE
+    if (load_bundle()) {
+#else
     if (load_source(argv[1])) {
+#endif
         flags = 0;
         (void)entry((void *)-1);
     }

@@ -86,6 +86,15 @@ objects.push(hostObject);
 const binary = join(output, 'crispbasic-native');
 run(cc, [...target.flags, ...objects, '-ldl', '-lm', '-lrt', '-pthread', '-Wl,-z,noexecstack', '-o', binary]);
 verifyNativeBinary(readFileSync(binary), target);
+// The standalone bundle stub is the same interpreter and host, compiled with
+// CRISP_BUNDLE: it runs the program appended to its own executable file.
+const bundleObject = join(work, 'crispbasic-bundle.o');
+run(cc, ['-Wall', '-Wextra', '-O2', '-DCRISP_BUNDLE', ...target.flags, ...includes, '-c',
+    join(root, 'native', 'crispbasic.c'), '-o', bundleObject]);
+const stub = join(output, 'crispbasic-bundle-stub');
+run(cc, [...target.flags, ...objects.filter(object => object !== hostObject), bundleObject,
+    '-ldl', '-lm', '-lrt', '-pthread', '-Wl,-z,noexecstack', '-o', stub]);
+verifyNativeBinary(readFileSync(stub), target);
 writeFileSync(join(output, 'BBCSDL-LICENSE.txt'), readFileSync(join(work, 'licence.txt')));
 writeFileSync(join(output, 'native-build.json'), JSON.stringify({
     version: 1, backend: 'bbcsdl-native', upstreamCommit: revision,
@@ -96,6 +105,7 @@ writeFileSync(join(output, 'native-build.json'), JSON.stringify({
     compiler: run(cc, ['--version'], {stdio: 'pipe'}).toString().split('\n')[0],
     assembler: target.nasm ? run(nasm, ['--version'], {stdio: 'pipe'}).toString().trim() :
         'GNU assembly via the selected C compiler',
-    binarySha256: createHash('sha256').update(readFileSync(binary)).digest('hex')
+    binarySha256: createHash('sha256').update(readFileSync(binary)).digest('hex'),
+    bundleStubSha256: createHash('sha256').update(readFileSync(stub)).digest('hex')
 }, null, 2) + '\n');
 console.log('Built ' + binary);
