@@ -17,6 +17,11 @@ Unix executable permissions.
 The latest completed qualification and its exact commit are recorded in
 [VALIDATION.md](VALIDATION.md).
 
+[Run 46129143522](https://github.com/CrispStrobe/brickwright/actions/runs/46129143522)
+passed both CPU jobs at `00d05d0377b1000b498e451439a12097a4078ec2`:
+122 source/contract checks and 53 runtime/CLI/corpus checks per CPU, with
+zero failures or skips, plus the documented standalone CLI invocation.
+
 ## Build and run an ARMv7 executable on x86-64 Linux
 
 Install Node 22+, Git, the cross compiler, its development sysroot and QEMU.

@@ -16,8 +16,8 @@ model does not execute BASIC on that controller's emulated CPU.
 | --- | --- | --- |
 | Native Linux x64 | Qualified by native runtime CI | A new native BBCSDL process per run; local files, OS and native facilities remain available to trusted programs |
 | Native Linux ARM64 | Qualified by native runtime CI | An ARM64 build using the upstream ARM64 data/assembler layout; no x86 emulation |
-| Linux ARMv7 hard-float executable | ARM32 port; see current CPU qualification below | Upstream ARM32 layout and ARMv7-A/Thumb-2 instructions; suitable 32-bit Linux userspace required |
-| ARMv7 / ARM64 through QEMU | Dedicated CPU execution gate | Real guest instructions on Cortex-A7/A53 user-mode emulation with a matching Linux sysroot; no guest board or kernel boot |
+| Linux ARMv7 hard-float executable | Qualified on an emulated Cortex-A7 CPU | Upstream ARM32 layout and ARMv7-A/Thumb-2 instructions; suitable 32-bit Linux userspace required |
+| ARMv7 / ARM64 through QEMU | Both CPU jobs passed at `00d05d03` | Real guest instructions on Cortex-A7/A53 user-mode emulation with a matching Linux sysroot; no guest board or kernel boot |
 | WASM in Node on Linux x64 and Linux ARM64 | Qualified runtime/CLI routes | A new worker and restricted interpreter instance per run; optional deterministic logical-pin host; ARM64 consumes the same built artifact |
 | WASM in the browser | Focused Chromium 158 qualification passed; browser and Brickwright gates exercise this route | The same restricted interpreter, interactive input, Stop/Reset, raw VDU output and a partial canvas preview |
 | WASM CLI on macOS ARM64 and Windows x64 | Qualified at the runtime checkpoint linked below | Real Node CLI execution of the same downloaded WASM artifact used on Linux; no native BASIC executable is needed |
@@ -49,6 +49,13 @@ runs the real native test suite on emulated ARM CPUs; completed results and
 exact commits are recorded in [VALIDATION.md](VALIDATION.md). This does not
 port the interpreter to Brickwright's existing RISC-V32 Linux guest or to
 bare-metal MCU simulators.
+
+[CPU run 46129143522](https://github.com/CrispStrobe/brickwright/actions/runs/46129143522)
+passed both Cortex-A7/ARMv7 and Cortex-A53/AArch64 jobs at
+`00d05d0377b1000b498e451439a12097a4078ec2`. Each ran 122 source/contract checks,
+53 native runtime/CLI/corpus checks and the documented standalone example,
+with zero failing or skipped tests. The artifacts include architecture-checked
+executables and matching binary digests; no physical ARMv7 board was used.
 
 To build the WASM artifact, make Emscripten **3.1.64** available as `emcc`, or set
 `EMCC` to that executable. Run:

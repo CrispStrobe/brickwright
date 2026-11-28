@@ -1,5 +1,81 @@
 # Validation records
 
+## ARMv7 port and ARM CPU emulation — 2026-11-28
+
+Runtime `0.1.0-dev.8` adds a Linux ARMv7-A hard-float interpreter using the
+pinned upstream ARM32 layout, explicit cross-build targets and an optional
+native session/CLI CPU runner. The exact code checkpoint is
+[`00d05d0377b1000b498e451439a12097a4078ec2`](https://github.com/CrispStrobe/brickwright/commit/00d05d0377b1000b498e451439a12097a4078ec2)
+on `feature/crispbasic-emulator-ports-20261128`.
+
+[CPU-emulation run 46129143522](https://github.com/CrispStrobe/brickwright/actions/runs/46129143522)
+passed both jobs. Each cross-built the real interpreter on an Ubuntu 24.04
+x86-64 host, verified the resulting ELF target and executed guest instructions
+through QEMU user-mode. The runner used Node 22.23.5, GCC cross compilers
+13.3.0 (`13.3.0-6ubuntu2~24.04.1`) and Ubuntu's QEMU package
+`1:8.2.2+ds-0ubuntu1.18`.
+
+| Guest executable | Emulated CPU | Source/contract checks | Runtime, CLI and fixed-output corpus checks | Failures / skips |
+| --- | --- | ---: | ---: | --- |
+| ELF32 ARM EABI hard-float | `qemu-arm -cpu cortex-a7` | 122 | 53 | 0 / 0 |
+| ELF64 AArch64 | `qemu-aarch64 -cpu cortex-a53` | 122 | 53 | 0 / 0 |
+
+This is **350 passing test executions** across the two CPU jobs, including
+shared tests repeated for both targets. Each job also ran the documented CLI
+example and received the fixed sum-of-squares output with exit code zero.
+The suites cover recursive calls, arrays, strings, DATA/READ/RESTORE, byte I/O,
+interactive input, source-mapped errors, explicit exit codes, fresh memory,
+floating SYS calling conventions, timeout, output limits and cancellation.
+Protocol-failure fixtures run on the host; language fixtures run on the
+selected guest executable. Missing binaries are failures, not passing skips.
+
+The original integration remains pinned to BBCSDL
+`6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f`. The ARMv7 build adds SHA-256-locked
+`src/bbasmb_arm_32.c` and `src/bbdata_arm_32.s`; it compiles for ARMv7-A,
+Thumb-2, VFPv3-D16 and the hard-float ABI. The `ARMHF` switch is applied only
+to `bbexec`, matching the upstream console build's SYS argument packing.
+
+### Retained artifact identities
+
+The workflow retains each target's executable, upstream license and
+`native-build.json`. Both downloaded ZIPs were checked against GitHub's
+artifact digest, and each contained executable was checked against the
+SHA-256 in its build receipt.
+
+| Target | Actions artifact ID | ZIP bytes | Binary SHA-256 |
+| --- | ---: | ---: | --- |
+| `linux-armv7` | `15256992882` | 78,891 | `b3115ad7f257a217fd8a12c16803383b2bf7b6581f542ae28f9091fc7fd4e19a` |
+| `linux-arm64` | `15257177197` | 106,376 | `5b39b7fd2bd4b555ab83384b39a21edb0e7eb48813b211bcb1ae69b94260ff12` |
+
+ZIP SHA-256 values:
+
+- ARMv7: `045625a5c16f1d6e86fb20f77216e7c453bc061fe21be1f48b5e2ddd27881147`
+- ARM64: `35225f7fee3b471b8433981cdb8ae290b452ec69939134c017a8685493d3b67e`
+
+Artifacts use the workflow's seven-day retention. The source/target locks,
+build commands and workflow remain committed for reproduction. Different
+compilers or system libraries can produce different binary digests.
+
+### Direct-host checks and exact boundary
+
+The same code passed all 122 source/contract checks and all 53 real native
+runtime/CLI/corpus checks locally on Linux x64 with Debian GCC 14.2.0 and
+NASM 2.16.03. Its native binary SHA-256 was
+`391e9f868e0cd3a4404b58f6fe8dfc7cb30b467b29deb6fbd7ee9a58810af292`.
+The hosted Native ARM64 job in
+[runtime run 46129143504](https://github.com/CrispStrobe/brickwright/actions/runs/46129143504)
+also passed the 122 source/contract and 53 native checks. Other jobs in that
+broader run are separate from the completed CPU qualification above.
+
+No physical ARMv7 board or guest Linux kernel was used. QEMU user-mode
+emulates the CPU while providing Linux system-call translation; it does not
+model a complete Raspberry Pi board or electrical peripherals. These ARM
+executables cannot run inside Brickwright's RISC-V32 Linux guest. Native
+execution retains trusted host access and does not implement the WASM
+simulation bridge. ARMv6, soft-float, bare-metal MCU and retro-CPU runtimes
+remain separate ports. [CPU-EMULATION.md](CPU-EMULATION.md) records commands,
+sysroot compatibility and deployment requirements.
+
 ## Portable controllers, source round trips and motor physics — 2026-11-28
 
 This integration is saved incrementally on
