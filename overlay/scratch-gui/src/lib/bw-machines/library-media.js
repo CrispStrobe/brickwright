@@ -2,6 +2,7 @@ import {berkeleyLogoDosUrl, berkeleyLogoProjectUrl, createBerkeleyLogoMachine} f
 import {createOpenGemMachine, cuteMouseSourceUrl, openGemLicenseUrl} from './opengem.js';
 import {aliceLicenseUrl, createAlicePascalMachine} from './alice-pascal.js';
 import {createZmiyMachine, zmiyDownloadUrl, zmiyProjectUrl} from './zmiy.js';
+import {createSopwithMachine, sopwithDosUrl, sopwithSourceUrl} from './sopwith.js';
 import {createSudoku86Machine, sudoku86DownloadUrl, sudoku86ProjectUrl} from './sudoku86.js';
 import {aceKimMedia} from './ace-kim-library.js';
 import {makeT} from '../bw-i18n.js';
@@ -86,6 +87,11 @@ export const libraryMedia = [
     {id: 'berkeley-logo-dos', title: 'Berkeley Logo 3.6 (DOS)', machine: 'i8086', license: 'GPL-2.0-or-later',
         licenseFile: berkeleyLogoDosUrl, freedosGuest: createBerkeleyLogoMachine, freedosHelp: 'berkeleyLogoHelp',
         supportSource: {title: 'Berkeley Logo', url: berkeleyLogoProjectUrl}},
+    {id: 'sopwith-dos', title: 'Sopwith Author’s Edition (DOS)', machine: 'i8086', license: 'GPL-2.0-or-later',
+        licenseFile: 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.html',
+        freedosGuest: createSopwithMachine, freedosHelp: 'sopwithHelp',
+        guestPackage: {url: sopwithDosUrl, title: 'Sopwith Author’s Edition ZIP', localOnly: true},
+        supportSource: {title: 'Sopwith source ZIP', url: sopwithSourceUrl}},
     {id: 'zmiy', title: 'Zmiy 0.85.2', machine: 'i8086', license: 'BSD-2-Clause',
         licenseFile: zmiyProjectUrl, freedosGuest: createZmiyMachine, freedosHelp: 'zmiyHelp',
         guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP', localOnly: true}},

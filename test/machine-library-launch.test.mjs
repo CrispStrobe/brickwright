@@ -181,3 +181,13 @@ test('Berkeley Logo uses an XT with the 1.2 MB FreeDOS disk and publisher archiv
     await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(720 * 1024)])), /120m/);
     await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(1200 * 1024)])), /floppy checksum differs/);
 });
+
+test('Sopwith uses a locally supplied original ZIP and the XT 1.2 MB boot disk', async () => {
+    const item = libraryMedia.find(item => item.id === 'sopwith-dos');
+    assert.equal(item.machine, 'i8086');
+    assert.equal(item.license, 'GPL-2.0-or-later');
+    assert.equal(item.guestPackage.localOnly, true);
+    assert.match(item.guestPackage.url, /original-files[/]swauth[.]zip$/);
+    assert.match(item.supportSource.url, /original-files[/]gplsrc[.]zip$/);
+    await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(720 * 1024)])), /120m/);
+});
