@@ -260,12 +260,17 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
 }
 
 /** A CP/M transient program uses the existing Z80 service machine loader. */
-export const cowgolCpmConfig = () => ({
-    id: 'cowgol-cpm', title: 'Cowgol — CP/M Z80', machine: 'z80',
-    executionMode: 'functional', cpu: {variant: 'z80'},
-    slots: {}, bootOrder: ['com'], widgets: [],
-    provenance: {language: 'cowgol', compilerTarget: 'z80-cpm'}
-});
+export const cowgolCpmConfig = ({target = 'z80-cpm'} = {}) => {
+    if (!['z80-cpm', 'i8080-cpm'].includes(target)) {
+        throw new Error('The CP/M program bench needs a Z80 or 8080 CP/M program.');
+    }
+    return {
+        id: 'cowgol-cpm', title: 'Cowgol — CP/M Z80', machine: 'z80',
+        executionMode: 'functional', cpu: {variant: 'z80'},
+        slots: {}, bootOrder: ['com'], widgets: [],
+        provenance: {language: 'cowgol', compilerTarget: target}
+    };
+};
 
 /** Mount the compiled program on the existing real CP/M 2.2 Z80 machine. */
 export function cowgolCpmSystemConfig ({display = false, target = 'z80-cpm'} = {}) {

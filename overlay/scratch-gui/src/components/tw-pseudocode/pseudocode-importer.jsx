@@ -6303,7 +6303,7 @@ class PseudocodeImporter extends React.Component {
             } else if (run && (target === 'z80-cpm' || target === 'i8080-cpm')) {
                 const {runCpmCom} = await import('../../lib/bw-machines/run-machine.js');
                 if (!current()) return;
-                await runCpmCom(cowgolCpmConfig(), out.bytes);
+                await runCpmCom(cowgolCpmConfig({target}), out.bytes);
             } else if (run) {
                 throw new Error('This Cowgol artifact has no machine Run action.');
             } else {
