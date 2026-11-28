@@ -14,7 +14,7 @@ In Machines, a CPU with both launch paths offers **All paths**, **Circuits** and
 | zForth for CP/M and CP/M-80 software | Existing Z80 entries. CP/M Sieve has an editable C route. |
 | BBC BASIC for Z80 | Existing serial and VDP lessons boot CP/M. The media-lab manifest describes a separate BDOS-shim workflow. |
 | Microsoft BASIC for 6502 | One 6502 lesson offers Run and Run on circuit. Both launch the same SHA-256-checked Microsoft BASIC V1.1 ROM. The circuit action opens the Ben Eater breadboard and extracts its bus and 65C51 ACIA. Both routes accept commands in Controller. |
-| Tali Forth 2 with framebuffer | The Machines entry runs the reviewed ROM on its declared 65C02 map. Switch between ACIA and Screen in Controller to define words and inspect the 64 × 32 framebuffer. The GUI check exercises VIA writes and verifies all 2,048 displayed pixels. |
+| Tali Forth 2 with framebuffer | The Machines entry runs the same pinned framebuffer ROM on the virtual 65C02 and the Ben Eater circuit. The circuit route keeps its extracted VIA and ACIA and observes writes to the framebuffer in shared RAM. Switch between ACIA and Screen in Controller to define words and inspect all 2,048 pixels. |
 | 6502 Animation Lab | The 6502 Machines entry runs the original MIT ROM and shows the 100 × 64 animation in Controller. It captures each visible frame when the guest publishes it at $0200. Source editing and rebuilding remain part of the Media Lab CLI lesson. |
 | Linux on RISC-V | Existing Linux lesson and cold-boot option. |
 | PicoBB | Existing RP2040 entry using the reviewed filesystem-enabled revision. |

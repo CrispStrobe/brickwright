@@ -462,6 +462,7 @@ class DebugPanel extends React.Component {
             i80386Media: kind === 'i80386' ? i80386Media || null : null,
             i80386HddGeometry: kind === 'i80386' ? i80386HddGeometry || null : null,
             machineConfig6502: kind === 'eater6502' ? machineConfig6502 || null : null,
+            wired6502Board: kind === 'eater6502' ? e.detail?.wired6502Board : null,
             // HARDWARE THE PROGRAM ASKED FOR, and it has to be listed here
             // explicitly: this destructure is a fixed field list, so a new
             // field on the event is silently dropped unless it is named in

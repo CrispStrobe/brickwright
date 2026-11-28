@@ -115,6 +115,7 @@ export const libraryMedia = [
         romHash: '45504aefefd3adc676028013b568332289876da79afc3f682045d6052e41c396'},
     {id: 'tali-forth-65c02', title: 'Tali Forth 2 with framebuffer', machine: 'eater6502',
         license: 'LicenseRef-Public-Domain', licenseFile: 'LICENSE.upstream', infoKey: 'tali65c02',
+        wiredExample: 'eater6502-bench',
         revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
         romHash: '81c331f6afcd7f7049dbf51e65d839d0a483ef0699697586819bbeff95e74703'},
     {...pdos86, id: 'pdos86-at', title: 'PDOS/86 (AT with RTC)', machine: 'i80386', infoKey: 'pdos86At'},

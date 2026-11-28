@@ -1,3 +1,4 @@
+import {bindGrayFramebufferToCircuit} from '../../lib/bw-machines/gray-framebuffer.js';
 import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import {addCardiacFace, addMicrotronicFace, addKim1Face, addKim1VideoFace} from '../../lib/controller-machine-faces.js';
 import React from 'react';
@@ -1760,7 +1761,19 @@ class CircuitTab extends React.Component {
         const runtime = this.props.vm?.runtime;
         if (runtime) runtime.circuitBoard = board;
         window.dispatchEvent(new CustomEvent('bw-board-ready'));
-        if (pending.media) window.dispatchEvent(new CustomEvent('bw-machine-media-load', {detail: pending.media}));
+        const media = pending.media;
+        if (!media) return;
+        if (media.circuitVideo6502) {
+            try {
+                media.machineConfig6502 = bindGrayFramebufferToCircuit(
+                    {regions: result.regions, chips: result.chips}, media.circuitVideo6502);
+                media.wired6502Board = board;
+            } catch (error) {
+                media.bootCompletion?.reject(error);
+                return;
+            }
+        }
+        window.dispatchEvent(new CustomEvent('bw-machine-media-load', {detail: media}));
     };
 
     /**

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
 const url = process.argv[2];
+const wired = process.argv.includes('--circuit');
 assert.ok(url, 'Pass the URL of the assembled Brickwright frontend');
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const page = await browser.newPage({viewport: {width: 1600, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
@@ -15,13 +16,25 @@ try {
     await page.getByTestId('bw-file-menu-trigger').click();
     await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
     const dialog = page.getByTestId('bw-machine-manager');
-    await dialog.getByRole('searchbox', {name: 'Search firmware'}).fill('Tali Forth');
+    await dialog.getByRole('combobox', {name: 'Machine type'}).selectOption('eater6502');
+    const path = dialog.getByTestId('bw-mm-path-eater6502');
+    await path.selectOption(wired ? 'circuit' : 'functional');
     const row = dialog.locator('[data-machine-media="tali-forth-65c02"]');
     await row.getByTestId('bw-mm-item-info').click();
     await row.getByText(/Choose ACIA in Controller/).waitFor();
     assert.match(await row.getByRole('link', {name: 'LicenseRef-Public-Domain'}).getAttribute('href'), /LICENSE\.upstream$/);
-    await row.getByRole('button', {name: 'Run', exact: true}).click();
+    assert.equal(await row.getByRole('button', {name: wired ? 'Run' : 'Run on circuit', exact: true}).count(), 0);
+    await row.getByRole('button', {name: wired ? 'Run on circuit' : 'Run', exact: true}).click();
     await dialog.waitFor({state: 'hidden'});
+    if (wired) {
+        await page.waitForFunction(() => {
+            const binding = window.__bwMachineBoard;
+            return window.__bwActiveExample?.id === 'eater6502-bench' && binding?.board &&
+                binding.board === window.__board && /designer board attached/.test(binding.why);
+        });
+    } else {
+        assert.equal(await page.evaluate(() => Boolean(window.__bwMachineBoard?.board)), false);
+    }
 
     const controller = page.locator('[data-bw-stage-dock="controller"]');
     const surface = controller.getByRole('combobox', {name: 'Controller surface'});
@@ -70,10 +83,10 @@ try {
     await surface.selectOption('terminal');
     await command('7 square . cr', /^7 square \. cr 50 $/);
     assert.deepEqual(errors, []);
-    console.log('Tali Forth in Machines accepted definitions and VIA I/O, rendered all 2048 real framebuffer pixels, and kept its dictionary across Controller views.');
+    console.log(`Tali Forth on the ${wired ? 'circuit' : 'functional machine'} accepted definitions and VIA I/O, rendered all 2048 real framebuffer pixels, and kept its dictionary across Controller views.`);
 } catch (error) {
     console.error(await page.getByTestId('bw-serial-console').allTextContents());
-    console.error(await page.getByTestId('bw-machine-manager').getByRole('alert').allTextContents());
+    console.error(errors, await page.getByTestId('bw-mm-status').allTextContents());
     throw error;
 } finally {
     await browser.close();

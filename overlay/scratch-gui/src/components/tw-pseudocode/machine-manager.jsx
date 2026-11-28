@@ -25,7 +25,7 @@ import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-p
 import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
 import {freedosFloppyZipUrl} from '../../lib/bw-machines/freedos-guest.js';
 import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
-import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
+import {activateConfig, defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
 import {
@@ -392,6 +392,17 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             name: ref.url.split('/').pop(), machineView: 'controller'
         }});
     });
+    const runWiredMedia = item => launch(item.id, async () => {
+        const request = {};
+        controllerRequest.current = request;
+        const config = await openLibraryMedia(item);
+        const {bootMedia, machineConfig, widgets} = await activateConfig(config);
+        if (controllerRequest.current !== request) return false;
+        return onOpenExample(item.wiredExample, false, {circuitFirmware: {
+            slotId: bootMedia.slot, kind: config.machine, bytes: bootMedia.bytes, name: bootMedia.name,
+            machineView: 'controller', widgets, circuitVideo6502: machineConfig
+        }});
+    });
     const dup = async id => { try { await store.duplicate(id); setStatus(t('duped')); await refresh(); } catch (e) { setStatus(e.message); } };
     const del = async id => { try { await store.remove(id); setStatus(t('removed')); await refresh(); } catch (e) { setStatus(e.message); } };
     const setNativeBlocks = async (cfg, enabled) => {
@@ -462,7 +473,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             const isCircuitMedia = item => Boolean(item.kim1Tape);
             const hasCircuitPath = group.presets.length || group.examples.some(isCircuitExample) ||
                 (canOpenExample && group.lessons.some(lesson => lesson.wiredExample)) ||
-                group.saved.some(usesWiredCircuit) || group.media.some(isCircuitMedia);
+                group.saved.some(usesWiredCircuit) ||
+                group.media.some(item => isCircuitMedia(item) || (canOpenExample && item.wiredExample));
             const hasFunctionalPath = group.bios || group.local || group.graphics || group.virtual.length ||
                 group.lessons.length || group.cpm65 || group.xkim || group.examples.some(example => !isCircuitExample(example)) ||
                 group.saved.some(config => !usesWiredCircuit(config)) || group.media.some(item => !isCircuitMedia(item));
@@ -478,7 +490,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                 lessons: circuit ? group.lessons.filter(lesson => canOpenExample && lesson.wiredExample) : group.lessons,
                 presets: circuit ? group.presets : [],
                 saved: group.saved.filter(matchesPath(usesWiredCircuit)),
-                media: group.media.filter(matchesPath(isCircuitMedia)),
+                media: group.media.filter(item => circuit ?
+                    isCircuitMedia(item) || (canOpenExample && item.wiredExample) : !isCircuitMedia(item)),
                 examples: group.examples.filter(matchesPath(isCircuitExample)),
                 cpm65: !circuit && group.cpm65, xkim: !circuit && group.xkim, local: !circuit && group.local
             };
@@ -639,7 +652,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                     {item.license}
                                                 </a> : (/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`)}
                                             </>}
-                                            actions={
+                                            actions={<>
+                                                {(group.path !== 'circuit' || !item.wiredExample) &&
                                                 <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
                                                         item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun) ||
                                                         ((item.freedosGuest || item.localFloppy) && !guestMedia[item.id]) || (item.guestPackage && !guestPackages[item.id])} style={btn}
@@ -685,8 +699,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         }
                                                     })}>
                                                     {t('run')}
-                                                </button>
-                                            }>
+                                                </button>}
+                                                {group.path !== 'functional' && canOpenExample && item.wiredExample &&
+                                                    <button type="button" style={btn} disabled={launching !== null || lessonBusy !== null}
+                                                        data-testid="bw-mm-media-wired"
+                                                        onClick={() => runWiredMedia(item)}>{t('runOnCircuit')}</button>}
+                                            </>}>
                                             {(item.freedosGuest || item.localFloppy) && <label style={fieldsStyle}>
                                                 {item.localFloppy ? item.localFloppy.name : t('freedosMedia')}{' '}
                                                 <input type="file" accept={item.localFloppy ? '.img,.ima' : '.zip,.img,.ima'}

@@ -3187,8 +3187,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.tali');
         }
 
+        const wiredBoard = bootMedia?.wired6502Board;
         const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
-            declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
+            declaredMachine && !wiredBoard ? {board: null, why: 'library machine map'} : designerBoard();
+        if (wiredBoard && db.board !== wiredBoard) throw new Error('The 65C02 circuit changed before boot.');
         if (db.board) {
             targetOpts.board = db.board;
             // Machine targets drive the designer's real board rather than a
