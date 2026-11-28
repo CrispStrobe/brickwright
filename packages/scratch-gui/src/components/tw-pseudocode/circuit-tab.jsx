@@ -1127,17 +1127,25 @@ class CircuitTab extends React.Component {
         }
     }
 
-    async load ({explicit = false} = {}) {
+    load (options) {
+        if (this.loading) return this.loading;
+        const pending = this.loadDesigner(options);
+        this.loading = pending;
+        return pending.finally(() => {
+            if (this.loading === pending) this.loading = null;
+        });
+    }
+
+    async loadDesigner ({explicit = false} = {}) {
         this._markReactUpdate('host:stc-load');
         this.setState({stc: this.readStc()});
-        if (this.state.Designer || this.loading) return;
+        if (this.state.Designer) return;
         if (!shouldLoadCircuitDesigner({
             explicit,
             isVisible: this.props.isVisible,
             portalOn: this._stagePortalOn(),
             debugDock: this.state.debugDock
         })) return;
-        this.loading = true;
         try {
             const [engine, m6502, z80, i8086] = await Promise.all([
                 import(/* webpackChunkName: "bw-board" */ 'bw-board'),
@@ -1241,7 +1249,7 @@ class CircuitTab extends React.Component {
             // legitimately not have them yet — which the panel strip reports
             // rather than hides.
             this._markReactUpdate('host:designer-load');
-            this.setState({Designer: ui.CircuitDesigner, ui, panels});
+            await new Promise(resolve => this.setState({Designer: ui.CircuitDesigner, ui, panels}, resolve));
         } catch (e) {
             // A chunk that 404s because the deploy moved on is not an error the
             // user can act on, and catching it here made it INVISIBLE to the
@@ -1255,7 +1263,6 @@ class CircuitTab extends React.Component {
                 window.__bwRecoverFromStaleBuild(e && e.message);
             this.setState(recovering ? {reloading: true} : {error: e.message});
         }
-        this.loading = false;
     }
 
     /**
@@ -1511,13 +1518,15 @@ class CircuitTab extends React.Component {
             const example = list.find(item => item.id === journey.exampleId);
             if (!example) throw new Error(
                 `Starter example "${journey.exampleId}" is missing from examples/index.json.`);
-            if (journey.mode !== 'program-only') this.load({explicit: true});
+            if (journey.circuitFirmware) await this.load({explicit: true});
+            else if (journey.mode !== 'program-only') this.load({explicit: true});
             const result = journey.mode === 'program-only' ?
                 await this.loadProgramOnlyStarter(example) :
                 await this.loadExample(example, {
-                    circuitOnly: journey.mode === 'circuit-only' || !!journey.kim1Tape,
+                    circuitOnly: journey.mode === 'circuit-only' || !!journey.kim1Tape || !!journey.circuitFirmware,
                     activateCircuit: !!journey.kim1Tape,
-                    kim1Tape: journey.kim1Tape
+                    kim1Tape: journey.kim1Tape,
+                    circuitFirmware: journey.circuitFirmware
                 });
             finish(result && result.ok ? {ok: true} : {
                 ok: false,
@@ -1743,7 +1752,9 @@ class CircuitTab extends React.Component {
         if (!pending || pending.data !== data) return;
         this._wiredExample = null;
         if (!result.ok || !board) {
-            this.setState({examplesError: result.reasons?.join(' · ') || 'The circuit could not be attached.'});
+            const message = result.reasons?.join(' · ') || 'The circuit could not be attached.';
+            this.setState({examplesError: message});
+            pending.media?.bootCompletion?.reject(new Error(message));
             return;
         }
         const runtime = this.props.vm?.runtime;
@@ -2080,6 +2091,10 @@ class CircuitTab extends React.Component {
                 !(Array.isArray(data.wires) || Array.isArray(data.nets))) {
                 throw new Error('not a circuit (no parts with wires or nets)');
             }
+            const circuitFirmware = opts?.circuitFirmware;
+            const wiredBoot = this.state.Designer?.supportsWiredExampleBoot &&
+                data.parts.some(part => part.kind === 'w65c02');
+            if (circuitFirmware && !wiredBoot) throw new Error('This firmware requires a 6502 circuit.');
             const microtronicPart = data.parts.find(item => item.kind === 'busch-microtronic');
             const kim1Part = data.parts.find(item => item.kind === 'kim-1');
             const kim1Tape = opts?.kim1Tape;
@@ -2166,12 +2181,10 @@ class CircuitTab extends React.Component {
             // established path — this tab stashes it to window.__bwPendingMedia
             // and debug-panel applies it when the panel mounts, which is what
             // makes an example loaded BEFORE the debugger exists still boot.
-            let wiredMedia = null;
-            const wiredBoot = this.state.Designer?.supportsWiredExampleBoot &&
-                data.parts.some(part => part.kind === 'w65c02');
+            let wiredMedia = circuitFirmware || null;
             try {
                 const romPath = ex.files && ex.files.rom;
-                if (romPath) {
+                if (romPath && !circuitFirmware) {
                     // The machine kind comes off the parts actually on the
                     // board, not off the example id or its category — the
                     // same test CircuitDesigner uses to decide it has a
@@ -2207,6 +2220,17 @@ class CircuitTab extends React.Component {
             const circuitData = kim1Tape ? {vcc: data.vcc, parts: [kim1Part], wires: [], fileOnly: true}
                 : wiredBoot ? {...data, fileOnly: true, bootWiredExample: true}
                     : hasProgram ? data : {...data, fileOnly: true};
+            const attachment = circuitFirmware && new Promise((resolve, reject) => {
+                const settle = error => {
+                    clearTimeout(timer);
+                    if (this._wiredExample?.data === circuitData) this._wiredExample = null;
+                    delete wiredMedia.bootCompletion;
+                    if (error) reject(error);
+                    else resolve();
+                };
+                const timer = setTimeout(() => settle(new Error('Timed out waiting for the circuit to attach.')), 60000);
+                wiredMedia.bootCompletion = {resolve: () => settle(null), reject: settle};
+            });
             this._wiredExample = wiredBoot ? {data: circuitData, media: wiredMedia} : null;
             const nextState = {
                 // fileOnly tells the designer this circuit came with no
@@ -2222,6 +2246,7 @@ class CircuitTab extends React.Component {
             };
             if (kim1Tape) await this.loadKim1TapeCircuit(circuitData, kim1Part.id, kim1Tape, nextState);
             else this.setState(nextState);
+            if (attachment) await attachment;
             // A loaded example is a named project, not the generic project
             // created by the SB3 converter. Keep the normal title reducer as
             // the single source used by the menu bar, save dialog and window.

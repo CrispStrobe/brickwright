@@ -3241,7 +3241,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
         if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||
-            (declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom))) {
+            await isBundledMicrosoftBasic(targetOpts.rom)) {
             const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
             basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
             runner.sendBasicLine = line => runner.sendSerial(microsoftBasicLine(line));

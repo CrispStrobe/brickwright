@@ -287,6 +287,48 @@ test('8086 offers both execution paths from a circuit and opens saved circuit re
     }
 });
 
+test('Microsoft BASIC uses the same verified ROM for the virtual and circuit launch actions', async t => {
+    const MachineManager = await loadManager();
+    const romUrl = 'static/roms/msbasic-6502.rom';
+    const bytes = await readFile(new URL('../overlay/scratch-gui/' + romUrl, import.meta.url));
+    let selectedBytes = bytes;
+    t.mock.method(globalThis, 'fetch', async url => url === 'examples/index.json' ?
+        {ok: true, json: async () => []} :
+        {ok: url === romUrl, arrayBuffer: async () => new Uint8Array(selectedBytes).buffer});
+    const launches = [];
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store: createMemoryMachineStore(), locale: 'en', preferredMachine: 'eater6502',
+            onRun: config => launches.push(config.slots.rom),
+            onOpenExample: (...args) => launches.push(args)
+        }));
+    });
+    try {
+        const row = () => renderer.root.findByProps({'data-lesson-id': 'lesson-msbasic-6502'});
+        const path = () => renderer.root.findByProps({'data-testid': 'bw-mm-path-eater6502'});
+        await act(async () => path().props.onChange({target: {value: 'functional'}}));
+        assert.equal(row().findAllByProps({'data-testid': 'bw-mm-lesson-wired'}).length, 0);
+        await act(async () => row().findByProps({'data-testid': 'bw-mm-lesson-run'}).props.onClick());
+        assert.equal(launches[0].url, romUrl);
+
+        await act(async () => path().props.onChange({target: {value: 'circuit'}}));
+        assert.equal(row().findAllByProps({'data-testid': 'bw-mm-lesson-run'}).length, 0);
+        const runWired = () => row().findByProps({'data-testid': 'bw-mm-lesson-wired'}).props.onClick();
+        await act(async () => runWired());
+        assert.equal(launches[1][0], 'eater6502-bench');
+        assert.deepEqual(launches[1][2].circuitFirmware.bytes, new Uint8Array(bytes));
+
+        selectedBytes = new Uint8Array(bytes);
+        selectedBytes[0] ^= 1;
+        await act(async () => runWired());
+        assert.equal(launches.length, 2);
+        assert.match(renderer.root.findByProps({'data-testid': 'bw-mm-status'}).props.children, /sha256 mismatch/);
+    } finally {
+        renderer.unmount();
+    }
+});
+
 test('reviewed media uses an immutable manifest URL and rejects a changed machine or license', async () => {
     const {libraryMedia, openLibraryMedia} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-media.js');
     const item = libraryMedia.find(row => row.id === 'forth-cpm');

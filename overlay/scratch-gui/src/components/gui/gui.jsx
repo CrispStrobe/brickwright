@@ -1069,7 +1069,7 @@ const GUIComponent = props => {
                 onOpenExample={(exampleId, codeOnly, options) => new Promise((resolve, reject) => {
                     props.onActivateTab(codeOnly ? 3 : CIRCUIT_TAB_INDEX);
                     window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
-                        exampleId, kim1Tape: options?.kim1Tape, onResult: result => {
+                        exampleId, kim1Tape: options?.kim1Tape, circuitFirmware: options?.circuitFirmware, onResult: result => {
                             if (result.error) reject(new Error(result.error));
                             else {
                                 if (result.ok && options?.kim1Tape) props.onActivateTab(CODE_TAB_INDEX);

@@ -40,7 +40,7 @@ const T = {
     en: {
         wiredFirmware: 'Wired firmware',
         path: 'Execution path', allPaths: 'All paths', functionalPath: 'Functional (fast)', circuitPath: 'Circuits',
-        circuitExamples: 'Circuit examples',
+        circuitExamples: 'Circuit examples', runOnCircuit: 'Run on circuit',
         local386: 'Local 386 media',
         localDos: 'Boot a local DOSBox HDD',
         localDosInfo: 'Select a raw hard-disk image. An optional DOSBox configuration supplies the 386 CPU and disk geometry. Its imgmount filename must match the image.',
@@ -73,7 +73,7 @@ const T = {
     de: {
         wiredFirmware: 'Firmware für die Schaltung',
         path: 'Ausführungspfad', allPaths: 'Alle Pfade', functionalPath: 'Funktional (schnell)', circuitPath: 'Schaltungen',
-        circuitExamples: 'Schaltungsbeispiele',
+        circuitExamples: 'Schaltungsbeispiele', runOnCircuit: 'Auf Schaltung starten',
         local386: 'Lokale 386-Medien',
         localDos: 'Lokales DOSBox-Festplattenabbild starten',
         localDosInfo: 'Wähle ein Rohabbild der Festplatte. Eine optionale DOSBox-Konfiguration legt die 386-CPU und die Geometrie fest. Der Dateiname im imgmount-Befehl muss zum Abbild passen.',
@@ -384,6 +384,14 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             setStatus(lessonT(locale, 'lessons.failed', {title, reason: (e && e.message) || String(e)}));
         }
     };
+    const runWiredLesson = lesson => launch(lesson.config.id, async () => {
+        const ref = lesson.config.slots.rom;
+        const {bytes} = await defaultImageFetcher(ref);
+        return onOpenExample(lesson.wiredExample, false, {circuitFirmware: {
+            slotId: 'rom', kind: lesson.config.machine, bytes,
+            name: ref.url.split('/').pop(), machineView: 'controller'
+        }});
+    });
     const dup = async id => { try { await store.duplicate(id); setStatus(t('duped')); await refresh(); } catch (e) { setStatus(e.message); } };
     const del = async id => { try { await store.remove(id); setStatus(t('removed')); await refresh(); } catch (e) { setStatus(e.message); } };
     const setNativeBlocks = async (cfg, enabled) => {
@@ -453,6 +461,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             const isCircuitExample = example => !example.codeOnly;
             const isCircuitMedia = item => Boolean(item.kim1Tape);
             const hasCircuitPath = group.presets.length || group.examples.some(isCircuitExample) ||
+                (canOpenExample && group.lessons.some(lesson => lesson.wiredExample)) ||
                 group.saved.some(usesWiredCircuit) || group.media.some(isCircuitMedia);
             const hasFunctionalPath = group.bios || group.local || group.graphics || group.virtual.length ||
                 group.lessons.length || group.cpm65 || group.xkim || group.examples.some(example => !isCircuitExample(example)) ||
@@ -465,7 +474,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             return {
                 ...group, bothPaths, path,
                 bios: !circuit && group.bios, graphics: !circuit && group.graphics,
-                virtual: circuit ? [] : group.virtual, lessons: circuit ? [] : group.lessons,
+                virtual: circuit ? [] : group.virtual,
+                lessons: circuit ? group.lessons.filter(lesson => canOpenExample && lesson.wiredExample) : group.lessons,
                 presets: circuit ? group.presets : [],
                 saved: group.saved.filter(matchesPath(usesWiredCircuit)),
                 media: group.media.filter(matchesPath(isCircuitMedia)),
@@ -574,12 +584,16 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         data-testid="bw-mm-lesson-source">{lesson.sourceLabel}</a>
                                                 </div>
                                             </>} actions={<>
-                                                <button onClick={() => {invalidateDosPackage(); return runLesson(lesson);}} style={primary}
-                                                    disabled={lessonBusy === lesson.config.id}
-                                                    data-testid="bw-mm-lesson-run">{lessonT(locale, 'lessons.run')}</button>
+                                                {group.path !== 'circuit' && <button onClick={() => {invalidateDosPackage(); return runLesson(lesson);}} style={primary}
+                                                    disabled={lessonBusy !== null || launching !== null}
+                                                    data-testid="bw-mm-lesson-run">{lessonT(locale, 'lessons.run')}</button>}
+                                                {group.path !== 'functional' && canOpenExample && lesson.wiredExample &&
+                                                    <button type="button" style={btn} disabled={launching !== null || lessonBusy !== null}
+                                                        data-testid="bw-mm-lesson-wired"
+                                                        onClick={() => runWiredLesson(lesson)}>{t('runOnCircuit')}</button>}
                                                 {lesson.coldConfig && (
                                                     <button onClick={() => {invalidateDosPackage(); return runLesson(lesson, true);}} style={btn}
-                                                        disabled={lessonBusy === lesson.config.id}
+                                                        disabled={lessonBusy !== null || launching !== null}
                                                         data-testid="bw-mm-lesson-cold">{lesson.coldLabel}</button>
                                                 )}
                                             </>} />
