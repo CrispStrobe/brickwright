@@ -140,6 +140,79 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## Linked instances, mates, datums and manufacturing checks: document versions 51 and 52 (28 November 2026)
+
+Lite pins CrispCAD SDK `422e5675f180ddb9febd34af2fe7114bd567092b` (previously
+`3336b7a`), CrispCAD main. Over `3336b7a` it brings:
+
+- **Assemblies, document version 51** (CrispCAD `9307d42`, BrickWright proof
+  `b14f359`): linked instances (`instance` nodes that place another copy of a
+  part and follow its edits; Unlink makes an independent copy), mates
+  (coincident, concentric, distance) between stable face names, solved in the
+  Assembly dialog's new Mates tab, a planetary set whose carrier turns, exact
+  edges on exploded assembly sheets, and group rename inside the dialog.
+- **Drawings, document version 52** (`24dd9c1`): datum feature symbols (ISO
+  5459) and feature control frames (ISO 1101) attached to exact faces and edges
+  of an assembly sheet, thread symbols, and DXF DIMENSION entities for the
+  automatic dimensions.
+- **Check for manufacturing** (`fdf0804`, analysis only): CNC pocket depth
+  against the tool, dogbones with suggested positions, injection moulding
+  (draft, undercuts along the pull, wall uniformity).
+- **Fixes** (`5db89fe`..`9bff537`): edge picking in the 3D view tests visibility
+  at each edge's own point; STEP import on tablets shows progress from the
+  exact worker with a 44 px Cancel; Shift during an object drag gives fine
+  precision again.
+- The exact kernel stays at 0.1.11 (the SDK's `NOTICE.txt` is unchanged).
+  THIRD-PARTY-NOTICES.md now also names datums and tolerance frames and the
+  faces offered for mates as kernel triggers.
+
+`editor-menu.ts` did not change between `3336b7a` and `422e567`, so the CAD
+tab's File and Edit menus list the same entries as after the previous sync.
+The new features are reached inside existing entries: linked copies and the
+Mates tab in **File > Assemblies > Groups and suppression…**, datums and
+tolerances in the drawing sheet opened by **File > Drawings and checks >
+Assembly drawing from exact edges…**, the new analyses in **Check for
+manufacturing…**. No host code changed for this sync.
+
+Until this sync the vendored editor refused documents of versions 51 and 52.
+CrispCAD's `npm run verify:brickwright` round-trips one document of each
+version from 41 to 52 through the real BrickWright writer and loader: version 51
+two linked instances of one part with a coincident and a concentric mate
+(measured exactly like their part, following an edit of the part, the mates
+still satisfied), version 52 two datums and two tolerance frames on exact faces
+by stable name (the model unchanged, still resolving on the exact B-rep). The 22
+robot projects regenerated from this pin are byte-identical, so
+`static/cad-robots` is unchanged.
+
+Checks on a fresh `BW_ENABLE_CAD=1` production GUI build of this pin, in the
+shared Chromium: CrispCAD `verify:brickwright` (versions 41 to 52; 51 and 52
+new) and `verify:brickwright-sync`; `sync-cad-sdk.mjs --check`;
+`gen:cad-robots:check` (against the pin and against the embedded documents);
+the CAD SDK fetch-pin and fetch-pinning tests (25 pass) and `prove:pins` (11/11
+mutations caught); `verify-built-cad-sdk` (846 files) and
+`verify-built-cad-robot-projects` (22); `verify-cad-editor.mjs` default,
+`--sdk-only`, `--ipad`, `--shapes-ui`, `--sdk-only --shapes-ui`, `--robots` and
+`--robots --ipad`. In the CAD tab, driven through the menus on a desktop window
+(mouse) and an iPad-sized touch viewport with the compact chrome, everything of
+the previous section passes again (STEP import 6000 mm³, two edges picked and
+chamfered 5880 mm³, STEP and DXF export, manufacturing check, holes and
+fasteners, printability, the MPM3610 assembly as groups with an exploded view),
+and in addition: File > Assemblies > Groups and suppression… places a linked
+copy of a lid from the Groups tab, and the Mates tab loads faces from the exact
+kernel and adds a coincident mate of the base's top and the lid's underside,
+which moves the lid onto the base (z 12); the design saves at version 51 with
+one instance and one mate. File > Drawings and checks > Assembly drawing from
+exact edges… of a 40 × 30 × 10 plate at 1:1 attaches datum A to the plate's top
+face by a click or a tap in the front view, Export drawing DXF downloads an
+R2000 DXF with 3 DIMENSION entities, and the saved sheet keeps the datum at
+version 52. The File menu opened from the CAD tab's bar on an iPad in landscape
+is taller than its window (718 px in 613 px) and scrolls. A 2 mm chamfer of the
+box's +z edges measures exactly 5810.667 mm³ with kernel 0.1.11; the version 42
+and 43 loft documents open, edit and save at their versions; a version 46
+document opens and saves at 46; a 150-hole rim fillet is refused with the
+tablet-limits message before the kernel runs. The `BW_ENABLE_CAD=0` build
+passes `--expect-absent`.
+
 ## Assemblies, split, materials and drawing export: document versions 48 to 50 and kernel 0.1.11 (28 November 2026)
 
 Lite pins CrispCAD SDK `3336b7aa70a8dceec4c1f82f6861fe8e1c2be896` (previously
