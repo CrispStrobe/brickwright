@@ -389,12 +389,20 @@ export const runnerTerminalReceipt = (wire, source, {env = process.env, shard} =
         source.gitBlob === createHash('sha1').update(Buffer.concat([Buffer.from('blob '+sourceBytes.length+'\0'), sourceBytes])).digest('hex'), 'exact checked source fingerprint');
     const partitioned = expectedForShard(source.text, shard);
     runnerNeed(partitioned.ok && typeof shard === 'string' && job.shards.includes(shard), 'complete source shard partition');
-    runnerNeed(env.GITHUB_REPOSITORY === 'CrispStrobe/brickwright-lite' && env.GITHUB_JOB === job.id && env.BW_JOB_NAME === job.id+' ('+shard+')', 'current runner repository/job/shard identity');
+    // The 2026-11-25 rename kept repository ID 1291854269 (see
+    // docs/REPOSITORY-RENAME.md). Both names describe this workbench; the
+    // separate Legacy application has another ID. Bind live evidence to the
+    // stable ID without rewriting names in historical receipts.
+    runnerNeed(env.GITHUB_REPOSITORY_ID === '1291854269' &&
+        ['CrispStrobe/brickwright', 'CrispStrobe/brickwright-lite'].includes(env.GITHUB_REPOSITORY) &&
+        env.GITHUB_JOB === job.id && env.BW_JOB_NAME === job.id+' ('+shard+')', 'current runner repository/job/shard identity');
     runnerNeed(typeof env.GITHUB_RUN_ID === 'string' && /^[1-9][0-9]{0,19}$/.test(env.GITHUB_RUN_ID) &&
         typeof env.GITHUB_RUN_ATTEMPT === 'string' && /^[1-9][0-9]{0,8}$/.test(env.GITHUB_RUN_ATTEMPT), 'current runner run/attempt identity');
+    const workflowPrefix = env.GITHUB_REPOSITORY+'/.github/workflows/build.yml@';
     runnerNeed(/^[0-9a-f]{40}$/.test(env.GITHUB_SHA || '') && source.checkoutHead === env.GITHUB_SHA &&
         /^[0-9a-f]{40}$/.test(env.GITHUB_WORKFLOW_SHA || '') && typeof env.GITHUB_WORKFLOW_REF === 'string' &&
-        env.GITHUB_WORKFLOW_REF.length <= 512 && /^CrispStrobe\/brickwright-lite\/\.github\/workflows\/build\.yml@refs\/(?:heads|pull)\/[A-Za-z0-9_./-]+$/.test(env.GITHUB_WORKFLOW_REF), 'current checked source/workflow identity');
+        env.GITHUB_WORKFLOW_REF.length <= 512 && env.GITHUB_WORKFLOW_REF.startsWith(workflowPrefix) &&
+        /^refs\/(?:heads|pull)\/[A-Za-z0-9_./-]+$/.test(env.GITHUB_WORKFLOW_REF.slice(workflowPrefix.length)), 'current checked source/workflow identity');
     const lines = wire.slice(0, -1).split('\n');
     const header = [RUNNER_SCHEMA, env.GITHUB_REPOSITORY, env.GITHUB_RUN_ID, env.GITHUB_RUN_ATTEMPT, env.GITHUB_JOB, shard, env.GITHUB_SHA, env.GITHUB_WORKFLOW_SHA, env.GITHUB_WORKFLOW_REF].join('\t');
     runnerNeed(lines[0] === header && lines.length === mapping.steps.length + 1, 'exact scalar run/source header and row count');

@@ -64,7 +64,7 @@ export function packageStoreCompliance ({buildDir, artifacts = [], outDir, root 
         generatedAt: now(),
         sourceCommit: commit,
         buildReceipt: receipt,
-        outputScan: verify ? 'passed: no prohibited GPL payload in frontend output' : 'not run',
+        outputScan: verify ? 'passed: no registered optional-only payloads or known prohibited signatures in frontend output; not a complete licence audit' : 'not run',
         files: files.map(artifactRecord).sort((a, b) => a.name.localeCompare(b.name))
     };
     writeFileSync(path.join(out, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);

@@ -40,6 +40,14 @@ emulated CPU and source lowered through blocks are different results and must
 be labeled accordingly. Keep the advanced retro-language routes; widen board
 coverage after current source semantics and modern reference routes are dependable.
 
+LP1a implementation checkpoint: shared SDCC package metadata now drives the
+existing downloader identities and the known-payload output guard; 46 focused
+source controls pass. Main landing uses the applicable automatic PR checks.
+[The claim](lanes/2026-11-28-lp1-toolchain-inventory.md) preserves exact scope
+and evidence. Digest verification for every artifact, complete component/runtime
+license evidence, service-worker cache retention and no-prefetch qualification
+are still open; LP1 as a whole is not complete.
+
 Status: **planned; claim and land bounded slices in LP0/LP1 → LP2/LP3 →
 LP4 → LP5 order**, with R1/R2/J1 as dependencies for new execution behavior.
 No pending runtime, silicon, installed-application or license qualification is
