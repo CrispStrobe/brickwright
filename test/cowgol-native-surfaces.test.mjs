@@ -75,6 +75,21 @@ test('explicit native compiler choices stay within the selected machine contract
     }
 });
 
+test('CP/M program bench configs preserve the compiler target and the Z80 CPU', () => {
+    assert.equal(compiler.cowgolCpmConfig().provenance.compilerTarget, 'z80-cpm');
+    assert.deepEqual(compiler.cowgolCpmConfig(), compiler.cowgolCpmConfig({target: 'z80-cpm'}));
+    for (const target of ['z80-cpm', 'i8080-cpm']) {
+        const config = compiler.cowgolCpmConfig({target});
+        assert.equal(config.provenance.compilerTarget, target);
+        assert.equal(config.machine, 'z80');
+        assert.deepEqual(config.cpu, {variant: 'z80'});
+    }
+    for (const target of [null, '', false, 'constructor', '__proto__', 'I8080-CPM', 'dos', 'riscv32', 'cowgol-cgen']) {
+        assert.throws(() => compiler.cowgolCpmConfig({target}),
+            {message: 'The CP/M program bench needs a Z80 or 8080 CP/M program.'}, String(target));
+    }
+});
+
 test('the capability matrix records the qualified AVR profiles without widening the family', () => {
     for (const device of ['arduino-uno', 'atmega328p', 'arduino-nano', 'atmega168p']) {
         const capability = cell('cowgol', device);
@@ -361,6 +376,8 @@ test('explicit 8080 selection imports checked source through the actual editor a
         assert.equal(f.currentProject().stc.device, 'z80');
         assert.equal(f.machineRuns.length, 1, f.editor.state.status);
         assert.equal(f.machineRuns[0].config.machine, 'z80');
+        assert.deepEqual(f.machineRuns[0].config.cpu, {variant: 'z80'});
+        assert.equal(f.machineRuns[0].config.provenance.compilerTarget, 'i8080-cpm');
     }
 });
 
