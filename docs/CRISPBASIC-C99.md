@@ -53,8 +53,10 @@ hosted C compilation seam and hands the resulting Intel HEX to the same
 AVR firmware path as other C programs. The ordinary flash action accepts the
 generated C too. It stays an explicit user action; compiling to C does not
 flash anything. Requests select ATmega328P, C99, 16 MHz and the required
-`-mdouble=64 -mlong-double=64` flags. An older hosted AVR GCC installation
-that lacks binary64 support fails visibly. No reduced-precision fallback is
+`-mdouble=64 -mlong-double=64` flags. The qualified toolchain is AVR GCC
+14.2 with libf7 arithmetic and math symbols. Generated C checks both the
+binary64 format and libf7 feature macros, so incompatible hosted toolchains
+fail visibly. No reduced-precision fallback is
 used. Successful compilation by itself is reported as build evidence, not
 simulator or physical-device evidence.
 
@@ -82,7 +84,7 @@ with esbuild, and staging plus loading the real standalone compiler was
 checked. This is not a complete production-browser or hosted-service proof.
 
 The standalone repository's `scripts/verify-compiler-boards.mjs` independently
-executes its BASIC pin fixture through BBCSDL, compiles firmware, and checks
+executes four BASIC fixtures through BBCSDL, compiles each to firmware, and checks
 two cold boots in Brickwright's pinned AVR and RP2040 simulators. See its
 `COMPILING-BOARDS.md` for the source pins, commands, timing tolerance, observed
 trace results and qualification limits.
