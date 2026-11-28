@@ -4,9 +4,11 @@ import {readFileSync} from 'node:fs';
 import {cowgolDosConfig} from '../overlay/scratch-gui/src/lib/bw-lang/cowgol-dos.js';
 import {normalizeMachineConfig, validateMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/machine-config.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
-import {createI80386DosBench} from '../overlay/scratch-gui/src/lib/bw-debug/i80386-dos-bench.js';
+import {createI80386DosBench, createI80386DosBootBench} from '../overlay/scratch-gui/src/lib/bw-debug/i80386-dos-bench.js';
 
 const config = () => cowgolDosConfig({variant: '80386'});
+const bootConfig = () => ({...config(), machineConfig: 'dos-boot',
+    slots: {disk: {url: 'local-media:cowgol-dos.img'}}, bootOrder: ['disk']});
 const read = path => readFileSync(new URL(`../overlay/scratch-gui/src/${path}`, import.meta.url), 'utf8');
 const section = (source, start, end) => {
     const begin = source.indexOf(start), stop = source.indexOf(end, begin + start.length);
@@ -41,6 +43,41 @@ test('only an explicit fixed 386 DOS-service config can omit the AT BIOS', () =>
     assert.equal(validateMachineConfig(normalizeMachineConfig(com)).ok, true);
 });
 
+test('386 DOS boot is an explicit disk-only BIOS-service machine', () => {
+    assert.equal(validateMachineConfig(normalizeMachineConfig(bootConfig())).ok, true);
+    for (const mutation of [
+        value => { delete value.machineConfig; },
+        value => { value.machineConfig = 'dos-service'; },
+        value => { value.machine = 'i8086'; },
+        value => { value.cpu.variant = '80286'; },
+        value => { value.executionMode = 'auto'; },
+        value => { value.slots = {exe: {url: 'local-media:program'}}; },
+        value => { value.slots.bios = {url: 'local-media:bios'}; },
+        value => { value.slots.floppy = {url: 'local-media:other'}; },
+        value => { value.bios = {kind: 'custom'}; },
+        value => { value.nativeBlocks = true; }
+    ]) {
+        const value = bootConfig(); mutation(value);
+        assert.equal(validateMachineConfig(normalizeMachineConfig(value)).ok, false, JSON.stringify(value));
+    }
+});
+
+test('386 disk activation retains the exact disk and separate boot profile', async () => {
+    const bytes = new Uint8Array(368640); bytes[42] = 99;
+    const out = await runMachineConfig(bootConfig(), {fetcher: ref => {
+        assert.equal(ref.url, 'local-media:cowgol-dos.img');
+        return {bytes};
+    }, dispatch () {}});
+    assert.equal(out.detail.kind, 'i80386');
+    assert.equal(out.detail.slotId, 'disk');
+    assert.equal(out.detail.profile, 'dos');
+    assert.equal(out.detail.machinePreset, 'dos-boot');
+    assert.equal(out.detail.dosVariant, '80386');
+    assert.equal(out.detail.x86Variant, '80386');
+    assert.deepEqual(out.detail.bytes, bytes);
+    assert.equal(out.detail.i80386Media, undefined);
+});
+
 test('386 activation preserves its own target, exact executable, arguments and ASCII file mounts', async () => {
     const cfg = config();
     cfg.provenance.program = {args: 'one two'};
@@ -65,10 +102,10 @@ test('386 activation preserves its own target, exact executable, arguments and A
 });
 
 test('386 media ownership waits for attachment, propagates failure and settles cancellation', async () => {
-    for (const outcome of ['resolve', 'reject', 'cancel']) {
+    for (const makeConfig of [config, bootConfig]) for (const outcome of ['resolve', 'reject', 'cancel']) {
         const entered = deferred(), signal = new AbortController();
         let detail, settled = false;
-        const pending = runMachineConfig(config(), {awaitBoot: true, signal: signal.signal,
+        const pending = runMachineConfig(makeConfig(), {awaitBoot: true, signal: signal.signal,
             fetcher: () => ({bytes: Uint8Array.of(0x4d, 0x5a)}),
             dispatch: value => { detail = value; entered.resolve(); }});
         pending.then(() => { settled = true; }, () => { settled = true; });
@@ -98,6 +135,16 @@ test('386 bench rejects foreign modes and cancelled work before loading the mach
     }
     const controller = new AbortController(); controller.abort();
     await assert.rejects(createI80386DosBench({...base, executionSignal: controller.signal}), /cancelled/);
+});
+
+test('386 boot rejects wrong media, hardware, CPU and cancellation before package loading', async () => {
+    const base = {bytes: new Uint8Array(368640), format: 'disk'};
+    for (const override of [{bytes: new Uint8Array(1474560)}, {bytes: [0]}, {format: 'exe'},
+        {variant: '80286'}, {nativeBlocks: true}, {chips: []}, {config: {}}]) {
+        await assert.rejects(createI80386DosBootBench({...base, ...override}), /386 DOS/);
+    }
+    const controller = new AbortController(); controller.abort();
+    await assert.rejects(createI80386DosBootBench({...base, executionSignal: controller.signal}), /cancelled/);
 });
 
 // Execute the runner's actual DOS branch. Only lazy package imports and the
@@ -141,12 +188,13 @@ function runner (hold = null, mutation = null) {
         if (hold === key) { entered.resolve(); await release.promise; }
         if (key === 'session') return {createDebugSession: target => ({target})};
         assert.equal(key, '386', '386 must never construct the 8086 CPU');
-        return {createI80386DosBench: async options => {
-            calls.built.push(options);
+        const createBench = route => async options => {
+            calls.built.push({...options, route});
             if (hold === 'construction') { entered.resolve(); await release.promise; }
             return {target: {kind: 'i80386'}, machine: {chipRefusals: () => []},
                 sendKeys: value => calls.keys.push(value), screenText: () => ['actual text']};
-        }};
+        };
+        return {createI80386DosBench: createBench('service'), createI80386DosBootBench: createBench('boot')};
     };
     return {...runnerFixture({bootMedia, loadDependency, signal: signal.signal, calls}),
         calls, signal, entered, release, bootMedia};
@@ -157,6 +205,7 @@ test('actual runner chooses the 386 constructor, console and live DOS ASCII queu
     const session = await f.attach();
     assert.deepEqual(f.calls.loaded, ['session', '386']);
     assert.equal(f.calls.built[0].variant, '80386');
+    assert.equal(f.calls.built[0].route, 'service');
     assert.deepEqual(f.calls.built[0].bytes, f.bootMedia.bytes);
     assert.equal(f.calls.built[0].executionSignal, f.signal.signal);
     assert.equal(session.target.kind, 'i80386');
@@ -167,11 +216,31 @@ test('actual runner chooses the 386 constructor, console and live DOS ASCII queu
     assert.deepEqual(f.serialLines, ['X', 'Y']);
 });
 
+test('actual runner selects the 386 boot constructor and live guest keyboard', async () => {
+    const f = runner(null, media => { media.machinePreset = 'dos-boot'; media.slot = 'disk';
+        media.bytes = new Uint8Array(368640); });
+    const session = await f.attach();
+    assert.deepEqual(f.calls.loaded, ['session', '386']);
+    assert.equal(f.calls.built[0].route, 'boot');
+    assert.equal(f.calls.built[0].format, 'disk');
+    assert.equal(f.calls.built[0].variant, '80386');
+    assert.deepEqual(f.calls.built[0].bytes, f.bootMedia.bytes);
+    assert.equal(session.target.kind, 'i80386');
+    assert.equal(f.runner.i8086MediaIo.dosKeyboard, true);
+    f.runner.sendSerial('ECHO LIVE\r');
+    assert.deepEqual(f.calls.keys, ['ECHO LIVE\r']);
+});
+
 test('actual runner refuses mixed 386 DOS/AT/native-block inputs', async () => {
     for (const mutation of [media => { media.slot = 'disk'; }, media => { media.nativeBlocks = true; },
         media => { media.chips = []; }, media => { media.i80386Media = {bios: new Uint8Array()}; },
         media => { media.x86Variant = '80286'; }, media => { delete media.dosVariant; }]) {
         const f = runner(null, mutation);
+        await assert.rejects(f.attach(), /fixed real-mode profile/);
+        assert.deepEqual(f.calls.loaded, []);
+    }
+    for (const slot of ['com', 'exe', 'bios', 'floppy']) {
+        const f = runner(null, media => { media.machinePreset = 'dos-boot'; media.slot = slot; });
         await assert.rejects(f.attach(), /fixed real-mode profile/);
         assert.deepEqual(f.calls.loaded, []);
     }
@@ -181,8 +250,10 @@ test('actual runner refuses mixed 386 DOS/AT/native-block inputs', async () => {
 });
 
 test('disposing a pending 386 attach cannot wire its completed machine', async () => {
-    for (const phase of ['386', 'construction']) {
-        const f = runner(phase), pending = f.attach();
+    for (const boot of [false, true]) for (const phase of ['386', 'construction']) {
+        const f = runner(phase, media => {
+            if (boot) { media.machinePreset = 'dos-boot'; media.slot = 'disk'; }
+        }), pending = f.attach();
         await f.entered.promise;
         f.signal.abort(); f.release.resolve();
         await assert.rejects(pending, /disposed/);

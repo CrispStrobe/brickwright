@@ -227,19 +227,20 @@ export function validateMachineConfig(cfg) {
         errors.push('nativeBlocks is available only for i80386 machines');
     }
 
-    // Direct DOS execution is an explicit, separate real-mode 386 machine.
-    // A program slot alone must never waive the BIOS requirement of an AT
-    // boot config, nor accept a boot disk or native dispatcher on this route.
-    const dos386 = cfg.machineConfig === 'dos-service';
+    // These explicit real-mode profiles supply BIOS services rather than a
+    // ROM BIOS. Keep direct program loading separate from actual DOS boot:
+    // an arbitrary slot must never waive the full AT BIOS requirement.
+    const dosBoot386 = cfg.machineConfig === 'dos-boot';
+    const dos386 = cfg.machineConfig === 'dos-service' || dosBoot386;
     if (dos386) {
         const slots = isObj(cfg.slots) ? Object.keys(cfg.slots) : [];
         if (cfg.machine !== 'i80386' || cfg.cpu?.variant !== '80386' || cfg.executionMode !== 'functional') {
-            errors.push('dos-service requires an explicit functional i80386 / 80386 machine');
+            errors.push(`${cfg.machineConfig} requires an explicit functional i80386 / 80386 machine`);
         }
-        if (slots.length !== 1 || !['com', 'exe'].includes(slots[0]) || cfg.bios != null) {
-            errors.push('the 386 dos-service requires exactly one COM or EXE slot and no BIOS');
+        if (slots.length !== 1 || !(dosBoot386 ? ['disk'] : ['com', 'exe']).includes(slots[0]) || cfg.bios != null) {
+            errors.push(`the 386 ${cfg.machineConfig} requires exactly one ${dosBoot386 ? 'disk' : 'COM or EXE'} slot and no BIOS`);
         }
-        if (cfg.nativeBlocks === true) errors.push('the 386 dos-service does not support native blocks');
+        if (cfg.nativeBlocks === true) errors.push(`the 386 ${cfg.machineConfig} does not support native blocks`);
     }
 
     const mode = cfg.executionMode;

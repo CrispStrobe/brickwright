@@ -3552,7 +3552,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     : import(/* webpackChunkName: "bw-debug-i8086" */ './i8086-dos-bench.js')
             ]);
             const createDosBench = variant === '80386'
-                ? benchModule.createI80386DosBench : benchModule.createI8086DosBench;
+                ? (bootMedia.machinePreset === 'dos-boot'
+                    ? benchModule.createI80386DosBootBench : benchModule.createI80386DosBench)
+                : benchModule.createI8086DosBench;
             const img = await resolveMediaImage(bootMedia);
             // The slot is authoritative when the loader named one; the MZ
             // signature decides otherwise. Guessing 'com' for an .EXE would
@@ -3844,11 +3846,12 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
      * network clone and never the private $AT_BIOS_ROM.
      */
     async function attachI80386() {
-        if (bootMedia?.machinePreset === 'dos-service') {
-            if (bootMedia.profile !== 'dos' || !['com', 'exe'].includes(bootMedia.slot) ||
+        if (['dos-service', 'dos-boot'].includes(bootMedia?.machinePreset)) {
+            const slots = bootMedia.machinePreset === 'dos-boot' ? ['disk'] : ['com', 'exe'];
+            if (bootMedia.profile !== 'dos' || !slots.includes(bootMedia.slot) ||
                 bootMedia.nativeBlocks || bootMedia.chips || bootMedia.i80386Media ||
                 bootMedia.x86Variant !== '80386' || bootMedia.dosVariant !== '80386') {
-                throw new Error('the 386 DOS service needs a COM or EXE on its fixed real-mode profile');
+                throw new Error('the 386 DOS machine needs the matching media on its fixed real-mode profile');
             }
             return attachI8086('80386');
         }

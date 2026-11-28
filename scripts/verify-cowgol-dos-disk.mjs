@@ -26,12 +26,12 @@ if (values.help) {
     [--expect "another line"] [--expect-output EXACT_PROGRAM_TEXT]
     [--board ../bw-board] [--out report.json]
 
-All three qualified CPUs (8086, 80186, real-mode 80286) boot a fresh copy of the
+All four qualified CPUs (8086, 80186, real-mode 80286/80386) boot a fresh copy of the
 shipped 360 KiB FAT12 disk on both console and Controller display surfaces.
 COMMAND.COM runs COWGOL.EXE from AUTOEXEC.BAT; a live shell command verifies
 return to DOS and ERRORLEVEL. BIOS services remain supplied by the machine
 adapter. This does not qualify a ROM BIOS boot, hardware disk controller,
-protected mode, 80386 OS boot, or a physical machine.
+protected mode, or a physical machine.
 `);
     process.exit(0);
 }
@@ -49,6 +49,9 @@ const boardImports = Object.fromEntries([
     ['bw-board/i8086-machine.js', 'i8086-machine.js'],
     ['bw-board/i8086-dos.js', 'i8086-dos.js'],
     ['bw-board/i8086-debug.js', 'i8086-debug.js'],
+    ['bw-board/i80386-debug.js', 'i80386-debug.js'],
+    ['bw-board/i8086-cga.js', 'i8086-cga.js'],
+    ['bw-board/experimental/i80386-at-machine.js', 'experimental/i80386-at-machine.js'],
     ['bw-board/dos-fat-inject.js', 'dos-fat-inject.js'],
     ['bw-board/execution-policy', 'execution-policy.js']
 ].map(([specifier, file]) => [specifier, pathToFileURL(join(board, 'src', file)).href]));
@@ -59,6 +62,7 @@ export function resolve(specifier, context, nextResolve) {
     return nextResolve(Object.prototype.hasOwnProperty.call(paths, specifier) ? paths[specifier] : specifier, context);
 }`)}`, {data: boardImports});
 const {createI8086DosBench} = await import('../overlay/scratch-gui/src/lib/bw-debug/i8086-dos-bench.js');
+const {createI80386DosBootBench} = await import('../overlay/scratch-gui/src/lib/bw-debug/i80386-dos-bench.js');
 const {i8086Execution} = await import('../overlay/scratch-gui/src/lib/bw-i8086-execution.js');
 const fat = await import(pathToFileURL(join(board, 'src/dos-fat-inject.js')).href);
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -82,8 +86,9 @@ for (const name of ['IO.SYS', 'MSDOS.SYS', 'COMMAND.COM']) {
 }
 const intVector = (machine, number) => {
     const at = number * 4;
-    return {offset: machine._read(at) | machine._read(at + 1) << 8,
-        segment: machine._read(at + 2) | machine._read(at + 3) << 8};
+    const read = address => machine.variant === '80386' ? machine._read386(address) : machine._read(address);
+    return {offset: read(at) | read(at + 1) << 8,
+        segment: read(at + 2) | read(at + 3) << 8};
 };
 function runUntil (bench, accept, label) {
     const deadline = performance.now() + 20_000;
@@ -96,6 +101,40 @@ function runUntil (bench, accept, label) {
     }
 }
 
+// Prove the boot entry uses 386 instructions and preserves caller state
+// across BIOS services. Then execute a real CR0 transition to witness the
+// ordinary-real-mode boundary before the next guest instruction can run.
+const boundaryDisk = new Uint8Array(COWGOL_DOS_BASE_IMAGE.bytes);
+boundaryDisk.set(Uint8Array.of(
+    0x66, 0xb8, 0x78, 0x56, 0x34, 0x12, // MOV EAX,12345678h
+    0x66, 0x05, 1, 0, 0, 0,             // ADD EAX,1
+    0x66, 0x89, 0xc6,                   // MOV ESI,EAX
+    0x68, 0x02, 0x32, 0x9d,             // PUSH 3202h; POPF
+    0xb4, 0x0e, 0xb0, 0x33, 0xcd, 0x10, // BIOS teletype '3'
+    0x66, 0x89, 0xc3,                   // MOV EBX,EAX after BIOS
+    0x9c, 0x5a,                         // PUSHF; POP DX
+    0x0f, 0x20, 0xc0,                   // MOV EAX,CR0
+    0x66, 0x83, 0xc8, 1,               // OR EAX,1
+    0x0f, 0x22, 0xc0, 0xf4));           // MOV CR0,EAX; HLT
+boundaryDisk[510] = 0x55; boundaryDisk[511] = 0xaa;
+let boundaryOutput = '';
+const boundary = await createI80386DosBootBench({bytes: boundaryDisk, format: 'disk', variant: '80386',
+    onChar: char => { boundaryOutput += char; }});
+try {
+    for (let step = 0; step < 32 && !boundary.machine.cpu.protectedMode; step++) boundary.step();
+    assert.equal(boundary.machine.cpu.constructor.name, 'ExperimentalI80386');
+    assert.equal(boundary.machine.cpu.esi, 0x12345679);
+    assert.equal(boundary.machine.cpu.ebx, 0x12340e33, 'BIOS services must retain upper EAX');
+    assert.equal(boundary.machine.cpu.dx & 0xf000, 0x3000, 'BIOS services must retain 386 IOPL');
+    assert.equal(boundaryOutput, '3');
+    assert.equal(boundary.machine.cpu.protectedMode, true);
+    assert.throws(() => boundary.step(), /ordinary 16-bit real mode only/);
+} finally { boundary.target.halt(); }
+const bootBoundary = {core: boundary.machine.cpu.constructor.name,
+    operand32Result: boundary.machine.cpu.esi, eaxAfterBios: boundary.machine.cpu.ebx,
+    flagsHighAfterBios: boundary.machine.cpu.dx & 0xf000,
+    output: boundaryOutput, protectedModeRefused: true};
+
 const runs = [];
 for (const variant of COWGOL_DOS_DISK_VARIANTS) for (const display of [false, true]) {
     const {detail} = await runMachineConfig(cowgolDosDiskConfig({variant, display}), {
@@ -104,7 +143,8 @@ for (const variant of COWGOL_DOS_DISK_VARIANTS) for (const display of [false, tr
             return {bytes: disk.slice()};
         }, dispatch () {}
     });
-    assert.equal(detail.kind, 'i8086');
+    assert.equal(detail.kind, variant === '80386' ? 'i80386' : 'i8086');
+    if (variant === '80386') assert.equal(detail.machinePreset, 'dos-boot');
     assert.equal(detail.slotId, 'disk');
     assert.equal(detail.profile, 'dos');
     assert.equal(detail.x86Variant, variant);
@@ -113,9 +153,16 @@ for (const variant of COWGOL_DOS_DISK_VARIANTS) for (const display of [false, tr
     assert.deepEqual(detail.bytes, disk);
     let output = '';
     const exits = [];
-    const bench = await createI8086DosBench({bytes: detail.bytes, format: detail.slotId,
+    const createBench = variant === '80386' ? createI80386DosBootBench : createI8086DosBench;
+    const bench = await createBench({bytes: detail.bytes, format: detail.slotId,
         variant: detail.x86Variant, onChar: char => { output += char; }, onExit: code => exits.push(code)});
-    assert.equal(bench.machine.cpu.variant, variant);
+    assert.equal(bench.machine.variant, variant);
+    if (variant === '80386') {
+        assert.equal(bench.machine.cpu.constructor.name, 'ExperimentalI80386');
+        assert.equal(bench.machine.cpu.cr0 & 0x80000001, 0);
+        assert.equal(bench.target.regs().pcSpace, 'linear');
+        assert.ok(Object.hasOwn(bench.target.regs(), 'eax'));
+    } else assert.equal(bench.machine.cpu.variant, variant);
     const initialInt21 = intVector(bench.machine, 0x21);
     bench.target.run();
     try {
@@ -160,21 +207,25 @@ for (const variant of COWGOL_DOS_DISK_VARIANTS) for (const display of [false, tr
         assert.equal(bench.report().stdoutTruncated, false);
         assert.deepEqual(bench.report().unsupported, []);
         runs.push({variant, surface: display ? 'controller-msdos-text' : 'msdos-console',
-            operatingSystem: 'MS-DOS 2.0', program: COWGOL_DOS_PROGRAM, programOutput,
+            operatingSystem: 'MS-DOS 2.0', cpuCore: bench.machine.cpu.constructor.name,
+            program: COWGOL_DOS_PROGRAM, programOutput,
             initialInt21, kernelInt21, returnedToShell: true, errorLevelZero: true,
             shellOutput, cycles: bench.machine.cycles,
             video: {mode: frame.mode, width: frame.width, height: frame.height,
                 rgbaSha256: sha256(frame.rgba), text: programScreen}});
     } finally {
         bench.target.halt();
-        i8086Execution.release(bench);
+        if (variant !== '80386') i8086Execution.release(bench);
     }
 }
 for (const run of runs) assert.equal(run.programOutput, runs[0].programOutput,
-    'all three CPU variants and both display choices must execute the same program output');
+    'all four CPU variants and both display choices must execute the same program output');
 const sourcePaths = [
     'overlay/scratch-gui/src/lib/bw-lang/cowgol-dos-disk.js',
     'overlay/scratch-gui/src/lib/bw-debug/i8086-dos-bench.js',
+    'overlay/scratch-gui/src/lib/bw-debug/i80386-dos-bench.js',
+    'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js',
+    'overlay/scratch-gui/src/lib/bw-machines/machine-config.js',
     'overlay/scratch-gui/src/lib/bw-machines/activate.js',
     'overlay/scratch-gui/src/lib/bw-machines/run-machine.js'
 ];
@@ -182,7 +233,7 @@ const sources = Object.fromEntries(await Promise.all(sourcePaths.map(async file 
 const report = {schema: 'bw.cowgol-msdos-boot-witness.v1', boardCommit: actual, compilerTarget: 'dos',
     artifact: {path: resolve(values.exe), bytes: image.length, sha256: sha256(image)},
     baseImage: {...COWGOL_DOS_BASE_IMAGE, systemFiles}, diskSha256: sha256(disk),
-    bios: 'machine adapter services', expected: values.expect, sources, runs};
+    bios: 'machine adapter services', expected: values.expect, sources, bootBoundary, runs};
 if (values.out) {
     const file = resolve(values.out);
     await mkdir(dirname(file), {recursive: true});

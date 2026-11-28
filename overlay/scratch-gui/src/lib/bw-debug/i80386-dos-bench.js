@@ -1,18 +1,34 @@
 /**
  * Real-mode DOS programs on the actual experimental 80386 core.
  *
- * This is a separate service machine: no BIOS, boot disk, protected-mode DOS
- * extender, native-block dispatcher or architectural replay. The existing DOS
- * service supplies its PSP, MZ relocations, console, files and text screen.
- * Its 8086 register writes are adapted to the 386's segment caches and FLAGS;
- * the CPU executing every guest instruction remains ExperimentalI80386.
+ * Two explicit entries share the same fixed real-mode hardware. The service
+ * entry loads COM/MZ programs directly; the boot entry starts a 360 KiB DOS
+ * disk whose real kernel loads programs and owns INT 21h. BIOS services are
+ * supplied by the adapter; neither entry executes a ROM BIOS or emulates a
+ * hardware disk controller. Protected-mode DOS extenders, native-block
+ * dispatch and architectural replay remain unavailable. Service register
+ * writes update the 386's segment caches and FLAGS; every guest instruction
+ * executes on ExperimentalI80386.
  */
 export async function createI80386DosBench (opts = {}) {
+    if (!['com', 'exe'].includes(opts.format)) {
+        throw new Error('the 386 DOS service accepts COM or MZ EXE programs');
+    }
+    return createI80386DosMachine(opts, false);
+}
+
+export async function createI80386DosBootBench (opts = {}) {
+    if (opts.format !== 'disk' || !(opts.bytes instanceof Uint8Array) || opts.bytes.length !== 368640) {
+        throw new Error('the 386 DOS boot bench requires a 360 KiB disk image');
+    }
+    return createI80386DosMachine(opts, true);
+}
+
+async function createI80386DosMachine (opts, diskBoot) {
     const {bytes, format, onChar, onExit} = opts;
     if (!(bytes instanceof Uint8Array) || !bytes.length) {
         throw new Error('the 386 DOS bench needs a nonempty byte image');
     }
-    if (!['com', 'exe'].includes(format)) throw new Error('the 386 DOS service accepts COM or MZ EXE programs');
     if (opts.variant !== undefined && opts.variant !== '80386') throw new Error('the 386 DOS bench needs the 80386 CPU');
     if (opts.nativeBlocks || opts.chips || opts.config) {
         throw new Error('the 386 DOS service has a fixed ordinary real-mode machine');
@@ -38,7 +54,7 @@ export async function createI80386DosBench (opts = {}) {
     const ensureRealMode = () => {
         if (cpu.protectedMode || cpu.virtual8086 || (cpu.cr0 & 0x80000000) ||
             Object.values(cpu.segmentCaches).some(cache => cache.default32 || cache.limit !== 0xffff)) {
-            throw new Error('the 386 DOS service supports ordinary 16-bit real mode only');
+            throw new Error('the 386 DOS machine supports ordinary 16-bit real mode only');
         }
     };
     // A plain visible CS write is insufficient on the 386: execution reads
@@ -79,9 +95,15 @@ export async function createI80386DosBench (opts = {}) {
         step: () => machine.step()
     };
     const files = opts.files instanceof Map ? opts.files : new Map();
+    // Guest writes belong to this machine's fresh disk, never the caller's
+    // validated media. The kernel replaces the service INT 21h vector while
+    // booting; BIOS disk and console traps remain active.
+    const disk = diskBoot ? bytes.slice() : null;
     const dos = createDos8086(serviceMachine, {files, onChar: onChar || null,
+        ...(diskBoot ? {disk, geometry: {sectors: 9, heads: 2}} : {}),
         keys: opts.keys || [], blockOnKey: true}).install();
-    if (format === 'exe') dos.loadExe(bytes, {args: opts.args});
+    if (diskBoot) dos.loadBoot(disk.subarray(0, 512), 0);
+    else if (format === 'exe') dos.loadExe(bytes, {args: opts.args});
     else dos.loadCom(bytes, {args: opts.args});
     ensureRealMode();
     let announced = false;
