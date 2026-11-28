@@ -53,3 +53,20 @@ qualification. An unchanged failure is never rerun or waived.
 
 Update this claim to DONE in the final consumer candidate with available exact
 identities and results. Preserve PR #1856 and incremental remote checkpoints.
+
+## Discovered remote gallery prerequisite
+
+Complete, untruncated supplier and consumer Git-tree comparisons establish that
+all 6,112 currently vendored gallery blobs equal the proposed repair revision;
+the supplier's four extra top-level internal documents are intentionally absent.
+The official remote gallery discovery nevertheless omits 2,116 existing circuit
+files and calls them orphans because it enumerates only index-declared assets.
+A remote sync mutation would therefore delete valid files. Do not run it that way.
+
+This lane also owns the bounded discovery correction in
+`scripts/sync-examples.mjs`, a small shared discovery helper if required, and
+focused local/remote discovery tests. Remote discovery must enumerate the same
+complete source set as local discovery with identical internal-file exclusions,
+refusing truncated listings and retaining byte comparison/orphan checks. No
+allowlist expansion, excluded circuit family or stale-source bypass is allowed.
+Qualify the real omitted-file cases before using the corrected official tool.
