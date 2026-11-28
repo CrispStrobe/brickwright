@@ -566,6 +566,55 @@ test('the current panel runner still starts and mirrors normally, and paused run
     assert.deepEqual(events, ['start', 'mirror', 'terminal', 'resume']);
 });
 
+
+const unmountMethod = classMethods(circuitClass, ['componentWillUnmount']);
+const exerciseUnmount = method => {
+    // Only browser plumbing is supplied here. Input ownership and the complete
+    // unmount method are extracted from the production CircuitTab class.
+    const Host = new Function('InputHost', 'window', 'document', 'cancelAnimationFrame',
+        `return class extends InputHost {${method}};`)(InputHost,
+        {removeEventListener () {}},
+        {documentElement: {removeAttribute () {}}, querySelector: () => null},
+        () => {});
+    const host = new Host(), events = [];
+    let alive = true;
+    host.props = {};
+    const runner = {
+        video: () => null,
+        setInputs: changes => {
+            assert.equal(alive, true, 'held touch must release before its original runner stops');
+            events.push(changes);
+            return {accepted: true};
+        }
+    };
+    const owner = host.createEsp32S040InputOwner(runner, 'A');
+    host._esp32S040InputOwner = owner;
+    host._coupledOwner = {stop: () => {alive = false; events.push('stop');}};
+    host._coupledBoard = {};
+    owner.input(down);
+    host.componentWillUnmount();
+    host.componentWillUnmount();
+    assert.deepEqual(events, [down, up, 'stop']);
+    assert.equal(host._esp32S040InputOwner, null);
+    assert.equal(host._coupledOwner, null);
+    assert.equal(host._coupledBoard, null);
+    assert.equal(owner.input(down).accepted, false);
+    assert.equal(owner.video(), null);
+};
+
+test('unmount releases held touch before stopping the coupled clock owner', () => {
+    exerciseUnmount(unmountMethod);
+});
+
+test('the unmount regression rejects moving release after the clock owner stops', () => {
+    const lateRelease = unmountMethod.replace('this.releaseEsp32S040Input();', '')
+        .replace('this._coupledOwner?.stop?.();',
+            'this._coupledOwner?.stop?.(); this.releaseEsp32S040Input();');
+    assert.notEqual(lateRelease, unmountMethod);
+    assert.throws(() => exerciseUnmount(lateRelease),
+        /held touch must release before its original runner stops/);
+});
+
 test('the checked host source connects exact owner, input and live video and releases before runner destruction', () => {
     assert.ok(panelAst.program.body.length, 'the real panel JSX parses');
     assert.match(circuitSource, /esp32S040PartId=\{this\.state\.debugState\?\.esp32S040PartId \|\| null\}/);

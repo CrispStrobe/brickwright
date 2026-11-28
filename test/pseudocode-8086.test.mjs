@@ -32,6 +32,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
 import path from 'node:path';
 
 import {SOURCE, REPO} from './helpers/bw-integrated.mjs';
@@ -42,6 +43,7 @@ import {
     buildPseudocode8086, emitI8086Asm, SUPPORTED, Pseudocode8086Error, boolishTruthTest
 } from '../overlay/scratch-gui/src/lib/bw-asm/pseudocode-8086.js';
 import {createI8086DosBench} from '../overlay/scratch-gui/src/lib/bw-debug/i8086-dos-bench.js';
+import {asmTargetForDevice} from '../overlay/scratch-gui/src/lib/bw-asm/assemble-route.js';
 
 const SB3Creator = (await import(path.join(SOURCE, 'src/lib/sb3-creator.js'))).default;
 
@@ -531,15 +533,58 @@ test('a program far longer than a conditional jump can reach still builds and ru
 
 // ── The two ends the node harness cannot click through ───────────────────
 
+// Inspect the actual JSX button, including its enclosing availability condition.
+// The menu and toolbar share a renderer; evaluate both IDs and the real gate
+// instead of requiring one historical spelling of the JSX attributes.
+const guiRequire = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
+const babel = guiRequire('@babel/core');
+function renderedRunButton (source, handler) {
+    const matches = [];
+    const ast = babel.parseSync(source, {babelrc: false, configFile: false,
+        sourceType: 'module', parserOpts: {plugins: ['jsx']}});
+    babel.traverse(ast, {
+        JSXOpeningElement (nodePath) {
+            const node = nodePath.node;
+            if (node.name.type !== 'JSXIdentifier' || node.name.name !== 'button') return;
+            const onClick = node.attributes.find(attribute => attribute.name?.name === 'onClick')?.value?.expression;
+            if (onClick?.type === 'MemberExpression' && !onClick.computed &&
+                onClick.object.type === 'ThisExpression' && onClick.property.name === handler) {
+                matches.push(nodePath);
+            }
+        }
+    });
+    assert.equal(matches.length, 1, handler + ': expected one shared toolbar/menu button');
+    const button = matches[0];
+    const id = button.node.attributes.find(attribute => attribute.name?.name === 'data-testid')?.value;
+    assert.ok(id, handler + ': button is missing its test ID');
+    const idExpression = id.type === 'JSXExpressionContainer' ? id.expression : id;
+    const readId = new Function('menu', 'return (' + source.slice(idExpression.start, idExpression.end) + ');');
+    const condition = button.findParent(nodePath => nodePath.isConditionalExpression());
+    assert.ok(condition, handler + ': button must have an availability condition');
+    assert.ok(button.node.start >= condition.node.consequent.start &&
+        button.node.end <= condition.node.consequent.end, handler + ': button belongs in the admitted branch');
+    const gate = condition.node.test;
+    const offered = new Function('asmTargetForDevice',
+        'return function () { return (' + source.slice(gate.start, gate.end) + '); };')(asmTargetForDevice);
+    return {
+        testId: readId,
+        offered: (lang, device, libraryProgram = null) => Boolean(offered.call({
+            state: {lang, libraryProgram}, currentDevice: () => device
+        }))
+    };
+}
+
+
 const importer = readFileSync(
     path.join(REPO, 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'),
     'utf8');
 
 test('the ▶ button exists, and it calls THIS module rather than its own copy', () => {
-    assert.match(importer, /data-testid="bw-run-8086"/,
-        'there is no 8086 run button, so nothing in production reaches this back end');
-    assert.match(importer, /onClick=\{this\.runPseudocodeOn8086\}/,
-        'the button does not call the handler');
+    const button = renderedRunButton(importer, 'runPseudocodeOn8086');
+    assert.equal(button.testId(false), 'bw-run-8086',
+        'the toolbar must expose the 8086 run handler');
+    assert.equal(button.testId(true), 'bw-run-8086-menu',
+        'the compact menu must expose the same 8086 run handler');
     assert.match(importer, /lib\/bw-asm\/pseudocode-8086\.js/,
         'the component does not import the back end this gate tests — a second ' +
         'copy of the lowering is exactly how the two would drift apart');
@@ -569,18 +614,23 @@ test('the button is offered for the 8086 family and decided in one place', () =>
     // `asmTargetForDevice` is the only function that says what an 8086 is
     // (asm-assemble-route.test.mjs rule 1). A second spelling test here
     // would be a second place that can disagree.
-    assert.match(importer,
-        /asmTargetForDevice\(this\.currentDevice\(\)\) === 'i8086'/,
-        'the button decides what an 8086 is by itself instead of asking the ' +
-        'one function that knows');
+    const button = renderedRunButton(importer, 'runPseudocodeOn8086');
+    for (const device of ['i8086', '8086', 'i8088', '8088']) {
+        assert.equal(button.offered('pseudocode', device), true, device + ': supported 8086-family source');
+        for (const lang of ['c', 'asm', 'basic', 'python']) {
+            assert.equal(button.offered(lang, device), false, device + ': wrong source language ' + lang);
+        }
+    }
+    for (const device of [null, 'z80', 'pico', 'i8086-extra']) {
+        assert.equal(button.offered('pseudocode', device), false, String(device) + ': not an 8086 target');
+    }
 });
 
 test('the built image is dispatched as a .COM, not as a ROM', () => {
     // A .COM loaded as a ROM at F0000 executes nothing, and a machine that
     // executes nothing looks exactly like one that failed to start — the
     // sentence i8086-dos-bench.js opens with. slotId/profile carry that.
-    const handler = importer.slice(importer.indexOf('async runPseudocodeOn8086'));
-    const body = handler.slice(0, handler.indexOf('\n    }\n'));
+    const body = scopeAfter(importer, 'async runPseudocodeOn8086 ()');
     assert.match(body, /bw-asm-rom-ready/,
         'the handler never hands the image to the bench');
     assert.match(body, /slotId: out\.slotId/);

@@ -800,12 +800,14 @@ class CircuitTab extends React.Component {
 
     componentWillUnmount () {
         this.galleryArtworkRequest = null;
+        // A coupled clock owner can retire its board during stop. Release held
+        // inputs while their original runner is still alive.
+        this.releaseEsp32S040Input();
         this._coupledOwner?.stop?.();
         this._coupledOwner = null;
         this._coupledBoard = null;
         window.removeEventListener('bw-circuit-clock-owner', this._couplingHandler);
         window.removeEventListener('bw-circuit-ensure-ready', this._couplingOpen);
-        this.releaseEsp32S040Input();
         this._menuMounted = false;
         this._designerMenuActions = [];
         if (this.unregisterMenu) this.unregisterMenu();

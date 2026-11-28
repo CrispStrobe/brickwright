@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
-export async function createKim1Tty ({setup, boot, bootPrompt, commandPrompt, exportFiles, exportImage, encodeInput = line => line + '\r', title, inputLabel, help}) {
+import {kim1T} from './kim1-l10n.js';
+export async function createKim1Tty ({locale = 'en', setup, boot, bootPrompt, commandPrompt, exportFiles, exportImage, encodeInput = line => line + '\r', title, inputLabel, help}) {
     const {createKim1Machine, controlKim1Machine, stepKim1Machine} =
         await import(/* webpackChunkName: "bw-kim1-tty" */ 'bw-board/kim1-machine.js');
     const machine = createKim1Machine('; KIM-1 expanded RAM\n0200: EA');
     const control = (verb, value) => {
-        if (!controlKim1Machine(machine, verb, value)) throw new Error('KIM-1 rejected ' + verb + '.');
+        if (!controlKim1Machine(machine, verb, value)) throw new Error(kim1T(locale, 'ttyRejected', {verb}));
     };
     control('useBrickwrightRom');
     setup(control);
@@ -44,7 +45,7 @@ export async function createKim1Tty ({setup, boot, bootPrompt, commandPrompt, ex
             const transcript = machine.ttyOutput.replace(/[^\x20-\x7e\r\n\t\b]/g, '');
             if (transcript !== shown) lastActivity = machine.cpu.cycles;
             if (machine.error || !machine.running || remaining <= 0) {
-                throw new Error(machine.error || 'The guest did not reach a prompt within the execution budget.');
+                throw new Error(machine.error || kim1T(locale, 'ttyBudget'));
             }
             if (phase === 'monitor' && /KIM>/.test(transcript)) {
                 control('sendTty', boot);
