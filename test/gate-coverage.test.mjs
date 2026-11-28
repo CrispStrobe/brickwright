@@ -26,7 +26,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync, readFileSync} from 'node:fs';
 import path from 'node:path';
-import {directlyExecutesPromisifiedGate} from '../scripts/lib/gate-promisified-exec.mjs';
+import {directlyExecutesPromisifiedGate, directlyExecutesChildProcessGate} from '../scripts/lib/gate-promisified-exec.mjs';
 import {stepReferenceProblems} from '../scripts/lib/workflow-step-refs.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -237,16 +237,16 @@ const aliasInvokes = (run, gate, scripts = packageScripts) => Object.entries(scr
  *
  * So: RUN BY A WORKFLOW is a `run:` scalar that invokes it, directly or through
  * an npm alias. EXERCISED BY A TEST is a test that SPAWNS it — the gate's path
- * appearing in the same statement as a child-process call. Anything else is a
+ * is the actual program argument of an imported Node child call. Anything else is a
  * MENTION, which is worth reporting and is not coverage.
  *
- * Statement-bounded rather than a character window: the source is split on `;`
- * and a statement must contain both the spawn and the path. A fixed-width window
- * around the name is the shape audit-gate-shapes flags, and it would be wrong
- * here for the same reason it is wrong there — the distance between a call and
- * its argument is not bounded by a number.
+ * The AST recognizer follows unique immutable path bindings into the program
+ * argument. A source-file inventory plus an unrelated child process is only a
+ * mention: fetch-pinning reads verify-machine-video-boot's source while running
+ * a Python probe, which used to give the browser gate false execution credit.
+ * Imported function identity, shadowing, reassignment and Node's argument
+ * position are checked; unsupported call forms fail closed.
  */
-const SPAWNERS = /\b(?:execFileSync|execSync|spawnSync|execFile|spawn|fork)\s*\(/;
 const runByWorkflow = gate => workflowRuns.some(run =>
     runInvokesGate(run, gate) || aliasInvokes(run, gate));
 /**
@@ -288,7 +288,8 @@ const exercisedIn = ({text, raw}, gate) => {
     if (/\bpromisify\s*\(\s*execFile\s*\)/.test(raw || '') && raw.includes(`scripts/${gate}`)) {
         return directlyExecutesPromisifiedGate(raw, gate);
     }
-    return importsGate(text, gate) || (referencesGatePath(text, gate) && SPAWNERS.test(text));
+    return importsGate(text, gate) || (referencesGatePath(text, gate) &&
+        directlyExecutesChildProcessGate(raw || text, gate));
 };
 
 /**
@@ -490,13 +491,25 @@ test('the rule reports two facts and does not confuse them', () => {
     const gate = 'verify-example.mjs';
     const scripts = {'verify:example': `node scripts/${gate}`};
     const mentionOnly = [{file: 'a.test.mjs', text: `assert.ok(yml.includes('${gate}'));`}];
-    const exercises = [{file: 'b.test.mjs',
-        text: `const S = join(here, '..', 'scripts', '${gate}'); execFileSync(node, [S]);`}];
+    const executionSource = `import {execFileSync} from 'node:child_process';
+        import {join} from 'node:path';
+        const S = join(import.meta.dirname, '..', 'scripts', '${gate}');
+        execFileSync(process.execPath, [S]);`;
+    const exercises = [{file: 'b.test.mjs', text: executionSource, raw: executionSource}];
 
     assert.equal(classifyGate(gate, {runs: [`node scripts/${gate}`], sources: [], scripts}), 'workflow');
     assert.equal(classifyGate(gate, {runs: ['PROOF_URL=x npm run verify:example'], sources: [], scripts}),
         'workflow', 'an env-prefixed alias is a workflow run, which is the whole point of this lane');
     assert.equal(classifyGate(gate, {runs: [], sources: exercises, scripts}), 'test');
+    for (const source of [
+        `import {execFileSync} from 'node:child_process';
+            const rows = [{file: 'scripts/${gate}'}];
+            execFileSync('/usr/bin/python3', ['-c', probe]);`,
+        `import {execFileSync} from 'node:child_process';
+            execFileSync(process.execPath, ['scripts/other.mjs', 'scripts/${gate}']);`
+    ]) assert.equal(classifyGate(gate, {runs: [], scripts,
+        sources: [{file: 'inventory.test.mjs', text: source, raw: source}]}), 'mention',
+    'path data and arguments to a different program cannot claim child execution');
     assert.equal(classifyGate(gate, {runs: [], sources: mentionOnly, scripts}), 'mention',
         'a gate a test merely NAMES must classify as a mention. If this reads "test", the two '
         + 'facts have been collapsed again and the inventory is counting strings.');
