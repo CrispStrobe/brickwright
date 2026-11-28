@@ -1,7 +1,7 @@
 // Test-only package bytes. Change the inventory before importing the real
 // downloader; production has no bypass for verification or alternate digests.
 import {createHash} from 'node:crypto';
-import inventory from '../../overlay/scratch-gui/src/lib/runtime-package-inventory.cjs';
+import inventory from '../../overlay/scratch-gui/src/lib/runtime-package-inventory.mjs';
 
 const record = inventory.packages.find(pkg => pkg.id === 'sdcc-wasm');
 export const fixtureBytes = name => Buffer.from(`payload:${record.origin}static/sdcc-wasm/${name}`);

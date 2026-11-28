@@ -237,7 +237,7 @@ test('denied toolchains make no HEAD, GET or cache execution-preparation calls',
 });
 
 test('missing Web Crypto and an unverified manifest fail closed before opening storage or fetching', () => {
-    const inventoryUrl = new URL('../overlay/scratch-gui/src/lib/runtime-package-inventory.cjs', import.meta.url).href;
+    const inventoryUrl = new URL('../overlay/scratch-gui/src/lib/runtime-package-inventory.mjs', import.meta.url).href;
     const sourceUrl = new URL('../overlay/scratch-gui/src/lib/sdcc-wasm/toolchain-source.js', import.meta.url).href;
     for (const problem of ['crypto', 'manifest']) {
         const script = `
