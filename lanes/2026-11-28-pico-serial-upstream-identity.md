@@ -80,3 +80,11 @@ pin acknowledgement and a brief provenance note in that test. Preserve every
 SB3 generation, canonical variable/extension, motor/distance and decompile
 assertion, and rerun the complete existing test at the reviewed backport.
 This is qualification of the unchanged compiler bytes, not a SPIKE behavior change.
+
+## Gallery fixture fetch-census declaration
+
+The new gallery CLI fixture contains a raw GitHub URL template intercepted by
+its offline fetch recorder. This lane also owns its exact `source-link` row
+in `test/fetch-pinning.test.mjs`, with the synthetic SHA and zero-network
+fixture behavior stated explicitly. Preserve detectors, exclusions, waivers
+and mutation proofs; carry the declaration through both consumer candidates.
