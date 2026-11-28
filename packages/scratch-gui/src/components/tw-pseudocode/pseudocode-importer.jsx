@@ -225,6 +225,8 @@ const L10N = {
         cowgolRunCpm: '▶ Cowgol on CP/M',
         cowgolRunDos: '▶ Cowgol on DOS',
         cowgolRunRiscv: '▶ Cowgol on RISC-V',
+        cowgolRunEater: '▶ Cowgol on Eater 6502',
+        cowgolDownloadEater: 'Download Eater 6502 ROM',
         cowgolDownloadRiscv: 'Download RISC-V .ELF',
         runBlocksRiscv: '▶ Run on RISC-V via Blocks',
         cowgolDownloadDos: 'Download DOS .EXE',
@@ -233,7 +235,7 @@ const L10N = {
         cowgolExportC: 'Export compiled C',
         cowgolCompiling: 'Compiling with Cowgol on the hosted service…',
         cowgolStale: 'The source, project or selected machine changed. The compiled program was not applied.',
-        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS and RISC-V compilation and C export use the hosted Cowgol compiler. RISC-V compiles full Cowgol through C and GCC and runs on its console; timing, canvas and GPIO need their own host bindings. Run via blocks uses the selected machine’s supported operations.',
+        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS, RISC-V and Eater 6502 compilation and C export use the hosted Cowgol compiler. RISC-V supports console output. Eater 6502 boots a ROM for the 1 MHz board with serial console and VIA digital pins. Timing and graphics have no native binding. Run via blocks uses the selected machine’s supported operations.',
         nqcCompile: '⚙ Compile .rcx', nqcSend: '🧱 Send to RCX',
         nqcEmpty: 'Type some NQC first.',
         nqcNoCompiler: 'This build has no local NQC compiler.',
@@ -591,6 +593,8 @@ const L10N = {
         cowgolRunCpm: '▶ Cowgol unter CP/M',
         cowgolRunDos: '▶ Cowgol unter DOS',
         cowgolRunRiscv: '▶ Cowgol auf RISC-V',
+        cowgolRunEater: '▶ Cowgol auf Eater 6502',
+        cowgolDownloadEater: 'Eater-6502-ROM herunterladen',
         cowgolDownloadRiscv: 'RISC-V-.ELF herunterladen',
         runBlocksRiscv: '▶ Über Blöcke auf RISC-V ausführen',
         cowgolDownloadDos: 'DOS-.EXE herunterladen',
@@ -599,7 +603,7 @@ const L10N = {
         cowgolExportC: 'Kompiliertes C exportieren',
         cowgolCompiling: 'Cowgol wird auf dem Compiler-Dienst kompiliert…',
         cowgolStale: 'Quelltext, Projekt oder ausgewählte Maschine wurde geändert. Das kompilierte Programm wurde nicht angewendet.',
-        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS- und RISC-V-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V übersetzt vollständiges Cowgol über C und GCC und nutzt seine Konsole; Zeit-, Zeichen- und GPIO-Aufrufe benötigen eigene Laufzeitbindungen. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
+        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS-, RISC-V- und Eater-6502-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V unterstützt Konsolenausgabe. Eater 6502 startet ein ROM für das 1-MHz-Board mit serieller Konsole und digitalen VIA-Pins. Zeit- und Zeichenaufrufe haben keine native Laufzeitbindung. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
         nqcCompile: '⚙ .rcx kompilieren', nqcSend: '🧱 An RCX senden',
         nqcEmpty: 'Zuerst NQC eingeben.',
         nqcNoCompiler: 'Dieser Build hat keinen lokalen NQC-Compiler.',
@@ -1471,7 +1475,8 @@ class PseudocodeImporter extends React.Component {
         const target = asmTargetForDevice(device);
         const actions = {
             pseudocode: target === 'riscv32' && (() => this.runViaBlocksOnDevice()),
-            cowgol: () => target === 'riscv32' ? this.compileCowgolSource('riscv32', true) : this.runCowgolAsBlocks(),
+            cowgol: () => ['riscv32', 'eater6502'].includes(target) ?
+                this.compileCowgolSource(target, true) : this.runCowgolAsBlocks(),
             tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
             forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
             fe: () => target === 'riscv32' ? this.runFeOnRiscv() : this.runFeOnDosInterp(),
@@ -6059,15 +6064,15 @@ class PseudocodeImporter extends React.Component {
             this.props.vm.runtime.getTargetForStage() === stage;
         this.setState({busy: true, status: this.L.cowgolCompiling});
         try {
-            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig, cowgolRiscvDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
+            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig, cowgolRiscvDetail, cowgolEaterDetail} = await import('../../lib/bw-lang/cowgol-compile.js');
             if (!current()) return;
             const out = await compileCowgol(source, target, {signal: request.signal});
             if (!current()) {
                 if (owns() && this.state.status === this.L.cowgolCompiling) this.setState({status: this.L.cowgolStale});
                 return;
             }
-            if (run && target === 'riscv32') {
-                const detail = cowgolRiscvDetail(out.image);
+            if (run && (target === 'riscv32' || target === 'eater6502')) {
+                const detail = target === 'riscv32' ? cowgolRiscvDetail(out.image) : cowgolEaterDetail(out.bytes);
                 try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
                 window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
                 window.__bwPendingMedia = {type: 'asm', detail};
@@ -7421,7 +7426,17 @@ class PseudocodeImporter extends React.Component {
                                         data-testid={menu ? 'bw-cowgol-riscv-run-menu' : 'bw-cowgol-riscv-run'}>
                                         {this.L.cowgolRunRiscv}
                                     </button>}
+                                {remoteToolchainsAllowed() && (!this.codeDevice() || this.codeDevice() === 'eater6502') &&
+                                    <button type="button" onClick={() => this.compileCowgolSource('eater6502', true)}
+                                        disabled={this.state.running || this.state.busy} style={actionBtn}
+                                        data-testid={menu ? 'bw-cowgol-eater-run-menu' : 'bw-cowgol-eater-run'}>
+                                        {this.L.cowgolRunEater}
+                                    </button>}
                                 {menu && remoteToolchainsAllowed() && <React.Fragment>
+                                    <button type="button" onClick={() => this.compileCowgolSource('eater6502')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolDownloadEater}
+                                    </button>
                                     <button type="button" onClick={() => this.compileCowgolSource('riscv32')}
                                         disabled={this.state.running || this.state.busy}>
                                         {this.L.cowgolDownloadRiscv}

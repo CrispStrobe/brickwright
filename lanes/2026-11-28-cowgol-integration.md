@@ -21,3 +21,13 @@ The producer pin moves deliberately along this feature branch from
 The vendor sync uses its explicit deliberate-pin option, followed by exact
 transformed-source identity and mirror checks. No default-branch merge is part
 of this continuation.
+
+RISC-V frontend checkpoint: `e4af9afccc4c2bc8b203c36ce07511faae899947`.
+Eater continuation adds a validated 32 KiB ROM action and explicitly carries
+the canonical board map through the existing ASM media handoff. This prevents
+a previously extracted 6502 map from relocating the program or peripherals.
+The focused editor workflow passes 105 tests; exact-machine execution is also
+checked by the fork/service and the reusable local HTTP verifier. The upstream
+compiler's final Eater argument-bound checkpoint is
+`8e807002bc6d1d457995f2759da262c230d807e1`. Native host support and the checked
+conversion subset remain separately qualified in docs/COWGOL.md.

@@ -15,11 +15,12 @@ by the web and native application wrappers.
 4. With a machine selected, **Run via blocks** imports successfully, then uses
    the existing circuit debugger and its build/emulate/flash actions. RISC-V
    instead compiles the accepted console Blocks project and loads the RV32 image.
-5. **Cowgol on CP/M**, **Cowgol on DOS**, and **Cowgol on RISC-V** compile the
-   original source on the hosted service and hand the executable to the
+5. **Cowgol on CP/M**, **Cowgol on DOS**, **Cowgol on RISC-V**, and
+   **Cowgol on Eater 6502** compile the original source on the hosted service
+   and hand the executable to the
    existing machine loaders. Downloads include Z80 and 8080 CP/M `.COM`, DOS
-   `.EXE`, RISC-V `.ELF`, and compiled C source. These actions require the
-   companion compiler-service deployment.
+   `.EXE`, RISC-V `.ELF`, Eater 6502 ROM `.BIN`, and compiled C source. These
+   actions require the companion compiler-service deployment.
 
 Syntax highlighting, editable optional tabs, the overflow language menu,
 source downloads, reopen/autosave, conversion, and keyboard Run all recognize
@@ -75,7 +76,7 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | STM32 | Existing C backend | No new bare-metal backend |
 | ESP8266 | Existing blob-free C backend | No new bare-metal backend |
 | micro:bit / Calliope | Existing MicroPython route | No new bare-metal backend |
-| Eater 6502 | Existing C/BASIC routes | Cowgol's BBC/Tube backend is not a breadboard port |
+| Eater 6502 | Existing C/BASIC routes | ROM-safe 65C02 compiler, 32 KiB boot ROM, ACIA console and VIA digital GPIO |
 | Z80 | Existing BASIC/C circuit routes | Real Z80 CP/M and 8080-compatible CP/M compilers |
 | 8086 | Existing assembly/C circuit routes | Real DOS MZ compiler |
 | Arcade / PyBadge | Existing PXT/TypeScript route where available | No new native backend |
@@ -88,10 +89,11 @@ from a matching CPU name. The shared producer documents exact accepted digital
 coordinates and reserved pins in
 [COWGOL-CONVERSION.md](https://github.com/CrispStrobe/sb3-creator/blob/feat/cowgol-integration-20261128/docs/COWGOL-CONVERSION.md).
 
-The matrix keeps native CP/M, DOS and RISC-V facts **open** until the companion
-service is deployed. Their console wrappers implement portable text/number output;
-native canvas and GPIO require a real host binding and fail to compile/link
-when absent. Circuit programs can use the Blocks route today.
+The matrix keeps native CP/M, DOS, RISC-V and Eater facts **open** until the
+companion service is deployed. All four supply portable text/number output;
+Eater also supplies serial input and checked VIA digital calls. Native canvas,
+timing, and other unimplemented host calls fail to compile/link. Circuit
+programs can also use the established Blocks route.
 
 ### RISC-V console
 
@@ -128,6 +130,56 @@ match the downloadable ELF, including zero-initialized workspace. Source,
 device or project changes revoke a pending run; edits to Blocks during either
 module loading or compilation revoke the checked route as well.
 
+### Eater 6502 ROM
+
+Select **Eater 6502**, open **Cowgol**, and choose **Cowgol on Eater 6502**.
+Keyboard Run selects the same native action; **Download Eater 6502 ROM** saves
+the exact 32 KiB image. The loader selects the canonical 1 MHz W65C02 board:
+
+| Resource | Native ROM contract |
+| --- | --- |
+| RAM | `$0000–$3FFF`; zero-page workspace and hardware stack kept separate |
+| ROM | `$8000–$FFFF`; reset at `$8000`, NMI/reset/IRQ vectors at the top |
+| VIA | `$6000`; PA0–PA7 and PB0–PB7 digital input/output |
+| ACIA | `$5000`; 19200 baud, 8N1 serial console |
+
+The action supplies this complete map even if another 6502 circuit was
+previously selected. The editor checks the compiler identity, exact ROM size,
+reset and interrupt vectors, halt/interrupt instructions, and reported
+workspace/relocation bounds before handing the ROM to the existing loader.
+The service separately checks those bounds against real assembler labels.
+
+This target has a ROM-safe backend and its own startup/runtime. Existing
+Cowgol 6502 code assumes writable program memory: nested calls patch return
+addresses, and initialized arrays can live alongside code. The Eater backend
+places return slots and writable initialized data in RAM, and startup copies
+initial data from ROM on every reset. Tests audit CPU writes and require no
+attempted write into ROM. Arrays, records, pointers, native integer arithmetic
+and the allocator are exercised on the actual machine emulator.
+
+`bw_print_text`, `bw_print_number`, `print_char` and `get_char` use the serial
+console. `bw_pin_mode` accepts mode `0` (input) or `1` (output), and
+`bw_digital_write`, `bw_digital_read` and `bw_digital_toggle` use the VIA.
+Native pins `0..7` mean PA0..PA7 and `8..15` mean PB0..PB7. Invalid pins or
+modes stop with an explicit diagnostic. Toggle uses the requested output
+latch, including when a measured input differs from the output latch. These
+bindings own both VIA output latches; direct writes to the VIA must not be
+mixed with their saved latch state.
+
+The native runtime owns the VIA and clears its timer mode, so PB7 is available
+as native pin 15. The checked conversion route still excludes PB7 because its
+existing C/BASIC runtime reserves that pin for a timer. A native Cowgol program
+using pin 15 can therefore compile successfully while **To blocks** refuses it.
+Pull-ups, analog/PWM, clocks/waits, graphics and file I/O have no native binding.
+Empty command-line arguments are supported. RAM, zero-page workspace, ROM,
+heap and the hardware stack are finite; oversized static allocations fail
+explicitly. The compiler reserves eight bytes at the top of RAM for allocator
+bookkeeping. Each complete input parameter list and each complete output
+parameter list must independently fit 128 bytes; larger lists fail compilation
+instead of overflowing the inherited transfer loop. The 256-byte hardware stack
+does not establish safety for arbitrary call depth or inline assembly. Hardware
+testing remains outstanding.
+
 ## Companion repositories and reproducibility
 
 All work is on `feat/cowgol-integration-20261128` in `brickwright`,
@@ -135,8 +187,11 @@ All work is on `feat/cowgol-integration-20261128` in `brickwright`,
 branch merge is part of these checkpoints.
 
 The Cowgol fork supplies a dependency-light C bootstrap, an explicit fixed-width
-host ABI, portable CP/M/DOS console headers and real compiler regression tests.
-The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V and C routes,
+host ABI, an embedded C console profile, portable CP/M/DOS console headers,
+and the Eater ROM backend/runtime. Array sizes, record sizes, static frames and
+combined call workspace are checked before their 16-bit object representation
+can wrap; the checks are present in both compiler source and bootstrap.
+The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V, Eater ROM and C routes,
 checks source/includes and artifact limits, and packages them for Docker,
 Hugging Face and Vercel. Missing toolchains return an explicit failure.
 
@@ -157,12 +212,13 @@ separate experimental browser runtime.
 `test/cowgol-integration.test.mjs` checks source persistence, target visibility,
 real machine-loader handoff, refusal/current-source behavior, restricted builds,
 and exact native artifact identity. `test/cowgol-platforms.test.mjs` covers RV32
-ELF/image identity, unsafe-memory refusal and actual editor-method ownership.
+ELF/image identity, Eater ROM/vector/layout validation, canonical machine
+selection, unsafe-memory refusal and actual editor-method ownership.
 Existing editor ownership/conversion tests
 cover the asynchronous import lifecycle. The producer tests also execute emitted
 Cowgol through the actual compiler and compare its host trace. The service
 tests run compiled `.COM` and `.EXE` files in independent CP/M and DOS emulators,
-and RV32 ELF images on the pinned Brickwright machine. The producer additionally
+and RV32 ELF images and Eater ROMs on the pinned Brickwright machines. The producer additionally
 compiles and executes the checked console C on that same RV32 machine.
 
 The reproducible HTTP check uses Brickwright's actual client against a child
@@ -178,7 +234,9 @@ The default checks native RISC-V and compiled C export. It exercises arrays,
 integer division, allocation and both signed int32 limits. Dependencies and a
 built compiler bundle must already exist; it installs nothing and sends no
 source to a deployed service. The JSON result records exact compiler and
-machine commits. Use `--help` for paths and explicit target selection.
+machine commits. Add `--targets riscv32,cowgol-cgen,eater6502` to include the
+Eater ROM, its serial output, cold-RAM startup and a no-ROM-write audit. Use
+`--help` for paths and explicit target selection.
 
 These checks qualify the conversion and software execution paths. They do not
 claim physical-board testing or a full production GUI build.

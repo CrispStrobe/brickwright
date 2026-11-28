@@ -868,7 +868,11 @@ behind it and still wants its own lane.
 **L5. Cowgol checked subset. FEATURE BRANCH 2026-11-28.** The Cowgol reader and
 emitter are owned by `sb3-creator`. This lane adds typed integer control flow
 and the supported canvas/circuit host calls, with explicit refusal of source
-outside the subset. Full Cowgol compilation is a separate `stc-compiler` route.
+outside the subset. Full Cowgol compilation is a separate `stc-compiler` route:
+CP/M, DOS, C export, RV32 console ELF and Eater 65C02 ROM. The Eater port
+includes ROM-safe writable-data relocation, serial console and digital VIA
+bindings on an explicitly selected canonical machine map. Native entries stay
+open until the companion service is deployed.
 Existing target backends retain their restrictions; pointer/record semantics,
 concurrent event scripts and full graphics APIs are not inferred. See
 [Cowgol integration](COWGOL.md) for the supported contract and validation.

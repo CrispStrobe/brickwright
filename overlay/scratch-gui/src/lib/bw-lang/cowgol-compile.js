@@ -6,6 +6,7 @@ export const COWGOL_COMPILE_TARGETS = Object.freeze({
     'i8080-cpm': {format: 'bin', toolchain: 'cowgol-cpm', filename: 'program.com', maxBytes: 0xcf00},
     dos: {format: 'bin', toolchain: 'cowgol-msdos', filename: 'program.exe', maxBytes: 1024 * 1024},
     riscv32: {format: 'elf', toolchain: 'cowgol-riscv32', filename: 'program.elf', maxBytes: 4 * 1024 * 1024},
+    eater6502: {format: 'bin', toolchain: 'cowgol-eater6502', filename: 'program.bin', maxBytes: 0x8000},
     'cowgol-cgen': {format: 'c', toolchain: 'cowgol-cgen', filename: 'program.c', maxBytes: 8 * 1024 * 1024}
 });
 
@@ -68,6 +69,38 @@ export const cowgolRiscvDetail = image => ({
     slotId: 'riscv', profile: 'riscv', format: 'riscv'
 });
 
+/** The ROM and its compiler workspace must fit the canonical Eater board. */
+function validateEaterRom (bytes, out) {
+    const fail = () => { throw new Error('Cowgol compiler returned an invalid Eater 6502 ROM or memory layout.'); };
+    const layout = out.memory_layout;
+    const names = ['lomem', 'eater_workspace_end', 'eater_zp_end', 'eater_code_end',
+        'eater_data_load', 'eater_data_size', 'eater_reset', 'eater_irq', 'eater_halt'];
+    if (bytes.length !== 0x8000 || out.format !== 'bin' || out.artifact_kind !== 'executable' ||
+        out.origin !== 0x8000 || out.entry !== 0x8000 || out.mcu !== 'w65c02' || !layout ||
+        names.some(name => !Number.isSafeInteger(layout[name]))) return fail();
+    const {lomem, eater_workspace_end: workspace, eater_zp_end: zeroPage,
+        eater_code_end: end, eater_data_load: data, eater_data_size: size,
+        eater_reset: reset, eater_irq: irq, eater_halt: halt} = layout;
+    if (workspace < 0x200 || workspace > lomem || lomem > 0x3ff8 || out.memory_end !== lomem ||
+        zeroPage < 0 || zeroPage > 0x100 || data <= 0x8000 || data + size !== end ||
+        size !== lomem - workspace || end > 0xfffa || reset !== 0x8000 ||
+        halt <= 0x8000 || halt >= data || irq <= 0x8000 || irq >= data ||
+        bytes[halt - 0x8000] !== 0xdb || bytes[irq - 0x8000] !== 0x40) return fail();
+    const word = offset => bytes[offset] | (bytes[offset + 1] << 8);
+    if (word(0x7ffa) !== irq || word(0x7ffc) !== reset || word(0x7ffe) !== irq) return fail();
+}
+
+/** Use an explicit board map, even if a different 6502 circuit was selected. */
+export const cowgolEaterDetail = bytes => ({
+    rom: bytes, image: null, listing: null, target: 'eater6502',
+    slotId: 'rom', profile: 'eater', format: 'bin',
+    machineConfig6502: {
+        clockHz: 1_000_000,
+        regions: [{kind: 'ram', start: 0x0000, end: 0x3fff}, {kind: 'rom', start: 0x8000, end: 0xffff}],
+        chips: [{kind: 'via', name: 'via1', at: 0x6000}, {kind: 'acia', name: 'acia1', at: 0x5000}]
+    }
+});
+
 /** Full Cowgol compilation, independent of the deliberately smaller Blocks reader. */
 export async function compileCowgol (code, target, {fetcher = globalThis.fetch, signal,
     endpoint = COWGOL_COMPILE_ENDPOINT} = {}) {
@@ -111,6 +144,7 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
         if (out.entry !== image.entry) throw new Error('Cowgol compiler returned an invalid RISC-V entry point.');
         return {...out, bytes, image, target, filename: spec.filename};
     }
+    if (target === 'eater6502') validateEaterRom(bytes, out);
     return {...out, bytes, target, filename: spec.filename};
 }
 

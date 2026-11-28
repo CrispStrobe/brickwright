@@ -643,6 +643,10 @@ class DebugPanel extends React.Component {
             // the image because they are a property of the PROGRAM, not of
             // the board the user happened to draw.
             chips: chips || null,
+            // A native ROM may require a fixed RAM/ROM/peripheral map. Carry
+            // it through the ASM event so an older extracted circuit cannot
+            // move the image or its console to different addresses.
+            ...(e.detail?.machineConfig6502 ? {machineConfig6502: e.detail.machineConfig6502} : {}),
             kind: target === 'z80' ? 'z80'
                 : target === 'i8086' ? 'i8086' : 'eater6502',
             name: 'assembled image', asmBlink: e.detail?.asmBlink,

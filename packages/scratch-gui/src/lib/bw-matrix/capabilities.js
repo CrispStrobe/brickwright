@@ -714,7 +714,10 @@ export const CELLS = Object.freeze({
     },
     w65c02: {
         pseudocode: {native: AST, lowered: [via('c'), via('basic')]},
-        cowgol: cowgolVia([via('c'), via('basic')]),
+        cowgol: {...cowgolVia([via('c'), via('basic')]),
+            native: open('bin', 'Cowgol ROM-safe 65C02 + 64tass', 'hosted', 'L5', {
+                note: 'Native 32 KiB Eater ROM with serial console and VIA digital pins; fixed 1 MHz board map; companion service deployment required'
+            })},
         python: {
             native: no('no-port', 'no MicroPython or other Python for the 6502'),
             lowered: [via('c'), via('basic')]
