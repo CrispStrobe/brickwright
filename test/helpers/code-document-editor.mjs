@@ -19,7 +19,11 @@ const machineHookDefaults = {
     'setMaximizedChrome': 'setMaximizedChrome () {}',
     // No machine filter attached: every Code language stays available.
     'allowsCodeLanguage': 'allowsCodeLanguage () { return true; }',
-    'closePicoBasicHardware': 'closePicoBasicHardware () {}'
+    'closePicoBasicHardware': 'closePicoBasicHardware () {}',
+    // No owned Code console attached.
+    'disposeCodeRun': 'disposeCodeRun () {}',
+    // No CrispBASIC session attached.
+    'disposeCrispBasic': 'async disposeCrispBasic () {}'
 };
 
 const importerUrl = new URL('../../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',
@@ -42,7 +46,10 @@ const adapterSignatures = [
     'restoreCodeBuffer (state, saved) {',
     'codeDevice () {',
     'selectedBasicProfile () {',
-    'standaloneBasicProfile (lang = this.state.lang) {'
+    'standaloneBasicProfile (lang = this.state.lang) {',
+    // BASIC generation options and the generation-error banner (CrispBASIC lane).
+    'basicGenerationOptions (state = this.state) {',
+    'basicGenerationPlaceholder (text) {'
 ];
 
 export const codeDocumentLabels = Object.fromEntries(documentApi.CODE_DOCUMENT_LANGUAGES.map(lang => [lang, lang]));
@@ -57,7 +64,12 @@ export const codeEditorMethod = (source, signature) => {
 export const codeDocumentEditorClass = (source, methods, bindings = {}) => {
     // The importer's own two-way language set, read from the source under test.
     const twoWay = source.match(/^const TWO_WAY = (new Set\(\[[^\]]*\]\));$/m);
+    // The importer's own conversion-warning classifier, read from the source.
+    const classifier = source.indexOf('const classifyConversionWarnings = warnings => {');
+    const classifyConversionWarnings = classifier < 0 ? undefined : new Function(`return ${
+        source.slice(source.indexOf('warnings =>', classifier), source.indexOf('\n};\n', classifier) + 2)};`)();
     const environment = {...documentApi, LANG_LABEL: codeDocumentLabels, basicProfileFor, basicProfilesFor,
+        ...(classifyConversionWarnings ? {classifyConversionWarnings} : {}),
         hiddenCodeDrafts, standaloneBasicDrafts, remoteMachineImagesAllowed, blinkFamily, blinkSource, blinkStarter,
         TWO_WAY: twoWay ? new Function(`return ${twoWay[1]};`)() : new Set(), ...bindings};
     const adapters = adapterSignatures.map(signature => codeEditorMethod(source, signature)).join('\n');

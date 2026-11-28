@@ -80,6 +80,8 @@ function fixture ({lang = 'pseudocode', code = defaultSource, target = 'pico', o
     });
     let libraries = 0;
     class Builder {
+        // The compiler's Stage-comment device reader: these projects carry none.
+        static readStc () { return null; }
         constructor () { this.project = {targets: []}; this.warnings = []; }
         parse (text) { parsed.push(text); this.project.source = text; }
         decompile () { return editor.blockSource ?? defaultSource; }

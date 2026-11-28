@@ -10,6 +10,7 @@ import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import basicToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
+import {codeDocumentEditorClass, codeDocumentLabels} from './helpers/code-document-editor.mjs';
 
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 function extract(start, end) {
@@ -18,14 +19,13 @@ function extract(start, end) {
     return source.slice(first, last);
 }
 const methods = extract('    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?') +
-    extract('    async compile ({strict = false, pseudocode = null} = {}) {', '    // Read the running project into all languages at once.') +
+    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {', '    // Read the running project into all languages at once.') +
     extract('    setActiveCode (text) {', '    // Lazily import the compiler through the registering door') +
     extract('    basicGenerationPlaceholder (text) {', '    // Fetch examples/index.json once');
 const readerImport = '(await import(/* webpackChunkName: "sb3-creator-basic" */ \'../../lib/sb3-creator-basic.js\')).default';
 assert.equal(methods.split(readerImport).length - 1, 2, 'both real BASIC-reader consumers are exercised');
-const Editor = new Function('readBasic', 'TWO_WAY', 'DOS_LANG', 'conversionFailure', 'LANG_LABEL',
-    `return class {${methods.replaceAll(readerImport, 'readBasic')}}`)(
-    basicToPseudocode, new Set(['basic']), {}, conversionFailure, {basic: 'BBC BASIC'});
+const Editor = codeDocumentEditorClass(source, methods.replaceAll(readerImport, 'readBasic'),
+    {readBasic: basicToPseudocode, DOS_LANG: {}, conversionFailure, LANG_LABEL: {...codeDocumentLabels, basic: 'BBC BASIC'}});
 
 function fixture(text) {
     const effects = [];

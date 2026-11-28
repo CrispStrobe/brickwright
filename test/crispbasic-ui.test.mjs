@@ -4,6 +4,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
+import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {EventEmitter} from 'node:events';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
 
@@ -17,7 +19,9 @@ function between(source, start, end) {
 const editorMethods = between(editorSource, '    async loadCrispBasicRunner () {', '    // Fetch examples/index.json once') +
     between(editorSource, '    componentWillUnmount () {', '    // Current-locale string table') +
     between(editorSource, '    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?');
-const Editor = new Function('DOS_LANG', `return class {${editorMethods}}`)({});
+// The production document adapters and neutral machine hooks come from the
+// shared fixture; only the VM and worker edges belong to this file.
+const Editor = codeDocumentEditorClass(editorSource, editorMethods, {DOS_LANG: {}, conversionFailure});
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -218,10 +222,17 @@ test('BBC generation retains subset warnings and reports failed generation separ
         }});
         const result = await f.editor.deriveBuffer('WHEN flag clicked:', 'pseudocode', 'basic');
         assert.deepEqual(calls.at(-1), ['generate', project, {profile: 'bbc', lineNumbers: false}]);
-        assert.equal(result.basicGenerationFailed, !ok);
-        assert.ok(result.basicWarnings.includes('digitalWrite is a commented hardware stub'));
-        if (ok) assert.equal(result.code, 'PRINT "generated"');
-        else assert.match(result.code, /Cannot show as BASIC/);
+        if (ok) {
+            assert.equal(result.basicGenerationFailed, false);
+            assert.ok(result.basicWarnings.includes('digitalWrite is a commented hardware stub'));
+            assert.equal(result.code, 'PRINT "generated"');
+        } else {
+            // A refused conversion is a refusal with its reasons (the authored
+            // Code document's rule): no placeholder text becomes the BASIC buffer.
+            assert.equal(result.code, undefined);
+            assert.match(result.error, /two scripts cannot run together/);
+            assert.equal(result.diagnostics.preserved, false);
+        }
     }
 });
 
