@@ -10,7 +10,8 @@ screenshot contains the expected `PRODUCTION` and three `X` output lines and an
 enabled Run control. Its completion wait still required `bw-code-status`, which
 is now mounted only while the Info popup is open. The production editor already
 publishes the same current state in its `data-code-operation-status` attribute.
-All operation status reads and waits now use that existing attribute. Completion
+All operation status reads and waits now use that existing attribute. The one
+assertion of the visible conversion report opens its actual Info popup. Completion
 still requires Run to be enabled, Stop to disappear and a terminal status; exact
 output, source refusal, worker and cleanup assertions remain in place.
 

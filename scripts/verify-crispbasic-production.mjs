@@ -633,6 +633,9 @@ WHEN flag clicked:
         await waitForCodeStatus(page, /To blocks cannot preserve/);
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), source);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
+        // The detailed refusal is a user-facing notice inside Info.
+        await page.getByTestId('bw-code-info').click();
+        await page.getByTestId('bw-code-info-popover').waitFor({state: 'visible'});
         assert.match(await page.getByTestId('bw-conversion-report').textContent(), /unsupported|not preserved|refus/i);
         record.portable = {source, before, observed, released,
             refusal: await codeStatus(page),
