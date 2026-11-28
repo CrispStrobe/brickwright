@@ -152,6 +152,25 @@ Bounded local proof uses the unchanged raw detector and pin-constant assertion:
 the real manifest yields exactly the declared source hit; its full SHA passes,
 while `main`, a seven-character abbreviation, an uppercase SHA and a missing
 source URL all fail. The manifest is unchanged at blob
-`84ea367a2bb149891829c2c930fb4d7478a5032f`. The correction changes only
+`84ea367a2bb149891829c2c930fb4d7478a5032f`. The initial provenance correction added
 11 lines in `test/fetch-pinning.test.mjs`, reviewed at blob
 `dc6f87ee7a928e883d41921106580c764f701384`; syntax and scoped whitespace pass.
+
+## Combined-candidate census follow-up
+
+Candidate `8d5e5673ecec3e4fba029e64cb430fb8bb73ed52` passes the complete hosted
+bounded source suite in
+[run 46142558391](https://github.com/CrispStrobe/brickwright/actions/runs/46142558391).
+The fetch census then identifies the newly introduced offline gallery fixture's
+URL template. Its nine-line declaration belongs to the gallery prerequisite
+and is carried through both branches; no fixture URL is hidden or rewritten.
+
+The combined gate blob is `ed89290ecc9e572935398328bfa281d0948f9f9b`.
+Independent review confirms that all three raw sites in 16 changed/new code
+files are declared. Existing detector/census assertions accept the correct
+declarations and reject missing, changed and vanished fixtures. Their full
+repository execution remains an unchanged hosted requirement.
+
+The exact app, loader, inventory and worker subtrees remain those already
+reviewed. Request the supported fast and thorough CI tiers for the corrected
+candidate, preserving mandatory real-worker scenario and mutation proof.

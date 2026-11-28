@@ -302,6 +302,15 @@ const CENSUS = [
         why: 'Historical source-package reproduction instructions, never executed by the app or its build. The next command checks out the full reference commit df32b7ff33595406ce7356d249ec61baec1fecf6 before using any sources; SHA_CONSTANTS checks that checkout remains a full SHA.'
     },
     {
+        file: 'test/sync-examples-remote.test.mjs',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/${REPO}/${AFTER}/',
+        class: 'source-link',
+        why: 'Offline expected-URL fixture: AFTER is a synthetic full 40-hex SHA. The production CLI '
+           + 'runs with an injected fetch recorder that returns local fixture bytes and rejects unexpected '
+           + 'URLs; no network request occurs. The production sync-examples fetch is declared separately.'
+    },
+    {
         file: 'test/vendor-bundles-targeted.test.mjs', kind: 'raw',
         text: 'raw.githubusercontent.com/${UPSTREAM_REPO}/${candidate}/extensions/CrispStrobe/arrays.js',
         class: 'source-link',
