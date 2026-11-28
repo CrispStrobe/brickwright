@@ -198,6 +198,7 @@
   },
   "scratch-vm/src/util/bw-procedure-constraint-model.js": {
     "tests": [
+      "test/arcade-code-example-motion.test.mjs",
       "test/makecode-game-stats-export.test.mjs",
       "test/makecode-owned-prompt-options-export.test.mjs",
       "test/makecode-owned-prompt-options-runtime.test.mjs",
