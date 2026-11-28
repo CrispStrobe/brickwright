@@ -44,9 +44,20 @@ LP1a implementation checkpoint: shared SDCC package metadata now drives the
 existing downloader identities and the known-payload output guard; 46 focused
 source controls pass. Main landing uses the applicable automatic PR checks.
 [The claim](lanes/2026-11-28-lp1-toolchain-inventory.md) preserves exact scope
-and evidence. Digest verification for every artifact, complete component/runtime
-license evidence, service-worker cache retention and no-prefetch qualification
-are still open; LP1 as a whole is not complete.
+and evidence.
+
+LP1b implementation checkpoint: all nine optional SDCC members now carry
+SHA-256/byte-length evidence from immutable supplier revision
+`64ea6915733cf6d6563dfe9424c8cc71b4731e06`. Managed download, cached reuse,
+offline inspection and browser import resolution verify the accepted bytes;
+service-worker activation retains the exact optional cache without prefetch.
+Forty-nine focused controls pass, independently reviewed, and a live-origin
+probe verified all 6,737,737 bytes and offline blob resolution. The
+[LP1b claim](lanes/2026-11-28-lp1-verified-installation-cache.md) records the
+scope and remaining hosted browser qualification. Complete compiler-component,
+linked-runtime and generated-output license evidence remains open; LP1 as a
+whole is not complete, and inherited hosted integration failures still block
+main landing.
 
 Status: **planned; claim and land bounded slices in LP0/LP1 → LP2/LP3 →
 LP4 → LP5 order**, with R1/R2/J1 as dependencies for new execution behavior.
