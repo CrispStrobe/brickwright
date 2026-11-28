@@ -30,6 +30,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
 import {REPO} from './helpers/bw-integrated.mjs';
+import {scopeAfter} from './helpers/js-scope.mjs';
 import {
     requestCBuild, cRouteFor, asmTargetForDevice, LOCAL_C_TARGETS, AsmRouteError
 } from '../overlay/scratch-gui/src/lib/bw-asm/assemble-route.js';
@@ -159,11 +160,37 @@ test('an empty buffer is refused before a WASM stage is started', async () => {
     }
 });
 
+function assertHostedCompileRoutes (src) {
+    const callers = [
+        'runLibraryProgram = async () =>',
+        'async runCOnZ80 ()',
+        'async runSketchOnAvr ()',
+        'async flashStm32ViaSwd ()',
+        'async deployPicoUf2 ()',
+        'async flashToBoard ()'
+    ];
+    assert.equal(src.split('await this.hostedCompileC(').length - 1, callers.length,
+        'the hosted compile has a new or missing caller; the 8086 C route must not be one');
+    for (const signature of callers) {
+        assert.equal(scopeAfter(src, signature).split('await this.hostedCompileC(').length - 1, 1,
+            `expected exactly one hosted call in ${signature}`);
+    }
+    assert.doesNotMatch(scopeAfter(src, 'async runCOn8086 ()'), /this\.hostedCompileC\(/,
+        'the 8086 handler must never fall back to the hosted compiler');
+    const library = scopeAfter(src, 'runLibraryProgram = async () =>');
+    const guard = scopeAfter(library,
+        "if (program.compilerTarget !== 'z80-cpm' || !remoteToolchainsAllowed())");
+    assert.match(guard, /throw new Error\(/, 'only an allowed CP/M target may reach the library compiler');
+    assert.ok(library.indexOf(guard) < library.indexOf('await this.hostedCompileC('),
+        'the CP/M target refusal must run before the library compile');
+}
+
 test('the C tab decides the route through this module, and in one place', async () => {
     const src = await readFileAsync(
         join(REPO, 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'),
         'utf8');
-    assert.match(src, /data-testid="bw-run-c-8086"/, 'the C tab has no ▶ for the 8086');
+    assert.match(src, /data-testid=\{menu \? "bw-run-c-8086-menu" : "bw-run-c-8086"\}/,
+        'both the C toolbar and its menu must expose the 8086 run action');
     assert.match(src, /requestCBuild, asmRouteFor, cRouteFor/,
         'the tab no longer imports the C route from assemble-route.js');
     assert.match(src, /out = await requestCBuild\(\{source, device\}\);/,
@@ -171,19 +198,11 @@ test('the C tab decides the route through this module, and in one place', async 
         'here is a second local path that no gate runs');
     assert.match(src, /cRouteFor\(this\.currentDevice\(\)\) === 'local'/,
         'the button must be gated by the route function, not by a device id compared in the JSX');
-    // The C 8086 path must not have added a hosted POST anywhere. Every
-    // hosted /compile in this component goes through ONE helper, and the
-    // five callers (flashToBoard, the STM32 SWD path, the Pico UF2 deploy,
-    // the AVR boards' ▶ Run sketch, and the Z80 bench's ▶ Run C on Z80 --
-    // neither has a local route to take) call it by name — so a new hosted
-    // route shows up as a sixth caller, and a second URL literal as a second.
+    // All six hosted callers are accounted for by name, including edited
+    // CP/M library programs. The local 8086 handler is checked separately.
     assert.equal(src.split('stc-compiler.vercel.app/compile').length - 1, 1,
         'the hosted /compile URL must appear exactly once, inside hostedCompileC()');
-    assert.equal(src.split('await this.hostedCompileC(').length - 1, 5,
-        'the hosted compile has a new or missing caller; the 8086 C route must not be one');
-    const sketch = src.slice(src.indexOf('async runSketchOnAvr ()'));
-    assert.match(sketch.slice(0, sketch.indexOf('\n    /**')), /await this\.hostedCompileC\(/,
-        'the fourth caller is expected to be the Arduino sketch route');
+    assertHostedCompileRoutes(src);
     for (const key of ['runC8086', 'runC8086Title', 'runC8086Building', 'runC8086Built',
         'runC8086Refused', 'runC8086Failed', 'runC8086Empty', 'runC8086Route']) {
         assert.equal(src.split(`${key}:`).length - 1, 2, `${key} is not in both locales`);
@@ -193,6 +212,22 @@ test('the C tab decides the route through this module, and in one place', async 
     // learner can act on.
     assert.match(src, /this\.L\.runC8086Refused\(routeName, e\.message\)/);
     assert.match(src, /this\.L\.runC8086Failed\(routeName, e\.message\)/);
+});
+
+test('the hosted route census rejects an 8086 fallback or a relaxed CP/M refusal', async () => {
+    const src = await readFileAsync(
+        join(REPO, 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
+    const libraryCall = "const out = await this.hostedCompileC(source, program.compilerTarget, 'bin');";
+    const localCall = 'out = await requestCBuild({source, device});';
+    assert.ok(src.includes(libraryCall) && src.includes(localCall), 'route mutations still apply');
+    // Keep the total call count at six: method ownership, not just the count,
+    // must reject moving the library call into the local 8086 handler.
+    const swapped = src.replace(libraryCall, 'const out = {};')
+        .replace(localCall, "out = await this.hostedCompileC(source, device, 'bin');");
+    assert.throws(() => assertHostedCompileRoutes(swapped));
+    const guard = "program.compilerTarget !== 'z80-cpm' || !remoteToolchainsAllowed()";
+    assert.ok(src.includes(guard), 'library refusal mutation still applies');
+    assert.throws(() => assertHostedCompileRoutes(src.replace(guard, 'false')));
 });
 
 test('the image reaches the bench by the SAME event a hand-written program does', async () => {
