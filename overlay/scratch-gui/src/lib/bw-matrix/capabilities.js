@@ -767,7 +767,7 @@ export const CELLS = Object.freeze({
     i8086: {
         cowgol: {...cowgolVia([via('asm'), via('c')]),
             native: open('exe', 'Cowgol msdos', 'hosted', 'L5', {
-                note: 'Native compiler and DOS MZ Run path implemented on the companion feature branches; deployment required'
+                note: 'DOS MZ real-mode services and MS-DOS 2.0 boot on 8086/80186/80286/80386, with console and Controller text; companion service deployment required'
             })},
         pseudocode: {
             native: AST,
@@ -919,6 +919,9 @@ export const DEVICE_NATIVE = Object.freeze({
     atmega328p: {cowgol: COWGOL_UNO},
     'arduino-nano': {cowgol: open('hex', 'Cowgol cgen + AVR GCC (classic Nano)', 'hosted', 'L5', {
         note: 'Classic ATmega328P Nano at 16 MHz: 30 KiB application flash with 2 KiB bootloader reservation, UART and digital GPIO; companion service deployment required'
+    })},
+    atmega168p: {cowgol: open('hex', 'Cowgol cgen + AVR GCC (bare ATmega168P)', 'hosted', 'L5', {
+        note: 'Bare ATmega168P at 16 MHz: 16 KiB flash without a bootloader, 1 KiB SRAM, 128-byte heap and 512-byte stack reserve; UART, digital GPIO and blocking delays; companion service deployment required'
     })}
 });
 

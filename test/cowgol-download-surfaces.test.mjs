@@ -78,7 +78,7 @@ function fixture ({device = 'arduino-uno', lang = 'pseudocode', text = source,
 }
 
 test('checked editor exports compile the active draft for each qualified machine without loading or running it', async () => {
-    for (const device of ['z80', 'i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
+    for (const device of ['z80', 'i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano', 'atmega168p']) {
         const f = fixture({device});
         const before = f.vm.toJSON(), stc = f.vm.runtime.stc, buffers = f.editor.state.buffers;
         const target = compiler.cowgolTargetForDevice(device);
@@ -140,7 +140,7 @@ test('actual DEVICE headers resolve only the documented Uno and classic Nano ali
     assert.match(conflict.editor.state.status, /different machine/);
     assert.equal(conflict.builds.length, 0);
     assert.equal(conflict.downloads.length, 0);
-    for (const alias of ['nano-every', 'nano33', 'uno-r4', 'mega', 'atmega168p', 'i80486']) {
+    for (const alias of ['nano-every', 'nano33', 'uno-r4', 'mega', 'atmega168', 'i80486']) {
         const f = fixture({text: `DEVICE ${alias}\n${source}`, actualDevice: true});
         assert.equal(f.editor.codeDevice(), alias);
         await f.editor.downloadViaCowgolOnDevice();
@@ -259,7 +259,42 @@ test('keyboard Run selects the native Nano compiler and respects a busy editor',
 
 test('the Code menu exposes checked export, Nano and 8080 CP/M computer actions', () => {
     for (const id of ['bw-cowgol-native-blocks-download', 'bw-cowgol-nano-run', 'bw-cowgol-nano-download',
+        'bw-cowgol-168-run', 'bw-cowgol-168-download',
         'bw-cowgol-8080-cpm-system-run', 'bw-cowgol-8080-cpm-vdp-run']) assert.ok(importer.includes(id), id);
     assert.match(importer, /compileCowgolSource\('i8080-cpm', true, \{surface: 'cpm-system'\}\)/);
     assert.match(importer, /compileCowgolSource\('i8080-cpm', true, \{surface: 'cpm-vdp'\}\)/);
+});
+
+test('ATmega168P original source keeps its device through download and native Run', async () => {
+    const text = 'include "cowgol.coh"; print("168P");';
+    const f = fixture({device: 'atmega168p', lang: 'cowgol', text});
+    await f.editor.compileCowgolSource('atmega168p');
+    assert.equal(f.downloads[0].name, 'atmega168p.hex');
+    await f.editor.compileCowgolSource('atmega168p', true);
+    assert.deepEqual(f.builds.map(build => build.target), ['atmega168p', 'atmega168p']);
+    assert.ok(f.builds.every(build => build.code === text));
+    const event = f.events.find(item => item.type === 'bw-asm-rom-ready');
+    assert.deepEqual(event.detail, compiler.cowgolAvrDetail(f.bytes, {target: 'atmega168p'}));
+    assert.equal(event.detail.firmware.device, 'atmega168p');
+    assert.equal(event.detail.firmware.fCpu, 16_000_000);
+});
+
+test('keyboard Run selects ATmega168P from the exact source declaration', () => {
+    const KeyboardEditor = new Function('cowgolTargetForDevice', 'asmTargetForDevice', 'sketchBoardFor',
+        'return class {' + extract('    codeDevice () {', '    // Publish the device') +
+        extract('    runActiveCode = event => {', '    componentDidMount ()') + '}')(
+        compiler.cowgolTargetForDevice, () => null, () => null);
+    const editor = new KeyboardEditor(), calls = [];
+    Object.assign(editor, {props: {isVisible: true}, state: {lang: 'cowgol', busy: false, running: false,
+        buffers: {pseudocode: 'DEVICE ATMEGA168P\n', cowgol: cowgolSource}},
+        activeCode: () => cowgolSource, allowsCodeLanguage: () => true,
+        compileCowgolSource: (...args) => calls.push(args),
+        runCowgolAsBlocks: () => assert.fail('ATmega168P native keyboard Run fell back to Blocks')});
+    const event = {detail: {}, preventDefault () {}};
+    editor.runActiveCode(event);
+    assert.deepEqual(calls, [['atmega168p', true]]);
+    assert.equal(event.detail.editor, 'code');
+    editor.state.busy = true;
+    editor.runActiveCode(event);
+    assert.equal(calls.length, 1);
 });

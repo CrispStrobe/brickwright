@@ -11,13 +11,14 @@ export const COWGOL_COMPILE_TARGETS = Object.freeze({
     eater6502: {format: 'bin', toolchain: 'cowgol-eater6502', filename: 'program.bin', maxBytes: 0x8000},
     atmega328p: {format: 'hex', toolchain: 'cowgol-atmega328p', filename: 'program.hex', maxBytes: 128 * 1024},
     'arduino-nano': {format: 'hex', toolchain: 'cowgol-arduino-nano', filename: 'nano.hex', maxBytes: 128 * 1024},
+    atmega168p: {format: 'hex', toolchain: 'cowgol-atmega168p', filename: 'atmega168p.hex', maxBytes: 128 * 1024},
     'cowgol-cgen': {format: 'c', toolchain: 'cowgol-cgen', filename: 'program.c', maxBytes: 8 * 1024 * 1024}
 });
 
 /** Exact qualified boards, rather than all boards with a related processor. */
 const DEVICE_TARGETS = Object.freeze({
     z80: 'z80-cpm', i8086: 'dos', i80386: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
-    'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano'
+    'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano', atmega168p: 'atmega168p'
 });
 /** Source-language aliases for these exact boards, not processor-family aliases. */
 export const cowgolCanonicalDevice = device => {
@@ -31,41 +32,56 @@ export const cowgolTargetForDevice = device => {
     return Object.prototype.hasOwnProperty.call(DEVICE_TARGETS, key) ? DEVICE_TARGETS[key] : null;
 };
 
+const AVR_PROFILES = Object.freeze({
+    atmega328p: {mcu: 'atmega328p', board: 'arduino-uno', flashBytes: 0x8000,
+        flashLimit: 0x7e00, ramEnd: 0x900, heapBytes: 512, bootloaderReserve: 512},
+    'arduino-nano': {mcu: 'atmega328p', board: 'arduino-nano', flashBytes: 0x8000,
+        flashLimit: 0x7800, ramEnd: 0x900, heapBytes: 512, bootloaderReserve: 2048},
+    atmega168p: {mcu: 'atmega168p', board: 'atmega168p', flashBytes: 0x4000,
+        flashLimit: 0x4000, ramEnd: 0x500, heapBytes: 128, bootloaderReserve: 0}
+});
+const avrProfile = target => Object.prototype.hasOwnProperty.call(AVR_PROFILES, target) ? AVR_PROFILES[target] : null;
+
 /** Same arbitrary-firmware path as an AVR sketch; the image fixes chip and clock. */
 export const cowgolAvrDetail = (bytes, {target = 'atmega328p'} = {}) => {
-    if (!['atmega328p', 'arduino-nano'].includes(target)) throw new Error('Unqualified Cowgol AVR board.');
+    const profile = avrProfile(target);
+    if (!profile) throw new Error('Unqualified Cowgol AVR board.');
     return {
         format: 'firmware', target, kind: 'avr8js',
         firmware: {name: COWGOL_COMPILE_TARGETS[target].filename, bytes: null, text: new TextDecoder().decode(bytes),
-            fCpu: 16_000_000, device: 'atmega328p'},
+            fCpu: 16_000_000, device: profile.mcu},
         rom: null, image: null, listing: null
     };
 };
 
 /** Check addressed flash bytes as well as the SRAM facts from the AVR ELF. */
 function validateAvrHex (bytes, out, target) {
-    const fail = () => { throw new Error('Cowgol compiler returned an invalid ATmega328P HEX image or memory layout.'); };
-    const nano = target === 'arduino-nano';
-    const expectedFlashLimit = nano ? 0x7800 : 0x7e00;
-    // Nano is an explicit board profile, including a bootloader reservation;
-    // do not accept an Uno envelope merely because both use the same CPU.
-    if (nano && (out.board !== 'arduino-nano' || out.bootloader_reserve !== 2048)) return fail();
-    if (!nano && ((out.board !== undefined && out.board !== 'arduino-uno') ||
-        (out.bootloader_reserve !== undefined && out.bootloader_reserve !== 512))) return fail();
+    const fail = () => { throw new Error('Cowgol compiler returned an invalid AVR HEX image or memory layout.'); };
+    const profile = avrProfile(target);
+    if (!profile) return fail();
+    const expectedStackStart = profile.ramEnd - 512;
+    // Uno's older envelope omitted board identity. New profiles must state
+    // their exact board and bootloader reservation, including zero for 168P.
+    if ((target !== 'atmega328p' || out.board !== undefined) && out.board !== profile.board) return fail();
+    if ((target !== 'atmega328p' || out.bootloader_reserve !== undefined) &&
+        out.bootloader_reserve !== profile.bootloaderReserve) return fail();
     const layout = out.memory_layout;
     const names = ['flash_end', 'flash_limit', 'data_start', 'data_end', 'bss_end',
         'heap_start', 'heap_end', 'stack_start', 'stack_reserve', 'ram_end', 'halted_addr', 'status_addr'];
-    if (out.format !== 'hex' || out.artifact_kind !== 'executable' || out.mcu !== 'atmega328p' ||
+    if (out.format !== 'hex' || out.artifact_kind !== 'executable' || out.mcu !== profile.mcu ||
         out.origin !== 0 || out.entry !== 0 || out.f_cpu !== 16_000_000 || out.uart_baud !== 9600 ||
         !layout || names.some(name => !Number.isSafeInteger(layout[name])) ||
         bytes.some(byte => byte > 127)) return fail();
+    for (const [name, expected] of Object.entries({mcu: profile.mcu, flash_size: profile.flashBytes, heap_size: profile.heapBytes})) {
+        if ((target === 'atmega168p' || layout[name] !== undefined) && layout[name] !== expected) return fail();
+    }
     const {flash_end: flashEnd, flash_limit: flashLimit, data_start: dataStart, data_end: dataEnd,
         bss_end: bssEnd, heap_start: heapStart, heap_end: heapEnd, stack_start: stackStart,
         stack_reserve: stackReserve, ram_end: ramEnd, halted_addr: halted, status_addr: status} = layout;
-    if (flashLimit !== expectedFlashLimit || flashEnd < 4 || flashEnd > flashLimit || flashEnd % 2 !== 0 ||
-        dataStart !== 0x100 || dataEnd < dataStart || bssEnd < dataEnd || bssEnd > 0x700 ||
-        out.memory_end !== bssEnd || heapStart < dataEnd || heapEnd - heapStart !== 512 || heapEnd > bssEnd ||
-        stackStart !== 0x700 || stackReserve !== 512 || ramEnd !== 0x900 ||
+    if (flashLimit !== profile.flashLimit || flashEnd < 4 || flashEnd > flashLimit || flashEnd % 2 !== 0 ||
+        dataStart !== 0x100 || dataEnd < dataStart || bssEnd < dataEnd || bssEnd > expectedStackStart ||
+        out.memory_end !== bssEnd || heapStart < dataEnd || heapEnd - heapStart !== profile.heapBytes || heapEnd > bssEnd ||
+        stackStart !== expectedStackStart || stackReserve !== 512 || ramEnd !== profile.ramEnd ||
         halted < dataEnd || halted >= bssEnd || status < dataEnd || status >= bssEnd || halted === status ||
         (halted >= heapStart && halted < heapEnd) || (status >= heapStart && status < heapEnd)) return fail();
     const text = new TextDecoder().decode(bytes);
@@ -232,7 +248,7 @@ export async function compileCowgol (code, target, {fetcher = globalThis.fetch, 
         return {...out, bytes, image, target, filename: spec.filename};
     }
     if (target === 'eater6502') validateEaterRom(bytes, out);
-    if (target === 'atmega328p' || target === 'arduino-nano') validateAvrHex(bytes, out, target);
+    if (avrProfile(target)) validateAvrHex(bytes, out, target);
     return {...out, bytes, target, filename: spec.filename};
 }
 

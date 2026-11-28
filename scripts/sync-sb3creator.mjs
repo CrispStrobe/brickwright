@@ -73,6 +73,7 @@ const FILES = [
     ['src/utils/cp1Program.js', path.join(lib, 'cp1-program.js')],
     ['src/utils/sb3Creator.js', path.join(lib, 'sb3-creator.js')],
     ['src/utils/procedureParameterConstraints.js', path.join(lib, 'procedureParameterConstraints.js')],
+    ['src/utils/crispBasicMode.js', path.join(lib, 'crispBasicMode.js')],
     // The referee: reference trace interpreter + comparator (corpus-and-oracles.md).
     ['src/utils/traceOracle.js', path.join(lib, 'trace-oracle.js')],
     ['src/utils/examples.js', path.join(lib, 'sb3-creator-examples.js')],

@@ -38,7 +38,7 @@ if (values.help) {
   --avr-runner PATH        Cowgol tests/avr-run.mjs (COWGOL_AVR_RUNNER; default ../cowgol/tests/avr-run.mjs)
   --avr8js-root PATH       Exact GUI-pinned avr8js checkout (AVR8JS_ROOT; default ../avr8js-oracle)
   --tmpdir PATH            Temporary parent directory (TMPDIR; default this repository)
-  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502,atmega328p,arduino-nano,z80-cpm,i8080-cpm,dos (default first two)
+  --targets LIST          Comma-separated riscv32,cowgol-cgen,eater6502,atmega328p,arduino-nano,atmega168p,z80-cpm,i8080-cpm,dos (default first two)
   --cli                   Also build through bwlite cowgol and execute its exact saved artifact
   --python COMMAND        Python executable (PYTHON; default python3)
   --cc COMMAND            Host C compiler executable (CC; default cc)
@@ -53,7 +53,7 @@ CP/M programs run under the actual CP/M 2.2 OS on both serial and Controller
 surfaces; both compiler targets execute on the pinned Z80 CPU. DOS executes on
 8086, 80186, real-mode 80286 and real-mode 80386 with console and Controller
 text output. The same DOS artifact also boots under real MS-DOS 2.0 on the
-8086/80186/80286 machines, using machine-provided BIOS services.`);
+8086/80186/80286/80386 machines, using machine-provided BIOS services.`);
     process.exit(0);
 }
 
@@ -160,7 +160,7 @@ app._AVR_STAMP = str(pathlib.Path(sys.argv[3]) / ".bundle-fingerprint")
 requested = set(sys.argv[4].split(","))
 if "riscv32" not in requested:
     app.stage_riscv_gcc = lambda: None
-if not requested.intersection({"atmega328p", "arduino-nano"}):
+if not requested.intersection({"atmega328p", "arduino-nano", "atmega168p"}):
     app.stage_avr = lambda: None
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.bind(("127.0.0.1", 0))
@@ -270,7 +270,7 @@ try {
                     encoding: 'utf8', timeout: 90_000, maxBuffer: 1024 * 1024,
                     env: {...process.env, TMPDIR: work}
                 }));
-            assert.equal(diskReport.runs.length, 6, 'Boot MS-DOS on three CPUs with console and Controller output');
+            assert.equal(diskReport.runs.length, 8, 'Boot MS-DOS on four CPUs with console and Controller output');
             output = report.runs[0].output.replace(/\r/g, '');
             execution = {machine: 'PC DOS services', boots: report.runs.length, exitCode: 0,
                 artifactSha256: report.artifact.sha256, sources: report.sources, probes: report.probes,
@@ -284,7 +284,7 @@ try {
             assert.equal(machine.exitCode, 0, 'RV32 program must exit successfully');
             output = machine.output;
             execution = {entry: out.image.entry, segments: out.image.segments.length, exitCode: machine.exitCode};
-        } else if (target === 'atmega328p' || target === 'arduino-nano') {
+        } else if (['atmega328p', 'arduino-nano', 'atmega168p'].includes(target)) {
             assert.ok(existsSync(avrRunner), 'The real AVR machine runner must exist');
             assert.equal(git(avrRoot, 'rev-parse', 'HEAD'), avrPin, 'Use exactly the AVR engine pinned by the GUI');
             assert.equal(git(avrRoot, 'status', '--porcelain', '--untracked-files=no'), '', 'The AVR engine must have no tracked edits');
@@ -303,7 +303,16 @@ try {
                     env: {...process.env, AVR8JS_ROOT: avrRoot}
                 }));
             assert.equal(observed.runs.length, 2, 'Execute two cold-SRAM boots');
+            const chip168 = target === 'atmega168p';
+            const expectedMcu = chip168 ? 'atmega168p' : 'atmega328p';
+            assert.equal(out.mcu, expectedMcu);
+            assert.equal(out.memory_layout.flash_limit, chip168 ? 0x4000 : target === 'arduino-nano' ? 0x7800 : 0x7e00);
+            assert.equal(out.memory_layout.ram_end, chip168 ? 0x500 : 0x900);
+            assert.equal(out.memory_layout.heap_end - out.memory_layout.heap_start, chip168 ? 128 : 512);
             for (const run of observed.runs) {
+                assert.equal(run.mcu, expectedMcu, 'The native oracle must run the exact compiled chip');
+                assert.equal(run.flashSize, chip168 ? 16384 : 32768);
+                assert.equal(run.sramSize, chip168 ? 1024 : 2048);
                 assert.equal(run.stopped, true, 'AVR program must halt within the cycle budget');
                 assert.equal(run.status, 0, 'AVR program must exit successfully');
                 assert.equal(run.flashUnchanged, true, 'AVR execution must preserve flash');
@@ -311,7 +320,9 @@ try {
                 assert.equal(run.text, fullOutput);
             }
             output = observed.runs[0].text;
-            execution = {board: out.board, flashLimit: out.memory_layout.flash_limit,
+            execution = {board: out.board, mcu: out.mcu, flashLimit: out.memory_layout.flash_limit,
+                flashCapacity: observed.runs[0].flashSize, sramCapacity: observed.runs[0].sramSize,
+                heapBytes: out.memory_layout.heap_end - out.memory_layout.heap_start,
                 flashBytes: out.memory_layout.flash_end, sramBytes: out.memory_end - 0x100,
                 cycles: observed.runs[0].cycles, minSP: observed.runs[0].minSP, boots: 2, exitCode: 0};
         } else if (target === 'cowgol-cgen') {
@@ -360,7 +371,7 @@ try {
         serviceTrackedEdits: git(service, 'status', '--porcelain', '--untracked-files=no') !== '',
         cowgolCommit: manifest.source_commit,
         boardCommit: needsBoard ? boardPin : null,
-        avrCommit: targets.some(target => ['atmega328p', 'arduino-nano'].includes(target)) ? avrPin : null,
+        avrCommit: targets.some(target => ['atmega328p', 'arduino-nano', 'atmega168p'].includes(target)) ? avrPin : null,
         results
     }, null, 2));
 } catch (error) {

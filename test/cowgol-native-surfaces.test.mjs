@@ -20,6 +20,8 @@ function record (address, data, type = 0) {
     return `:${bytes.map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
 }
 function avrArtifact (size = 128, target = 'atmega328p') {
+    const chip168 = target === 'atmega168p';
+    const heapEnd = chip168 ? 0x184 : 0x304;
     const flash = new Uint8Array(size);
     flash.set([0x0c, 0x94, 0x34, 0]); // JMP after the complete 104-byte vector table.
     const lines = [];
@@ -28,12 +30,15 @@ function avrArtifact (size = 128, target = 'atmega328p') {
     const bytes = new TextEncoder().encode(`${lines.join('\n')}\n`);
     return {flash, bytes, reply: {
         success: true, language: 'cowgol', target, toolchain: `cowgol-${target}`,
-        ...(target === 'arduino-nano' ? {board: target, bootloader_reserve: 2048} : {}),
-        format: 'hex', artifact_kind: 'executable', mcu: 'atmega328p', origin: 0, entry: 0,
-        f_cpu: 16_000_000, uart_baud: 9600, bytes: bytes.length, base64: encode(bytes), memory_end: 0x304,
-        memory_layout: {flash_end: size, flash_limit: target === 'arduino-nano' ? 0x7800 : 0x7e00, data_start: 0x100, data_end: 0x102,
-            bss_end: 0x304, heap_start: 0x104, heap_end: 0x304, stack_start: 0x700,
-            stack_reserve: 512, ram_end: 0x900, halted_addr: 0x102, status_addr: 0x103}
+        ...(target === 'arduino-nano' ? {board: target, bootloader_reserve: 2048} :
+            chip168 ? {board: target, bootloader_reserve: 0} : {}),
+        format: 'hex', artifact_kind: 'executable', mcu: chip168 ? 'atmega168p' : 'atmega328p', origin: 0, entry: 0,
+        f_cpu: 16_000_000, uart_baud: 9600, bytes: bytes.length, base64: encode(bytes), memory_end: heapEnd,
+        memory_layout: {flash_end: size, flash_limit: chip168 ? 0x4000 : target === 'arduino-nano' ? 0x7800 : 0x7e00,
+            data_start: 0x100, data_end: 0x102, bss_end: heapEnd, heap_start: 0x104,
+            heap_end: heapEnd, stack_start: chip168 ? 0x300 : 0x700,
+            stack_reserve: 512, ram_end: chip168 ? 0x500 : 0x900, halted_addr: 0x102, status_addr: 0x103,
+            ...(chip168 ? {mcu: 'atmega168p', flash_size: 0x4000, heap_size: 128} : {})}
     }};
 }
 const replaceHex = (reply, text) => {
@@ -44,25 +49,25 @@ const replaceHex = (reply, text) => {
 test('native device routing advertises only explicitly qualified machine profiles', () => {
     for (const [device, target] of Object.entries({
         z80: 'z80-cpm', i8086: 'dos', i80386: 'dos', riscv32: 'riscv32', eater6502: 'eater6502',
-        'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano'
+        'arduino-uno': 'atmega328p', atmega328p: 'atmega328p', 'arduino-nano': 'arduino-nano', atmega168p: 'atmega168p'
     })) {
         assert.equal(compiler.cowgolTargetForDevice(device), target);
         assert.equal(compiler.cowgolTargetForDevice(device.toUpperCase()), target);
     }
-    for (const device of ['arduino-mega', 'atmega168p', 'attiny85', 'pico', 'i80486', 'constructor', '__proto__', '', null]) {
+    for (const device of ['arduino-mega', 'atmega168', 'attiny85', 'pico', 'i80486', 'constructor', '__proto__', '', null]) {
         assert.equal(compiler.cowgolTargetForDevice(device), null, String(device));
     }
 });
 
-test('the capability matrix records the pending Uno/328P and classic Nano ports without widening the family', () => {
-    for (const device of ['arduino-uno', 'atmega328p', 'arduino-nano']) {
+test('the capability matrix records the qualified AVR profiles without widening the family', () => {
+    for (const device of ['arduino-uno', 'atmega328p', 'arduino-nano', 'atmega168p']) {
         const capability = cell('cowgol', device);
         assert.equal(isNativeNull(capability.native), false, device);
         assert.equal(capability.native.artefact, 'hex', device);
         assert.equal(capability.native.status, 'open', device);
         assert.equal(capability.native.sim, false, 'a pending deployment is not a shipped machine route');
     }
-    for (const device of ['arduino-mega', 'atmega168p', 'attiny85']) {
+    for (const device of ['arduino-mega', 'atmega2560', 'attiny85']) {
         assert.equal(isNativeNull(cell('cowgol', device).native), true, device);
     }
 });
@@ -85,7 +90,7 @@ test('AVR compilation requests HEX and hands the identical validated text to the
         firmware: {name: 'program.hex', bytes: null, text: new TextDecoder().decode(bytes),
             fCpu: 16_000_000, device: 'atmega328p'}, rom: null, image: null, listing: null
     });
-    for (const target of ['atmega168p', 'constructor', '__proto__']) {
+    for (const target of ['atmega2560', 'constructor', '__proto__']) {
         await assert.rejects(compiler.compileCowgol(requestSource, target, {
             fetcher: () => assert.fail('an unqualified target contacted the compiler')
         }), /Unsupported/);
@@ -196,7 +201,7 @@ test('Nano requires its own compiler identity, 2 KiB reservation and fixed MCU h
     const wrongLimit = avrArtifact(128, target).reply;
     wrongLimit.memory_layout.flash_limit = 0x7e00;
     await assert.rejects(compiler.compileCowgol(requestSource, target, {fetcher: fetcher(wrongLimit)}), /invalid/i);
-    assert.throws(() => compiler.cowgolAvrDetail(bytes, {target: 'atmega168p'}), /Unqualified/);
+    assert.throws(() => compiler.cowgolAvrDetail(bytes, {target: 'atmega2560'}), /Unqualified/);
 });
 
 test('AVR exit markers must be in zero-initialized SRAM rather than initialized .data', async () => {
@@ -251,7 +256,7 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
         builds.push({code, target, options});
         await pause('network');
         if (output) return output;
-        if (target === 'atmega328p' || target === 'arduino-nano') return {...avrArtifact(), toolchain: `cowgol-${target}`};
+        if (['atmega328p', 'arduino-nano', 'atmega168p'].includes(target)) return {...avrArtifact(128, target), toolchain: `cowgol-${target}`};
         return {bytes: new Uint8Array([0x4d, 0x5a, 0]), toolchain: `cowgol-${target}`,
             image: {entry: 0x1000, segments: [{addr: 0x1000, bytes: new Uint8Array([0x73, 0, 0, 0])}]}};
     };
@@ -299,7 +304,7 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
 }
 
 test('the actual native Blocks method sends real checked Cowgol to every qualified compiler/loader', async () => {
-    for (const device of ['z80', 'i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano']) {
+    for (const device of ['z80', 'i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'atmega328p', 'arduino-nano', 'atmega168p']) {
         const f = editorFixture({device});
         const target = compiler.cowgolTargetForDevice(device);
         const generated = new SB3Creator().generateCowgol(f.currentProject(), {target});
@@ -399,8 +404,8 @@ test('native Blocks runtime refusal never calls the compiler or replaces/starts 
     }
 });
 
-test('Uno, classic Nano and bare ATmega328P editor routes emit native timed digital sequences', async () => {
-    for (const device of ['arduino-uno', 'arduino-nano', 'atmega328p']) {
+test('Uno, classic Nano and both bare AVR chip editor routes emit native timed digital sequences', async () => {
+    for (const device of ['arduino-uno', 'arduino-nano', 'atmega328p', 'atmega168p']) {
         const source = `DEVICE ${device.toUpperCase()}\nPIN lamp = D13 OUTPUT\n` +
             'WHEN flag clicked:\n  turn on lamp\n  wait 0.001 seconds\n  turn off lamp\n';
         const f = editorFixture({device, lang: 'pseudocode', source});
@@ -547,4 +552,57 @@ test('disabled native actions do not import or contact a hosted compiler', async
         assert.equal(f.builds.length, 0);
         assert.equal(f.events.length, 0);
     }
+});
+
+test('bare ATmega168P enforces 16 KiB flash, 1 KiB SRAM, its smaller heap and exact MCU handoff', async () => {
+    const target = 'atmega168p';
+    const {reply, bytes} = avrArtifact(0x4000, target);
+    const out = await compiler.compileCowgol(requestSource, target, {fetcher: fetcher(reply)});
+    assert.deepEqual(out.bytes, bytes);
+    assert.equal(out.filename, 'atmega168p.hex');
+    assert.deepEqual(compiler.cowgolAvrDetail(out.bytes, {target}), {
+        format: 'firmware', target, kind: 'avr8js',
+        firmware: {name: 'atmega168p.hex', bytes: null, text: new TextDecoder().decode(bytes),
+            fCpu: 16_000_000, device: 'atmega168p'}, rom: null, image: null, listing: null
+    });
+    for (const changes of [{mcu: 'atmega328p'}, {board: 'arduino-nano'}, {board: undefined},
+        {bootloader_reserve: 512}, {bootloader_reserve: undefined},
+        {toolchain: 'cowgol-atmega328p'}, {target: 'atmega328p'}]) {
+        await assert.rejects(compiler.compileCowgol(requestSource, target, {
+            fetcher: fetcher({...reply, ...changes})
+        }), /invalid/i);
+    }
+    await assert.rejects(compiler.compileCowgol(requestSource, target, {
+        fetcher: fetcher(avrArtifact(0x4002, target).reply)
+    }), /invalid/i);
+    for (const [key, value] of Object.entries({
+        mcu: 'atmega328p', flash_size: 0x8000, flash_limit: 0x7e00, heap_size: 512,
+        ram_end: 0x900, stack_start: 0x700, stack_reserve: 511, heap_end: 0x304, bss_end: 0x301
+    })) {
+        const changed = structuredClone(reply);
+        changed.memory_layout[key] = value;
+        if (key === 'bss_end') changed.memory_end = value;
+        await assert.rejects(compiler.compileCowgol(requestSource, target, {fetcher: fetcher(changed)}), /invalid/i, key);
+    }
+    for (const key of Object.keys(reply.memory_layout)) {
+        const changed = structuredClone(reply);
+        delete changed.memory_layout[key];
+        await assert.rejects(compiler.compileCowgol(requestSource, target, {fetcher: fetcher(changed)}), /invalid/i, key);
+    }
+    // Both ends of the 512-byte stack reservation are fixed by the actual chip.
+    const boundary = avrArtifact(128, target).reply;
+    boundary.memory_layout.bss_end = boundary.memory_end = 0x300;
+    await compiler.compileCowgol(requestSource, target, {fetcher: fetcher(boundary)});
+});
+
+test('native editor refuses a portable CrispBASIC project before network or project replacement', async () => {
+    const source = '# @crispbasic-portable 1\nWHEN flag clicked:\n  say 42\n';
+    const f = editorFixture({device: 'atmega328p', projectSource: source});
+    const before = f.vm.toJSON();
+    await f.editor.compileCowgolSource('atmega328p', true, {fromBlocks: true});
+    assert.equal(f.builds.length, 0);
+    assert.equal(f.loads.length, 0);
+    assert.equal(f.events.length, 0);
+    assert.equal(f.vm.toJSON(), before);
+    assert.match(f.editor.state.status, /requires CrispBASIC mode/);
 });
