@@ -253,6 +253,8 @@ const L10N = {
         cowgolRunEater: '▶ Cowgol on Eater 6502',
         cowgolRunAvr: '▶ Cowgol on Arduino Uno',
         cowgolRunNano: '▶ Cowgol on Arduino Nano',
+        cowgolRun168: '▶ Cowgol on ATmega168P',
+        cowgolDownload168: 'Download ATmega168P .HEX',
         cowgolDownloadNano: 'Download Arduino Nano .HEX',
         cowgolDownloadAvr: 'Download ATmega328P .HEX',
         cowgolRunNativeBlocks: '▶ Run Blocks via Cowgol',
@@ -268,7 +270,7 @@ const L10N = {
         cowgolExportC: 'Export compiled C',
         cowgolCompiling: 'Compiling with Cowgol on the hosted service…',
         cowgolStale: 'The source, project or selected machine changed. The compiled program was not applied.',
-        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS, RISC-V, Eater 6502, Arduino Uno and classic ATmega328P Nano compilation and C export use the hosted Cowgol compiler. RISC-V supports console output. Eater 6502 boots a ROM for the 1 MHz board with serial console and VIA digital pins. Uno and classic Nano use separate 16 MHz firmware profiles with serial console, digital GPIO and literal waits. Run Blocks via Cowgol checks the selected native runtime and integer overflow. Download Blocks via Cowgol builds the checked draft without replacing the project. Native graphics remain unavailable. Run via blocks uses the selected machine’s supported operations.',
+        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. CP/M, DOS, RISC-V, Eater 6502, Arduino Uno, classic ATmega328P Nano and bare ATmega168P compilation and C export use the hosted Cowgol compiler. RISC-V supports console output. Eater 6502 boots a ROM for the 1 MHz board with serial console and VIA digital pins. Uno, classic Nano and bare ATmega168P use separate 16 MHz firmware and memory profiles with serial console, digital GPIO and literal waits. Run Blocks via Cowgol checks the selected native runtime and integer overflow. Download Blocks via Cowgol builds the checked draft without replacing the project. Native graphics remain unavailable. Run via blocks uses the selected machine’s supported operations.',
         nqcCompile: '⚙ Compile .rcx', nqcSend: '🧱 Send to RCX',
         nqcEmpty: 'Type some NQC first.',
         nqcNoCompiler: 'This build has no local NQC compiler.',
@@ -653,6 +655,8 @@ const L10N = {
         cowgolRunEater: '▶ Cowgol auf Eater 6502',
         cowgolRunAvr: '▶ Cowgol auf Arduino Uno',
         cowgolRunNano: '▶ Cowgol auf Arduino Nano',
+        cowgolRun168: '▶ Cowgol auf ATmega168P',
+        cowgolDownload168: 'ATmega168P-.HEX herunterladen',
         cowgolDownloadNano: 'Arduino-Nano-.HEX herunterladen',
         cowgolDownloadAvr: 'ATmega328P-.HEX herunterladen',
         cowgolRunNativeBlocks: '▶ Blöcke mit Cowgol ausführen',
@@ -668,7 +672,7 @@ const L10N = {
         cowgolExportC: 'Kompiliertes C exportieren',
         cowgolCompiling: 'Cowgol wird auf dem Compiler-Dienst kompiliert…',
         cowgolStale: 'Quelltext, Projekt oder ausgewählte Maschine wurde geändert. Das kompilierte Programm wurde nicht angewendet.',
-        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS-, RISC-V-, Eater-6502-, Arduino-Uno- und klassische ATmega328P-Nano-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V unterstützt Konsolenausgabe. Eater 6502 startet ein ROM für das 1-MHz-Board mit serieller Konsole und digitalen VIA-Pins. Uno und klassischer Nano verwenden getrennte 16-MHz-Firmwareprofile mit serieller Konsole, digitalen GPIOs und literalen Wartezeiten. Blöcke mit Cowgol ausführen prüft die native Laufzeit und Ganzzahlüberläufe. Blöcke mit Cowgol herunterladen kompiliert den geprüften Entwurf, ohne das Projekt zu ersetzen. Native Grafik bleibt nicht verfügbar. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
+        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. CP/M-, DOS-, RISC-V-, Eater-6502-, Arduino-Uno-, klassische ATmega328P-Nano- und ATmega168P-Kompilierung sowie C-Export verwenden den gehosteten Cowgol-Compiler. RISC-V unterstützt Konsolenausgabe. Eater 6502 startet ein ROM für das 1-MHz-Board mit serieller Konsole und digitalen VIA-Pins. Uno, klassischer Nano und ATmega168P verwenden getrennte 16-MHz-Firmware- und Speicherprofile mit serieller Konsole, digitalen GPIOs und literalen Wartezeiten. Blöcke mit Cowgol ausführen prüft die native Laufzeit und Ganzzahlüberläufe. Blöcke mit Cowgol herunterladen kompiliert den geprüften Entwurf, ohne das Projekt zu ersetzen. Native Grafik bleibt nicht verfügbar. Über Blöcke ausführen nutzt die unterstützten Operationen der gewählten Maschine.',
         nqcCompile: '⚙ .rcx kompilieren', nqcSend: '🧱 An RCX senden',
         nqcEmpty: 'Zuerst NQC eingeben.',
         nqcNoCompiler: 'Dieser Build hat keinen lokalen NQC-Compiler.',
@@ -6263,9 +6267,9 @@ class PseudocodeImporter extends React.Component {
                     if (owns() && this.state.status === this.L.cowgolCompiling) this.setState({status: this.L.cowgolStale});
                     return;
                 }
-            } else if (run && ['riscv32', 'eater6502', 'atmega328p', 'arduino-nano'].includes(target)) {
+            } else if (run && ['riscv32', 'eater6502', 'atmega328p', 'arduino-nano', 'atmega168p'].includes(target)) {
                 const detail = target === 'riscv32' ? cowgolRiscvDetail(out.image)
-                    : ['atmega328p', 'arduino-nano'].includes(target) ? cowgolAvrDetail(out.bytes, {target}) : cowgolEaterDetail(out.bytes);
+                    : ['atmega328p', 'arduino-nano', 'atmega168p'].includes(target) ? cowgolAvrDetail(out.bytes, {target}) : cowgolEaterDetail(out.bytes);
                 try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
                 window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
                 window.__bwPendingMedia = {type: 'asm', detail};
@@ -7801,11 +7805,22 @@ class PseudocodeImporter extends React.Component {
                                         data-testid={menu ? 'bw-cowgol-nano-run-menu' : 'bw-cowgol-nano-run'}>
                                         {this.L.cowgolRunNano}
                                     </button>}
+                                {remoteToolchainsAllowed() && (!this.codeDevice() || cowgolTargetForDevice(this.codeDevice()) === 'atmega168p') &&
+                                    <button type="button" onClick={() => this.compileCowgolSource('atmega168p', true)}
+                                        disabled={this.state.running || this.state.busy} style={actionBtn}
+                                        data-testid={menu ? 'bw-cowgol-168-run-menu' : 'bw-cowgol-168-run'}>
+                                        {this.L.cowgolRun168}
+                                    </button>}
                                 {menu && remoteToolchainsAllowed() && <React.Fragment>
                                     <button type="button" onClick={() => this.compileCowgolSource('arduino-nano')}
                                         disabled={this.state.running || this.state.busy}
                                         data-testid="bw-cowgol-nano-download">
                                         {this.L.cowgolDownloadNano}
+                                    </button>
+                                    <button type="button" onClick={() => this.compileCowgolSource('atmega168p')}
+                                        disabled={this.state.running || this.state.busy}
+                                        data-testid="bw-cowgol-168-download">
+                                        {this.L.cowgolDownload168}
                                     </button>
                                     <button type="button" onClick={() => this.compileCowgolSource('atmega328p')}
                                         disabled={this.state.running || this.state.busy}>

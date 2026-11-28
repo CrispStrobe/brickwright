@@ -16,7 +16,7 @@ by the web and native application wrappers.
    the existing circuit debugger and its build/emulate/flash actions. RISC-V
    instead compiles the accepted console Blocks project and loads the RV32 image.
 5. **Cowgol on CP/M**, **Cowgol on DOS**, **Cowgol on RISC-V**, and
-   **Cowgol on Eater 6502**, **Cowgol on Arduino Uno**, or **Cowgol on Arduino Nano** compile the original source on the hosted service
+   **Cowgol on Eater 6502**, **Cowgol on Arduino Uno**, **Cowgol on Arduino Nano**, or **Cowgol on ATmega168P** compile the original source on the hosted service
    and hand the executable to the
    existing machine loaders. Downloads include Z80 and 8080 CP/M `.COM`, DOS
    `.EXE`, RISC-V `.ELF`, Eater 6502 ROM `.BIN`, ATmega328P `.HEX`, and compiled C source. These
@@ -35,7 +35,7 @@ by the web and native application wrappers.
    Cowgol draft and downloads the selected machine artifact. It leaves the
    current project and authored buffers intact and does not start a machine.
 9. The DOS action menu also offers **Cowgol in MS-DOS 2.0** and the matching
-   display actions on 8086, 80186 and 80286. These boot a fresh OS disk and
+   display actions on 8086, 80186, 80286 and 80386. These boot a fresh OS disk and
    launch `COWGOL.EXE` through the actual DOS kernel. Checked source has the
    corresponding **Blocks via Cowgol** actions.
 
@@ -97,6 +97,7 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | 8051 / STC | Existing C backend and simulator/flasher | No new bare-metal backend |
 | Arduino Uno / bare ATmega328P | Existing C backend; additional checked Blocks → Cowgol console/digital route with literal waits | Full Cowgol → cgen → AVR GCC → Intel HEX; fixed 16 MHz Uno runtime with blocking millisecond delays |
 | Arduino Nano (classic ATmega328P) | Existing C backend; checked native console/digital route with literal waits | Separate `arduino-nano` HEX profile: 16 MHz, 30 KiB application flash, 2 KiB bootloader reservation |
+| Bare ATmega168P | Existing C backend; checked native console/digital route with literal waits | Separate `atmega168p` HEX profile: 16 MHz, 16 KiB application flash, 1 KiB SRAM and a 128-byte allocation arena |
 | Other AVR / Arduino / ATtiny | Existing C backend and supported simulator/flasher | No native Cowgol port qualified |
 | Pico / RP2040 | Existing MicroPython or C backend | No new bare-metal backend |
 | STM32 | Existing C backend | No new bare-metal backend |
@@ -105,7 +106,7 @@ changed into Scratch's message output; use `bw_print_*` for portable conversion.
 | Eater 6502 | Existing C/BASIC routes; additional checked Blocks → Cowgol console/digital route | ROM-safe 65C02 compiler, 32 KiB boot ROM, ACIA console and VIA digital GPIO |
 | Z80 | Existing BASIC/C circuit routes; checked Blocks → Cowgol CP/M console route | Real Z80 CP/M and 8080-compatible compilers; direct program bench or full CP/M 2.2 with serial/TMS9918 output |
 | 8086 / 80186 / 80286 | Checked `DEVICE I8086` console programs select the execution CPU | DOS MZ on the service bench or a fresh booted MS-DOS 2.0 disk; console and 720×400 Controller text output; 80286 executes in real mode |
-| 80386 | Exact `DEVICE I80386` console source, or checked `I8086` source with an explicit 386 execution selection | The same 16-bit DOS MZ on the actual 386 core, in ordinary real mode; separate DOS-service console/display/keyboard route |
+| 80386 | Exact `DEVICE I80386` console source, or checked `I8086` source with an explicit 386 execution selection | The same 16-bit DOS MZ on the actual 386 core, in ordinary real mode; separate DOS-service or booted MS-DOS 2.0 console/display/keyboard routes |
 | Arcade / PyBadge | Existing PXT/TypeScript route where available | No new native backend |
 | RISC-V | Checked int32 console C through hosted GCC, or checked Blocks → Cowgol; one sequential flag script | Full Cowgol → cgen → RV32 GCC/picolibc → executable ELF, using console output |
 
@@ -116,15 +117,15 @@ from a matching CPU name. The shared producer documents exact accepted digital
 coordinates and reserved pins in
 [COWGOL-CONVERSION.md](https://github.com/CrispStrobe/sb3-creator/blob/feat/cowgol-integration-20261128/docs/COWGOL-CONVERSION.md).
 
-The matrix keeps native CP/M, DOS, RISC-V, Eater, Uno and Nano facts **open** until the
+The matrix keeps native CP/M, DOS, RISC-V, Eater, Uno, Nano and ATmega168P facts **open** until the
 companion service is deployed. All supply portable text/number output;
-Eater, Uno and Nano also supply serial input and checked digital calls. Uno and Nano supply
+Eater, Uno, Nano and ATmega168P also supply serial input and checked digital calls. All three AVR profiles supply
 blocking delays; native clocks, canvas and other unimplemented host calls fail to compile/link. Circuit
 programs can also use the established Blocks route.
 
 ### Checked native Blocks and pseudocode
 
-Select Z80, 8086, 80386, RISC-V, Eater 6502, Arduino Uno, bare ATmega328P or classic Nano, then use
+Select Z80, 8086, 80386, RISC-V, Eater 6502, Arduino Uno, bare ATmega328P, classic Nano or bare ATmega168P, then use
 **Run Blocks via Cowgol** in the pseudocode or Cowgol tab. To start with an
 existing Blocks program, use **From blocks** first. The selected machine is
 retained when the source has no device declaration. A conflicting declaration,
@@ -133,15 +134,15 @@ is refused before the current project is replaced.
 
 The shared producer API is `generateCowgol(project, {target})`. Qualified
 targets are `z80-cpm`, `i8080-cpm`, `dos`, `riscv32`, `eater6502` and
-`atmega328p`, and `arduino-nano`. CP/M, DOS and RISC-V accept sequential int32/text console
-programs. Eater adds digital VIA operations; Uno and Nano add digital GPIO and input
+`atmega328p`, `arduino-nano` and `atmega168p`. CP/M, DOS and RISC-V accept sequential int32/text console
+programs. Eater adds digital VIA operations; the three AVR profiles add digital GPIO and input
 pull-ups and literal millisecond waits. Native Eater can use PB7, but its ordinary C export is cleared with
 a diagnostic when that older backend cannot represent the pin. The reversible
 Cowgol reader still has its existing PB7 restriction. Eater active-low input
 is refused because that pin declaration requires a pull-up the VIA runtime
 does not supply; active-low outputs remain supported.
 
-Native waits are available on Uno and Nano; the other native profiles still refuse them.
+Native waits are available on Uno, Nano and ATmega168P; the other native profiles still refuse them.
 Graphics, clock queries, concurrent events, custom procedures and lists remain
 unavailable in these profiles. Calls are not silently removed. Source edits,
 edit/revert, target or device-metadata changes, project replacement, Blocks
@@ -253,7 +254,7 @@ after an actual `MOV CR0` mode switch.
 ### Booted MS-DOS 2.0
 
 **Cowgol in MS-DOS 2.0** and **Cowgol on MS-DOS 2.0 display** are separate
-OS-boot actions for 8086, 80186 and 80286. Checked pseudocode/Cowgol offers
+OS-boot actions for 8086, 80186, 80286 and 80386. Checked pseudocode/Cowgol offers
 matching **Blocks via Cowgol** actions. Each CPU/display choice is explicit.
 
 The helper verifies the SHA-256 and size of the app's existing 360 KiB
@@ -268,8 +269,15 @@ adapter supplies BIOS services; this qualification does not include a ROM
 BIOS or hardware disk controller. The guest DOS kernel handles INT 21h,
 loads the MZ and returns to the command shell when it exits. The Controller
 shows the same 720×400 text screen and accepts live keyboard input. Each run
-starts with a fresh disk; guest writes are not project autosaves. The 386
-OS-boot route remains outside this qualification.
+starts with a fresh disk; guest writes are not project autosaves.
+
+The 80386 disk route explicitly selects `machineConfig: "dos-boot"` and the
+actual experimental 386 core. It is distinct from both the COM/MZ-only
+`dos-service` configuration and the AT ROM-BIOS configuration. The 360 KiB
+floppy geometry is fixed; no external BIOS or alternate disk size is implied.
+Its BIOS adapter preserves upper registers and architectural FLAGS, updates
+segment caches, and refuses protected mode, virtual-8086 mode, paging or
+nonstandard real-mode segments. CPU scheduling remains functional.
 
 These actions require both hosted-toolchain and machine-image policies.
 Missing or changed OS images, disk capacity errors and failed attachments
@@ -277,7 +285,7 @@ remain visible errors. Source/project/Blocks/device edits, Stop and image
 policy changes revoke pending work across compilation, image preparation,
 activation and attachment. A late result cannot start an obsolete program.
 
-`scripts/verify-cowgol-dos-disk.mjs` verifies six real boots. It checks the
+`scripts/verify-cowgol-dos-disk.mjs` verifies eight real boots. It checks the
 unchanged system files, exact injected executable, the INT 21h vector moving
 from the service trap into guest RAM, full program output, actual text pixels,
 return to the live shell, zero guest `ERRORLEVEL`, and a subsequently typed
@@ -291,7 +299,7 @@ node scripts/verify-cowgol-dos-disk.mjs \
 
 The combined HTTP/CLI witness builds full Cowgol once through each frontend
 entry point, requires identical artifacts, and runs all eight DOS-service and
-six OS-boot configurations:
+eight OS-boot configurations:
 
 ```sh
 node scripts/verify-cowgol-platforms.mjs \
@@ -299,7 +307,7 @@ node scripts/verify-cowgol-platforms.mjs \
   --targets dos,cowgol-cgen --cli --tmpdir ../validation
 ```
 
-### Arduino Uno / ATmega328P and classic Nano
+### Arduino Uno / ATmega328P, classic Nano and bare ATmega168P
 
 Choose **Cowgol on Arduino Uno** to build the original source and start the
 existing AVR debugger with the exact validated Intel HEX. Keyboard Run uses
@@ -343,8 +351,8 @@ Execution tests cover cold SRAM, initialized data, arrays, pointers, integer
 division, allocation/free, serial receive/transmit and digital pins on all
 three ports. Measured GPIO transitions qualify 0, 1 and 7 ms waits; a bounded
 observation of 65,536 ms checks that the count does not narrow to 16 bits.
-No physical-board qualification is claimed. Mega, ATmega168P, ATtiny and
-other AVR targets remain outside these explicitly qualified native profiles.
+No physical-board qualification is claimed. Mega, ATtiny and other AVR
+targets remain outside these explicitly qualified native profiles.
 
 **Classic Nano** has its own `arduino-nano` target and **Cowgol on Arduino
 Nano** action. It accepts the classic ATmega328P board at 16 MHz. Application
@@ -362,6 +370,30 @@ Nano Every, Nano 33, ATmega168 variants and other Nano families require separate
 ports. The execution tests cold-boot the compiled application on the CPU model;
 physical bootloader upload transport is not qualified. Use the existing
 board-specific upload settings when flashing a separately reviewed artifact.
+
+**Bare ATmega168P** has its own `atmega168p` target, **Cowgol on ATmega168P**
+action and **Download ATmega168P .HEX** action. Keyboard Run and the checked
+Blocks/pseudocode routes retain the selected chip, including exact
+`DEVICE ATMEGA168P` source. Its smaller memory contract is enforced by the
+linker, service, frontend and exact-MCU execution oracle:
+
+| Resource | ATmega168P contract |
+| --- | --- |
+| MCU and clock | ATmega168P, 16 MHz |
+| Program flash | `$0000–$3FFF`, 16,384 bytes; no bootloader reservation |
+| SRAM | `$0100–$04FF`, 1,024 bytes; static data ends by `$0300` |
+| Allocation | Bounded 128-byte arena included in static SRAM; failure returns null |
+| C stack reservation | `$0300–$04FF`, 512 bytes |
+| Serial and digital pins | Same USART0 and D2–D13/A0–A5 bindings as the 328P profile |
+
+The HEX must identify the 168P MCU, flash boundary, SRAM size and heap
+contract. A valid Uno or Nano artifact is still a wrong-target response for
+this profile. The execution tests use the actual 1 KiB SRAM and 16 KiB flash
+model, cold-memory resets, allocation reuse/exhaustion and stack monitoring.
+Full Cowgol can use arrays and allocation within these limits; a large
+allocation cannot inherit the 328P's arena. This is a bare-chip profile:
+ATmega168-based Nano or Duemilanove bootloaders, clocks and upload transports
+need their own board contracts.
 
 ### Command-line conversion
 
@@ -392,7 +424,7 @@ node bin/bwlite.mjs cowgol build program.cow --target z80-cpm --out program.com 
 ```
 
 `cowgol build` accepts full Cowgol source directly or validates the original
-Blocks graph for `.sb3` and the parsed graph for `.bw`. All eight compiler
+Blocks graph for `.sb3` and the parsed graph for `.bw`. All nine compiler
 outputs are available; C export requires `.cow`/`.cowgol`. The command validates
 the artifact using the editor's client, then atomically writes it. Errors and
 timeouts preserve prior output, and source/output aliases are refused.
@@ -511,11 +543,11 @@ host ABI, an embedded C console profile, portable CP/M/DOS console headers,
 and the Eater ROM backend/runtime. Array sizes, record sizes, static frames and
 combined call workspace are checked before their 16-bit object representation
 can wrap; the checks are present in both compiler source and bootstrap.
-The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V, Eater ROM, Uno, Nano and C routes,
+The compiler service builds pinned Z80 CP/M, 8080 CP/M, DOS, RISC-V, Eater ROM, Uno, Nano, ATmega168P and C routes,
 checks source/includes and artifact limits, and packages them for Docker,
 Hugging Face and Vercel. Missing toolchains return an explicit failure. Its
-browser demo also exposes all eight targets, including distinct Uno and
-classic Nano profiles, and selects the required C/BIN/ELF/HEX format. Cowgol
+browser demo also exposes all nine targets, including distinct Uno,
+classic Nano and bare ATmega168P profiles, and selects the required C/BIN/ELF/HEX format. Cowgol
 keeps its fixed clock contract when switching between targets. Authored source
 is preserved across language changes.
 
@@ -575,13 +607,13 @@ machine commits. Add `--targets riscv32,cowgol-cgen,eater6502` to include the
 Eater ROM, its serial output, cold-RAM startup and a no-ROM-write audit. Use
 `--help` for paths and explicit target selection.
 
-To include Uno or Nano, supply a bundle with `atmega328p` or `arduino-nano` and a clean avr8js checkout
+To include the AVR profiles, supply a bundle with `atmega328p`, `arduino-nano` or `atmega168p` and a clean avr8js checkout
 at the exact SHA in `scripts/lib/avr8js-spec.mjs`:
 
 ```sh
 node scripts/verify-cowgol-platforms.mjs \
   --service ../stc-compiler --bundle ../cowgol-bundle-avr \
-  --targets atmega328p,arduino-nano --avr8js-root ../avr8js-oracle \
+  --targets atmega328p,arduino-nano,atmega168p --avr8js-root ../avr8js-oracle \
   --avr-runner ../cowgol/tests/avr-run.mjs --tmpdir ../validation
 ```
 

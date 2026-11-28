@@ -153,13 +153,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: CrispStrobe/stc-compiler
-          ref: cd23ac280c6292a9d27bdbbecf04566fee3c9be8
+          ref: 597b52f7464313c9774206e570ee8ee47a667a16
           path: _stc_compiler
       - name: Checkout its exact Cowgol source
         uses: actions/checkout@v4
         with:
           repository: CrispStrobe/cowgol
-          ref: 4082aaba5c023b17f469f74d7a84504e3dbbebd4
+          ref: 89b13e71030f929b40f82018a19b5b3386650342
           path: _cowgol
       - name: Checkout the exact GUI machine
         uses: actions/checkout@v4
@@ -199,13 +199,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: CrispStrobe/stc-compiler
-          ref: cd23ac280c6292a9d27bdbbecf04566fee3c9be8
+          ref: 597b52f7464313c9774206e570ee8ee47a667a16
           path: _stc_compiler
       - name: Checkout its exact Cowgol source and AVR runner
         uses: actions/checkout@v4
         with:
           repository: CrispStrobe/cowgol
-          ref: 4082aaba5c023b17f469f74d7a84504e3dbbebd4
+          ref: 89b13e71030f929b40f82018a19b5b3386650342
           path: _cowgol
       - name: Checkout the exact GUI AVR engine
         uses: actions/checkout@v4
@@ -220,11 +220,11 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends build-essential git
           python3 -m pip install --quiet fastapi pydantic uvicorn
-          python3 _stc_compiler/scripts/build-cowgol-bundle.py --source _cowgol --targets atmega328p arduino-nano
-      - name: Build through the real CLI and boot Uno and Nano with cold SRAM
+          python3 _stc_compiler/scripts/build-cowgol-bundle.py --source _cowgol --targets atmega328p arduino-nano atmega168p
+      - name: Build through the real CLI and cold-boot Uno, Nano and ATmega168P
         run: |
           mkdir -p test-results
-          node scripts/verify-cowgol-platforms.mjs --service _stc_compiler --bundle _stc_compiler/vendor/cowgol --targets atmega328p,arduino-nano --avr8js-root _avr8js --avr-runner _cowgol/tests/avr-run.mjs --cli --tmpdir "$RUNNER_TEMP" > test-results/cowgol-native-avr-surfaces.json
+          node scripts/verify-cowgol-platforms.mjs --service _stc_compiler --bundle _stc_compiler/vendor/cowgol --targets atmega328p,arduino-nano,atmega168p --avr8js-root _avr8js --avr-runner _cowgol/tests/avr-run.mjs --cli --tmpdir "$RUNNER_TEMP" > test-results/cowgol-native-avr-surfaces.json
       - uses: actions/upload-artifact@v4
         with:
           name: cowgol-native-avr-surfaces

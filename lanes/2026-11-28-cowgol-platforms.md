@@ -1,7 +1,7 @@
 # Cowgol platform expansion and default-branch integration — 2026-11-28
 
 Status: active. Owner: ChatGPT, at the repository owner's request.
-Branch: `feat/cowgol-integration-20261128`. Base: `2f5aebabc023d5473958a549318d99adfd92819a`; current default at claim: `ca1e54a6733d17f9a97ffca12747af28c8f3849d`.
+Branch: `feat/cowgol-platforms-20261128`, continuing `feat/cowgol-integration-20261128`. Base: `2f5aebabc023d5473958a549318d99adfd92819a`; current default at claim: `ca1e54a6733d17f9a97ffca12747af28c8f3849d`.
 
 Continue the existing Cowgol integration lane with two qualified expansions: booted MS-DOS 2.0 on the actual 80386 core (console and Controller display), and an explicit bare ATmega168P 16 MHz runtime with its own 16 KiB flash and 1 KiB SRAM limits. Retain source ownership, cancellation, image policy and target validation across both routes.
 
