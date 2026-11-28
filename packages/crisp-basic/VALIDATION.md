@@ -1,5 +1,38 @@
 # Validation records
 
+## Native ARM64 and portable CLI — 2026-11-28
+
+Runtime `0.1.0-dev.7` adds a native Linux ARM64 build and an explicit
+`--backend wasm` CLI with capability discovery and versioned logical-pin
+fixtures. The simulation ABI/contract stays at version 2 and the BBCSDL pin
+stays `6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f`.
+
+The native architecture implementation
+[`b8f6e35366601d42df12e3aba436d13322f5524c`](https://github.com/CrispStrobe/brickwright/commit/b8f6e35366601d42df12e3aba436d13322f5524c)
+passed both the Linux x64 and Linux ARM64 jobs of
+[run 46123563640](https://github.com/CrispStrobe/brickwright/actions/runs/46123563640).
+Each job built the real target executable and passed 111 source/bridge checks
+plus 42 native runtime/CLI checks. The added ELF machine and binary-receipt
+assertion proves that the ARM64 job executed an ARM64 artifact.
+
+The subsequent CLI and input-race changes pass **168 local tests with zero
+failures or skips**: 117 source/fixture/bridge checks, 42 native runtime/CLI
+checks and nine real WASM CLI checks. Local native execution used GCC and
+NASM 2.16.03 on Linux x64. WASM CLI execution used the integration lane's
+Emscripten 3.1.64 build of the unchanged core; its build metadata must be
+regenerated with the final package revision before packaging qualification.
+
+The first local native run exposed the existing pipe-startup race in
+noninteractive `INKEY(0)`. Supplying the finalized input on an inherited private
+file descriptor before process launch fixes that race; the input, EOF, error,
+deadline, cancellation and cleanup tests pass with the change.
+
+The workflow now downloads one exact-commit WASM artifact on Linux ARM64,
+macOS ARM64 and Windows x64 and runs the portable CLI tests without a native
+interpreter. Those jobs must be inspected at the final feature-branch head
+before claiming those host combinations passed. POSIX signal delivery is
+tested on POSIX hosts; parent-owned resource limits are tested on every host.
+
 ## Explicit output-latch toggle
 
 The implementation is

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {access, mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {access, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {constants} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
@@ -26,6 +27,22 @@ async function fakeExecutable(t, body) {
 
 test('native integration requires a built executable; absence is not a passing skip', async () => {
     await access(executable, constants.X_OK);
+});
+
+test('native artifact and build receipt match the executing Linux architecture', async () => {
+    const bytes = await readFile(executable);
+    assert.deepEqual([...bytes.subarray(0, 4)], [0x7f, 0x45, 0x4c, 0x46]);
+    assert.equal(bytes[4], 2, 'ELF64');
+    assert.equal(bytes[5], 1, 'little endian');
+    const machine = {x64: 62, arm64: 183}[process.arch];
+    assert.ok(machine, `qualified architecture: ${process.arch}`);
+    assert.equal(bytes.readUInt16LE(18), machine, 'artifact is native to this test runner');
+    const receipt = JSON.parse(await readFile(new URL('../.build/native-build.json', import.meta.url), 'utf8'));
+    assert.equal(receipt.target, `linux-${process.arch}`);
+    assert.equal(receipt.binarySha256, createHash('sha256').update(bytes).digest('hex'));
+    const session = createNativeSession();
+    try { assert.ok(session.capabilities.platforms.includes(receipt.target)); }
+    finally { await session.dispose(); }
 });
 
 test('the real core executes structured BASIC, procedures, functions, arrays and strings', async t => {

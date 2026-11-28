@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import {readFile} from 'node:fs/promises';
 import {parseArgs} from 'node:util';
-import {createNativeSession, SourceError, VERSION} from '../index.mjs';
+import {createNativeSession, createWasmSession, SourceError, VERSION} from '../index.mjs';
+import {prepareCliSimulation} from '../src/cli-simulation.mjs';
 
 let activeSession;
 let outputFailure;
@@ -19,10 +20,14 @@ for (const stream of [process.stdout, process.stderr]) {
 const writeOut = bytes => { if (!closedStreams.has(process.stdout)) process.stdout.write(bytes); };
 const writeError = text => { if (!closedStreams.has(process.stderr)) process.stderr.write(text); };
 
-const HELP = `CrispBASIC ${VERSION} — native BBC BASIC-compatible runtime
+const HELP = `CrispBASIC ${VERSION} — BBC BASIC-compatible runtime
 
 Usage: crispbasic [options] program.bas
+       crispbasic [--backend native|wasm] [--simulation FILE] --capabilities
 
+  --backend NAME      native (default, Linux x64/ARM64) or wasm (Node worker)
+  --capabilities      Print the selected runtime's capabilities as JSON
+  --simulation FILE   Enable a validated logical-pin fixture (WASM only)
   --input FILE        Supply runtime input bytes from a file (otherwise stdin)
   --timeout MS        Wall-clock limit, including input waits (default: 5000)
   --max-output BYTES  Raw output limit (default: 1048576)
@@ -30,10 +35,12 @@ Usage: crispbasic [options] program.bas
   --version           Print the CrispBASIC version
   --help              Show this help
 
-Build the native core first: npm run build:native
-Source files are UTF-8 text restricted to Latin-1 characters for this backend.
+Build the selected core first: npm run build:native or npm run build:wasm
+Source files are UTF-8 text restricted to Latin-1 characters.
 Output is the raw VDU byte stream; --json includes a Latin-1 text view.
-This native developer backend executes trusted local programs with host access.
+WASM uses the restricted host; native executes trusted local programs with host access.
+Simulation uses deterministic logical pins, without circuit physics or real hardware.
+With --json, simulation results include the final bounded pin/time trace.
 `;
 
 function numberOption(value, name) {
@@ -45,11 +52,13 @@ function numberOption(value, name) {
     return Number(value);
 }
 
-const EXIT = {completed: 0, error: 1, 'host-error': 1, timeout: 124, 'output-limit': 125, cancelled: 130};
+const EXIT = {completed: 0, error: 1, 'host-error': 1, timeout: 124,
+    'output-limit': 125, 'simulation-limit': 125, cancelled: 130};
 
 async function main() {
     const {values, positionals} = parseArgs({
         options: {
+            backend: {type: 'string'}, capabilities: {type: 'boolean'}, simulation: {type: 'string'},
             input: {type: 'string'}, timeout: {type: 'string'},
             'max-output': {type: 'string'}, json: {type: 'boolean'},
             version: {type: 'boolean'}, help: {type: 'boolean'}
@@ -59,21 +68,44 @@ async function main() {
     });
     if (values.help) { writeOut(HELP); return; }
     if (values.version) { writeOut(`CrispBASIC ${VERSION}\n`); return; }
-    if (positionals.length !== 1) throw new Error('Expected one .bas source file. Use --help for usage.');
+    const backend = values.backend ?? 'native';
+    if (!['native', 'wasm'].includes(backend)) throw new Error('--backend must be native or wasm');
+    if (values.simulation !== undefined && backend !== 'wasm') {
+        throw new Error('--simulation requires --backend wasm');
+    }
+    if (positionals.length !== (values.capabilities ? 0 : 1)) {
+        throw new Error(values.capabilities ? '--capabilities takes no source file' :
+            'Expected one .bas source file. Use --help for usage.');
+    }
+    if (values.capabilities && values.input !== undefined) throw new Error('--capabilities does not consume --input');
     const timeoutMs = numberOption(values.timeout, '--timeout');
     const maxOutputBytes = numberOption(values['max-output'], '--max-output');
-    const filename = positionals[0];
-    const source = await readFile(filename, 'utf8');
-    const input = values.input === undefined ? '' : await readFile(values.input);
-    const session = createNativeSession({
+    let fixture, simulationHost;
+    if (values.simulation !== undefined) {
+        fixture = prepareCliSimulation(JSON.parse(await readFile(values.simulation, 'utf8')));
+    }
+    const session = (backend === 'wasm' ? createWasmSession : createNativeSession)({
         ...(timeoutMs === undefined ? {} : {timeoutMs}),
         ...(maxOutputBytes === undefined ? {} : {maxOutputBytes}),
+        ...(fixture ? {simulation: {maxRequests: fixture.maxRequests, createHost() {
+            simulationHost = fixture.createHost();
+            return simulationHost;
+        }}} : {}),
         onEvent(event) {
             if (event.type === 'output' && !values.json) writeOut(Buffer.from(event.bytes));
         }
     });
+    if (values.capabilities) {
+        try {
+            writeOut(`${JSON.stringify({...session.capabilities,
+                ...(fixture ? {simulationHost: fixture.capabilities} : {})})}\n`);
+        } finally { await session.dispose(); }
+        return;
+    }
+    const filename = positionals[0];
     activeSession = session;
-    const interrupt = () => session.cancel();
+    const cancellation = new AbortController();
+    const interrupt = () => { cancellation.abort(); session.cancel(); };
     const sendInput = bytes => {
         try { session.writeInput(bytes); } catch (error) {
             writeError(`CrispBASIC: ${error.message}\n`);
@@ -88,7 +120,10 @@ async function main() {
     process.on('SIGINT', interrupt);
     process.on('SIGTERM', interrupt);
     try {
-        const pending = session.run(source, {filename, input, interactive: values.input === undefined});
+        const source = await readFile(filename, 'utf8');
+        const input = values.input === undefined ? '' : await readFile(values.input);
+        const pending = session.run(source, {filename, input, interactive: values.input === undefined,
+            signal: cancellation.signal});
         if (values.input === undefined) {
             process.stdin.on('data', sendInput);
             process.stdin.once('end', endInput);
@@ -101,7 +136,10 @@ async function main() {
             return;
         } else if (values.json) {
             const {output, ...rest} = result;
-            writeOut(`${JSON.stringify({...rest, outputBase64: Buffer.from(output).toString('base64')})}\n`);
+            const trace = simulationHost?.trace;
+            writeOut(`${JSON.stringify({...rest, outputBase64: Buffer.from(output).toString('base64'),
+                ...(simulationHost ? {simulation: {capabilities: simulationHost.capabilities,
+                    elapsedMs: trace.at(-1)?.atMs ?? 0, trace}} : {})})}\n`);
         } else if (result.status !== 'completed') {
             const where = result.error?.filename ?
                 `${result.error.filename}${result.error.line ? `:${result.error.line}` : ''}: ` : '';

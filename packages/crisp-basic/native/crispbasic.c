@@ -14,6 +14,11 @@
 #include <unistd.h>
 #include "bbccon.h"
 
+#if !defined(__linux__) || !(defined(__x86_64__) || defined(__aarch64__))
+#error "CrispBASIC native requires Linux x64 or ARM64"
+#endif
+_Static_assert(sizeof(void *) == 8, "CrispBASIC native requires the 64-bit upstream layout");
+
 #define SOURCE_LINE_LIMIT 4096
 #define SOURCE_LIMIT (4 * 1024 * 1024)
 #define BASIC_LINE_MAX 65279

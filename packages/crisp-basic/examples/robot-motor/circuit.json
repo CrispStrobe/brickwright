@@ -1,0 +1,318 @@
+{
+  "vcc": 5,
+  "parts": [
+    {
+      "id": "uno",
+      "kind": "arduino_uno",
+      "params": {},
+      "terminals": [
+        "d3",
+        "d7",
+        "d8",
+        "5v",
+        "gnd"
+      ],
+      "x": 60,
+      "y": 40
+    },
+    {
+      "id": "supply",
+      "kind": "vcc",
+      "params": {},
+      "terminals": [
+        "vcc"
+      ],
+      "x": 360,
+      "y": 40
+    },
+    {
+      "id": "ground",
+      "kind": "gnd",
+      "params": {},
+      "terminals": [
+        "gnd"
+      ],
+      "x": 360,
+      "y": 430
+    },
+    {
+      "id": "driver",
+      "kind": "h_bridge",
+      "params": {},
+      "terminals": [
+        "vcc",
+        "gnd",
+        "en1",
+        "in1",
+        "in2",
+        "out1",
+        "out2",
+        "en2",
+        "in3",
+        "in4",
+        "out3",
+        "out4"
+      ],
+      "x": 370,
+      "y": 200
+    },
+    {
+      "id": "motor",
+      "kind": "dc_motor",
+      "params": {
+        "kV": 0.05,
+        "kT": 0.05,
+        "J": 1e-05,
+        "windingR": 5,
+        "windingH": 0.005,
+        "friction": 0.0001
+      },
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "x": 670,
+      "y": 210
+    },
+    {
+      "id": "pull_enable",
+      "kind": "resistor",
+      "params": {
+        "ohms": 10000
+      },
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "x": 190,
+      "y": 300
+    },
+    {
+      "id": "pull_forward",
+      "kind": "resistor",
+      "params": {
+        "ohms": 10000
+      },
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "x": 260,
+      "y": 340
+    },
+    {
+      "id": "pull_reverse",
+      "kind": "resistor",
+      "params": {
+        "ohms": 10000
+      },
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "x": 330,
+      "y": 380
+    }
+  ],
+  "wires": [
+    {
+      "id": "supply_0",
+      "to": {
+        "part": "uno",
+        "terminal": "5v"
+      },
+      "from": {
+        "part": "supply",
+        "terminal": "vcc"
+      }
+    },
+    {
+      "id": "supply_1",
+      "to": {
+        "part": "driver",
+        "terminal": "vcc"
+      },
+      "from": {
+        "part": "supply",
+        "terminal": "vcc"
+      }
+    },
+    {
+      "id": "ground_0",
+      "to": {
+        "part": "uno",
+        "terminal": "gnd"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_1",
+      "to": {
+        "part": "driver",
+        "terminal": "gnd"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_2",
+      "to": {
+        "part": "driver",
+        "terminal": "en2"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_3",
+      "to": {
+        "part": "driver",
+        "terminal": "in3"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_4",
+      "to": {
+        "part": "driver",
+        "terminal": "in4"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_5",
+      "to": {
+        "part": "pull_enable",
+        "terminal": "b"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_6",
+      "to": {
+        "part": "pull_forward",
+        "terminal": "b"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground_7",
+      "to": {
+        "part": "pull_reverse",
+        "terminal": "b"
+      },
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "enable_0",
+      "to": {
+        "part": "driver",
+        "terminal": "en1"
+      },
+      "from": {
+        "part": "uno",
+        "terminal": "d3"
+      }
+    },
+    {
+      "id": "enable_1",
+      "to": {
+        "part": "pull_enable",
+        "terminal": "a"
+      },
+      "from": {
+        "part": "uno",
+        "terminal": "d3"
+      }
+    },
+    {
+      "id": "forward_0",
+      "to": {
+        "part": "driver",
+        "terminal": "in1"
+      },
+      "from": {
+        "part": "uno",
+        "terminal": "d7"
+      }
+    },
+    {
+      "id": "forward_1",
+      "to": {
+        "part": "pull_forward",
+        "terminal": "a"
+      },
+      "from": {
+        "part": "uno",
+        "terminal": "d7"
+      }
+    },
+    {
+      "id": "reverse_0",
+      "to": {
+        "part": "driver",
+        "terminal": "in2"
+      },
+      "from": {
+        "part": "uno",
+        "terminal": "d8"
+      }
+    },
+    {
+      "id": "reverse_1",
+      "to": {
+        "part": "pull_reverse",
+        "terminal": "a"
+      },
+      "from": {
+        "part": "uno",
+        "terminal": "d8"
+      }
+    },
+    {
+      "id": "motor_a_0",
+      "to": {
+        "part": "motor",
+        "terminal": "a"
+      },
+      "from": {
+        "part": "driver",
+        "terminal": "out1"
+      }
+    },
+    {
+      "id": "motor_b_0",
+      "to": {
+        "part": "motor",
+        "terminal": "b"
+      },
+      "from": {
+        "part": "driver",
+        "terminal": "out2"
+      }
+    }
+  ],
+  "holeWires": []
+}

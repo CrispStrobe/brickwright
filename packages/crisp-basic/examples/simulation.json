@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "pins": [0, 1],
+  "maxRequests": 100,
+  "maxTimeMs": 1000,
+  "inputs": [
+    {"pin": 1, "value": 0, "atMs": 25}
+  ]
+}
