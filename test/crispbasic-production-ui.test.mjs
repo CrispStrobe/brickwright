@@ -69,6 +69,8 @@ test('production refusal waits and result reads use the same current operation s
     f.editor.dataset.codeOperationStatus = 'Blocks loaded.';
     await f.waitForCodeStatus(f.page, 'Blocks loaded.'); assert.equal(result, true);
     await f.waitForCodeStatus(f.page, /To blocks cannot preserve/); assert.equal(result, false);
+    delete f.editor.dataset.codeOperationStatus;
+    await f.waitForCodeStatus(f.page, 'roundtrip.bas'); assert.equal(result, false);
 });
 
 async function runCadSequence(text = cadMethod) {

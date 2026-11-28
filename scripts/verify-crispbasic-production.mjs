@@ -242,8 +242,7 @@ async function openCodeFile (page, filename, source) {
     const chooser = page.waitForEvent('filechooser');
     await page.getByText('Open code file…', {exact: true}).click();
     await (await chooser).setFiles({name: filename, mimeType: 'text/plain', buffer: Buffer.from(source)});
-    await page.waitForFunction(name => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus
-        .includes(name), filename);
+    await waitForCodeStatus(page, filename);
 }
 
 async function finished (page) {
