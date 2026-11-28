@@ -1,6 +1,6 @@
 {
   "note": "Real CP/M 2.2 for the Z80 machine \u2014 the redistributable ROMs that let the debug-runner boot a genuine CP/M computer (an A> prompt: DIR, TYPE, warm boot, running .COMs off a RAM-disk) in the browser, NOT the per-.COM BDOS shim. cpm22-64k.bin is Digital Research's CCP+BDOS; cpm-bios.bin is our own MIT BIOS (MC6850 ACIA console + a host RAM-disk on ports $10-$15). Both are vendored UNMODIFIED from bw-board's roms/cpm/ at the pinned sha (bwBoardPin); the boot itself is bw-board's createCpmSystem, reached through the z80 adapter's cpmSystem option. lite's attachZ80 (profile 'cpm-system') loads CCP+BDOS at 0xE400 and the BIOS at 0xFA00 and stocks drive A: with BBC BASIC. The alternate cpm-bios-vdp.bin writes to the TMS9918A at $98/$99 in addition to serial.",
-  "bwBoardPin": "a6aa62fc63c7e3655137d6d78df2dcf911a1e21a",
+  "bwBoardPin": "baf97e362f189ed8f1a253d89dd19fdbbc7bbab5",
   "upstreamOf": "vendored from bw-board roms/cpm (unmodified)",
   "roms": [
     {

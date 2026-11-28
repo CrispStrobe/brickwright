@@ -1016,9 +1016,12 @@ const GUIComponent = props => {
             <MachineManager store={getMachineStore()} locale={props.intl.locale} preferredMachine={showMachines.kind}
                 onRun={async (cfg, opts) => {
                     const code = opts?.code;
-                    const run = (source = code?.text) => runMachineConfig(cfg, code?.dosSourceName ? {
-                        ...opts, dosSource: {name: code.dosSourceName, text: source}
-                    } : opts);
+                    const run = (source = code?.text, runOptions) => runMachineConfig(cfg, {
+                        ...opts,
+                        ...runOptions,
+                        ...(code?.dosSourceName ? {dosSource: {name: code.dosSourceName, text: source}} : {}),
+                        ...(code?.compilerTarget === 'i8086-smallc' ? {smallCSource: source} : {})
+                    });
                     const started = await run();
                     if (started && code) {
                         const program = {...code, config: cfg, run};

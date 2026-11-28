@@ -184,6 +184,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [localNativeBlocks, setLocalNativeBlocks] = React.useState(false);
     const [dosPackageFile, setDosPackageFile] = React.useState(null);
     const [dosPackageBusy, setDosPackageBusy] = React.useState(false);
+    const smallCLaunch = React.useRef(null);
+    React.useEffect(() => () => smallCLaunch.current?.abort(), []);
     const dosPackageOwner = React.useRef({mounted:true,epoch:{},file:null,busy:false});
     React.useEffect(() => {
         const owner = dosPackageOwner.current; owner.mounted = true;
@@ -211,6 +213,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const closeManager = event => {
         invalidateDosPackage();
+        smallCLaunch.current?.abort();
         controllerRequest.current = null;
         if (onClose) onClose(event);
     };
@@ -567,8 +570,19 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                             const kim1Tape = await readKim1LibraryTape(item);
                                                             return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
-                                                        const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
-                                                        return onRun(config, {code});
+                                                        const build = item.code?.compilerTarget === 'i8086-smallc'
+                                                            ? new AbortController() : null;
+                                                        if (build) smallCLaunch.current = build;
+                                                        try {
+                                                            const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
+                                                            if (build?.signal.aborted) return false;
+                                                            return await onRun(config, {code, signal: build?.signal});
+                                                        } catch (error) {
+                                                            if (build?.signal.aborted) return false;
+                                                            throw error;
+                                                        } finally {
+                                                            if (build) smallCLaunch.current = null;
+                                                        }
                                                     })}>
                                                     {t('run')}
                                                 </button>
