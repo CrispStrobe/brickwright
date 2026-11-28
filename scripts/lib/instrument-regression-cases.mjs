@@ -3,8 +3,8 @@ import {createHash} from 'node:crypto';
 
 export const SCHEMA_VERSION = 1;
 export const CONTRACT_SOURCES = Object.freeze({
-    'bw-board': 'da447ee8d66e566b38de5b84e638f90bd7d78524',
-    'bw-circuit-ui': '1ec24a77f1782a824484b0644e017079c5392910'
+    'bw-board': 'cda715c16d4b733ceb73f7720a236b5ea9e3f21d',
+    'bw-circuit-ui': '659431ce46a7b6d4ae472182b069ec301aee0df3'
 });
 export const THERMAL_PROFILE = Object.freeze({volts: .02585, celsius: 26.826793442075882});
 const TEMPERATURE_TEXT = '26.826793442075882';

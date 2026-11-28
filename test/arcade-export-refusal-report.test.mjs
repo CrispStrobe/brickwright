@@ -7,6 +7,7 @@ import {arcadeToPseudocode} from '../overlay/scratch-gui/src/lib/bw-makecode/arc
 import {projectJsonToArcade,projectToArcade} from '../overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js';
 import {makeCodeProjectFile} from '../overlay/scratch-gui/src/lib/bw-makecode/project-file.js';
 import {balancedFrom} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass, codeEditorMethod} from './helpers/code-document-editor.mjs';
 const observations=[];
 const test=(title,body)=>originalTest(title,async t=>{
     const first=observations.length;
@@ -168,11 +169,11 @@ test('original export error remains visible and assets are not modified by repor
     const body=method('async exportArcade ()');const execute=new (Object.getPrototypeOf(async function(){}).constructor)('downloadBlob','Blob',body.slice(1,-1));
     await execute.call(c,()=>{throw new Error('download must not run');},Blob);assert.equal(observed,failure.message);assert.deepEqual(assets,before);
     assert.equal(c.state.conversionReport,null);assert.equal(c.state.busy,false);
-    const edited=context();edited.state={lang:'pseudocode',buffers:{pseudocode:'old'},conversionReport:{operation:'export'}};
+    const Editor=codeDocumentEditorClass(component,codeEditorMethod(component,'setActiveCode (text) {'));
+    const edited=Object.assign(new Editor(),context());edited.state={lang:'pseudocode',buffers:{pseudocode:'old'},conversionReport:{operation:'export'}};
     edited.setState=patch=>{const update=typeof patch==='function'?patch(edited.state):patch;
         if(update&&Object.hasOwn(update,'conversionReport'))throw new Error('report clear failed');if(update)Object.assign(edited.state,update);};
-    const setCode=new Function('LANG_LABEL','hiddenCodeDrafts', 'standaloneBasicDrafts','text',method('setActiveCode (text)').slice(1,-1));
-    assert.doesNotThrow(()=>setCode.call(edited,{pseudocode:'Pseudocode'},hiddenCodeDrafts,standaloneBasicDrafts,'current source'));
+    assert.doesNotThrow(()=>edited.setActiveCode('current source'));
     assert.equal(edited.state.buffers.pseudocode,'current source','report-only clearing cannot block the original edit');
 });
 

@@ -30,6 +30,10 @@ class VduTerminal extends React.Component {
     constructor (props) {
         super(props);
         this._canvasRef = React.createRef();
+        this._resetState();
+    }
+
+    _resetState () {
         this._decoder = new VduDecoder();
         this._gx = 0; // graphics cursor x (logical 0-1279)
         this._gy = 0; // graphics cursor y (logical 0-1023)
@@ -39,18 +43,31 @@ class VduTerminal extends React.Component {
         this._cx = 0; // text cursor column
         this._cy = 0; // text cursor row
         this._processed = 0; // bytes already processed from props.output
+        this._lastOutput = '';
     }
 
-    componentDidMount () { this._draw(); }
+    componentDidMount () {
+        this._draw();
+        // The lazy renderer often mounts after the first worker output (or
+        // even completion), so its initial props are part of the stream too.
+        this._processNew();
+    }
 
     componentDidUpdate (prevProps) {
-        if (this.props.output !== prevProps.output) {
+        const output = this.props.output || '';
+        const reset = this.props.resetKey !== prevProps.resetKey || !output.startsWith(this._lastOutput);
+        if (reset) {
+            this._resetState();
+            this._draw();
+        }
+        if (reset || this.props.output !== prevProps.output) {
             this._processNew();
         }
     }
 
     _processNew () {
         const output = this.props.output || '';
+        this._lastOutput = output;
         if (output.length <= this._processed) return;
         const newBytes = output.slice(this._processed);
         this._processed = output.length;

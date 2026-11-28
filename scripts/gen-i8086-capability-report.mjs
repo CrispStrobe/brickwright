@@ -103,7 +103,8 @@ export function buildI8086CapabilityReport() {
     capture(browserBench, /setupTimeline: timeline/,
         'browser setup and steady-state attribution');
     const [wallBudgetMs, maxQuantumNs] = capture(runner,
-        /targetKind === 'i8086' \? \{wallBudgetMs: (\d+), maxQuantumNs: ([\d_]+)\}/,
+        // The object may continue with further fields (e.g. a DOS fast-start speed).
+        /targetKind === 'i8086' \? \{wallBudgetMs: (\d+), maxQuantumNs: ([\d_]+)[,}]/,
         '8086 adaptive pump budget');
     const [snapshotMs] = capture(runner, /DEBUG_LIVE_SNAPSHOT_MS = (\d+)/,
         'debug live-snapshot interval');

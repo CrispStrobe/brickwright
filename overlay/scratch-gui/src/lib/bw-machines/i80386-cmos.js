@@ -14,3 +14,9 @@ export const withI80386MouseCmos = (chips, overrides = []) => chips.map(chip => 
     cmos[0x2f] = checksum & 0xff;
     return {...chip, initialCmos: [...cmos.entries()].filter(([, value]) => value !== 0)};
 });
+
+/** The AT BIOS uses this drive type to select transfer geometry and data rate. */
+export const i80386FloppyCmos = ({cylinders, heads, sectors, bytesPerSector}) => [
+    [0x10, cylinders === 80 && heads === 2 && sectors === 18 && bytesPerSector === 512 ? 0x40 : 0x20],
+    [0x3d, 0x01]
+];

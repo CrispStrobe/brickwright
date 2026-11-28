@@ -1,8 +1,9 @@
-// The NQC tab in the Code tab, asserted on the component's source text.
+// The NQC tab in the Code tab: registration checks on the component's source
+// and source-edit checks through its actual document adapter.
 //
 // This component is 4,400 lines of React that this suite cannot mount, so the
-// assertions here read the file. That is weaker than executing it and it is
-// said plainly — what it can still catch is the class of mistake that made
+// registration assertions here read the file. The document check executes the
+// actual source methods. Together they catch the class of mistake that made
 // this feature worth writing carefully: a tab that is registered in one of
 // the six places it has to be registered and forgotten in the others, which
 // produces a tab that looks fine and loses your work when you switch away.
@@ -10,6 +11,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {codeDocumentEditorClass, codeDocumentLabels, codeEditorMethod} from './helpers/code-document-editor.mjs';
+import {scopeAfter} from './helpers/js-scope.mjs';
 
 const root = join(import.meta.dirname, '..');
 const importer = readFileSync(
@@ -18,17 +21,28 @@ const languages = readFileSync(
     join(root, 'overlay/scratch-gui/src/lib/codemirror-languages.js'), 'utf8');
 
 test('nqc is registered everywhere a tab has to be, not just in the tab row', () => {
-    // Each of these is a separate place, and missing any one of them is a
-    // different bug. The buffer initialisers are the dangerous ones: a tab
-    // absent from them is wiped whenever another tab is edited, because
-    // setActiveCode clears every buffer it knows about except the active one.
+    // Each registration is a separate requirement. A missing source buffer
+    // used to lose NQC text when the editor cleared generated views.
     assert.match(importer, /nqc:\s*\{ext: 'nqc'/, 'CODE_FILES needs an entry or save/open breaks');
     assert.match(importer, /micropython: 'micro:bit', nqc: 'NQC'/, 'LANG_LABEL needs a name');
-    // Every buffer reset is built from LANG_LABEL (checked above to name
-    // nqc), so a tab cannot be missing from one; a hand-written buffer list
-    // is how a tab went missing before.
-    const inits = importer.match(/Object\.fromEntries\(Object\.keys\(LANG_LABEL\)\.map\(l => \[l, ''\]\)\)/g) || [];
-    assert.ok(inits.length >= 5, `only ${inits.length} buffer resets are built from LANG_LABEL`);
+    // The shared document adapter replaces the old inline buffer resets.
+    // It must provide every registered buffer and retain edited NQC as author.
+    assert.match(scopeAfter(importer, 'codeDocumentState (document)'),
+        /restoreCodeDocumentState\(document, Object\.keys\(LANG_LABEL\)\)/);
+    const Editor = codeDocumentEditorClass(importer, codeEditorMethod(importer, 'setActiveCode (text) {'));
+    const editor = Object.assign(new Editor(), {
+        state: {}, invalidateArcadeReport () {},
+        setState (update) { Object.assign(this.state, typeof update === 'function' ? update(this.state) : update); }
+    });
+    editor.state = editor.authoredCodeState('nqc', 'task main() {}');
+    const edited = 'task main() { OnFwd(OUT_A); }';
+    editor.setActiveCode(edited);
+    assert.deepEqual(Object.keys(editor.state.buffers).sort(), Object.keys(codeDocumentLabels).sort());
+    assert.equal(editor.state.codeDocument.lang, 'nqc');
+    assert.equal(editor.state.codeDocument.code, edited);
+    for (const [lang, code] of Object.entries(editor.state.buffers)) {
+        assert.equal(code, lang === 'nqc' ? edited : '', `${lang} buffer after NQC edit`);
+    }
     assert.doesNotMatch(importer, /buffers: \{pseudocode: ''/,
         'a hand-written buffer list is back: a tab missing from it is silently emptied when another tab is edited');
 });

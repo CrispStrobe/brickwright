@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import {hddWorkflowBeforeRepositoryIdentity} from './helpers/reviewed-repository-identity.mjs';
 
 const workflow = readFileSync(new URL('../.github/workflows/i80386-hdd-gui-actual.yml', import.meta.url), 'utf8');
 
@@ -81,8 +82,12 @@ function setupNodeStep(source) {
 
 function checkSource(source) {
     assert.deepEqual([...jobNames(source)].sort(), [...reviewedJobs].sort(), 'exact reviewed job roster');
+    // Invert only the four reviewed repository-identity guards. The original
+    // held-job hashes still reject any unrelated workflow byte change.
+    const historical = hddWorkflowBeforeRepositoryIdentity(
+        '.github/workflows/i80386-hdd-gui-actual.yml', source);
     for (const [id, expected] of Object.entries(heldJobs)) {
-        assert.equal(createHash('sha256').update(job(source, id)).digest('hex'), expected,
+        assert.equal(createHash('sha256').update(job(historical, id)).digest('hex'), expected,
             `unrelated ${id} job remains byte-exact`);
     }
     const f7 = job(source, 'finite-inventory-seven');
@@ -166,7 +171,7 @@ function checkActualV9Source(source, controller = actualV9Controller) {
         'source prelude and actual execution activation are coupled');
     const block = job(source, 'actual-v9');
     const gate = "      ${{ " + enabled.toLowerCase() + " && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&\n" +
-        "          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&\n" +
+        "          github.repository_id == '1291854269' && github.run_attempt == 1 &&\n" +
         "          github.event.inputs.protocol == 'actual-v9' && github.ref_type == 'branch' &&\n" +
         "          github.event.inputs.pull_request != '' && github.event.inputs.prelude_sha256 != '' &&\n" +
         "          github.event.inputs.request_sha256 == '' && github.event.inputs.tag_name == '' &&\n" +
@@ -347,6 +352,8 @@ test('same-job V9 keeps admission, setup, phase, ACK, entry and terminal deliver
 test('same-job V9 source policy detects lost boundaries and nonexclusive setup', () => {
     const block=job(workflow,'actual-v9');
     const cases=[
+        ["github.repository_id == '1291854269'", "github.repository_id == '1291854270'"],
+        ["github.repository_id == '1291854269'", "github.repository == 'CrispStrobe/brickwright-lite'"],
         ['github.run_attempt == 1','github.run_attempt == 2'],
         ["startsWith(github.ref, 'refs/heads/lane/')","startsWith(github.ref, 'refs/')"],
         ['timeout-minutes: 35','timeout-minutes: 36'],

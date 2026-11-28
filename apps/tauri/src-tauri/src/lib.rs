@@ -168,6 +168,9 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
             #[cfg(desktop)]
             editor_menu::update_editor_menu,
             fileio::save_project,
+            fileio::stage_fat_image_chunk,
+            fileio::finish_fat_image_export,
+            fileio::discard_fat_image_export,
             fileio::open_project_document,
             fileio::open_recent_project,
             fileio::recent_projects,

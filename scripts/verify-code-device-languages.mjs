@@ -75,6 +75,16 @@ try {
     await page.getByTestId('bw-basic-run-menu').click();
     await rows.getByText('PiccoloBASIC UART', {exact: true}).waitFor();
     await rows.getByText(/^PICCOLO-GUI\s+42$/).waitFor({timeout: 120000});
+    const piccoloCommand = async (target, input, response) => {
+        const terminal = target.getByTestId('bw-picobb-terminal');
+        await terminal.locator('textarea').focus();
+        await target.keyboard.type(input, {delay: 14});
+        await target.keyboard.press('Enter');
+        const results = terminal.locator('.xterm-rows').getByText(response, {exact: true});
+        await results.last().waitFor();
+    };
+    await piccoloCommand(page, 'SAVE "piccolo.bas"', 'Saved piccolo.bas');
+    await piccoloCommand(page, 'FILES', 'piccolo.bas');
 
     await profile.selectOption('pico-stefan');
     await typeIntoEditor(page, '10 INPUT A\n20 PRINT A*2');
@@ -148,6 +158,9 @@ try {
     const stefanPartitions = state.picoFlash.partitions.filter(partition => partition.offset === 0x1df000);
     assert.equal(stefanPartitions.length, 1);
     assert.equal(stefanPartitions[0].length, 128 * 1024);
+    const piccoloPartitions = state.picoFlash.partitions.filter(partition => partition.offset === 0xa0000);
+    assert.equal(piccoloPartitions.length, 1);
+    assert.equal(piccoloPartitions[0].length, 128 * 1024);
 
     await page.getByRole('button', {name: 'History', exact: true}).click();
     await page.getByTestId('bw-history-tab-autosave').click();
@@ -187,6 +200,14 @@ try {
         else await reopenedRows.getByText(`> ${input}`, {exact: true}).last().waitFor();
     }
     await reopenedRows.getByText('STEFAN-SESSION-FILE', {exact: true}).waitFor();
+    await openCodeActions(reopened);
+    await reopened.getByTestId('bw-device-select-menu').selectOption('__manage__');
+    const reopenedManager = reopened.getByTestId('bw-machine-manager');
+    await reopenedManager.getByRole('searchbox', {name: 'Search firmware'}).fill('PiccoloBASIC');
+    await reopenedManager.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
+    await reopenedRows.getByText('PiccoloBASIC UART', {exact: true}).waitFor();
+    await piccoloCommand(reopened, 'LOAD "piccolo.bas"', 'Loaded piccolo.bas');
+    await piccoloCommand(reopened, 'RUN', /^PICCOLO-GUI\s+42$/);
     await reopened.close();
 
     await page.reload({waitUntil: 'domcontentloaded'});

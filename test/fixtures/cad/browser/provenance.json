@@ -1,0 +1,79 @@
+{
+  "schema": "bw.cad-browser-fixtures.v1",
+  "cadSdk": {
+    "repository": "https://github.com/CrispStrobe/CrispCAD",
+    "previousRepositoryName": "CrispStrobe/brickwright-cad",
+    "commit": "02287df59bdb8ba7f3685a9241dd6b299276b1c3",
+    "consumerManifest": "overlay/scratch-gui/static/cad-sdk/manifest.json"
+  },
+  "fixtures": {
+    "dwg": {
+      "file": "inch-plate.dwg",
+      "mimeType": "image/vnd.dwg",
+      "bytes": 6448,
+      "sha256": "8f84ee202b78ae048d584a35adf00c46c8df933e995fb35718940dca79464b5a",
+      "source": {
+        "repository": "https://github.com/CrispStrobe/CrispCAD",
+        "commit": "7b736aa0407584af9b2b276917e97a2a2740a2aa",
+        "path": "tests/sketch-dwg-fixture.ts",
+        "gitBlob": "8ec6f4e2771d1297450dafa03081b4e8e1c62492",
+        "retainedFile": "sketch-dwg-fixture.ts",
+        "bytes": 1179,
+        "sha256": "d225cc313329a7afb6d61415cfbc8606366adaf654598204146cc1764455f9a3"
+      },
+      "generation": {
+        "command": "TZ=UTC node scripts/gen-cad-browser-dwg-fixture.mjs",
+        "nodeVersion": "24.22.3",
+        "factoryOptions": {},
+        "worker": "overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-FWEoDxb0.js",
+        "workerBytes": 1850080,
+        "workerSha256": "b61636ee4049a98623f2eea55d3bd514d4536de4a2f9ff11958c5037e6e21d4d",
+        "clock": "2026-01-01T00:00:00.000Z",
+        "uuidSequence": "00000000-0000-4000-8000-000000000001, incrementing the final twelve decimal digits",
+        "verification": "Two fresh codec contexts produced identical bytes; the unmodified shipping worker read protocol decoded CUT and GUIDES."
+      },
+      "license": "BSD-3-Clause",
+      "licenseFile": "LICENSE-CRISPCAD.txt"
+    },
+    "step": {
+      "file": "Adafruit3777.step",
+      "mimeType": "model/step",
+      "bytes": 112694,
+      "sha256": "12e0fa54576085011cc9f5221ad95aca62d565e051d995523d192d0a65797ce3",
+      "source": {
+        "repository": "https://github.com/adafruit/Adafruit_CAD_Parts",
+        "commit": "9f2a89f3d5c3491886d58cb7fe83385417563cf4",
+        "path": "3777 TT Motor/3777 TT Motor.step",
+        "gitBlob": "17d51676e5b11ad4ac8a35384017fbe79f2ad392"
+      },
+      "cadSdkCopy": {
+        "repository": "https://github.com/CrispStrobe/CrispCAD",
+        "commit": "7b736aa0407584af9b2b276917e97a2a2740a2aa",
+        "path": "library/sources/adafruit-motors/3777 TT Motor/3777 TT Motor.step",
+        "gitBlob": "17d51676e5b11ad4ac8a35384017fbe79f2ad392",
+        "provenancePath": "library/sources/adafruit-motors/provenance.json",
+        "provenanceGitBlob": "b46c12e8ed2185e36bfbf089f001001157226638"
+      },
+      "license": "MIT",
+      "licenseFile": "LICENSE-ADAFRUIT.txt"
+    }
+  },
+  "licenses": {
+    "LICENSE-CRISPCAD.txt": {
+      "repository": "https://github.com/CrispStrobe/CrispCAD",
+      "commit": "7b736aa0407584af9b2b276917e97a2a2740a2aa",
+      "path": "LICENSE",
+      "gitBlob": "5b291e83c7402eb74588422ede329d9e9935e183",
+      "bytes": 1520,
+      "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad"
+    },
+    "LICENSE-ADAFRUIT.txt": {
+      "repository": "https://github.com/adafruit/Adafruit_CAD_Parts",
+      "commit": "9f2a89f3d5c3491886d58cb7fe83385417563cf4",
+      "path": "LICENSE",
+      "gitBlob": "19a9cd8546f62f1fe25919da52882cb67c52dbba",
+      "bytes": 1076,
+      "sha256": "f60436644e066301d4c2e8f1f0674a157b1f60e4fd5586717b99dde255cc18cd"
+    }
+  }
+}

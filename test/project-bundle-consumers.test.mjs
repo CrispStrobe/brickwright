@@ -4,6 +4,8 @@ import {readFileSync} from 'node:fs';
 import {ControllerPanel} from 'bw-board/controller.js';
 import {bindPanelToBoard} from 'bw-board/controller-binding.js';
 import {clearControllerPanel} from '../overlay/scratch-gui/src/lib/controller-inputs.js';
+import {scopeAfter} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass, codeDocumentLabels} from './helpers/code-document-editor.mjs';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const uploader = read('../overlay/scratch-gui/src/lib/sb-file-uploader-hoc.jsx');
@@ -48,11 +50,25 @@ describe('mounted project consumers obey replacement outcomes', () => {
 
     test('Code explicitly clears every authored buffer on loaded empty or legacy state', () => {
         assert.match(code, /outcome === 'legacy'.*outcome === 'loaded'/s);
-        // The reset is built from LANG_LABEL (one entry per Code tab), so the
-        // invariant is: the bundle branch builds it that way, and LANG_LABEL
-        // names every authored language.
-        assert.match(code, /outcome === 'loaded'[\s\S]*?buffers: Object\.fromEntries\(Object\.keys\(LANG_LABEL\)\.map\(l => \[l, ''\]\)\)/,
-            'the loaded/legacy branch does not reset every buffer');
+        // Follow the actual bundle consumer through the shared document reset,
+        // rather than requiring its former inline Object.fromEntries spelling.
+        const Editor = codeDocumentEditorClass(code,
+            `handleBundle (event) ${scopeAfter(code, 'this._onBundleLoaded = event => {')}`);
+        for (const outcome of ['loaded', 'legacy']) {
+            const controls = [];
+            const component = Object.assign(new Editor(), {props: {},
+                state: {lang: 'javascript', buffers: Object.fromEntries(
+                    Object.keys(codeDocumentLabels).map(lang => [lang, `old ${lang}`]))},
+                readAutosave: () => null, publishGameControls: value => controls.push(value),
+                setState (patch) {Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch);}});
+            component.handleBundle({detail: {outcome}});
+            assert.deepEqual(component.state.buffers, Object.fromEntries(
+                Object.keys(codeDocumentLabels).map(lang => [lang, ''])), 'every old authored buffer is cleared');
+            assert.equal(component.state.codeDocument.lang, 'pseudocode');
+            assert.equal(component.state.codeDocument.code, '');
+            assert.equal(component.state.codeDocument.target, null);
+            assert.deepEqual(controls, [null]);
+        }
         const labels = /const LANG_LABEL = \{([^}]*)\}/.exec(code);
         assert.ok(labels, 'LANG_LABEL not found');
         for (const language of ['pseudocode', 'python', 'javascript', 'c', 'basic', 'asm',

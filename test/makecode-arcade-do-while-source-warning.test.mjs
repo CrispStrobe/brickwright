@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {arcadeToPseudocode} from '../overlay/scratch-gui/src/lib/bw-makecode/arcade-translate.js';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import {projectToArcade} from '../overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js';
+import {codeDocumentEditorClass, codeEditorMethod} from './helpers/code-document-editor.mjs';
 test('the imported Code and warning receipt name the original SDK do-while boundary',()=>{
  const imported=arcadeToPseudocode('let count=0;do{count++;if(count>3)break;continue}while(false)');
  assert.deepEqual(imported.unsupported,[]);assert.equal(imported.warnings.length,1);assert.match(imported.warnings[0],/Selected Arcade SDK do-while continue skips its posttest/);assert.match(imported.code,/^# source warning: Selected Arcade SDK/m);
@@ -16,10 +17,10 @@ test('actual GUI import consumer displays the named warning and the annotated Co
  const {readFileSync}=await import('node:fs');const {importProjectFiles}=await import('../overlay/scratch-gui/src/lib/bw-makecode/index.js');
  const source='let count=0;do{count++;if(count>3)break;continue}while(false)';
  const imported=importProjectFiles({'main.ts':source,'pxt.json':JSON.stringify({name:'Owned loop control',dependencies:{device:'*'},files:['main.ts']})},{target:'arcade'});
- const gui=readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',import.meta.url),'utf8');const start=gui.indexOf('applyMakeCodeImport (res, label) {'),end=gui.indexOf('\n    }\n',start)+6;
- const method=new Function('LANG_LABEL',`return ({${gui.slice(start,end)}}).applyMakeCodeImport`)({pseudocode:'Code'});
- let state;const host={publishGameControls(){},loadArcadeBoards(){},props:{vm:{runtime:{getTargetForStage:()=>({})}}},L:{mcArcade:()=> 'Imported Arcade',toBlocks:'To blocks'},setState:next=>{state=next;}};
- method.call(host,imported,'owned-control.ts');assert.match(state.status,/Selected Arcade SDK do-while continue skips its posttest/);assert.match(state.buffers.pseudocode,/^# source warning:/m);
+ const gui=readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',import.meta.url),'utf8');
+ const Editor=codeDocumentEditorClass(gui,codeEditorMethod(gui,'applyMakeCodeImport (res, label) {'),{LANG_LABEL:{pseudocode:'Code'}});
+ let state;const host=Object.assign(new Editor(),{state:{lang:'pseudocode',buffers:{pseudocode:''}},publishGameControls(){},loadArcadeBoards(){},props:{vm:{runtime:{getTargetForStage:()=>({})}}},L:{mcArcade:()=> 'Imported Arcade',toBlocks:'To blocks'},setState(next){state=next;Object.assign(this.state,next);}});
+ host.applyMakeCodeImport(imported,'owned-control.ts');assert.match(state.status,/Selected Arcade SDK do-while continue skips its posttest/);assert.match(state.buffers.pseudocode,/^# source warning:/m);
 });
 
 test('actual CLI import prints the named warning and writes annotated Code',async()=>{

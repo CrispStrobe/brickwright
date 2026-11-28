@@ -1,7 +1,8 @@
 # Code execution and game export (Python and JavaScript)
 
-Status: planned, with the initial bounded evaluation, console-session candidate
-and scoped JavaScript task continuation recorded. Hosted qualification and
+Status: implementation candidate, with the initial bounded evaluation, console
+sessions, scoped JavaScript tasks and authored-document integration recorded.
+Section 8.3 records the next milestone and its remaining landing dependencies. Hosted qualification and
 supplier adoption remain pending. Recorded 2026-11-27 at the
 repository owner's request. This document is an implementation plan, not a
 claim that new runtimes or standalone exporters have shipped.
@@ -667,7 +668,7 @@ after correction. The focused suite now passes **201/201**, no skips, including
 to the original baseline; **84/84** additional outputs from 14 Boolean graphs
 under six legacy options match `c7584fd0`, including reused generator instances.
 
-The [39-case successor receipt](../scripts/probes/code-runtime/session-console-values-browser-results.json)
+The [39-case successor receipt](CODE-CONSOLE-VALUES-WORKER-RECEIPT-2026-11-27.md)
 executes the published supplier and passes with zero page errors. Its fourth
 canonical generated program places an actual SB3 comparison reporter in a say
 value socket and requires `true`, preserving the graph, transform description,
@@ -704,6 +705,43 @@ but the RF mixer test measured 1170.569 Hz instead of 5830 ±600 Hz, identical t
 Supplier PR #244 records that RF repair's separate owner. The successor commits
 need their own hosted qualification. Pins, vendored source, Code-tab generator
 selection, separately owned repairs and workflow gates do not change here.
+
+### 8.3 Authored documents and actual Code-tab integration
+
+The next candidate is implemented on the existing worker-ownership branch under
+the [integration claim](../lanes/2026-11-27-owned-console-code-tab-integration.md)
+and [Pico ownership companion](../lanes/2026-11-27-code-document-pico-ownership.md).
+The [integration report](CODE-DOCUMENT-INTEGRATION-2026-11-27.md) records source
+identity, behavior controls, actual-editor reproduction and the landing blockers.
+The [rendered receipt](OWNED-CONSOLE-CODE-TAB-RECEIPT-2026-11-27.md) passes 12/12
+checks against the exact production-source checkpoint and an isolated official
+supplier sync; its full hashes and experimental classification are preserved.
+
+The Code tab now separates one authored document from revision-bound generated
+views. The existing autosave and SB3 sidecar retain the exact source, selected
+view, target, runtime, generation options and diagnostics. Edits invalidate
+derived views; selecting a view does not replace its author. An explicit
+file/example import establishes a new authored program. Save refuses when the
+live document cannot be persisted rather than attaching an older cached source.
+
+JavaScript has an explicit **Console program** generation choice. Its bounded
+owned-task contract is retained when the generated text becomes authored or its
+header is deleted. Reverse conversion is refused before a reader or VM mutation;
+the original authored source remains available while generated views are merely
+being inspected. From blocks generates from the actual current SB3 graph.
+
+The existing Pico route receives the clicked Python text and has cancellation
+ownership through asynchronous startup. It does not infer the program from an
+emptied Pseudo view or allow old teardown to unpublish a newer run's board.
+Generic Python remains Skulpt; no interpreter replacement is part of this step.
+
+Supplier PR #246 adds source-located refusals for the demonstrated lossy generic
+Python conversions. The consumer retains individual codes and spans in its
+conversion report. The supplier's pre-existing RF failure still prevents normal
+upstream landing and shipping-pin adoption. Candidate browser integration uses
+an isolated, explicitly experimental official sync; it is not a shipping pin
+or platform qualification. The full R1/R2/J1 milestones retain their broader
+preview/apply, source-map, compatibility and platform acceptance work.
 
 ## 9. JavaScript execution and game export across platforms
 

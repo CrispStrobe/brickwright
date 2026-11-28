@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {withI80386MouseCmos} from '../overlay/scratch-gui/src/lib/bw-machines/i80386-cmos.js';
+import {i80386FloppyCmos, withI80386MouseCmos} from '../overlay/scratch-gui/src/lib/bw-machines/i80386-cmos.js';
 
 const image = chip => {
     const bytes = new Uint8Array(0x40);
@@ -50,4 +50,11 @@ test('unrelated chips and RTC settings survive mouse advertisement', () => {
     assert.equal(image(after)[0x3d], 0x21);
     assert.equal(image(after)[0x19], 47);
     assert.notEqual(after, input);
+});
+
+
+test('the free AT BIOS boots a 1.44 MB floppy with its matching CMOS drive type', () => {
+    const geometry = {cylinders: 80, heads: 2, sectors: 18, bytesPerSector: 512};
+    assert.deepEqual(i80386FloppyCmos(geometry), [[0x10, 0x40], [0x3d, 0x01]]);
+    assert.deepEqual(i80386FloppyCmos({...geometry, sectors: 15}), [[0x10, 0x20], [0x3d, 0x01]]);
 });

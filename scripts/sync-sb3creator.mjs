@@ -105,7 +105,17 @@ const FILES = [
     ['src/utils/cpxDialect.js', path.join(lib, 'cpxDialect.js')],
     // The pin-role PART table (HCSR04 / DS18B20 / DS3231 / AT24C02 / I2C), read by
     // sb3Creator.js and the C reader (sb3-creator #52).
-    ['src/utils/pinRoleParts.js', path.join(lib, 'pinRoleParts.js')]
+    ['src/utils/pinRoleParts.js', path.join(lib, 'pinRoleParts.js')],
+    // Game export: the current project -> a playable JS web game or a Python +
+    // pygame project (sb3-creator docs/GAME-EXPORT.md). The runtime files travel
+    // inside sources.generated.js, so the app needs no other upstream file.
+    ['src/game/model.js', path.join(lib, 'sb3-creator-game-model.js')],
+    ['src/game/emit.js', path.join(lib, 'sb3-creator-game-emit.js')],
+    ['src/game/export.js', path.join(lib, 'sb3-creator-game-export.js')],
+    ['src/game/runtime/sources.generated.js', path.join(lib, 'sb3-creator-game-sources.js')],
+    // Costume rasters for pixel collisions and touching colour; the app rasterizes
+    // with its own canvas (rasterizeInPage), so no browser dependency is added.
+    ['src/game/raster.js', path.join(lib, 'sb3-creator-game-raster.js')]
 ];
 
 // Downstream-only modules imported by synced compiler files. EMPTY, with no stated

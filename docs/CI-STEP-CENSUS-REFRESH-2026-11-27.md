@@ -1,0 +1,63 @@
+# CI step census refresh — 2026-11-27
+
+Observed at **2026-11-27T14:18:12.449Z**, through the authenticated GitHub connector.
+
+This refresh adds the two workflows missing from the census. It measures whether jobs and steps ran; a passing census does not mean every sampled workflow succeeded.
+
+## Recorded scope
+
+| Workflow | Completed runs | Success / failure | Main runs | Named observed steps | Declaration source |
+| --- | ---: | ---: | ---: | ---: | --- |
+| cp1-qualification.yml | 20 | 6 / 14 | 0 | 22 | [0d697c826096](https://github.com/CrispStrobe/brickwright/blob/0d697c826096b51e843d924b3b40be0e47ace5a0/.github/workflows/cp1-qualification.yml) |
+| reference-qualified-instrument-controls.yml | 1 | 1 / 0 | 0 | 2 | [2775707eee57](https://github.com/CrispStrobe/brickwright/blob/2775707eee578744ac49dc833839e065eb916ad7/.github/workflows/reference-qualified-instrument-controls.yml) |
+
+CP1 uses the newest 20 completed, non-cancelled matching runs in the first two consecutive repository run catalog pages. Those pages contained 21 matching runs; the oldest matching run was outside the 20-run window. The sample contains two feature branches and no main runs. Failures are included.
+
+Instrument controls uses the successful run at the introducing [PR #1827](https://github.com/CrispStrobe/brickwright/pull/1827) head. This is a targeted one-run historical sample, not an exhaustive workflow history or a 20-run reliability sample. The recent catalog pages contained no matching controls runs.
+
+The jobs endpoint returned one completed job for each selected run, with total_count equal to the number of returned jobs. Every named step at each selected declaration source appeared in the observed jobs, and no observed step or job was classified as never run.
+
+## Preservation and generation
+
+The refresh calls the existing exported census(), workflowSource(), and mergeWorkflowReadings() functions in scripts/gen-ci-steps.mjs. Every unrelated workflow object and run record is preserved. The existing main provenance stays headSha=a87a7b447, newestMainRun=36409366028; these values were not replaced with branch evidence.
+
+The report's repository spelling changes from CrispStrobe/brickwright-lite to CrispStrobe/brickwright. [GitHub's PR metadata](https://api.github.com/repos/CrispStrobe/brickwright/pulls/1827) identifies the canonical repository as immutable ID 1291854269. This is the renamed repository, not a change of evidence owner. No workflow, exclusion, pointer, or policy threshold changed.
+
+The captured connector payloads used for generation have SHA-256 30bbeb794b0952092c8afb55622c8718ac991fb8b2518090466dc062594162b5. They were read from these endpoints:
+
+- [Run catalog](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs?per_page=100&page=1) — 100 returned records.
+- [Run catalog](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs?per_page=100&page=2) — 100 returned records.
+- [Run catalog](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs?head_sha=2775707eee578744ac49dc833839e065eb916ad7&per_page=100) — 6 returned records.
+- The jobs links in the table below, each queried with per_page=100.
+
+The normal networked reproduction commands are `node scripts/gen-ci-steps.mjs --fetch --workflow cp1-qualification.yml` and the corresponding command for `reference-qualified-instrument-controls.yml`. A later fetch will sample a later window. This refresh used captured connector responses with the same exported generation functions because the connector does not support the workflow-scoped run-list endpoint.
+
+## Observed runs
+
+| Workflow | Run | Created (UTC) | Conclusion | Branch | Head | Jobs evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| cp1-qualification.yml | [46009447919](https://github.com/CrispStrobe/brickwright/actions/runs/46009447919) | 2026-11-27T13:42:38Z | success | feat/coherent-retro-workbench | [0d697c826096](https://github.com/CrispStrobe/brickwright/commit/0d697c826096b51e843d924b3b40be0e47ace5a0) | [140540907690](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/46009447919/jobs?per_page=100) |
+| cp1-qualification.yml | [45989703316](https://github.com/CrispStrobe/brickwright/actions/runs/45989703316) | 2026-11-27T11:20:46Z | failure | feat/coherent-retro-workbench | [b617a62fb2bf](https://github.com/CrispStrobe/brickwright/commit/b617a62fb2bf329095ee42b43e45a7a7978ac4a7) | [140474115520](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45989703316/jobs?per_page=100) |
+| cp1-qualification.yml | [45982318783](https://github.com/CrispStrobe/brickwright/actions/runs/45982318783) | 2026-11-27T10:27:55Z | success | codex/code-worker-ownership-2026-11-27 | [ccc9e8e0ffa7](https://github.com/CrispStrobe/brickwright/commit/ccc9e8e0ffa7101893ade1218a4706a2473c2ff7) | [140449069281](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45982318783/jobs?per_page=100) |
+| cp1-qualification.yml | [45981042168](https://github.com/CrispStrobe/brickwright/actions/runs/45981042168) | 2026-11-27T10:18:56Z | success | codex/code-worker-ownership-2026-11-27 | [71d6854cb3c4](https://github.com/CrispStrobe/brickwright/commit/71d6854cb3c4411072deeaee448281d2fc9d13c1) | [140444713376](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45981042168/jobs?per_page=100) |
+| cp1-qualification.yml | [45979693141](https://github.com/CrispStrobe/brickwright/actions/runs/45979693141) | 2026-11-27T10:09:24Z | success | codex/code-worker-ownership-2026-11-27 | [65d724775f2e](https://github.com/CrispStrobe/brickwright/commit/65d724775f2ea3f21d8f9d82ed2827740be7bc55) | [140440143632](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45979693141/jobs?per_page=100) |
+| cp1-qualification.yml | [45977139642](https://github.com/CrispStrobe/brickwright/actions/runs/45977139642) | 2026-11-27T09:51:05Z | success | codex/code-worker-ownership-2026-11-27 | [8f6ce4aa2e6d](https://github.com/CrispStrobe/brickwright/commit/8f6ce4aa2e6d5e6455313aba1063a44e523bcc71) | [140431584655](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45977139642/jobs?per_page=100) |
+| cp1-qualification.yml | [45976994378](https://github.com/CrispStrobe/brickwright/actions/runs/45976994378) | 2026-11-27T09:50:03Z | failure | feat/coherent-retro-workbench | [7ae170e503f0](https://github.com/CrispStrobe/brickwright/commit/7ae170e503f06e081aac48d96c1de5dbbd989557) | [140431099493](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45976994378/jobs?per_page=100) |
+| cp1-qualification.yml | [45976341183](https://github.com/CrispStrobe/brickwright/actions/runs/45976341183) | 2026-11-27T09:45:18Z | failure | feat/coherent-retro-workbench | [c06454c28c4f](https://github.com/CrispStrobe/brickwright/commit/c06454c28c4f0eabe2507416323dc79c82a8dcfc) | [140428885160](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45976341183/jobs?per_page=100) |
+| cp1-qualification.yml | [45976038108](https://github.com/CrispStrobe/brickwright/actions/runs/45976038108) | 2026-11-27T09:43:09Z | success | codex/code-worker-ownership-2026-11-27 | [adfe53db0ccf](https://github.com/CrispStrobe/brickwright/commit/adfe53db0ccfebf4a96d58ef21b9207aeacf7762) | [140427879392](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45976038108/jobs?per_page=100) |
+| cp1-qualification.yml | [45975068807](https://github.com/CrispStrobe/brickwright/actions/runs/45975068807) | 2026-11-27T09:36:08Z | failure | feat/coherent-retro-workbench | [af5b9241b087](https://github.com/CrispStrobe/brickwright/commit/af5b9241b0877e98779a873dd3914dece9dffd45) | [140424645647](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45975068807/jobs?per_page=100) |
+| cp1-qualification.yml | [45974748394](https://github.com/CrispStrobe/brickwright/actions/runs/45974748394) | 2026-11-27T09:33:50Z | failure | feat/coherent-retro-workbench | [383ffd3e1c31](https://github.com/CrispStrobe/brickwright/commit/383ffd3e1c31214ffa7cb0641057aad1ac2b6103) | [140423582439](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45974748394/jobs?per_page=100) |
+| cp1-qualification.yml | [45973729118](https://github.com/CrispStrobe/brickwright/actions/runs/45973729118) | 2026-11-27T09:26:29Z | failure | feat/coherent-retro-workbench | [3549f415609a](https://github.com/CrispStrobe/brickwright/commit/3549f415609afb99caeefa491f47389be1638312) | [140420180632](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45973729118/jobs?per_page=100) |
+| cp1-qualification.yml | [45971808801](https://github.com/CrispStrobe/brickwright/actions/runs/45971808801) | 2026-11-27T09:12:46Z | failure | feat/coherent-retro-workbench | [2a48222acaa7](https://github.com/CrispStrobe/brickwright/commit/2a48222acaa743fb1d7b564af0e77d526073fdc0) | [140413797520](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45971808801/jobs?per_page=100) |
+| cp1-qualification.yml | [45971550128](https://github.com/CrispStrobe/brickwright/actions/runs/45971550128) | 2026-11-27T09:10:55Z | failure | feat/coherent-retro-workbench | [726f3eb59896](https://github.com/CrispStrobe/brickwright/commit/726f3eb598964564543df9b6ae899afc355aa917) | [140412936328](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45971550128/jobs?per_page=100) |
+| cp1-qualification.yml | [45966221120](https://github.com/CrispStrobe/brickwright/actions/runs/45966221120) | 2026-11-27T08:30:37Z | failure | feat/coherent-retro-workbench | [e3a62c264e2d](https://github.com/CrispStrobe/brickwright/commit/e3a62c264e2d807e32840d57b59ccf56932badbf) | [140395408697](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45966221120/jobs?per_page=100) |
+| cp1-qualification.yml | [45963636899](https://github.com/CrispStrobe/brickwright/actions/runs/45963636899) | 2026-11-27T08:10:26Z | failure | feat/coherent-retro-workbench | [900eaa44d866](https://github.com/CrispStrobe/brickwright/commit/900eaa44d866e5ab30b3b9e81ca7eb41441b2408) | [140387029879](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45963636899/jobs?per_page=100) |
+| cp1-qualification.yml | [45959098332](https://github.com/CrispStrobe/brickwright/actions/runs/45959098332) | 2026-11-27T07:31:58Z | failure | feat/coherent-retro-workbench | [b13d9d4d2725](https://github.com/CrispStrobe/brickwright/commit/b13d9d4d2725148cd655150d37bc18444b74d626) | [140372397971](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45959098332/jobs?per_page=100) |
+| cp1-qualification.yml | [45958974929](https://github.com/CrispStrobe/brickwright/actions/runs/45958974929) | 2026-11-27T07:30:55Z | failure | feat/coherent-retro-workbench | [5c0e6dac8570](https://github.com/CrispStrobe/brickwright/commit/5c0e6dac8570ba3c9eaaa62213496fc021fd0c38) | [140372006049](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45958974929/jobs?per_page=100) |
+| cp1-qualification.yml | [45947330798](https://github.com/CrispStrobe/brickwright/actions/runs/45947330798) | 2026-11-27T05:41:49Z | failure | feat/coherent-retro-workbench | [b12f2f452a1c](https://github.com/CrispStrobe/brickwright/commit/b12f2f452a1cc109bc56543099c18d775163fc18) | [140334923023](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45947330798/jobs?per_page=100) |
+| cp1-qualification.yml | [45946356509](https://github.com/CrispStrobe/brickwright/actions/runs/45946356509) | 2026-11-27T05:31:56Z | failure | feat/coherent-retro-workbench | [54347a61f0d6](https://github.com/CrispStrobe/brickwright/commit/54347a61f0d69a4b0e7d874d08031abb5d3d899f) | [140331840680](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45946356509/jobs?per_page=100) |
+| reference-qualified-instrument-controls.yml | [45618157734](https://github.com/CrispStrobe/brickwright/actions/runs/45618157734) | 2026-11-25T12:53:45Z | success | fix/publish-privacy-and-canonical-links | [2775707eee57](https://github.com/CrispStrobe/brickwright/commit/2775707eee578744ac49dc833839e065eb916ad7) | [139218868646](https://api.github.com/repos/CrispStrobe/brickwright/actions/runs/45618157734/jobs?per_page=100) |
+
+## Validation
+
+`TMPDIR=/workspace/scratch/6490e3182008/test-temp BW_TEST_TMPDIR=/workspace/scratch/6490e3182008/test-temp node --test test/ci-step-census.test.mjs` passed all 7 tests. These cover workflow coverage, step and job classification, dated pointers, scoped merge preservation, and the existing mutation controls. The existing diagnostic still reports unrelated current steps that are newer than their preserved readings; this scoped refresh does not qualify those newer steps.

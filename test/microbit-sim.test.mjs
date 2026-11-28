@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
+import {scopeAfter} from './helpers/js-scope.mjs';
+import {createCodeDocument, addCodeProjection} from '../overlay/scratch-gui/src/lib/code-source-document.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const overlay = resolve(here, '../overlay/scratch-gui');
@@ -33,11 +36,31 @@ test('pseudocode-importer has micropython buffer and tab', () => {
         'Calliope retarget hides the generated MicroPython tab');
     assert.match(src, /this\.currentDevice\(\) === 'calliopemini' \? '🤖 Calliope'/,
         'Calliope generated-code tab keeps the micro:bit identity');
-    const setDevice = src.slice(src.indexOf('async setDevice (deviceId)'), src.indexOf('async deployToPico'));
-    assert.match(setDevice, /pseudocode: result\.pseudocode, micropython: ''/,
-        'retargeting can reuse stale MicroPython from the previous device/source');
-    assert.match(setDevice, /await new Promise\(resolve => this\.setState[\s\S]{0,900}await this\.compile\(\{pseudocode: nextSource\}\)/,
-        'pinless micro:bit examples are not rebuilt when retargeted to Calliope');
+    const setDevice = scopeAfter(src, 'async setDevice (deviceId)');
+    assert.match(setDevice, /\.\.\.this\.retargetCodeState\(result\.pseudocode\)/,
+        'retargeting must atomically replace the source and its generated views');
+    const Editor = codeDocumentEditorClass(src, '');
+    const editor = new Editor();
+    const source = 'DEVICE microbit\nWHEN flag clicked:\n  say 1\n';
+    const document = createCodeDocument({code: source});
+    editor.state = editor.codeDocumentState(addCodeProjection(document, {
+        lang: 'micropython', code: '# generated for the previous device', sourceRevision: document.revision
+    }));
+    const rewritten = source.replace('DEVICE microbit', 'DEVICE calliopemini');
+    const retargeted = editor.retargetCodeState(rewritten);
+    assert.equal(retargeted.codeDocument.lang, 'pseudocode');
+    assert.equal(retargeted.codeDocument.code, rewritten);
+    assert.equal(retargeted.codeDocument.target, 'calliopemini');
+    assert.equal(retargeted.codeDocument.revision, document.revision + 1);
+    assert.equal(retargeted.buffers.micropython, '',
+        'retargeting must clear MicroPython generated for the previous device/source');
+    assert.deepEqual(retargeted.codeDocument.projections, {});
+    const pinlessCommit = setDevice.indexOf('await new Promise(resolve => this.setState');
+    const pinlessCompile = setDevice.indexOf('await this.compile({pseudocode: nextSource})');
+    assert.ok(pinlessCommit >= 0 && pinlessCompile >= 0,
+        'pinless retarget must await both its source commit and compilation');
+    assert.ok(pinlessCommit < pinlessCompile,
+        'pinless micro:bit examples must commit rewritten source before rebuilding for Calliope');
     assert.match(setDevice, /deriveBuffer\(nextSource, 'pseudocode', 'micropython'\)/,
         'pinless Calliope retarget does not derive generated code from the rewritten source');
 });

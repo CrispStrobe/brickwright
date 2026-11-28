@@ -87,3 +87,16 @@ test('same-sized corrupt network bytes never reach cache, notices or returned as
         assert.deepEqual(calls, []);
     } finally { catalog.topbench.files = original; }
 });
+
+
+test('the MIT Sieve only admits its verified raw image', async () => {
+    const {runNativeBenchmark} = module.exports;
+    const project = 'native-sieve';
+    const {manifest, files} = catalog[project];
+    assert.equal(manifest.license, 'MIT');
+    assert.equal(manifest.kind, 'native-i80386-raw');
+    assert.deepEqual(manifest.slots, {raw: 'SIEVE.BIN'});
+    assert.equal(files['SIEVE.BIN'].sha256, 'ec78198054f2c65a49db577c7110c40f807437dc6dea6163231422a5306d8db8');
+    await assert.rejects(runNativeBenchmark({project, files: {}}), /executable unavailable/);
+    await assert.rejects(runNativeBenchmark({project, files: {'SIEVE.BIN': new Uint8Array(375)}}), /SHA-256 mismatch/);
+});

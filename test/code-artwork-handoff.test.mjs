@@ -101,19 +101,20 @@ test('explicit new SVG upload overrides the retained first costume', () => {
 // the old Code-to-graphics handoff, because they have not replaced its source.
 import {readFileSync} from 'node:fs';
 import {scopeAfter} from './helpers/js-scope.mjs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 const importer = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 const openBody = scopeAfter(importer, 'openCodeFile (e) {');
 const openSetup = () => {
     let reader;
     class Reader {constructor () {reader = this;} readAsText () {}}
     const retained = {original: true};
-    const component = {_codeArtwork: retained, state: {lang: 'pseudocode', uploads: [{svg: 'pending'}],
+    const Editor = codeDocumentEditorClass(importer, `openCodeFile (e) ${openBody}`,
+        {FileReader: Reader, isImportableArtefact: name => name.endsWith('.hex')});
+    const component = Object.assign(new Editor(), {_codeArtwork: retained, state: {lang: 'pseudocode', uploads: [{svg: 'pending'}],
         buffers: {pseudocode: 'old program'}}, publishGameControls () {}, openArtefactFile () {},
         langForFile: name => name.endsWith('.bw') ? 'pseudocode' : null,
         L: {openBad: name => `Bad ${name}`, openDone: name => `Opened ${name}`, stError: message => message},
-        setState (patch) {Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch);}};
-    component.openCodeFile = new Function('FileReader', 'isImportableArtefact', 'LANG_LABEL',
-        `return function (e) ${openBody}`)(Reader, name => name.endsWith('.hex'), {});
+        setState (patch) {Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch);}});
     const open = name => component.openCodeFile({target: {files: [{name}], value: name}});
     return {component, retained, open, reader: () => reader};
 };
@@ -181,10 +182,10 @@ const bundleBody = scopeAfter(importer, 'this._onBundleLoaded = event => {');
 for (const outcome of ['legacy', 'loaded', 'future', 'invalid', 'storage-failed']) {
     test(`external bundle outcome ${outcome} resets artwork only when the project was accepted`, () => {
         const context = {};
-        const component = {_codeArtwork: context, props: {}, state: {uploads: [{svg: 'pending'}]},
+        const Editor = codeDocumentEditorClass(importer, `handleBundle (event) ${bundleBody}`);
+        const component = Object.assign(new Editor(), {_codeArtwork: context, props: {}, state: {uploads: [{svg: 'pending'}]},
             readAutosave: () => null, publishGameControls () {},
-            setState (patch) {Object.assign(this.state, patch);}};
-        component.handleBundle = new Function('LANG_LABEL', `return function (event) ${bundleBody}`)({});
+            setState (patch) {Object.assign(this.state, patch);}});
         component.handleBundle({detail: {outcome}});
         const accepted = outcome === 'legacy' || outcome === 'loaded';
         assert.equal(component._codeArtwork, accepted ? null : context);

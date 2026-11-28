@@ -115,6 +115,126 @@ pub async fn save_project(
 }
 
 
+const FAT_EXPORT_LIMIT: u64 = 128 * 1024 * 1024;
+const FAT_EXPORT_CHUNK_LIMIT: usize = 192 * 1024;
+
+fn fat_export_dir(app: &AppHandle, id: &str) -> Result<PathBuf, String> {
+    if id.len() != 32 || !id.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err("Invalid disk export ID.".into());
+    }
+    Ok(app
+        .path()
+        .app_cache_dir()
+        .map_err(|error| error.to_string())?
+        .join("fat-exports")
+        .join(id))
+}
+
+#[tauri::command]
+pub fn stage_fat_image_chunk(
+    app: AppHandle,
+    id: String,
+    offset: u64,
+    data: String,
+) -> Result<(), String> {
+    use base64::{engine::general_purpose::STANDARD, Engine};
+    if data.len() > FAT_EXPORT_CHUNK_LIMIT / 3 * 4 {
+        return Err("Disk export chunk is too large.".into());
+    }
+    let bytes = STANDARD.decode(data).map_err(|error| error.to_string())?;
+    if bytes.is_empty() || offset > FAT_EXPORT_LIMIT - bytes.len() as u64 {
+        return Err("Disk export exceeds its size limit.".into());
+    }
+    let dir = fat_export_dir(&app, &id)?;
+    if offset == 0 {
+        std::fs::create_dir_all(dir.parent().ok_or("Disk export has no cache directory.")?)
+            .map_err(|error| error.to_string())?;
+        std::fs::create_dir(&dir).map_err(|error| error.to_string())?;
+    }
+    let mut staged = std::fs::OpenOptions::new()
+        .create_new(offset == 0)
+        .append(true)
+        .open(dir.join("pending"))
+        .map_err(|error| error.to_string())?;
+    if staged.metadata().map_err(|error| error.to_string())?.len() != offset {
+        return Err("Disk export chunks arrived out of order.".into());
+    }
+    staged.write_all(&bytes).map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+pub fn discard_fat_image_export(app: AppHandle, id: String) -> Result<(), String> {
+    match std::fs::remove_dir_all(fat_export_dir(&app, &id)?) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+fn save_fat_image_copy(source: &Path, destination: &Path, id: &str) -> std::io::Result<()> {
+    let temporary = destination.with_file_name(format!(".brickwright-fat-{id}.tmp"));
+    let mut target = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&temporary)?;
+    let result = (|| {
+        std::io::copy(&mut std::fs::File::open(source)?, &mut target)?;
+        target.sync_all()?;
+        drop(target);
+        std::fs::rename(&temporary, destination)
+    })();
+    if result.is_err() {
+        let _ = std::fs::remove_file(temporary);
+    }
+    result
+}
+
+#[tauri::command]
+pub async fn finish_fat_image_export(
+    app: AppHandle,
+    id: String,
+    filename: String,
+    size: u64,
+) -> Result<Option<String>, String> {
+    let dir = fat_export_dir(&app, &id)?;
+    let source = dir.join("pending");
+    if size == 0
+        || size > FAT_EXPORT_LIMIT
+        || std::fs::metadata(&source)
+            .map_err(|error| error.to_string())?
+            .len()
+            != size
+    {
+        return Err("Disk export is incomplete.".into());
+    }
+    let name = Path::new(&filename)
+        .file_name()
+        .and_then(|part| part.to_str())
+        .filter(|part| part.ends_with(".img"))
+        .unwrap_or("xkim-updated.img")
+        .to_string();
+    if cfg!(mobile) {
+        let path = dir.join(name);
+        std::fs::rename(source, &path).map_err(|error| error.to_string())?;
+        return Ok(Some(path.to_string_lossy().into_owned()));
+    }
+    off_ipc_thread(move || {
+        if let Some(chosen) = app
+            .dialog()
+            .file()
+            .set_file_name(&name)
+            .add_filter("Disk image", &["img"])
+            .blocking_save_file()
+        {
+            let destination = chosen.into_path().map_err(|error| error.to_string())?;
+            save_fat_image_copy(&source, &destination, &id).map_err(|error| error.to_string())?;
+        }
+        std::fs::remove_dir_all(dir).map_err(|error| error.to_string())?;
+        Ok(None)
+    })
+    .await?
+}
+
 /// Run a blocking native dialog (and the file I/O around it) on a blocking worker.
 async fn off_ipc_thread<T: Send + 'static>(
     work: impl FnOnce() -> T + Send + 'static,
@@ -539,6 +659,23 @@ mod tests {
             write_document(&path, format!("round {round}").as_bytes(), &backups).unwrap();
         }
         assert_eq!(std::fs::read_dir(&backups).unwrap().count(), MAX_BACKUPS);
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn fat_image_copy_replaces_only_after_a_complete_write() {
+        let dir = scratch_dir("fat-copy");
+        let source = dir.join("staged");
+        let destination = dir.join("saved.img");
+        std::fs::write(&destination, b"old disk").unwrap();
+        assert!(save_fat_image_copy(&source, &destination, "test").is_err());
+        assert_eq!(std::fs::read(&destination).unwrap(), b"old disk");
+        assert!(!dir.join(".brickwright-fat-test.tmp").exists());
+        std::fs::write(&source, [0, 5, 128, 255]).unwrap();
+        save_fat_image_copy(&source, &destination, "test").unwrap();
+        assert_eq!(std::fs::read(&destination).unwrap(), [0, 5, 128, 255]);
+        assert_eq!(std::fs::read(&source).unwrap(), [0, 5, 128, 255]);
+        assert!(!dir.join(".brickwright-fat-test.tmp").exists());
         std::fs::remove_dir_all(dir).unwrap();
     }
 

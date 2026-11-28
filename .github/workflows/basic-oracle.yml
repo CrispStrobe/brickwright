@@ -25,9 +25,11 @@
 # never bundled or linked (built here for the oracle only, the ngspice
 # GPL-oracle-only regime); pinned in build-brandy-reference.sh (sha-const).
 #
-# BBCSDL is zlib-licensed and is NOT bundled or linked into the browser app; it
-# exists only so a real reference can run in CI/dev. Pinned to an immutable
-# commit inside build-bbcsdl-reference.sh (fetch-pinning classes it sha-const).
+# This workflow's BBCSDL console executable is a separate CI/dev reference
+# and is not shipped. CrispBASIC separately packages a restricted WASM build of
+# the zlib-licensed BBCSDL core; its own source locks, host restrictions and
+# distribution notices live in packages/crisp-basic. The console reference here
+# stays pinned in build-bbcsdl-reference.sh (fetch-pinning class sha-const).
 name: BASIC oracle — emulated BBC BASIC (Z80) vs BBCSDL + Matrix Brandy
 on:
   workflow_dispatch:

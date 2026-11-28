@@ -1,6 +1,7 @@
 # Owned console Code-tab integration and source identity — 2026-11-27
 
-Status: CLAIMED — implementation and qualification in progress.
+Status: IMPLEMENTED — focused controls and 12/12 rendered checks pass;
+main landing remains blocked by supplier and existing pin/gallery qualification.
 
 Owner: Code execution continuation maintainer, continuing the repository owner's
 approved next milestone. The owner authorizes incremental remote checkpoints and
@@ -61,3 +62,22 @@ unqualified dependency pins, change device/simulator APIs or qualify game/native
 exports. Integrate existing reviewed prerequisite work only with its provenance
 and ownership preserved. Record blockers and incremental candidate checkpoints
 truthfully; a real failed gate is not passing qualification.
+
+## Implementation checkpoint
+
+Versioned authored documents, explicit owned-console generation, preserved
+target/runtime, exact-source Pico routing, structured Python refusals and
+save-time stale-source refusal are implemented. The focused consumer set passes
+214/214; 133 additional local legacy/import controls and 32 selected final
+fixture controls pass. Browser acceptance passes 12/12 on consumer `71d6854c`
+with supplier `4994e2c7`, using a separate, explicitly experimental official
+sync until upstream qualification permits normal adoption. All 53 loaded script
+responses match the build inventory, all nine observed workers close, and there
+are zero uncaught page errors. See
+`docs/CODE-DOCUMENT-INTEGRATION-2026-11-27.md` for boundaries and reproduction.
+
+The existing HDD identity prerequisite is reused as the five-file exact subset
+of PR #1846's `ad492c7ac87d2ca393e0da9ceed4d96a3da16563`, including its connected
+negative/hash controls. Its original lane retains ownership; no workflow,
+firmware fixture or historical digest changes. Full HDD controls pass 29/29 and
+the connected identity proof passes 5/5; separate current-pin drift remains red.

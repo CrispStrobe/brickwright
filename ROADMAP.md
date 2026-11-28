@@ -92,6 +92,28 @@ existing Tauri tooling; an Electron desktop package needs its own reason and
 dependency/update review. None of these JS gates is closed by the Python runtime
 or authored pygame packaging probes.
 
+### Game export status — 2026-11-27 (evening)
+
+First G0/J3/G1 slices are implemented upstream in sb3-creator
+([#249](https://github.com/CrispStrobe/sb3-creator/pull/249),
+`docs/GAME-EXPORT.md`): a source-aware game model with a capability report
+(exact / approximate / unsupported; unsupported refuses), an editable
+generator-based JS game on the `bwgame-v1` runtime (module `index.html` and a
+self-contained `play.html`), and the same game as Python + pygame
+(`python main.py`). `bw export-game <file.bw|.py|.js|.c|.bas|.sb3> --to web|pygame`.
+
+Evidence: 17 gallery programs run frame-identical in scratch-vm and as exported
+JS (one tick per frame, frame clock, shared seeded random); 18 games, including
+the collision games, give byte-identical JS and Python state traces; pseudocode,
+generated Python and generated JavaScript export one identical game. Documented
+differences: one tick per frame, box collision around drawn content, simplified
+bubbles/monitors, ghost/brightness-only effects.
+
+Not yet: Brickwright adoption (vendor map + Code-tab "Playable web game" /
+"Python + pygame game" actions are prepared on `integ/code-runtime-20261127`,
+awaiting the sb3-creator pin move), Arcade source profile, desktop/mobile
+packaging (G3/G4, J4–J6).
+
 ## Examples across the workspace
 
 Use the [example surface audit](docs/EXAMPLE-SURFACES.md) to prioritize examples that leave a stale pane, ship an incomplete bench, or rely on manual setup the example never explains. Use the [repository transition plan](docs/REPOSITORY-RENAME.md) for the Brickwright and Brickwright Legacy cutover.

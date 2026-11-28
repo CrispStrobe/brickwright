@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 const source=fs.readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',import.meta.url),'utf8');
 const method=name=>{const match=source.match(new RegExp('^    (?:async )?'+name+' \\([^\\n]*\\) \\{[\\s\\S]*?^    \\}','m'));assert.ok(match,name+' actual method');return match[0];};
 const later=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};};
@@ -8,16 +9,18 @@ function fixture() {
  const readers=[],effects=[],requests=[],waits=new Map();let stage={},answer='share';
  class Reader{constructor(){this.result=new Uint8Array([1]).buffer;readers.push(this);}readAsArrayBuffer(file){this.file=file;}}
  const names=['currentMakeCodeRequest','openArtefactFile','openMakeCodeShare','applyMakeCodeImport','componentWillUnmount','setMaximizedChrome','disposeCodeRun'];
- const labels=source.match(/^const LANG_LABEL = .*;$/m)[0];
+ const labels=new Function(source.match(/^const LANG_LABEL = .*;$/m)[0]+'\nreturn LANG_LABEL;')();
  // Evaluate only these OWN source methods over authored IO/UI stubs. No JSX,
  // React, DOM, SDK, Scratch VM, browser or translated guest is executed.
- const methods=new Function('FileReader','promptAsync','window',labels+'\nreturn ({'+names.map(method).join(',\n')+'});')(Reader,async()=>answer,{removeEventListener:()=>{}});
- const receiver={...methods,state:{buffers:{pseudocode:'before'},uploads:[],status:'before'},
+ const Editor=codeDocumentEditorClass(source,names.map(method).join('\n'),{
+  FileReader:Reader,promptAsync:async()=>answer,window:{removeEventListener:()=>{}},LANG_LABEL:labels});
+ const receiver=Object.assign(new Editor(),{state:{lang:'pseudocode',buffers:{pseudocode:'before'},uploads:[],status:'before',
+  driverMode:'shim',asyncMode:false,eventsMode:false,jsExecution:'classic',basicProfile:'bbc',basicLineNumbers:true},
   props:{vm:{runtime:{getTargetForStage:()=>stage}}},
   L:{mcReading:name=>'reading '+name,mcFailed:(name,error)=>'failed '+name+': '+error,mcNoSource:name=>'missing '+name,mcSharePrompt:'share?',mcShareLoading:'loading',mcArcade:(_label,name)=>'loaded '+name,toBlocks:'To blocks'},
-  setState:update=>{receiver.state={...receiver.state,...update};effects.push(update);},
+  setState:update=>{const patch=typeof update==='function'?update(receiver.state):update;if(patch){receiver.state={...receiver.state,...patch};effects.push(patch);}},
   publishGameControls:value=>effects.push({controls:value}),loadArcadeBoards:()=>effects.push({boards:true}),
-  makeCodeImportModule:async()=>({importArtefact:async(_bytes,opts)=>{requests.push(opts);return waits.get(opts.name).promise;},importShareLink:async(input,opts)=>{requests.push(opts);return waits.get(input).promise;}})};
+  makeCodeImportModule:async()=>({importArtefact:async(_bytes,opts)=>{requests.push(opts);return waits.get(opts.name).promise;},importShareLink:async(input,opts)=>{requests.push(opts);return waits.get(input).promise;}})});
  const result=name=>({kind:'makecode',lang:'pseudocode',code:'code '+name,files:{'main.ts':'authored '+name},project:{name,target:'arcade'},unsupported:[],warnings:[],costumes:[{sprite:'Game',name,svg:'<svg>'+name+'</svg>',mode:'replace'}],dependencyInputs:{marker:name}});
  return {receiver,readers,effects,requests,waits,result,setStage:value=>{stage=value;},setAnswer:value=>{answer=value;}};
 }

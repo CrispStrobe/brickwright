@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "bbcSDL": {
+    "repository": "https://github.com/rtrussell/BBCSDL.git",
+    "commit": "6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f",
+    "license": "Zlib",
+    "files": [
+      {
+        "path": "include/BBC.h",
+        "sha256": "eeefa176f509b9ea5f307f4ca1ac2a141dff5d39931ccedb601ff2af17565efd"
+      },
+      {
+        "path": "include/bbccon.h",
+        "sha256": "282ea688d81a3b3193e75391ae8d49a47adaa87cccb29ba8732b3cd6ff81f245"
+      },
+      {
+        "path": "src/bbmain.c",
+        "sha256": "722d61f845d3fe49fda8d8fedfd1c600d17e6a905cd822d6ceaa31da6a46f390"
+      },
+      {
+        "path": "src/bbexec.c",
+        "sha256": "b15e0841d5bb8211016455427340c4fbbecc962136668e251481efa669d722d2"
+      },
+      {
+        "path": "src/bbeval.c",
+        "sha256": "a70c5ef7b4f1763d3bda9ea9bcf5ed971a41573235cd63897fd9b29f13f8cdfb"
+      },
+      {
+        "path": "src/bbasmb_x86_64.c",
+        "sha256": "e1aef20c0e118573c50b8f219d44c0138bb6f5bf559232f625c367d90b5e23e2"
+      },
+      {
+        "path": "src/bbdata_x86_64.nas",
+        "sha256": "e21ab96847df67433dae1c10a84671ce4fcdf98b6df0baaeb49bf30cabd77f20"
+      },
+      {
+        "path": "src/bbccos.c",
+        "sha256": "995b5ecdff8b4a51786c419053ae342c58bcc3a9f5b61b64d7d3427bf988b62d"
+      },
+      {
+        "path": "src/bbccon.c",
+        "sha256": "60d8dfe07bdff5a716f6533ac94db805afbfe950b857b3f4d4c512954283ce85"
+      },
+      {
+        "path": "licence.txt",
+        "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+      },
+      {
+        "path": "bin/wasm/BBC.h",
+        "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+      },
+      {
+        "path": "src/bbdata_wasm32.c",
+        "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+      }
+    ]
+  }
+}

@@ -5,6 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 const method = name => {
@@ -14,16 +15,18 @@ const method = name => {
     return source.slice(begin + 1, end + 6).trim();
 };
 const hasOpen = source.includes('\n    openEmptyTab (');
-const body = [method('switchTab'), ...(hasOpen ? [method('openEmptyTab')] : [])].join(',\n');
+const body = [method('switchTab'), ...(hasOpen ? [method('openEmptyTab')] : [])].join('\n');
+const Pane = codeDocumentEditorClass(source, body);
 const pane = (deriveResult) => {
-    const p = new Function('TWO_WAY', `return ({${body}});`)(new Set(['python', 'pseudocode', 'javascript']));
+    const p = new Pane();
     Object.assign(p, {
         props: {vm: {}},
-        state: {lang: 'python', busy: false, status: '', buffers: {python: 'import hub\nhub.light_matrix.show_image("HAPPY")\n', pseudocode: ''}},
+        state: {lang: 'python', busy: false, status: '', driverMode: 'shim', asyncMode: false,
+            eventsMode: false, jsExecution: 'classic',
+            buffers: {python: 'import hub\nhub.light_matrix.show_image("HAPPY")\n', pseudocode: ''}},
         L: {stConverting: to => `Converting to ${to}…`, stCantShow: (to, e) => `Can't show as ${to}: ${e}`},
         leaveCp1 () {},
         detachCardiac () {},
-        currentDevice () { return null; },
         deriveBuffer: async () => deriveResult,
         setState (patch) { Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch); }
     });

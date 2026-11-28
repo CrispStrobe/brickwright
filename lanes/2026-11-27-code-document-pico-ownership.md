@@ -1,6 +1,7 @@
 # Code document integration: Pico startup ownership — 2026-11-27
 
-Status: CLAIMED — bounded companion to the Code document integration.
+Status: IMPLEMENTED — 18 helper/epoch controls and 8 actual importer ownership
+controls pass; landing remains ordered with the parent Code integration.
 
 Owner: Code execution continuation maintainer on
 `codex/code-worker-ownership-2026-11-27`, PR #1855. This continues the

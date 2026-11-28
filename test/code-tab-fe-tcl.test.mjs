@@ -24,6 +24,8 @@ import {readFileSync} from 'node:fs';
 
 import {SOURCE, REPO} from './helpers/bw-integrated.mjs';
 import {DOS_LANG_CORPUS} from './helpers/dos-lang-corpus.mjs';
+import {codeDocumentEditorClass, codeDocumentLabels, codeEditorMethod} from './helpers/code-document-editor.mjs';
+import {scopeAfter} from './helpers/js-scope.mjs';
 import tclToPseudocode, {generateTcl} from '../overlay/scratch-gui/src/lib/bw-lang/tcl.js';
 import feToPseudocode, {generateFe} from '../overlay/scratch-gui/src/lib/bw-lang/fe.js';
 
@@ -401,10 +403,26 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // TWO_WAY nor EDITABLE_ONE_WAY is read-only.
     assert.match(importer, /const TWO_WAY = new Set\(\[[^\]]*'fe', 'tcl', 'forth'\]\)/);
     assert.match(importer, /nqc: 'NQC', fe: 'fe \(Lisp\)', tcl: 'Tcl', forth: 'Forth'\}/, 'LANG_LABEL');
-    // Every buffer reset is built from LANG_LABEL, so no tab is left without a
-    // buffer (a missing one made activeCode() undefined: "can't access
-    // property trim" when the Code tab opened).
-    assert.match(importer, /buffers: Object\.fromEntries\(Object\.keys\(LANG_LABEL\)\.map\(l => \[l, ''\]\)\)/);
+    // Source replacement and edits now share the document adapter. Exercise
+    // that boundary, so a missing tab buffer still fails even though the old
+    // five inline reset expressions no longer exist.
+    assert.match(scopeAfter(importer, 'codeDocumentState (document)'),
+        /restoreCodeDocumentState\(document, Object\.keys\(LANG_LABEL\)\)/);
+    const Editor = codeDocumentEditorClass(importer, codeEditorMethod(importer, 'setActiveCode (text) {'));
+    const editor = Object.assign(new Editor(), {
+        state: {}, invalidateArcadeReport () {},
+        setState (update) { Object.assign(this.state, typeof update === 'function' ? update(this.state) : update); }
+    });
+    for (const lang of ['fe', 'tcl', 'forth']) {
+        editor.state = editor.authoredCodeState(lang, 'original source');
+        editor.setActiveCode('edited source');
+        assert.deepEqual(Object.keys(editor.state.buffers).sort(), Object.keys(codeDocumentLabels).sort());
+        assert.equal(editor.state.codeDocument.lang, lang);
+        assert.equal(editor.state.codeDocument.code, 'edited source');
+        for (const [key, value] of Object.entries(editor.state.buffers)) {
+            assert.equal(value, key === lang ? 'edited source' : '', `${lang} edit: ${key} buffer`);
+        }
+    }
     assert.doesNotMatch(importer, /buffers: \{pseudocode: ''/, 'a hand-written buffer list is back');
     assert.match(importer, /return this\.state\.buffers\[this\.state\.lang\] \?\? '';/);
     // fe and Tcl are offered from the "+" menu at the end of the tab row
@@ -419,15 +437,16 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // overwrote an edit typed meanwhile, or reloaded the project after a
     // machine had started.
     assert.match(importer, /for \(const l of Object\.keys\(DOS_LANG\)\) if \(l !== lang\) nb\[l\] = '';/);
-    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null, scratchExample = false} = {})');
+    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null} = {})');
     const compileEnd = importer.indexOf('async fromBlocks ()', compileStart);
     assert.doesNotMatch(importer.slice(compileStart, compileEnd), /dosLangBuffersFor|generateDosLangs|\.generate\(await/,
         'compile() runs no fe/Tcl generator (reading the open fe/Tcl tab is its input, not a regeneration)');
-    assert.match(importer, /\.\.\.\(await dosLangBuffersFor\(project, this\.state\.lang\)\)/);
+    assert.match(scopeAfter(importer, 'async fromBlocks ()'), /\.\.\.\(await dosLangBuffersFor\(project, lang\)\)/);
     // A tab switch derives through them in both directions — before this,
     // switching INTO fe or Tcl fell through to generateJavaScript.
-    assert.match(importer, /else if \(DOS_LANG\[from\]\) result = \(await DOS_LANG\[from\]\.load\(\)\)\.default\(src\);/);
-    assert.match(importer, /const pseudo = result \? this\.convertedSource\(result\) : src;/);
+    const derive = scopeAfter(importer, 'async deriveBuffer (src, from, to)');
+    assert.match(derive, /else if \(DOS_LANG\[from\]\) read = \(await DOS_LANG\[from\]\.load\(\)\)\.default\(src\);/);
+    assert.match(derive, /const pseudo = read \? this\.convertedSource\(read\) : src;/);
     assert.match(importer, /\} else if \(DOS_LANG\[to\]\) \{\n\s+code = DOS_LANG\[to\]\.generate/);
     // The reference panel says what each subset is.
     assert.match(importer, /\n {4}tcl: \[\n {8}\['Overview', \['Jim Tcl/);

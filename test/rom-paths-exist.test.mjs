@@ -26,8 +26,9 @@
 // `rom: 'NAME'` (or "rom": "NAME") property in the SAME FILE is taken as a name
 // the constructed path can produce. That is the load-bearing depth of what
 // this file can see: a name that arrives from a prop, a JSON fixture, another
-// module or a runtime string is out of reach, so a constructed path in a file
-// with NO rom: entries is refused by name rather than passed as "nothing found".
+// module or a runtime string is out of reach. A template using a literal local
+// const is resolved through its actual lexical binding; a constructed path with
+// neither that binding nor rom: entries is refused rather than silently omitted.
 // The same limit is stated, not solved: a ROM name assembled from parts
 // ('i8086-' + kind + '-demo.bin') is invisible here.
 
@@ -36,12 +37,14 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { resolve, dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {createRequire} from 'node:module';
 import {packageSourceRoot} from './helpers/package-source.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '..');
 const overlaySrc = resolve(repo, 'overlay/scratch-gui/src');
 const romDir = resolve(repo, 'overlay/scratch-gui/static/roms');
+const babel = createRequire(resolve(repo, 'packages/scratch-gui/package.json'))('@babel/core');
 
 function walk(dir, out = []) {
     for (const name of readdirSync(dir)) {
@@ -69,14 +72,16 @@ const isComment = line => /^\s*(\/\/|\*|\/\*)/.test(line);
 /**
  * Every ROM name a source text can fetch, by shape. Pure; exported for the
  * mutation tests below.
- * @returns {{literal: string[], constructed: {line: number, expr: string}[], listNames: string[]}}
+ * @returns {{literal: string[], constructed: {line: number, column: number, expr: string}[], listNames: string[]}}
  */
 export function censusRomRefs (text) {
     const literal = [], constructed = [], listNames = [], examplePaths = [];
     text.split('\n').forEach((line, i) => {
         if (isComment(line)) return;
         for (const m of line.matchAll(REF)) literal.push(m[1]);
-        for (const re of CONSTRUCTED) for (const m of line.matchAll(re)) constructed.push({line: i + 1, expr: m[1].trim()});
+        for (const re of CONSTRUCTED) for (const m of line.matchAll(re)) {
+            constructed.push({line: i + 1, column: m.index, expr: m[1].trim()});
+        }
         const override = line.match(EXAMPLE_OVERRIDE);
         for (const m of line.matchAll(LIST_ENTRY)) {
             if (override) examplePaths.push(override[1]);
@@ -86,14 +91,46 @@ export function censusRomRefs (text) {
     return {literal, constructed, listNames, examplePaths};
 }
 
+// A locally bound filename is as finite as a preset entry. Resolve the actual
+// lexical const binding, not a same-spelled variable elsewhere in the file.
+// Anything dynamic, reassigned, shadowed by a parameter or declared after the
+// use remains unresolvable and fails the existing completeness assertion.
+function constantRomNames(text) {
+    const names = new Map();
+    let ast;
+    try {
+        ast = babel.parseSync(text, {babelrc: false, configFile: false,
+            parserOpts: {plugins: ['jsx']}});
+    } catch {
+        return names;
+    }
+    babel.traverse(ast, {TemplateLiteral(path) {
+        const {node} = path;
+        if (node.quasis.length !== 2 || node.expressions.length !== 1 ||
+            !/^(?:\.?\/)?static\/roms\/$/.test(node.quasis[0].value.cooked) ||
+            node.quasis[1].value.cooked !== '' || node.expressions[0].type !== 'Identifier') return;
+        const binding = path.scope.getBinding(node.expressions[0].name);
+        const init = binding?.path.node.init;
+        if (binding?.kind !== 'const' || !binding.constant || init?.type !== 'StringLiteral' ||
+            binding.path.node.start >= node.start || !/^[A-Za-z0-9_.-]+$/.test(init.value)) return;
+        names.set(`${node.loc.start.line}:${node.loc.start.column}`, init.value);
+    }});
+    return names;
+}
+
 /** The names a file can fetch, and the constructed paths whose source it cannot see. */
 export function resolveRomNames (text) {
     const {literal, constructed, listNames, examplePaths} = censusRomRefs(text);
     const names = new Set(literal);
     const unresolvable = [];
     if (constructed.length) {
-        if (listNames.length === 0) unresolvable.push(...constructed);
-        else for (const n of listNames) names.add(n);
+        const constants = constantRomNames(text);
+        for (const ref of constructed) {
+            const local = constants.get(`${ref.line}:${ref.column}`);
+            if (local) names.add(local);
+            else if (listNames.length === 0) unresolvable.push(ref);
+            else for (const n of listNames) names.add(n);
+        }
     }
     return {names: [...names], unresolvable, constructed: constructed.length, listNames: listNames.length, examplePaths};
 }
@@ -112,7 +149,7 @@ test('every static/roms file the app and installed Circuit UI can fetch — lite
         const text = readFileSync(file, 'utf8');
         const {names, unresolvable, constructed, examplePaths} = resolveRomNames(text);
         constructedSeen += constructed;
-        for (const u of unresolvable) blind.push(`${relative(repo, file)}:${u.line} builds static/roms/${'$'}{${u.expr}} and no rom: entry in that file says what it can be`);
+        for (const u of unresolvable) blind.push(`${relative(repo, file)}:${u.line} builds static/roms/${'$'}{${u.expr}} without a finite rom: list or immutable local filename`);
         for (const path of examplePaths) {
             if (!existsSync(join(repo, 'overlay/scratch-gui', path))) missing.push(`${relative(repo, file)} fetches ${path}`);
         }
@@ -129,8 +166,8 @@ test('every static/roms file the app and installed Circuit UI can fetch — lite
         'the scan found no CONSTRUCTED static/roms path — the Machine Loader builds one from its '
         + 'preset list; if that moved, the widened half of this census is reading nothing');
     assert.deepEqual(blind, [],
-        'constructed static/roms path(s) whose name source this census cannot see — name the ROMs '
-        + 'in a rom: list in the same file, or the 404 is invisible again:\n  ' + blind.join('\n  '));
+        'constructed static/roms path(s) whose name source this census cannot see — provide a finite '
+        + 'rom: list or immutable local filename, or the 404 is invisible again:\n  ' + blind.join('\n  '));
     assert.deepEqual(missing, [],
         'these paths 404 at runtime, and only for the user:\n  ' + missing.join('\n  '));
 });
@@ -151,6 +188,27 @@ test('the widened census can fail, each shape by name (mutation)', () => {
     assert.deepEqual(resolveRomNames(override).names, []);
     const literalSlash = "fetch('/static/roms/z.bin')";
     assert.deepEqual(resolveRomNames(literalSlash).names, ['z.bin']);
+});
+
+test('immutable local ROM names resolve by lexical binding and dynamic names still fail', () => {
+    const source = "const name = 'outer.bin'; function a() { const name = 'inner.bin'; return `static/roms/${name}`; }\n"
+        + "function b() { return `static/roms/${name}`; }";
+    assert.deepEqual(resolveRomNames(source).names.sort(), ['inner.bin', 'outer.bin']);
+    for (const text of [
+        "const name = 'outer.bin'; function a(name) { return `static/roms/${name}`; }",
+        "let name = 'mutable.bin'; const url = `static/roms/${name}`;",
+        "const name = getName(); const url = `static/roms/${name}`;",
+        "const url = `static/roms/${name}`; const name = 'late.bin';",
+        "const name = 'one.bin'; name = 'two.bin'; const url = `static/roms/${name}`;"
+    ]) {
+        const result = resolveRomNames(text);
+        assert.deepEqual(result.names, []);
+        assert.equal(result.unresolvable.length, 1);
+    }
+    const sameLine = "const name = 'outer.bin'; function good() { return `static/roms/${name}`; } function bad(name) { return `static/roms/${name}`; }";
+    assert.deepEqual(resolveRomNames(sameLine).names, ['outer.bin']);
+    assert.equal(resolveRomNames(sameLine).unresolvable.length, 1,
+        'a resolved sibling expression cannot hide the shadowed use on the same line');
 });
 
 test('the four 8086 ROMs are present and are the size their load address assumes', () => {

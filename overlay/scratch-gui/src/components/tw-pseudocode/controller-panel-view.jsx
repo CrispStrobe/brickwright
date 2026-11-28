@@ -5,14 +5,18 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
     serializeControllerPanel} from '../../lib/controller-inputs.js';
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
+import 'bw-circuit-ui/components/kim1-panel.css';
+import MachineScreenHeader from './machine-screen-header.jsx';
 import MachineTerminal from './machine-terminal.jsx';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
-import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
+import {addAceKimFace, isAceKimFace, addCardiacFace, addKim1Face, addKim1VideoFace, addMicrotronicFace, isCardiacFace, isKim1Face, isKim1VideoFace, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
 import {CONSOLE_6502_CHANGED, isConsoleMonitor, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
 
+const AceKimFace = React.lazy(() => import(/* webpackChunkName: "bw-ace-kim-face" */ 'bw-circuit-ui/components/AceKimPanel.jsx')
+    .then(module => ({default: module.AceKimFace})));
 const MicrotronicSurface = React.lazy(() => import(/* webpackChunkName: "bw-microtronic-surface" */ './microtronic-surface.jsx'));
 const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
@@ -1538,6 +1542,9 @@ class ControllerPanelView extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
+        if (prevProps.machineTerminal !== this.props.machineTerminal && this.props.machineTerminal?.focusOnOpen) {
+            this.setState({machineSurface: 'terminal'});
+        }
         if (prevProps.board !== this.props.board) {
             const panel = this._getPanel();
             this._buttonInputs?.releaseAll();
@@ -1837,7 +1844,7 @@ class ControllerPanelView extends React.Component {
         const panel = this._getPanel();
         const mode = panel.mode;
         const widgets = panel.getWidgets();
-        const {cp1WidgetSlot, cardiacWidgetSlot} = this.props;
+        const {cp1WidgetSlot, cardiacWidgetSlot, aceKimMachine} = this.props;
         const logikusLabel = /^de/i.test(this.props.locale || '') ? 'Logikus-Labor' : 'Logikus Lab';
         const cardiacWidget = widgets.find(isCardiacFace);
         const kimParts = (this.props.board?.parts || []).filter(part => part.kind === 'kim-1');
@@ -1855,6 +1862,16 @@ class ControllerPanelView extends React.Component {
                 disabled: widgets.some(widget => isKim1Face(widget) && widget.config.partId === part.id),
                 run: () => this._addMachineWidget(panel => addKim1Face(panel, part.id))
             })),
+            ...kimParts.filter(part => this.props.vm?.runtime?.circuitBoard?.getDeviceState?.(part.id)?.k1008)
+                .map(part => ({
+                    label: kimParts.length > 1 ? `K-1008 · ${part.id}` : 'K-1008',
+                    disabled: widgets.some(widget => isKim1VideoFace(widget) && widget.config.partId === part.id),
+                    run: () => this._addMachineWidget(panel => addKim1VideoFace(panel, part.id))
+                })),
+            aceKimMachine && {
+                label: 'ACE KIM', disabled: widgets.some(isAceKimFace),
+                run: () => this._addMachineWidget(addAceKimFace)
+            },
             cardiacWidgetSlot && {
                 label: german ? 'CARDIAC-Anzeige' : 'CARDIAC display', disabled: !!cardiacWidget,
                 run: () => this._addMachineWidget(addCardiacFace)
@@ -1883,6 +1900,8 @@ class ControllerPanelView extends React.Component {
         const hasOtherWidgets = screen && widgets.some(widget => widget !== screen);
         const machineWidget = showTerminal || (hasOtherWidgets && this.state.machineSurface === 'widgets') ? null : screen;
         const machineFullScreen = Boolean((machineWidget || terminal) && this.props.isFullScreen);
+        const aceFullScreen = this.props.isFullScreen && mode === 'play' &&
+            !machineWidget && !terminal && aceKimMachine && widgets.length === 1 && isAceKimFace(widgets[0]);
         const toggleMachineFullScreen = this.props.isFullScreen ?
             this.props.onExitFullScreen : this.props.onEnterFullScreen;
 
@@ -1896,7 +1915,7 @@ class ControllerPanelView extends React.Component {
                 zIndex: 10,
             }} onPointerDown={() => activateUndoSurface('widgets')}>
                 <div data-widgets-toolbar style={{
-                    display: machineFullScreen ? 'none' : 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
+                    display: machineFullScreen || aceFullScreen ? 'none' : 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
                     minWidth: 0, padding: '4px 6px',
                     borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0
                 }}>
@@ -2110,9 +2129,8 @@ class ControllerPanelView extends React.Component {
                             <PositionedWidget
                                 key={w.name}
                                 widget={w}
-                                fitCanvas={widgets.length === 1 && isCardiacFace(w) &&
-                                    w.layout.x === 8 && w.layout.y === 8 && !w.layout.w &&
-                                    w.layout.h === MACHINE_WIDGET_HEIGHT}
+                                fitCanvas={widgets.length === 1 && w.layout.x === 8 && w.layout.y === 8 && !w.layout.w &&
+                                    ((isCardiacFace(w) && w.layout.h === MACHINE_WIDGET_HEIGHT) || isAceKimFace(w))}
                                 mode={mode}
                                 selected={mode === 'edit' && this.state.selected === w.name}
                                 snap={v => this._snap(v)}
@@ -2123,13 +2141,25 @@ class ControllerPanelView extends React.Component {
                                     <section aria-label={w.layout.label || w.name}
                                         style={{background: '#f6f8f4', border: '1px solid #c5d5d8', borderRadius: 8,
                                             height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
-                                        <header data-testid={`bw-ctl-machine-header-${w.name}`}
+                                        {mode === 'play' && isAceKimFace(w) && aceKimMachine ?
+                                            <MachineScreenHeader locale={this.props.locale} title="ACE KIM · 65C02"
+                                                help={german ? 'ESC öffnet den Monitor. INS bearbeitet das Byte an der angezeigten Adresse.' :
+                                                    'Press Esc to open the monitor. Press Ins to edit the byte at the displayed address.'}
+                                                isFullScreen={this.props.isFullScreen} onToggleFullScreen={toggleMachineFullScreen} /> :
+                                            <header data-testid={`bw-ctl-machine-header-${w.name}`}
                                             title={mode === 'edit' ? (german ? 'Zum Verschieben ziehen' : 'Drag to move') : undefined}
                                             style={{padding: '5px 26px 5px 8px', fontSize: 12, fontWeight: 700, color: '#16333c',
                                                 borderBottom: '1px solid #c5d5d8'}}>
-                                            {w.layout.label || w.name}
-                                        </header>
-                                        {w === cardiacWidget && cardiacWidgetSlot ?
+                                                {w.layout.label || w.name}
+                                            </header>}
+                                        {isAceKimFace(w) && aceKimMachine ?
+                                            <div className="kim1-panel" style={{flex: 1, minHeight: 0, overflow: 'auto',
+                                                width: '100%', maxWidth: 520, margin: '0 auto', boxSizing: 'border-box'}}>
+                                                <React.Suspense fallback={null}>
+                                                    <AceKimFace machine={aceKimMachine} disabled={mode === 'edit'} />
+                                                </React.Suspense>
+                                            </div> :
+                                            w === cardiacWidget && cardiacWidgetSlot ?
                                             <div ref={cardiacWidgetSlot} data-cardiac-widget-slot
                                                 style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}} /> :
                                             isMicrotronicFace(w) && microtronicParts.some(part => part.id === w.config.partId) ?
@@ -2139,10 +2169,11 @@ class ControllerPanelView extends React.Component {
                                                             variant="front" locale={this.props.locale} />
                                                     </React.Suspense>
                                                 </div> :
-                                            isKim1Face(w) && kimParts.some(part => part.id === w.config.partId) ?
+                                            (isKim1Face(w) || isKim1VideoFace(w)) && kimParts.some(part => part.id === w.config.partId) ?
                                                 <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
                                                     <React.Suspense fallback={null}>
-                                                        <Kim1Surface vm={this.props.vm} partId={w.config.partId} variant="front"
+                                                        <Kim1Surface vm={this.props.vm} partId={w.config.partId}
+                                                            variant={isKim1VideoFace(w) ? 'video' : 'front'}
                                                             locale={this.props.locale} />
                                                     </React.Suspense>
                                                 </div> :

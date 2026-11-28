@@ -1,0 +1,138 @@
+{
+  "schema": "bw.owned-console-boolean-fixture.v1",
+  "source": "SPRITE BooleanConsole:\n  WHEN flag clicked:\n    IF 2 > 1 THEN:\n      say \"placeholder\"\n",
+  "graphTransform": "Move the operator_gt reporter from the IF condition to the say MESSAGE value socket, retain its inputs and remove only the IF wrapper. Remove unused default sounds.",
+  "expectedOutput": "true\n",
+  "project": {
+    "targets": [
+      {
+        "isStage": true,
+        "name": "Stage",
+        "variables": {},
+        "lists": {},
+        "broadcasts": {},
+        "blocks": {},
+        "comments": {},
+        "currentCostume": 0,
+        "costumes": [
+          {
+            "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
+            "name": "backdrop1",
+            "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
+            "dataFormat": "svg",
+            "rotationCenterX": 240,
+            "rotationCenterY": 180
+          }
+        ],
+        "sounds": [],
+        "volume": 100,
+        "layerOrder": 0,
+        "tempo": 60,
+        "videoTransparency": 50,
+        "videoState": "on",
+        "textToSpeechLanguage": null
+      },
+      {
+        "isStage": false,
+        "name": "BooleanConsole",
+        "variables": {},
+        "lists": {},
+        "broadcasts": {},
+        "blocks": {
+          "owned-console-fixture-1": {
+            "opcode": "event_whenflagclicked",
+            "next": "owned-console-fixture-4",
+            "parent": null,
+            "inputs": {},
+            "fields": {},
+            "shadow": false,
+            "topLevel": true,
+            "x": 40,
+            "y": 40
+          },
+          "owned-console-fixture-3": {
+            "opcode": "operator_gt",
+            "parent": "owned-console-fixture-4",
+            "next": null,
+            "shadow": false,
+            "topLevel": false,
+            "inputs": {
+              "OPERAND1": [
+                1,
+                [
+                  4,
+                  "2"
+                ]
+              ],
+              "OPERAND2": [
+                1,
+                [
+                  4,
+                  "1"
+                ]
+              ]
+            },
+            "fields": {}
+          },
+          "owned-console-fixture-4": {
+            "opcode": "looks_say",
+            "next": null,
+            "parent": "owned-console-fixture-1",
+            "inputs": {
+              "MESSAGE": [
+                3,
+                "owned-console-fixture-3",
+                [
+                  10,
+                  ""
+                ]
+              ]
+            },
+            "fields": {},
+            "shadow": false,
+            "topLevel": false
+          }
+        },
+        "comments": {},
+        "currentCostume": 0,
+        "costumes": [
+          {
+            "assetId": "00000000000000000000000000000002",
+            "name": "costume1",
+            "md5ext": "00000000000000000000000000000002.svg",
+            "dataFormat": "svg",
+            "rotationCenterX": 40,
+            "rotationCenterY": 40
+          }
+        ],
+        "sounds": [],
+        "volume": 100,
+        "layerOrder": 1,
+        "visible": true,
+        "x": 0,
+        "y": 0,
+        "size": 100,
+        "direction": 90,
+        "draggable": false,
+        "rotationStyle": "all around"
+      }
+    ],
+    "monitors": [],
+    "extensions": [],
+    "meta": {
+      "semver": "3.0.0",
+      "vm": "4.6.0",
+      "agent": "SB3 Creator/1.0.0"
+    }
+  },
+  "assets": {
+    "cd21514d0531fdffb22204e0ec5ed84a.svg": {
+      "encoding": "base64",
+      "data": "PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjQ4MCIgaGVpZ2h0PSIzNjAiIHZpZXdCb3g9IjAsMCw0ODAsMzYwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojODdDRUVCO3N0b3Atb3BhY2l0eToxIiAvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6Izk4RkI5ODtzdG9wLW9wYWNpdHk6MSIgLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iNDgwIiBoZWlnaHQ9IjM2MCIgZmlsbD0idXJsKCNiZykiLz48L3N2Zz4="
+    },
+    "00000000000000000000000000000002.svg": {
+      "encoding": "base64",
+      "data": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIj48ZWxsaXBzZSBjeD0iNDAiIGN5PSI0MCIgcng9IjM2IiByeT0iMzYiIGZpbGw9IiM0Qzk3RkYiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHRleHQgeD0iNDAiIHk9IjUzIiBmb250LXNpemU9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0iSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiI+QjwvdGV4dD48L3N2Zz4="
+    }
+  }
+}

@@ -36,6 +36,18 @@ if (existsSync(path.join(ROOT,'overlay/scratch-gui/static/cad-sdk'))) rmSync(pat
 cpSync(path.join(ROOT, 'overlay', 'scratch-gui'), GUI, { recursive: true });
 console.log('  overlaid scratch-gui delta (Code tab, SoundFX, de-brand, webpack, extension picker)');
 
+// CrispBASIC is an optional locally built payload, copied as plain ESM/WASM
+// rather than entering webpack's dependency graph. Re-stage after vendor/overlay
+// so a fresh vendored GUI cannot discard a previously built interpreter.
+// If an older payload is present, require its build record as well: never ship
+// a stale engine merely because its generated directory survived a cache restore.
+if (existsSync(path.join(ROOT, 'packages/crisp-basic/.build/wasm/build.json')) ||
+    existsSync(path.join(GUI, 'static/crispbasic'))) {
+    const crispBasic = spawnSync(process.execPath, [path.join(ROOT, 'scripts/package-crispbasic.mjs')],
+        {cwd: ROOT, stdio: 'inherit'});
+    if (crispBasic.status !== 0) throw new Error('CrispBASIC asset packaging failed; run npm run build:crispbasic');
+}
+
 // 2) micro:bit stub. Install runs with --ignore-scripts (upstream prepublish.mjs downloads
 // micro:bit firmware from a flaky URL), so src/generated/microbit-hex-url.cjs is never created
 // and webpack fails to resolve it. Only the firmware flasher path needs it; stub it empty.

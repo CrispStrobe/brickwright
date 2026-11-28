@@ -36,3 +36,20 @@ judgement made here.
 
 Run `node --test test/schematic-visual-baselines.test.mjs` after an intentional
 layout change. Review regenerated SVG/PNG output before updating these files.
+
+## 2026-11-27 review
+
+Rendered and inspected both the saved and current motor-speed SVGs as PNGs.
+The current pinned renderer moves the three-segment PWM-to-resistor route
+from y=201 to y=193, clearing the `pico1` label above the MCU. These three
+line coordinates are the entire SVG delta: all eight symbols, labels,
+terminals, net identities, other routes and the 540×396 view box are unchanged.
+The motor, transistor, diode and potentiometer connections remain the same.
+The reviewed motor-speed baseline now records that clearance improvement.
+
+The Z80 bench was also rendered and inspected before acceptance. Its `in1`
+74HC244 right-side pins now follow the installed sidecar's canonical terminal
+order. Nine pin labels and their matching net stubs move together (27 changed
+SVG elements); every terminal-to-net identity remains equal before and after.
+All 37 symbols, the other chip pin layouts, and the view box are unchanged.
+The blink and LED-chaser baselines remain byte-identical.

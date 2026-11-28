@@ -126,6 +126,12 @@ export const SB3_CREATOR_FILES = Object.freeze([
     ['arcadeDialect.js', 'src/utils/arcadeDialect.js'],
     ['cpxDialect.js', 'src/utils/cpxDialect.js'],
     ['pinRoleParts.js', 'src/utils/pinRoleParts.js'],
+    // Game export (sb3-creator docs/GAME-EXPORT.md): SB3 -> JS / Python+pygame games.
+    ['sb3-creator-game-model.js', 'src/game/model.js'],
+    ['sb3-creator-game-emit.js', 'src/game/emit.js'],
+    ['sb3-creator-game-export.js', 'src/game/export.js'],
+    ['sb3-creator-game-sources.js', 'src/game/runtime/sources.generated.js'],
+    ['sb3-creator-game-raster.js', 'src/game/raster.js'],
 ]);
 
 /**
@@ -154,13 +160,18 @@ export const SB3_CREATOR_IMPORT_REWRITES = Object.freeze([
     ['runtimeRegistry.generated.js', 'sb3-creator-runtime.js'],
     ['scratchRuntime.js', 'sb3-creator-scratchruntime.js'],
     ['cHostRuntime.js', 'sb3-creator-chostruntime.js'],
-    ['cHostToPseudocode.js', 'sb3-creator-chost.js']
+    ['cHostToPseudocode.js', 'sb3-creator-chost.js'],
+    // export.js imports its siblings by their upstream names.
+    ['model.js', 'sb3-creator-game-model.js'],
+    ['emit.js', 'sb3-creator-game-emit.js'],
+    ['runtime/sources.generated.js', 'sb3-creator-game-sources.js'],
+    ['raster.js', 'sb3-creator-game-raster.js']
 ]);
 
 /** Every rename the file map implies — the superset the sync does NOT fully cover. */
 export const SB3_CREATOR_POSSIBLE_REWRITES = Object.freeze(
     SB3_CREATOR_FILES
-        .map(([local, up]) => [up.replace(/^src\/utils\//, ''), local])
+        .map(([local, up]) => [up.replace(/^src\/(utils|game)\//, ''), local])
         .filter(([from, to]) => from !== to));
 
 export function applySb3CreatorRewrites (text) {
