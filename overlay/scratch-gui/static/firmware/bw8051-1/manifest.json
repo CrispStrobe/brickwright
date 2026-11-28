@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "bwBoard": "5af626649e52dbea26d1f3156620dfa420490c57",
+  "bwBoard": "cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
   "files": {
     "hourglass-stage2.hex": "ca45fa98824dfe769222f6744f8ae3613e8a356ef56f5e7afb347835312a5798",
     "hourglass-stage2.json": "a5c6361e6b4b539d66132d55bd45199e80a746624a2be3d0c4695f0ec16afed9",
@@ -12,6 +12,6 @@
     "sources.json": "1b8a4734e5845e690bb397a4fe97d6630047f3a49816c77f26ffd4a48f13945e",
     "build-manifest.json": "05e1bed87c170c0aacba39d1e72607f362996504f2586243efc54724fda24861",
     "README.md": "ca8119c6ad7e4b1ed51cbddcde6a19af2bee75ed13db5d3848e31d34d3a3ea79",
-    "sources.tar.gz": "1621dd1f9b70df791f90c0e7b18cd9e89dfdf37af44082725cccbf9bd6f7c835"
+    "sources.tar.gz": "0007ad2a1db63b048186c5422f0a63ed4799996e073ed1dbc62ba4fefa084b54"
   }
 }
