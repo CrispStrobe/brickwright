@@ -158,6 +158,15 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## External mechanical clock for CrispBASIC (28 November 2026)
+
+Lite pins CrispCAD SDK `0b577f63d60424ead19e1aaa9cf602f81fee60ff` (previously
+`422e567`), CrispCAD main after "Merge preserved external mechanical clock
+recovery (#80)". It lets a program-driven host (CrispBASIC with Connect CAD
+motors) own the clock while CAD keeps its fixed solver quantum. The approved
+manifest, commit and carrier hashes in `scripts/lib/cad-sdk-fetch-pins.mjs`
+follow this SDK.
+
 ## Linked instances, mates, datums and manufacturing checks: document versions 51 and 52 (28 November 2026)
 
 Lite pins CrispCAD SDK `422e5675f180ddb9febd34af2fe7114bd567092b` (previously

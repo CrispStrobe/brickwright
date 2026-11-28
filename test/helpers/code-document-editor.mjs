@@ -8,6 +8,8 @@ import {basicProfileFor, basicProfilesFor, hiddenCodeDrafts, standaloneBasicDraf
     from '../../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {remoteMachineImagesAllowed} from '../../overlay/scratch-gui/src/lib/distribution-policy.js';
 import {blinkFamily, blinkSource, blinkStarter} from '../../overlay/scratch-gui/src/lib/bw-asm/blink-machines.js';
+import {validateCrispBasicPseudocode, crispBasicModeError}
+    from '../../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
 
 // Machine-mode hooks the importer calls around retargeting (CP1, CARDIAC,
 // maximized chrome). Fixtures that observe them define their own; otherwise
@@ -71,6 +73,8 @@ export const codeDocumentEditorClass = (source, methods, bindings = {}) => {
     const environment = {...documentApi, LANG_LABEL: codeDocumentLabels, basicProfileFor, basicProfilesFor,
         ...(classifyConversionWarnings ? {classifyConversionWarnings} : {}),
         hiddenCodeDrafts, standaloneBasicDrafts, remoteMachineImagesAllowed, blinkFamily, blinkSource, blinkStarter,
+        // The portable CrispBASIC source guard the conversion methods call (production module).
+        validateCrispBasicPseudocode, crispBasicModeError,
         TWO_WAY: twoWay ? new Function(`return ${twoWay[1]};`)() : new Set(), ...bindings};
     const adapters = adapterSignatures.map(signature => codeEditorMethod(source, signature)).join('\n');
     // A Function-compiled fixture has no importer module location. Resolve only
