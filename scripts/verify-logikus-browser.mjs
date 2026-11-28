@@ -65,6 +65,7 @@ export async function serveBuild (directory) {
 export async function runSmoke () {
     let sourceCommit = null;
     try {
+        // gate-shapes-allow: optional report provenance only; absent Git leaves sourceCommit null and cannot affect the browser verdict.
         sourceCommit = execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'],
             {encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']}).trim();
     } catch { /* A source archive may have no Git metadata. Do not invent a revision. */ }

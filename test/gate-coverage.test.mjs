@@ -24,9 +24,10 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {readdirSync, readFileSync} from 'node:fs';
 import path from 'node:path';
-import {directlyExecutesPromisifiedGate} from '../scripts/lib/gate-promisified-exec.mjs';
+import {directlyExecutesPromisifiedGate, directlyExecutesChildProcessGate} from '../scripts/lib/gate-promisified-exec.mjs';
 import {stepReferenceProblems} from '../scripts/lib/workflow-step-refs.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -37,7 +38,79 @@ const ROOT = path.resolve(import.meta.dirname, '..');
  * making it pass, which for most of these means bringing it up to the current
  * UI rather than tweaking a selector.
  */
+// The complete source-frozen historical report is not an admission list.
+// Only entries with independently documented manual/local scope in the reviewed
+// audit may enter KNOWN_UNWIRED. The other entries remain explicit failures.
+// Source identity, new-orphan, newly-wired and missing-entry checks stay active.
+const inheritedInventory = JSON.parse(readFileSync(
+    new URL('./fixtures/gate-coverage-inherited.json', import.meta.url), 'utf8'));
+const documentedScopeSource = readFileSync(new URL(
+    '../docs/receipts/2026-11-28-cowgol-gate-wiring-audit.json', import.meta.url), 'utf8');
+const documentedScopeAudit = JSON.parse(documentedScopeSource);
+const scopeSignature = scope => {
+    if (!scope || !['manual_command', 'local_scope_or_historical_receipt'].includes(scope.category) ||
+        !Array.isArray(scope.evidence) || !scope.evidence.length ||
+        scope.evidence.some(item => typeof item.path !== 'string' || !item.path.startsWith('docs/') ||
+            !Number.isInteger(item.line) || item.line < 1 ||
+            (item.endLine !== undefined && (!Number.isInteger(item.endLine) || item.endLine < item.line)))) return null;
+    return JSON.stringify([scope.script, scope.category,
+        scope.evidence.map(item => [item.path, item.line, item.endLine ?? null]), scope.match ?? null]);
+};
+const documentedScopeFor = (entry, audit) => {
+    const matches = audit.documented.filter(scope => scope.script === 'scripts/' + entry.name);
+    if (matches.length !== 1) return null;
+    const signature = scopeSignature(matches[0]);
+    return signature !== null && signature === scopeSignature(entry.documentedScope) ? matches[0] : null;
+};
+const documentedInventoryReasons = (inventory, audit) => Object.fromEntries(inventory.entries.flatMap(entry => {
+    const scope = documentedScopeFor(entry, audit);
+    if (!scope) return [];
+    return [[entry.name, 'documented ' + scope.category + ' at ' + inventory.verifiedCommit + ': ' + entry.purpose +
+        '. Requires ' + entry.prerequisites + '. Evidence: ' +
+        scope.evidence.map(item => item.path + ':' + item.line +
+            (item.endLine === undefined ? '' : '-' + item.endLine)).join(', ') + '. ' +
+        (entry.pendingWiring ? 'Pending PR #' + entry.pendingWiring.pullRequest + ' at ' +
+            entry.pendingWiring.commit + '; that wiring is not adopted here. ' : 'No pending wiring owner is recorded. ') +
+        'No current execution or pass is claimed.']];
+}));
+const inheritedReasons = documentedInventoryReasons(inheritedInventory, documentedScopeAudit);
+
+const gitBlobSha = source => {
+    const bytes = Buffer.isBuffer(source) ? source : Buffer.from(source);
+    return createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
+};
+
+const frozenInventoryProblems = (entries, sourceFor) => {
+    const problems = [], seen = new Set();
+    for (const entry of entries) {
+        const name = entry.name;
+        if (typeof name !== 'string' || !/^(?:verify|smoke|oracle)-[\w-]+\.mjs$/.test(name) || seen.has(name)) {
+            problems.push('invalid or duplicate inherited gate name: ' + String(name));
+        } else {
+            seen.add(name);
+            if (!/^[0-9a-f]{40}$/.test(entry.blobSha || '') ||
+                typeof entry.purpose !== 'string' || !entry.purpose.trim() ||
+                typeof entry.prerequisites !== 'string' || !entry.prerequisites.trim()) {
+                problems.push('incomplete inherited gate state: ' + name);
+            }
+            const owner = entry.pendingWiring;
+            if (owner !== null && (!owner || !Number.isInteger(owner.pullRequest) || owner.pullRequest <= 0 ||
+                !/^[0-9a-f]{40}$/.test(owner.commit || ''))) {
+                problems.push('invalid pending wiring provenance: ' + name);
+            }
+            const source = sourceFor(name);
+            if (source === undefined) problems.push('missing inherited gate: ' + name);
+            else if (gitBlobSha(source) !== entry.blobSha) problems.push('changed inherited gate source: ' + name);
+        }
+    }
+    return problems;
+};
+
+const unlistedGates = (gates, known, wired) => gates.filter(gate => !wired(gate) && !(gate in known));
+const newlyWiredKnown = (known, wired) => Object.keys(known).filter(wired);
+
 const KNOWN_UNWIRED = {
+    ...inheritedReasons,
     'verify-sim-floor-contact.mjs': 'retained historical bw.9 scalar-output reader, not executed by current CI. It binds the historical manifest engine integrity to the checkout pin and rejects a later engine pin; run it only in the matching historical source/pin checkout against its retained original eight-case output. Current affected-engine qualification executes scripts/verify-sim-floor-contact-current.mjs in test/bw-sim-sarrus-lift.test.mjs, including missing-case rejection. The source-equivalence check in test/sim-engine-admission.test.mjs does not execute this historical reader or qualify its retained outputs.',
     'verify-multi-board-radio.mjs': 'manual/local: frames the pinned MakeCode micro:bit and Calliope mini simulators side by side through scripts/makecode/host.html and checks the radio relay and motor report (A held, B held, relay cut). It drives the host pages and message protocol from a plain page, not the built app, so it does not show the React pane; test/multi-board-radio-pair.test.mjs covers the per-board compile it loads. Not wired: it needs both served simulator trees and has no reading in browser-gate-readings.json yet',
     'verify-makecode-assets-roundtrip.mjs': 'opt-in live external editor qualification: imports the GUI-exported duplicate-animation .mkcd into arcade.makecode.com, edits Assets through native controls and returns its PNG to Brickwright. Routine CI must not depend on a mutable external editor/network. Passed four journeys against Arcade4.1.25/PXT13.1.23, zero final page errors, on2026-10-07. Run the wired verify-arcade-animation-resource-browser.mjs first, then node scripts/verify-makecode-assets-roundtrip.mjs --input test-results/arcade-animation-resource-browser/animation-duplicate-libraries.mkcd --out test-results/makecode-assets-roundtrip/current.json --bw-url http://localhost:8617/. The offline native-envelope tests and existing Arcade GUI export/reimport gates remain mandatory.',
@@ -237,16 +310,16 @@ const aliasInvokes = (run, gate, scripts = packageScripts) => Object.entries(scr
  *
  * So: RUN BY A WORKFLOW is a `run:` scalar that invokes it, directly or through
  * an npm alias. EXERCISED BY A TEST is a test that SPAWNS it — the gate's path
- * appearing in the same statement as a child-process call. Anything else is a
+ * is the actual program argument of an imported Node child call. Anything else is a
  * MENTION, which is worth reporting and is not coverage.
  *
- * Statement-bounded rather than a character window: the source is split on `;`
- * and a statement must contain both the spawn and the path. A fixed-width window
- * around the name is the shape audit-gate-shapes flags, and it would be wrong
- * here for the same reason it is wrong there — the distance between a call and
- * its argument is not bounded by a number.
+ * The AST recognizer follows unique immutable path bindings into the program
+ * argument. A source-file inventory plus an unrelated child process is only a
+ * mention: fetch-pinning reads verify-machine-video-boot's source while running
+ * a Python probe, which used to give the browser gate false execution credit.
+ * Imported function identity, shadowing, reassignment and Node's argument
+ * position are checked; unsupported call forms fail closed.
  */
-const SPAWNERS = /\b(?:execFileSync|execSync|spawnSync|execFile|spawn|fork)\s*\(/;
 const runByWorkflow = gate => workflowRuns.some(run =>
     runInvokesGate(run, gate) || aliasInvokes(run, gate));
 /**
@@ -288,7 +361,8 @@ const exercisedIn = ({text, raw}, gate) => {
     if (/\bpromisify\s*\(\s*execFile\s*\)/.test(raw || '') && raw.includes(`scripts/${gate}`)) {
         return directlyExecutesPromisifiedGate(raw, gate);
     }
-    return importsGate(text, gate) || (referencesGatePath(text, gate) && SPAWNERS.test(text));
+    return importsGate(text, gate) || (referencesGatePath(text, gate) &&
+        directlyExecutesChildProcessGate(raw || text, gate));
 };
 
 /**
@@ -335,6 +409,97 @@ const gates = readdirSync(path.join(ROOT, 'scripts'))
     .filter(f => /^(?:verify|smoke|oracle)-/.test(f) && f.endsWith('.mjs'))
     .filter(f => !TOOLS_NOT_GATES.has(f));
 
+test('the inherited unwired inventory stays bound to the reviewed source bytes and explicit state', () => {
+    assert.equal(inheritedInventory.schema, 1);
+    assert.equal(inheritedInventory.baselineCommit, '44e08bc8eb2c5a283cfe199d611c0b9253dedb68');
+    assert.equal(inheritedInventory.verifiedCommit, '689feabf5d68086865448ecdb362ceecf0b00df4');
+    assert.match(inheritedInventory.state, /No current execution or pass is claimed/);
+    const present = new Set(gates);
+    assert.deepEqual(frozenInventoryProblems(inheritedInventory.entries, name =>
+        present.has(name) ? readFileSync(path.join(ROOT, 'scripts', name)) : undefined), []);
+    assert.equal(gitBlobSha(documentedScopeSource), '3a2706d2726dd04d9cc655abee729e99f232bf68',
+        'admission is bound to the independently reviewed documentation audit');
+    assert.deepEqual(inheritedInventory.documentedScopeAudit, {
+        path: 'docs/receipts/2026-11-28-cowgol-gate-wiring-audit.json',
+        blobSha: '3a2706d2726dd04d9cc655abee729e99f232bf68',
+        sourceRef: inheritedInventory.verifiedCommit
+    });
+    assert.equal(documentedScopeAudit.sourceRef, inheritedInventory.verifiedCommit);
+    const documentedSources = new Map([
+        'docs/CAD-ROBOT-PROJECTS.md',
+        'docs/WORKBENCH-OWNER-ROADMAP.md',
+        'docs/ROBOT-CAD-EDITOR-PARITY.md'
+    ].map(file => [file, readFileSync(path.join(ROOT, file), 'utf8').split(/\r?\n/)]));
+    for (const scope of documentedScopeAudit.documented) {
+        for (const reference of scope.evidence) {
+            const lines = documentedSources.get(reference.path);
+            assert.ok(lines, 'unreviewed documentation source: ' + reference.path);
+            const end = reference.endLine ?? reference.line;
+            assert.ok(reference.line >= 1 && end >= reference.line && end <= lines.length,
+                scope.script + ': documentation reference is outside ' + reference.path);
+            assert.ok(lines[reference.line - 1].trim() && lines[end - 1].trim(),
+                scope.script + ': documentation reference names an empty boundary line in ' + reference.path);
+        }
+    }
+
+    assert.equal(documentedScopeAudit.documented.length, 32);
+    assert.equal(documentedScopeAudit.unresolved.length, 24);
+    assert.equal(inheritedInventory.entries.length, 56);
+    assert.deepEqual(Object.keys(inheritedReasons).sort(),
+        documentedScopeAudit.documented.map(scope => scope.script.replace(/^scripts\//, '')).sort());
+    assert.deepEqual(inheritedInventory.entries.filter(entry => !documentedScopeFor(entry, documentedScopeAudit))
+        .map(entry => entry.name).sort(),
+    documentedScopeAudit.unresolved.map(script => script.replace(/^scripts\//, '')).sort(),
+    'the unresolved 24 remain in the report without admission to KNOWN_UNWIRED');
+});
+
+
+test('an inventory entry cannot admit itself without independently documented scope', () => {
+    const known = 'verify-documented-fixture.mjs', unknown = 'verify-unresolved-fixture.mjs';
+    const scope = {script: 'scripts/' + known, category: 'manual_command',
+        evidence: [{path: 'docs/FIXTURE.md', line: 7}]};
+    const audit = {documented: [scope]};
+    const entry = {name: known, purpose: 'Fixture state', prerequisites: 'Fixture setup', pendingWiring: null};
+    const inventory = entries => ({verifiedCommit: 'fixture', entries});
+    assert.deepEqual(documentedInventoryReasons(inventory([entry]), audit), {},
+        'being in the historical inventory does not establish documented scope');
+    const admitted = {...entry, documentedScope: scope};
+    assert.deepEqual(Object.keys(documentedInventoryReasons(inventory([admitted]), audit)), [known]);
+    const forged = {...entry, name: unknown,
+        documentedScope: {...scope, script: 'scripts/' + unknown}};
+    assert.deepEqual(documentedInventoryReasons(inventory([forged]), audit), {},
+        'a self-declared scope cannot add a gate absent from the independent audit');
+    for (const documentedScope of [
+        {...scope, category: 'unresolved'},
+        {...scope, evidence: []},
+        {...scope, evidence: [{path: 'docs/FIXTURE.md', line: 8}]}
+    ]) assert.deepEqual(documentedInventoryReasons(inventory([{...entry, documentedScope}]), audit), {},
+        'missing or mismatched documentation cannot grant admission');
+    const reasons = documentedInventoryReasons(inventory([admitted, forged]), audit);
+    assert.deepEqual(unlistedGates([known, unknown], reasons, () => false), [unknown],
+        'the unresolved gate remains a real coverage failure');
+});
+
+test('an inherited inventory cannot admit a new orphan, changed source or newly wired gate', () => {
+    const gate = 'verify-inherited-fixture.mjs', added = 'verify-new-fixture.mjs';
+    const source = 'export const fixture = 1;\n';
+    const entry = {name: gate, blobSha: gitBlobSha(source),
+        purpose: 'Fixture verdict', prerequisites: 'Fixture setup', pendingWiring: null};
+    const known = {[gate]: 'inherited/unwired'};
+    const world = {runs: [], sources: [], scripts: {}};
+    const wired = name => ['workflow', 'test'].includes(classifyGate(name, world));
+    assert.deepEqual(frozenInventoryProblems([entry], () => source), []);
+    assert.deepEqual(unlistedGates([gate, added], known, wired), [added],
+        'a new unlisted gate remains a coverage failure');
+    assert.deepEqual(frozenInventoryProblems([entry], () => source + 'export const changed = true;\n'),
+        ['changed inherited gate source: ' + gate], 'changing a reviewed gate invalidates its frozen state');
+    assert.deepEqual(frozenInventoryProblems([entry], () => undefined),
+        ['missing inherited gate: ' + gate]);
+    world.runs = ['node scripts/' + gate];
+    assert.deepEqual(newlyWiredKnown(known, wired), [gate],
+        'real workflow wiring requires removal from the inherited inventory');
+});
+
 test('a wrapper runs a gate; a mention of one does not', () => {
     // The whitelist that lets `xvfb-run -a dbus-run-session -- node …` count must not also let a
     // gate named in an echo or a comment look protected — that strictness is the whole reason
@@ -363,8 +528,7 @@ test('a wrapper runs a gate; a mention of one does not', () => {
 });
 
 test('every browser gate is either run by CI or knowingly listed as not', () => {
-    const unwired = gates.filter(g => !gateIsWired(g));
-    const undeclared = unwired.filter(g => !(g in KNOWN_UNWIRED));
+    const undeclared = unlistedGates(gates, KNOWN_UNWIRED, gateIsWired);
     // NAME WHICH FACT EACH ONE HAS. "Not wired" is three different situations
     // and they want three different actions: a gate NAMED in a test needs
     // wiring or listing; one named nowhere at all may be dead. Reporting them
@@ -373,8 +537,9 @@ test('every browser gate is either run by CI or knowingly listed as not', () => 
     assert.deepEqual(undeclared, [],
         'these gates are run by nothing and are not in KNOWN_UNWIRED:\n  ' +
         undeclared.map(g => `${g} — ${coverageOf(g)}`).join('\n  ') +
-        '\nWire them into .github/workflows/build.yml, or add them to that list with their ' +
-        'state. A gate nothing runs stops working and nobody finds out — 13 of 17 already had. ' +
+        '\nWire them into .github/workflows/build.yml, or document and review their manual/local ' +
+        'scope before listing them. An inherited inventory entry alone grants no admission. ' +
+        'A gate nothing runs stops working and nobody finds out — 13 of 17 already had. ' +
         'A gate a test only NAMES is in that category: naming is not running.');
 });
 
@@ -382,7 +547,7 @@ test('the unwired list only shrinks — entries that are now wired must be remov
     // Without this the list rots too: a gate could be wired into CI and still
     // sit here claiming to be unwatched, which is exactly the kind of stale
     // bookkeeping that made the sweep necessary.
-    const wrongly = Object.keys(KNOWN_UNWIRED).filter(g => gateIsWired(g));
+    const wrongly = newlyWiredKnown(KNOWN_UNWIRED, gateIsWired);
     assert.deepEqual(wrongly, [],
         `these are in KNOWN_UNWIRED but ARE run by a workflow — delete them from the list: ${wrongly.join(', ')}`);
 });
@@ -490,13 +655,25 @@ test('the rule reports two facts and does not confuse them', () => {
     const gate = 'verify-example.mjs';
     const scripts = {'verify:example': `node scripts/${gate}`};
     const mentionOnly = [{file: 'a.test.mjs', text: `assert.ok(yml.includes('${gate}'));`}];
-    const exercises = [{file: 'b.test.mjs',
-        text: `const S = join(here, '..', 'scripts', '${gate}'); execFileSync(node, [S]);`}];
+    const executionSource = `import {execFileSync} from 'node:child_process';
+        import {join} from 'node:path';
+        const S = join(import.meta.dirname, '..', 'scripts', '${gate}');
+        execFileSync(process.execPath, [S]);`;
+    const exercises = [{file: 'b.test.mjs', text: executionSource, raw: executionSource}];
 
     assert.equal(classifyGate(gate, {runs: [`node scripts/${gate}`], sources: [], scripts}), 'workflow');
     assert.equal(classifyGate(gate, {runs: ['PROOF_URL=x npm run verify:example'], sources: [], scripts}),
         'workflow', 'an env-prefixed alias is a workflow run, which is the whole point of this lane');
     assert.equal(classifyGate(gate, {runs: [], sources: exercises, scripts}), 'test');
+    for (const source of [
+        `import {execFileSync} from 'node:child_process';
+            const rows = [{file: 'scripts/${gate}'}];
+            execFileSync('/usr/bin/python3', ['-c', probe]);`,
+        `import {execFileSync} from 'node:child_process';
+            execFileSync(process.execPath, ['scripts/other.mjs', 'scripts/${gate}']);`
+    ]) assert.equal(classifyGate(gate, {runs: [], scripts,
+        sources: [{file: 'inventory.test.mjs', text: source, raw: source}]}), 'mention',
+    'path data and arguments to a different program cannot claim child execution');
     assert.equal(classifyGate(gate, {runs: [], sources: mentionOnly, scripts}), 'mention',
         'a gate a test merely NAMES must classify as a mention. If this reads "test", the two '
         + 'facts have been collapsed again and the inventory is counting strings.');

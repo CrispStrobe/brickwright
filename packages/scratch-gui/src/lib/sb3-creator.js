@@ -1,4 +1,7 @@
+import {CRISPBASIC_PSEUDOCODE_MARKER, validateCrispBasicPseudocode, stripCrispBasicPseudocodeMarker, validateCrispBasicProject, crispBasicModeError, hasCrispBasicPinMap, crispBasicLogicalPin} from './crispBasicMode.js';
 import {validateProcedureParameterConstraints} from './procedureParameterConstraints.js';
+import {generateCowgol} from './sb3-creator-cowgol.js';
+import {generateRiscvC} from './sb3-creator-riscv-console.js';
 import JSZip from 'jszip';
 // Auto-generated hardware-extension registry (scripts/gen-runtime-registry.mjs). Covers all
 // the LEGO/hardware extensions declaratively so the pluggable driver "works for all of them".
@@ -3530,6 +3533,10 @@ class SB3Creator {
                 if (op === '+' || op === '-') {
                     const prev = this.prevMeaningful(s, i);
                     if (prev === null || '+-*/(,'.includes(prev)) continue; // unary sign, not a binary op
+                    // Numeric reporter phrases and the word-form modulo also
+                    // introduce an operand. Do not invent a variable named
+                    // "ceiling of" by splitting `ceiling of -1.2` at its sign.
+                    if (/(?:\b(?:abs|floor|ceiling|sqrt|sin|cos|tan|asin|acos|atan|ln|log)\s+of|\bround|\bmod)\s*$/i.test(s.slice(0, i))) continue;
                 }
                 if (op === '<' && s[i + 1] === '=') continue;
                 if (op === '>' && s[i + 1] === '=') continue;
@@ -5279,6 +5286,7 @@ class SB3Creator {
                 // unknown devices were refused (task D6) `DEVICE 8086` silently
                 // parsed as the default STC12 — Lite's own export gate wrote it.
                 8086: 'i8086', 8088: 'i8086', i8088: 'i8086',
+                riscv: 'riscv32', 'risc-v': 'riscv32', rv32: 'riscv32',
                 // Adafruit Circuit Playground Express: the names bw-circuit-ui's
                 // seated inference already answers to (B3).
                 circuitplayground: 'cpx', adafruit: 'cpx', circuit_playground_express: 'cpx'
@@ -5303,6 +5311,14 @@ class SB3Creator {
             const value = Number(m[1].replace(/_/g, ''));
             this.stcConfig().clock = /^mhz$/i.test(m[2] || '') ? value * 1000000 : value;
             return true;
+        }
+        if (this.stcConfig().device === 'i80386' && /^(PIN|PORT|PART|LEDCUBE|MAP|CHIP)\b/i.test(trimmed)) {
+            return this.refuseDeclaration(lineIndex, trimmed,
+                'I80386 DOS console has no GPIO, ports, peripherals, or circuit memory map');
+        }
+        if (this.stcConfig().device === 'riscv32' && /^(PIN|PORT|PART|LEDCUBE|MAP|CHIP)\b/i.test(trimmed)) {
+            return this.refuseDeclaration(lineIndex, trimmed,
+                'RISC-V console has no GPIO, ports, peripherals, or circuit memory map');
         }
         // MAP / CHIP: the composable 6502 machine's declared config — the
         // second of its three config sources (preset, DECLARED, wired). A
@@ -8576,7 +8592,15 @@ class SB3Creator {
     }
 
     parse(pseudocode) {
+        const portableSource = validateCrispBasicPseudocode(pseudocode);
         this.reset();
+        if (portableSource) {
+            this.project.crispbasicSource = {schemaVersion: 1, requiredRuntime: 'crispbasic'};
+            // This directive is project metadata, not a block comment. Keeping
+            // it in the comment stream would make decompile emit it twice and
+            // cause a correctly preserved source to fail duplicate validation.
+            pseudocode = stripCrispBasicPseudocodeMarker(pseudocode);
+        }
         if (!pseudocode.trim()) {
             throw new ParseError("Pseudocode is empty");
         }
@@ -9303,6 +9327,7 @@ class SB3Creator {
     }
 
     async generateSB3() {
+        if (validateCrispBasicProject(this.project)) throw crispBasicModeError('Blocks/SB3 execution');
         if (!this.project) {
             throw new ValidationError('No project to generate');
         }
@@ -9621,9 +9646,10 @@ class SB3Creator {
 
     // Decompile a whole project back into pseudocode.
     decompile(project = this.project) {
+        const portableSource = validateCrispBasicProject(project);
         try{validateProcedureParameterConstraints(project);}catch(error){throw new ParseError('Procedure parameter constraint: '+error.message);}
         project = this.refreshCallableSourceBindings(project);
-        const out = [];
+        const out = portableSource ? [CRISPBASIC_PSEUDOCODE_MARKER] : [];
         const stage = project.targets.find(t => t.isStage);
         // STC12 / 8051 device declarations first — they are read before any script.
         // A project that lived through scratch-vm's serializer has lost the
@@ -9635,7 +9661,8 @@ class SB3Creator {
         const boards = SB3Creator.readBoards(project);
         if (boards) {
             if (!project.boards) project.boards = boards;
-            return this.decompileBoards(project, boards);
+            const source = this.decompileBoards(project, boards);
+            return portableSource ? CRISPBASIC_PSEUDOCODE_MARKER + '\n' + source : source;
         }
         if (project.stc) this.decompileStcDeclarations(project.stc, out);
         for (const v of Object.values(stage.variables || {})) out.push(`GLOBAL ${this.declarationText(v)}`);
@@ -10942,6 +10969,7 @@ class SB3Creator {
     }
 
     generatePython(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generatePython');
         this._driverPins = (project.stc && project.stc.pins) || null;
         this._driverStc = project.stc || null;  // PORT/PART tables for the stc12 driver
         this._nativePinExpr = null;   // MicroPython-only; must not leak in here
@@ -11104,6 +11132,14 @@ class SB3Creator {
             if (type === 12 || type === 13) return this.varRef(a);
             return /^-?\d+(\.\d+)?$/.test(String(a)) ? String(a) : this.pyStr(a);
         }
+        // Boolean reporters can occupy ordinary Scratch value sockets too.
+        // Owned-console admission promises these opcodes; use their existing
+        // condition lowering instead of jsRep's unsupported-value fallback.
+        // Keep the legacy targets' source unchanged until separately adopted.
+        if (this._ownedJsConsole && ['operator_gt', 'operator_lt', 'operator_equals',
+            'operator_and', 'operator_or', 'operator_not'].includes(blocks[inner]?.opcode)) {
+            return this.jsCond(inner, blocks);
+        }
         return this.jsRep(blocks[inner], blocks);
     }
 
@@ -11254,10 +11290,14 @@ class SB3Creator {
             case 'control_repeat_until': return block(`while (!(${cond()})) {`, 'SUBSTACK');
             case 'control_if': return block(`if (${cond()}) {`, 'SUBSTACK');
             case 'control_if_else': return [pad + `if (${cond()}) {`, ...sub('SUBSTACK'), pad + '} else {', ...sub('SUBSTACK2'), pad + '}'];
-            case 'control_wait': return line(`scratch.wait(${v('DURATION')});`);
+            case 'control_wait': return line(this._ownedJsConsole
+                ? `await codeRun.sleep(Number(${v('DURATION')}) * 1000);`
+                : `scratch.wait(${v('DURATION')});`);
             case 'control_wait_until': return line(`scratch.wait_until(${cond()});`);
             case 'control_stop': return f('STOP_OPTION') === 'this script' ? line('return;') : line(this.scratchCall(b, blocks, this.jsVal).call + ';');
-            case 'sensing_askandwait': this._jsUses.answer = true; return line(`answer = prompt(String(${v('QUESTION')}));`);
+            case 'sensing_askandwait': this._jsUses.answer = true; return line(this._ownedJsConsole
+                ? `answer = await codeRun.input(String(${v('QUESTION')}));`
+                : `answer = prompt(String(${v('QUESTION')}));`);
             case 'data_setvariableto': return line(`${this.varRef(f('VARIABLE'))} = ${v('VALUE')};`);
             case 'data_changevariableby': return line(`${this.varRef(f('VARIABLE'))} += ${v('VALUE')};`);
             case 'data_addtolist': return line(`${L('LIST')}.push(${v('ITEM')});`);
@@ -11275,6 +11315,7 @@ class SB3Creator {
                     args.push(tok === '%b' ? this.jsCond(input[1], blocks) : this.jsVal(input, blocks));
                     return '';
                 });
+                if (this._ownedJsConsole) args.unshift('codeRun');
                 const fn = this.pyName(this._curPrefix + this.pyProcRaw(m.proccode));
                 return line(`${this._async ? 'await ' : ''}${fn}(${args.join(', ')});`);
             }
@@ -11291,12 +11332,63 @@ class SB3Creator {
         }
     }
 
+    // This opt-in is a console lifetime contract, not a stage/game exporter.
+    // Validate the whole supplied graph (including disconnected blocks) before
+    // emitting anything: an unknown opcode must not become a silent stub here.
+    ownedJavaScriptConsole(project, opts) {
+        if (!opts || opts.execution === undefined) return false;
+        const refuse = reason => { throw new Error(`owned-console-v1: ${reason}`); };
+        if (opts.execution !== 'owned-console-v1') refuse(`unknown execution contract ${String(opts.execution)}`);
+        if (opts.async !== true) refuse('requires async: true');
+        if (opts.events) refuse('event registration requires a separate event-program lifetime');
+        if (opts.driver !== undefined && opts.driver !== 'shim') refuse('only the console shim driver is supported');
+        const admitted = new Set([
+            'event_whenflagclicked', 'procedures_definition', 'procedures_prototype', 'procedures_call',
+            'argument_reporter_string_number', 'argument_reporter_boolean',
+            'control_repeat', 'control_if', 'control_if_else', 'control_wait',
+            'looks_say', 'looks_think', 'sensing_askandwait', 'sensing_answer',
+            'data_setvariableto', 'data_changevariableby', 'data_addtolist', 'data_deleteoflist',
+            'data_deletealloflist', 'data_insertatlist', 'data_replaceitemoflist',
+            'data_itemoflist', 'data_lengthoflist', 'data_listcontainsitem',
+            'operator_add', 'operator_subtract', 'operator_multiply', 'operator_divide', 'operator_mod',
+            'operator_random', 'operator_round', 'operator_mathop', 'operator_join', 'operator_letter_of',
+            'operator_length', 'operator_contains', 'operator_gt', 'operator_lt', 'operator_equals',
+            'operator_and', 'operator_or', 'operator_not'
+        ]);
+        for (const target of project.targets || []) {
+            for (const [id, block] of Object.entries(target.blocks || {})) {
+                const opcode = block && block.opcode;
+                const where = `${String(target.name || 'target')} / ${id}`;
+                if (!admitted.has(opcode)) refuse(`unsupported block ${String(opcode)} at ${where}`);
+                if (opcode === 'procedures_prototype' && block.mutation &&
+                    (block.mutation.warp === 'true' || block.mutation.warp === true)) {
+                    refuse(`run-without-screen-refresh procedure at ${where} requires a scheduler contract`);
+                }
+                if (opcode === 'operator_mathop' && ![
+                    'abs', 'floor', 'ceiling', 'sqrt', 'sin', 'cos', 'tan', 'ln', 'log', 'e ^', '10 ^'
+                ].includes(block.fields && block.fields.OPERATOR && block.fields.OPERATOR[0])) {
+                    refuse(`unsupported math function at ${where}`);
+                }
+            }
+        }
+        return true;
+    }
+
     generateJavaScript(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generateJavaScript');
+        this._ownedJsConsole = this.ownedJavaScriptConsole(project, opts);
         this._driverPins = (project.stc && project.stc.pins) || null;
         this._driverStc = project.stc || null;  // PORT/PART tables for the stc12 driver
         this._nativePinExpr = null;   // MicroPython-only; must not leak in here
         this._nativeScratchExpr = null;
         this._pyNames = new Map();
+        if (this._ownedJsConsole) {
+            // A learner variable or procedure argument named codeRun must not
+            // replace the injected owner. Reserve the console's other bindings
+            // and generated expression helpers for the same reason.
+            for (const name of ['codeRun', 'console', 'scratch', 'Math', 'Number', 'String', 'Error', 'Proxy',
+                'answer', '_eq', '_truthy', '_rand']) this._pyNames.set(Symbol(name), name);
+        }
         this._jsUses = { rand: false, eq: false, truthy: false, answer: false, fact: false, arrays: false, sumdigits: false, multiple: false };
         this._runtimesUsed = new Set();
         this._async = !!(opts && opts.async);
@@ -11347,6 +11439,7 @@ class SB3Creator {
                     const proto = blocks[b.inputs.custom_block[1]];
                     const m = proto.mutation;
                     const argNames = JSON.parse(m.argumentnames || '[]').map((n) => this.pyName(n));
+                    if (this._ownedJsConsole) argNames.unshift('codeRun');
                     const fn = this.pyName(pfx + this.pyProcRaw(m.proccode));
                     const marker = `scratch.defblock(${this.pyStr(m.proccode)}, ${m.warp === 'true' ? 1 : 0});`;
                     defs.push([marker, `${af}function ${fn}(${argNames.join(', ')}) {`, ...this.jsStackFrom(b.next, blocks, 1), '}'].join('\n'));
@@ -11356,11 +11449,11 @@ class SB3Creator {
                     // A comment on the hat belongs to the script, and was being dropped.
                     const note = this.codeCommentLines(Object.keys(blocks)
                         .find((k) => blocks[k] === b), '', '//');
-                    let code = [...note, `${af}function ${name}() {`,
+                    let code = [...note, `${af}function ${name}(${this._ownedJsConsole ? 'codeRun' : ''}) {`,
                         ...this.jsStackFrom(b.next, blocks, 1), '}'].join('\n');
                     if (!isFlag) code = `// ${this.decompileHat(b, blocks)}  (event handler — call it when that event happens)\n` + code;
                     defs.push(code);
-                    if (isFlag) flagCalls.push(`${name}();`);
+                    if (isFlag) flagCalls.push(this._ownedJsConsole ? `codeRun.spawn(${name});` : `${name}();`);
                 }
             }
             bodyBlocks.push({ markers: this.scratchStructMarkers(t).map((l) => l + ';'), defs });
@@ -11370,8 +11463,20 @@ class SB3Creator {
         const out = [];
         out.push('// Generated by Brickwright — blocks → JavaScript.');
         out.push('// Scratch blocks (motion/looks/sensing/…) map to a `scratch` runtime object;');
-        out.push('// sprite structure is marked by scratch.sprite()/costume() so it round-trips to blocks.');
+        out.push(this._ownedJsConsole
+            ? '// Structure markers are retained; the current JS reader does not admit this async contract.'
+            : '// sprite structure is marked by scratch.sprite()/costume() so it round-trips to blocks.');
         out.push('');
+        if (this._ownedJsConsole) {
+            out.push('// owned-console-v1: registered async flag tasks, awaited input and finite waits.');
+            out.push('// Console preview only; no stage, events, hardware or game scheduler.');
+            out.push('if (typeof codeRun === "undefined" || !codeRun || codeRun.version !== 1 ||');
+            out.push('    typeof codeRun.spawn !== "function" || typeof codeRun.input !== "function" ||');
+            out.push('    typeof codeRun.sleep !== "function") {');
+            out.push('    throw new Error("This generated program requires the owned-console-v1 codeRun API.");');
+            out.push('}');
+            out.push('');
+        }
         // `is multiple of` gets its own function: `x % y === 0` is a different
         // block that means the same thing, and the way back cannot guess which.
         if (this._jsUses.multiple) out.push('function _multiple(a, b) { return Number(b) !== 0 && Number(a) % Number(b) === 0; }');
@@ -11401,7 +11506,7 @@ class SB3Creator {
         if (eventRegs.length || flagCalls.length) {
             out.push('// run');
             out.push(...eventRegs);
-            out.push(...flagCalls.map((c) => (this._async ? `(async () => { await ${c} })();` : c)));
+            out.push(...flagCalls.map((c) => (this._async && !this._ownedJsConsole ? `(async () => { await ${c} })();` : c)));
         }
         return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
     }
@@ -14585,6 +14690,7 @@ class SB3Creator {
     static C_ARRAYS_UNIMPLEMENTED = new Set([]);
 
     generateHostC(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generateHostC');
         this._cNames = new Map();
         this._hcWarnings = [];
         this._hcUses = { answer: false };
@@ -14753,6 +14859,7 @@ class SB3Creator {
      * @returns {{ok: boolean, py?: string, reasons: string[], warnings: string[]}}
      */
     generateMicroPython(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generateMicroPython');
         // Debug build: instrument each block with a position marker over serial
         // — the micro:bit analogue of the 8051's <task>_state lever (read
         // position, do not VM-step; DEBUG-CONTROL-MODEL.md §2, MICROBIT-NATIVE.md
@@ -16308,11 +16415,47 @@ class SB3Creator {
             ...(trc ? { lineMap } : {}) };
     }
 
+    generateCowgol(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generateCowgol');
+        return generateCowgol(this, project, opts);
+    }
+
+    /** Checked console-only C for the RV32 bench's hosted GCC runtime. */
+    generateRiscvC(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generateRiscvC');
+        return generateRiscvC(this, project, opts);
+    }
+
     generateBASIC(project = this.project, opts = {}) {
         const profile = opts.profile || 'bbc';
         const bbc = profile === 'bbc';
+        const crisp = opts.mode === 'crispbasic';
         const reasons = [];
         const warnings = [];
+        const diagnostics = [];
+        const blockIds = new Map();
+        if (crisp) for (const target of project.targets || []) {
+            for (const [id, block] of Object.entries(target.blocks || {})) blockIds.set(block, id);
+        }
+        const refuse = (code, message, block = null, detail = {}) => {
+            const diagnostic = {severity: 'error', code: `crispbasic-${code}`, message,
+                blockId: blockIds.get(block) || null, opcode: block && block.opcode || null, ...detail};
+            diagnostics.push(diagnostic);
+            reasons.push(`CrispBASIC: ${message}${diagnostic.blockId ? ` (block ${diagnostic.blockId})` : ''}`);
+        };
+        const refused = () => ({ok: false, reasons: [...new Set(reasons)], warnings, diagnostics});
+        if (validateCrispBasicProject(project) && !crisp) {
+            refuse('runtime-mode', crispBasicModeError('legacy BASIC generation').message);
+            return refused();
+        }
+        if (opts.mode !== undefined && opts.mode !== 'legacy' && !crisp) {
+            refuse('mode', `unknown generator mode "${opts.mode}"; use legacy or crispbasic`);
+            return refused();
+        }
+        if (crisp && !bbc) {
+            refuse('profile', 'the portable library requires the bbc profile');
+            return refused();
+        }
         // Line numbers are OPTIONAL in modern BBC BASIC (tutorial Appendix
         // A: "Line Numbers and the Dreaded GOTO") — the structured form uses
         // multi-line IF/ENDIF (ch. 9) and REPEAT/UNTIL (ch. 12) instead of
@@ -16327,7 +16470,12 @@ class SB3Creator {
         const structured = bbc && !numbered;
         let depth = 0;
         this._basLoopSeq = 0;
-        const stc = project.stc || {};
+        // scratch-vm drops the top-level extension key when saving; the Stage
+        // persistence comment is the producer-owned source of the same metadata.
+        const stc = (crisp ? SB3Creator.readStc(project) : project.stc) || {};
+        if (crisp && (SB3Creator.readBoards(project) || []).length > 1) {
+            refuse('multiple-boards', 'portable generation supports one declared board');
+        }
         const machine = stc.machine || null;
         const viaAt = (machine && (machine.chips || []).find((c) => c.kind === 'via') || { at: 0x6000 }).at;
         const pins = new Map((stc.pins || []).map((p) => [String(p.name).toLowerCase(), p]));
@@ -16337,10 +16485,58 @@ class SB3Creator {
         // REM-commented stubs that still RUN (host-C's report-stub pattern).
         const devPart = SB3Creator.STC_PARTS[String(stc.device || '').toLowerCase()];
         const pokeable = !stc.device || (devPart && devPart.core === 'w65c02');
-        if (!pokeable && pins.size) {
+        if (!crisp && !pokeable && pins.size) {
             warnings.push(`DEVICE ${String(stc.device).toUpperCase()} pin operations emitted as REM stubs — `
                 + 'BASIC pokes drive the 6502 machine\'s VIA; retarget to EATER6502 for real pokes');
         }
+
+        // This mode targets the ordinary CrispBASIC library, not MCU registers.
+        // These IDs are shared with the Circuit adapter; the connected host still
+        // validates which terminals its actual board exposes. No fallback map.
+        const crispPins = new Map();
+        if (crisp) {
+            const device = String(stc.device || '').toLowerCase();
+            const supported = hasCrispBasicPinMap(device);
+            if ((device || pins.size) && !supported) {
+                refuse('device', `DEVICE ${device || '(missing)'} has no portable digital pin map`, null, {device});
+            }
+            for (const port of stc.ports || []) {
+                refuse('port', `PORT ${port.name} is unsupported; declare individual digital PINs`);
+            }
+            for (const part of stc.parts || []) {
+                refuse('peripheral', `PART ${part.name} (${part.type || part.kind || 'peripheral'}) is unsupported by the digital library`);
+            }
+            if (stc.ledcube) refuse('peripheral', 'LED cube operations are unsupported by the digital library');
+            if (stc.machine) refuse('machine', 'Custom MAP/CHIP memory and peripheral layouts are not represented by the portable GPIO host');
+            const usedIds = new Set();
+            const usedNames = new Set();
+            for (const p of stc.pins || []) {
+                const key = String(p.name).toLowerCase();
+                const where = String(p.where || `P${p.port}.${p.bit}`).toUpperCase();
+                const id = supported ? crispBasicLogicalPin(device, where) : null;
+                if (id === null) refuse('pin-map', `PIN ${p.name} (${where}) has no supported ${device || 'device'} logical ID`, null, {pin: p.name});
+                if (!['input', 'output'].includes(p.direction) || p.openDrain || p.pull === 'down') {
+                    refuse('pin-mode', `PIN ${p.name} mode ${p.direction}${p.openDrain ? ' open-drain' : ''}${p.pull === 'down' ? ' pull-down' : ''} is unsupported; use digital INPUT or OUTPUT`, null, {pin: p.name});
+                }
+                if (usedNames.has(key) || (id !== null && usedIds.has(id))) {
+                    refuse('pin-alias', `PIN ${p.name} duplicates a declared name or logical pin ${id}`, null, {pin: p.name});
+                }
+                usedNames.add(key);
+                if (id !== null) {
+                    usedIds.add(id);
+                    crispPins.set(key, {...p, id, mode: p.direction === 'output' ? 'output' : p.activeLow ? 'input-pullup' : 'input'});
+                }
+            }
+        }
+        const crispPin = (name, block, write = false) => {
+            const p = crispPins.get(String(name).toLowerCase());
+            if (!p) refuse('undeclared-pin', `pin "${name}" is undeclared or has no portable map`, block, {pin: name});
+            else if (write && p.direction !== 'output') {
+                refuse('pin-not-output', `cannot write INPUT pin "${name}"`, block, {pin: name});
+                return null;
+            }
+            return p;
+        };
 
         // ---- shim tracking (like _cUses: emit DEF PROCs on demand) ----
         const basUses = { answer: false, lists: new Map(), pen: false, motionXY: false, timer: false };
@@ -16348,6 +16544,15 @@ class SB3Creator {
         // We track which Scratch variable names are known-string (from
         // assignments of string literals, join, letter-of, ask/answer).
         const stringVars = new Set();
+        const crispVariableUses = new Set();
+        const crispVariableValues = new Map();
+        if (crisp) for (const target of project.targets || []) {
+            for (const [id, variable] of Object.entries(target.variables || {})) {
+                const name = String(variable[0]);
+                if (!crispVariableValues.has(name)) crispVariableValues.set(name, []);
+                crispVariableValues.get(name).push({id, value: variable[1]});
+            }
+        }
         // Lists: track name -> { lenVar, dimmed }; Scratch lists map to
         // parallel DIM arrays + a length counter variable.
         const listMeta = (raw) => {
@@ -16385,8 +16590,14 @@ class SB3Creator {
             names.set(k, n);
             return n;
         };
+        // Reserve internal names through the same allocator as user variables.
+        // The NUL key cannot be authored in the dialect; a similarly spelled
+        // user variable receives a distinct generated name.
+        const crispSeconds = crisp ? basName('\0bw_crisp_seconds') : null;
+        const crispTimerBase = crisp ? basName('\0bw_crisp_timer_base') : null;
         // String-safe variable reference: appends $ if we know it's a string.
         const basVarRef = (raw) => {
+            if (crisp) crispVariableUses.add(String(raw));
             const n = basName(raw);
             return stringVars.has(String(raw)) ? n + '$' : n;
         };
@@ -16409,8 +16620,11 @@ class SB3Creator {
         const emitLabel = (l) => { outLines.push({ label: l }); lineBlocks.push(null); };
 
         // ---- expressions ----------------------------------------------
-        const num = (v) => {
+        const num = (v, owner = null) => {
             const n = Number(v);
+            if (crisp && (!Number.isFinite(n) || typeof v === 'string' && !v.trim())) {
+                refuse('numeric-value', `expected a finite numeric value, received ${JSON.stringify(v)}`, owner);
+            }
             return Number.isFinite(n) ? String(n) : '0';
         };
         const pinMask = (p) => 1 << Number(String(p.where || '').replace(/^P[AB]/i, ''));
@@ -16437,22 +16651,44 @@ class SB3Creator {
             if (typeof v === 'string' && blocks[v]) return basRep(blocks[v], blocks);
             return '""';
         };
-        const basVal = (input, blocks) => {
+        const basVal = (input, blocks, owner = null) => {
             if (!input) return '0';
             const v = input[1];
             if (Array.isArray(v)) {
                 if (v[0] === 12) return basVarRef(v[1]);
-                return num(v[1]);
+                return num(v[1], owner);
             }
             if (typeof v === 'string' && blocks[v]) return basRep(blocks[v], blocks);
             return '0';
+        };
+        // The public bridge takes exact integer milliseconds. Positive seconds
+        // round to the nearest millisecond (half up); negatives and values above
+        // its 31-bit time domain are refused, never clamped or wrapped. A computed
+        // duration is evaluated once and every check retains the block's lineMap.
+        const crispWait = (input, blocks, owner) => {
+            const value = input && input[1];
+            if (Array.isArray(value) && value[0] !== 12) {
+                const seconds = Number(value[1]);
+                if (!Number.isFinite(seconds) || typeof value[1] === 'string' && !value[1].trim() || seconds < 0 || seconds > 2147483.647) {
+                    refuse('delay-range', `wait duration must be numeric seconds in 0..2147483.647; received ${JSON.stringify(value[1])}`, owner);
+                    return;
+                }
+                emit(`PROCdelay(${Math.round(seconds * 1000)})`);
+                return;
+            }
+            emit(`${crispSeconds}=${basVal(input, blocks, owner)}`);
+            emit(`IF ${crispSeconds}<0 OR ${crispSeconds}>2147483.647 THEN ERROR 204,"CrispBASIC wait seconds outside 0..2147483.647"`);
+            emit(`PROCdelay(INT(${crispSeconds}*1000+0.5))`);
         };
         // BBC BASIC math-op mapping (operator_mathop OPERATOR field).
         const basMathop = (op, arg) => {
             switch (String(op).toLowerCase()) {
                 case 'abs': return `ABS(${arg})`;
                 case 'floor': return `INT(${arg})`;
-                case 'ceiling': return `(INT(${arg})+(${arg}<>INT(${arg})))`;
+                // INT is floor and BBC TRUE is -1. Negating a single floor
+                // evaluation gives ceiling for positive/negative fractions
+                // without duplicating a sensed argument or adding -1.
+                case 'ceiling': return `(-INT(-(${arg})))`;
                 case 'sqrt': return `SQR(${arg})`;
                 case 'sin': return `SIN(RAD(${arg}))`;
                 case 'cos': return `COS(RAD(${arg}))`;
@@ -16468,9 +16704,14 @@ class SB3Creator {
             }
         };
         const basRep = (b, blocks) => {
-            const v = (k2) => basVal(b.inputs[k2], blocks);
+            const v = (k2) => basVal(b.inputs[k2], blocks, b);
             const vs = (k2) => basValStr(b.inputs[k2], blocks);
             const f = (k2) => (b.fields[k2] ? b.fields[k2][0] : '');
+            if (crisp && ['sensing_mousex', 'sensing_mousey', 'sensing_loudness', 'sensing_mousedown',
+                'looks_costumenumbername', 'looks_backdropnumbername', 'looks_size'].includes(b.opcode)) {
+                refuse('reporter', `reporter ${b.opcode} has no supported CrispBASIC implementation`, b);
+                return '0';
+            }
             switch (b.opcode) {
                 case 'operator_add': return `(${v('NUM1')}+${v('NUM2')})`;
                 case 'operator_subtract': return `(${v('NUM1')}-${v('NUM2')})`;
@@ -16487,20 +16728,34 @@ class SB3Creator {
                 case 'operator_join': return `(${vs('STRING1')}+${vs('STRING2')})`;
                 case 'operator_letter_of': return `MID$(${vs('STRING')},${v('LETTER')},1)`;
                 case 'operator_length': return `LEN(${vs('STRING')})`;
-                case 'operator_contains': return `(INSTR(${vs('STRING1')},${vs('STRING2')})>0)`;
-                case 'operator_equals': return `${v('OPERAND1')}=${v('OPERAND2')}`;
-                case 'operator_gt': return `${v('OPERAND1')}>${v('OPERAND2')}`;
-                case 'operator_lt': return `${v('OPERAND1')}<${v('OPERAND2')}`;
-                case 'operator_and': return `(${v('OPERAND1')}) AND (${v('OPERAND2')})`;
-                case 'operator_or': return `(${v('OPERAND1')}) OR (${v('OPERAND2')})`;
-                case 'operator_not': return `NOT (${v('OPERAND')})`;
+                case 'operator_contains': return crisp
+                    ? `ABS(INSTR(${vs('STRING1')},${vs('STRING2')})>0)` : `(INSTR(${vs('STRING1')},${vs('STRING2')})>0)`;
+                // Scratch Boolean reporters also participate in arithmetic as
+                // 0/1. Normalize here, before an enclosing arithmetic reporter
+                // can observe BBC's -1, and group each comparison's operands.
+                case 'operator_equals': return crisp
+                    ? `ABS((${v('OPERAND1')})=(${v('OPERAND2')}))` : `${v('OPERAND1')}=${v('OPERAND2')}`;
+                case 'operator_gt': return crisp
+                    ? `ABS((${v('OPERAND1')})>(${v('OPERAND2')}))` : `${v('OPERAND1')}>${v('OPERAND2')}`;
+                case 'operator_lt': return crisp
+                    ? `ABS((${v('OPERAND1')})<(${v('OPERAND2')}))` : `${v('OPERAND1')}<${v('OPERAND2')}`;
+                case 'operator_and': return crisp
+                    ? `ABS(((${v('OPERAND1')})<>0) AND ((${v('OPERAND2')})<>0))`
+                    : `(${v('OPERAND1')}) AND (${v('OPERAND2')})`;
+                case 'operator_or': return crisp
+                    ? `ABS(((${v('OPERAND1')})<>0) OR ((${v('OPERAND2')})<>0))`
+                    : `(${v('OPERAND1')}) OR (${v('OPERAND2')})`;
+                case 'operator_not': return crisp ? `ABS((${v('OPERAND')})=0)` : `NOT (${v('OPERAND')})`;
                 // ---- sensing reporters ----
                 case 'sensing_answer': basUses.answer = true; return 'answer$';
-                case 'sensing_timer': basUses.timer = true; return '(TIME/100)';
+                case 'sensing_timer':
+                    basUses.timer = true;
+                    return crisp ? `((FNmillis-${crispTimerBase})/1000)` : '(TIME/100)';
                 case 'sensing_mousex': return '0:REM mouse x (no input device)';
                 case 'sensing_mousey': return '0:REM mouse y (no input device)';
                 case 'sensing_loudness': return '0';
-                case 'sensing_keypressed': return `(INKEY(-${this._basInkeyCode(f('KEY_OPTION'))})=-1)`;
+                case 'sensing_keypressed': return crisp
+                    ? `ABS(INKEY(-${this._basInkeyCode(f('KEY_OPTION'))})=-1)` : `(INKEY(-${this._basInkeyCode(f('KEY_OPTION'))})=-1)`;
                 case 'sensing_mousedown': return '0';
                 // ---- motion reporters ----
                 case 'motion_xposition': basUses.motionXY = true; return 'bw_x%';
@@ -16521,7 +16776,8 @@ class SB3Creator {
                 }
                 case 'data_listcontainsitem': {
                     const lm = listMeta(f('LIST'));
-                    return `FNlist_contains(${lm.baseName}(),${lm.lenVar},${vs('ITEM')})`;
+                    const expression = `FNlist_contains(${lm.baseName}(),${lm.lenVar},${vs('ITEM')})`;
+                    return crisp ? `ABS(${expression})` : expression;
                 }
                 case 'data_itemnumoflist': {
                     const lm = listMeta(f('LIST'));
@@ -16529,14 +16785,20 @@ class SB3Creator {
                 }
                 // ---- pin reads (hardware) ----
                 case 'stc12_read': case 'stc12_readpin': {
+                    if (crisp) {
+                        const p = crispPin(f('PIN'), b);
+                        if (!p) return '0';
+                        const read = `FNdigitalRead(${p.id})`;
+                        return p.activeLow ? `(1-${read})` : read;
+                    }
                     if (!pokeable) { return '0:REM read ' + f('PIN'); }
                     const p = pins.get(String(f('PIN')).toLowerCase());
                     if (!p) { warnings.push(`read of undeclared pin "${f('PIN')}" — 0`); return '0'; }
                     return peekPin(p);
                 }
-                case 'argument_reporter_string_number':
-                case 'argument_reporter_boolean':
-                    return basName(f('VALUE'));
+                case 'argument_reporter_string_number': return basName(f('VALUE'));
+                case 'argument_reporter_boolean': return crisp
+                    ? `ABS((${basName(f('VALUE'))})<>0)` : basName(f('VALUE'));
                 // ---- Planete Maths extension ----
                 case 'planetemaths_add': return `(${v('A')}+${v('B')})`;
                 case 'planetemaths_substract': return `(${v('A')}-${v('B')})`;
@@ -16556,21 +16818,32 @@ class SB3Creator {
                 case 'planetemaths_letterOf': return `MID$(${vs('S')},${v('L')},1)`;
                 case 'planetemaths_length': return `LEN(${vs('S')})`;
                 case 'planetemaths_sommechiffres': return `FNsumdigits(${v('N')})`;
-                case 'planetemaths_gt': return `${v('A')}<${v('B')}`;
-                case 'planetemaths_gte': return `${v('A')}<=${v('B')}`;
-                case 'planetemaths_lt': return `${v('A')}>${v('B')}`;
-                case 'planetemaths_lte': return `${v('A')}>=${v('B')}`;
-                case 'planetemaths_equals': return `${v('A')}=${v('B')}`;
-                case 'planetemaths_and': return `(${v('A')}) AND (${v('B')})`;
-                case 'planetemaths_or': return `(${v('A')}) OR (${v('B')})`;
-                case 'planetemaths_not': return `NOT (${v('A')})`;
-                case 'planetemaths_contains': return `(INSTR(${vs('A')},${vs('B')})>0)`;
-                case 'planetemaths_multiple': return `((${v('A')}) MOD (${v('B')})=0)`;
+                case 'planetemaths_gt': return crisp ? `ABS((${v('A')})<(${v('B')}))` : `${v('A')}<${v('B')}`;
+                case 'planetemaths_gte': return crisp ? `ABS((${v('A')})<=(${v('B')}))` : `${v('A')}<=${v('B')}`;
+                case 'planetemaths_lt': return crisp ? `ABS((${v('A')})>(${v('B')}))` : `${v('A')}>${v('B')}`;
+                case 'planetemaths_lte': return crisp ? `ABS((${v('A')})>=(${v('B')}))` : `${v('A')}>=${v('B')}`;
+                case 'planetemaths_equals': return crisp ? `ABS((${v('A')})=(${v('B')}))` : `${v('A')}=${v('B')}`;
+                case 'planetemaths_and': return crisp
+                    ? `ABS(((${v('A')})<>0) AND ((${v('B')})<>0))` : `(${v('A')}) AND (${v('B')})`;
+                case 'planetemaths_or': return crisp
+                    ? `ABS(((${v('A')})<>0) OR ((${v('B')})<>0))` : `(${v('A')}) OR (${v('B')})`;
+                case 'planetemaths_not': return crisp ? `ABS((${v('A')})=0)` : `NOT (${v('A')})`;
+                case 'planetemaths_contains': return crisp
+                    ? `ABS(INSTR(${vs('A')},${vs('B')})>0)` : `(INSTR(${vs('A')},${vs('B')})>0)`;
+                case 'planetemaths_multiple': return crisp
+                    ? `ABS(((${v('A')}) MOD (${v('B')}))=0)` : `((${v('A')}) MOD (${v('B')})=0)`;
                 // ---- arrays extension reporters ----
                 case 'arrays_get': return `${basName(this._basUnq(v('NAME')))}(${v('INDEX')})`;
                 case 'arrays_length': return `${basName(this._basUnq(v('NAME')))}_n`;
-                case 'arrays_contains': return `FNlist_contains(${basName(this._basUnq(v('NAME')))}(),${basName(this._basUnq(v('NAME')))}_n,${vs('VALUE')})`;
+                case 'arrays_contains': {
+                    const expression = `FNlist_contains(${basName(this._basUnq(v('NAME')))}(),${basName(this._basUnq(v('NAME')))}_n,${vs('VALUE')})`;
+                    return crisp ? `ABS(${expression})` : expression;
+                }
                 default: {
+                    if (crisp) {
+                        refuse('reporter', `reporter ${b.opcode} is unsupported by CrispBASIC`, b);
+                        return '0';
+                    }
                     // Unsupported reporter — degrade to 0 with a warning, not a hard refusal.
                     const desc = this.decompileBlock ? this.decompileBlock(b, blocks) : b.opcode;
                     warnings.push(`no BASIC form for reporter "${desc}" — 0`);
@@ -16607,9 +16880,33 @@ class SB3Creator {
             }
         };
         const basStmt = (b, blocks) => {
-            const v = (k2) => basVal(b.inputs[k2], blocks);
+            const v = (k2) => basVal(b.inputs[k2], blocks, b);
             const vs = (k2) => basValStr(b.inputs[k2], blocks);
             const f = (k2) => (b.fields[k2] ? b.fields[k2][0] : '');
+            if (crisp && b.opcode === 'control_stop' && f('STOP_OPTION') !== 'all') {
+                refuse('stop-scope', `stop ${f('STOP_OPTION')} has no qualified script-lifetime mapping; use stop all`, b);
+                return;
+            }
+            // Legacy BASIC keeps its historic comments. Explicit portable mode
+            // must not advertise a partial program as executable hardware code.
+            if (crisp && ['looks_show', 'looks_hide', 'looks_switchcostumeto', 'looks_nextcostume',
+                'looks_setsizeto', 'looks_changesizeby', 'looks_seteffectto', 'looks_changeeffectby',
+                'sound_play', 'sound_playuntildone', 'sound_stopallsounds', 'sound_setvolumeto', 'sound_changevolumeby',
+                'pen_setPenSizeTo', 'pen_changePenSizeBy', 'pen_stamp', 'pen_changePenColorParamBy', 'pen_setPenColorParamTo',
+                'event_broadcast', 'event_broadcastandwait', 'control_create_clone_of', 'control_delete_this_clone',
+                'data_showvariable', 'data_hidevariable', 'data_showlist', 'data_hidelist'].includes(b.opcode)) {
+                refuse('operation', `operation ${b.opcode} has no supported CrispBASIC implementation`, b);
+                return;
+            }
+            if (crisp && b.opcode === 'stc12_writepin') {
+                const p = crispPin(f('PIN'), b, true);
+                // BBC comparisons return -1 for true. ABS of a fully grouped
+                // comparison produces exactly 0/1, with one evaluation even for
+                // a sensed input or FNmillis expression. Computed levels ignore
+                // ACTIVE LOW, like the dialect's explicit high/low statements.
+                if (p) emit(`PROCdigitalWrite(${p.id},ABS((${v('VALUE')})<>0))`);
+                return;
+            }
             switch (b.opcode) {
                 case 'data_setvariableto': emit(`${basVarRef(f('VARIABLE'))}=${v('VALUE')}`); return;
                 case 'data_changevariableby': { const n = basVarRef(f('VARIABLE')); emit(`${n}=${n}+${v('VALUE')}`); return; }
@@ -16617,7 +16914,8 @@ class SB3Creator {
                 case 'looks_say': emit(`PRINT ${vs('MESSAGE')}`); return;
                 case 'looks_sayforsecs': {
                     emit(`PRINT ${vs('MESSAGE')}`);
-                    if (bbc) {
+                    if (crisp) crispWait(b.inputs.SECS, blocks, b);
+                    else if (bbc) {
                         emit(`time_target=TIME+${v('SECS')}*100`);
                         emit('REPEAT UNTIL TIME>=time_target');
                     }
@@ -16626,7 +16924,8 @@ class SB3Creator {
                 case 'looks_think': emit(`PRINT ${vs('MESSAGE')}`); return;
                 case 'looks_thinkforsecs': {
                     emit(`PRINT ${vs('MESSAGE')}`);
-                    if (bbc) {
+                    if (crisp) crispWait(b.inputs.SECS, blocks, b);
+                    else if (bbc) {
                         emit(`time_target=TIME+${v('SECS')}*100`);
                         emit('REPEAT UNTIL TIME>=time_target');
                     }
@@ -16647,7 +16946,10 @@ class SB3Creator {
                     emit('INPUT answer$');
                     return;
                 }
-                case 'sensing_resettimer': basUses.timer = true; emit('TIME=0'); return;
+                case 'sensing_resettimer':
+                    basUses.timer = true;
+                    emit(crisp ? `${crispTimerBase}=FNmillis` : 'TIME=0');
+                    return;
                 // ---- sound (REM stubs) ----
                 case 'sound_play': emit(`REM play sound ${vs('SOUND_MENU')}`); return;
                 case 'sound_playuntildone': emit(`REM play sound ${vs('SOUND_MENU')} until done`); return;
@@ -16679,7 +16981,8 @@ class SB3Creator {
                     basUses.motionXY = true;
                     emit(`bw_x%=${v('X')}:bw_y%=${v('Y')}`);
                     emit('IF bw_pen% THEN DRAW bw_x%*4+640,bw_y%*4+512 ELSE MOVE bw_x%*4+640,bw_y%*4+512');
-                    if (bbc) { emit(`time_target=TIME+${v('SECS')}*100`); emit('REPEAT UNTIL TIME>=time_target'); }
+                    if (crisp) crispWait(b.inputs.SECS, blocks, b);
+                    else if (bbc) { emit(`time_target=TIME+${v('SECS')}*100`); emit('REPEAT UNTIL TIME>=time_target'); }
                     return;
                 }
                 case 'motion_movesteps': {
@@ -16785,6 +17088,17 @@ class SB3Creator {
                 }
                 // ---- hardware pin operations ----
                 case 'stc12_setpin': {
+                    if (crisp) {
+                        const p = crispPin(f('PIN'), b, true);
+                        const state = f('STATE');
+                        if (!['on', 'off', 'high', 'low'].includes(state)) {
+                            refuse('digital-state', `unsupported digital state "${state}"`, b);
+                        } else if (p) {
+                            const level = state === 'high' ? 1 : state === 'low' ? 0 : (state === 'on') !== !!p.activeLow ? 1 : 0;
+                            emit(`PROCdigitalWrite(${p.id},${level})`);
+                        }
+                        return;
+                    }
                     if (!pokeable) { emit(`REM turn ${f('STATE')} ${f('PIN')}`); return; }
                     const p = pins.get(String(f('PIN')).toLowerCase());
                     if (!p) { warnings.push(`undeclared pin "${f('PIN')}"`); return; }
@@ -16793,6 +17107,14 @@ class SB3Creator {
                     emit(pokePin(p, on)); return;
                 }
                 case 'stc12_toggle': {
+                    if (crisp) {
+                        const p = crispPin(f('PIN'), b, true);
+                        // The host owns the electrical output latch. Toggling
+                        // it is atomic and independent of ACTIVE LOW or the
+                        // solved net, which may be held low by an external load.
+                        if (p) emit(`PROCdigitalToggle(${p.id})`);
+                        return;
+                    }
                     if (!pokeable) { emit(`REM toggle ${f('PIN')}`); return; }
                     const p = pins.get(String(f('PIN')).toLowerCase());
                     if (!p) { warnings.push(`undeclared pin "${f('PIN')}"`); return; }
@@ -16804,12 +17126,13 @@ class SB3Creator {
                 case 'stc12_print': {
                     const mode = f('MODE');
                     if (mode === 'text') {
-                        emit(`PRINT "${String(this.dtext(b.inputs.VALUE, blocks)).replace(/"/g, '').replace(/[\r\n]+/g, ' ')}"`);
+                        emit(`PRINT "${String(this.dtext(b.inputs.VALUE, blocks)).replace(/"/g, crisp ? '""' : '').replace(/[\r\n]+/g, ' ')}"`);
                     } else emit(`PRINT ${v('VALUE')}`);
                     return;
                 }
                 case 'control_wait': {
-                    if (bbc) {
+                    if (crisp) crispWait(b.inputs.DURATION, blocks, b);
+                    else if (bbc) {
                         emit(`time_target=TIME+${v('DURATION')}*100`);
                         emit('REPEAT UNTIL TIME>=time_target');
                     } else {
@@ -16845,7 +17168,7 @@ class SB3Creator {
                 }
                 case 'control_repeat_until': {
                     if (structured) {
-                        emit(`WHILE NOT (${basVal(b.inputs.CONDITION, blocks)})`);
+                        emit(`WHILE NOT (${crisp ? `(${basVal(b.inputs.CONDITION, blocks)})<>0` : basVal(b.inputs.CONDITION, blocks)})`);
                         depth++;
                         basChain(b.inputs.SUBSTACK ? b.inputs.SUBSTACK[1] : null, blocks);
                         depth--;
@@ -16861,6 +17184,10 @@ class SB3Creator {
                     return;
                 }
                 case 'control_wait_until': {
+                    if (crisp) {
+                        refuse('wait-until', 'wait until has no defined simulation polling interval; use a repeat-until loop with an explicit wait to advance simulated time', b);
+                        return;
+                    }
                     if (structured) { emit(`REPEAT UNTIL ${basVal(b.inputs.CONDITION, blocks)}`); return; }
                     const top = newLabel();
                     emitLabel(top);
@@ -16877,7 +17204,7 @@ class SB3Creator {
                         return;
                     }
                     const after = newLabel();
-                    emit(`IF NOT (${basVal(b.inputs.CONDITION, blocks)}) THEN GOTO ${after}`);
+                    emit(`IF NOT (${crisp ? `(${basVal(b.inputs.CONDITION, blocks)})<>0` : basVal(b.inputs.CONDITION, blocks)}) THEN GOTO ${after}`);
                     basChain(b.inputs.SUBSTACK ? b.inputs.SUBSTACK[1] : null, blocks);
                     emitLabel(after);
                     return;
@@ -16896,7 +17223,7 @@ class SB3Creator {
                         return;
                     }
                     const elseL = newLabel(); const after = newLabel();
-                    emit(`IF NOT (${basVal(b.inputs.CONDITION, blocks)}) THEN GOTO ${elseL}`);
+                    emit(`IF NOT (${crisp ? `(${basVal(b.inputs.CONDITION, blocks)})<>0` : basVal(b.inputs.CONDITION, blocks)}) THEN GOTO ${elseL}`);
                     basChain(b.inputs.SUBSTACK ? b.inputs.SUBSTACK[1] : null, blocks);
                     emit(`GOTO ${after}`);
                     emitLabel(elseL);
@@ -16913,6 +17240,10 @@ class SB3Creator {
                     return;
                 }
                 default: {
+                    if (crisp) {
+                        refuse('operation', `operation ${b.opcode} is unsupported by CrispBASIC`, b);
+                        return;
+                    }
                     // Unsupported statement — REM stub that still RUNs.
                     const desc = this.decompileBlock ? this.decompileBlock(b, blocks) : b.opcode;
                     warnings.push(`no BASIC form for "${desc}" — emitted as REM`);
@@ -16940,19 +17271,24 @@ class SB3Creator {
         // (event_whenkeypressed, broadcast-receives, clone starts) cannot
         // be serialized — emit REM stubs for those.
         if (scripts.length > 1) {
-            warnings.push(`${scripts.length} WHEN flag scripts serialized — BASIC is single-threaded; concurrent semantics lost`);
+            if (crisp) refuse('concurrency', `${scripts.length} WHEN flag scripts require concurrency; portable generation supports one flag script`);
+            else warnings.push(`${scripts.length} WHEN flag scripts serialized — BASIC is single-threaded; concurrent semantics lost`);
         }
         for (const h of otherHats) {
-            warnings.push(`"${h.b.opcode}" script emitted as REM — BASIC is single-threaded`);
+            if (crisp) refuse('event', `event ${h.b.opcode} is unsupported; portable generation supports one flag script`, h.b);
+            else warnings.push(`"${h.b.opcode}" script emitted as REM — BASIC is single-threaded`);
         }
         if (!scripts.length && !otherHats.length) reasons.push('no "when flag clicked" script — nothing to run');
-        if (reasons.length) return { ok: false, reasons: [...new Set(reasons)], warnings };
+        if (reasons.length) return crisp ? refused() : { ok: false, reasons: [...new Set(reasons)], warnings };
 
         // ---- header + pin setup ----------------------------------------
         emit(`REM generated by Brickwright (${profile.toUpperCase()} BASIC profile)`);
+        if (crisp) emit('REM @bw generator crispbasic-v2: digital library; output latches; simulated milliseconds');
         if (stc.device) emit(`REM @bw device ${stc.device}`);
         for (const p of pins.values()) emit(`REM @bw pin ${p.name} ${p.where || `P${p.port}.${p.bit}`} ${p.direction}${p.activeLow ? ' active-low' : ''}`);
-        if (pokeable) {
+        if (crisp) {
+            for (const p of crispPins.values()) emit(`PROCpinMode(${p.id},"${p.mode}")`);
+        } else if (pokeable) {
             const ddr = { a: 0, b: 0 };
             for (const p of pins.values()) {
                 if (p.direction === 'output') ddr[/^PB/i.test(p.where) ? 'b' : 'a'] |= pinMask(p);
@@ -17029,6 +17365,21 @@ class SB3Creator {
         if (bbc && needsSumDigits) { emit('DEF FNsumdigits(n%):LOCAL s%,a%:a%=ABS(n%):s%=0:WHILE a%>0:s%=s%+a% MOD 10:a%=a% DIV 10:ENDWHILE:=s%'); }
         // Post-body splices at the header seam.
         const seam = [];
+        if (crisp) for (const name of crispVariableUses) {
+            const declarations = crispVariableValues.get(name) || [];
+            if (declarations.length !== 1) {
+                refuse('variable-scope', `variable "${name}" ${declarations.length ? 'is ambiguous across targets; rename the scoped variables' : 'has no serialized initial value'}`);
+                continue;
+            }
+            const value = declarations[0].value;
+            const numeric = (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'string' && value.trim()) && Number.isFinite(Number(value));
+            if (!numeric) {
+                refuse('variable-value', `variable "${name}" has an unsupported initial value ${JSON.stringify(value)}; this mode requires finite numeric scalars`);
+                continue;
+            }
+            seam.push(`${basName(name)}=${Number(value)}`);
+        }
+        if (crisp && basUses.timer) seam.push(`${crispTimerBase}=FNmillis`);
         if (!bbc) for (const [raw, nm] of names) seam.push(`REM ${nm} = ${raw.replace(/^proc:/, '')}`);
         if (this._basNeedsDC) seam.push('DC=1000:REM delay units/second - CALIBRATE');
         // List DIM declarations at top.
@@ -17042,7 +17393,7 @@ class SB3Creator {
         }
         outLines.splice(headerEnd, 0, ...seam);
         lineBlocks.splice(headerEnd, 0, ...seam.map(() => null));
-        if (reasons.length) return { ok: false, reasons: [...new Set(reasons)], warnings };
+        if (reasons.length) return crisp ? refused() : { ok: false, reasons: [...new Set(reasons)], warnings };
 
         // ---- number the lines, resolve labels --------------------------
         // lineMap: emitted-line key → Scratch block id (only lines a block
@@ -17057,7 +17408,7 @@ class SB3Creator {
                 if (lineBlocks[i]) lineMap[kept.length] = lineBlocks[i];
             }
             const basic = kept.join('\n') + '\n';
-            return { ok: true, basic, lineMap, reasons: [], warnings };
+            return { ok: true, basic, lineMap, reasons: [], warnings, ...(crisp ? {mode: 'crispbasic', diagnostics} : {}) };
         }
         const lineNo = new Map();
         let n = 10;
@@ -17072,7 +17423,7 @@ class SB3Creator {
         }
         const resolve = (text) => text.replace(/@L\d+@/g, (m) => String(lineNo.get(m) ?? n));
         const basic = numberedOut.map((l) => `${l.n} ${resolve(l.text)}`).join('\n') + '\n';
-        return { ok: true, basic, lineMap, reasons: [], warnings };
+        return { ok: true, basic, lineMap, reasons: [], warnings, ...(crisp ? {mode: 'crispbasic', diagnostics} : {}) };
     }
 
     // INKEY code lookup for BBC BASIC key detection.
@@ -17085,6 +17436,7 @@ class SB3Creator {
     _basUnq(s) { return String(s).replace(/^"|"$/g, ''); }
 
     generateC(project = this.project, opts = {}) {
+        if (validateCrispBasicProject(project)) throw crispBasicModeError('generateC');
         // Which C? The project decides. Declared pins mean the chip and bare
         // metal; anything else is a Scratch program, and emitting 8051 register
         // writes for it produced the 390 "no C equivalent" warnings this split
@@ -17106,6 +17458,24 @@ class SB3Creator {
         const declaredDevice = !!(stc && (stc.deviceDeclared
             || (stc.device && String(stc.device).toLowerCase() !== 'stc12c5a60s2')));
         const want = opts.target || ((hasHardware || declaredDevice) ? 'device' : 'host');
+        if (want !== 'host' && String(opts.device || stc?.device || '').toLowerCase() === 'i80386') {
+            const reason = 'I80386 DOS console requires generateCowgol(project, {target: "dos"}); no device C backend is qualified.';
+            this._cWarnings = [reason];
+            const error = new Error(reason);
+            error.code = 'DOS_CONSOLE_C_UNSUPPORTED';
+            throw error;
+        }
+        if (opts.target !== 'host' && String(opts.device || stc?.device || '').toLowerCase() === 'riscv32') {
+            const result = this.generateRiscvC(project, opts);
+            this._cWarnings = result.ok ? [] : result.reasons;
+            if (!result.ok) {
+                const error = new Error(`RISC-V console C refused: ${result.reasons.join('; ')}`);
+                error.code = 'RISCV_CONSOLE_UNSUPPORTED';
+                error.diagnostics = result.diagnostics;
+                throw error;
+            }
+            return result.c;
+        }
         if (want === 'host') return this.generateHostC(project, opts);
 
         this._cNames = new Map();
@@ -22217,6 +22587,9 @@ SB3Creator.RETARGET_POOLS = (() => {
     const unoDigital = ['D13', 'D12', 'D8', 'D7', 'D4', 'D2', 'D3', 'D5', 'D6', 'D9', 'D10', 'D11', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5'];
     const unoInput = ['D2', 'D4', 'D7', 'D8', 'D3', 'D5', 'D6', 'D9', 'D10', 'D11', 'D12', 'D13', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5'];
     return {
+        // The RV32 bench has a console and no circuit terminals. Empty pools
+        // let a console program be retargeted while refusing hardware roles.
+        riscv32: { digital: [], analog: [], input: [], pwm: [], ledActiveLow: false },
         // P1.3/P1.4 (the PCA/CCP pair) close BOTH the digital and input
         // pools — appended LAST, so they are touched only when 26+ pins of
         // a role are already taken and a PWM-less program needs the full
@@ -22496,7 +22869,7 @@ SB3Creator.retargetPseudocode = function retargetPseudocode(src, device) {
         if (e.code !== 'DIALECT_UNPARSED_LINES') throw e;
         return { ok: false, reasons: [e.message], warnings: e.warnings || [] };
     }
-    const stc = c.project && c.project.stc;
+    const stc = (c.project && c.project.stc) || (core === 'riscv32' ? c.stcConfig() : null);
     if (!stc || !Array.isArray(stc.pins)) {
         return { ok: false, reasons: ['the source has no hardware declarations to retarget'], warnings: [] };
     }
@@ -22787,6 +23160,12 @@ SB3Creator.retargetPseudocode = function retargetPseudocode(src, device) {
 };
 
 SB3Creator.STC_PARTS = {
+    // Exact execution selection for the checked Cowgol DOS console. It has
+    // no native 386 code generator, GPIO, scheduler or protected-mode ABI.
+    i80386: { core: 'dos-console', header: null, portModes: false, aux1T: false, adc: false },
+    // Software RV32IMAC console, built with riscv32-gcc/picolibc. No GPIO or
+    // timing runtime; generateRiscvC checks the sequential console subset.
+    riscv32: { core: 'riscv32', header: null, portModes: false, aux1T: false, adc: false },
     // core: '8051' -- {port, bit} pins, and generateC() emits for these.
     // ccp: array of {port, bit} for each PCA module (0, 1, …), or null if no PCA.
     //   STC12: CCP0=P1.3, CCP1=P1.4.  STC15: CCP0=P1.1, CCP1=P1.0, CCP2=P3.7.

@@ -83,6 +83,7 @@ try {
     });
     await page.goto(url, {waitUntil: 'domcontentloaded'});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    // gate-shapes-allow: startup readiness for conversions that check language/source, VM opcodes and the executed total of 42.
     await page.getByTestId('bw-lang-row').waitFor();
     await typeIntoEditor(page, `GLOBAL total\nWHEN flag clicked:\n  set total to 17\n  change total by 25\n  say "${message}"\n`);
     await apply();

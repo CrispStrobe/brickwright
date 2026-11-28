@@ -14,19 +14,19 @@ each reader is a measured figure, not folklore.
 Each run of a fixture through its reader is one of three outcomes:
 
 - **clean** — lifted with nothing dropped.
-- **degraded** — lifted, but the reader met a construct it cannot represent and
-  kept going with a placeholder, naming the loss. The program imports and is
-  quietly missing something. This is the outcome a mapped/refused ratio hides,
-  and it is broken out here for exactly that reason.
-- **refused** — the reader threw, or the 8086 lifter returned `ok:false`:
+- **degraded** — accepted with warnings, restricted semantics or placeholders.
+  Inspect the reason: a placeholder names lost behavior, while Cowgol's int32
+  advisory limits the domain in which translation preserves arithmetic.
+  Neither is counted as an unqualified clean result.
+- **refused** — the reader threw or explicitly returned `ok:false`:
   nothing was produced.
 
 ## Overall
 
-491 clean · 401 degraded · 15 refused (of 907; 54% clean)
+495 clean · 443 degraded · 20 refused (of 958; 52% clean)
 
-- round-trip (emit → read back): 491 clean · 399 degraded · 4 refused (of 894; 55% clean)
-- native (real source fed to the reader): 0 clean · 2 degraded · 11 refused (of 13; 0% clean)
+- round-trip (emit → read back): 495 clean · 438 degraded · 4 refused (of 937; 53% clean)
+- native (real source fed to the reader): 0 clean · 5 degraded · 16 refused (of 21; 0% clean)
 
 ## By method, language and device family
 
@@ -36,7 +36,7 @@ source straight to the reader — for the 8086 lifter that is hand-written asm i
 is designed to REFUSE as foreign, so a high refused count there is the reader
 working, not failing.
 
-Two readers refuse by design rather than by inability, and their refused counts
+Some readers refuse by design rather than by inability, and their refused counts
 should be read that way. The 8086 lifter is v1: it lifts the control-flow and
 variable programs the ▶ button lowers and refuses pins, ports, displays, tones,
 PWM, keypad, broadcast, "say for secs" and the multi-script scheduler form BY
@@ -44,10 +44,16 @@ NAME (plan L1) — every shipped `i8086_*` example happens to use one of those,
 so all five round-trips are named v1 refusals, and all eleven hand-written
 programs are refused as foreign. The refusal reasons below say which.
 
+Cowgol accepts a sequential signed-int32/host-API subset and refuses unsupported
+source before returning executable pseudocode. Its accepted results carry an
+int32 range advisory and are therefore counted as **degraded**, conservatively;
+that does not mean the reader inserted placeholder code. Pointer/array,
+recursion, quotient/remainder and inline-host-code probes expose the boundary.
+
 | method | reader (language) | device family | outcome |
 | --- | --- | --- | --- |
 | round-trip | python | 6502 | 4 clean · 1 degraded · 0 refused (of 5; 80% clean) |
-| round-trip | python | 8051 | 40 clean · 32 degraded · 0 refused (of 72; 56% clean) |
+| round-trip | python | 8051 | 41 clean · 31 degraded · 0 refused (of 72; 57% clean) |
 | round-trip | python | arduino | 22 clean · 59 degraded · 0 refused (of 81; 27% clean) |
 | round-trip | python | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | python | microbit | 2 clean · 8 degraded · 0 refused (of 10; 20% clean) |
@@ -55,7 +61,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | round-trip | python | spike | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | python | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | javascript | 6502 | 4 clean · 1 degraded · 0 refused (of 5; 80% clean) |
-| round-trip | javascript | 8051 | 40 clean · 32 degraded · 0 refused (of 72; 56% clean) |
+| round-trip | javascript | 8051 | 41 clean · 31 degraded · 0 refused (of 72; 57% clean) |
 | round-trip | javascript | arduino | 22 clean · 59 degraded · 0 refused (of 81; 27% clean) |
 | round-trip | javascript | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | javascript | microbit | 10 clean · 0 degraded · 0 refused (of 10; 100% clean) |
@@ -64,14 +70,14 @@ programs are refused as foreign. The refusal reasons below say which.
 | round-trip | javascript | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | c | 6502 | 4 clean · 1 degraded · 0 refused (of 5; 80% clean) |
 | round-trip | c | 8051 | 63 clean · 9 degraded · 0 refused (of 72; 88% clean) |
-| round-trip | c | arduino | 60 clean · 21 degraded · 0 refused (of 81; 74% clean) |
+| round-trip | c | arduino | 59 clean · 22 degraded · 0 refused (of 81; 73% clean) |
 | round-trip | c | i8086 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | c | microbit | 0 clean · 10 degraded · 0 refused (of 10; 0% clean) |
 | round-trip | c | pico | 0 clean · 8 degraded · 0 refused (of 8; 0% clean) |
 | round-trip | c | spike | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | c | z80 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | basic | 6502 | 2 clean · 0 degraded · 0 refused (of 2; 100% clean) |
-| round-trip | basic | 8051 | 39 clean · 33 degraded · 0 refused (of 72; 54% clean) |
+| round-trip | basic | 8051 | 41 clean · 31 degraded · 0 refused (of 72; 57% clean) |
 | round-trip | basic | arduino | 62 clean · 19 degraded · 0 refused (of 81; 77% clean) |
 | round-trip | basic | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | basic | microbit | 8 clean · 2 degraded · 0 refused (of 10; 80% clean) |
@@ -79,27 +85,36 @@ programs are refused as foreign. The refusal reasons below say which.
 | round-trip | basic | spike | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | basic | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | micropython | 6502 | 1 clean · 1 degraded · 0 refused (of 2; 50% clean) |
-| round-trip | micropython | 8051 | 46 clean · 26 degraded · 0 refused (of 72; 64% clean) |
-| round-trip | micropython | arduino | 37 clean · 44 degraded · 0 refused (of 81; 46% clean) |
+| round-trip | micropython | 8051 | 48 clean · 23 degraded · 0 refused (of 71; 68% clean) |
+| round-trip | micropython | arduino | 36 clean · 45 degraded · 0 refused (of 81; 44% clean) |
 | round-trip | micropython | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | micropython | microbit | 4 clean · 6 degraded · 0 refused (of 10; 40% clean) |
 | round-trip | micropython | pico | 4 clean · 4 degraded · 0 refused (of 8; 50% clean) |
 | round-trip | micropython | spike | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | micropython | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
+| round-trip | cowgol | 8051 | 0 clean · 20 degraded · 0 refused (of 20; 0% clean) |
+| round-trip | cowgol | arduino | 0 clean · 19 degraded · 0 refused (of 19; 0% clean) |
+| round-trip | cowgol | i8086 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
+| round-trip | cowgol | microbit | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
+| round-trip | cowgol | pico | 0 clean · 2 degraded · 0 refused (of 2; 0% clean) |
+| round-trip | cowgol | z80 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | asm | 8086 | 0 clean · 1 degraded · 4 refused (of 5; 0% clean) |
 | native | c | 8051 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | native | c | arduino | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
+| native | cowgol | arduino | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
+| native | cowgol | generic | 0 clean · 2 degraded · 5 refused (of 7; 0% clean) |
 | native | asm | 8086 | 0 clean · 0 degraded · 11 refused (of 11; 0% clean) |
 
 ## Why readers degrade, by construct
 
-| fixtures | construct kept as a placeholder |
+| fixtures | warning, restriction or placeholder |
 | --- | --- |
-| 196 | dropped expression statement |
-| 88 | no pins found |
-| 41 | no dialect form for "…" |
+| 192 | dropped expression statement |
+| 87 | no pins found |
+| 47 | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| 39 | no dialect form for "…" |
 | 32 | unstructured "…" |
-| 22 | dropped call in expression |
+| 26 | dropped call in expression |
 | 13 | no clock #define found |
 | 11 | no register header found |
 | 11 | no main() and no @bw script markers |
@@ -122,7 +137,6 @@ programs are refused as foreign. The refusal reasons below say which.
 | 3 | procedure handle_op with parameters not lifted yet |
 | 3 | procedure handle_digit with parameters not lifted yet |
 | 2 | Port 2 has 8 output pins |
-| 2 | stc12_seg_shownum: no equivalent on this board; the block was not translated |
 | 2 | early ENDPROC |
 | 2 | top-level declaration dropped (no block equivalent): static int _servo_angle [ 2 ] |
 | 1 | stc12_setpart: no equivalent on this board; the block was not translated |
@@ -141,6 +155,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | 1 | statement dropped (not representable as a block): = ( unsigned char ) ( 0 ) |
 | 1 | statement dropped (not representable as a block): = ( unsigned char ) ( bw_tab_font [ … |
 | 1 | stc12_setport: no equivalent on this board; the block was not translated |
+| 1 | stc12_seg_shownum: no equivalent on this board; the block was not translated |
 | 1 | stc12_led_only: no equivalent on this board; the block was not translated |
 | 1 | data_deletealloflist: no equivalent on this board; the block was not translated |
 | 1 | data_addtolist: no equivalent on this board; the block was not translated |
@@ -150,10 +165,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | 1 | no dialect form for "…"Chip: "…" C"…" |
 | 1 | no dialect form for "…":"…":"…" |
 | 1 | devices_settime: no equivalent on this board; the block was not translated |
-| 1 | devices_clearmatrix: no equivalent on this board; the block was not translated |
-| 1 | devices_setpixel: no equivalent on this board; the block was not translated |
 | 1 | devices_setneopixel: no equivalent on this board; the block was not translated |
-| 1 | devices_showdigit: no equivalent on this board; the block was not translated |
 | 1 | no dialect form for "…"Started "…" times"…" |
 | 1 | devices_eepromwrite: no equivalent on this board; the block was not translated |
 | 1 | no dialect form for "…"Hello "…", I am thinking of a number from 1 to 100."…" |
@@ -180,6 +192,11 @@ programs are refused as foreign. The refusal reasons below say which.
 | 2 | refused (refused): line N: the "…" statement is not lifted yet (displays, tones, PWM, keypad, broadcast and " |
 | 1 | lift-fail: line N: expected a statement anchor (`…`, `…`, …), found label BW_HAT4 |
 | 1 | lift-fail: line N: expected a value into DX:AX, found keypad |
+| 1 | line N: Expected uint8, found int32 |
+| 1 | line N: Uninitialized Cowgol variable values has no deterministic pseudocode initializer |
+| 1 | line N: Cowgol does not permit recursive procedures |
+| 1 | line N: Cowgol / uses integer quotient/remainder; the pseudocode operators differ |
+| 1 | line N: unsupported token "…" |
 
 ## Per-fixture ledger (non-clean outcomes)
 
@@ -188,7 +205,9 @@ fixture appears here so its verdict is traceable to the program that caused it.
 
 | method | language | family | fixture | outcome | reasons |
 | --- | --- | --- | --- | --- | --- |
+| round-trip | cowgol | 8051 | 01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 05-counter | degraded | no dialect form for "…" |
+| round-trip | cowgol | 8051 | 06-active-low-high | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | 8051 | 07-buzzer-siren | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | 07-buzzer-siren | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | 07-buzzer-siren | degraded | no pins found |
@@ -196,20 +215,34 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | 8051 | 08-led-chaser-595 | degraded | dropped expression statement |
 | round-trip | basic | 8051 | 08-led-chaser-595 | degraded | unstructured "…" |
 | round-trip | micropython | 8051 | 08-led-chaser-595 | degraded | stc12_setpart: no equivalent on this board; the block was not translated; no pins found |
+| round-trip | cowgol | 8051 | 09-relay-clicker | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 11-toggle-button | degraded | no dialect form for "…" |
+| round-trip | cowgol | 8051 | 12-dual-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | 8051 | 13-sos-morse | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | 8051 | 14-traffic-light | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 15-voltage-divider | degraded | no dialect form for "…"; unstructured "…" |
 | round-trip | basic | 8051 | 16-ldr-bargraph | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | arduino | 168p01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 17-comparator | degraded | no dialect form for "…"; unstructured "…" |
 | round-trip | basic | 8051 | 18-logic-and-gate | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | 8051 | 18-logic-and-gate | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 19-logic-or-gate | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | 8051 | 19-logic-or-gate | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | 8051 | 24-pwm-fade | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 25-reaction-timer | degraded | no dialect form for "…" |
+| round-trip | cowgol | 8051 | 25-reaction-timer | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | 26-debounce | degraded | no dialect form for "…" |
 | round-trip | basic | 8051 | 27-led-dice | degraded | no dialect form for "…" |
+| round-trip | cowgol | 8051 | 30-multi-led-pattern | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | 8051 | 32-source-vs-sink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | 8051 | 33-inductive-no-flyback | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | c | 8051 | 46-port-overcurrent | degraded | 8 output pins × 20 mA = up to 160 mA at maximum pin ratings (actual current depends on ser; Port 1 has 8 output pins |
+| round-trip | cowgol | 8051 | 46-port-overcurrent | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | 8051 | 49-lcd-hello | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | 49-lcd-hello | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | 49-lcd-hello | degraded | devices_lcdclear: no equivalent on this board; the block was not translated; devices_lcdprint: no equivalent on this board; the block was not translated; devices_lcdcursor: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | c | 8051 | 50-7seg-chase | degraded | 7 output pins × 20 mA = up to 140 mA at maximum pin ratings (actual current depends on ser; Port 0 has 7 output pins |
+| round-trip | cowgol | 8051 | 50-7seg-chase | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | micropython | 8051 | 51-tft-pixels | degraded | devices_tftclear: no equivalent on this board; the block was not translated; devices_tftfill: no equivalent on this board; the block was not translated; devices_tftpixel: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | python | 8051 | 53-servo-sweep | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | 53-servo-sweep | degraded | dropped expression statement |
@@ -220,8 +253,10 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | 8051 | 55-oled-hello | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | 55-oled-hello | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | 55-oled-hello | degraded | devices_oledclear: no equivalent on this board; the block was not translated; devices_oledprint: no equivalent on this board; the block was not translated; devices_oledcursor: no equivalent on this board; the block was not translated; no pins found |
+| round-trip | cowgol | 8051 | 56-logical-on-pin-level | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | c | 8051 | 60-retro-console | degraded | 28 output pins × 20 mA = up to 560 mA at maximum pin ratings (actual current depends on se; Port 1 has 7 output pins; Port 2 has 8 output pins; Port 0 has 8 output pins |
 | round-trip | basic | 8051 | 60-retro-console | degraded | no dialect form for "…" |
+| round-trip | cowgol | 8051 | 60-retro-console | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | c | 8051 | 61-console-pong | degraded | 26 output pins × 20 mA = up to 520 mA at maximum pin ratings (actual current depends on se; Port 1 has 7 output pins; Port 2 has 7 output pins; Port 0 has 8 output pins |
 | round-trip | basic | 8051 | 61-console-pong | degraded | unstructured "…"; no dialect form for "…" |
 | round-trip | micropython | 8051 | 61-console-pong | degraded | 1 more WHEN script(s) not lifted |
@@ -268,8 +303,6 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | micropython | 8051 | 78-a2-calculator | degraded | stc12_seg_shownum: no equivalent on this board; the block was not translated |
 | round-trip | python | 8051 | 79-a2-sampler | degraded | dropped call in expression |
 | round-trip | javascript | 8051 | 79-a2-sampler | degraded | dropped call in expression |
-| round-trip | basic | 8051 | 79-a2-sampler | degraded | no dialect form for "…" |
-| round-trip | micropython | 8051 | 79-a2-sampler | degraded | stc12_seg_shownum: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | python | 8051 | 80-a2-lcd-moving-text | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | 80-a2-lcd-moving-text | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | 80-a2-lcd-moving-text | degraded | devices_lcdclear: no equivalent on this board; the block was not translated; devices_lcdcursor: no equivalent on this board; the block was not translated; devices_lcdprint: no equivalent on this board; the block was not translated; no pins found |
@@ -280,9 +313,11 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | arduino | arduino-01-analog-read-serial | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-01-analog-read-serial | degraded | dropped expression statement |
 | round-trip | micropython | arduino | arduino-01-analog-read-serial | degraded | no pins found |
+| round-trip | cowgol | arduino | arduino-01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-01-digital-read-serial | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-01-digital-read-serial | degraded | dropped expression statement |
 | round-trip | micropython | arduino | arduino-01-digital-read-serial | degraded | no pins found |
+| round-trip | cowgol | arduino | arduino-01-digital-read-serial | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-01-fade | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-01-fade | degraded | dropped expression statement |
 | round-trip | micropython | arduino | arduino-01-fade | degraded | no pins found |
@@ -291,9 +326,11 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | micropython | arduino | arduino-01-read-analog-voltage | degraded | no pins found |
 | round-trip | basic | arduino | arduino-02-blink-without-delay | degraded | unstructured "…" |
 | round-trip | basic | arduino | arduino-02-button | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | arduino | arduino-02-button | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | arduino | arduino-02-debounce | degraded | unstructured "…" |
 | round-trip | python | arduino | arduino-02-digital-input-pullup | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-02-digital-input-pullup | degraded | dropped expression statement |
+| round-trip | cowgol | arduino | arduino-02-digital-input-pullup | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-02-state-change | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-02-state-change | degraded | dropped expression statement |
 | round-trip | python | arduino | arduino-02-tone-keyboard | degraded | dropped expression statement |
@@ -327,6 +364,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | arduino | arduino-04-ascii-table | degraded | dropped expression statement |
 | round-trip | c | arduino | arduino-04-ascii-table | degraded | no pins found |
 | round-trip | micropython | arduino | arduino-04-ascii-table | degraded | no pins found |
+| round-trip | cowgol | arduino | arduino-04-ascii-table | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-04-dimmer | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-04-dimmer | degraded | dropped expression statement |
 | round-trip | python | arduino | arduino-04-read-ascii-string | degraded | dropped expression statement |
@@ -338,18 +376,23 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | arduino | arduino-04-serial-passthrough | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-04-serial-passthrough | degraded | dropped expression statement |
 | round-trip | micropython | arduino | arduino-04-serial-passthrough | degraded | no pins found |
+| round-trip | cowgol | arduino | arduino-05-arrays | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | arduino | arduino-05-for-loop | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-05-if-statement | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-05-if-statement | degraded | dropped expression statement |
 | round-trip | python | arduino | arduino-05-switch-case | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-05-switch-case | degraded | dropped expression statement |
 | round-trip | micropython | arduino | arduino-05-switch-case | degraded | no pins found |
+| round-trip | cowgol | arduino | arduino-05-switch-case-2 | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-05-while-statement | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-05-while-statement | degraded | dropped expression statement |
 | round-trip | basic | arduino | arduino-05-while-statement | degraded | no dialect form for "…"; unstructured "…" |
 | round-trip | python | arduino | arduino-06-knock | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-06-knock | degraded | dropped expression statement |
-| round-trip | python | arduino | arduino-06-ping | degraded | dropped expression statement |
-| round-trip | javascript | arduino | arduino-06-ping | degraded | dropped expression statement |
+| round-trip | python | arduino | arduino-06-ping | degraded | dropped call in expression; dropped expression statement |
+| round-trip | javascript | arduino | arduino-06-ping | degraded | dropped call in expression; dropped expression statement |
+| round-trip | c | arduino | arduino-06-ping | degraded | no pins found |
+| round-trip | micropython | arduino | arduino-06-ping | degraded | no pins found |
 | round-trip | python | arduino | arduino-07-row-column-scanning | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-07-row-column-scanning | degraded | dropped expression statement |
 | round-trip | python | arduino | arduino-08-char-analysis | degraded | dropped expression statement |
@@ -408,6 +451,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | c | arduino | arduino-08-string-toint | degraded | no pins found |
 | round-trip | micropython | arduino | arduino-08-string-toint | degraded | no pins found |
 | round-trip | basic | arduino | arduino-sk-p02-spaceship | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | arduino | arduino-sk-p02-spaceship | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-sk-p03-love-o-meter | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-sk-p03-love-o-meter | degraded | dropped expression statement |
 | round-trip | python | arduino | arduino-sk-p04-color-mixing | degraded | dropped expression statement |
@@ -425,6 +469,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | basic | arduino | arduino-sk-p07-keyboard | degraded | no dialect form for "…" |
 | round-trip | basic | arduino | arduino-sk-p08-hourglass | degraded | no dialect form for "…" |
 | round-trip | basic | arduino | arduino-sk-p09-motorized-pinwheel | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | arduino | arduino-sk-p09-motorized-pinwheel | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-sk-p10-zoetrope | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-sk-p10-zoetrope | degraded | dropped expression statement |
 | round-trip | basic | arduino | arduino-sk-p10-zoetrope | degraded | no dialect form for "…" |
@@ -437,9 +482,12 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | basic | arduino | arduino-sk-p12-knock-lock | degraded | unstructured "…"; no dialect form for "…" |
 | round-trip | micropython | arduino | arduino-sk-p12-knock-lock | degraded | devices_setservo: no equivalent on this board; the block was not translated |
 | round-trip | basic | arduino | arduino-sk-p13-touch-lamp | degraded | unstructured "…" |
+| round-trip | cowgol | arduino | arduino-sk-p13-touch-lamp | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | arduino-sk-p14-serial-pot | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-sk-p14-serial-pot | degraded | dropped expression statement |
 | round-trip | micropython | arduino | arduino-sk-p14-serial-pot | degraded | no pins found |
+| round-trip | cowgol | arduino | arduino-sk-p15-hacking-buttons | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| round-trip | cowgol | arduino | avr01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | avr02-dimmer | degraded | dropped expression statement |
 | round-trip | javascript | arduino | avr02-dimmer | degraded | dropped expression statement |
 | round-trip | micropython | arduino | avr02-dimmer | degraded | no pins found |
@@ -448,6 +496,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | arduino | avr04-serial-pot | degraded | dropped expression statement |
 | round-trip | micropython | arduino | avr04-serial-pot | degraded | no pins found |
 | round-trip | basic | arduino | avr05-button-led | degraded | no dialect form for "…"; unstructured "…" |
+| round-trip | cowgol | arduino | avr05-button-led | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | avr06-blink-and-print | degraded | dropped expression statement |
 | round-trip | javascript | arduino | avr06-blink-and-print | degraded | dropped expression statement |
 | round-trip | micropython | arduino | avr06-blink-and-print | degraded | 1 more WHEN script(s) not lifted |
@@ -456,6 +505,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | basic | 8051 | binary-counter-buttons | degraded | no dialect form for "…" |
 | round-trip | c | arduino | blinkenrocket-pendant | degraded | 16 output pins × 20 mA = up to 320 mA at maximum pin ratings (actual current depends on se |
 | round-trip | basic | arduino | blinkenrocket-pendant | degraded | no dialect form for "…" |
+| round-trip | cowgol | arduino | blinkenrocket-pendant | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | chip-thermometer | degraded | dropped expression statement |
 | round-trip | javascript | arduino | chip-thermometer | degraded | dropped expression statement |
 | round-trip | basic | arduino | chip-thermometer | degraded | no dialect form for "…"Chip: "…" C"…" |
@@ -471,9 +521,6 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | 8051 | disp-lcd | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | disp-lcd | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | disp-lcd | degraded | devices_lcdclear: no equivalent on this board; the block was not translated; devices_lcdprint: no equivalent on this board; the block was not translated; devices_lcdcursor: no equivalent on this board; the block was not translated; no pins found |
-| round-trip | python | 8051 | disp-led-matrix | degraded | dropped expression statement |
-| round-trip | javascript | 8051 | disp-led-matrix | degraded | dropped expression statement |
-| round-trip | micropython | 8051 | disp-led-matrix | degraded | devices_clearmatrix: no equivalent on this board; the block was not translated; devices_setpixel: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | python | 8051 | disp-mono-lcd | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | disp-mono-lcd | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | disp-mono-lcd | degraded | devices_oledclear: no equivalent on this board; the block was not translated; devices_oledprint: no equivalent on this board; the block was not translated; devices_oledcursor: no equivalent on this board; the block was not translated; no pins found |
@@ -483,10 +530,9 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | 8051 | disp-rgb-light | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | disp-rgb-light | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | disp-rgb-light | degraded | devices_setneopixel: no equivalent on this board; the block was not translated; no pins found |
-| round-trip | python | 8051 | disp-sevenseg | degraded | dropped expression statement |
-| round-trip | javascript | 8051 | disp-sevenseg | degraded | dropped expression statement |
+| round-trip | python | 8051 | disp-sevenseg | degraded | dropped call in expression |
+| round-trip | javascript | 8051 | disp-sevenseg | degraded | dropped call in expression |
 | round-trip | c | 8051 | disp-sevenseg | degraded | 7 output pins × 20 mA = up to 140 mA at maximum pin ratings (actual current depends on ser; Port 1 has 7 output pins |
-| round-trip | micropython | 8051 | disp-sevenseg | degraded | devices_showdigit: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | c | 6502 | eater6502-blink | degraded | 8 output pins × 20 mA = up to 160 mA at maximum pin ratings (actual current depends on ser |
 | round-trip | python | 6502 | eater6502-full-build | degraded | dropped expression statement |
 | round-trip | javascript | 6502 | eater6502-full-build | degraded | dropped expression statement |
@@ -503,6 +549,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | 8051 | i2c-scanner | degraded | dropped call in expression; dropped expression statement |
 | round-trip | basic | 8051 | i2c-scanner | degraded | no dialect form for "…"device at "…"; no dialect form for "…" devices"…" |
 | round-trip | c | i8086 | i8086-blink | degraded | no pseudocode for the call "…" |
+| round-trip | cowgol | i8086 | i8086-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | 8051 | idea-generator | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | idea-generator | degraded | dropped expression statement |
 | round-trip | basic | 8051 | idea-generator | degraded | no dialect form for "…"; unstructured "…" |
@@ -519,6 +566,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | c | microbit | mb05-faceplate-matrix | degraded | no register header found; no clock #define found; no pins found; no main() and no @bw script markers |
 | round-trip | basic | microbit | mb05-faceplate-matrix | degraded | unstructured "…" |
 | round-trip | micropython | microbit | mb05-faceplate-matrix | degraded | no pins found |
+| round-trip | cowgol | microbit | mb05-faceplate-matrix | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | microbit | mb05-lesson | degraded | dropped call in expression |
 | round-trip | c | microbit | mb05-lesson | degraded | no register header found; no clock #define found; no pins found; no main() and no @bw script markers |
 | round-trip | python | microbit | mb06-reaction | degraded | dropped call in expression |
@@ -530,16 +578,19 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | c | microbit | mb08-thermometer | degraded | no register header found; no clock #define found; no pins found; no main() and no @bw script markers |
 | round-trip | basic | microbit | mb08-thermometer | degraded | unstructured "…" |
 | round-trip | micropython | microbit | mb08-thermometer | degraded | no pins found |
+| round-trip | cowgol | arduino | mega01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | mega02-adc-print | degraded | dropped expression statement |
 | round-trip | javascript | arduino | mega02-adc-print | degraded | dropped expression statement |
 | round-trip | micropython | arduino | mega02-adc-print | degraded | no pins found |
 | round-trip | c | arduino | mega03-port-current | degraded | 8 output pins × 20 mA = up to 160 mA at maximum pin ratings (actual current depends on ser |
+| round-trip | cowgol | arduino | mega03-port-current | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | 8051 | melody-lists | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | melody-lists | degraded | dropped expression statement |
 | round-trip | basic | 8051 | melody-lists | degraded | no dialect form for "…"; early ENDPROC |
 | round-trip | micropython | 8051 | melody-lists | degraded | no pins found |
 | round-trip | python | microbit | microbit01-hello | degraded | dropped call in expression |
 | round-trip | c | microbit | microbit01-hello | degraded | no register header found; no clock #define found; no pins found; no main() and no @bw script markers |
+| round-trip | cowgol | arduino | nano01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | arduino | nano02-pot-print | degraded | dropped expression statement |
 | round-trip | javascript | arduino | nano02-pot-print | degraded | dropped expression statement |
 | round-trip | micropython | arduino | nano02-pot-print | degraded | no pins found |
@@ -547,6 +598,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | arduino | nano03-two-tasks | degraded | dropped expression statement |
 | round-trip | micropython | arduino | nano03-two-tasks | degraded | 1 more WHEN script(s) not lifted |
 | round-trip | c | pico | pico01-blink | degraded | top-level declaration dropped (no block equivalent): typedef void ( * bw_vec_t ) ( void …; no pseudocode for the call "…" |
+| round-trip | cowgol | pico | pico01-blink | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | pico | pico02-pot-print | degraded | dropped expression statement |
 | round-trip | javascript | pico | pico02-pot-print | degraded | dropped expression statement |
 | round-trip | c | pico | pico02-pot-print | degraded | top-level declaration dropped (no block equivalent): typedef void ( * bw_vec_t ) ( void …; no pseudocode for the call "…" |
@@ -556,7 +608,7 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | micropython | pico | pico03-two-tasks | degraded | 1 more WHEN script(s) not lifted |
 | round-trip | c | pico | pico04-button | degraded | top-level declaration dropped (no block equivalent): typedef void ( * bw_vec_t ) ( void …; no pseudocode for the call "…" |
 | round-trip | basic | pico | pico04-button | degraded | no dialect form for "…"; unstructured "…" |
-| round-trip | basic | 8051 | random-lucky-light | degraded | no dialect form for "…" |
+| round-trip | cowgol | pico | pico04-button | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | 8051 | reaction-duel | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | reaction-duel | degraded | dropped expression statement |
 | round-trip | basic | 8051 | reaction-duel | degraded | no dialect form for "…"; unstructured "…" |
@@ -572,10 +624,12 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | 8051 | sense-light-barrier | degraded | dropped expression statement |
 | round-trip | python | 8051 | sense-noise-counter | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | sense-noise-counter | degraded | dropped expression statement |
+| round-trip | cowgol | 8051 | sense-noise-counter | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | basic | 8051 | sense-noise-light | degraded | unstructured "…" |
 | round-trip | python | 8051 | sense-pir-alarm | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | sense-pir-alarm | degraded | dropped expression statement |
 | round-trip | basic | 8051 | sense-pir-alarm | degraded | no dialect form for "…" |
+| round-trip | cowgol | 8051 | sense-pir-alarm | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | python | 8051 | sense-thermometer-1wire | degraded | dropped call in expression; dropped expression statement |
 | round-trip | javascript | 8051 | sense-thermometer-1wire | degraded | dropped call in expression; dropped expression statement |
 | round-trip | python | 8051 | sense-twilight-switch | degraded | dropped expression statement |
@@ -585,7 +639,9 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | javascript | spike | spike01-obstacle-avoid | degraded | dropped expression statement; dropped call in expression |
 | round-trip | c | spike | spike01-obstacle-avoid | degraded | no register header found; no clock #define found; no pins found; no main() and no @bw script markers |
 | round-trip | micropython | spike | spike01-obstacle-avoid | degraded | spikeprime_motorStart: no equivalent on this board; the block was not translated; spikeprime_motorStop: no equivalent on this board; the block was not translated; spikeprime_displayText: no equivalent on this board; the block was not translated; spikeprime_displayClear: no equivalent on this board; the block was not translated; no pins found |
+| round-trip | cowgol | 8051 | two-toggle-keys | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | c | z80 | z80-pd-bench | degraded | 8 output pins × 20 mA = up to 160 mA at maximum pin ratings (actual current depends on ser |
+| round-trip | cowgol | z80 | z80-pd-bench | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
 | round-trip | asm | 8086 | i8086_analog | refused | refused (refused): line N: the "…" statement is not lifted yet (displays, tones, PWM, keypad, broadcast and " |
 | round-trip | asm | 8086 | i8086_blink | degraded | pin polarity (ACTIVE LOW) is not recoverable from the bytes; every pin is lifted as active |
 | round-trip | asm | 8086 | i8086_counter | refused | refused (refused): line N: the "…" statement is not lifted yet (displays, tones, PWM, keypad, broadcast and " |
@@ -604,15 +660,35 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | native | asm | 8086 | ether2 | refused | refused (foreign): no Brickwright anchors found: this reader lifts programs the ▶ button lowered, not hand-wr |
 | native | c | 8051 | stc12-blink | degraded | inferred DEVICE STC89C52RC from <8051.h>; no clock #define found; polarity of "…" is unknown; statement dropped (not representable as a block): __asm nop __endasm |
 | native | c | arduino | atmega328p-blink | degraded | inferred DEVICE ATMEGA328P from <avr/io.h>; no clock #define found; no pins found; statement dropped (not representable as a block): __asm__ __volatile__ ( "…" ) |
+| native | cowgol | generic | int32-control-flow | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| native | cowgol | generic | turtle-canvas-host | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| native | cowgol | arduino | active-low-gpio-and-latch | degraded | Cowgol arithmetic is signed int32. This conversion requires intermediate arithmetic values |
+| native | cowgol | generic | pointer-refusal | refused | line N: Expected uint8, found int32 |
+| native | cowgol | generic | array-refusal | refused | line N: Uninitialized Cowgol variable values has no deterministic pseudocode initializer |
+| native | cowgol | generic | recursion-refusal | refused | line N: Cowgol does not permit recursive procedures |
+| native | cowgol | generic | integer-division-refusal | refused | line N: Cowgol / uses integer quotient/remainder; the pseudocode operators differ |
+| native | cowgol | generic | inline-host-code-refusal | refused | line N: unsupported token "…" |
+
+## Source-generation boundary probes
+
+These probes test whether an emitter can produce source at all. They are
+separate from reader totals: a refused concurrent program has no Cowgol source
+to feed into a reader.
+
+| language | fixture | emitter outcome | reasons |
+| --- | --- | --- | --- |
+| cowgol | concurrent-flag-scripts | refused | Cowgol requires exactly one flag script; found 2 |
 
 ## Fixture provenance
 
-Every fixture is either already tracked in this repository or drawn from a
-corpus this repository pins, with its licence recorded here.
+Every fixture is tracked in this repository, explicitly authored in the fixture
+module, or drawn from a corpus this repository pins, with its licence recorded
+here.
 
 | source | languages | origin | licence |
 | --- | --- | --- | --- |
-| program.bw corpus | python, javascript, c, basic, micropython | overlay/scratch-gui/examples — 179 device-tagged programs, round-tripped (parse → emit → read back). Emitter gaps not fed to a reader: python 0, javascript 0, c 0, basic 3, micropython 3 | BSD-3 (repo); Arduino-port programs CC0 |
+| program.bw corpus | python, javascript, c, basic, micropython, cowgol | overlay/scratch-gui/examples — 179 device-tagged programs, round-tripped (parse → emit → read back). Emitter gaps not fed to a reader: python 0, javascript 0, c 0, basic 3, micropython 4, cowgol 135 | BSD-3 (repo); Arduino-port programs CC0 |
 | examples-i8086.js | asm | overlay/scratch-gui/src/lib/bw-asm/examples-i8086.js — 11 MASM programs (6 Amey Thakur, 5 ours), fed native | MIT (Amey Thakur set) / BSD-3 (ours) |
 | oracle C fixtures | c | test/fixtures/oracle/{stc12-blink,atmega328p-blink}.c — real device C, fed native to the pin-inferring reader | BSD-3 (repo) |
+| Cowgol boundary probes | cowgol | scripts/reader-coverage-fixtures.mjs — authored native control/canvas/GPIO, pointer/array/recursion/division/inline-code probes; concurrent-handler emitter refusal counted separately | BSD-3 (repo) |
 | Amey Thakur external corpus (not folded in) | asm | /mnt/volume1/code/retro-corpus-8086 (525 .asm, env I8086_CORPUS) — a larger asm input, deliberately excluded from committed figures so CI stays reproducible | MIT |

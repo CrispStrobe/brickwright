@@ -363,14 +363,15 @@ class DebugPanel extends React.Component {
      *  must boot TOGETHER so the CPU reads its reset vector from the
      *  real bytes, not from a zero-filled ROM it booted with earlier. */
     async _onMediaLoad (e) {
+        const completion = e.detail?.bootCompletion;
         try {
             const consumed = await this._bootFromMedia(e);
-            if (consumed) e.detail?.bootCompletion?.resolve();
+            if (consumed) completion?.resolve();
         } catch (error) {
             // DOM dispatch does not await an async listener. Return attachment
             // failures to Machine Manager when it requested completion.
-            if (e.detail?.bootCompletion) {
-                e.detail.bootCompletion.reject(error);
+            if (completion) {
+                completion.reject(error);
                 return;
             }
             throw error;
@@ -384,6 +385,13 @@ class DebugPanel extends React.Component {
         // `bytes`. Read on their own line so the fixed field-list gate above
         // (i8086-chips-wiring) still sees the canonical destructure unchanged.
         const {riscvImage, riscvEcallTraps} = e.detail || {};
+        const {launchControl} = e.detail || {};
+        const ownsLaunch = () => !launchControl || (!launchControl.cancelled && !launchControl.signal?.aborted &&
+            (!launchControl.isCurrent || launchControl.isCurrent()));
+        const cancelLaunch = () => {
+            e.detail?.bootCompletion?.cancel();
+            return false;
+        };
         // A Linux kernel boots WITH its initramfs (the Machine Manager's
         // `kernel` + `initrd` slots, both sha256-checked by activateConfig).
         // Its own line, for the same fixed-field-list reason as above.
@@ -394,6 +402,7 @@ class DebugPanel extends React.Component {
         const {i8086Assembly} = e.detail || {};
         const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt, picoBasicConsole, picoBasicCommands, picoFlashStorage} = e.detail || {};
         if (!bytes && !riscvImage) return;
+        if (!ownsLaunch()) return cancelLaunch();
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
         // same detail object a frame later (for a panel that was not mounted
@@ -426,7 +435,7 @@ class DebugPanel extends React.Component {
                 i8086WiredConfig = useWired ? board : null;
                 i8086Hardware = useWired ? 'wired' : 'virtual';
             }
-            if (this._lastMediaDetail !== e.detail) return false;
+            if (this._lastMediaDetail !== e.detail || !ownsLaunch()) return cancelLaunch();
         }
         this._teardownRunner();
         if (this._userFirmware?.blinkOutputOnly) this._userFirmware = null;
@@ -451,6 +460,7 @@ class DebugPanel extends React.Component {
             dosFastStart,
             cpmLaunch,
             cpmFiles,
+            launchControl,
             picoWakeOnPrompt,
             picoBasicConsole,
             picoBasicCommands,
@@ -500,15 +510,28 @@ class DebugPanel extends React.Component {
         await new Promise(resolve => this.setState(
             {kind: nextKind, runner: null, ui: {phase: 'idle', message: ''},
                 ...(i8086WiredConfig ? {machineConfig: i8086WiredConfig} : {})}, resolve));
+        if (this._lastMediaDetail !== e.detail || !ownsLaunch()) return cancelLaunch();
         const pending = this.runner();
         const owner = this._runnerPromise;
         const runner = await pending;
-        if (this._runnerPromise !== owner) return false;
-        await runner.start({paused: nextKind === 'cp1'});
+        const discardLaunch = () => {
+            // A cancelled older attach must never tear down its replacement.
+            if (this._lastMediaDetail === e.detail && this._runnerPromise === owner) {
+                this._teardownRunner();
+            }
+            return cancelLaunch();
+        };
+        if (this._lastMediaDetail !== e.detail || this._runnerPromise !== owner || !ownsLaunch()) {
+            return discardLaunch();
+        }
+        const started = await runner.start({paused: nextKind === 'cp1'});
         // The runner reports attachment failures in state() rather than
         // rejecting start(). Promote that failure to the media completion
         // promise before the manager closes or a dead screen is mirrored.
-        if (this._lastMediaDetail !== e.detail || this._runnerPromise !== owner) return false;
+        if (this._lastMediaDetail !== e.detail || this._runnerPromise !== owner || !ownsLaunch() ||
+            (started?.accepted === false && ['cancelled', 'destroyed'].includes(started.code))) {
+            return discardLaunch();
+        }
         const bootState = e.detail?.bootCompletion || i8086Hardware ? runner.state() : null;
         if (bootState?.phase === 'error') {
             throw new Error(bootState.message || 'The machine failed to attach');
@@ -521,11 +544,11 @@ class DebugPanel extends React.Component {
         // instrument, exactly as before — this only adds a surface, never removes
         // one. The video-widget declaration rides the media-load event's
         // `widgets` field (the machine-manager activate action supplies it).
-        const io = nextKind === 'i8086' ? runner.i8086MediaIo : null;
+        const io = ['i8086', 'i80386'].includes(nextKind) ? runner.i8086MediaIo : null;
         const displayName = io?.display && `PC ${io.display === 'hercules' ? 'Hercules' : io.display.toUpperCase()}`;
         const screen = (Array.isArray(widgets)
             ? widgets.find(w => w && w.source === 'video') : null) ||
-            (['i80286', 'i80386'].includes(nextKind) ? {name: 'AT VGA', type: 'simplevga', source: 'video',
+            (['i80286', 'i80386'].includes(nextKind) && !io?.dosKeyboard ? {name: 'AT VGA', type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null) ||
             (displayName ? {name: displayName, type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null);
@@ -643,6 +666,10 @@ class DebugPanel extends React.Component {
             // the image because they are a property of the PROGRAM, not of
             // the board the user happened to draw.
             chips: chips || null,
+            // A native ROM may require a fixed RAM/ROM/peripheral map. Carry
+            // it through the ASM event so an older extracted circuit cannot
+            // move the image or its console to different addresses.
+            ...(e.detail?.machineConfig6502 ? {machineConfig6502: e.detail.machineConfig6502} : {}),
             kind: target === 'z80' ? 'z80'
                 : target === 'i8086' ? 'i8086' : 'eater6502',
             name: 'assembled image', asmBlink: e.detail?.asmBlink,
@@ -1038,16 +1065,23 @@ class DebugPanel extends React.Component {
     }
 
     async _createRunner (claim) {
+        // This claim owns the configuration at creation time. Reading the
+        // panel's mutable media after the lazy import could give a stale
+        // runner its replacement's launch control, which teardown would cancel.
+        const vm = this.props.vm;
+        const {kind, machineConfig, labwiredChip, esp32s3Console, esp32S040McuId} = this.state;
+        const bootMedia = this._bootMedia;
+        const userFirmware = this._userFirmware;
         const {createDebugRunner} = await import(
             /* webpackChunkName: "bw-debug" */ '../../lib/bw-debug/debug-runner.js');
         const runner = createDebugRunner({
-            vm: this.props.vm,
-            targetKind: this.state.kind,
-            machineConfig: this.state.machineConfig,
-            bootMedia: this._bootMedia,
-            labwiredChip: this.state.kind === 'labwired' ? (this.state.labwiredChip || null) : null,
-            esp32s3Console: this.state.esp32s3Console,
-            esp32S040McuId: this.state.esp32S040McuId || null,
+            vm,
+            targetKind: kind,
+            machineConfig,
+            bootMedia,
+            labwiredChip: kind === 'labwired' ? (labwiredChip || null) : null,
+            esp32s3Console,
+            esp32S040McuId: esp32S040McuId || null,
             // A replaced runner still inside its attach await publishes
             // attaching/ready when that await resolves; dropped, not applied
             // over its replacement's phase.
@@ -1077,9 +1111,9 @@ class DebugPanel extends React.Component {
                 });
             })
         });
-        runner.blinkOutputOnly = Boolean(this._bootMedia?.asmBlink || this._userFirmware?.blinkOutputOnly);
-        if (this._userFirmware && typeof runner.setFirmware === 'function') {
-            runner.setFirmware(this._userFirmware);
+        runner.blinkOutputOnly = Boolean(bootMedia?.asmBlink || userFirmware?.blinkOutputOnly);
+        if (userFirmware && typeof runner.setFirmware === 'function') {
+            runner.setFirmware(userFirmware);
         }
         // Torn down while the chunk import was pending: the teardown destroys
         // this instance, so it must not become the panel's runner either.

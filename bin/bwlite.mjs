@@ -17,8 +17,12 @@ const help = `Brickwright Lite CLI
   bwlite check PROGRAM.bw
   bwlite devices [PROGRAM.bw]
   bwlite retarget PROGRAM.bw DEVICE [--out FILE]
-  bwlite convert FILE.bw|.c|.py|.js|.bas|.sb3 --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic [--device DEVICE] [--out FILE]
-  bwlite transpile PROGRAM.bw --to c|micropython|python|sb3 [--device DEVICE] [--out FILE]
+  bwlite read FILE.bw|.c|.py|.js|.bas|.cow|.cowgol|.sb3 [--device DEVICE] [--out FILE]
+  bwlite convert FILE.bw|.c|.py|.js|.bas|.cow|.cowgol|.sb3 --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic|cowgol [--device DEVICE] [--out FILE]
+  bwlite transpile PROGRAM.bw --to c|micropython|python|sb3|cowgol [--device DEVICE] [--out FILE]
+  bwlite convert PROGRAM.bw|.sb3 --to cowgol --target TARGET [--out FILE]
+  bwlite cowgol targets
+  bwlite cowgol build PROGRAM.cow|.cowgol|.bw|.sb3 --target TARGET --out FILE [--endpoint URL]
   bwlite spike probe [--port USB_DEVICE]
   bwlite spike run PROGRAM.bw [--port USB_DEVICE]
   bwlite spike bridge --port USB_DEVICE [--listen IP] [--tcp-port N]
@@ -40,9 +44,11 @@ Python with pyserial (pip install pyserial). Set BWLITE_PYTHON to select a venv.
 `;
 
 const die = message => { console.error(message); process.exitCode = 2; };
+const hasOption = name => args.some(arg => arg === name || arg.startsWith(`${name}=`));
 const value = name => {
-    const index = args.indexOf(name);
-    return index >= 0 ? args[index + 1] : undefined;
+    const index = args.findIndex(arg => arg === name || arg.startsWith(`${name}=`));
+    if (index < 0) return undefined;
+    return args[index] === name ? args[index + 1] : args[index].slice(name.length + 1);
 };
 const output = async (data, destination) => {
     if (destination) await writeFile(destination, data);
@@ -62,15 +68,18 @@ const retarget = (source, device, SB3Creator) => {
     for (const warning of result.warnings || []) console.error(`warning: ${warning}`);
     return result.pseudocode;
 };
+const loadProject = async file => {
+    const zip = await guiRequire('jszip').loadAsync(await readFile(file));
+    const entry = zip.file('project.json');
+    if (!entry) throw new Error(`${file}: missing project.json`);
+    return JSON.parse(await entry.async('string'));
+};
 const loadPseudocode = async file => {
-    const input = await readFile(file);
     if (/\.sb3$/i.test(file)) {
-        const zip = await guiRequire('jszip').loadAsync(input);
-        const entry = zip.file('project.json');
-        if (!entry) throw new Error(`${file}: missing project.json`);
         const SB3Creator = await creatorClass();
-        return new SB3Creator().decompile(JSON.parse(await entry.async('string')));
+        return new SB3Creator().decompile(await loadProject(file));
     }
+    const input = await readFile(file);
     const source = input.toString('utf8');
     const lib = '../packages/scratch-gui/src/lib/';
     let reader;
@@ -78,9 +87,14 @@ const loadPseudocode = async file => {
     else if (/\.py$/i.test(file)) reader = (await import(`${lib}${/^\s*from\s+(machine|microbit)\s+import/m.test(source) ? 'sb3-creator-micropython' : 'sb3-creator-python'}.js`)).default;
     else if (/\.js$/i.test(file)) reader = (await import(`${lib}sb3-creator-javascript.js`)).default;
     else if (/\.(bas|basic)$/i.test(file)) reader = (await import(`${lib}sb3-creator-basic.js`)).default;
+    else if (/\.(cow|cowgol)$/i.test(file)) reader = (await import(`${lib}sb3-creator-cowgol-reader.js`)).default;
     else if (/\.bw$/i.test(file)) return source;
-    else throw new Error('Input must be .bw, .c, .py, .js, .bas, or .sb3');
+    else throw new Error('Input must be .bw, .c, .py, .js, .bas, .cow, .cowgol, or .sb3');
     const result = reader(source);
+    if (result?.ok === false) {
+        const language = /\.(cow|cowgol)$/i.test(file) ? 'Cowgol' : 'Source';
+        throw new Error(`${language} import refused: ${(result.reasons || []).join('; ') || 'unsupported source'}`);
+    }
     for (const warning of result.warnings || []) console.error(`warning: ${warning}`);
     return result.pseudocode ?? result;
 };
@@ -90,11 +104,12 @@ const runScript = (script, rest) => {
     else process.exitCode = result.status ?? 1;
 };
 
-if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0] === 'help') {
+if (!args.length || (args.includes('--help') && !['circuit', 'cowgol'].includes(args[0])) || args[0] === 'help') {
     console.log(help);
-} else if (['toolchain', 'machine', 'fpga', 'makecode', 'circuit'].includes(args[0])) {
+} else if (['toolchain', 'machine', 'fpga', 'makecode', 'circuit', 'cowgol'].includes(args[0])) {
     const scripts = {toolchain: 'scripts/bw-toolchain.mjs', machine: 'scripts/machine-manager.mjs',
-        fpga: 'scripts/bw-fpga.mjs', makecode: 'scripts/makecode.mjs', circuit: 'scripts/circuit-examples.mjs'};
+        fpga: 'scripts/bw-fpga.mjs', makecode: 'scripts/makecode.mjs', circuit: 'scripts/circuit-examples.mjs',
+        cowgol: 'scripts/bw-cowgol.mjs'};
     runScript(scripts[args[0]], args.slice(1));
 } else if (args[0] === '8051' && ['build', 'flash'].includes(args[1])) {
     const mode = args[1];
@@ -171,10 +186,29 @@ if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0
             if (!args[2] || args[2].startsWith('--')) die('retarget needs PROGRAM.bw DEVICE');
             else await output(retarget(await loadPseudocode(file), args[2], SB3Creator), value('--out'));
         } else {
-            let source = await loadPseudocode(file);
-            source = retarget(source, value('--device'), SB3Creator);
             const creator = new SB3Creator();
-            creator.parse(source);
+            const to = command === 'read' ? 'pseudocode' : command === 'check' ? null : value('--to');
+            let source, originalProject;
+            if (to === 'cowgol' && /\.sb3$/i.test(file)) {
+                originalProject = await loadProject(file);
+                if (value('--device')) {
+                    // Check the original graph before an explicit retargeting
+                    // decompile can turn an unsupported opcode into a comment.
+                    const original = creator.generateCowgol(originalProject);
+                    if (!original.ok) throw new Error(`Cowgol generation refused: ${(original.reasons || []).join('; ')}`);
+                }
+            }
+            if (!originalProject || value('--device')) {
+                source = await loadPseudocode(file);
+                if (to === 'cowgol' && value('--device')) {
+                    // Retargeting reparses the source and can normalize away a
+                    // warning. Refuse the original partial parse first.
+                    creator.parse(source);
+                    if (creator.warnings.length) throw new Error(`Cowgol generation refused: ${creator.warnings.join('; ')}`);
+                }
+                source = retarget(source, value('--device'), SB3Creator);
+                creator.parse(source);
+            }
             for (const warning of creator.warnings || []) console.error(`warning: ${warning}`);
             if (command === 'check') {
                 const verdict = creator.validate();
@@ -182,9 +216,11 @@ if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0
                 console.log(verdict.isValid ? 'ok' : 'INVALID');
                 if (!verdict.isValid) process.exitCode = 1;
             } else {
-                const to = command === 'read' ? 'pseudocode' : value('--to');
-                if (!['pseudocode', 'sb3', 'c', 'host-c', 'python', 'javascript', 'micropython', 'basic'].includes(to)) {
-                    throw new Error('Use --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic');
+                if (!['pseudocode', 'sb3', 'c', 'host-c', 'python', 'javascript', 'micropython', 'basic', 'cowgol'].includes(to)) {
+                    throw new Error('Use --to pseudocode|sb3|c|host-c|python|javascript|micropython|basic|cowgol');
+                }
+                if (hasOption('--target') && (to !== 'cowgol' || !value('--target') || value('--target').startsWith('-'))) {
+                    throw new Error('--target requires a native Cowgol target with --to cowgol');
                 }
                 let result;
                 if (to === 'pseudocode') result = source;
@@ -193,6 +229,16 @@ if (!args.length || (args.includes('--help') && args[0] !== 'circuit') || args[0
                 else if (to === 'host-c') result = creator.generateHostC();
                 else if (to === 'python') result = creator.generatePython();
                 else if (to === 'javascript') result = creator.generateJavaScript();
+                else if (to === 'cowgol') {
+                    // A partially parsed pseudocode program must not become a
+                    // successful Cowgol artifact with the missing statements gone.
+                    if (creator.warnings.length) throw new Error(`Cowgol generation refused: ${creator.warnings.join('; ')}`);
+                    const generated = creator.generateCowgol(value('--device') ? undefined : originalProject,
+                        hasOption('--target') ? {target: value('--target')} : {});
+                    if (!generated.ok) throw new Error(`Cowgol generation refused: ${(generated.reasons || []).join('; ') || 'unsupported program'}`);
+                    for (const warning of generated.warnings || []) console.error(`warning: ${warning}`);
+                    result = generated.cowgol;
+                }
                 else if (to === 'micropython') {
                     const generated = creator.generateMicroPython();
                     if (!generated.ok) throw new Error(`MicroPython refused: ${generated.reasons.join('; ')}`);

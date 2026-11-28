@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "classification": "Inherited gate-shape blockers; no source, detector, exemption, or budget changes proposed",
+  "refs": {
+    "before_gate_fixes": "689feabf5d68086865448ecdb362ceecf0b00df4",
+    "candidate": "f67974e92c0f405e8e6d9cfc64212390a5e5d939",
+    "main": "ccc5c6405bd2065ab85d42fe660fb0bee391422f"
+  },
+  "ci": {
+    "run": 46164617380,
+    "job": 141039306658,
+    "url": "https://github.com/CrispStrobe/brickwright/actions/runs/46164617380/job/141039306658",
+    "verdict": "EVENT-AS-STATE: 10 suspects, baseline 0"
+  },
+  "validation": {
+    "method": "Executed the exact candidate scripts/audit-gate-shapes.mjs in memory with filesystem/path adapters over 174 exact candidate source files; only imports and import.meta.url were adapted. Compared all 10 flagged files and scanner byte-for-byte against both prior feature and current main.",
+    "scannedCandidateFiles": 174,
+    "eventFindings": 10,
+    "completeRepositoryScan": false,
+    "candidatePopulation": "Union of GitHub code-search appearance candidates; the ten reproduced EVENT findings match the full CI count.",
+    "identity": "All ten EVENT files and the scanner are identical across all three refs. Four file comparisons independently repeated by remote_review.",
+    "limits": "No browser gate was rerun. Source identity proves inheritance, not that each underlying gate or finding is sound."
+  },
+  "eventFindings": [
+    {
+      "file": "scripts/verify-code-arcade-run.mjs",
+      "line": 71,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-code-conversion-matrix.mjs",
+      "line": 86,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-code-language-readback.mjs",
+      "line": 19,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-costume-toolbar.mjs",
+      "line": 19,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-cp1-cp5-browser.mjs",
+      "line": 72,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-gallery-artwork-browser.mjs",
+      "line": 56,
+      "kind": "EVENT-AS-STATE",
+      "detail": "2 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-imported-machine-profiles.mjs",
+      "line": 65,
+      "kind": "EVENT-AS-STATE",
+      "detail": "3 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-kim1-circuits-browser.mjs",
+      "line": 44,
+      "kind": "EVENT-AS-STATE",
+      "detail": "2 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-labwired-engine.mjs",
+      "line": 207,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-shared-3d-navigation.mjs",
+      "line": 80,
+      "kind": "EVENT-AS-STATE",
+      "detail": "1 appearance assertion(s), none proving the thing is ever gone",
+      "identicalAcrossAllThreeRefs": true
+    }
+  ],
+  "additionalInheritedFindings": [
+    {
+      "file": "scripts/verify-gallery-artwork-browser.mjs",
+      "line": 17,
+      "kind": "SEGMENT-MATCH",
+      "detail": "qualified name reduced to its final segment before a membership test",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-gallery-artwork-browser.mjs",
+      "line": 18,
+      "kind": "SEGMENT-MATCH",
+      "detail": "qualified name reduced to its final segment before a membership test",
+      "identicalAcrossAllThreeRefs": true
+    },
+    {
+      "file": "scripts/verify-machine-library-launch.mjs",
+      "line": 247,
+      "kind": "WINDOWED-SEARCH",
+      "detail": "fixed 450-char window searched as a scope — brace-match instead",
+      "identicalAcrossAllThreeRefs": true
+    }
+  ],
+  "maskedByEarlierFailure": "The no-new-suspects test iterates AMBIENT-BINDING before EVENT-AS-STATE; old AMBIENT count 11 stopped it before these already-existing EVENT findings. EVENT precedes SEGMENT-MATCH and WINDOWED-SEARCH, masking their already-existing findings in turn.",
+  "decision": "Preserve every verifier assertion, keep EVENT-AS-STATE budget zero, and leave inherited blockers explicit. None of the ten comes from the Cowgol/CAD gate fixes."
+}

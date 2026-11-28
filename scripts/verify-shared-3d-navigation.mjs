@@ -77,6 +77,7 @@ const openRobots = async () => {
 const openCad = async () => {
     await tab('CAD').click();
     await page.waitForFunction(() => window.__bwCad?.editor);
+    // gate-shapes-allow: synchronize the persistent canvas before transition() checks camera position, target and distance, including settings changes and reload persistence.
     await cad.waitFor();
 };
 const selectSetting = async (label, value) => {

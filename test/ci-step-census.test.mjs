@@ -19,7 +19,8 @@ import assert from 'node:assert/strict';
 import {readFileSync, readdirSync} from 'node:fs';
 import path from 'node:path';
 import {parseStepPointers, judgeSteps, STEP_HEADING} from '../scripts/lib/skip-pointers.mjs';
-import {census, yamlSteps, why, workflowSource, mergeWorkflowReadings, READINGS} from '../scripts/gen-ci-steps.mjs';
+import {census, yamlSteps, why, workflowSource, mergeWorkflowReadings, repositoryIdentity, READINGS} from '../scripts/gen-ci-steps.mjs';
+import {BRICKWRIGHT_REPOSITORY_ID, BRICKWRIGHT_PREVIOUS_SLUG, BRICKWRIGHT_SLUG} from '../scripts/lib/brickwright-repository.mjs';
 
 test('a scoped workflow refresh preserves unrelated dated evidence and main provenance', () => {
     const previous = {repo: 'owner/repo', headSha: 'old-main', newestMainRun: 1,
@@ -35,6 +36,69 @@ test('a scoped workflow refresh preserves unrelated dated evidence and main prov
     assert.equal(result.lastRefresh.sourceSha, 'branch');
     assert.throws(() => mergeWorkflowReadings(previous, {...fresh, repo: 'other/repo'}, 'new.yml'));
     assert.throws(() => mergeWorkflowReadings(previous, fresh, 'absent.yml'));
+});
+
+test('live census metadata requires the owned repository ID, not just the renamed slug', () => {
+    const metadata = {full_name: BRICKWRIGHT_SLUG, id: BRICKWRIGHT_REPOSITORY_ID};
+    assert.deepEqual(repositoryIdentity(metadata),
+        {repo: BRICKWRIGHT_SLUG, repositoryId: BRICKWRIGHT_REPOSITORY_ID});
+    for (const id of [undefined, null, 0, -1, 1.5, String(BRICKWRIGHT_REPOSITORY_ID), BRICKWRIGHT_REPOSITORY_ID - 1]) {
+        assert.throws(() => repositoryIdentity({...metadata, id}), 'an absent, malformed or wrong ID is refused');
+    }
+    for (const full_name of [undefined, 'other/brickwright', 'CrispStrobe/brickwright-legacy']) {
+        assert.throws(() => repositoryIdentity({...metadata, full_name}), 'another repository name is refused');
+    }
+});
+
+test('a scoped census refresh admits the owned rename without changing prior observations or main provenance', () => {
+    const previous = {repo: BRICKWRIGHT_PREVIOUS_SLUG, headSha: 'a87a7b447', newestMainRun: 17,
+        generatedAt: '2026-09-07',
+        runs: [{run: 17, workflow: 'old.yml', branch: 'main', sha: 'a87a7b447'},
+            {run: 18, workflow: 'cowgol.yml', branch: 'feature', sha: '111111111'}],
+        workflowsInTree: ['old.yml', 'cowgol.yml'],
+        workflows: {'old.yml': {sourceSha: 'a87a7b447', runs: 1, steps: {old: {ran: 1}}},
+            'cowgol.yml': {sourceSha: '111111111', runs: 1}}};
+    const before = structuredClone(previous);
+    const fresh = {repo: BRICKWRIGHT_SLUG, repositoryId: BRICKWRIGHT_REPOSITORY_ID,
+        generatedAt: '2026-11-28',
+        runs: [{run: 19, workflow: 'cowgol.yml', branch: 'feature', sha: '222222222'}],
+        workflows: {'cowgol.yml': {sourceSha: '222222222', runs: 1}}};
+    const result = mergeWorkflowReadings(previous, fresh, 'cowgol.yml');
+    assert.equal(result.repo, BRICKWRIGHT_SLUG);
+    assert.equal(result.repositoryId, BRICKWRIGHT_REPOSITORY_ID);
+    assert.equal(result.headSha, previous.headSha);
+    assert.equal(result.newestMainRun, previous.newestMainRun);
+    assert.equal(JSON.stringify(result.workflows['old.yml']), JSON.stringify(previous.workflows['old.yml']));
+    assert.deepEqual(result.runs, [previous.runs[0], fresh.runs[0]]);
+    assert.deepEqual(previous, before, 'the inherited readings were not mutated');
+    const anotherRun = {run: 20, workflow: 'another.yml', branch: 'feature', sha: '333333333'};
+    const next = mergeWorkflowReadings(result, {...fresh,
+        runs: [anotherRun],
+        workflows: {'another.yml': {sourceSha: '333333333', runs: 1}}}, 'another.yml');
+    assert.equal(next.repo, BRICKWRIGHT_SLUG);
+    assert.equal(next.repositoryId, BRICKWRIGHT_REPOSITORY_ID);
+    assert.equal(next.headSha, previous.headSha);
+    assert.equal(next.newestMainRun, previous.newestMainRun);
+    assert.deepEqual(next.runs, [...result.runs, anotherRun]);
+    assert.deepEqual(next.workflows['old.yml'], previous.workflows['old.yml']);
+    assert.deepEqual(next.workflows['cowgol.yml'], result.workflows['cowgol.yml']);
+});
+
+test('census rename admission refuses another repository, a wrong ID and a reverse rename', () => {
+    const previous = {repo: BRICKWRIGHT_PREVIOUS_SLUG,
+        runs: [], workflowsInTree: [], workflows: {}};
+    const fresh = {repo: BRICKWRIGHT_SLUG, repositoryId: BRICKWRIGHT_REPOSITORY_ID,
+        runs: [], workflows: {'cowgol.yml': {sourceSha: '222222222', runs: 0}}};
+    assert.throws(() => mergeWorkflowReadings(previous, {...fresh, repositoryId: undefined}, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings(previous, {...fresh, repositoryId: BRICKWRIGHT_REPOSITORY_ID - 1}, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings({...previous, repositoryId: BRICKWRIGHT_REPOSITORY_ID - 1}, fresh, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings({...previous, repo: 'other/brickwright'}, fresh, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings(previous, {...fresh, repo: 'other/brickwright'}, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings({...previous, repo: BRICKWRIGHT_SLUG,
+        repositoryId: BRICKWRIGHT_REPOSITORY_ID}, {...fresh, repo: BRICKWRIGHT_PREVIOUS_SLUG}, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings({...previous, repo: BRICKWRIGHT_SLUG,
+        repositoryId: BRICKWRIGHT_REPOSITORY_ID - 1}, fresh, 'cowgol.yml'));
+    assert.throws(() => mergeWorkflowReadings(previous, fresh, 'missing.yml'));
 });
 
 test('a new workflow sources its own branch run until main has actually run it', () => {

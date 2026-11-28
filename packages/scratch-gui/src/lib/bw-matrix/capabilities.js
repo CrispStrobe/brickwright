@@ -93,6 +93,7 @@ export const ARTEFACTS = Object.freeze([
     'py', // MicroPython / CircuitPython source
     'bas', // BASIC text typed into a ROM interpreter
     'com', // DOS .COM program
+    'exe', // DOS MZ executable
     'cpm', // CP/M-80 (Z80) .COM program, run on the CP/M BDOS service layer
     'elf', // RISC-V ELF object/executable, loaded + relocated by the rv32 ELF loader
     'img', // bootable 1.44M floppy image (a .COM wrapped in a boot sector)
@@ -105,6 +106,8 @@ export const LANGUAGES = Object.freeze([
     {id: 'javascript', label: 'JavaScript', reader: 'sb3-creator-javascript.js', emitter: 'generateJavaScript'},
     {id: 'c', label: 'C', reader: 'sb3-creator-c.js', emitter: 'generateC'},
     {id: 'basic', label: 'BASIC', reader: 'sb3-creator-basic.js', emitter: 'generateBASIC'},
+    {id: 'cowgol', label: 'Cowgol', reader: 'sb3-creator-cowgol-reader.js', emitter: 'generateCowgol',
+        readerNote: 'Checked integer, control-flow, canvas and circuit subset; unsupported source is refused', readerTask: 'L5'},
     // The reader lifts the 8086 emitter's own shapes and refuses the rest by
     // name (plan task L1); 8051/6502/Z80/AVR assembly is still one-way.
     {
@@ -590,9 +593,15 @@ const ESP_C = via('c');
  * `native` is a fact object or a null-reason object; `lowered` is a list,
  * possibly empty, of {via} entries whose reach is the landing cell's.
  */
+const cowgolVia = lowered => ({
+    native: no('no-port', 'No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends'),
+    lowered: lowered.map(route => ({...route, note: 'Cowgol checked subset → pseudocode; target backend restrictions still apply'}))
+});
+
 export const CELLS = Object.freeze({
     8051: {
         pseudocode: {native: AST, lowered: [via('c')]},
+        cowgol: cowgolVia([via('c')]),
         python: {native: no('ram', STC_RAM), lowered: [via('c')]},
         javascript: {native: no('ram', `STC12C5A60S2: 1,280 B RAM; ${JS_MIN}`), lowered: [via('c')]},
         c: {
@@ -612,6 +621,7 @@ export const CELLS = Object.freeze({
     },
     avr: {
         pseudocode: {native: AST, lowered: [via('c')]},
+        cowgol: cowgolVia([via('c')]),
         python: {native: no('ram', AVR_RAM), lowered: [via('c')]},
         javascript: {native: no('ram', `ATmega328P: 2 KB RAM; ${JS_MIN}`), lowered: [via('c')]},
         // DEVICE_GROUPS says `compile: false` for every AVR while the C tab
@@ -630,6 +640,7 @@ export const CELLS = Object.freeze({
     },
     rp2040: {
         pseudocode: {native: AST, lowered: [via('micropython'), via('c')]},
+        cowgol: cowgolVia([via('micropython'), via('c')]),
         python: {native: MPY, lowered: [via('micropython'), via('c')]},
         javascript: {
             native: open('js', 'Kaluma (Apache-2.0) or Espruino (MPL-2.0)', 'none', 'N5'),
@@ -652,6 +663,7 @@ export const CELLS = Object.freeze({
     },
     stm32: {
         pseudocode: {native: AST, lowered: [via('c')]},
+        cowgol: cowgolVia([via('c')]),
         python: {native: no('flash', `${F030}; ${MPY_MIN}`), lowered: [via('c')]},
         javascript: {native: no('flash', `${F030}; ${JS_MIN}`), lowered: [via('c')]},
         c: {native: shipped('bin', 'arm-none-eabi-gcc bare-metal', 'hosted'), lowered: [via('c')]},
@@ -661,6 +673,7 @@ export const CELLS = Object.freeze({
     },
     esp8266: {
         pseudocode: {native: AST, lowered: [ESP_C]},
+        cowgol: cowgolVia([ESP_C]),
         python: {native: no('licence', ESP_SDK), lowered: [ESP_C]},
         javascript: {native: no('licence', `${ESP_SDK} (Espruino's ESP8266 port links it too)`), lowered: [ESP_C]},
         c: {
@@ -678,6 +691,7 @@ export const CELLS = Object.freeze({
     },
     microbit: {
         pseudocode: {native: AST, lowered: [via('micropython')]},
+        cowgol: cowgolVia([via('micropython')]),
         python: {native: MPY, lowered: [via('micropython')]},
         javascript: {native: open('ts', 'PXT static TypeScript (MIT)', 'hosted', 'N5'), lowered: [via('micropython')]},
         c: {
@@ -700,6 +714,10 @@ export const CELLS = Object.freeze({
     },
     w65c02: {
         pseudocode: {native: AST, lowered: [via('c'), via('basic')]},
+        cowgol: {...cowgolVia([via('c'), via('basic')]),
+            native: open('bin', 'Cowgol ROM-safe 65C02 + 64tass', 'hosted', 'L5', {
+                note: 'Native 32 KiB Eater ROM with serial console and VIA digital pins; fixed 1 MHz board map; companion service deployment required'
+            })},
         python: {
             native: no('no-port', 'no MicroPython or other Python for the 6502'),
             lowered: [via('c'), via('basic')]
@@ -717,6 +735,10 @@ export const CELLS = Object.freeze({
     },
     z80: {
         pseudocode: {native: AST, lowered: [via('basic'), via('c')]},
+        cowgol: {...cowgolVia([via('basic'), via('c')]),
+            native: open('cpm', 'Cowgol cpmz / cpm', 'hosted', 'L5', {
+                note: 'Native compiler and CP/M Run path implemented on the companion feature branches; deployment required'
+            })},
         python: {
             native: no('no-port', 'no MicroPython or other Python for the Z80'),
             lowered: [via('basic'), via('c')]
@@ -743,6 +765,10 @@ export const CELLS = Object.freeze({
         micropython: {native: no('no-port', 'no MicroPython for the Z80'), lowered: [via('basic'), via('c')]}
     },
     i8086: {
+        cowgol: {...cowgolVia([via('asm'), via('c')]),
+            native: open('exe', 'Cowgol msdos', 'hosted', 'L5', {
+                note: 'DOS MZ real-mode services and MS-DOS 2.0 boot on 8086/80186/80286/80386, with console and Controller text; companion service deployment required'
+            })},
         pseudocode: {
             native: AST,
             lowered: [via('asm', {note: 'pseudocode-8086.js lowers in the browser'}), via('c')]
@@ -795,14 +821,18 @@ export const CELLS = Object.freeze({
     },
     // RISC-V: two local roads, both measured in bw-board (riscv-asm.test.mjs
     // runs assembled programs on the core; riscv-cc-wasm.test.mjs compiles C
-    // with shecc in wasm and runs it), no network. Nothing lowers to it YET:
-    // sb3-creator's generateC has no RISC-V core, so the dialect (and every
-    // language read into it) has no road here. N12 is that road -- a RISC-V
-    // console profile in generateC whose C the same shecc compiles.
+    // with shecc in wasm and runs it). The checked int32 console lowerer uses
+    // full hosted GCC for its fixed-width types and checked intermediate math.
+    // Its source languages inherit that console-only operation boundary.
     riscv32: {
-        pseudocode: {native: AST, lowered: [viaOpen('c', 'N12')]},
-        python: {native: no('no-port', 'no Python port wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
-        javascript: {native: no('no-port', 'no JavaScript engine wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
+        pseudocode: {native: AST, lowered: [via('c', {note: 'Checked int32 console profile; full hosted GCC; no GPIO, canvas or timing'})]},
+        cowgol: {...cowgolVia([via('c')]),
+            native: open('elf', 'Cowgol cgen + RV32 GCC', 'hosted', 'L5', {
+                note: 'Full Cowgol compiles through C to a validated RV32 ELF console image; companion service deployment required'
+            }),
+            lowered: [via('c', {note: 'Cowgol checked subset → Blocks → int32 console C; full hosted GCC; no GPIO, canvas or timing'})]},
+        python: {native: no('no-port', 'no Python port wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; full hosted GCC'})]},
+        javascript: {native: no('no-port', 'no JavaScript engine wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; full hosted GCC'})]},
         c: {
             native: shipped('elf', 'shecc (wasm) in the browser; hosted gcc fallback', 'local', {
                 note: 'shecc (BSD-2-Clause) compiles the C subset it supports, straight to an RV32IM '
@@ -811,16 +841,17 @@ export const CELLS = Object.freeze({
             }),
             lowered: []
         },
-        basic: {native: no('no-port', 'no BASIC interpreter wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
+        basic: {native: no('no-port', 'no BASIC interpreter wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; full hosted GCC'})]},
         asm: {
             native: shipped('elf', 'riscv-asm.js (RV32IM, local)', 'local', {
                 note: 'bw-board riscv-asm.test.mjs checks encodings against the ISA layout and runs programs'
             }),
             lowered: []
         },
-        micropython: {native: no('no-port', 'no MicroPython port wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]}
+        micropython: {native: no('no-port', 'no MicroPython port wired for this RV32IMA SoC'), lowered: [via('c', {note: 'Reader subset → checked int32 console C; hardware calls refused; full hosted GCC'})]}
     },
     samd51: {
+        cowgol: cowgolVia([via('ts', {evidence: EVIDENCE.DECLARED})]),
         pseudocode: {
             native: AST,
             lowered: [via('ts', {
@@ -878,6 +909,22 @@ export const languageById = function (id) {
  * @param {?object} native a cell's native half
  * @returns {boolean} true when it is a null-with-reason rather than a fact
  */
+// Native firmware ports can be qualified for one board without claiming its
+// whole CPU family. Existing device overrides still change only where/note.
+const COWGOL_UNO = open('hex', 'Cowgol cgen + AVR GCC (ATmega328P)', 'hosted', 'L5', {
+    note: 'Canonical 16 MHz Uno: UART console and D2–D19 digital GPIO; native source and checked Blocks; companion service deployment required'
+});
+export const DEVICE_NATIVE = Object.freeze({
+    'arduino-uno': {cowgol: COWGOL_UNO},
+    atmega328p: {cowgol: COWGOL_UNO},
+    'arduino-nano': {cowgol: open('hex', 'Cowgol cgen + AVR GCC (classic Nano)', 'hosted', 'L5', {
+        note: 'Classic ATmega328P Nano at 16 MHz: 30 KiB application flash with 2 KiB bootloader reservation, UART and digital GPIO; companion service deployment required'
+    })},
+    atmega168p: {cowgol: open('hex', 'Cowgol cgen + AVR GCC (bare ATmega168P)', 'hosted', 'L5', {
+        note: 'Bare ATmega168P at 16 MHz: 16 KiB flash without a bootloader, 1 KiB SRAM, 128-byte heap and 512-byte stack reserve; UART, digital GPIO and blocking delays; companion service deployment required'
+    })}
+});
+
 export const isNativeNull = function (native) {
     return !native || typeof native.reason === 'string';
 };
@@ -917,9 +964,10 @@ export const cell = function (langId, deviceId) {
     // A device may override facts of its family's cell (e.g. one STC part
     // whose C compiles hosted rather than locally). Reach is computed after.
     const override = (device.overrides && device.overrides[lang.id]) || null;
-    const native = isNativeNull(raw.native) ?
-        {...raw.native, ...NO_REACH} :
-        {...raw.native, ...override, ...reachOf(raw.native, device)};
+    const nativeFact = DEVICE_NATIVE[device.id]?.[lang.id] || raw.native;
+    const native = isNativeNull(nativeFact) ?
+        {...nativeFact, ...NO_REACH} :
+        {...nativeFact, ...override, ...reachOf(nativeFact, device)};
     const lowered = raw.lowered.map(l => {
         const landing = fam[l.via] && fam[l.via].native;
         const reach = l.status === STATUS.SHIPPED ? reachOf(landing, device) : NO_REACH;

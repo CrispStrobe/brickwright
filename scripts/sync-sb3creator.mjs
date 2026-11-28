@@ -73,6 +73,7 @@ const FILES = [
     ['src/utils/cp1Program.js', path.join(lib, 'cp1-program.js')],
     ['src/utils/sb3Creator.js', path.join(lib, 'sb3-creator.js')],
     ['src/utils/procedureParameterConstraints.js', path.join(lib, 'procedureParameterConstraints.js')],
+    ['src/utils/crispBasicMode.js', path.join(lib, 'crispBasicMode.js')],
     // The referee: reference trace interpreter + comparator (corpus-and-oracles.md).
     ['src/utils/traceOracle.js', path.join(lib, 'trace-oracle.js')],
     ['src/utils/examples.js', path.join(lib, 'sb3-creator-examples.js')],
@@ -95,6 +96,9 @@ const FILES = [
     ['src/utils/cHostRuntime.js', path.join(lib, 'sb3-creator-chostruntime.js')],
     ['src/utils/cHostToPseudocode.js', path.join(lib, 'sb3-creator-chost.js')],
     ['src/utils/basicToPseudocode.js', path.join(lib, 'sb3-creator-basic.js')],
+    ['src/utils/cowgol.js', path.join(lib, 'sb3-creator-cowgol.js')],
+    ['src/utils/cowgolToPseudocode.js', path.join(lib, 'sb3-creator-cowgol-reader.js')],
+    ['src/utils/riscvConsole.js', path.join(lib, 'sb3-creator-riscv-console.js')],
     ['src/utils/cubeDirections.js', path.join(lib, 'cubeDirections.js')],
     // The DEVICE EV3 word table, read by sb3Creator.js in both directions.
     ['src/utils/ev3Dialect.js', path.join(lib, 'ev3Dialect.js')],

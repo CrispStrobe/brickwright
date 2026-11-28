@@ -141,9 +141,15 @@ try{
     for(const name of ['New CAD design…','Import STEP as exact bodies…','Export STEP (exact B-rep)…','STEP evidence…','Check printability…'])await item(name).waitFor();
     for(const [submenu,entries] of [['Exact modeling (B-rep)',['Fillet, chamfer or shell…','Fillet or chamfer chosen edges…','Measure exactly','Recompute exact features','Inspect surface blends…']],['Holes and fasteners',['Standard hole','Fasten holes','Standard parts']],['Assemblies',['Groups and suppression…','Exploded view','Configurations…','Check mechanism…','Insert planetary gear set']],['Drawings and checks',['Assembly drawing…','Assembly drawing from exact edges…','Export drawing (PDF, SVG or DXF)…','Check for manufacturing…','Materials and mass…']]]){
      await item(submenu).click();
-     for(const name of entries){const entry=item(name);await entry.waitFor();const view=page.viewportSize();let box=await entry.boundingBox();
+     for(const name of entries){const entry=item(name);await entry.waitFor();const view=page.viewportSize();
       // The submenu is fitted into the window on the next animation frame (menu.jsx).
-      for(const deadline=Date.now()+2000;!(box.y>=0&&box.y+box.height<=view.height+1)&&Date.now()<deadline;){await page.waitForTimeout(100);box=await entry.boundingBox();}
+      // Wait for that placement itself; polling must not add an unconditional browser sleep.
+      await page.waitForFunction(({element,viewport})=>{
+       if(!element?.isConnected||!element.getClientRects().length||getComputedStyle(element).visibility!=='visible')return false;
+       const box=element.getBoundingClientRect();
+       return box.width>0&&box.height>0&&box.y>=0&&box.y+box.height<=viewport.height+1;
+      },{element:await entry.elementHandle(),viewport:view},{polling:'raf',timeout:2000});
+      const box=await entry.boundingBox();
       assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=view.width+1&&box.y+box.height<=view.height+1,`${where}: ${name} inside the viewport: ${JSON.stringify(box)} in ${JSON.stringify(view)}`);}
     }
     await page.keyboard.press('Escape');await page.mouse.click(5,(page.viewportSize().height)-5);

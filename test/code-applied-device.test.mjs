@@ -9,7 +9,7 @@ import {captureCodeArtwork, codeArtworkMatches} from '../overlay/scratch-gui/src
 import {basicProfileFor, hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {balancedFrom, scopeAfter} from './helpers/js-scope.mjs';
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {';
+const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) {';
 const compileBody = balancedFrom(source, source.indexOf(signature) + signature.length - 1, '{', '}');
 const publishBody = scopeAfter(source, 'publishAppliedDevice (stc) {');
 const devices = {arcade: {core: 'arcade'}, microbit: {core: 'microbit'}, calliopemini: {core: 'microbit'}, uno: {core: 'avr'}};
@@ -53,7 +53,7 @@ const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, load
     // regenerates; none here (stubs keep the sandbox to the names it gives).
     component.compile = new Function('TWO_WAY', 'classifyConversionWarnings', 'LANG_LABEL', 'window', 'codeArtworkMatches', 'captureCodeArtwork', 'conversionFailure',
         'DOS_LANG', 'generateDosLangs', 'usesScratchStage', 'setCircuitView', 'hiddenCodeDrafts',
-        `return async function ({strict = false, pseudocode = null, scratchExample = false} = {}) ${compileBody}`)(new Set(['pseudocode']),
+        `return async function ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) ${compileBody}`)(new Set(['pseudocode']),
         () => ({changed: [], unsupported: []}), {pseudocode: 'Pseudocode'}, window, codeArtworkMatches, captureCodeArtwork, conversionFailure,
         {}, async () => ({}), usesScratchStage, view => views.push(view), hiddenCodeDrafts);
     Creator.RETARGET_POOLS = {calliopemini: {}};

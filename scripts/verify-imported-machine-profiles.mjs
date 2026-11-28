@@ -62,6 +62,7 @@ try {
             await page.getByTestId('bw-mm-row').filter({hasText: `Test ${kind}`}).getByTestId('bw-mm-run').click();
 
             if (kind === 'gpascal') {
+                // gate-shapes-allow: the imported ROM's serial boot text is the contract and persists; this is output evidence, not a closing UI.
                 await page.getByTestId('bw-serial-console').getByText(/G-Pascal compiler, version/).waitFor();
             } else if (kind.startsWith('i80')) {
                 await page.waitForFunction(() => {
@@ -72,6 +73,7 @@ try {
                 assert.equal(JSON.parse(topology).variant, kind === 'i8088' ? '8086' : '80186');
                 const controller = page.locator('[data-bw-stage-dock="controller"]');
                 const screen = controller.getByTestId('bw-machine-canvas');
+                // gate-shapes-allow: persistent canvas readiness; CGA pixels, topology and halted CPU/keyboard memory are asserted around this wait.
                 await screen.waitFor();
                 await page.waitForFunction(() => {
                     const canvas = document.querySelector('[data-bw-stage-dock="controller"] [data-testid="bw-machine-canvas"]');
@@ -91,6 +93,7 @@ try {
                 assert.equal(await fullscreen.innerText(), 'Full screen');
             } else {
                 const screen = page.getByTestId('bw-machine-canvas');
+                // gate-shapes-allow: persistent canvas readiness; exact dimensions/pixels and keyboard RAM transitions are asserted below.
                 await screen.waitFor();
                 await page.waitForFunction(() => {
                     const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');

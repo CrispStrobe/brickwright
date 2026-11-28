@@ -114,6 +114,13 @@ const ABOUT_GROUPS = [
         titleDe: 'Toolchains (gehosteter Dienst)',
         entries: [
             {
+                name: 'Cowgol',
+                url: 'https://github.com/CrispStrobe/cowgol',
+                license: 'BSD-2-Clause',
+                licenseUrl: 'https://github.com/CrispStrobe/cowgol/blob/master/COPYING',
+                role: 'David Given’s Cowgol compiler; hosted CP/M, DOS and C export, with a checked Blocks bridge'
+            },
+            {
                 name: 'avr-gcc + arm-none-eabi-gcc',
                 url: 'https://gcc.gnu.org/',
                 license: 'GPL (service-side)',
@@ -419,7 +426,7 @@ const ABOUT_GROUPS = [
                 url: 'https://github.com/CrispStrobe',
                 license: 'MPL-2.0',
                 licenseUrl: `${REPO}/blob/main/overlay/scratch-gui/src/lib/sb3-creator-LICENSE`,
-                role: 'Blocks-to-code transpiler (C, Python, JS, BASIC)'
+                role: 'Blocks-to-code transpiler (C, Python, JS, BASIC, Cowgol)'
             },
             {
                 name: 'bw-board (simulation engine)',
