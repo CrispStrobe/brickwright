@@ -1,20 +1,22 @@
 # CrispBASIC native host
 
-This is the first working backend: a headless, single-process BBCSDL interpreter
-for **Linux x64**. It consumes a prepared BASIC source file, writes the original
+This backend is a headless, single-process BBCSDL interpreter for **Linux x64
+and Linux ARM64**. It consumes a prepared BASIC source file, writes the original
 VDU output bytes, and reports completion separately from program output. It is
 the actual pinned interpreter, with a small host patch recorded in
 `patch-upstream.mjs`.
 
 ## Build
 
-Install GCC, NASM, Git and Node.js, then run from the package root:
+Install GCC, GNU binutils, Git and Node.js. Linux x64 additionally requires
+NASM; ARM64 uses the native compiler's GNU assembler. Run from the package root:
 
 ```sh
 node scripts/build-native.mjs
 ```
 
-`CC` and `NASM` may specify alternative executable paths. The build fetches the
+`CC` and (on x64) `NASM` may specify alternative executable paths. This is a
+native build: the architecture follows the running Node.js process. The build fetches the
 exact upstream commit into `.build/BBCSDL` and obtains each source directly from
 the pinned git object. It checks every source's SHA-256 against
 `upstream.lock.json` before patching a separate copy under `.build/native`.
@@ -23,6 +25,16 @@ Uncommitted changes in the upstream checkout cannot enter the build.
 the pinned commit. The build output is `.build/crispbasic-native` with the
 upstream licence and toolchain metadata alongside it. Generated files are not
 committed. This pins the source inputs; binaries can differ between toolchains.
+
+The ARM64 build selects the pinned `src/bbasmb_arm_64.c` and
+`src/bbdata_arm_64.s`. Its symbol conversion matches the same revision's
+[Linux ARM64 console makefile](https://github.com/rtrussell/BBCSDL/blob/6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f/console/rpi64/makefile).
+Both architectures use the same batch host and process protocol. The build
+receipt includes the architecture, selected sources and binary SHA-256; the
+runtime tests inspect the executable's ELF machine identity and execute the
+same structured-language, I/O, error and lifecycle suite on both CI runners.
+Linux on an ARM64 Raspberry Pi is covered by the architecture build; bare-metal
+Pico firmware, ARM32, RISC-V, macOS and Windows native hosts are separate ports.
 
 ## Process protocol, version 1
 

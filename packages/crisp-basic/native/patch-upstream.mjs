@@ -28,6 +28,11 @@ export function patchUpstream(path, original) {
         replace('#include "bbccon.h"', '#include "bbccon.h"\nvoid oswrch(unsigned char);\nvoid osline(char *);\nunsigned char osrdch(void);\nint oskey(int);');
         replace('xeqvdu (0x1700, 0, 0x1F) ;', '/* CrispBASIC: no ANSI terminal initialisation in raw VDU mode. */');
         replace('vflags = UTF8 ;', 'vflags = 0 ;');
+    } else if (path === 'src/bbdata_arm_64.s') {
+        // Identical to console/rpi64/makefile's sed 's/_\([a-z]*\)/\1/g'.
+        // The shared upstream data file spells symbols for Mach-O. Linux ELF
+        // symbols have no leading underscore; constants are transformed too.
+        source = source.replace(/_([a-z]*)/g, '$1');
     } else if (path === 'src/bbmain.c') {
         replace('#include <setjmp.h>', '#include <setjmp.h>\nvoid crisp_runtime_error(int, const char *, unsigned short);\nvoid crisp_set_exit(int);');
         replace('int basic (void *ecx, void *edx, void *prompt)\n{',
