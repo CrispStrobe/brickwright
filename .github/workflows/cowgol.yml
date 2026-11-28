@@ -168,7 +168,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/bw-board
-          ref: d21d6d8b819263eb08231134b7556efa82289a90
+          ref: 52ca68b6ccc9895300ec1d3a6bd9d6b4b79182e5
           path: _bw_board
       - name: Prepare the native compiler and local HTTP service
         run: |

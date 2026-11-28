@@ -49,7 +49,7 @@
     "balance-text": "^3.3.1",
     "base64-loader": "^1.0.0",
     "bowser": "^1.9.4",
-    "bw-board": "github:CrispStrobe/bw-board#cda715c16d4b733ceb73f7720a236b5ea9e3f21d",
+    "bw-board": "github:CrispStrobe/bw-board#52ca68b6ccc9895300ec1d3a6bd9d6b4b79182e5",
     "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#659431ce46a7b6d4ae472182b069ec301aee0df3",
     "cat-blocks": "npm:scratch-blocks@0.1.0-prerelease.20220318143026",
     "classnames": "^2.2.6",
