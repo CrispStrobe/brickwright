@@ -2020,6 +2020,13 @@ See `packages/crisp-basic/THIRD-PARTY-NOTICES.md`,
 `packages/crisp-basic/wasm/toolchain.lock.json` for provenance. The browser
 payload does not contain the native backend, SDL or the Matrix Brandy oracle.
 
+CrispBASIC's upstream home is https://github.com/CrispStrobe/crispbasic,
+extracted with its history from `packages/crisp-basic/` on 2026-11-28.
+`packages/crisp-basic/` is that repository, unmodified, at the `crispbasic`
+commit in `vendor-pins.json`, without its repository-only `.github/` and
+`tools/` paths. `scripts/sync-crispbasic.mjs` copies it and
+`test/crispbasic-vendor-identity.test.mjs` holds the copy byte-identical.
+
 ## CP/M 2.2 (Z80) — redistributable (DRDOS grant) + MIT
 
 The Z80 machine can boot a **real CP/M 2.2 computer** (an `A>` prompt, not

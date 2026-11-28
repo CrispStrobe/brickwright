@@ -39,6 +39,7 @@
         "gen:package-notices": "node scripts/package-upstream-notices.mjs",
         "verify:package-notices": "node scripts/package-upstream-notices.mjs --check",
         "sync:emuwasm": "node scripts/sync-emu8051-wasm.mjs",
+        "sync:crispbasic": "node scripts/sync-crispbasic.mjs",
         "sync:emuwasm:check": "node scripts/sync-emu8051-wasm.mjs --check",
         "check:mirrors": "node scripts/check-mirrors.mjs",
         "package:store-compliance": "node scripts/package-store-compliance.mjs",
