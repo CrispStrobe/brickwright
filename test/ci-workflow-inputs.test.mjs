@@ -244,3 +244,42 @@ test('workflow script receipt fields do not become checkout declarations', () =>
         .replace('      NODE', '      NODE\n      git clone https://example.invalid/unreviewed.git')]])),
         /unreviewed raw clone/);
 });
+
+test('multiline quoted YAML cannot hide a real checkout from the pin census', () => {
+    for (const quote of ['"', "'"]) {
+        for (const ref of ['main', 'a'.repeat(40)]) {
+            const source = [
+                'name: scanner regression',
+                'on: push',
+                'jobs:',
+                '  test:',
+                '    runs-on: ubuntu-latest',
+                '    steps:',
+                '      - name: ' + quote + 'quoted text',
+                'fake: |',
+                '        ending' + quote,
+                '        uses: actions/checkout@full',
+                '        with:',
+                '          repository: Acme/real',
+                '          ref: ' + ref
+            ].join('\n');
+            assert.throws(() => assertCheckoutPins(new Map([['quoted.yml', source]])),
+                /unsupported multiline quoted YAML scalar/,
+                'ambiguous quoted data must fail closed instead of hiding the checkout');
+        }
+    }
+    const supported = ref => [
+        'steps:',
+        '  - name: |',
+        '      quoted text',
+        '      fake: |',
+        '      ending',
+        '    uses: actions/checkout@full',
+        '    with:',
+        '      repository: Acme/real',
+        '      ref: ' + ref
+    ].join('\n');
+    assert.equal(assertCheckoutPins(new Map([['literal.yml', supported('a'.repeat(40))]])).length, 1);
+    assert.throws(() => assertCheckoutPins(new Map([['literal.yml', supported('main')]])),
+        /Acme\/real: expected a full/);
+});
