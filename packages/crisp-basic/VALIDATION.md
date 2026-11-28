@@ -20,6 +20,64 @@ check and mirrored-fact check pass. All 21 mapped producer files match the
 adopted source after the sync's documented import rewrites. The SPIKE artifact
 test passes at the new exact pin.
 
+### Consumer hosted qualification
+
+The integration implementation is
+[`73370eb148c8`](https://github.com/CrispStrobe/brickwright/commit/73370eb148c8833b20e464e5576f1e33b206c386)
+on `feature/crispbasic`. **All three jobs in
+[run 46104769080](https://github.com/CrispStrobe/brickwright/actions/runs/46104769080)
+passed: 544 tests, zero failures, cancellations or skips.** The run completed on
+2026-11-28 at 04:58:52 CET. Both interpreter backends were rebuilt from the
+unchanged pinned source. The runtime package remains `0.1.0-dev.5`; only the
+owning generator's existing dependency pin advances in this milestone.
+
+| Suite | Passed |
+| --- | ---: |
+| Source preparation, reference host and bridge protocol/lifecycle | 100 |
+| Native runtime and CLI | 41 |
+| Actual WASM execution, restricted-host policy and simulation bridge | 147 |
+| Native/WASM comparisons against fixed expected results | 10 |
+| Real Chromium engine workers | 18 |
+| GUI adapter, assets, editor, board host/session, generated source and conversion | 176 |
+| Shared board ownership and existing CAD bridge/cancellation | 30 |
+| Focused Chromium editor, renderer and Circuit integration | 12 |
+| Complete production GUI in Chromium | 10 |
+| **CrispBASIC CI total** | **544** |
+
+The separate
+[BASIC oracle run, 46104769121](https://github.com/CrispStrobe/brickwright/actions/runs/46104769121),
+also passed all nine fixtures, comparing the emulated BBC BASIC engine with
+BBCSDL and Matrix Brandy. Those fixtures and the producer's 299 tests are
+separate from the 544-test consumer total.
+
+The complete CAD/FPGA-enabled production build used Node 24.22.3 and webpack
+5.96.1 and finished in 126556 ms. Its three existing warnings concern a
+Microtronic CSS recommendation and bundle/entrypoint sizes. The asset gate
+authenticated all 20 runtime payload assets, three entry scripts and 562 lazy
+JavaScript chunks for build `73370eb`. The runtime jobs used Node 22.23.5,
+Emscripten 3.1.64 and lock-pinned Playwright 1.62.1 / Chromium 151.0.7922.34.
+
+The two additional production scenarios passed through the actual CodeMirror
+editor and Code/Circuit controls. The portable program first pauses for INPUT,
+then advances the owned electrical solver by exactly 25000000 ns, observes the
+expected LED-current range and pauses again without advancing the clock. Its
+completed run releases pin and clock ownership. **To blocks** then reports the
+portable-call refusal while preserving the editor source and serialized project.
+The toggle scenario retains the legacy hardware comment by default, refuses
+portable generation, and keeps Run disabled even after a newline edit to the
+error banner; conversion preserves the project and no interpreter is loaded.
+All eight earlier production scenarios also passed.
+
+The production job downloaded and verified its same-run WASM artifact
+`15246234590` against archive SHA-256
+`8c3182c5c7646a95caf7fbb9c9a90077de65c72f02bb9a5476b1093dd1a6870a`.
+The [production evidence archive](https://github.com/CrispStrobe/brickwright/actions/runs/46104769080/artifacts/15247127299)
+contains the browser report, screenshots, build/asset identities and logs.
+GitHub records artifact `15247127299` as 624598 bytes, archive SHA-256
+`7cc38c7e90dba4d4b46800827f45b22bddf46f45dfe3c105b74f6d42ad9b8bcb`.
+Artifacts retain the workflow's seven-day lifetime; this source record and
+reproduction commands remain in the repository.
+
 ### Local checks before consumer CI
 
 The final pinned compiler passed the complete 176-test Brickwright integration
@@ -27,7 +85,10 @@ suite, including 11 conversion/editor/CLI guards and 13 new actual-WASM
 generator cases. Ten separate producer-identity, mirror-sync and SPIKE tests
 also passed. The local interpreter is the authenticated, unchanged WASM from
 run 46078751114 recorded below; its recipe matches the current runtime inputs.
-No native rebuild or local Chromium execution is claimed by these checks.
+The 27 existing editor-ownership tests also passed. The complete production
+GUI built locally, and its asset check passed for all 20 runtime assets,
+three entry scripts and 562 lazy chunks. No local native rebuild or local
+Chromium execution is claimed; browser qualification is the hosted evidence above.
 
 The generator cases verify logical polarity and raw electrical writes,
 single-evaluation numeric and Boolean normalization, saved pin metadata and
@@ -40,12 +101,10 @@ The actual pinned Uno/solver fixture reaches exactly 25000000 ns and the
 expected LED current. A separate clamp fixture demonstrates output latch `1`
 with solved read `0`; toggle generation refuses with no executable source.
 
-The production gate adds two scenarios to the previous eight: the actual
-portable-generation control through connected execution and a non-mutating
-**To blocks** refusal, plus default-comment preservation and portable toggle
-refusal with Run disabled. Consumer hosted results are recorded after the
-complete ten-scenario gate has executed. The historical production result below
-qualifies the earlier implementation, not these additions.
+This qualifies the reverse path as an explicit refusal, not a portable-library
+round trip. Other browsers, physical hardware, broader Scratch semantics and
+an output-latch/toggle extension remain separate work. The historical production
+result below records the earlier eight-scenario milestone.
 
 ## Production GUI qualification
 

@@ -10,10 +10,14 @@
   callers and qualification; its exact pinned consumer sync; the Code tab's
   explicit generation choice and refusal handling; focused runtime/browser
   tests and the CrispBASIC documentation.
-- Status: DONE implementation on the incubation branch; consumer hosted
-  qualification follows this candidate. No merge to either default branch.
-- Qualification: producer hosted run passes 299 tests; the pinned consumer
-  passes 176 integration tests and 10 identity/mirror/SPIKE tests locally.
+- Status: DONE and qualified on the incubation branch. Implementation
+  `73370eb148c8833b20e464e5576f1e33b206c386`; no merge to either default branch.
+- Qualification: producer hosted run passes 299 tests; consumer
+  [run 46104769080](https://github.com/CrispStrobe/brickwright/actions/runs/46104769080)
+  passes 544 tests, including all ten complete production Chromium scenarios.
+  The separate BASIC oracle run `46104769121` passes nine fixtures. The pinned
+  consumer passes 176 integration tests, 10 identity/mirror/SPIKE tests and
+  27 editor-ownership tests locally; the complete local production build passes.
   Official source sync, provenance, mirror checks and flagged JSX parsing pass.
 - Delivery: default and retro generation remain legacy;
   portable digital/timing operations require an explicit mode. Toggle and
