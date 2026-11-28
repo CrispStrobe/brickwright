@@ -121,7 +121,7 @@ const HISTORICAL_X86_CURRENT_BOARD = '836867513c3e7fac420ddaa32c17e1c7b6d3e513';
 // the reviewed bodies (historicalSb3Spans) and this declaration may carry.
 const HISTORICAL_X86_SB3 = '1cbaeed325f5a890e43b78a4211acae8f801f2d2';
 // The live supplier identity follows the current pin, separate from consumed F10.
-const LIVE_X86_SB3 = 'b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a';
+const LIVE_X86_SB3 = 'edd30b11967747774cfddd01f8eb888509866c5c';
 // Consumed F10 controllers remain whole-file sealed at this shipped epoch.
 const HISTORICAL_X86_F10_SB3 = '8e53c1621a1b9eeb42e0565f987c4c47ab598961';
 const HISTORICAL_X86_FINITE_V7_PINS = "FINITE_V7_PINS = {'bw-board':'" + HISTORICAL_X86_CURRENT_BOARD + "','bw-circuit-ui':'" + HISTORICAL_X86_V8_CUI + "','sb3-creator':'" + HISTORICAL_X86_SB3 + "'}";

@@ -6,10 +6,10 @@
  * A reader turns source in one language into the pseudocode AST. It has THREE
  * outcomes, not two, and the third is the one folklore hides:
  *   - CLEAN    — parsed, nothing dropped (empty `warnings`).
- *   - DEGRADED — parsed, but the reader hit a construct it has no lifting for
- *                and kept going with a placeholder, naming the loss in
- *                `warnings`. The program "imports" and is quietly wrong.
- *   - REFUSED  — the reader threw (or, for the 8086 lifter, returned ok:false):
+ *   - DEGRADED — parsed with warnings, restrictions or placeholders. Cowgol's
+ *                numeric-profile advisory is counted conservatively here,
+ *                without claiming that it emitted a placeholder.
+ *   - REFUSED  — the reader threw or returned ok:false:
  *                nothing came back.
  * A mapped/refused ratio that folds DEGRADED into "mapped" reports a reader as
  * healthier than it is. This document counts all three and lists the refusal
@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {FIXTURES, FIXTURE_SOURCES} from './reader-coverage-fixtures.mjs';
+import {FIXTURES, FIXTURE_SOURCES, EMITTER_PROBES} from './reader-coverage-fixtures.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const output = path.join(root, 'docs/generated/READER-COVERAGE.md');
@@ -44,6 +44,12 @@ async function loadReaders () {
         let r;
         try { r = fn(src); }
         catch (e) { return {outcome: OUTCOME.REFUSED, reasons: [firstClause(e.message)]}; }
+        // Explicit refusal wins over warnings or any partial preview. Cowgol
+        // preserves rejected source for review, never as executable pseudocode.
+        if (!r || r.ok === false) {
+            const reasons = r?.reasons?.length ? r.reasons : r?.diagnostics?.map(d => d.message) || [];
+            return {outcome: OUTCOME.REFUSED, reasons: (reasons.length ? reasons : ['reader returned ok:false']).map(firstClause)};
+        }
         const warnings = r.warnings || [];
         // A reader that returns no pseudocode while warning that the source is
         // not its language has refused softly, not lifted: count it refused.
@@ -59,11 +65,13 @@ async function loadReaders () {
     const cDevice = await dflt('sb3-creator-c.js');
     const cHost = await dflt('sb3-creator-chost.js');
     const asm = await dflt('bw-asm/asm-8086-to-pseudocode.js');
+    const cowgol = await dflt('sb3-creator-cowgol-reader.js');
 
     return {
         python: sb3(python),
         javascript: sb3(javascript),
         basic: sb3(src => basic(src, {})),
+        cowgol: sb3(cowgol),
         micropython: sb3(src => micropython(src, {})),
         // Host C carries @bw-program and its own structure; device C infers pins
         // from possibly hand-written 8051/Arduino source. The importer picks by
@@ -163,6 +171,8 @@ export async function buildReaderCoverage () {
 
     // Fixture provenance and licence, so every program's origin is on the page.
     const srcRows = FIXTURE_SOURCES.map(s => `| ${s.id} | ${s.langs.join(', ')} | ${s.origin} | ${s.licence} |`);
+    const emitterRows = EMITTER_PROBES.map(probe =>
+        `| ${probe.lang} | ${probe.name} | ${probe.outcome} | ${probe.reasons.map(firstClause).join('; ') || '—'} |`);
 
     return `# Reader coverage
 
@@ -180,11 +190,11 @@ each reader is a measured figure, not folklore.
 Each run of a fixture through its reader is one of three outcomes:
 
 - **clean** — lifted with nothing dropped.
-- **degraded** — lifted, but the reader met a construct it cannot represent and
-  kept going with a placeholder, naming the loss. The program imports and is
-  quietly missing something. This is the outcome a mapped/refused ratio hides,
-  and it is broken out here for exactly that reason.
-- **refused** — the reader threw, or the 8086 lifter returned \`ok:false\`:
+- **degraded** — accepted with warnings, restricted semantics or placeholders.
+  Inspect the reason: a placeholder names lost behavior, while Cowgol's int32
+  advisory limits the domain in which translation preserves arithmetic.
+  Neither is counted as an unqualified clean result.
+- **refused** — the reader threw or explicitly returned \`ok:false\`:
   nothing was produced.
 
 ## Overall
@@ -202,7 +212,7 @@ source straight to the reader — for the 8086 lifter that is hand-written asm i
 is designed to REFUSE as foreign, so a high refused count there is the reader
 working, not failing.
 
-Two readers refuse by design rather than by inability, and their refused counts
+Some readers refuse by design rather than by inability, and their refused counts
 should be read that way. The 8086 lifter is v1: it lifts the control-flow and
 variable programs the ▶ button lowers and refuses pins, ports, displays, tones,
 PWM, keypad, broadcast, "say for secs" and the multi-script scheduler form BY
@@ -210,13 +220,19 @@ NAME (plan L1) — every shipped \`i8086_*\` example happens to use one of those
 so all five round-trips are named v1 refusals, and all eleven hand-written
 programs are refused as foreign. The refusal reasons below say which.
 
+Cowgol accepts a sequential signed-int32/host-API subset and refuses unsupported
+source before returning executable pseudocode. Its accepted results carry an
+int32 range advisory and are therefore counted as **degraded**, conservatively;
+that does not mean the reader inserted placeholder code. Pointer/array,
+recursion, quotient/remainder and inline-host-code probes expose the boundary.
+
 | method | reader (language) | device family | outcome |
 | --- | --- | --- | --- |
 ${rowsByLangFamily.join('\n')}
 
 ## Why readers degrade, by construct
 
-| fixtures | construct kept as a placeholder |
+| fixtures | warning, restriction or placeholder |
 | --- | --- |
 ${reasonRows(degradedReasons)}
 
@@ -235,10 +251,21 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | --- | --- | --- | --- | --- | --- |
 ${ledgerRows.join('\n')}
 
+## Source-generation boundary probes
+
+These probes test whether an emitter can produce source at all. They are
+separate from reader totals: a refused concurrent program has no Cowgol source
+to feed into a reader.
+
+| language | fixture | emitter outcome | reasons |
+| --- | --- | --- | --- |
+${emitterRows.join('\n')}
+
 ## Fixture provenance
 
-Every fixture is either already tracked in this repository or drawn from a
-corpus this repository pins, with its licence recorded here.
+Every fixture is tracked in this repository, explicitly authored in the fixture
+module, or drawn from a corpus this repository pins, with its licence recorded
+here.
 
 | source | languages | origin | licence |
 | --- | --- | --- | --- |

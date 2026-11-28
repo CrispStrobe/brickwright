@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 import {createCodeDocument, addCodeProjection} from '../overlay/scratch-gui/src/lib/code-source-document.js';
+import cowgolToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-cowgol-reader.js';
 
 const importer = new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url);
 const original = readFileSync(importer, 'utf8');
@@ -15,17 +16,21 @@ const extract = (start, end) => {
     assert.ok(a >= 0 && b > a, `Actual method boundaries: ${start}`);
     return original.slice(a, b);
 };
-const methods = extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
+const methods = extract('    convertedSource (', '    // source → pseudocode') +
+    extract('    async runViaBlocksOnDevice () {', '    async runCowgolAsBlocks () {') +
+    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) {',
     '    // Read the running project into all languages at once.') +
     extract('    async loadAsmExample (id) {', '    openArtefactFile (file) {') +
     extract('    publishAppliedDevice (stc) {',
         '    // Real hardware, two minutes: generate MicroPython and push it to a');
 const Editor = codeDocumentEditorClass(original, methods, {
-    TWO_WAY: new Set(['pseudocode']), DOS_LANG: {}, codeArtworkMatches: () => false, captureCodeArtwork: () => null,
+    TWO_WAY: new Set(['pseudocode', 'cowgol']), DOS_LANG: {cowgol: {load: async () => ({default: cowgolToPseudocode})}},
+    codeArtworkMatches: () => false, captureCodeArtwork: () => null,
     classifyConversionWarnings: () => ({changed: [], unsupported: []}),
     conversionFailure: error => ({message: error.message, issues: []}), pickLocale: () => 'en',
     confirmAsync: async () => true,
-    DEVICE_BY_ID: {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}}
+    DEVICE_BY_ID: {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'},
+        riscv32: {core: 'riscv32', label: 'RISC-V'}}
 });
 const deferred = () => {
     let resolve;
@@ -54,16 +59,31 @@ function fixture (hold = null, failure = null) {
         constructor () {
             this.project = {targets: [], stc: hold === 'load-commit' ? {device: 'pico', pins: []} :
                 hold === 'comment' || editor.withStc ? {device: 'i8086', pins: []} : null};
-            this.warnings = [];
+            this.warnings = editor.parserWarnings || [];
         }
-        parse () { if (failure === 'parse') throw new Error('current parse failed'); }
+        parse (source) {
+            if (failure === 'parse') throw new Error('current parse failed');
+            if (editor.withSourceDevice) {
+                let device = source.match(/^\s*DEVICE\s+(\S+)/im)?.[1]?.toLowerCase();
+                if (['riscv', 'risc-v', 'rv32'].includes(device)) device = 'riscv32';
+                this.project.stc = device ? {device, pins: []} : null;
+                this.project.pseudocode = source;
+                editor.parsedSources.push(source);
+            }
+        }
         async generateSB3 () {
             await editor.onGenerateSB3?.();
             return {arrayBuffer: async () => new ArrayBuffer(0)};
         }
         generatePython () { editor.onGenerate?.(); return 'generated Python'; }
+        decompile (project) { return editor.withSourceDevice ? project.pseudocode : 'generated Pseudocode'; }
         generateJavaScript () { return 'generated JS'; }
-        generateC () { return 'generated C'; }
+        generateC () {
+            if (editor.riscvGenerationRefusal) {
+                throw Object.assign(new Error('RISC-V console does not support control_wait.'), {code: 'RISCV_CONSOLE_UNSUPPORTED'});
+            }
+            return 'generated C';
+        }
         generateBASIC () { return {ok: true, basic: 'generated BASIC'}; }
         generateMicroPython () { return {ok: true, py: 'generated MicroPython'}; }
     }
@@ -101,7 +121,7 @@ function fixture (hold = null, failure = null) {
             done?.();
         },
         activeCode () { return this.state.buffers[this.state.lang] || ''; },
-        canLiftAsm: () => false, loadCatalog () {}, _asmExamples: () => [example]
+        canLiftAsm: () => false, loadCatalog () {}, _asmExamples: () => [example], parsedSources: []
     });
     let libraries = 0;
     editor.lib = async () => {
@@ -124,6 +144,125 @@ test('ordinary conversion still regenerates buffers, retains authored ASM and fi
     assert.equal(f.editor.state.status, 'Blocks loaded.');
     assert.equal(f.editor.state.busy, false);
 });
+
+test('strict Cowgol import accepts the real reader range qualification and retains it in feedback', async () => {
+    const f = fixture();
+    f.editor.state.lang = 'cowgol';
+    f.editor.state.buffers.cowgol = 'include "cowgol.coh"; include "brickwright.coh"; var n: int32 := 42; bw_print_number(n);';
+    const applied = await f.editor.compile({strict: true});
+    assert.equal(applied?.applied, true, "compile() returns its applied-conversion receipt");
+    assert.deepEqual(f.calls, ['load', 'refresh']);
+    assert.match(f.editor.state.status, /32/);
+    assert.equal(f.editor.state.conversionReport.preserved, true);
+});
+
+test('strict Cowgol import still rejects reader refusals and downstream parser warnings before VM load', async () => {
+    for (const [code, warnings] of [['var a: uint8 := 1;', []],
+        ['include "brickwright.coh"; bw_print_number(42);', ['Unsupported target operation']]]) {
+        const f = fixture();
+        f.editor.state.lang = 'cowgol';
+        f.editor.state.buffers.cowgol = code;
+        f.editor.parserWarnings = warnings;
+        await assert.rejects(f.editor.compile({strict: true}));
+        assert.deepEqual(f.calls, []);
+        assert.equal(f.editor.state.conversionReport.preserved, false);
+        assert.equal(f.editor.state.buffers.cowgol, code);
+    }
+});
+
+function riscvCowgolFixture (source = 'include "brickwright.coh"; bw_print_number(42);') {
+    const f = fixture();
+    f.editor.withSourceDevice = true;
+    f.editor.state.lang = 'cowgol';
+    f.editor.state.buffers = {...f.editor.state.buffers, pseudocode: 'DEVICE RISCV32', cowgol: source, c: 'previous C'};
+    f.editor.props.vm.runtime.stc = {device: 'riscv32', pins: []};
+    f.editor.props.vm.runtime.bwDeviceId = 'riscv32';
+    // Exercise the actual wrapper and import lifecycle through to the selected
+    // project. Compiler-service and guest execution are qualified separately.
+    f.editor.runBlocksOnRiscv = async () => {
+        f.calls.push('run-riscv');
+        assert.equal(f.editor.props.vm.runtime.stc.device, 'riscv32');
+        assert.equal(f.editor.props.vm.runtime.bwDeviceId, 'riscv32');
+        assert.equal(f.editor.activeCode(), source);
+        return 'riscv-run';
+    };
+    return f;
+}
+
+test('Cowgol Run via Blocks preserves the selected RISCV32 for declaration-free source', async () => {
+    const f = riscvCowgolFixture();
+    const source = f.editor.activeCode();
+    const result = await f.editor.runViaBlocksOnDevice();
+    assert.equal(result, 'riscv-run');
+    assert.deepEqual(f.calls, ['load', 'refresh', 'run-riscv']);
+    assert.equal(f.editor.parsedSources.length, 1);
+    assert.match(f.editor.parsedSources[0], /^DEVICE riscv32\n/);
+    assert.match(f.editor.state.buffers.pseudocode, /^DEVICE riscv32\n/);
+    assert.equal(f.editor.props.vm.runtime.bwDeviceCore, 'riscv32');
+    assert.equal(f.editor.state.buffers.cowgol, source, 'An inferred machine does not rewrite authored Cowgol');
+    assert.equal(f.editor.state.conversionReport.preserved, true);
+    assert.equal(f.editor.state.busy, false);
+});
+
+test('Cowgol Run via Blocks refuses an explicit conflicting machine before replacing the project', async () => {
+    const source = '# @bw-declaration "DEVICE PICO"\ninclude "brickwright.coh"; bw_print_number(42);';
+    const f = riscvCowgolFixture(source);
+    const stage = f.editor.props.vm.runtime.getTargetForStage();
+    const stc = f.editor.props.vm.runtime.stc;
+    const result = await f.editor.runViaBlocksOnDevice();
+    assert.equal(result, undefined);
+    assert.deepEqual(f.calls, []);
+    assert.equal(f.editor.props.vm.runtime.getTargetForStage(), stage);
+    assert.equal(f.editor.props.vm.runtime.stc, stc);
+    assert.equal(f.editor.props.vm.runtime.bwDeviceId, 'riscv32');
+    assert.match(f.editor.state.status, /declares a different machine.*pico/);
+    assert.equal(f.editor.state.buffers.cowgol, source);
+    assert.equal(f.editor.state.conversionReport.preserved, false);
+    assert.equal(f.editor.state.busy, false);
+});
+
+test('RISC-V C export refusal after a successful Cowgol import is a warning about the applied Blocks', async () => {
+    const source = 'include "brickwright.coh"; bw_delay(1000); bw_print_number(42);';
+    const f = riscvCowgolFixture(source);
+    f.editor.riscvGenerationRefusal = true;
+    const stage = f.editor.props.vm.runtime.getTargetForStage();
+    const applied = await f.editor.compile({strict: true, targetDevice: 'riscv32'});
+    assert.equal(applied?.applied, true, "compile() returns its applied-conversion receipt");
+    assert.deepEqual(f.calls, ['load', 'refresh']);
+    assert.notEqual(f.editor.props.vm.runtime.getTargetForStage(), stage);
+    assert.equal(f.editor.props.vm.runtime.stc.device, 'riscv32');
+    assert.equal(f.editor.state.buffers.c, '', 'Previously generated C cannot stand in for a refused export');
+    assert.match(f.editor.state.status, /RISC-V C export: .*control_wait/);
+    assert.equal(f.editor.state.conversionReport.preserved, true);
+    assert.equal(f.editor.state.buffers.cowgol, source);
+    assert.equal(f.editor.state.busy, false);
+});
+
+for (const change of ['retarget', 'edit and revert']) {
+    test(`Cowgol Run via Blocks cannot apply prepared RISCV32 source after ${change}`, async () => {
+        const f = riscvCowgolFixture();
+        const entered = deferred(); const release = deferred();
+        f.editor.onGenerateSB3 = async () => { entered.resolve(); await release.promise; };
+        const stage = f.editor.props.vm.runtime.getTargetForStage();
+        const stc = f.editor.props.vm.runtime.stc;
+        const source = f.editor.activeCode();
+        const pending = f.editor.runViaBlocksOnDevice();
+        await entered.promise;
+        const initial = f.editor.state.buffers;
+        f.editor.state.buffers = {...initial, pseudocode: 'DEVICE PICO'};
+        if (change === 'edit and revert') f.editor.state.buffers = {...initial};
+        const buffers = f.editor.state.buffers;
+        f.editor.state.status = 'new machine selection owns feedback';
+        release.resolve(); await pending;
+        assert.deepEqual(f.calls, [], 'Revoked preparation cannot replace the project or start it');
+        assert.equal(f.editor.activeCode(), source, 'The machine edit leaves active Cowgol text unchanged');
+        assert.equal(f.editor.state.buffers, buffers);
+        assert.equal(f.editor.props.vm.runtime.getTargetForStage(), stage);
+        assert.equal(f.editor.props.vm.runtime.stc, stc);
+        assert.equal(f.editor.state.status, 'new machine selection owns feedback');
+        assert.equal(f.editor.state.busy, false);
+    });
+}
 
 test('explicit device-retarget source still compiles while ASM is selected', async () => {
     const f = fixture(); f.editor.state.lang = 'asm';
@@ -262,7 +401,8 @@ test('publication rechecks editor ownership after a generator reenters the edito
         current = f.editor.state.buffers = {...f.editor.state.buffers, asm: 'new edit during generation'};
         f.editor.state.status = 'new edit owns feedback';
     };
-    await f.editor.compile();
+    const applied = await f.editor.compile();
+    assert.equal(applied, undefined, 'revoked publication cannot authorize an immediate Run');
     assert.equal(f.editor.state.buffers, current);
     assert.equal(f.editor.state.buffers.asm, 'new edit during generation');
     assert.equal(f.editor.state.status, 'new edit owns feedback');

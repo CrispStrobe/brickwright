@@ -401,8 +401,8 @@ const importer = readFileSync(
 test('the importer treats fe and Tcl as two-way languages everywhere one must be registered', () => {
     // Two-way is also what makes the editor writable for them: a tab neither
     // TWO_WAY nor EDITABLE_ONE_WAY is read-only.
-    assert.match(importer, /const TWO_WAY = new Set\(\[[^\]]*'fe', 'tcl', 'forth'\]\)/);
-    assert.match(importer, /nqc: 'NQC', fe: 'fe \(Lisp\)', tcl: 'Tcl', forth: 'Forth'\}/, 'LANG_LABEL');
+    assert.match(importer, /const TWO_WAY = new Set\(\[[^\]]*'fe', 'tcl', 'forth'[^\]]*\]\)/);
+    assert.match(importer, /nqc: 'NQC', fe: 'fe \(Lisp\)', tcl: 'Tcl', forth: 'Forth'[^}]*\}/, 'LANG_LABEL');
     // Source replacement and edits now share the document adapter. Exercise
     // that boundary, so a missing tab buffer still fails even though the old
     // five inline reset expressions no longer exist.
@@ -427,7 +427,9 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     assert.match(importer, /return this\.state\.buffers\[this\.state\.lang\] \?\? '';/);
     // fe and Tcl are offered from the "+" menu at the end of the tab row
     // (#786), remembered per browser, and stay visible while open or holding text.
-    assert.match(importer, /const BW_OPTIONAL_LANGS = \[\['fe', 'λ fe', [^\]]*\], \['tcl', '○ Tcl', [^\]]*\], \['forth', '🔺 Forth', [^\]]*\]\];/);
+    const optional = importer.match(/const BW_OPTIONAL_LANGS = (\[.*\]);/)[1];
+    const optionalIds = new Function(`return ${optional}`)().map(([id]) => id);
+    for (const id of ['fe', 'tcl', 'forth']) assert.ok(optionalIds.includes(id), `${id} remains optional`);
     assert.match(importer, /\.\.\.this\.visibleOptionalLangs\(\)/);
     assert.match(importer, /data-testid="bw-lang-more"/);
     // compile() reads them, and both regenerate paths write them.
@@ -437,7 +439,7 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // overwrote an edit typed meanwhile, or reloaded the project after a
     // machine had started.
     assert.match(importer, /for \(const l of Object\.keys\(DOS_LANG\)\) if \(l !== lang\) nb\[l\] = '';/);
-    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null} = {})');
+    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {})');
     const compileEnd = importer.indexOf('async fromBlocks ()', compileStart);
     assert.doesNotMatch(importer.slice(compileStart, compileEnd), /dosLangBuffersFor|generateDosLangs|\.generate\(await/,
         'compile() runs no fe/Tcl generator (reading the open fe/Tcl tab is its input, not a regeneration)');

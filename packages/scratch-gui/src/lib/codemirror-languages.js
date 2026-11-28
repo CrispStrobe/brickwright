@@ -2,6 +2,7 @@ import {pseudocode as pseudocodeLang} from './cm-lang-pseudocode.js';
 import {basic as basicLang} from './cm-lang-basic.js';
 import {asm as asmLang} from './cm-lang-asm.js';
 import {cardiac as cardiacLang} from './cm-lang-cardiac.js';
+import {cowgol as cowgolLang} from './cm-lang-cowgol.js';
 
 // A stable, empty extension leaves CodeMirror usable as plain text while an
 // optional grammar is in flight or unavailable.
@@ -19,6 +20,7 @@ export const immediateCodeMirrorLanguage = language => {
     case 'javascript':
         return undefined;
     case 'basic': return basicLang();
+    case 'cowgol': return cowgolLang();
     case 'asm': return asmLang();
     case 'cardiac': return cardiacLang();
     case 'pseudocode':

@@ -9,7 +9,7 @@ import {scopeAfter} from './helpers/js-scope.mjs';
 import {codeDocumentEditorClass, codeEditorMethod} from './helpers/code-document-editor.mjs';
 import {createCodeDocument, addCodeProjection, selectCodeDocumentLanguage} from '../overlay/scratch-gui/src/lib/code-source-document.js';
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-const methods = ['async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
+const methods = ['async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) {',
     'publishAppliedDevice (stc) {', 'async setDevice (deviceId) {']
     .map(signature => codeEditorMethod(source, signature)).join('\n');
 const devices = {arcade: {core: 'arcade'}, microbit: {core: 'microbit'}, calliopemini: {core: 'microbit'}, uno: {core: 'avr'}};

@@ -31,9 +31,12 @@ export function runCpmCom(config, bytes) {
  * @param {(detail: object) => void} [opts.dispatch] emit the media-load event
  *   (default: a `bw-machine-media-load` CustomEvent on the global)
  * @param {(ref: object) => Promise<{bytes: Uint8Array}>} [opts.fetcher] image fetcher
+ * @param {() => boolean} [opts.isCurrent] retain ownership through attachment and queued autostart
+ * @param {AbortSignal} [opts.signal] cancel a pending launch, including lazy attachment
  * @returns {Promise<object>} `{mode:'wired', activated}` for a wired machine
  *   (realized in the circuit designer, not booted here), else
- *   `{mode:'functional', activated, detail}` where `detail` is the event payload.
+ *   `{mode:'functional', activated, detail}` where `detail` is the event payload;
+ *   `{mode:'cancelled', activated}` if ownership was revoked before launch.
  */
 export async function runMachineConfig(config, opts = {}) {
     const dispatch = typeof opts.dispatch === 'function'
@@ -49,6 +52,27 @@ export async function runMachineConfig(config, opts = {}) {
     const activated = await activateConfig(config, {
         fetcher: opts.fetcher || defaultImageFetcher
     });
+    // The same owner must survive media resolution, the panel's lazy imports,
+    // OS ROM loading, and any queued program launch at the guest's prompt.
+    const launchSignal = opts.signal;
+    const launchControl = typeof opts.isCurrent === 'function' || launchSignal
+        ? {isCurrent: opts.isCurrent, signal: launchSignal, cancelled: false, released: false,
+            release (cancelled = false, error = null) {
+                if (this.released) return;
+                this.released = true;
+                this.cancelled = cancelled;
+                // Retained media must not retain the editor/project snapshot
+                // after the launch has either transferred or been revoked.
+                this.isCurrent = null;
+                this.signal = null;
+                const notify = this.onRelease;
+                this.onRelease = null;
+                notify?.(cancelled, error);
+            }} : null;
+    if (launchControl && (launchControl.signal?.aborted ||
+        (launchControl.isCurrent && !launchControl.isCurrent()))) {
+        return {mode: 'cancelled', activated};
+    }
 
     // A wired machine is realized on the breadboard/circuit designer, not booted
     // from an image here (design §3). Hand the descriptor back for the caller to
@@ -72,6 +96,7 @@ export async function runMachineConfig(config, opts = {}) {
         // stays in the Debug instrument).
         widgets: Array.isArray(activated.widgets) ? activated.widgets : []
     };
+    if (launchControl) detail.launchControl = launchControl;
     if (bm.cpmLaunch) {
         detail.cpmLaunch = bm.cpmLaunch;
         detail.cpmFiles = bm.cpmFiles;
@@ -134,30 +159,44 @@ export async function runMachineConfig(config, opts = {}) {
     const serialMachine = ['z80', 'rp2040js', 'eater6502', 'riscv32'].includes(activated.targetKind);
     if (serialMachine) detail.machineView = activated.videoWidget ? 'controller' : 'debugger';
     const awaitBoot = (activated.machinePreset === 'freedos-vga' || serialMachine ||
+        (activated.targetKind === 'i80386' && ['dos-service', 'dos-boot'].includes(activated.machinePreset)) ||
         (activated.targetKind === 'i80386' && ['bios', 'floppy'].includes(bm.slot)) ||
-        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
+        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe', 'disk'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
     let completion = null;
     let timer = null;
+    let cancelCompletion = null;
     if (awaitBoot) {
         completion = new Promise((resolve, reject) => {
-            const settle = (error) => {
+            let settled = false;
+            const settle = (error, accepted = true) => {
+                if (settled) return;
+                settled = true;
                 clearTimeout(timer);
+                launchSignal?.removeEventListener('abort', cancelCompletion);
+                launchControl?.release(Boolean(error) || !accepted, error);
                 delete detail.bootCompletion;
                 if (error) reject(error);
-                else resolve();
+                else resolve(accepted);
             };
-            detail.bootCompletion = {resolve: () => settle(null), reject: settle};
+            cancelCompletion = () => settle(null, false);
+            detail.bootCompletion = {resolve: () => settle(null), reject: settle, cancel: cancelCompletion};
             timer = setTimeout(() => settle(new Error('timed out waiting for the machine to attach')), 60000);
+            if (launchControl) launchControl.onRelease = (cancelled, error) => {
+                launchSignal?.removeEventListener('abort', cancelCompletion);
+                if (error) settle(error);
+                else if (cancelled) cancelCompletion();
+            };
+            launchSignal?.addEventListener('abort', cancelCompletion, {once: true});
         });
     }
     try {
         dispatch(detail);
     } catch (error) {
-        if (timer) clearTimeout(timer);
-        delete detail.bootCompletion;
+        cancelCompletion?.();
+        launchControl?.release(true);
         throw error;
     }
-    if (completion) await completion;
+    if (completion && !(await completion)) return {mode: 'cancelled', activated};
     return {mode: 'functional', activated, detail};
 }

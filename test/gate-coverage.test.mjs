@@ -26,7 +26,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync, readFileSync} from 'node:fs';
 import path from 'node:path';
-import {directlyExecutesPromisifiedGate} from '../scripts/lib/gate-promisified-exec.mjs';
+import {directlyExecutesPromisifiedGate, directlyExecutesChildProcessGate} from '../scripts/lib/gate-promisified-exec.mjs';
 import {stepReferenceProblems} from '../scripts/lib/workflow-step-refs.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -38,6 +38,42 @@ const ROOT = path.resolve(import.meta.dirname, '..');
  * UI rather than tweaking a selector.
  */
 const KNOWN_UNWIRED = {
+    // Existing documented manual/local probes, audited at 689feabf.
+    // These entries record their documented scope, not a current pass or a
+    // permanent CI exemption. The 24 unresolved probes remain gate failures.
+    // Exact source/evidence mapping: docs/receipts/2026-11-28-cowgol-gate-wiring-audit.json.
+    "verify-cad-command-palette-browser.mjs": "documented manual command: touch command palette filtering and command admission. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:415.",
+    "verify-cad-curved-offset-browser.mjs": "documented manual command: curved outline offset, touch editing and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:440.",
+    "verify-cad-drawing-sheet-browser.mjs": "documented manual command: linked drawing preview, dimensions and PDF sheet/set export. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:386, docs/ROBOT-CAD-EDITOR-PARITY.md:467.",
+    "verify-cad-dxf-region-browser.mjs": "documented manual command: DXF region import, extrusion and persistence. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:372.",
+    "verify-cad-gallery-workspace.mjs": "documented local browser harness: CAD gallery images, workspace defaults/toggles and persistence. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:126.",
+    "verify-cad-mirror-browser.mjs": "documented manual command: mirrored geometry, touch controls and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:402.",
+    "verify-cad-offset-browser.mjs": "documented manual command: outline offset with touch controls and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:428.",
+    "verify-cad-path-dxf-browser.mjs": "documented manual command: DXF path import/export and editable path persistence. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:453.",
+    "verify-cad-path-lock-browser.mjs": "documented manual command: path locking, touch edits and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:460.",
+    "verify-cad-pattern-browser.mjs": "documented manual command: linear and circular pattern operations and saved geometry. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:409.",
+    "verify-cad-revolution-browser.mjs": "documented manual command: revolved bodies, touch edits and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:396.",
+    "verify-cad-sketch-path-browser.mjs": "documented manual command: editable sketch paths, derived bodies and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:446.",
+    "verify-cad-tangent-browser.mjs": "documented manual command: tangent outline constraints, touch edits and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:422.",
+    "verify-cad-trim-browser.mjs": "documented manual command: outline trim, touch edits and SB3 save/readback. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:434.",
+    "verify-circuit-shift-registers.mjs": "documented local browser harness: Code target switching and Sim driving wired Circuit LEDs. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:108.",
+    "verify-code-arduboy-python.mjs": "documented local browser harness: Arduboy conversion, menu behavior and inline Python execution. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:128.",
+    "verify-code-console-browser.mjs": "documented local browser harness: rendered Python/JavaScript input, Stop and restart behavior. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:134.",
+    "verify-code-conversion-matrix.mjs": "documented local browser harness: eight-language Blocks roundtrip and directed language switching. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:132, docs/WORKBENCH-OWNER-ROADMAP.md:138.",
+    "verify-code-language-readback.mjs": "documented local browser harness: authored Code readback, conversion paths and unsupported-source refusal. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:129, docs/WORKBENCH-OWNER-ROADMAP.md:132.",
+    "verify-code-machine-menu.mjs": "documented local browser harness: Code overflow and keyboard launch of the CP1 machine. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:124.",
+    "verify-compact-editor-menus.mjs": "documented local browser harness: rendered editor help, Stage transitions and language/machine menus. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:138.",
+    "verify-controller-machine-io.mjs": "documented local browser harness: Controller Linux commands, pane switching, CP/M Sieve and current Code. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:117, docs/WORKBENCH-OWNER-ROADMAP.md:131, docs/WORKBENCH-OWNER-ROADMAP.md:135.",
+    "verify-costume-precision-browser.mjs": "documented local browser harness: Local Chrome probe for default-off/lazy SDK behavior, precise region and hole placement, extrusion bounds/volume, SB3 reopen, contour repairs and stroke outlines. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:596-607.",
+    "verify-costume-precision-drawing.mjs": "documented local browser harness: Local Chrome probe for numeric vector shapes, Undo/Redo, CAD handoff, SB3 artwork reopen and retained circular arc segments. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:525-528.",
+    "verify-costume-sketch-refresh.mjs": "documented local browser harness: Local Chrome probe for linked costume sketch preview/cancel/apply, Undo/Redo, SB3 reopen, reordered regions and duplicate-source-ID handling. Evidence: docs/ROBOT-CAD-EDITOR-PARITY.md:546-548, docs/ROBOT-CAD-EDITOR-PARITY.md:559-560.",
+    "verify-costume-to-cad-workflow.mjs": "documented local browser harness: precise costume outline handoff, CAD constraint edits, vertex drag, extrusion and binary STL export. Evidence: docs/CAD-ROBOT-PROJECTS.md:125.",
+    "verify-editor-overflow-style.mjs": "documented local browser harness: Blocks, Code, Circuit, Robots, CAD and FPGA overflow interaction. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:116, docs/WORKBENCH-OWNER-ROADMAP.md:135.",
+    "verify-firmware-cardiac-browser.mjs": "documented local browser harness: CARDIAC card-deck execution and Controller widget lifecycle. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:135.",
+    "verify-imported-machine-profiles.mjs": "documented local browser harness: imported 8088/80186 CGA ROM output and Controller keyboard input. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:154.",
+    "verify-machine-library-launch.mjs": "documented local browser harness: rendered machine-library launches, Controller output and active locale. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:101, docs/WORKBENCH-OWNER-ROADMAP.md:139, docs/WORKBENCH-OWNER-ROADMAP.md:153, docs/WORKBENCH-OWNER-ROADMAP.md:169, docs/WORKBENCH-OWNER-ROADMAP.md:172.",
+    "verify-retro-6502-browser.mjs": "documented local browser harness: 6502 wired display/terminal paths, KIM-1 and Scratch Stage ownership. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:130, docs/WORKBENCH-OWNER-ROADMAP.md:165.",
+    "verify-x86-debugger-picker.mjs": "documented local browser harness: 8086/80286/80386 BIOS launch, Controller video and fullscreen. Evidence: docs/WORKBENCH-OWNER-ROADMAP.md:154.",
     'verify-sim-floor-contact.mjs': 'retained historical bw.9 scalar-output reader, not executed by current CI. It binds the historical manifest engine integrity to the checkout pin and rejects a later engine pin; run it only in the matching historical source/pin checkout against its retained original eight-case output. Current affected-engine qualification executes scripts/verify-sim-floor-contact-current.mjs in test/bw-sim-sarrus-lift.test.mjs, including missing-case rejection. The source-equivalence check in test/sim-engine-admission.test.mjs does not execute this historical reader or qualify its retained outputs.',
     'verify-multi-board-radio.mjs': 'manual/local: frames the pinned MakeCode micro:bit and Calliope mini simulators side by side through scripts/makecode/host.html and checks the radio relay and motor report (A held, B held, relay cut). It drives the host pages and message protocol from a plain page, not the built app, so it does not show the React pane; test/multi-board-radio-pair.test.mjs covers the per-board compile it loads. Not wired: it needs both served simulator trees and has no reading in browser-gate-readings.json yet',
     'verify-makecode-assets-roundtrip.mjs': 'opt-in live external editor qualification: imports the GUI-exported duplicate-animation .mkcd into arcade.makecode.com, edits Assets through native controls and returns its PNG to Brickwright. Routine CI must not depend on a mutable external editor/network. Passed four journeys against Arcade4.1.25/PXT13.1.23, zero final page errors, on2026-10-07. Run the wired verify-arcade-animation-resource-browser.mjs first, then node scripts/verify-makecode-assets-roundtrip.mjs --input test-results/arcade-animation-resource-browser/animation-duplicate-libraries.mkcd --out test-results/makecode-assets-roundtrip/current.json --bw-url http://localhost:8617/. The offline native-envelope tests and existing Arcade GUI export/reimport gates remain mandatory.',
@@ -237,16 +273,16 @@ const aliasInvokes = (run, gate, scripts = packageScripts) => Object.entries(scr
  *
  * So: RUN BY A WORKFLOW is a `run:` scalar that invokes it, directly or through
  * an npm alias. EXERCISED BY A TEST is a test that SPAWNS it — the gate's path
- * appearing in the same statement as a child-process call. Anything else is a
+ * is the actual program argument of an imported Node child call. Anything else is a
  * MENTION, which is worth reporting and is not coverage.
  *
- * Statement-bounded rather than a character window: the source is split on `;`
- * and a statement must contain both the spawn and the path. A fixed-width window
- * around the name is the shape audit-gate-shapes flags, and it would be wrong
- * here for the same reason it is wrong there — the distance between a call and
- * its argument is not bounded by a number.
+ * The AST recognizer follows unique immutable path bindings into the program
+ * argument. A source-file inventory plus an unrelated child process is only a
+ * mention: fetch-pinning reads verify-machine-video-boot's source while running
+ * a Python probe, which used to give the browser gate false execution credit.
+ * Imported function identity, shadowing, reassignment and Node's argument
+ * position are checked; unsupported call forms fail closed.
  */
-const SPAWNERS = /\b(?:execFileSync|execSync|spawnSync|execFile|spawn|fork)\s*\(/;
 const runByWorkflow = gate => workflowRuns.some(run =>
     runInvokesGate(run, gate) || aliasInvokes(run, gate));
 /**
@@ -288,7 +324,8 @@ const exercisedIn = ({text, raw}, gate) => {
     if (/\bpromisify\s*\(\s*execFile\s*\)/.test(raw || '') && raw.includes(`scripts/${gate}`)) {
         return directlyExecutesPromisifiedGate(raw, gate);
     }
-    return importsGate(text, gate) || (referencesGatePath(text, gate) && SPAWNERS.test(text));
+    return importsGate(text, gate) || (referencesGatePath(text, gate) &&
+        directlyExecutesChildProcessGate(raw || text, gate));
 };
 
 /**
@@ -490,13 +527,25 @@ test('the rule reports two facts and does not confuse them', () => {
     const gate = 'verify-example.mjs';
     const scripts = {'verify:example': `node scripts/${gate}`};
     const mentionOnly = [{file: 'a.test.mjs', text: `assert.ok(yml.includes('${gate}'));`}];
-    const exercises = [{file: 'b.test.mjs',
-        text: `const S = join(here, '..', 'scripts', '${gate}'); execFileSync(node, [S]);`}];
+    const executionSource = `import {execFileSync} from 'node:child_process';
+        import {join} from 'node:path';
+        const S = join(import.meta.dirname, '..', 'scripts', '${gate}');
+        execFileSync(process.execPath, [S]);`;
+    const exercises = [{file: 'b.test.mjs', text: executionSource, raw: executionSource}];
 
     assert.equal(classifyGate(gate, {runs: [`node scripts/${gate}`], sources: [], scripts}), 'workflow');
     assert.equal(classifyGate(gate, {runs: ['PROOF_URL=x npm run verify:example'], sources: [], scripts}),
         'workflow', 'an env-prefixed alias is a workflow run, which is the whole point of this lane');
     assert.equal(classifyGate(gate, {runs: [], sources: exercises, scripts}), 'test');
+    for (const source of [
+        `import {execFileSync} from 'node:child_process';
+            const rows = [{file: 'scripts/${gate}'}];
+            execFileSync('/usr/bin/python3', ['-c', probe]);`,
+        `import {execFileSync} from 'node:child_process';
+            execFileSync(process.execPath, ['scripts/other.mjs', 'scripts/${gate}']);`
+    ]) assert.equal(classifyGate(gate, {runs: [], scripts,
+        sources: [{file: 'inventory.test.mjs', text: source, raw: source}]}), 'mention',
+    'path data and arguments to a different program cannot claim child execution');
     assert.equal(classifyGate(gate, {runs: [], sources: mentionOnly, scripts}), 'mention',
         'a gate a test merely NAMES must classify as a mention. If this reads "test", the two '
         + 'facts have been collapsed again and the inventory is counting strings.');

@@ -30,7 +30,7 @@ test('serialized and object VM diagnostics retain every SB3 path and omit unrela
 test('actual Code compile catch displays a real VM serialized validation rejection and preserves the loaded project', async () => {
     const source = await fs.readFile(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
     const Editor = codeDocumentEditorClass(source,
-        codeEditorMethod(source, 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {'), {
+        codeEditorMethod(source, 'async compile ({strict = false, pseudocode = null, scratchExample = false, targetDevice = null, cowgolTarget = null} = {}) {'), {
             TWO_WAY: new Set(['pseudocode']), LANG_LABEL: {pseudocode: 'Pseudocode'},
             codeArtworkMatches, conversionFailure, DOS_LANG: {}
         });
