@@ -19,7 +19,8 @@ by the web and native application wrappers.
    **Cowgol on Eater 6502**, **Cowgol on Arduino Uno**, **Cowgol on Arduino Nano**, or **Cowgol on ATmega168P** compile the original source on the hosted service
    and hand the executable to the
    existing machine loaders. Downloads include Z80 and 8080 CP/M `.COM`, DOS
-   `.EXE`, RISC-V `.ELF`, Eater 6502 ROM `.BIN`, ATmega328P `.HEX`, and compiled C source. These
+   `.EXE`, RISC-V `.ELF`, Eater 6502 ROM `.BIN`, distinct Uno/Nano/ATmega168P
+   `.HEX` profiles, and compiled C source. These
    actions require the companion compiler-service deployment.
 6. On a qualified native machine, **Run Blocks via Cowgol** is available in
    both the Cowgol and pseudocode editors. It first checks the selected native
@@ -386,8 +387,8 @@ linker, service, frontend and exact-MCU execution oracle:
 | C stack reservation | `$0300–$04FF`, 512 bytes |
 | Serial and digital pins | Same USART0 and D2–D13/A0–A5 bindings as the 328P profile |
 
-The HEX must identify the 168P MCU, flash boundary, SRAM size and heap
-contract. A valid Uno or Nano artifact is still a wrong-target response for
+The compiler response accompanying the HEX must identify the 168P MCU,
+flash boundary, SRAM size and heap contract. A valid Uno or Nano artifact is still a wrong-target response for
 this profile. The execution tests use the actual 1 KiB SRAM and 16 KiB flash
 model, cold-memory resets, allocation reuse/exhaustion and stack monitoring.
 Full Cowgol can use arrays and allocation within these limits; a large
@@ -534,9 +535,25 @@ testing remains outstanding.
 
 ## Companion repositories and reproducibility
 
-All work is on `feat/cowgol-integration-20261128` in `brickwright`,
-`sb3-creator`, `cowgol`, and `stc-compiler`. No production deployment or default
-branch merge is part of these checkpoints.
+The implementation belongs to `brickwright`, `sb3-creator`, `cowgol` and
+`stc-compiler`. The current default-branch integration is tracked in
+[`lanes/2026-11-28-cowgol-platforms.md`](../lanes/2026-11-28-cowgol-platforms.md)
+and uses each repository's normal pull-request gates. Production app and
+compiler-service deployment remain separate operations.
+
+The platform expansion uses these exact qualified source revisions:
+
+| Component | Source revision |
+| --- | --- |
+| Cowgol compiler/runtime | `89b13e71030f929b40f82018a19b5b3386650342` |
+| Compiler service | `597b52f7464313c9774206e570ee8ee47a667a16` |
+| Shared producer | `edd30b11967747774cfddd01f8eb888509866c5c` |
+| GUI board engine | `d21d6d8b819263eb08231134b7556efa82289a90` |
+| GUI AVR engine | `feea84c43e36e578841b5fce640202823b69b7f7` |
+
+The supplier pins identify tested source commits. A later merge commit on a
+supplier's default branch does not by itself require changing an identical
+tested source snapshot.
 
 The Cowgol fork supplies a dependency-light C bootstrap, an explicit fixed-width
 host ABI, an embedded C console profile, portable CP/M/DOS console headers,

@@ -73,6 +73,7 @@ for (const filename of [path.join(service, 'app.py'), path.join(bundle, 'manifes
     assert.ok(existsSync(filename), `Required input is missing: ${filename}`);
 }
 
+// gate-shapes-allow: Git reads revision/dirty metadata; engine/runtime pin assertions gate execution and missing Git throws.
 const git = (directory, ...args) => execFileSync('git', ['-C', directory, ...args], {encoding: 'utf8', timeout: 10_000}).trim();
 const manifest = JSON.parse(readFileSync(path.join(bundle, 'manifest.json'), 'utf8'));
 const needsBoard = targets.some(target => ['riscv32', 'eater6502', 'z80-cpm', 'i8080-cpm', 'dos'].includes(target));

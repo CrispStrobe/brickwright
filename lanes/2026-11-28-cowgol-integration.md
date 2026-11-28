@@ -1,6 +1,10 @@
 # Cowgol integration — 2026-11-28
 
-Status: active on `feat/cowgol-integration-20261128`.
+Status: DONE. The completed integration continues through
+`feat/cowgol-platforms-20261128`; the earlier feature branch is retained.
+Historical checkpoint receipts below remain part of the audit trail. Final
+platform and default-branch delivery evidence is recorded in
+[`2026-11-28-cowgol-platforms.md`](2026-11-28-cowgol-platforms.md).
 
 Owner: ChatGPT, at the repository owner's request. Base: `b474327531ab9133f27c69fce9c6bd776bce2b50`.
 

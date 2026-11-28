@@ -38,8 +38,10 @@ const board = resolve(values.board || process.env.COWGOL_BW_BOARD || join(root, 
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const pin = pkg.devDependencies['bw-board'].split('#')[1];
 assert.match(pin, /^[a-f0-9]{40}$/);
+// gate-shapes-allow: provenance-only Git read; missing Git throws and the exact package pin is asserted below.
 const actual = execFileSync('git', ['-C', board, 'rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
 assert.equal(actual, pin, 'machine checkout must match Brickwright\'s exact bw-board pin');
+// gate-shapes-allow: reject edits to tracked machine inputs before importing them; missing Git or a nonzero diff throws.
 execFileSync('git', ['-C', board, 'diff', '--quiet', 'HEAD', '--', 'src'], {stdio: 'pipe'});
 const image = new Uint8Array(await readFile(resolve(values.com)));
 assert.ok(image.length > 0 && image.length <= COWGOL_COMPILE_TARGETS[values.target].maxBytes,
@@ -88,7 +90,7 @@ for (const display of [false, true]) {
     };
     // The editor launches only after this exact serial prompt. The VDP BIOS
     // also emits the serial copy, so it follows the same ownership and input path.
-    until(() => output.replace(/\r/g, '').split('\n').at(-1) === 'A>', 'cold boot to A>');
+    until(() => /(?:^|\n)A>(?![\s\S])/.test(output.replace(/\r/g, '')), 'cold boot to A>');
     const runStart = output.length;
     send(`${detail.cpmLaunch}\r${values.input}`);
     until(() => values.expect.every(text => output.slice(runStart).includes(text)) &&

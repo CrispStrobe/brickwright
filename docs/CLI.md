@@ -67,7 +67,7 @@ invoke the native compiler or produce CP/M, DOS, RISC-V, or Eater executables.
 Arrays, pointers and other full-language constructs may compile through a
 native Code-tab route while still being refused by terminal conversion.
 
-Add `--target z80-cpm|i8080-cpm|dos|riscv32|eater6502|atmega328p|arduino-nano` to
+Add `--target z80-cpm|i8080-cpm|dos|riscv32|eater6502|atmega328p|arduino-nano|atmega168p` to
 `convert --to cowgol` (or its `transpile`/`compile` aliases) to generate the
 checked native int32 profile. It includes runtime overflow checks and refuses
 operations that the selected native runtime does not implement. `--target`
@@ -94,6 +94,7 @@ bwlite cowgol build program.cow --target riscv32 --out program.elf
 bwlite cowgol build program.cow --target eater6502 --out program.bin
 bwlite cowgol build blink.bw --target atmega328p --out blink.hex
 bwlite cowgol build nano-blink.bw --target arduino-nano --out nano.hex
+bwlite cowgol build chip-blink.bw --target atmega168p --out chip.hex
 bwlite cowgol build program.cow --target cowgol-cgen --out program.c
 ```
 
@@ -102,8 +103,15 @@ with a 30 KiB application-flash limit and 2 KiB bootloader reservation. Checked
 Nano source declares `DEVICE ARDUINO-NANO` (or `DEVICE NANO`). Other Nano
 families are not inferred from the name.
 
+The separate `atmega168p` target is a bare ATmega168P at 16 MHz with
+16 KiB flash, no bootloader reservation, 1 KiB SRAM, a 128-byte allocation
+arena and a reserved 512-byte C stack. Checked source declares
+`DEVICE ATMEGA168P`; a Nano or Uno declaration is a conflicting board contract.
+Its smaller memory limits are enforced during compilation and artifact
+validation. This target does not imply a particular bootloader or upload transport.
+
 The `cowgol-cgen` target exports C and accepts `.cow`/`.cowgol` input. It is
-a source artifact; the remaining six targets produce executables. Native
+a source artifact; the remaining eight targets produce machine artifacts. Native
 builds require an output path (`--out` or `-o`) and never write a binary to
 stdout. They build the file without flashing hardware or launching a machine.
 

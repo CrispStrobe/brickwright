@@ -1,4 +1,4 @@
-name: Cowgol producer snapshot
+name: Cowgol integration evidence
 
 on:
   push:
@@ -9,105 +9,130 @@ permissions:
   contents: read
 
 concurrency:
-  group: cowgol-producer-snapshot-${{ github.ref }}
+  group: cowgol-final-evidence-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  sync:
+  evidence:
     if: ${{ github.repository == 'CrispStrobe/brickwright' && github.ref == 'refs/heads/feat/cowgol-platforms-20261128' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: write
+      actions: read
     env:
-      PRODUCER_REF: edd30b11967747774cfddd01f8eb888509866c5c
-      SB3_CREATOR_DIR: ${{ github.workspace }}/_producer
+      GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/checkout@v4
-        with:
-          repository: CrispStrobe/sb3-creator
-          ref: edd30b11967747774cfddd01f8eb888509866c5c
-          path: _producer
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
-      - name: Prepare the converter dependency
+      - name: Confirm the qualified supplier snapshot and prepare report dependencies
         run: |
-          npm install --prefix .cowgol-sync-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1
-          ln -s .cowgol-sync-deps/node_modules node_modules
-      - name: Sync the exact reviewed source and its gallery
-        run: |
-          set -euo pipefail
-          test "$(git -C _producer rev-parse HEAD)" = "$PRODUCER_REF"
-          set +e
-          node scripts/sync-sb3creator.mjs --dir _producer --allow-stale --pin > "$RUNNER_TEMP/cowgol-source-sync.log" 2>&1
-          sync_status=$?
-          set -e
-          if [ "$sync_status" != 0 ]; then
-            # The source script deliberately records its pin, then refuses a
-            # stale gallery before its mirror phase. Accept only that named
-            # intermediate state; the following two canonical syncs finish it.
-            node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import assert from 'node:assert/strict';
-          const log = fs.readFileSync(process.env.RUNNER_TEMP + '/cowgol-source-sync.log', 'utf8');
-          assert.ok(log.includes('STALE GALLERY:'), log.slice(-8000));
-          assert.ok(!log.includes('REFUSED'), log.slice(-8000));
-          assert.equal(JSON.parse(fs.readFileSync('vendor-pins.json'))['sb3-creator'], process.env.PRODUCER_REF);
-          NODE
-          fi
-          node scripts/sync-examples.mjs --dir _producer --allow-stale --pin > "$RUNNER_TEMP/cowgol-gallery-sync.log" 2>&1 || { tail -100 "$RUNNER_TEMP/cowgol-gallery-sync.log"; exit 1; }
-          node scripts/sync-sb3creator.mjs --dir _producer --allow-stale --pin > "$RUNNER_TEMP/cowgol-source-final.log" 2>&1 || { tail -100 "$RUNNER_TEMP/cowgol-source-final.log"; exit 1; }
-          tail -12 "$RUNNER_TEMP/cowgol-source-final.log"
-          node scripts/gen-language-device-matrix.mjs
-      - name: Verify supplier identity, gallery, mirrors and the SPIKE artifact
-        run: |
-          node scripts/sync-sb3creator.mjs --dir _producer --check
-          node scripts/sync-examples.mjs --dir _producer --check
-          node scripts/check-mirrors.mjs
-          node --test test/sb3-creator-vendor-identity.test.mjs test/lego-spike-roundtrip.test.mjs test/bw-matrix-doc.test.mjs
-      - name: Save the reviewed generated snapshot
-        run: |
-          set -euo pipefail
-          git add -u
-          git add -- overlay/scratch-gui/examples
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           import {execFileSync} from 'node:child_process';
-          import {SB3_CREATOR_FILES} from './scripts/lib/vendor-rewrites.mjs';
-          for (const [local] of SB3_CREATOR_FILES) {
-            for (const root of ['overlay/scratch-gui/src/lib/', 'packages/scratch-gui/src/lib/']) {
-              execFileSync('git', ['add', '-f', '--', root + local]);
-            }
-          }
-          const paths = execFileSync('git', ['diff', '--cached', '--name-only', '-z'], {encoding:'utf8'}).split('\0').filter(Boolean);
-          const allowed = path => path === 'vendor-pins.json' ||
-            /^overlay\/scratch-gui\/(src\/lib|examples)\//.test(path) ||
-            /^packages\/scratch-gui\/src\/lib\//.test(path) ||
-            /^scripts\/lib\/vendor\//.test(path) ||
-            /^docs\/generated\/(ARCADE-AUTHORING-VOCABULARY|LANGUAGE-DEVICE-MATRIX)\.md$/.test(path);
-          assert.deepEqual(paths.filter(path => !allowed(path)), [], 'snapshot changed files outside the supplier boundary');
-          const before = execFileSync('git', ['ls-tree', '--name-only', 'HEAD'], {encoding:'utf8'}).trim().split('\n');
-          const tree = execFileSync('git', ['write-tree'], {encoding:'utf8'}).trim();
-          const after = execFileSync('git', ['ls-tree', '--name-only', tree], {encoding:'utf8'}).trim().split('\n');
-          assert.deepEqual(after, before, 'snapshot must retain the complete repository root');
-          const report = {producer: process.env.PRODUCER_REF, mappedFiles: SB3_CREATOR_FILES.length,
-            changedFiles: paths.length, rootEntries: after.length, sourceIdentity: 'passed',
-            galleryIdentity: 'passed', trackedMirrors: 'passed', spikeArtifact: 'passed'};
-          fs.writeFileSync(process.env.RUNNER_TEMP + '/cowgol-supplier-sync.json', JSON.stringify(report, null, 2) + '\n');
+          assert.equal(JSON.parse(fs.readFileSync('vendor-pins.json'))['sb3-creator'],
+            'edd30b11967747774cfddd01f8eb888509866c5c');
+          execFileSync('git', ['merge-base', '--is-ancestor',
+            '301316b0736180ee84bedb4439b8f33689f65bd3', 'HEAD']);
+          execFileSync('git', ['diff', '--exit-code',
+            '301316b0736180ee84bedb4439b8f33689f65bd3', 'HEAD', '--',
+            'vendor-pins.json', 'overlay/scratch-gui/src/lib',
+            'packages/scratch-gui/src/lib', 'overlay/scratch-gui/examples'], {stdio: 'inherit'});
+          NODE
+          npm install --prefix .cowgol-evidence-deps --ignore-scripts --no-save --package-lock=false jszip@3.10.1 acorn@8.14.0 acorn-walk@8.3.4
+          ln -s .cowgol-evidence-deps/node_modules node_modules
+      - name: Generate reader coverage and qualify the final workflow set
+        run: |
+          set -euo pipefail
+          node scripts/gen-reader-coverage.mjs
+          git rm -- .github/workflows/cowgol-producer-sync.yml
+          for workflow in cowgol.yml cardiac-lab.yml cp1-qualification.yml kim1-app.yml kim1-prepare.yml reference-qualified-instrument-controls.yml; do
+            gh run list --repo "$GITHUB_REPOSITORY" --workflow "$workflow" --limit 20 \
+              --json headSha,status,conclusion \
+              --jq '.[] | select(.status == "completed" and .conclusion != "cancelled") | .headSha' \
+              > "$RUNNER_TEMP/cowgol-census-source-shas.txt"
+            while IFS= read -r revision; do
+              [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+              if ! git cat-file -e "$revision^{commit}" 2>/dev/null; then
+                git fetch --no-tags origin "$revision"
+              fi
+            done < "$RUNNER_TEMP/cowgol-census-source-shas.txt"
+            node scripts/gen-ci-steps.mjs --fetch --workflow "$workflow"
+          done
+          node scripts/gen-ci-steps.mjs --check
+      - name: Verify the focused app gates and exact CLI refusal behavior
+        run: |
+          node scripts/check-mirrors.mjs
+          node --test \
+            test/gate-shapes.test.mjs \
+            test/gate-coverage.test.mjs \
+            test/fetch-pinning.test.mjs \
+            test/ci-step-census.test.mjs \
+            test/reader-coverage-doc.test.mjs \
+            test/workflow-step-shape.test.mjs \
+            test/ci-workflow-inputs.test.mjs \
+            test/wait-census.test.mjs \
+            test/build-trigger-paths.test.mjs \
+            test/cowgol-verifier-cli.test.mjs
+      - name: Record the qualified final tree and save only generated evidence
+        run: |
+          set -euo pipefail
+          git add -- docs/generated/READER-COVERAGE.md docs/generated/ci-step-census.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          const git = (...args) => execFileSync('git', args, {encoding:'utf8'}).trim();
+          const temporary = '.github/workflows/cowgol-producer-sync.yml';
+          assert.equal(fs.existsSync(temporary), false);
+          const changed = git('diff', '--cached', '--name-only').split('\n').filter(Boolean);
+          const allowed = new Set([temporary, 'docs/generated/READER-COVERAGE.md',
+            'docs/generated/ci-step-census.json']);
+          assert.deepEqual(changed.filter(path => !allowed.has(path)), []);
+          assert.deepEqual(git('diff', '--cached', '--diff-filter=D', '--name-only').split('\n').filter(Boolean),
+            [temporary], 'only the one-use workflow may be removed');
+          assert.equal(git('diff', '--name-only'), '', 'no unstaged tracked mutation may escape the qualified tree');
+          const qualifiedTree = git('write-tree');
+          const roots = git('ls-tree', '--name-only', 'HEAD').split('\n');
+          assert.deepEqual(git('ls-tree', '--name-only', qualifiedTree).split('\n'), roots);
+          const report = {
+            sourceSnapshot: '301316b0736180ee84bedb4439b8f33689f65bd3',
+            producer: 'edd30b11967747774cfddd01f8eb888509866c5c',
+            candidate: git('rev-parse', 'HEAD'), qualifiedTree, rootEntries: roots.length,
+            changedFiles: changed, readerCoverage: 'passed', workflowCensus: 'passed',
+            focusedAppGates: 'passed', verifierCli: 'passed',
+            finalization: 'Root must remove only the temporary workflow and reproduce qualifiedTree exactly.'
+          };
+          fs.writeFileSync(process.env.RUNNER_TEMP + '/cowgol-final-evidence.json',
+            JSON.stringify(report, null, 2) + '\n');
           console.log(JSON.stringify(report));
+          NODE
+          # Keep this token's push restricted to generated documents. The owning
+          # caller removes the temporary workflow and verifies qualifiedTree.
+          git restore --source=HEAD --staged --worktree -- .github/workflows/cowgol-producer-sync.yml
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          const paths = execFileSync('git', ['diff', '--cached', '--name-only'],
+            {encoding:'utf8'}).trim().split('\n').filter(Boolean);
+          const allowed = new Set(['docs/generated/READER-COVERAGE.md', 'docs/generated/ci-step-census.json']);
+          assert.ok(paths.length, 'the missing workflow observations must be saved');
+          assert.deepEqual(paths.filter(path => !allowed.has(path)), []);
           NODE
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'build: sync reviewed Cowgol producer and derived artifacts'
+          git commit -m 'test: refresh Cowgol reader and workflow evidence'
           git push origin HEAD:refs/heads/feat/cowgol-platforms-20261128
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
         with:
-          name: cowgol-supplier-sync
-          path: ${{ runner.temp }}/cowgol-supplier-sync.json
+          name: cowgol-final-evidence
+          path: |
+            ${{ runner.temp }}/cowgol-final-evidence.json
+            docs/generated/READER-COVERAGE.md
+            docs/generated/ci-step-census.json

@@ -105,7 +105,9 @@ program as text, and you can edit either side; the two stay in sync.
   and the **Raspberry Pi Pico** — plus live **Forth** (zForth), **Tcl**
   (Jim Tcl / partcl), **Lisp** (`fe`) and **Cowgol** tabs. Cowgol is available
   from **Code → +**, with a checked integer, turtle-canvas and digital-circuit
-  subset, plus native CP/M/DOS compiler routes. See [Cowgol support and limits](docs/COWGOL.md).
+  subset, plus native CP/M, DOS, RISC-V, Eater 6502 and AVR compiler routes.
+  AVR profiles include Uno, classic Nano and bare ATmega168P. See
+  [Cowgol support and limits](docs/COWGOL.md).
   It reads hand-written code back
   too: edit the C or BASIC a program became and import it to blocks again.
 - Beyond the round trip, programs can be **compiled and run on emulated DOS and

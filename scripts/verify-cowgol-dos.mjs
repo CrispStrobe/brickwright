@@ -39,8 +39,10 @@ const board = resolve(values.board || process.env.COWGOL_BW_BOARD || join(root, 
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const pin = pkg.devDependencies['bw-board'].split('#')[1];
 assert.match(pin, /^[a-f0-9]{40}$/);
+// gate-shapes-allow: provenance-only Git read; missing Git throws and the exact package pin is asserted below.
 const actual = execFileSync('git', ['-C', board, 'rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
 assert.equal(actual, pin, 'the machine checkout must match the exact Brickwright bw-board pin');
+// gate-shapes-allow: reject edits to tracked machine inputs before importing them; missing Git or a nonzero diff throws.
 execFileSync('git', ['-C', board, 'diff', '--quiet', 'HEAD', '--', 'src', 'package.json'], {stdio: 'pipe'});
 
 // Resolve the GUI bench's four package imports from the verified checkout.

@@ -23,6 +23,7 @@ on:
       - 'test/cowgol-dos-surfaces.test.mjs'
       - 'test/cowgol-i80386-surfaces.test.mjs'
       - 'test/cowgol-dos-disk.test.mjs'
+      - 'test/cowgol-verifier-cli.test.mjs'
       - 'test/bwlite-cowgol-cli.test.mjs'
       - 'test/bwlite-cowgol-build.test.mjs'
       - 'test/cowgol-computer-surfaces.test.mjs'
@@ -57,6 +58,7 @@ on:
       - 'test/cowgol-dos-surfaces.test.mjs'
       - 'test/cowgol-i80386-surfaces.test.mjs'
       - 'test/cowgol-dos-disk.test.mjs'
+      - 'test/cowgol-verifier-cli.test.mjs'
       - 'test/bwlite-cowgol-cli.test.mjs'
       - 'test/bwlite-cowgol-build.test.mjs'
       - 'test/cowgol-computer-surfaces.test.mjs'
@@ -84,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           sparse-checkout: |
             overlay/scratch-gui/src
@@ -94,7 +96,7 @@ jobs:
             test
             bin
             packages/scratch-gui/src/lib
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
       - name: Prepare the shared converter and its ZIP dependency
@@ -115,6 +117,7 @@ jobs:
           test/cowgol-dos-surfaces.test.mjs
           test/cowgol-i80386-surfaces.test.mjs
           test/cowgol-dos-disk.test.mjs
+          test/cowgol-verifier-cli.test.mjs
           test/cowgol-computer-surfaces.test.mjs
           test/cowgol-cpm-launch-ownership.test.mjs
           test/debug-panel-runner-ownership.test.mjs
@@ -134,7 +137,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           sparse-checkout: |
             overlay/scratch-gui/src/lib
@@ -143,26 +146,26 @@ jobs:
             scripts
             bin
             packages/scratch-gui/src/lib
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       - name: Checkout the qualified compiler service
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/stc-compiler
           ref: 597b52f7464313c9774206e570ee8ee47a667a16
           path: _stc_compiler
       - name: Checkout its exact Cowgol source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/cowgol
           ref: 89b13e71030f929b40f82018a19b5b3386650342
           path: _cowgol
       - name: Checkout the exact GUI machine
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/bw-board
           ref: d21d6d8b819263eb08231134b7556efa82289a90
@@ -177,7 +180,7 @@ jobs:
         run: |
           mkdir -p test-results
           node scripts/verify-cowgol-platforms.mjs --service _stc_compiler --bundle _stc_compiler/vendor/cowgol --board _bw_board --targets z80-cpm,i8080-cpm,dos,cowgol-cgen --cli --tmpdir "$RUNNER_TEMP" > test-results/cowgol-native-surfaces.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: cowgol-native-surfaces
           path: test-results/cowgol-native-surfaces.json
@@ -186,29 +189,29 @@ jobs:
     container: python:3.11-bullseye
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           sparse-checkout: |
             overlay/scratch-gui/src/lib
             scripts
             bin
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
       - name: Checkout the qualified compiler service
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/stc-compiler
           ref: 597b52f7464313c9774206e570ee8ee47a667a16
           path: _stc_compiler
       - name: Checkout its exact Cowgol source and AVR runner
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/cowgol
           ref: 89b13e71030f929b40f82018a19b5b3386650342
           path: _cowgol
       - name: Checkout the exact GUI AVR engine
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/avr8js
           ref: feea84c43e36e578841b5fce640202823b69b7f7
@@ -225,7 +228,7 @@ jobs:
         run: |
           mkdir -p test-results
           node scripts/verify-cowgol-platforms.mjs --service _stc_compiler --bundle _stc_compiler/vendor/cowgol --targets atmega328p,arduino-nano,atmega168p --avr8js-root _avr8js --avr-runner _cowgol/tests/avr-run.mjs --cli --tmpdir "$RUNNER_TEMP" > test-results/cowgol-native-avr-surfaces.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: cowgol-native-avr-surfaces
           path: test-results/cowgol-native-avr-surfaces.json
