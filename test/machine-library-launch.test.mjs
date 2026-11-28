@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import JSZip from 'jszip';
 import {sha256Hex} from '../overlay/scratch-gui/src/lib/bw-machines/activate.js';
+import {readLibraryFloppy} from '../overlay/scratch-gui/src/lib/bw-machines/local-floppy.js';
 import {readFreedosGuestPackage} from '../overlay/scratch-gui/src/lib/bw-machines/freedos-guest.js';
 import {fromMediaManifest} from '../overlay/scratch-gui/src/lib/bw-machines/importers.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
@@ -125,4 +126,49 @@ test('FreeDOS guest packages verify the archive and extract only the declared me
     ]);
     await assert.rejects(readFreedosGuestPackage(new Blob([new Uint8Array(file.size)]), release), /checksum differs/);
     await assert.rejects(readFreedosGuestPackage(file, {...release, files: ['missing.exe']}), /missing missing[.]exe/);
+});
+
+test('PDOS/86 only passes its verified local 360 KiB image to the XT and Controller', async () => {
+    const item = libraryMedia.find(item => item.id === 'pdos86');
+    assert.equal(item.machine, 'i8086');
+    assert.equal(item.license, 'CC0-1.0');
+    assert.match(libraryLicenseUrl(item), /readme[.]txt$/);
+    const descriptor = item.localFloppy;
+    assert.equal(descriptor.url, 'https://www.pdos.org/flop360.img');
+    await assert.rejects(readLibraryFloppy(new Blob(), item), /360 KiB/);
+    const bytes = new Uint8Array(360 * 1024);
+    const file = new Blob([bytes]);
+    await assert.rejects(readLibraryFloppy(file, item), /checksum differs/);
+
+    const synthetic = {...descriptor, sha256: await sha256Hex(bytes)};
+    const {config, fetcher} = await readLibraryFloppy(file, {...item, localFloppy: synthetic});
+    assert.equal(config.machineConfig, 'PCXT8086');
+    await runMachineConfig(config, {fetcher, awaitBoot: true, dispatch: detail => {
+        assert.equal(detail.kind, 'i8086');
+        assert.equal(detail.slotId, 'floppy');
+        assert.deepEqual(detail.geometry, {cylinders: 40, heads: 2, sectors: 9, bytesPerSector: 512});
+        assert.deepEqual(detail.bytes, bytes);
+        assert.equal(detail.widgets[0].source, 'video');
+        detail.bootCompletion.resolve();
+    }});
+});
+
+test('PDOS/86 AT mounts the same verified floppy through the clock-equipped profile', async () => {
+    const xt = libraryMedia.find(item => item.id === 'pdos86');
+    const at = libraryMedia.find(item => item.id === 'pdos86-at');
+    assert.equal(at.machine, 'i80386');
+    assert.deepEqual(at.localFloppy, xt.localFloppy);
+    const bytes = new Uint8Array(360 * 1024);
+    const sample = {...at, localFloppy: {...at.localFloppy, sha256: await sha256Hex(bytes)}};
+    const {config, fetcher} = await readLibraryFloppy(new Blob([bytes]), sample);
+    assert.equal(config.machineConfig, 'freedos-vga');
+    assert.equal(config.bios.kind, 'bochs-lgpl');
+    await runMachineConfig(config, {fetcher, awaitBoot: true, dispatch: detail => {
+        assert.equal(detail.kind, 'i80386');
+        assert.equal(detail.slotId, 'floppy');
+        assert.deepEqual(detail.geometry, {cylinders: 40, heads: 2, sectors: 9, bytesPerSector: 512});
+        assert.deepEqual(detail.bytes, bytes);
+        assert.equal(detail.widgets[0].source, 'video');
+        detail.bootCompletion.resolve();
+    }});
 });

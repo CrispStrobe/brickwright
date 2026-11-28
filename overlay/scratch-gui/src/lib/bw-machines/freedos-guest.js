@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
-import {defaultImageFetcher, sha256Hex} from './activate.js';
+import {sha256Hex} from './activate.js';
 import {writeDosFloppyFiles} from './kim1-xkim-fat.js';
-import {newMachineConfig} from './machine-config.js';
+import {localFloppyMedia, pcXtFloppy} from './local-floppy.js';
 import {localFreedosVgaMachine} from './local-freedos-vga.js';
 
 export const freedosFloppyZipUrl = 'https://download.freedos.org/1.4/FD14-FloppyEdition.zip';
@@ -61,14 +61,9 @@ export async function createFreedosGuest (floppy, {title, machine = 'i80386', re
         ])},
         {name: 'FDAUTO.BAT', bytes: dosText(['@ECHO OFF', ...startup])}
     ]);
-    const config = machine === 'i8086' ? newMachineConfig({
-        title, machine, executionMode: 'functional', machineConfig: 'PCXT8086',
-        slots: {floppy: {url: 'local-media:floppy', geometry: {
-            cylinders: 80, heads: 2, sectors: 9, bytesPerSector: 512
-        }}},
-        bootOrder: ['floppy'],
-        widgets: [{name: 'PC CGA', type: 'simplevga', source: 'video', config: {width: 720, height: 400}}],
-        provenance: {source: 'local-freedos-guest'}
-    }) : localFreedosVgaMachine({floppy: {size: bytes.length, name: title}});
-    return {config, fetcher: ref => ref.url === 'local-media:floppy' ? {bytes} : defaultImageFetcher(ref)};
+    if (machine === 'i8086') {
+        return pcXtFloppy({title, bytes, cylinders: 80, provenance: {source: 'local-freedos-guest'}});
+    }
+    const config = localFreedosVgaMachine({floppy: {size: bytes.length, name: title}});
+    return localFloppyMedia(config, bytes);
 }

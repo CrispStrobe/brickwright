@@ -11,6 +11,7 @@
 // app. Inline styles, matching the rest of tw-pseudocode.
 
 import React from 'react';
+import {readLibraryFloppy} from '../../lib/bw-machines/local-floppy.js';
 import {makeT} from '../../lib/bw-i18n.js';
 import {currentBox, overlayStyleFor, subscribeVisualViewport} from '../../lib/visual-viewport.js';
 import {
@@ -177,7 +178,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
     const showLocal386 = matchesType('i80386');
     const mediaAllowed = remoteMachineImagesAllowed();
-    const availableMedia = libraryMedia.filter(item => mediaAllowed || item.guestPackage?.localOnly);
+    const availableMedia = libraryMedia.filter(item => mediaAllowed || item.localFloppy || item.guestPackage?.localOnly);
     const matchingMedia = availableMedia.map(item => localizedMedia(item, locale))
         .filter(item => matchesType(item.machine) && matchesTitle(item.title));
     const [circuits, setCircuits] = React.useState(null);
@@ -560,6 +561,9 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 {item.freedosGuest && <div>{t(item.freedosHelp)}{' '}
                                                     <a href={freedosFloppyZipUrl} target="_blank" rel="noopener noreferrer">FreeDOS 1.4</a>
                                                 </div>}
+                                                {item.localFloppy && <div>
+                                                    <a href={item.localFloppy.url} target="_blank" rel="noopener noreferrer">{item.localFloppy.name}</a>
+                                                </div>}
                                                 {item.guestPackage && <div>
                                                     <a href={item.guestPackage.url} target="_blank" rel="noopener noreferrer">{item.guestPackage.title}</a>
                                                 </div>}
@@ -575,7 +579,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             actions={
                                                 <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
                                                         item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun) ||
-                                                        (item.freedosGuest && !guestMedia[item.id]) || (item.guestPackage && !guestPackages[item.id])} style={btn}
+                                                        ((item.freedosGuest || item.localFloppy) && !guestMedia[item.id]) || (item.guestPackage && !guestPackages[item.id])} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
@@ -594,10 +598,15 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                             const kim1Tape = await readKim1LibraryTape(item);
                                                             return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
-                                                        const build = item.freedosGuest || item.code?.compilerTarget === 'i8086-smallc'
+                                                        const build = item.freedosGuest || item.localFloppy || item.code?.compilerTarget === 'i8086-smallc'
                                                             ? new AbortController() : null;
                                                         if (build) mediaLaunch.current = build;
                                                         try {
+                                                            if (item.localFloppy) {
+                                                                const {config, fetcher} = await readLibraryFloppy(
+                                                                    guestMedia[item.id], item, build.signal);
+                                                                return await onRun(config, {fetcher, signal: build.signal});
+                                                            }
                                                             if (item.freedosGuest) {
                                                                 const {config, fetcher} = await item.freedosGuest(guestMedia[item.id], build.signal, guestPackages[item.id]);
                                                                 return await onRun(config, {fetcher, signal: build.signal});
@@ -615,8 +624,10 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                     {t('run')}
                                                 </button>
                                             }>
-                                            {item.freedosGuest && <label style={fieldsStyle}>{t('freedosMedia')}{' '}
-                                                <input type="file" accept=".zip,.img,.ima" data-testid="bw-mm-freedos-guest-media"
+                                            {(item.freedosGuest || item.localFloppy) && <label style={fieldsStyle}>
+                                                {item.localFloppy ? item.localFloppy.name : t('freedosMedia')}{' '}
+                                                <input type="file" accept={item.localFloppy ? '.img,.ima' : '.zip,.img,.ima'}
+                                                    data-testid={item.localFloppy ? 'bw-mm-local-floppy' : 'bw-mm-freedos-guest-media'}
                                                     disabled={launching !== null}
                                                     onChange={event => {
                                                         const selected = event.target.files?.[0] || null;

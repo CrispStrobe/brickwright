@@ -10,14 +10,18 @@ import {validateMachineConfig} from './machine-config.js';
 import {PICOBB_FLASH} from './pico-basic-flash.js';
 
 const mediaInfo = makeT({
-    en: {minix: 'Click the screen and press = to boot MINIX. Log in as root and try ls.', sieve: 'CP/M Sieve',
+    en: {pdos86: 'Click the Controller screen for keyboard input. Wait for the PCOMM prompt, then try DIR or TYPE README.TXT. Boot can take about three minutes. Use the 80386 entry for file writes.',
+        pdos86At: 'Wait for PCOMM, then click the Controller screen. The AT clock supports timestamps for files created by PDOS/86.',
+        minix: 'Click the screen and press = to boot MINIX. Log in as root and try ls.', sieve: 'CP/M Sieve',
         animation6502: 'Watch the 6502 copy four frames to video RAM at $2000. The screen updates when the guest publishes a frame.',
         tali65c02: 'Choose ACIA in Controller. Define a word, or write grayscale pixels at $3000. Switch to Screen to see the framebuffer.', forthCpm: 'zForth on CP/M',
         ackPascal: 'Prints the primes first. The DOS service then reports a file-close error.',
         dosForth: 'In Controller, enter : SQUARE DUP * ; and then 7 SQUARE . on separate lines.',
         smallC: 'Build C with the guest compiler, assembler and linker. Edit the sample in C and run it again. Output appears in Controller.',
         ubasic: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.'},
-    de: {minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb',
+    de: {pdos86: 'Klicke für die Tastatureingabe auf den Controller-Bildschirm. Warte auf die PCOMM-Eingabeaufforderung und probiere DIR oder TYPE README.TXT. Der Start kann etwa drei Minuten dauern. Zum Schreiben von Dateien verwende den 80386-Eintrag.',
+        pdos86At: 'Warte auf PCOMM und klicke auf den Controller-Bildschirm. Die AT-Uhr liefert Zeitstempel für Dateien, die PDOS/86 anlegt.',
+        minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb',
         animation6502: 'Der 6502 kopiert vier Bilder in den Bildspeicher ab $2000. Die Anzeige übernimmt fertige Bilder.',
         tali65c02: 'Wähle im Controller ACIA. Definiere ein Wort oder schreibe Graustufenpixel ab $3000. Wähle Bildschirm für die Bildausgabe.', forthCpm: 'zForth unter CP/M',
         ackPascal: 'Gibt zuerst die Primzahlen aus. Danach meldet der DOS-Dienst einen Fehler beim Schließen der Datei.',
@@ -53,6 +57,13 @@ const ackSamples = [
     sample: {language, file, sha256}
 }));
 
+const pdos86 = {
+    license: 'CC0-1.0',
+    licenseFile: 'https://github.com/pdos-project/pdos/blob/0fe81209e78d022b40301f86f97c7f4d3e406d0a/readme.txt',
+    localFloppy: {name: 'flop360.img', url: 'https://www.pdos.org/flop360.img', cylinders: 40,
+        sha256: 'e977ac9a1c95d283777dbcb0a25e913d977770c6ebbc47ebdda10e46b7d75e0f'}
+};
+
 export const libraryMedia = [
     {id: 'forth-cpm', title: mediaInfo('en', 'forthCpm'), titleKey: 'forthCpm', machine: 'z80', license: 'MIT'},
     {id: 'cpm-software', title: mediaInfo('en', 'sieve'), titleKey: 'sieve', machine: 'z80', license: 'BSD-2-Clause',
@@ -70,6 +81,7 @@ export const libraryMedia = [
     {id: 'small-c', title: 'Small-C 2.5 (DOS)', machine: 'i8086', license: 'LicenseRef-Public-Domain',
         licenseFile: 'PUBLIC-DOMAIN.txt', infoKey: 'smallC', revision: '925c5b12902867b3cd6c87b2450a7183c9db8848',
         code: {language: 'c', path: 'samples/demo.c', compilerTarget: 'i8086-smallc'}},
+    {...pdos86, id: 'pdos86', title: 'PDOS/86', machine: 'i8086', infoKey: 'pdos86'},
     {id: 'zmiy', title: 'Zmiy 0.85.2', machine: 'i8086', license: 'BSD-2-Clause',
         licenseFile: zmiyProjectUrl, freedosGuest: createZmiyMachine, freedosHelp: 'zmiyHelp',
         guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP', localOnly: true}},
@@ -95,6 +107,7 @@ export const libraryMedia = [
         license: 'LicenseRef-Public-Domain', licenseFile: 'LICENSE.upstream', infoKey: 'tali65c02',
         revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
         romHash: '81c331f6afcd7f7049dbf51e65d839d0a483ef0699697586819bbeff95e74703'},
+    {...pdos86, id: 'pdos86-at', title: 'PDOS/86 (AT with RTC)', machine: 'i80386', infoKey: 'pdos86At'},
     {id: 'minix-2.0', title: 'MINIX 2.0.4', machine: 'i80386', license: 'BSD-3-Clause',
         licenseFile: 'LICENSE', infoKey: 'minix', revision: 'b424a9a6d2826360351d1ed1fbcd7548c4edf9f8'},
     {id: 'alice-pascal', title: 'ALICE Pascal', machine: 'i80386', license: 'Artistic-1.0',
