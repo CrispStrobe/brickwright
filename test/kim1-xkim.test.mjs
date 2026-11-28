@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {createXkimMemoryMap, readXkimMedia} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim.js';
+import JSZip from 'jszip';
+import {createXkimArchive, createXkimMemoryMap, readXkimMedia} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim.js';
 
 test('xKIM maps expansion RAM and ROM while retaining the original KIM reset vectors', () => {
     const rom = new Uint8Array(8192).fill(0xea);
@@ -24,4 +25,11 @@ test('local xKIM media validates ROM size and case-insensitive 8.3 names', async
     await assert.rejects(readXkimMedia(new Blob(), []), /8 KiB/);
     await assert.rejects(readXkimMedia(rom, [text, new File([], 'INTRO.TXT')]), /unique 8.3/);
     await assert.rejects(readXkimMedia(rom, [new File([], '../secret.txt')]), /unique 8.3/);
+});
+
+test('xKIM export preserves empty and binary files byte for byte', async () => {
+    const files = [{name: 'EMPTY.TXT', bytes: new Uint8Array()}, {name: 'PROGRAM.BIN', bytes: Uint8Array.of(0, 255, 128)}];
+    const blob = await createXkimArchive(files);
+    const archive = await JSZip.loadAsync(await blob.arrayBuffer());
+    for (const {name, bytes} of files) assert.deepEqual(await archive.file(name).async('uint8array'), bytes);
 });

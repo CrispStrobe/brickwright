@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import JSZip from 'jszip';
 import {chromium} from 'playwright';
 
 const [url, rom] = process.argv.slice(2);
@@ -56,9 +58,43 @@ try {
     await waitFor(/0201 00\s*$/);
     await submit('?');
     await waitFor(/0201 00[\s\S]*>\s*$/);
+    await submit('S');
+    await waitFor(/>S\s*$/);
+    await submit('0200');
+    await waitFor(/0200-\s*$/);
+    await submit('0200');
+    await waitFor(/display to console:\s*$/);
+    await submit('SAVE.HEX');
+    await waitFor(/SAVE[.]HEX[\s\S]*>\s*$/);
+    await submit('T');
+    await waitFor(/Enter filename:\s*$/);
+    await submit('SAVE.HEX');
+    await waitFor(/:010200005AA3[\s\S]*:00000001FF[\s\S]*>\s*$/);
+
     await submit('E');
     await submit('0200');
     await waitFor(/0200 5A\s*$/);
+    await submit('00');
+    await waitFor(/0201 00\s*$/);
+    await submit('?');
+    await waitFor(/0201 00[\s\S]*>\s*$/);
+    await submit('L');
+    await waitFor(/load from console:\s*$/);
+    await submit('SAVE.HEX');
+    await waitFor(/load from console: SAVE[.]HEX[\s\S]*>\s*$/);
+    await submit('E');
+    await submit('0200');
+    await waitFor(/0200 5A\s*$/);
+
+    const downloading = page.waitForEvent('download');
+    await terminal.getByRole('button', {name: 'Export files', exact: true}).click();
+    const download = await downloading;
+    assert.equal(download.suggestedFilename(), 'xkim-files.zip');
+    const archive = await JSZip.loadAsync(await readFile(await download.path()));
+    assert.deepEqual(Object.keys(archive.files).sort(), ['HELLO.TXT', 'README.ME', 'SAVE.HEX']);
+    assert.equal(await archive.file('SAVE.HEX').async('string'), ':010200005AA3\r\n:00000001FF');
+    assert.equal(await archive.file('HELLO.TXT').async('string'), 'HELLO FROM BRICKWRIGHT\r\n');
+
     await terminal.getByTestId('bw-machine-fullscreen').click();
     await terminal.getByRole('button', {name: 'Exit full screen', exact: true}).click();
     await page.getByTestId('bw-ctl-mode-edit').click();
@@ -80,7 +116,7 @@ try {
     await terminal.waitFor({state: 'hidden'});
     await unrelatedWidget.waitFor();
     assert.deepEqual(errors, []);
-    console.log('xKIM booted, listed and read session files, handled a missing file, and edited RAM through the Controller terminal.');
+    console.log('xKIM booted, saved and reloaded Intel HEX, and exported the exact session files through Controller.');
 } catch (error) {
     console.error(await page.getByTestId('bw-serial-console').allTextContents());
     console.error(await page.getByTestId('bw-machine-manager').allTextContents());

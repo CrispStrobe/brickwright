@@ -606,7 +606,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                     {group.xkim && <MachineEntry title="Corsham xKIM" infoPrefix={infoPrefix}
                                         rowAttributes={{'data-testid': 'bw-mm-xkim'}}
                                         info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
-                                            {' '}Optional files have 8.3 names and are available read-only. Enter D to list them or T to display one.</>}
+                                            {' '}Choose optional files with 8.3 names. The guest can change session copies. Use Export files in Controller to save them.</>}
                                         actions={<>
                                             <label style={fieldsStyle}>ROM
                                                 <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}

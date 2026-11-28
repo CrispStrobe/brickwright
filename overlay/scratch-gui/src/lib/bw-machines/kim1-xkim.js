@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+import downloadBlob from '../download-blob.js';
 import {createKim1Tty} from './kim1-tty.js';
 
 export const XKIM_SOURCE = 'https://github.com/CorshamTech/xKIM/tree/0ce44974504514563e86cdf84ac8a9848b8bcdb5';
@@ -36,6 +37,13 @@ export function createXkimMemoryMap (rom) {
     return map;
 }
 
+export async function createXkimArchive (files) {
+    const {default: JSZip} = await import('jszip');
+    const archive = new JSZip();
+    for (const {name, bytes} of files) archive.file(name, bytes);
+    return archive.generateAsync({type: 'blob', compression: 'STORE'});
+}
+
 export function createXkimTerminal ({rom, files}) {
     return createKim1Tty({
         setup: control => {
@@ -44,9 +52,11 @@ export function createXkimTerminal ({rom, files}) {
         },
         boot: 'E000 G', bootPrompt: /Extended KIM Monitor[\s\S]*>\s*$/,
         // xKIM takes one key at its main prompt and a line at the file prompt.
-        encodeInput: (line, transcript) => !line || /filename:\s*$/i.test(transcript) ? line + '\r' : line,
+        encodeInput: (line, transcript) =>
+            !line || /(?:filename|display to console|load from console):\s*$/i.test(transcript) ? line + '\r' : line,
+        exportFiles: async snapshot => downloadBlob('xkim-files.zip', await createXkimArchive(snapshot)),
         title: 'xKIM · Corsham files',
         inputLabel: 'xKIM command',
-        help: 'Enter D to list mounted files. Enter T and then a filename to display it. Imported files are read-only for this session.'
+        help: 'D lists files. T displays a file. S saves a memory range as Intel HEX. Export files downloads the current session files.'
     });
 }
