@@ -3,7 +3,16 @@ name: Cowgol integration evidence
 on:
   push:
     branches: [feat/cowgol-platforms-20261128]
-    paths: ['.github/workflows/cowgol-producer-sync.yml']
+    paths:
+      - '.github/workflows/cowgol-producer-sync.yml'
+      - 'overlay/scratch-gui/src/lib/bw-lang/cowgol-compile.js'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'test/cowgol-*.test.mjs'
+      - 'test/gate-coverage.test.mjs'
+      - 'test/gate-direct-exec.test.mjs'
+      - 'test/gate-promisified-exec.test.mjs'
+      - 'scripts/lib/gate-promisified-exec.mjs'
 
 permissions:
   contents: read

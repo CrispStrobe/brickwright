@@ -108,7 +108,10 @@ test('explicit 8080 downloads compile checked pseudocode and Cowgol without chan
             `# @bw-declaration "DEVICE Z80"\n${cowgolSource}`;
         const f = fixture({device: 'z80', lang, text, actualDevice: true});
         const before = f.vm.toJSON(), stc = f.vm.runtime.stc, buffers = f.editor.state.buffers;
-        const expected = new SB3Creator().generateCowgol(projectFor(source, 'z80'), {target: 'i8080-cpm'});
+        // Authored Cowgol initializers execute on every fresh program start.
+        const expectedSource = lang === 'cowgol' ?
+            'GLOBAL total = 7\nWHEN flag clicked:\n  set total to 7\n  change total by 5\n  say total\n' : source;
+        const expected = new SB3Creator().generateCowgol(projectFor(expectedSource, 'z80'), {target: 'i8080-cpm'});
         assert.equal(expected.ok, true, expected.reasons?.join('; '));
         await f.editor.downloadViaCowgolOnDevice({compilerTarget: 'i8080-cpm'});
         assert.equal(f.builds.length, 1, f.editor.state.status);
