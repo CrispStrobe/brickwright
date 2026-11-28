@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import downloadBlob from '../download-blob.js';
 import {createKim1Tty} from './kim1-tty.js';
+import {kim1T} from './kim1-l10n.js';
 import {saveXkimDiskImage} from './kim1-xkim-download.js';
 import {
     readXkimFatImage, writeXkimFatImage, XKIM_FAT_IMAGE_LIMIT, XKIM_FILE_COUNT, XKIM_FILE_LIMIT,
@@ -9,18 +10,18 @@ import {
 
 export const XKIM_SOURCE = 'https://github.com/CorshamTech/xKIM/tree/0ce44974504514563e86cdf84ac8a9848b8bcdb5';
 
-export async function readXkimMedia (romFile, files, diskImage) {
-    if (romFile?.size !== 8192) throw new Error('Choose the 8 KiB xKIM ROM for $E000–$FFFF.');
-    if (diskImage && files.length) throw new Error('Choose either a single FAT image or loose Corsham files.');
-    if (diskImage?.size > XKIM_FAT_IMAGE_LIMIT) throw new Error('Choose a FAT image up to 128 MiB.');
+export async function readXkimMedia (romFile, files, diskImage, locale = 'en') {
+    if (romFile?.size !== 8192) throw new Error(kim1T(locale, 'xkimRomSize'));
+    if (diskImage && files.length) throw new Error(kim1T(locale, 'xkimMediaChoice'));
+    if (diskImage?.size > XKIM_FAT_IMAGE_LIMIT) throw new Error(kim1T(locale, 'xkimImageLimit'));
     if (files.length > XKIM_FILE_COUNT || files.reduce((total, file) => total + file.size, 0) > XKIM_TOTAL_LIMIT) {
-        throw new Error('Choose up to 64 Corsham files and 2 MiB in total.');
+        throw new Error(kim1T(locale, 'xkimFilesLimit'));
     }
     const names = new Set();
     for (const file of files) {
         const name = file.name.toUpperCase();
         if (!XKIM_SHORT_NAME.test(file.name) || names.has(name) || file.size > XKIM_FILE_LIMIT) {
-            throw new Error('Corsham files need unique 8.3 names and at most 64 KiB each.');
+            throw new Error(kim1T(locale, 'xkimFileNames'));
         }
         names.add(name);
     }
@@ -33,8 +34,8 @@ export async function readXkimMedia (romFile, files, diskImage) {
     return {rom, files: mounted};
 }
 
-export function createXkimMemoryMap (rom) {
-    if (!(rom instanceof Uint8Array) || rom.length !== 8192) throw new Error('xKIM needs an 8 KiB ROM.');
+export function createXkimMemoryMap (rom, locale = 'en') {
+    if (!(rom instanceof Uint8Array) || rom.length !== 8192) throw new Error(kim1T(locale, 'xkimMemoryRom'));
     const map = new Uint8Array(131072);
     for (let index = 1; index < map.length; index += 2) map[index] = 1;
     // Keep base RAM, RIOTs, the onboard ROM and the hardware reset vectors.
@@ -53,10 +54,11 @@ export async function createXkimArchive (files) {
     return archive.generateAsync({type: 'blob', compression: 'STORE'});
 }
 
-export function createXkimTerminal ({rom, files, diskImage, timerLine = 'none'}) {
+export function createXkimTerminal ({rom, files, diskImage, timerLine = 'none', locale = 'en'}) {
     return createKim1Tty({
+        locale,
         setup: control => {
-            control('setMemoryCard', createXkimMemoryMap(rom));
+            control('setMemoryCard', createXkimMemoryMap(rom, locale));
             control('mountCorshamFiles', files);
             control('setCorshamTimerLine', timerLine);
         },
@@ -70,9 +72,8 @@ export function createXkimTerminal ({rom, files, diskImage, timerLine = 'none'})
             const stem = diskImage.name?.replace(/\.[^.]+$/, '') || 'xkim';
             return saveXkimDiskImage(stem + '-updated.img', updated, isOpen);
         }),
-        title: 'xKIM · Corsham files',
-        inputLabel: 'xKIM command',
-        help: 'C shows the clock in UTC. D lists files. T displays a file. S saves a memory range as Intel HEX and L reloads it. Export files downloads the current session files. ' +
-            (diskImage ? 'Save image makes an updated copy of the mounted disk.' : '')
+        title: kim1T(locale, 'xkimTerminalTitle'),
+        inputLabel: kim1T(locale, 'xkimInput'),
+        help: kim1T(locale, 'xkimTerminalHelp') + (diskImage ? ' ' + kim1T(locale, 'xkimSaveHelp') : '')
     });
 }
