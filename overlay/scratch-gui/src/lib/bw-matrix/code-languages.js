@@ -8,10 +8,13 @@ const basicProfiles = [
     {id: 'i8086-ubasic', device: 'i8086', dialect: 'ms'},
     {id: 'pico-bbcbasic', device: 'pico', dialect: 'bbc', media: 'picobb-rp2040'},
     {id: 'pico-piccolo', device: 'pico', dialect: 'piccolo', media: 'piccolobasic-rp2040', standalone: true},
-    {id: 'pico-stefan', device: 'pico', dialect: 'stefan', media: 'stefan-basic-rp2040', standalone: true}
+    {id: 'pico-stefan', device: 'pico', dialect: 'stefan', media: 'stefan-basic-rp2040', standalone: true},
+    {id: 'bbc-c99', device: 'pico', dialect: 'bbc', compiled: true},
+    {id: 'bbc-c99', device: 'arduino-uno', dialect: 'bbc', compiled: true},
+    {id: 'bbc-c99', device: 'atmega328p', dialect: 'bbc', compiled: true}
 ];
 
-export const basicProfilesFor = device => basicProfiles.filter(profile => device ? profile.device === device : profile.device !== 'pico');
+export const basicProfilesFor = device => basicProfiles.filter(profile => device ? profile.device === device : profile.device !== 'pico' && !profile.compiled);
 
 export const basicProfileFor = (device, preferred) => {
     const profiles = basicProfilesFor(device);
@@ -27,7 +30,7 @@ export function standaloneBasicDrafts (buffers) {
 
 export function codeLanguageAvailable (lang, device, {remoteImages = true, riscvHosted = true} = {}) {
     if (!device || lang === 'pseudocode') return true;
-    if (lang === 'basic') return (device !== 'pico' || remoteImages) && basicProfilesFor(device).length > 0;
+    if (lang === 'basic') return basicProfilesFor(device).some(profile => !profile.media || remoteImages);
     if (['fe', 'forth', 'tcl'].includes(lang)) return device === 'i8086' || (device === 'riscv32' && riscvHosted);
     if (device === 'spike') return lang === 'python';
     // DEVICE headers shared with extensions can predate the capability matrix.

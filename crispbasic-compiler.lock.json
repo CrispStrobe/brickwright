@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/CrispStrobe/crispbasic.git",
+  "commit": "94217124ffea05ce8a138b4f4e122dd42db1c2a7",
+  "files": {
+    "src/compiler/index.mjs": {
+      "bytes": 44018,
+      "sha256": "a7d40ef530310047474ae4c0e41cd28c7dbaef63aef7d751f012af69eabdc9ad"
+    },
+    "src/compiler/runtime.mjs": {
+      "bytes": 24180,
+      "sha256": "2d96a587c9dd21b7a3df51780d20ab719ff02ac6edce77055b85a9d9c923bca4"
+    },
+    "src/compiler/platform.mjs": {
+      "bytes": 10602,
+      "sha256": "3a9d6b2810981f648a89e1bf83d97f22048e8649b1850230d034e97d7abb1851"
+    },
+    "src/source.mjs": {
+      "bytes": 6836,
+      "sha256": "5b48812da607a53c7d1f540afb4563e8d597dcbe817e78926cfbd8405ab5ee61"
+    },
+    "LICENSE": {
+      "bytes": 1520,
+      "sha256": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad"
+    }
+  }
+}

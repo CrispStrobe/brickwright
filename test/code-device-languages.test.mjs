@@ -30,9 +30,13 @@ test('BASIC profiles respect the selected machine and retain a compatible prefer
     assert.equal(basicProfileFor('pico', 'ms').id, 'pico-bbcbasic');
     assert.equal(basicProfileFor(null, 'pico-bbcbasic').id, 'bbc');
     assert.equal(basicProfileFor('pico', 'ms').dialect, 'bbc');
-    assert.deepEqual(basicProfilesFor('pico').map(profile => profile.id), ['pico-bbcbasic', 'pico-piccolo', 'pico-stefan']);
+    assert.deepEqual(basicProfilesFor('pico').map(profile => profile.id), ['pico-bbcbasic', 'pico-piccolo', 'pico-stefan', 'bbc-c99']);
     assert.equal(basicProfileFor('pico', 'pico-piccolo').media, 'piccolobasic-rp2040');
-    assert.equal(codeLanguageAvailable('basic', 'pico', {remoteImages: false}), false);
+    assert.equal(codeLanguageAvailable('basic', 'pico', {remoteImages: false}), true, 'local C99 compilation does not fetch an interpreter image');
+    assert.equal(basicProfileFor('pico', 'bbc-c99').compiled, true);
+    assert.equal(basicProfileFor('pico', 'bbc-c99').media, undefined);
+    assert.equal(basicProfileFor('arduino-uno', 'bbc').id, 'bbc-c99');
+    assert.equal(codeLanguageAvailable('basic', 'arduino-uno'), true);
     assert.equal(basicProfileFor('stm32f030', 'ms'), undefined);
     assert.equal(codeLanguageAvailable('tcl', 'riscv32', {riscvHosted: false}), false);
     assert.equal(codeLanguageAvailable('asm', 'riscv32', {riscvHosted: false}), true);
