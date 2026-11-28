@@ -29,6 +29,7 @@ import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-mac
 import {
     libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readKim1LibraryTape, readLibraryCode, readMediaManifest
 } from '../../lib/bw-machines/library-media.js';
+import {kim1CpmProfiles, readKim1CpmArchive, createKim1CpmTerminal} from '../../lib/bw-machines/kim1-cpm65.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
@@ -137,7 +138,7 @@ function MachineEntry({title, info, infoPrefix, actions, children, rowAttributes
     );
 }
 
-export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample}) {
+export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample, onRunKim1Cpm}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
     // viewport, which this app floors at 1024px wide — so on a 430pt phone the
     // modal centred at x=512 and its buttons sat off the side of the screen.
@@ -166,6 +167,10 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const matchingMedia = mediaAllowed ? libraryMedia.map(item => localizedMedia(item, locale))
         .filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
     const [circuits, setCircuits] = React.useState(null);
+    const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
+    const [cpmFile, setCpmFile] = React.useState(null);
+    const cpmRequest = React.useRef(null);
+    React.useEffect(() => () => { cpmRequest.current = null; }, []);
     const [launching, setLaunching] = React.useState(null);
     const [status, setStatus] = React.useState('');
     const [text, setText] = React.useState('');
@@ -200,6 +205,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const closeManager = event => {
         invalidateDosPackage();
+        cpmRequest.current = null;
         if (onClose) onClose(event);
     };
     const run = async (cfg, opts) => {
@@ -398,11 +404,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         lessons: lessons.filter(lesson => lesson.config.machine === kind),
         saved: matchingMachines.filter(machine => machine.machine === kind),
         media: matchingMedia.filter(item => item.machine === kind),
+        cpm65: kind === 'kim1' && onRunKim1Cpm && matchesTitle('CP/M-65 for KIM-1'),
         examples: showCircuitPrograms ? matchingCircuits.filter(example => example.machine === kind) : [],
         local: kind === 'i80386' && (
             !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
     })).filter(group => group.bios || group.local || group.graphics || group.virtual.length || group.presets.length ||
-        group.lessons.length || group.saved.length || group.media.length || group.examples.length);
+        group.lessons.length || group.saved.length || group.media.length || group.examples.length || group.cpm65);
 
     return (
         <div onClick={closeManager} data-testid="bw-machine-manager"
@@ -549,6 +556,37 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 </button>
                                             } />)}
                                     </div>}
+                                    {group.cpm65 && <MachineEntry title="CP/M-65 for KIM-1" infoPrefix={infoPrefix}
+                                        rowAttributes={{'data-testid': 'bw-mm-kim1-cpm65'}}
+                                        info={<>Choose the matching <a href={cpmProfile.url} target="_blank" rel="noreferrer">upstream ZIP</a>.
+                                            {' '}The archive stays in this session. CP/M-65 itself is BSD-2-Clause, and the disk includes separately licensed utilities.</>}
+                                        actions={<>
+                                            <select aria-label="CP/M-65 drive" value={cpmProfile.id} disabled={launching !== null}
+                                                onChange={event => {
+                                                    setCpmProfile(kim1CpmProfiles.find(profile => profile.id === event.target.value));
+                                                    setCpmFile(null);
+                                                    setStatus('');
+                                                }}>
+                                                {kim1CpmProfiles.map(profile => <option key={profile.id} value={profile.id}>{profile.label}</option>)}
+                                            </select>
+                                            <input key={cpmProfile.id} type="file" accept=".zip" aria-label="CP/M-65 ZIP"
+                                                style={{maxWidth: 175}} disabled={launching !== null}
+                                                onChange={event => setCpmFile(event.target.files?.[0] || null)} />
+                                            <button type="button" style={btn} disabled={launching !== null || !cpmFile}
+                                                onClick={() => launch('kim1-cpm65', async () => {
+                                                    const request = {};
+                                                    cpmRequest.current = request;
+                                                    const media = await readKim1CpmArchive(cpmProfile.id, cpmFile);
+                                                    if (cpmRequest.current !== request) return false;
+                                                    const session = await createKim1CpmTerminal(media);
+                                                    if (cpmRequest.current !== request) {
+                                                        session.dispose();
+                                                        return false;
+                                                    }
+                                                    onRunKim1Cpm(session);
+                                                    return true;
+                                                })}>{t('run')}</button>
+                                        </>} />}
                                     {group.examples.length > 0 && <div data-testid="bw-mm-circuit-programs">
                                         {group.examples.map(example => <MachineEntry key={example.id} title={circuitTitle(example)} rowAttributes={{'data-machine-example': example.id}} actions={
                                             <button type="button" disabled={launching !== null} style={btn}

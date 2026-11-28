@@ -563,6 +563,23 @@ const GUIComponent = props => {
     const controllerPanel = controllerPanelRef.current;
     const [machineConsole, setMachineConsole] = React.useState(null);
     const [machineTerminal, setMachineTerminal] = React.useState(null);
+    const cpmTerminal = React.useRef(null);
+    React.useEffect(() => {
+        const stop = () => {
+            cpmTerminal.current?.();
+            cpmTerminal.current = null;
+        };
+        const events = ['bw-stop-all', 'bw-cp1-stop-request', 'bw-cardiac-stop-request',
+            'bw-machine-media-load', 'bw-machine-extracted', 'bw-start-journey'];
+        for (const event of events) window.addEventListener(event, stop);
+        const runtime = props.vm?.runtime;
+        runtime?.on('PROJECT_STOP_ALL', stop);
+        return () => {
+            stop();
+            runtime?.removeListener('PROJECT_STOP_ALL', stop);
+            for (const event of events) window.removeEventListener(event, stop);
+        };
+    }, [props.vm]);
     // Expose on vm.runtime so ControllerExtension can find it, and wire the
     // LIVE variable binding: input widgets write program variables, display
     // widgets show them (bindPanelToVariables polls via requestAnimationFrame).
@@ -1014,6 +1031,18 @@ const GUIComponent = props => {
                         window.dispatchEvent(new CustomEvent('bw-code-machine-selected', {detail: selection}));
                     }
                     return started;
+                }}
+                onRunKim1Cpm={session => {
+                    props.vm.stopAll();
+                    window.bwStopMachineVideo?.();
+                    const unmirror = window.bwMirrorMachineTerminal(session, true);
+                    cpmTerminal.current = () => {
+                        session.dispose();
+                        unmirror();
+                    };
+                    window.dispatchEvent(new CustomEvent('bw-settings-change',
+                        {detail: {key: 'bw-right-pane-hidden', value: '0'}}));
+                    session.start();
                 }}
                 wiredPresets={showMachines.presets}
                 onOpenExample={(exampleId, codeOnly, options) => new Promise((resolve, reject) => {
