@@ -59,7 +59,7 @@ const isObj = v => v != null && typeof v === 'object' && !Array.isArray(v);
 const isStr = v => typeof v === 'string' && v.length > 0;
 
 /** Hex-encode a SHA-256 of the bytes using Web Crypto. */
-async function sha256Hex(bytes) {
+export async function sha256Hex(bytes) {
     const subtle = globalThis.crypto && globalThis.crypto.subtle;
     if (!subtle) throw new Error('Web Crypto (crypto.subtle) is unavailable; cannot verify sha256');
     const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);

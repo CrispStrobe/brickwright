@@ -22,6 +22,7 @@ import {
 import {localDosboxMachine} from '../../lib/bw-machines/local-dosbox.js';
 import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-package-zip.js';
 import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
+import {createAlicePascalMachine, freedosFloppyZipUrl} from '../../lib/bw-machines/alice-pascal.js';
 import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
@@ -47,6 +48,8 @@ const T = {
         bootDisk: 'Boot disk',
         bootPackage: 'Boot package HDD',
         bootFreeDos: 'Boot FreeDOS VGA',
+        aliceFloppy: 'FreeDOS media',
+        aliceHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. ALICE opens DEMO.AP in Controller. Press F1 to run it. Saves last for this session.',
         bootBios: 'Boot BIOS only',
         diskImage: 'Disk image',
         zipFile: 'ZIP file',
@@ -71,6 +74,8 @@ const T = {
         bootDisk: 'Festplatte starten',
         bootPackage: 'Paket-Festplatte starten',
         bootFreeDos: 'FreeDOS VGA starten',
+        aliceFloppy: 'FreeDOS-Medium',
+        aliceHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. ALICE öffnet DEMO.AP im Controller. F1 startet das Programm. Änderungen gelten für diese Sitzung.',
         bootBios: 'Nur BIOS starten',
         diskImage: 'Festplattenabbild',
         zipFile: 'ZIP-Datei',
@@ -184,8 +189,9 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [localNativeBlocks, setLocalNativeBlocks] = React.useState(false);
     const [dosPackageFile, setDosPackageFile] = React.useState(null);
     const [dosPackageBusy, setDosPackageBusy] = React.useState(false);
-    const smallCLaunch = React.useRef(null);
-    React.useEffect(() => () => smallCLaunch.current?.abort(), []);
+    const [aliceFloppy, setAliceFloppy] = React.useState(null);
+    const mediaLaunch = React.useRef(null);
+    React.useEffect(() => () => mediaLaunch.current?.abort(), []);
     const dosPackageOwner = React.useRef({mounted:true,epoch:{},file:null,busy:false});
     React.useEffect(() => {
         const owner = dosPackageOwner.current; owner.mounted = true;
@@ -213,7 +219,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     };
     const closeManager = event => {
         invalidateDosPackage();
-        smallCLaunch.current?.abort();
+        mediaLaunch.current?.abort();
         controllerRequest.current = null;
         if (onClose) onClose(event);
     };
@@ -543,6 +549,9 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             rowAttributes={{'data-machine-media': item.id}}
                                             info={<>
                                                 {item.summary && <div>{item.summary}</div>}
+                                                {item.alicePascal && <div>{t('aliceHelp')}{' '}
+                                                    <a href={freedosFloppyZipUrl} target="_blank" rel="noopener noreferrer">FreeDOS 1.4</a>
+                                                </div>}
                                                 {item.aceKim ? aceKimLicenses.map(({label, url}) => <div key={label}>
                                                     <a href={url} target="_blank" rel="noopener noreferrer">{label} · MIT</a>
                                                 </div>) : item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
@@ -551,7 +560,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             </>}
                                             actions={
                                                 <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
-                                                        item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun)} style={btn}
+                                                        item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun) ||
+                                                        (item.alicePascal && !aliceFloppy)} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
@@ -570,10 +580,14 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                             const kim1Tape = await readKim1LibraryTape(item);
                                                             return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
-                                                        const build = item.code?.compilerTarget === 'i8086-smallc'
+                                                        const build = item.alicePascal || item.code?.compilerTarget === 'i8086-smallc'
                                                             ? new AbortController() : null;
-                                                        if (build) smallCLaunch.current = build;
+                                                        if (build) mediaLaunch.current = build;
                                                         try {
+                                                            if (item.alicePascal) {
+                                                                const {config, fetcher} = await createAlicePascalMachine(aliceFloppy, build.signal);
+                                                                return await onRun(config, {fetcher, signal: build.signal});
+                                                            }
                                                             const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
                                                             if (build?.signal.aborted) return false;
                                                             return await onRun(config, {code, signal: build?.signal});
@@ -581,12 +595,18 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                             if (build?.signal.aborted) return false;
                                                             throw error;
                                                         } finally {
-                                                            if (build) smallCLaunch.current = null;
+                                                            if (build) mediaLaunch.current = null;
                                                         }
                                                     })}>
                                                     {t('run')}
                                                 </button>
-                                            } />)}
+                                            }>
+                                            {item.alicePascal && <label style={fieldsStyle}>{t('aliceFloppy')}{' '}
+                                                <input type="file" accept=".zip,.img,.ima" data-testid="bw-mm-alice-floppy"
+                                                    disabled={launching !== null}
+                                                    onChange={event => setAliceFloppy(event.target.files?.[0] || null)} />
+                                            </label>}
+                                        </MachineEntry>)}
                                     </div>}
                                     {group.cpm65 && <MachineEntry title="CP/M-65 for KIM-1" infoPrefix={infoPrefix}
                                         rowAttributes={{'data-testid': 'bw-mm-kim1-cpm65'}}

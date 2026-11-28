@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {readXkimFatImage, writeXkimFatImage, XKIM_FAT_IMAGE_LIMIT} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim-fat.js';
+import {readXkimFatImage, writeDosFloppyFiles, writeXkimFatImage, XKIM_FAT_IMAGE_LIMIT} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim-fat.js';
 import {readXkimMedia} from '../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim.js';
 
 const encoder = new TextEncoder();
-function makeFat (bits, partition = false) {
+function makeFat (bits, partition = false, dataClusters = {12: 64, 16: 4100, 32: 65530}[bits]) {
     const sectorSize = 512;
-    const dataClusters = {12: 64, 16: 4100, 32: 65530}[bits];
     const fatSectors = Math.ceil((dataClusters + 2) * bits / 8 / sectorSize);
     const isFat32 = bits === 32;
     const reserved = isFat32 ? 32 : 1;
@@ -199,4 +198,16 @@ test('xKIM leaves the original untouched if the directory is full or the replace
         if (![3, 7, 8, 9].includes(cluster)) fat(cluster, 0xff7);
     }
     assert.throws(() => writeXkimFatImage(bytes, [{...changed, bytes: new Uint8Array(1100)}]), /not enough free space/);
+});
+
+test('DOS media can mount a large executable while xKIM retains its file limit', () => {
+    const {bytes} = makeFat(12, false, 400);
+    const program = {name: 'ALICE.EXE', bytes: new Uint8Array(187712).fill(0x4d)};
+    const original = bytes.slice();
+    const mounted = writeDosFloppyFiles(bytes, [program]);
+    assert.deepEqual(bytes, original);
+    assert.deepEqual(mounted.subarray(0, 512), original.subarray(0, 512));
+    assert.throws(() => writeXkimFatImage(bytes, [program]), /exceeds the 64 KiB file limit/);
+    assert.throws(() => readXkimFatImage(mounted), /ALICE.EXE exceeds the 64 KiB file limit/);
+    assert.deepEqual(writeDosFloppyFiles(mounted, [program]), mounted);
 });

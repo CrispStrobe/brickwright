@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {fromMediaManifest} from '../overlay/scratch-gui/src/lib/bw-machines/importers.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
+import {createAlicePascalMachine} from '../overlay/scratch-gui/src/lib/bw-machines/alice-pascal.js';
 import {localAtBiosMachine} from '../overlay/scratch-gui/src/lib/bw-machines/local-freedos-vga.js';
 
 test('partcl launch sends its 80186 variant and mounted script to the live runner', async () => {
@@ -49,4 +50,10 @@ test('Start 386 runs the bundled BIOS as the boot slot without requiring any dis
             detail.bootCompletion.resolve();
         }
     });
+});
+
+test('ALICE requires the exact FreeDOS 1.4 boot media before fetching guest files', async () => {
+    await assert.rejects(createAlicePascalMachine(new Blob()), /Choose 120m\/x86BOOT.img/);
+    await assert.rejects(createAlicePascalMachine(new Blob([new Uint8Array(1228800)])), /floppy checksum differs/);
+    await assert.rejects(createAlicePascalMachine(new Blob([new Uint8Array(23624258)])), /ZIP checksum differs/);
 });
