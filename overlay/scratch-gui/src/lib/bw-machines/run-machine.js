@@ -145,7 +145,7 @@ export async function runMachineConfig(config, opts = {}) {
     if (serialMachine) detail.machineView = activated.videoWidget ? 'controller' : 'debugger';
     const awaitBoot = (activated.machinePreset === 'freedos-vga' || serialMachine ||
         (activated.targetKind === 'i80386' && ['bios', 'floppy'].includes(bm.slot)) ||
-        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
+        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe', 'floppy'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
     let completion = null;
     let timer = null;

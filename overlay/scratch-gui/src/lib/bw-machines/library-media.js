@@ -1,5 +1,6 @@
 import {createOpenGemMachine, cuteMouseSourceUrl, openGemLicenseUrl} from './opengem.js';
 import {aliceLicenseUrl, createAlicePascalMachine} from './alice-pascal.js';
+import {createZmiyMachine, zmiyDownloadUrl, zmiyProjectUrl} from './zmiy.js';
 import {aceKimMedia} from './ace-kim-library.js';
 import {makeT} from '../bw-i18n.js';
 import {activateConfig, defaultImageFetcher} from './activate.js';
@@ -68,6 +69,9 @@ export const libraryMedia = [
     {id: 'small-c', title: 'Small-C 2.5 (DOS)', machine: 'i8086', license: 'LicenseRef-Public-Domain',
         licenseFile: 'PUBLIC-DOMAIN.txt', infoKey: 'smallC', revision: '925c5b12902867b3cd6c87b2450a7183c9db8848',
         code: {language: 'c', path: 'samples/demo.c', compilerTarget: 'i8086-smallc'}},
+    {id: 'zmiy', title: 'Zmiy 0.85.2', machine: 'i8086', license: 'BSD-2-Clause',
+        licenseFile: zmiyProjectUrl, freedosGuest: createZmiyMachine, freedosHelp: 'zmiyHelp',
+        guestPackage: {url: zmiyDownloadUrl, title: 'Zmiy 0.85.2 ZIP'}},
     ...ackSamples,
     aceKimMedia,
     ...[

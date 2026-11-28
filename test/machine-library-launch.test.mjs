@@ -67,3 +67,32 @@ test('OpenGEM is an on-demand 80386 guest with linked desktop and mouse sources'
     assert.equal(item.supportSource.title, 'CuteMouse');
     await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(1228800)])), /floppy checksum differs/);
 });
+
+test('8086 floppy launch reports attachment failures and retains its declared controller display', async () => {
+    const geometry = {cylinders: 80, heads: 2, sectors: 9, bytesPerSector: 512};
+    const config = fromMediaManifest({
+        machine: 'i8086', machineConfig: 'PCXT8086',
+        slots: {floppy: {url: 'local-media:floppy', geometry}},
+        widgets: [{name: 'PC CGA', type: 'simplevga', source: 'video'}]
+    });
+    const bytes = new Uint8Array(720 * 1024);
+    const opts = {fetcher: async () => ({bytes}), awaitBoot: true};
+    await runMachineConfig(config, {...opts, dispatch: detail => {
+        assert.equal(detail.kind, 'i8086');
+        assert.equal(detail.slotId, 'floppy');
+        assert.equal(detail.bytes, bytes);
+        assert.deepEqual(detail.geometry, geometry);
+        assert.equal(detail.widgets[0].name, 'PC CGA');
+        detail.bootCompletion.resolve();
+    }});
+    await assert.rejects(runMachineConfig(config, {...opts, dispatch: detail =>
+        detail.bootCompletion.reject(new Error('floppy controller unavailable'))}), /floppy controller unavailable/);
+});
+
+test('Zmiy requires the XT FreeDOS boot image and the local game archive', async () => {
+    const item = libraryMedia.find(item => item.id === 'zmiy');
+    assert.equal(item.machine, 'i8086');
+    assert.equal(item.license, 'BSD-2-Clause');
+    assert.match(item.guestPackage.url, /v0[.]85[.]2/);
+    await assert.rejects(item.freedosGuest(new Blob([new Uint8Array(1228800)])), /720k/);
+});

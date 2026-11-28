@@ -49,6 +49,7 @@ const T = {
         bootPackage: 'Boot package HDD',
         bootFreeDos: 'Boot FreeDOS VGA',
         freedosMedia: 'FreeDOS media',
+        zmiyHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 720k/x86BOOT.img, and the Zmiy 0.85.2 ZIP. In Controller, use the arrows to steer, P to pause and Esc to quit.',
         openGemHelp: 'Select the official FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. Move the pointer over the Controller screen to use the mouse.',
         aliceHelp: 'Select the FreeDOS 1.4 Floppy Edition ZIP or 120m/x86BOOT.img. ALICE opens DEMO.AP in Controller. Press F1 to run it. Use Save image in Controller to keep guest files.',
         bootBios: 'Boot BIOS only',
@@ -76,6 +77,7 @@ const T = {
         bootPackage: 'Paket-Festplatte starten',
         bootFreeDos: 'FreeDOS VGA starten',
         freedosMedia: 'FreeDOS-Medium',
+        zmiyHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 720k/x86BOOT.img und das ZIP von Zmiy 0.85.2. Im Controller steuern die Pfeiltasten, P pausiert und Esc beendet das Spiel.',
         openGemHelp: 'Wähle das ZIP der offiziellen FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. Bewege den Zeiger über den Controller-Bildschirm, um die Maus zu verwenden.',
         aliceHelp: 'Wähle das ZIP der FreeDOS 1.4 Floppy Edition oder 120m/x86BOOT.img. ALICE öffnet DEMO.AP im Controller. F1 startet das Programm. Abbild speichern im Controller sichert die Gastdateien.',
         bootBios: 'Nur BIOS starten',
@@ -173,8 +175,9 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
     const showLocal386 = matchesType('i80386');
     const mediaAllowed = remoteMachineImagesAllowed();
-    const matchingMedia = mediaAllowed ? libraryMedia.map(item => localizedMedia(item, locale))
-        .filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
+    const availableMedia = libraryMedia.filter(item => mediaAllowed || item.guestPackage);
+    const matchingMedia = availableMedia.map(item => localizedMedia(item, locale))
+        .filter(item => matchesType(item.machine) && matchesTitle(item.title));
     const [circuits, setCircuits] = React.useState(null);
     const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
     const [cpmFile, setCpmFile] = React.useState(null);
@@ -192,6 +195,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [dosPackageFile, setDosPackageFile] = React.useState(null);
     const [dosPackageBusy, setDosPackageBusy] = React.useState(false);
     const [guestMedia, setGuestMedia] = React.useState({});
+    const [guestPackages, setGuestPackages] = React.useState({});
     const mediaLaunch = React.useRef(null);
     React.useEffect(() => () => mediaLaunch.current?.abort(), []);
     const dosPackageOwner = React.useRef({mounted:true,epoch:{},file:null,busy:false});
@@ -317,7 +321,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const allLessons = React.useMemo(() => lessonMachines(locale), [locale]);
     const lessons = allLessons.filter(lesson => matchesType(lesson.config.machine) && matchesTitle(lesson.config.title));
     const machineKinds = [...new Set([preferredMachine, 'i8086', 'i80386', ...CIRCUIT_LIBRARY_MACHINES,
-        ...allLessons.map(lesson => lesson.config.machine), ...(mediaAllowed ? libraryMedia.map(item => item.machine) : []),
+        ...allLessons.map(lesson => lesson.config.machine), ...availableMedia.map(item => item.machine),
         ...machines.map(machine => machine.machine)].filter(Boolean))].sort(sortMachines);
     const circuitTitle = example => example.title?.[/^de/i.test(locale) ? 'de' : 'en'] || example.title?.en || example.id;
     const canOpenExample = !!onOpenExample;
@@ -554,6 +558,9 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 {item.freedosGuest && <div>{t(item.freedosHelp)}{' '}
                                                     <a href={freedosFloppyZipUrl} target="_blank" rel="noopener noreferrer">FreeDOS 1.4</a>
                                                 </div>}
+                                                {item.guestPackage && <div>
+                                                    <a href={item.guestPackage.url} target="_blank" rel="noopener noreferrer">{item.guestPackage.title}</a>
+                                                </div>}
                                                 {item.supportSource && <div>
                                                     <a href={item.supportSource.url} target="_blank" rel="noopener noreferrer">{item.supportSource.title}</a>
                                                 </div>}
@@ -566,7 +573,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             actions={
                                                 <button type="button" disabled={launching !== null || (item.aceKim ? !onRunAceKim :
                                                         item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun) ||
-                                                        (item.freedosGuest && !guestMedia[item.id])} style={btn}
+                                                        (item.freedosGuest && !guestMedia[item.id]) || (item.guestPackage && !guestPackages[item.id])} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
@@ -590,7 +597,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                         if (build) mediaLaunch.current = build;
                                                         try {
                                                             if (item.freedosGuest) {
-                                                                const {config, fetcher} = await item.freedosGuest(guestMedia[item.id], build.signal);
+                                                                const {config, fetcher} = await item.freedosGuest(guestMedia[item.id], build.signal, guestPackages[item.id]);
                                                                 return await onRun(config, {fetcher, signal: build.signal});
                                                             }
                                                             const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
@@ -612,6 +619,14 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                     onChange={event => {
                                                         const selected = event.target.files?.[0] || null;
                                                         setGuestMedia(current => ({...current, [item.id]: selected}));
+                                                    }} />
+                                            </label>}
+                                            {item.guestPackage && <label style={fieldsStyle}>{item.guestPackage.title}{' '}
+                                                <input type="file" accept=".zip" data-testid="bw-mm-freedos-guest-package"
+                                                    disabled={launching !== null}
+                                                    onChange={event => {
+                                                        const selected = event.target.files?.[0] || null;
+                                                        setGuestPackages(current => ({...current, [item.id]: selected}));
                                                     }} />
                                             </label>}
                                         </MachineEntry>)}
