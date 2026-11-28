@@ -222,33 +222,66 @@ async function editSource (page, source) {
     await page.keyboard.insertText(source);
 }
 
+// Notices and conversion reports live in the real Code help popover. Open
+// that user control for an observation and restore its prior visibility; do
+// not depend on obsolete, permanently mounted status markup.
+async function withCodeInfo (page, read) {
+    const info = page.getByTestId('bw-code-info-popover');
+    const wasOpen = await info.isVisible();
+    if (!wasOpen) {
+        await page.getByTestId('bw-code-info').click();
+        await info.waitFor({state: 'visible'});
+    }
+    try {
+        return await read(info);
+    } finally {
+        if (!wasOpen && await info.isVisible()) {
+            await info.getByRole('button', {name: 'Close Code help', exact: true}).click();
+            await info.waitFor({state: 'hidden'});
+        }
+    }
+}
+
+async function codeStatus (page, expected) {
+    return withCodeInfo(page, async info => {
+        const status = info.getByTestId('bw-code-status');
+        await (expected === undefined ? status : status.filter({hasText: expected})).waitFor({state: 'visible'});
+        return status.textContent();
+    });
+}
+
 async function openCodeFile (page, filename, source) {
     await page.getByText('File', {exact: true}).click();
     const chooser = page.waitForEvent('filechooser');
     await page.getByText('Open code file…', {exact: true}).click();
     await (await chooser).setFiles({name: filename, mimeType: 'text/plain', buffer: Buffer.from(source)});
-    await page.waitForFunction(name => document.querySelector('[data-testid="bw-code-status"]')?.textContent
-        .includes(name), filename);
+    await withCodeInfo(page, async () => {
+        await page.waitForFunction(name => document.querySelector(
+            '[data-testid="bw-code-info-popover"] [data-testid="bw-code-status"]')?.textContent.includes(name), filename);
+    });
 }
 
 async function finished (page) {
-    await page.waitForFunction(() => {
-        const run = document.querySelector('[data-testid="bw-basic-run"]');
-        const status = document.querySelector('[data-testid="bw-code-status"]')?.textContent || '';
-        return run && !run.disabled && !document.querySelector('[data-testid="bw-crispbasic-stop"]') &&
-            (/^Completed\b/.test(status) || /^CrispBASIC (?:stopped|could not|reached)/.test(status));
-    }, null, {timeout: 30000});
+    return withCodeInfo(page, async info => {
+        await page.waitForFunction(() => {
+            const run = document.querySelector('[data-testid="bw-basic-run"]');
+            const status = document.querySelector('[data-testid="bw-code-info-popover"] [data-testid="bw-code-status"]')?.textContent || '';
+            return run && !run.disabled && !document.querySelector('[data-testid="bw-crispbasic-stop"]') &&
+                (/^Completed\b/.test(status) || /^CrispBASIC (?:stopped|could not|reached)/.test(status));
+        }, null, {timeout: 30000});
+        return info.getByTestId('bw-code-status').textContent();
+    });
 }
 
 async function runSource (page, source) {
     await editSource(page, source);
     await page.getByTestId('bw-basic-run').click();
-    await finished(page);
-    return page.evaluate(() => ({
+    const status = await finished(page);
+    return page.evaluate(status => ({
         output: document.querySelector('[data-testid="bw-basic-output"]')?.textContent,
-        status: document.querySelector('[data-testid="bw-code-status"] > span')?.textContent,
+        status,
         diagnostic: document.querySelector('[data-testid="bw-crispbasic-diagnostic"]')?.textContent || null
-    }));
+    }), status);
 }
 
 async function successfulOutput (page, source, expected) {
@@ -351,6 +384,10 @@ async function openCadRobot (page) {
     const chooser = page.waitForEvent('filechooser');
     await page.getByText('Load from your computer', {exact: true}).click();
     await (await chooser).setFiles({name: 'scout-encoder.sb3', mimeType: 'application/x.scratch.sb3', buffer: payload.project});
+    // The completed project upload selects Blocks. Re-enter the real Circuit
+    // surface after that transition before checking its displayed Board.
+    await page.getByRole('tab', {name: 'Blocks', exact: true, selected: true}).waitFor({state: 'visible'});
+    await page.getByRole('tab', {name: /Circuit/}).click();
     await page.waitForFunction(() => {
         const runtime = window.__brickwrightStore?.getState?.()?.scratchGui?.vm?.runtime;
         const board = runtime?.circuitBoard;
@@ -502,11 +539,11 @@ END
         assert.equal((marked.match(/# @crispbasic-portable 1/g) || []).length, 1);
         const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
         await page.getByRole('button', {name: /To blocks/}).first().click();
-        await page.getByTestId('bw-code-status').filter({hasText: /To blocks is not qualified/}).waitFor();
+        await codeStatus(page, /To blocks is not qualified/);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), marked);
         await page.getByTestId('bw-code-editor').getByRole('button', {name: '🐍 Py', exact: true}).click();
-        await page.getByTestId('bw-code-status').filter({hasText: /python is not qualified/}).waitFor();
+        await codeStatus(page, /python is not qualified/);
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), marked);
         // Reopen saved source after discarding the checkbox preference and all
         // derived buffers: the marker alone must retain the runtime contract.
@@ -514,7 +551,7 @@ END
         await page.getByTestId('bw-basic-portable-library').uncheck();
         await openCodeFile(page, 'roundtrip.bw', marked);
         await page.getByRole('button', {name: /To blocks/}).first().click();
-        await page.getByTestId('bw-code-status').filter({hasText: /To blocks is not qualified/}).waitFor();
+        await codeStatus(page, /To blocks is not qualified/);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
         await page.getByTestId('bw-code-editor').getByRole('button', {name: '📺 BAS', exact: true}).click();
         await page.getByTestId('bw-basic-engine').waitFor({state: 'visible'});
@@ -553,7 +590,7 @@ WHEN flag clicked:
         await page.getByRole('button', {name: /To blocks/}).first().click();
         await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
             ?.toJSON().includes('PORTABLE GENERATOR'));
-        await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await codeStatus(page, 'Blocks loaded.');
         await openCircuit(page);
         await codeTab(page);
         const portable = page.getByTestId('bw-basic-portable-library');
@@ -607,12 +644,13 @@ WHEN flag clicked:
 
         const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
         await page.getByRole('button', {name: /To blocks/}).first().click();
-        await page.getByTestId('bw-code-status').filter({hasText: /To blocks cannot preserve/}).waitFor();
+        await codeStatus(page, /To blocks cannot preserve/);
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), source);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
-        assert.match(await page.getByTestId('bw-conversion-report').textContent(), /unsupported|not preserved|refus/i);
+        assert.match(await withCodeInfo(page, info => info.getByTestId('bw-conversion-report').textContent()),
+            /unsupported|not preserved|refus/i);
         record.portable = {source, before, observed, released,
-            refusal: await page.getByTestId('bw-code-status').textContent(),
+            refusal: await codeStatus(page),
             projectSha256: createHash('sha256').update(projectBefore).digest('hex')};
         await page.screenshot({path: resolve(artifacts, 'portable-generator-refusal.png'), fullPage: true});
     });
@@ -637,7 +675,7 @@ WHEN flag clicked:
         await page.getByRole('button', {name: /To blocks/}).first().click();
         await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
             ?.toJSON().includes('LATCH TOGGLE'));
-        await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await codeStatus(page, 'Blocks loaded.');
         await openCircuit(page, '', {clamp: true});
         await codeTab(page);
         await page.getByRole('button', {name: /From blocks/}).first().click();
@@ -688,8 +726,8 @@ WHEN flag clicked:
         await noInterpreterWorkers(page);
         const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
         await page.getByRole('button', {name: /To blocks/}).first().click();
-        await page.getByTestId('bw-code-status').filter({hasText: /To blocks cannot preserve/}).waitFor();
-        assert.match(await page.getByTestId('bw-code-status').textContent(), /PROCdigitalToggle/);
+        await codeStatus(page, /To blocks cannot preserve/);
+        assert.match(await codeStatus(page), /PROCdigitalToggle/);
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), record.generatedSource);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
         await page.screenshot({path: resolve(artifacts, 'portable-latch-toggle.png'), fullPage: true});
@@ -702,7 +740,7 @@ scenario('production undefined polling refuses and disables Run even after an er
         await page.getByRole('button', {name: /To blocks/}).first().click();
         await page.waitForFunction(() => window.__brickwrightStore?.getState?.()?.scratchGui?.vm
             ?.toJSON().includes('POLLING REFUSAL'));
-        await page.getByTestId('bw-code-status').filter({hasText: 'Blocks loaded.'}).waitFor();
+        await codeStatus(page, 'Blocks loaded.');
         await codeTab(page);
         await page.getByTestId('bw-basic-portable-library').check();
         await page.getByRole('button', {name: /From blocks/}).first().click();
@@ -716,7 +754,7 @@ scenario('production undefined polling refuses and disables Run even after an er
         const source = await page.getByTestId('bw-code-editor').locator('.cm-content').innerText();
         const projectBefore = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON());
         await page.getByRole('button', {name: /To blocks/}).first().click();
-        await page.getByTestId('bw-code-status').filter({hasText: /CrispBASIC: wait until/}).waitFor();
+        await codeStatus(page, /CrispBASIC: wait until/);
         assert.equal(await page.getByTestId('bw-code-editor').locator('.cm-content').innerText(), source);
         assert.equal(await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.toJSON()), projectBefore);
         assert.equal(await page.getByTestId('bw-basic-run').isDisabled(), true);
@@ -767,7 +805,7 @@ scenario('production Stop interrupts a tight interpreter loop and Reset permits 
     await codeTab(page);
     await editSource(page, 'REPEAT\nUNTIL FALSE\n');
     await page.getByTestId('bw-basic-run').click();
-    await page.getByTestId('bw-code-status').filter({hasText: 'CrispBASIC is running.'}).waitFor();
+    await codeStatus(page, 'CrispBASIC is running.');
     const ticks = await page.evaluate(async () => {
         let ticks = 0;
         const timer = setInterval(() => ticks++, 5);
@@ -780,7 +818,7 @@ scenario('production Stop interrupts a tight interpreter loop and Reset permits 
     await finished(page);
     await noInterpreterWorkers(page);
     await page.getByTestId('bw-crispbasic-reset').click();
-    await page.getByTestId('bw-code-status').filter({hasText: 'CrispBASIC reset.'}).waitFor();
+    await codeStatus(page, 'CrispBASIC reset.');
     assert.equal(await page.getByTestId('bw-basic-output').textContent(), '…');
     assert.equal(await page.getByTestId('bw-vdu-terminal').count(), 0);
     await successfulOutput(page, 'PRINT "fresh production run"\nEND\n', 'fresh production run\r\n');
@@ -889,7 +927,7 @@ scenario('production BASIC drives the shipped Scout project and a second run res
             await continueCadInput(page);
             await finished(page);
             assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
-            assert.equal(await page.getByTestId('bw-code-status').locator('span').first().textContent(), 'Completed.');
+            assert.equal(await codeStatus(page), 'Completed.');
             const output = await page.getByTestId('bw-basic-output').textContent();
             assert.match(output, /Elapsed ms:\s*205\r\n/);
             assert.match(output, /Encoder:\s*[01]\r\n/);
@@ -926,7 +964,7 @@ scenario('production BASIC Stop releases pins and motor ownership without discar
         await page.getByTestId('bw-crispbasic-stop').click();
         await finished(page);
         assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
-        assert.match(await page.getByTestId('bw-code-status').textContent(), /CrispBASIC stopped/);
+        assert.match(await codeStatus(page), /CrispBASIC stopped/);
         const stopped = await assertCadReleased(page, design);
         assert.ok(stopped.probe.stop, 'no actual Stop control click was observed');
         assert.equal(stopped.probe.steps, stopped.probe.stop.steps, 'Stop cleanup submitted another physics step');
