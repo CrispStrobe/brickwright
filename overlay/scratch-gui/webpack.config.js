@@ -305,6 +305,10 @@ const baseConfig = new ScratchWebpackConfigBuilder(
         // endpoint needed. This is only the FALLBACK the C route uses if the
         // in-browser compiler cannot load: stc-compiler's hosted /compile, which
         // riscv-compile.js tolerates. Override with BW_RISCV_CC_ENDPOINT.
+        // Optional GPL Cowgol assembler payload (djlink, 64tass) for offline DOS
+        // and Eater 6502. Null: those targets use the hosted compiler. Used only
+        // after explicit opt-in and when remote toolchains are allowed.
+        'process.env.BW_COWGOL_GPL_ORIGIN': JSON.stringify(process.env.BW_COWGOL_GPL_ORIGIN || null),
         'process.env.BW_RISCV_CC_ENDPOINT':
             JSON.stringify(process.env.BW_RISCV_CC_ENDPOINT || 'https://stc-compiler.vercel.app'),
         'process.env.BW_VERSION': JSON.stringify(buildCommit),
@@ -365,6 +369,17 @@ const baseConfig = new ScratchWebpackConfigBuilder(
                 // normally and so is bundled rather than copied.
                 from: 'src/lib/smallerc-wasm/dist',
                 to: 'static/smallerc-wasm',
+                noErrorOnMissing: true
+            },
+            {
+                // Cowgol compiler stages as WASM — CP/M Z80/8080 offline, in a
+                // Web Worker. Only the PERMISSIVE payload (Cowgol BSD-2, zmac
+                // public domain, NASM BSD-2, runtime headers) is here; the GPL
+                // assemblers (djlink, 64tass) are an optional download from a
+                // separate origin and never enter this build. Every file is
+                // SHA-256 checked against src/lib/cowgol-wasm/pins.js before use.
+                from: 'src/lib/cowgol-wasm/dist',
+                to: 'static/cowgol-wasm',
                 noErrorOnMissing: true
             },
             {

@@ -1,4 +1,5 @@
 import {remoteToolchainsAllowed} from '../distribution-policy.js';
+import {defaultCowgolLocalCompiler} from '../cowgol-wasm/client.js';
 export {cowgolDosConfig, cowgolDosVariantForDevice, COWGOL_DOS_VARIANTS} from './cowgol-dos.js';
 export {cowgolDosDiskConfig, prepareCowgolDosDisk, COWGOL_DOS_DISK_VARIANTS} from './cowgol-dos-disk.js';
 
@@ -210,27 +211,62 @@ export const cowgolEaterDetail = bytes => ({
     }
 });
 
-/** Full Cowgol compilation, independent of the deliberately smaller Blocks reader. */
+/**
+ * Full Cowgol compilation, independent of the deliberately smaller Blocks reader.
+ *
+ * ROUTES. A target the offline WebAssembly compiler supports in this
+ * installation (`local.supports(target)`; see lib/cowgol-wasm/) compiles in a
+ * Web Worker with no network: it needs no remote-toolchain permission. Its
+ * reply has the hosted service's exact JSON shape and passes through the SAME
+ * validation below. A compile failure is reported, never retried on the
+ * network. Only an unavailable local toolchain (missing or unverifiable
+ * payload, worker failure) falls back, and only where the distribution's
+ * remote-toolchain policy allows the hosted service. Targets the local
+ * compiler does not serve use the hosted service as before.
+ */
 export async function compileCowgol (code, target, {fetcher = globalThis.fetch, signal,
-    endpoint = COWGOL_COMPILE_ENDPOINT} = {}) {
-    if (!remoteToolchainsAllowed()) throw new Error('Hosted Cowgol compilation is unavailable in this build.');
+    endpoint = COWGOL_COMPILE_ENDPOINT, local = defaultCowgolLocalCompiler()} = {}) {
     const spec = Object.prototype.hasOwnProperty.call(COWGOL_COMPILE_TARGETS, target) ? COWGOL_COMPILE_TARGETS[target] : null;
+    const useLocal = Boolean(spec && local && local.supports(target));
+    if (!useLocal && !remoteToolchainsAllowed()) throw new Error('Hosted Cowgol compilation is unavailable in this build.');
     if (!spec) throw new Error(`Unsupported Cowgol compiler target: ${target}`);
     if (typeof code !== 'string' || !code.trim()) throw new Error('Write a Cowgol program first.');
     if (new TextEncoder().encode(code).byteLength > 256 * 1024) throw new Error('Cowgol source exceeds 256 KiB.');
-    const response = await fetcher(endpoint, {
-        method: 'POST', headers: {'Content-Type': 'application/json'}, signal,
-        body: JSON.stringify({language: 'cowgol', code, target, format: spec.format})
-    });
+    const request = {language: 'cowgol', code, target, format: spec.format};
     let out;
-    try { out = await response.json(); } catch (error) {
-        throw new Error(`Cowgol compiler returned an invalid response (HTTP ${response.status}).`);
+    let route = 'hosted';
+    if (useLocal) {
+        try {
+            out = await local.compile(request, {signal});
+            route = 'wasm';
+        } catch (error) {
+            if (error?.name !== 'CowgolLocalUnavailable' || !remoteToolchainsAllowed()) throw error;
+        }
     }
-    if (!response.ok || !out?.success) {
-        const error = new Error(out?.error || `Cowgol compiler HTTP ${response.status}`);
+    if (route === 'hosted') {
+        const response = await fetcher(endpoint, {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, signal,
+            body: JSON.stringify(request)
+        });
+        try { out = await response.json(); } catch (error) {
+            throw new Error(`Cowgol compiler returned an invalid response (HTTP ${response.status}).`);
+        }
+        if (!response.ok) {
+            const error = new Error(out?.error || `Cowgol compiler HTTP ${response.status}`);
+            error.log = out?.log || '';
+            throw error;
+        }
+    }
+    if (!out?.success) {
+        const error = new Error(out?.error || 'Cowgol compilation failed.');
         error.log = out?.log || '';
         throw error;
     }
+    return {...validateCowgolReply(out, target, spec), route};
+}
+
+/** Every reply, hosted or offline, must name exactly the requested compiler. */
+function validateCowgolReply (out, target, spec) {
     // The native route must never accept the ordinary C compiler's reply or
     // mistake a generated-C file for a runnable CP/M program.
     if (out.toolchain !== spec.toolchain || out.target !== target || out.language !== 'cowgol' ||

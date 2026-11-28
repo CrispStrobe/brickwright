@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "cowgol": {
+    "repository": "https://github.com/CrispStrobe/cowgol",
+    "commit": "89b13e71030f929b40f82018a19b5b3386650342",
+    "license": "BSD-2-Clause"
+  },
+  "service": {
+    "repository": "https://github.com/CrispStrobe/stc-compiler",
+    "commit": "597b52f7464313c9774206e570ee8ee47a667a16",
+    "bundleScript": "scripts/build-cowgol-bundle.py",
+    "aptSources": "scripts/cowgol-bullseye.list"
+  },
+  "debian": {
+    "image": "python:3.11-bullseye",
+    "snapshot": "20250101T000000Z",
+    "packages": {
+      "nasm": {"license": "BSD-2-Clause", "distribution": "bundled"},
+      "64tass": {"license": "GPL-2.0-or-later", "distribution": "gpl-origin"}
+    }
+  },
+  "emscripten": {
+    "version": "3.1.64",
+    "installerRepository": "https://github.com/emscripten-core/emsdk",
+    "installerCommit": "a7c808831a666cc903fedb906c171a718cd97341",
+    "notices": [
+      {"source": "LICENSE", "name": "EMSCRIPTEN-LICENSE.txt", "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"},
+      {"source": "AUTHORS", "name": "EMSCRIPTEN-AUTHORS.txt", "sha256": "56f7df65203d4858dac19cafe3a84a8c49abaff56b67d32d2d463d5fef6e440b"},
+      {"source": "system/lib/libc/musl/COPYRIGHT", "name": "MUSL-COPYRIGHT.txt", "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"},
+      {"source": "system/lib/compiler-rt/LICENSE.TXT", "name": "COMPILER-RT-LICENSE.txt", "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"},
+      {"source": "system/lib/libcxx/LICENSE.TXT", "name": "LIBCXX-LICENSE.txt", "sha256": null},
+      {"source": "system/lib/libcxxabi/LICENSE.TXT", "name": "LIBCXXABI-LICENSE.txt", "sha256": null}
+    ]
+  },
+  "tools": {
+    "cowfe-16bit": {"upstream": "bin/cowfe-for-16bit-with-nncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowfe-6502": {"upstream": "bin/cowfe-for-6502-with-nncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowbe-z80": {"upstream": "bin/cowbe-for-z80-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowbe-8080": {"upstream": "bin/cowbe-for-8080-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowbe-8086": {"upstream": "bin/cowbe-for-8086-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowbe-65c02-rom": {"upstream": "bin/cowbe-for-65c02-rom-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowlink-ncpmz": {"upstream": "bin/cowlink-for-ncpmz-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowlink-ncpm": {"upstream": "bin/cowlink-for-ncpm-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowlink-msdos": {"upstream": "bin/cowlink-for-msdos-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "cowlink-eater6502": {"upstream": "bin/cowlink-for-eater6502-with-ncgen", "kind": "cgen", "distribution": "bundled"},
+    "zmac": {"upstream": "bin/zmac", "kind": "c", "license": "public domain", "distribution": "bundled"},
+    "nasm": {"upstream": "debian:nasm", "kind": "autoconf", "license": "BSD-2-Clause", "distribution": "bundled"},
+    "djlink": {"upstream": "bin/djlink", "kind": "c++", "license": "GPL-2.0 with the DJLINK executable exception", "distribution": "gpl-origin"},
+    "64tass": {"upstream": "debian:64tass", "kind": "make", "license": "GPL-2.0-or-later", "distribution": "gpl-origin"}
+  },
+  "families": {
+    "cpmz": {"target": "z80-cpm", "cowfe": "cowfe-16bit", "cowbe": "cowbe-z80", "cowlink": "cowlink-ncpmz", "assemblers": ["zmac"]},
+    "cpm": {"target": "i8080-cpm", "cowfe": "cowfe-16bit", "cowbe": "cowbe-8080", "cowlink": "cowlink-ncpm", "assemblers": ["zmac"]},
+    "msdos": {"target": "dos", "cowfe": "cowfe-16bit", "cowbe": "cowbe-8086", "cowlink": "cowlink-msdos", "assemblers": ["nasm", "djlink"]},
+    "eater6502": {"target": "eater6502", "cowfe": "cowfe-6502", "cowbe": "cowbe-65c02-rom", "cowlink": "cowlink-eater6502", "assemblers": ["64tass"]}
+  }
+}
