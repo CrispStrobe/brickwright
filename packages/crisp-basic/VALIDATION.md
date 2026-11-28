@@ -2,49 +2,119 @@
 
 ## Explicit output-latch toggle
 
-This milestone adds `PROCdigitalToggle(pin)` as an atomic host operation,
-with runtime package `0.1.0-dev.6`, simulation ABI/contract version 2 and the
-unchanged version-1 worker envelope. The owning producer is
+The implementation is
+[`brickwright@2f056f5334a1b5ee6cef0e2ff40f2a562c836f84`](https://github.com/CrispStrobe/brickwright/commit/2f056f5334a1b5ee6cef0e2ff40f2a562c836f84)
+on `feature/crispbasic`. It adds `PROCdigitalToggle(pin)` as an atomic host
+operation, with runtime package `0.1.0-dev.6`, simulation ABI/contract version 2
+and the unchanged version-1 worker envelope.
+
+The owning producer is
 [`sb3-creator@b465a543aa04aac9800635034b87e7438d62adc0`](https://github.com/CrispStrobe/sb3-creator/commit/b465a543aa04aac9800635034b87e7438d62adc0)
-on `feature/crispbasic-generator`; `vendor-pins.json`, both compiler mirrors
-and the derived authoring inventory identify that revision. The board,
-Circuit and BBCSDL pins are unchanged, as is the existing gallery.
+on `feature/crispbasic-generator`. Its
+[qualification run 46121321231](https://github.com/CrispStrobe/sb3-creator/actions/runs/46121321231)
+passed **306 tests**, zero failures or skips. `vendor-pins.json`, both compiler
+mirrors and the derived authoring inventory identify that exact revision.
+All 21 mapped producer files match after the documented import rewrites.
+The board, Circuit, BBCSDL and toolchain pins are unchanged, as is the gallery.
 
-### Observed local qualification before hosted rebuild
+### Hosted consumer qualification
 
-| Check | Observed result |
-| --- | --- |
-| Owning producer generation, reverse/CLI, legacy, source maps and traces | 306 passed, zero failures or skips |
-| Runtime source, reference host and worker protocol/lifecycle | 111 passed, zero failures or skips |
-| Circuit host/session/model/guard, runner, conversion and editor | 134 passed, zero failures or skips |
-| Exact producer identity, sync mirroring and SPIKE artifact | 10 passed, zero failures or skips |
-| Producer sync check and duplicated-fact mirror check | Passed |
+All three jobs in
+[run 46121568018](https://github.com/CrispStrobe/brickwright/actions/runs/46121568018)
+passed: **570 tests, zero failures, cancellations or skips**, including all
+**eleven complete production Chromium scenarios**. The run completed on
+2026-11-28 at 08:43:19 CET. Both native and WASM runtimes were rebuilt from the
+unchanged pinned BBCSDL source; the WASM build used Emscripten 3.1.64.
 
-The 134 integration checks include the 21 board-host tests. Counts in this table
-are separate suites, not additions to the historical totals below. The identity
-check compares all 21 mapped producer files at the explicit supplier checkout.
-The producer's owning command is `node --test test/crispbasic-*.test.mjs
-test/basic-sweep.test.mjs test/basic-linemap.test.mjs test/basic-trace.test.mjs`.
-The runtime source/reference/protocol command is `npm test` in this package.
+| Suite | Passed |
+| --- | ---: |
+| Source preparation, reference host and bridge protocol/lifecycle | 111 |
+| Native runtime and CLI | 41 |
+| Actual WASM execution, restricted-host policy and simulation bridge | 153 |
+| Native/WASM comparisons against fixed expected results | 10 |
+| Real Chromium engine workers | 18 |
+| GUI adapter, assets, editor, board host/session, generated source and conversion | 184 |
+| Shared board ownership and existing CAD bridge/cancellation | 30 |
+| Focused Chromium editor, renderer and Circuit integration | 12 |
+| Complete production GUI in Chromium | 11 |
+| **CrispBASIC CI total** | **570** |
 
-The real pinned solver now demonstrates the distinction directly: request high,
+The separate
+[BASIC oracle run 46121567986](https://github.com/CrispStrobe/brickwright/actions/runs/46121567986)
+also passed all **nine fixtures**, comparing the emulated BBC BASIC engine with
+BBCSDL and Matrix Brandy. The oracle fixtures and producer's 306 tests are
+separate from the consumer total.
+
+The WASM job rebuilt both interpreter backends and uploaded its exact runtime
+as artifact `15253719385`, 123098 bytes, archive SHA-256
+`c187eb7b638d4f304dd144cc651675d45525c1ee0b3992cd871e92f3b137c22f`.
+The production job downloaded and verified that same-run artifact, built the
+complete CAD/FPGA-enabled editor with its locked dependencies, and authenticated
+all 20 emitted runtime assets, three entry scripts and 562 lazy chunks for
+build `2f056f5`. Webpack 5.96.1 completed in 127548 ms with its three existing
+warnings (Microtronic CSS and bundle/entrypoint sizes).
+
+The [production evidence archive](https://github.com/CrispStrobe/brickwright/actions/runs/46121568018/artifacts/15254660014)
+contains the browser report, screenshots, build/asset identities and logs.
+GitHub records artifact `15254660014` as 755513 bytes, archive SHA-256
+`62c4a9668e85f89739b283a6efb2402e592da8e8a59d3ba1c1bf2b2a0bcc2b9f`.
+Workflow artifacts have a seven-day lifetime; the source record and
+reproduction commands remain in the repository.
+
+### What the new qualification establishes
+
+The real pinned solver demonstrates the distinction directly: request high,
 observe the clamped net low, toggle the retained request to low, then toggle it
-back to high while the solved read stays low. It also checks initial zero,
-write/mode retention, fresh runs, no clock advancement, trace exhaustion before
-mutation, synchronous cancellation and revoked ownership. Runtime bridge tests
-verify one operation-6 request, duplicate refusal, typed void replies, stale
-ABI-1 rejection and the catchable unavailable result for old custom hosts.
+back to high while the solved read stays low. The generated-program fixture
+executes this path through the actual C/WASM engine. Both numbered and structured
+source and both polarities have fixed expected traces. There is no synthesized
+read/write pair or time advancement for toggle.
 
-The new actual-C/WASM tests and complete production-browser gate require the
-hosted rebuild; no local native/WASM rebuild or browser execution is claimed
-here. The complete GUI gate now contains eleven scenarios, adding generated
-ACTIVE LOW latch-toggle execution against a clamped circuit and retaining the
-error-banner/newline regression with unsupported `wait until`. Hosted results
-and artifact identities will be recorded after those jobs complete.
+The tests also cover initial zero, write/mode retention, fresh runs, BASIC
+`CLEAR`/`RUN` within the same host lifetime, once-only pin-expression evaluation,
+recursive asynchronous suspension, call-site diagnostics, user definition
+overrides, trace exhaustion before mutation, synchronous cancellation and
+revoked Circuit ownership. Bridge tests verify one operation-6 request,
+duplicate refusal, typed void replies and explicit rejection of stale ABI 1.
+An older custom host remains usable for its original methods; a missing toggle
+produces catchable `ERR208` (`unavailable`) without sensing or writing a pin.
+
+The complete GUI gate passed all eleven scenarios. Its new active-low toggle
+program pauses after requested levels high, low and high while the clamped
+net remains low, verifies stationary owned time and releases pin/clock ownership.
+The default generation path retains its hardware comments, and selecting the
+portable option preserves the current buffer until explicit regeneration.
+Reverse conversion of the generated toggle program refuses without changing
+source or project. A separate unsupported `wait until` scenario retains the
+disabled-Run and editor-newline refusal regression now that toggle generation
+succeeds. The prior exact 25000000 ns delay, LED-current, input suspension,
+error/VDU, cancellation, file-replacement and missing-runtime cases also pass.
+
+### Local reproduction and identity
+
+Local execution also passed the owning producer's 306 tests, the package's
+111 source/reference/protocol tests, all 153 genuine WASM tests, the complete
+184-test Brickwright integration suite, and ten producer-identity/mirror/SPIKE
+checks. The 184 integration tests include 21 board-host tests and 17 generated
+C/WASM programs. These are overlapping local and hosted observations, not
+additional tests in the CI total. Sync checking, the duplicated-fact mirror
+check, and packaging/authentication of all 20 runtime assets passed.
+
+The genuine local WASM build used the unchanged SDK installer
+`a7c808831a666cc903fedb906c171a718cd97341`, Emscripten 3.1.64 and BBCSDL
+`6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f`. Its build manifest verifies six
+upstream inputs, nine local inputs and 24 allowed imports. Its output identities
+are module SHA-256
+`f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655`
+and WASM SHA-256
+`c22c6cbe4cea922450c979f41869b9b4e53de238f087341048fe9b4580edce9a`.
+No local native rebuild, production GUI build or browser execution is claimed.
+The owning commands are the existing workflow commands and
+[production reproduction steps](BRICKWRIGHT.md#complete-production-gui-gate).
 
 Reverse conversion remains a qualified refusal. Toggle does not establish a
 portable-library round trip, an instruction-to-time model, peripheral support
-or physical-device equivalence. The older generator refusal and ABI-1 results
+or physical-device equivalence. The older generator-refusal and ABI-1 results
 below describe their own exact revisions and are retained as history.
 
 ## Explicit portable generator boundary
