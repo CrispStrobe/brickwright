@@ -2,6 +2,115 @@
 
 The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
 
+## Language execution across Simulator and silicon — 2026-11-28
+
+The owner-requested extension covers Python, JavaScript and C across the Code
+tab, Simulator and physical boards. Extend the existing
+[language/device matrix](docs/LANGUAGE-DEVICE-MATRIX-PLAN.md) and
+[code runtime plan](docs/CODE-RUNTIME-AND-GAME-EXPORT.md); preserve the
+R0–R4, G0–G4 and J0–J6 tracks and the existing capability registry.
+
+### Current source audit
+
+Baseline: main `b474327531ab9133f27c69fce9c6bd776bce2b50`. These are implemented
+routes and their limits, not a new hardware qualification. The host application
+has browser and Tauri Windows/macOS/Linux/Android/iOS targets; host packaging
+does not establish which languages run on each simulated or physical machine.
+
+| Area | Existing route | Qualification boundary / next gap |
+| --- | --- | --- |
+| Host Code tab | Blocks/pseudocode, Skulpt Python and browser/WebView JavaScript; owned console workers and task handling | Skulpt is not CPython. Source/target persistence and conversion repairs have an existing integration owner; console execution is not the shared circuit/device bridge |
+| Pico / RP2040 | Actual MicroPython firmware in the CPU simulator; Python deployment by serial or `main.py` download; hosted C and a UF2 wrapper | Simulator install/reset already exists. Main's edited-source caller needs the already-claimed repair in PR #1855; physical deploy source selection is a separate gap. The SRAM-origin C wrapper does not prove flash-resident power-cycle boot |
+| micro:bit / Calliope and MakeCode targets | MicroPython paths and offline PXT/native compilation, including supported EV3, Circuit Playground Express and Arcade profiles | PXT needs the exact matching base firmware; missing bases are explicit refusals. Qualify each target/artifact/transport combination rather than treating PXT compilation as universal hardware support |
+| AVR / Arduino and STC / 8051 | Existing C/C++ and assembly toolchains, CPU simulation and target-specific deployment; optional local SDCC WASM already exists | Python/JS lowering covers declared subsets, not arbitrary interpreter semantics. Compiler location, ABI/runtime and available transport remain per-target facts |
+| RISC-V, ESP8266 and retro machines | RV32 C (local shecc subset / hosted full compiler), SDK-free ESP8266 C simulation, and existing assembly/BASIC/Forth/Tcl/Lisp and other target-language routes | A working emulator/compiler does not establish a silicon transport. Preserve useful retro routes without promising full Python/JS interpreters on tiny targets |
+| LEGO and specialized labs | Target-specific NQC/NXC, MicroPython/virtual-hub paths, native firmware profiles and specialized machine languages; Verilog is a separate lab | Virtual source execution, real firmware emulation and physical hub deployment have distinct limits and acceptance evidence |
+
+The matrix and older boot notes contain historical states. Reconcile actual
+callers and current pins before changing a capability: Pico reset and several
+PXT/native paths are already implemented. The existing
+[Code/Pico ownership claim](lanes/2026-11-27-code-document-pico-ownership.md)
+and [integration PR #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
+remain with their owners; their unmerged candidate is not main acceptance.
+
+### Delivery sequence
+
+Every route must name its language/dialect, runtime, board/CPU, artifact,
+compiler location, transport and evidence. Distinguish host execution,
+language-level simulation, instruction-level firmware simulation, compilation,
+and physical deployment. Keep native execution and lowering separate; arbitrary
+Python or JavaScript must not silently become another program through blocks/C.
+
+Source correctness and execution ownership remain the first runtime priorities:
+complete R1/R2 and J1 through their existing claims, including exact-or-refused
+conversion, authored source/target persistence, input, Stop and restart.
+LP0/LP1 can establish route and package data independently; runtime adapters
+then use the existing R3/R4 and J2 service/bridge boundaries.
+
+1. **LP0 — current route inventory:** reconcile the matrix with actual callers,
+   pinned dependencies and firmware/transport paths. Preserve evidence levels
+   and generate the visible matrix from the same capability data.
+2. **LP1 — runtime and toolchain packages:** record exact artifact identities,
+   component licenses, source/build recipes, runtime/output exceptions,
+   distribution class and emulator eligibility. Extend the existing SDCC
+   download manager and build-output policy. Start with a shared package
+   inventory and known-payload exclusion checks; hash-verified installation,
+   cache migration and additional compilers are subsequent acceptance slices.
+3. **LP2 — Python:** qualify explicit CPython/Pyodide and MicroPython modes
+   without silently changing dialect. Prioritize Pico and micro:bit, then
+   selected SAMD/CircuitPython and board-specific SPIKE/other 32-bit profiles.
+   Use a versioned device API and clock, and qualify Simulator and physical
+   execution independently. Bytecode compilation is not native machine code.
+4. **LP3 — C:** finish one compile → firmware simulation → physical deployment
+   route, including target ABI, linker/startup/runtime and peripheral support.
+   Pico is the reference: persistent flash-resident startup/boot2 and power-cycle
+   evidence, followed by micro:bit and selected SAMD cells. Expand AVR,
+   STC/8051 and RISC-V cell by cell; retain the retro toolchains. Optional GCC,
+   Clang/LLVM and SDCC packages compile native MCU code even when the compiler
+   itself runs as browser WASM.
+5. **LP4 — JavaScript on silicon:** retain browser/WebView JavaScript for host
+   execution and evaluate Kaluma on the existing Pico/RP2040 simulator first.
+   Measure its language subset, device API and RAM/flash footprint before
+   promising other boards. QuickJS/MQuickJS are later candidates for a concrete
+   target need; a bytecode-producing tool does not imply standalone native code.
+6. **LP5 — portable WASM:** evaluate WAMR or another compatible device runtime
+   only for a demonstrated workload and suitable 32-bit target. Browser WASM
+   needs supported imports, a memory budget and an on-device interpreter/AOT
+   runtime; it is not directly flashable firmware.
+
+For each admitted Pico Python/JS/C route, the acceptance program must read a
+changing input, control PWM or a motor, print output, survive project save/reopen,
+and stop/restart correctly. Record source/artifact identities and independent
+Simulator/physical results; C additionally proves power-cycle startup. Use the
+same admitted source and API semantics where the route promises parity.
+
+### Distribution boundary
+
+Code and firmware vendored into BW must remain **non-NC and non-GPL**.
+Separately distributed GPL WASM tools may be downloaded explicitly by the user,
+with license/source disclosure, verified artifacts, cancellable installation,
+offline reuse and removal. They must not enter the shipped bundle or initial
+pre-cache. This supersedes the older matrix plan's hosted-only GPL wording.
+WASM, Workers and separate origins do not by themselves settle whether
+components form separate works.
+
+Check compiler executables, linked runtimes/SDKs/firmware, and user programs
+separately; compiler licensing alone does not determine output licensing.
+The optional-GPL allowance does not approve NC dependencies. Existing
+component-specific LGPL treatment, including the two 386 BIOS images, grants
+no blanket approval to new LGPL packages such as pygame-ce. Prefer permissive
+new engines and review their complete dependency/firmware graphs.
+
+Preserve exact-artifact vendor-chip and emulator eligibility checks: firmware
+allowed on physical silicon can still be unsuitable for Simulator. An MIT core
+does not qualify all bundled wireless libraries or a complete firmware image.
+
+Status: **plan recorded; incremental implementation and per-target qualification
+follow in claimed slices**. Existing runtime candidates and unrelated blockers
+retain their recorded status. The first independent implementation is LP1's
+SDCC-backed package inventory and known-payload build boundary; it does not add
+an interpreter, accept a new compiler payload or claim verified installation.
+
 ## Code execution and game export (Python and JavaScript) — 2026-11-27
 
 The owner-requested [Code runtime and game export plan](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)

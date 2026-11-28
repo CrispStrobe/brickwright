@@ -49,6 +49,8 @@ import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view
 import downloadBlob from '../../lib/download-blob.js';
 import animationResourceMenuItems from 'scratch-vm/src/util/bw-animation-resource-menu.js';
 import {conversionFailure} from '../../lib/bw-conversion-error.js';
+import {validateCrispBasicPseudocode, crispBasicModeError} from '../../lib/sb3-creator-crispbasic-mode.js';
+import {PORTABLE_GPIO_PROFILES} from 'bw-board/portable-gpio.js';
 import {getCostumeDocument, inspectArtwork, applyArtwork, syncAnimationResources} from '../../lib/bw-artwork-bundle.js';
 import {captureCodeArtwork, codeArtworkMatches, retainCodeArtwork,
     captureCodeArtworkRevision, codeArtworkRevisionMatches} from '../../lib/bw-code-artwork.js';
@@ -260,13 +262,18 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC reached the output limit.',
         basicCrispSimulationLimit: 'CrispBASIC reached a circuit simulation limit.',
         basicConnectCircuit: 'Connect Circuit',
-        basicPortableLibrary: 'Generate portable Circuit calls',
-        basicPortableHint: 'Regenerate from blocks to apply this choice. Portable calls need Connect Circuit to run; To blocks currently refuses them. Toggle and unsupported hardware operations are reported as generation errors.',
+        basicConnectCad: 'Connect CAD motors',
+        basicConnectCadHint: 'Use the saved circuit–CAD motor connections. BASIC delays advance the circuit and CAD world together. Stop preserves the last completed physical state.',
+        basicCircuitControllers: count => `Supported Circuit controllers (${count})`,
+        basicCircuitHost: 'CrispBASIC runs in this browser and controls the simulated pins. Use the logical pin numbers below; only pins exposed by the loaded circuit are available.',
+        basicCircuitBenchVoltage: 'bench voltage',
+        basicPortableLibrary: 'Portable BASIC ↔ pseudocode',
+        basicPortableHint: 'Use the qualified portable subset when switching between BASIC and pseudocode. Regenerate from blocks to apply this choice to generated BASIC. Circuit calls need Connect Circuit to run. Portable pseudocode retains its CrispBASIC requirement when saved; To blocks and other runtimes refuse it. Toggle reverses the requested output level. Unsupported operations are reported as conversion errors.',
         basicCrispError: 'CrispBASIC could not finish this program.',
         basicInputLine: 'Program input', basicInputKey: 'One character (empty for Enter)',
         basicInputSend: 'Send', basicInputEnd: 'End input',
         basicInputKeyError: 'Enter one Latin-1 character, or leave the field empty for Enter.',
-        basicCrispScope: 'Text, input and basic VDU drawing. Connect Circuit enables digital pins and simulated time on the current circuit. Physical hardware, files, graphics queries, sound and source debugging are unavailable. Runs stop after 60 seconds.',
+        basicCrispScope: 'Text, input and basic VDU drawing. Connect Circuit enables digital pins and simulated time on the current circuit; Connect CAD motors also drives its connected mechanical joints. Physical hardware, files, graphics queries, sound and source debugging are unavailable. Runs stop after 60 seconds.',
         basic8086Building: 'Compiling BASIC for the 8086 in this browser…',
         basicRealDosBuilding: 'Compiling BASIC and preparing a real MS-DOS 2.0 boot disk…',
         basicRealDosFailed: (m) => `Could not prepare the MS-DOS boot disk: ${m}`,
@@ -643,13 +650,18 @@ const L10N = {
         basicCrispOutputLimit: 'CrispBASIC hat die Ausgabegrenze erreicht.',
         basicCrispSimulationLimit: 'CrispBASIC hat eine Grenze der Schaltungssimulation erreicht.',
         basicConnectCircuit: 'Schaltung verbinden',
-        basicPortableLibrary: 'Portable Schaltungsaufrufe erzeugen',
-        basicPortableHint: 'Diese Auswahl mit „Aus Blöcken“ anwenden. Portable Aufrufe benötigen „Schaltung verbinden“; „Zu Blöcken“ lehnt sie derzeit ab. Umschalten und nicht unterstützte Hardwareoperationen werden als Erzeugungsfehler gemeldet.',
+        basicConnectCad: 'CAD-Motoren verbinden',
+        basicConnectCadHint: 'Die gespeicherten Motorverbindungen zwischen Schaltung und CAD verwenden. BASIC-Wartezeiten treiben Schaltung und CAD-Welt gemeinsam voran. Stopp erhält den letzten abgeschlossenen physikalischen Zustand.',
+        basicCircuitControllers: count => `Unterstützte Schaltungscontroller (${count})`,
+        basicCircuitHost: 'CrispBASIC läuft in diesem Browser und steuert die simulierten Pins. Verwende die logischen Pinnummern unten; verfügbar sind nur die Pins der geladenen Schaltung.',
+        basicCircuitBenchVoltage: 'Spannung der Schaltung',
+        basicPortableLibrary: 'Portables BASIC ↔ Pseudocode',
+        basicPortableHint: 'Beim Wechsel zwischen BASIC und Pseudocode die geprüfte portable Teilmenge verwenden. Für erzeugtes BASIC diese Auswahl mit „Aus Blöcken“ anwenden. Schaltungsaufrufe benötigen „Schaltung verbinden“. Portabler Pseudocode behält beim Speichern seine CrispBASIC-Anforderung; „Zu Blöcken“ und andere Laufzeiten lehnen ihn ab. Umschalten kehrt den angeforderten Ausgangspegel um. Nicht unterstützte Operationen werden als Konvertierungsfehler gemeldet.',
         basicCrispError: 'CrispBASIC konnte dieses Programm nicht beenden.',
         basicInputLine: 'Programmeingabe', basicInputKey: 'Ein Zeichen (leer für Eingabetaste)',
         basicInputSend: 'Senden', basicInputEnd: 'Eingabe beenden',
         basicInputKeyError: 'Ein Latin-1-Zeichen eingeben oder das Feld für die Eingabetaste leer lassen.',
-        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Schaltung verbinden aktiviert digitale Pins und simulierte Zeit in der aktuellen Schaltung. Physische Hardware, Dateien, Grafikabfragen, Ton und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
+        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Schaltung verbinden aktiviert digitale Pins und simulierte Zeit; CAD-Motoren verbinden treibt zusätzlich die verbundenen mechanischen Gelenke an. Physische Hardware, Dateien, Grafikabfragen, Ton und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
         basic8086Building: 'Übersetze BASIC für den 8086 in diesem Browser…',
         basicRealDosBuilding: 'Übersetze BASIC und bereite eine echte MS-DOS-2.0-Bootdiskette vor…',
         basicRealDosFailed: (m) => `Die MS-DOS-Bootdiskette konnte nicht vorbereitet werden: ${m}`,
@@ -1329,7 +1341,7 @@ class PseudocodeImporter extends React.Component {
             // ever left without one — a missing buffer made activeCode()
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
-            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false, basicConnectCircuit: false,
+            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false, basicConnectCircuit: false, basicConnectCad: false,
             basicPortableLibrary: false,
             basicFilename: 'editor.bas', basicOutputRunId: 0,
             basicWarnings: [], basicGenerationFailed: false,
@@ -3321,7 +3333,14 @@ class PseudocodeImporter extends React.Component {
         try {
             const refusal = codeDocumentConversionRefusal(this.state.codeDocument, from, src);
             if (refusal) throw new Error(refusal);
-            const SB3 = (await this.lib()).default;
+            const crispEngine = this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic';
+            const portableRead = crispEngine && this.state.basicPortableLibrary;
+            // A saved portable source carries its runtime requirement with it.
+            // Check it before loading a compiler or touching a destination buffer.
+            if (from === 'pseudocode' && validateCrispBasicPseudocode(src) &&
+                to !== 'pseudocode' && !(to === 'basic' && crispEngine)) {
+                throw crispBasicModeError(to);
+            }
             let read = null;
             if (from === 'c') read = await this.readC(src);
             else if (from === 'python' || from === 'javascript') {
@@ -3331,11 +3350,24 @@ class PseudocodeImporter extends React.Component {
                 if (this.state.basicGenerationFailed || this.basicGenerationPlaceholder(src)) {
                     throw new Error((this.state.basicWarnings || []).join('\n') || 'BASIC generation was refused. Remove or replace the generation-error banner.');
                 }
-                read = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
+                read = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(
+                    src, portableRead ? {mode: 'crispbasic'} : undefined);
                 if (read.ok === false) throw new Error((read.reasons || []).join('\n') || 'BASIC conversion refused.');
             }
             else if (DOS_LANG[from]) read = (await DOS_LANG[from].load()).default(src);
             const pseudo = read ? this.convertedSource(read) : src;
+            const portableSource = validateCrispBasicPseudocode(pseudo);
+            if (portableSource) {
+                if (to === 'pseudocode') {
+                    return {code: pseudo, diagnostics: {direction: `${LANG_LABEL[from] || from} → ${LANG_LABEL[to] || to}`,
+                        preserved: true, changed: [], unsupported: []}, options: this.genOpts(to)};
+                }
+                if (to !== 'basic' || !crispEngine) throw crispBasicModeError(to);
+            }
+            // A portable source keeps portable generation even with the toggle off;
+            // the conversion turns the toggle on with it (basicPortableLibrary below).
+            const portableGeneration = Boolean(crispEngine && (this.state.basicPortableLibrary || portableSource));
+            const SB3 = (await this.lib()).default;
             const creator = new SB3();
             creator.parse(pseudo);
             const proj = creator.project;
@@ -3346,7 +3378,8 @@ class PseudocodeImporter extends React.Component {
             else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts(to));
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
-                const r = new SB3().generateBASIC(proj, this.basicGenerationOptions());
+                const r = new SB3().generateBASIC(proj, {...this.basicGenerationOptions(),
+                    ...(portableGeneration ? {mode: 'crispbasic'} : {})});
                 if (!r.ok) throw new Error(r.reasons.join('; '));
                 code = r.basic;
                 basicWarnings = r.warnings || [];
@@ -3362,7 +3395,8 @@ class PseudocodeImporter extends React.Component {
             const classified = classifyConversionWarnings([...(read?.warnings || []), ...(creator.warnings || [])]);
             const diagnostics = {direction: `${LANG_LABEL[from] || from} → ${LANG_LABEL[to] || to}`,
                 preserved: true, changed: classified.changed, unsupported: [...classified.unsupported, ...(read?.unsupported || [])]};
-            return {code, diagnostics, options: this.genOpts(to), ...(to === 'basic' ? {basicWarnings, basicGenerationFailed} : {})};
+            return {code, diagnostics, options: this.genOpts(to), ...(to === 'basic' ? {basicWarnings, basicGenerationFailed,
+                basicPortableLibrary: portableGeneration} : {})};
         } catch (e) {
             const failure = conversionFailure(e);
             return {error: failure.message, diagnostics: {direction: `${LANG_LABEL[from] || from} → ${LANG_LABEL[to] || to}`,
@@ -3535,7 +3569,8 @@ class PseudocodeImporter extends React.Component {
         const ownsEditor = state => ownsRequest() && state.lang === from &&
             state.buffers === buffers && this.props.vm === vm;
         this.setState({busy: true, status: this.L.stConverting(to), emptyTabOffer: null});
-        this.deriveBuffer(src, sourceLang, to).then(({code, error, diagnostics, options, basicWarnings = [], basicGenerationFailed = false}) => {
+        this.deriveBuffer(src, sourceLang, to).then(({code, error, diagnostics, options, basicWarnings = [], basicGenerationFailed = false,
+            basicPortableLibrary = false}) => {
             // A failed conversion keeps the source tab, and offers an explicit
             // way into the requested tab with an empty buffer instead of a dead end.
             if (!ownsRequest()) return;
@@ -3546,11 +3581,17 @@ class PseudocodeImporter extends React.Component {
                 if (!ownsEditor(state)) return {busy: false};
                 if (error) return {busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to,
                     conversionReport: diagnostics || null};
-                const next = addCodeProjection(document, {lang: to, code, sourceRevision: document.revision,
+                // A portable conversion turns the portable toggle on; the document's
+                // generation options follow it so the stale-conversion fence agrees.
+                const portableOn = to === 'basic' && basicPortableLibrary && !state.basicPortableLibrary;
+                const owner = portableOn ? {...document,
+                    generationOptions: this.codeGenerationOptions({...state, basicPortableLibrary: true})} : document;
+                const next = addCodeProjection(owner, {lang: to, code, sourceRevision: document.revision,
                     options: options || this.genOpts(to), diagnostics: diagnostics || null,
                     runtime: this.codeRuntimeFor(to, document.target)});
                 return {...this.withRetainedDrafts(this.codeDocumentState(next), state, to), busy: false, output: null, status: '', emptyTabOffer: null,
-                    ...(to === 'basic' ? {basicWarnings, basicGenerationFailed, basicFilename: 'editor.bas'} : {}),
+                    ...(to === 'basic' ? {basicWarnings, basicGenerationFailed, basicFilename: 'editor.bas',
+                        ...(portableOn ? {basicPortableLibrary: true} : {})} : {}),
                     conversionReport: diagnostics || null};
             });
         });
@@ -5858,7 +5899,8 @@ class PseudocodeImporter extends React.Component {
         if (this._unmounted || this._crispBasicRun || this._crispBasicReset || this.state.running) return;
         const epoch = this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
         const run = {source: code, filename: this.state.basicFilename || 'editor.bas', runner: null, cancelled: false};
-        const circuit = this.state.basicConnectCircuit ? {runtime: this.props.vm?.runtime} : undefined;
+        const circuit = this.state.basicConnectCircuit ? {runtime: this.props.vm?.runtime,
+            ...(this.state.basicConnectCad ? {cad: true} : {})} : undefined;
         this._crispBasicRun = run;
         const owns = () => !this._unmounted && this._crispBasicRun === run;
         const ownsOutcome = () => !this._unmounted && this._crispBasicEpoch === epoch;
@@ -5880,7 +5922,8 @@ class PseudocodeImporter extends React.Component {
         };
         const circuitEvents = circuit && typeof window !== 'undefined' ?
             ['bw-circuit-changed', 'bw-board-ready', 'bw-project-bundle-loaded', 'bw-settings-change',
-                'bw-stop-all', 'bw-power-off', 'bw-green-flag'] : [];
+                'bw-stop-all', 'bw-power-off', 'bw-green-flag',
+                ...(circuit.cad ? ['bw-cad-circuit-bindings-changed', 'bw-cad-toggle', 'bw-cad-simulation-interrupt'] : [])] : [];
         for (const name of circuitEvents) window.addEventListener(name, pendingCircuitChange);
         const circuitRuntimeEvents = circuit?.runtime?.on && circuit?.runtime?.off ?
             ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED'].map(name => [name, () => pendingCircuitChange({type: name})]) : [];
@@ -5914,7 +5957,7 @@ class PseudocodeImporter extends React.Component {
             // Run owns a fresh adapter. Do not enable the next Run until its
             // worker and callbacks have been disposed, even on a host failure.
             try { if (run.runner) await run.runner.dispose(); }
-            catch (error) { failure = error; }
+            catch (error) { if (!failure && !result?.error) failure = error; }
             if (owns()) {
                 this._crispBasicRun = null;
                 const error = failure || (result && result.error);
@@ -6616,6 +6659,7 @@ class PseudocodeImporter extends React.Component {
             let source = typeof pseudocode === 'string' ? pseudocode : this.activeCode();
             const refusal = codeDocumentConversionRefusal(this.state.codeDocument, lang, source);
             if (refusal) throw new Error(refusal);
+            if (lang === 'pseudocode' && validateCrispBasicPseudocode(source)) throw crispBasicModeError('To blocks');
             let parseWarnings = [];
             if (lang === 'asm') {
                 const lift = (await import(/* webpackChunkName: "bw-asm-reader" */ '../../lib/bw-asm/asm-8086-to-pseudocode.js')).default;
@@ -6659,6 +6703,7 @@ class PseudocodeImporter extends React.Component {
                 const res = await this.readC(text);
                 source = this.convertedSource(res); parseWarnings = parseWarnings.concat(res.warnings || []);
             }
+            if (validateCrispBasicPseudocode(source)) throw crispBasicModeError('To blocks');
             const SB3Creator = (await this.lib()).default;
             const creator = new SB3Creator();
             creator.parse(source);
@@ -7928,20 +7973,32 @@ class PseudocodeImporter extends React.Component {
                                 ■ {this.L.stop}
                             </button>
                         ) : null}
-                        {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                        {this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
                             <button type="button" onClick={() => this.resetCrispBasic()}
                                 disabled={this.state.basicResetting || (this.state.running && !this.state.crispBasicActive)}
                                 style={actionBtn} data-testid="bw-crispbasic-reset">
                                 {this.L.basicCrispReset}
                             </button>
                         ) : null}
-                        {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                        {this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
                             <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}>
                                 <input type="checkbox" checked={Boolean(this.state.basicConnectCircuit)}
                                     disabled={this.state.running || this.state.basicResetting}
-                                    onChange={event => this.setState({basicConnectCircuit: event.target.checked})}
+                                    onChange={event => this.setState({basicConnectCircuit: event.target.checked,
+                                        ...(event.target.checked ? {} : {basicConnectCad: false})})}
                                     data-testid="bw-crispbasic-connect-circuit" />
                                 {this.L.basicConnectCircuit}
+                            </label>
+                        ) : null}
+                        {process.env.BW_ENABLE_CAD && this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' &&
+                            this.state.basicEngine === 'crispbasic' && this.state.basicConnectCircuit ? (
+                            <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}
+                                title={this.L.basicConnectCadHint}>
+                                <input type="checkbox" checked={Boolean(this.state.basicConnectCad)}
+                                    disabled={this.state.running || this.state.basicResetting}
+                                    onChange={event => this.setState({basicConnectCad: event.target.checked})}
+                                    data-testid="bw-crispbasic-connect-cad" />
+                                {this.L.basicConnectCad}
                             </label>
                         ) : null}
                         {this.state.lang === 'fe' && this.activeCode().trim() ? (
@@ -8263,11 +8320,21 @@ class PseudocodeImporter extends React.Component {
                         </label>}
                     </div>
                 )}
-                {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                {this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
                     <div style={{padding: '6px 12px', fontSize: 12, color: '#475569', flexShrink: 0}}
                         data-testid="bw-crispbasic-capabilities">
                         {this.L.basicCrispScope}
                         {this.state.basicPortableLibrary ? <p style={{margin: '4px 0 0'}}>{this.L.basicPortableHint}</p> : null}
+                        <details style={{marginTop: 4}} data-testid="bw-crispbasic-controller-list">
+                            <summary style={{cursor: 'pointer'}}>{this.L.basicCircuitControllers(PORTABLE_GPIO_PROFILES.length)}</summary>
+                            <p style={{margin: '4px 0'}}>{this.L.basicCircuitHost}</p>
+                            <ul style={{margin: 0, paddingLeft: 20}}>
+                                {PORTABLE_GPIO_PROFILES.map(profile => <li key={profile.kind}>
+                                    <strong>{profile.label}</strong>{' — '}{profile.numbering}{' ('}
+                                    {profile.nominalVoltage === null ? this.L.basicCircuitBenchVoltage : `${profile.nominalVoltage} V`}{')'}
+                                </li>)}
+                            </ul>
+                        </details>
                     </div>
                 ) : null}
                 {this.state.lang === 'basic' && this.state.basicWarnings.length ? (

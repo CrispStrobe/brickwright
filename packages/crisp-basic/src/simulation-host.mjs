@@ -11,6 +11,8 @@ export const SIMULATION_CAPABILITIES = Object.freeze({
     basicBridge: false,
     circuitPhysics: false,
     digitalPins: true,
+    digitalToggle: true,
+    outputLatch: 'per-run-retained-electrical-level',
     analogPins: false,
     pwm: false,
     interrupts: false,
@@ -110,6 +112,16 @@ export class SimulationHost {
         this.#reserve();
         target.latch = value;
         this.#record('digital-write', {pin, value});
+    }
+
+    /** Invert the retained output request, independently of input stimulus or
+     * an electrical host's sensed net. A toggle is one bounded mutation. */
+    digitalToggle(pin) {
+        const target = this.#pin(pin);
+        if (target.mode !== 'output') fail('pin-not-output', `pin ${pin} is not configured as an output`);
+        this.#reserve();
+        target.latch = 1 - target.latch;
+        this.#record('digital-toggle', {pin, value: target.latch});
     }
 
     digitalRead(pin) {

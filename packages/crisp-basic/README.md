@@ -1,7 +1,7 @@
 # CrispBASIC
 
-CrispBASIC is a BBC BASIC-compatible runtime project, incubated in Brickwright
-on `feature/crispbasic`. It is intended to become an independent repository.
+CrispBASIC is a BBC BASIC-compatible runtime project maintained in Brickwright's
+`packages/crisp-basic` directory. It is intended to become an independent repository.
 
 **CrispBASIC runs real BASIC through the pinned BBCSDL C interpreter in native
 processes and restricted WebAssembly workers.** Both use the original tokenizer
@@ -9,17 +9,37 @@ and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
 access. The Brickwright Code tab now adapts this runtime, with interactive input,
 Stop/Reset, mapped diagnostics and the existing partial VDU renderer. Version
-`0.1.0-dev.5` connects the opt-in BASIC simulation bridge to the active Brickwright
+`0.1.0-dev.8` adds a Linux ARMv7 hard-float port, target-verified cross builds
+and explicit CPU-emulator launch support. Linux ARM64/x64 and the portable WASM
+command-line runner retain capability discovery and deterministic simulation fixtures.
+It retains the opt-in BASIC simulation bridge to the active Brickwright
 Circuit board through a GUI-owned adapter. Digital pin operations use the pinned
 electrical solver, and integer-millisecond delays advance its clock cooperatively.
+The portable generator emits an explicit `PROCdigitalToggle` operation backed
+by retained output latches, including when the solved electrical level differs
+from the requested output. Explicit portable mode now reads a qualified BASIC
+subset back into pseudocode, including digital pins, simulated time, reusable
+numeric procedures, checked computed waits, qualified math and simple pen
+paths. Saved source retains a CrispBASIC requirement; generic Blocks and
+other execution targets refuse that source before changing a project.
 Full graphics, source debugging and physical-board targets remain subsequent work.
+
+The optional **Connect CAD motors** path coordinates the Circuit clock with
+the saved CAD motor/joint connections and preserves the paused physical world
+after completion or Stop. The [CAD robot example](examples/cad-robot/README.md)
+uses the shipped Scout project and the real physics worker.
+
+See [PORTABILITY.md](PORTABILITY.md) for supported host platforms, all 18
+electrical controller profiles, two-way source conversion, canvas behavior and
+the real motor-circuit and CAD robot examples.
 
 ## Try it
 
 ### Native CLI
 
-Requirements: Linux x86-64, Node 22 or newer, Git, GCC and NASM. On Debian/Ubuntu
-the native build tools are available as `build-essential` and `nasm`.
+Requirements: Linux x86-64, ARM64 or ARMv7 hard-float, Node 22 or newer, Git and GCC/binutils.
+The x86-64 build also requires NASM. On Debian/Ubuntu the native build tools
+are available as `build-essential` and (for x64) `nasm`.
 
 ```sh
 cd packages/crisp-basic
@@ -39,6 +59,12 @@ Generated sources, objects, the native executable and build metadata stay in
 existing BBCSDL checkout can be supplied through `CRISP_BASIC_UPSTREAM`; the
 builder reads the locked Git objects, not its working-tree edits.
 
+Set `CRISP_BASIC_TARGET` and a cross compiler in `CC` to build for another
+supported Linux CPU. The CLI's `--native-executable`, `--native-runner` and
+`--native-runner-arg` flags can run the guest executable under QEMU. See
+[CPU-EMULATION.md](CPU-EMULATION.md) for ARMv7/AArch64 commands and the boundary
+between CPU user-mode emulation, a full machine and a Circuit GPIO host.
+
 ### Restricted WASM
 
 Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
@@ -50,6 +76,9 @@ when building the native backend for comparison.
 cd packages/crisp-basic
 npm run build:wasm
 node examples/run-wasm.mjs
+node bin/crispbasic.mjs --backend wasm examples/hello.bas
+node bin/crispbasic.mjs --backend wasm --capabilities
+node bin/crispbasic.mjs --backend wasm --simulation examples/simulation.json examples/simulation.bas --json
 npm run test:wasm
 ```
 
@@ -60,6 +89,14 @@ data layout; the x86-64 header/data are never substituted. No SDL, filesystem,
 native symbol resolver, inline assembler or dynamic JavaScript evaluator is
 linked. Unexpected WASM imports fail the build. See [wasm/README.md](wasm/README.md)
 for the C host boundary and deployment layout.
+
+The same built WASM artifact runs in a Node worker without a host-native
+interpreter binary. `--backend native` remains the CLI default for compatibility;
+`--backend wasm` selects the restricted worker explicitly. `--capabilities`
+requires no source file or compiled artifact. A versioned JSON simulation
+fixture supplies logical pin IDs, time limits and scheduled input levels;
+`--json` retains its final trace alongside the result. See [CLI.md](CLI.md)
+for commands, fixture semantics and platform qualification.
 
 ### Brickwright Code tab
 
@@ -79,9 +116,9 @@ reads, clock ownership and cancellation. Physical hardware is not connected.
 
 | Command | Prerequisites and coverage |
 | --- | --- |
-| `npm test` | Source preparation, deterministic simulation contract and bridge protocol/lifecycle tests; no compiled backend needed |
+| `npm test` | Source preparation, CLI capability/fixture validation, deterministic simulation contract and bridge protocol/lifecycle tests; no compiled backend needed |
 | `npm run test:native` | Native build; execution, CLI and process cleanup |
-| `npm run test:wasm` | WASM build; execution, host restrictions, simulation library and worker lifecycle |
+| `npm run test:wasm` | WASM build; execution, CLI, host restrictions, simulation library and worker lifecycle |
 | `npm run test:parity` | Both builds; the same corpus checked against fixed expected bytes |
 | `npm run test:all` | All of the above |
 | `npm run test:browser` | WASM build, Playwright and Chromium; real browser workers |
@@ -102,6 +139,11 @@ module and `CRISP_BASIC_CHROMIUM` an existing browser executable. No root
 Brickwright GUI dependency installation is needed. The dedicated
 [workflow](../../.github/workflows/crispbasic.yml) tests both backends, parity,
 and real Chromium workers on Ubuntu with Node 22 and the pinned SDK installer.
+Native qualification runs the same interpreter suite on Linux x64 and ARM64.
+The separate CPU-emulation workflow cross-builds ARMv7 and ARM64 executables
+and runs that native runtime/CLI suite on emulated Cortex-A7/A53 CPUs.
+The same built WASM artifact also receives focused CLI qualification on
+Linux ARM64, macOS ARM64 and Windows x64, without rebuilding the interpreter.
 The recorded local results and their limits are in [VALIDATION.md](VALIDATION.md).
 
 ## A first program
@@ -159,7 +201,7 @@ the bytes, including CR/LF and VDU control bytes; it is not a graphics renderer.
 | Explicit BASIC `QUIT n` | `n` modulo 256 |
 | BASIC error, invalid source, or host failure | 1 |
 | Deadline reached | 124 |
-| Output limit reached | 125 |
+| Output or simulation resource limit reached | 125 |
 | Cancelled / Ctrl-C | 130 |
 | Closed downstream output pipe | 141 |
 
@@ -272,7 +314,7 @@ sessions can execute concurrently, and repeated runs share no BASIC variables.
 
 Omitting `simulation` leaves the bridge disabled. `simulation: {}` creates a
 fresh deterministic reference host for every run and installs the ordinary
-`PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay` and `FNmillis`
+`PROCpinMode`, `PROCdigitalWrite`, `PROCdigitalToggle`, `FNdigitalRead`, `PROCdelay` and `FNmillis`
 library in a separate interpreter library area:
 
 ```js
@@ -294,9 +336,16 @@ END
 ```
 
 The C/WASM artifact must be rebuilt for this API: the worker checks
-`crisp_simulation_abi() === 1` before enabling it. Older artifacts produce an
+`crisp_simulation_abi() === 2` before enabling it. Older artifacts produce an
 actionable host error. The native backend has no simulation bridge and explicitly
 rejects a `simulation` option instead of silently ignoring it.
+
+The simulation capability advertises `contractVersion: 2` and bridge support
+for `digitalToggle`; worker records retain framing version `1`. Toggle requires
+an output and inverts its retained electrical request in one operation, without
+sensing the net or advancing time. Latches start at `0`, survive mode changes,
+and are cleared by reference-host reset or a fresh run. Each successful toggle
+creates one trace record with the resulting latch value.
 
 `simulation.createHost({signal, runId})` may synchronously return a custom fresh
 host; its operation methods may return values or Promises. Each host belongs to
@@ -307,6 +356,11 @@ work must check cancellation/disposal before changing state. The session ignores
 late replies and terminates its worker; it cannot undo an adapter's external
 side effects. [SIMULATION.md](SIMULATION.md) defines the full ownership and
 cancellation contract.
+
+Custom hosts implementing only the original five operations remain supported.
+If they omit `digitalToggle`, a toggle call raises catchable `ERR208`
+(`unavailable`); no read/write fallback is attempted. The bridge's advertised
+toggle capability does not promise that a custom host implements it.
 
 The default request budget is 4096, configurable from 1 to 1000000, including
 `FNmillis` requests that do not create trace records. Request, trace, scheduled
@@ -324,7 +378,7 @@ milliseconds.
 | Area | Native | Restricted WASM |
 | --- | --- | --- |
 | Language engine | Pinned BBCSDL tokenizer and executor | Same pinned core, correct WASM32 ABI |
-| Host | Linux x86-64 process | Browser module worker or Node worker thread |
+| Host | Linux x86-64, ARM64 or ARMv7 hard-float process; optional explicit CPU runner | Browser module worker or Node worker thread |
 | Execution | Fixed/interactive input, cancellation, deadline, output bound | Same, with Asyncify input/wait suspension |
 | Diagnostics | Separate control channel; original editor-line mapping | Separate worker records; same source mapping |
 | Output | Raw VDU bytes and Latin-1 text | Same |

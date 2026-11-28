@@ -18,12 +18,13 @@ const cleanupFailure = error => {
 /** Reserve one existing canvas board and wait until the Designer stops its
  * clock. No pins, power or solver state change until createHost is called. */
 export async function createCrispBasicCircuitSession ({runtime, eventTarget = globalThis.window,
-    signal, onInvalidate = () => {}, timeoutMs = 10000, expectedBoard, expectedParts, expectedNets} = {}) {
+    signal, onInvalidate = () => {}, timeoutMs = 10000, expectedBoard, expectedParts, expectedNets, cad = false} = {}) {
     if (!runtime || typeof runtime !== 'object') throw new Error('The Circuit runtime is unavailable');
     if (!eventTarget?.addEventListener || !eventTarget?.removeEventListener || !eventTarget?.dispatchEvent) {
         throw new Error('Open the Circuit tab before connecting BASIC');
     }
     if (!(signal instanceof AbortSignal)) throw new TypeError('The circuit session requires an AbortSignal');
+    if (typeof cad !== 'boolean') throw new TypeError('cad must be a Boolean');
     if (signal.aborted) throw stopped();
     if (runtime.bwCrispBasicSimulation || runtime.bwCircuitRunPreparing || runtime.bwRunBoard || runtime.bwProgramClock ||
         runtime.threads?.length || ['preparing', 'compiling', 'running'].includes(runtime.cadCircuitSimulation?.state().phase)) {
@@ -41,13 +42,16 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
     if (model?.board && model.board !== board) throw new Error('The Circuit is changing; wait for it to finish loading');
     const parts = board.parts, nets = board.getNets();
     let disposed = false, host = null, creatingHost = false, requested = false, ready = false, rejectWait, disposalError = null;
+    let cadClock = null, cadPreparation = null, cadPreparationTask = null, cadPreparing = false;
+    let cleanupTask = null, ownerReleased = false;
     const owner = {board, stop: () => invalidate('The BASIC circuit run was stopped')};
     runtime.bwCrispBasicSimulation = owner;
     const windowListeners = [], runtimeListeners = [], modelGuards = [];
     const clean = action => {
         try { action(); } catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
     };
-    const cleanupPending = () => creatingHost || Boolean(host && !host.cleanupComplete);
+    const cleanupPending = () => creatingHost || cadPreparing || Boolean(host && !host.cleanupComplete) ||
+        Boolean(cadClock && !cadClock.cleanupComplete);
     const restoreModelGuards = () => {
         // Keep the guard during a solver callback or pin-release callback:
         // retrying a refused edit in that same stack must not take a snapshot.
@@ -74,6 +78,13 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         !runtime.bwRunBoard && !runtime.bwCircuitRunPreparing && !runtime.bwProgramClock &&
         runtime.circuitBoard === board && board.parts === parts && board.getNets() === nets &&
         (!runtime.circuitModel || runtime.circuitModel === model) && !model?.netlistError;
+    const finishOwner = () => {
+        if (ownerReleased) return;
+        ownerReleased = true;
+        restoreModelGuards();
+        clean(() => { if (runtime.bwCrispBasicSimulation === owner) delete runtime.bwCrispBasicSimulation; });
+        clean(() => { if (requested) eventTarget.dispatchEvent(new CustomEvent(OWNER_EVENT, {detail: {board: null, owner}})); });
+    };
     const release = () => {
         if (disposed) return;
         disposed = true;
@@ -81,12 +92,25 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         for (const [name, fn] of windowListeners) clean(() => eventTarget.removeEventListener(name, fn));
         for (const [name, fn] of runtimeListeners) clean(() => runtime.off(name, fn));
         clean(() => board.offChange?.(boardChanged));
-        // Host cleanup is synchronous and idempotent; it releases only its
-        // own pin/clock lease before the Designer may resume its animation.
+        // Pin release is synchronous. A CAD worker may still be finishing an
+        // already-submitted step; retain Designer/model ownership until its
+        // paused-world handoff has reconciled that final frame.
         clean(() => host?.dispose());
-        restoreModelGuards();
-        clean(() => { if (runtime.bwCrispBasicSimulation === owner) delete runtime.bwCrispBasicSimulation; });
-        clean(() => { if (requested) eventTarget.dispatchEvent(new CustomEvent(OWNER_EVENT, {detail: {board: null, owner}})); });
+        clean(() => cadPreparation?.abort());
+        if (!host && !creatingHost) clean(() => cadClock?.release());
+        if (cad && cleanupPending()) {
+            cleanupTask = Promise.resolve().then(async () => {
+                // Also cover cancellation while initial CAD sensing is in
+                // flight, before a programClock could be returned to us.
+                try { await cadPreparationTask; } catch { /* Preparation reports its original error. */ }
+                try { await host?.whenDisposed(); }
+                catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
+                try { await cadClock?.release(); }
+                catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
+                finishOwner();
+            });
+            cleanupTask.catch(error => { if (!disposalError) disposalError = cleanupFailure(error); });
+        } else finishOwner();
     };
     const dispose = () => {
         release();
@@ -96,6 +120,11 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         try { host?.dispose(); }
         catch (error) { if (!disposalError) disposalError = cleanupFailure(error); }
         restoreModelGuards();
+        if (disposalError) throw disposalError;
+    };
+    const whenDisposed = async () => {
+        try { dispose(); } catch { /* Wait for other owned cleanup before reporting it. */ }
+        await cleanupTask;
         if (disposalError) throw disposalError;
     };
     const invalidate = message => {
@@ -171,6 +200,9 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
         });
         for (const name of ['bw-stop-all', 'bw-power-off', 'bw-green-flag']) watch(name, () => invalidate('The BASIC circuit run was stopped'));
         for (const name of ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED']) watchRuntime(name, () => invalidate('The BASIC circuit run was stopped'));
+        if (cad) for (const name of ['bw-cad-circuit-bindings-changed', 'bw-cad-toggle', 'bw-cad-simulation-interrupt']) {
+            watch(name, () => invalidate('The CAD design or its connections changed; BASIC stopped'));
+        }
         await new Promise((resolve, reject) => {
             let settled = false;
             const finish = (callback, value) => {
@@ -186,6 +218,17 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
             if (!valid()) finish(reject, stopped());
         });
         if (!valid()) throw stopped();
+        if (cad) {
+            cadPreparation = new AbortController();
+            const {prepareCrispBasicCadClock} = await import(/* webpackChunkName: "crispbasic-cad-clock" */ './crispbasic-cad-clock.js');
+            if (!valid()) throw stopped();
+            cadPreparing = true;
+            try {
+                cadPreparationTask = prepareCrispBasicCadClock({runtime, board, signal: cadPreparation.signal});
+                cadClock = await cadPreparationTask;
+            } finally {cadPreparing = false;}
+            if (!valid()) {await cadClock.release();throw stopped();}
+        }
         return {
             board,
             createHost ({signal: hostSignal}, SimulationError) {
@@ -193,7 +236,7 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
                 if (host) throw new Error('A circuit session can create only one BASIC host');
                 creatingHost = true;
                 try {
-                    host = createCrispBasicBoardHost({board, signal: hostSignal, SimulationError,
+                    host = createCrispBasicBoardHost({board, signal: hostSignal, SimulationError, clock: cadClock,
                         onInvalidate: error => invalidate(error.message)});
                     if (!valid()) { host.dispose(); throw stopped(); }
                     return host;
@@ -202,7 +245,12 @@ export async function createCrispBasicCircuitSession ({runtime, eventTarget = gl
                     if (disposed) dispose();
                 }
             },
-            dispose
+            dispose,
+            whenDisposed,
+            get cleanupComplete() {return ownerReleased;}
         };
-    } catch (error) { dispose(); throw error; }
+    } catch (error) {
+        try { await whenDisposed(); } catch { /* Preserve the preparation failure. */ }
+        throw error;
+    }
 }

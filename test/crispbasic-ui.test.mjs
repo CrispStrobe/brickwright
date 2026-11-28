@@ -8,6 +8,8 @@ import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {EventEmitter} from 'node:events';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
+import {validateCrispBasicPseudocode, crispBasicModeError} from '../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
+import {extractCrispBasicEditorMethods} from '../scripts/lib/crispbasic-editor-harness.mjs';
 
 const editorSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 function between(source, start, end) {
@@ -16,12 +18,13 @@ function between(source, start, end) {
     assert.ok(a >= 0 && b > a, `Actual method boundaries: ${start}`);
     return source.slice(a, b);
 }
-const editorMethods = between(editorSource, '    async loadCrispBasicRunner () {', '    // Fetch examples/index.json once') +
-    between(editorSource, '    componentWillUnmount () {', '    // Current-locale string table') +
-    between(editorSource, '    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?');
-// The production document adapters and neutral machine hooks come from the
-// shared fixture; only the VM and worker edges belong to this file.
-const Editor = codeDocumentEditorClass(editorSource, editorMethods, {DOS_LANG: {}, conversionFailure});
+// The lane's editor methods (run, lifecycle, profile/draft and unmount
+// dependencies) plus conversion, on the shared fixture's production document
+// adapters and neutral machine hooks; only the VM and worker edges belong here.
+const editorMethods = extractCrispBasicEditorMethods(editorSource) +
+    between(editorSource, '    convertedSource ({pseudocode, warnings = []}) {', '    /**\n     * Is the RCX extension loaded?');
+const Editor = codeDocumentEditorClass(editorSource, editorMethods,
+    {DOS_LANG: {}, conversionFailure, validateCrispBasicPseudocode, crispBasicModeError});
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -30,7 +33,7 @@ const deferred = () => {
 const done = {status: 'completed', exitCode: 0};
 const turn = () => new Promise(resolve => setImmediate(resolve));
 
-function fixture({loadGate = null, disposeGate = null} = {}) {
+function fixture({loadGate = null, disposeGate = null, runFailure = null, disposeFailure = null} = {}) {
     const entered = deferred();
     const completion = deferred();
     const calls = [];
@@ -39,10 +42,18 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
     let runnerOptions;
     let created = 0;
     const runner = {
-        async run(source, options) { calls.push(['run', source, options]); entered.resolve(); return completion.promise; },
+        async run(source, options) {
+            calls.push(['run', source, options]); entered.resolve();
+            if (runFailure) throw runFailure;
+            return completion.promise;
+        },
         cancel() { calls.push(['cancel']); completion.resolve({status: 'cancelled'}); return true; },
         async reset() { calls.push(['reset']); completion.resolve({status: 'cancelled'}); },
-        async dispose() { calls.push(['dispose']); if (disposeGate) await disposeGate.promise; },
+        async dispose() {
+            calls.push(['dispose']);
+            if (disposeGate) await disposeGate.promise;
+            if (disposeFailure) throw disposeFailure;
+        },
         writeInput(value) { calls.push(['input', value]); },
         endInput() { calls.push(['end-input']); }
     };
@@ -50,6 +61,8 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
     Object.assign(editor, {
         state: {lang: 'basic', basicProfile: 'bbc', basicEngine: 'crispbasic', basicFilename: 'lesson.bas',
             basicOutputRunId: 0, basicInputMethod: null, basicInputValue: '', basicInputError: '',
+            basicLineNumbers: false, basicPortableLibrary: false, basicWarnings: [],
+            libraryTarget: null, authoredSources: {},
             buffers: {basic: 'PRINT "hello"\n'}, running: false, basicResetting: false},
         props: {vm: {runtime: {}}},
         L: {basicCrispLoading: 'loading', basicCrispRunning: 'running', basicCrispError: 'error',
@@ -61,7 +74,6 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
         setState(update) { const patch = typeof update === 'function' ? update(this.state) : update;
             if (patch) Object.assign(this.state, patch); },
         setHighlightedLine(line) { highlights.push(line); },
-        activeCode() { return this.state.buffers[this.state.lang]; },
         async loadCrispBasicRunner() {
             if (loadGate) await loadGate.promise;
             return {createCrispBasicRunner(options) { created++; runnerOptions = options; emit = options.onEvent; return runner; }};
@@ -95,6 +107,31 @@ test('Connect Circuit passes the actual runtime only when explicitly enabled', a
     const pending = f.editor.runBasic(); await f.entered.promise;
     assert.deepEqual(f.runnerOptions.circuit, {runtime: f.editor.props.vm.runtime});
     f.completion.resolve(done); await pending;
+});
+
+test('Connect CAD motors requests the shared clock only with Circuit access enabled', async () => {
+    for (const connectCircuit of [false, true]) {
+        const f = fixture();
+        f.editor.state.basicConnectCircuit = connectCircuit;
+        f.editor.state.basicConnectCad = true;
+        const pending = f.editor.runBasic();await f.entered.promise;
+        assert.deepEqual(f.runnerOptions.circuit,
+            connectCircuit ? {runtime: f.editor.props.vm.runtime, cad: true} : undefined);
+        f.completion.resolve(done);await pending;
+    }
+});
+
+test('a CAD connection edit during the cold import revokes the pending BASIC start', async () => {
+    const previous = globalThis.window;globalThis.window = new EventTarget();
+    try {
+        const gate = deferred(), f = fixture({loadGate: gate});
+        f.editor.state.basicConnectCircuit = true;f.editor.state.basicConnectCad = true;
+        const pending = f.editor.runBasic();
+        window.dispatchEvent(new CustomEvent('bw-cad-circuit-bindings-changed'));
+        gate.resolve();await pending;
+        assert.equal(f.created, 0);
+        assert.equal(f.editor.state.running, false);
+    } finally {if (previous === undefined) delete globalThis.window;else globalThis.window = previous;}
 });
 
 for (const name of ['PROJECT_STOP_ALL', 'PROJECT_START', 'PROJECT_LOADED']) {
@@ -137,6 +174,56 @@ test('the three 8086 BASIC routes retain their explicit selection', async () => 
         assert.deepEqual(seen, [f.editor.state.buffers.basic]);
         assert.equal(f.created, 0);
     }
+});
+
+test('the selected machine resolves a stale BBC preference before Run and portable generation', async () => {
+    const f = fixture();
+    Object.assign(f.editor.state, {libraryTarget: 'i8086', basicProfile: 'bbc', basicPortableLibrary: true});
+    const routed = [];
+    f.editor.runBasicOn8086 = source => routed.push(source);
+    assert.equal(f.editor.selectedBasicProfile().id, 'i8086');
+    assert.deepEqual(f.editor.basicGenerationOptions(), {profile: 'ms', lineNumbers: false});
+    await f.editor.runBasic();
+    assert.deepEqual(routed, [f.editor.state.buffers.basic]);
+    assert.equal(f.created, 0);
+
+    f.editor.state.libraryTarget = 'arduino-uno';
+    assert.equal(f.editor.selectedBasicProfile(), undefined, 'an unrelated machine does not inherit BBC Run');
+    await f.editor.runBasic();
+    assert.equal(f.created, 0);
+    assert.equal(routed.length, 1);
+});
+
+test('standalone Pico BASIC edits and runs its own draft while retaining the BBC source', async () => {
+    const f = fixture();
+    const original = f.editor.state.buffers.basic;
+    Object.assign(f.editor.state, {libraryTarget: 'pico', basicProfile: 'pico-piccolo'});
+    f.editor.state.buffers['pico-piccolo'] = 'print "old Piccolo"\n';
+    f.editor.setActiveCode('print "new Piccolo"\n');
+    assert.equal(f.editor.activeCode(), 'print "new Piccolo"\n');
+    assert.equal(f.editor.state.buffers.basic, original);
+    const routed = [];
+    f.editor.runPicoBasic = (source, profile) => routed.push([source, profile.id, profile.media]);
+    await f.editor.runBasic();
+    assert.deepEqual(routed, [['print "new Piccolo"\n', 'pico-piccolo', 'piccolobasic-rp2040']]);
+    assert.equal(f.created, 0);
+    Object.assign(f.editor.state, {libraryTarget: null, basicProfile: 'bbc'});
+    assert.equal(f.editor.activeCode(), original);
+});
+
+test('editing BASIC preserves standalone and machine-hidden authored drafts', () => {
+    const f = fixture();
+    f.editor.state.libraryTarget = 'pico';
+    Object.assign(f.editor.state.buffers, {pseudocode: 'DEVICE pico\n', javascript: 'const retained = 1;',
+        asm: 'retained assembly', nqc: 'retained NQC', 'pico-stefan': '10 PRINT "retained Stefan"'});
+    f.editor.state.authoredSources = {javascript: 'const retained = 1;'};
+    f.editor.setActiveCode('PRINT "new BBC"\n');
+    assert.equal(f.editor.state.buffers.basic, 'PRINT "new BBC"\n');
+    assert.equal(f.editor.state.buffers.javascript, 'const retained = 1;');
+    assert.equal(f.editor.state.authoredSources.javascript, 'const retained = 1;');
+    assert.equal(f.editor.state.buffers.asm, 'retained assembly');
+    assert.equal(f.editor.state.buffers.nqc, 'retained NQC');
+    assert.equal(f.editor.state.buffers['pico-stefan'], '10 PRINT "retained Stefan"');
 });
 
 test('Z80 refuses unnumbered, mixed or malformed numbering before loading its ROM', async () => {
@@ -235,6 +322,41 @@ test('BBC generation retains subset warnings and reports failed generation separ
         }
     }
 });
+
+test('portable generation follows the resolved profile and selected engine', () => {
+    for (const [libraryTarget, basicProfile, basicEngine, expected] of [
+        [null, 'bbc', 'crispbasic', {profile: 'bbc', lineNumbers: false, mode: 'crispbasic'}],
+        [null, 'bbc', 'z80', {profile: 'bbc', lineNumbers: false}],
+        ['i8086', 'bbc', 'crispbasic', {profile: 'ms', lineNumbers: false}],
+        ['pico', 'bbc', 'crispbasic', {profile: 'bbc', lineNumbers: false}]
+    ]) {
+        const f = fixture();
+        Object.assign(f.editor.state, {libraryTarget, basicProfile, basicEngine, basicPortableLibrary: true});
+        assert.deepEqual(f.editor.basicGenerationOptions(), expected);
+    }
+});
+
+for (const outcome of ['throws', 'BASIC error result']) {
+    test(`${outcome} survives disposal failure and the next Run waits for cleanup`, async () => {
+        const gate = deferred();
+        const primary = {kind: 'basic', filename: 'lesson.bas', line: 3, message: 'original BASIC failure'};
+        const f = fixture({disposeGate: gate, disposeFailure: new Error('secondary disposal failure'),
+            runFailure: outcome === 'throws' ? primary : null});
+        const pending = f.editor.runBasic();
+        await f.entered.promise;
+        if (outcome !== 'throws') f.completion.resolve({status: 'error', error: primary});
+        await turn();
+        assert.ok(f.calls.some(call => call[0] === 'dispose'));
+        assert.equal(f.editor.state.running, true, 'cleanup still owns Run');
+        await f.editor.runBasic();
+        assert.equal(f.created, 1);
+        gate.resolve();
+        await pending;
+        assert.equal(f.editor.state.running, false);
+        assert.equal(f.editor.state.basicDiagnostic.message, 'lesson.bas:3: original BASIC failure');
+        assert.deepEqual(f.highlights, [null, 3]);
+    });
+}
 
 test('Stop during the cold import prevents a late worker from starting', async () => {
     const gate = deferred(); const f = fixture({loadGate: gate});
@@ -340,15 +462,26 @@ test('a failed reset still disposes the adapter and reports the error', async ()
 
 test('unmount disposes an active session and all late view updates are ignored', async () => {
     const f = fixture(); const pending = f.editor.runBasic(); await f.entered.promise;
+    const adjacentCleanup = [];
+    f.editor._codeRunRequest = {source: 'owned console'};
+    f.editor._codeSession = {dispose() { adjacentCleanup.push('console'); }};
+    f.editor._picoBasicHardware = {
+        unmirror() { adjacentCleanup.push('mirror'); },
+        session: {close() { adjacentCleanup.push('Pico UART'); }}
+    };
     const previousWindow = globalThis.window;
     globalThis.window = {removeEventListener() {}};
     try { f.editor.componentWillUnmount(); }
     finally { if (previousWindow === undefined) delete globalThis.window; else globalThis.window = previousWindow; }
     const before = {...f.editor.state};
-    f.emit(view('late output', 'line')); await pending;
+    f.emit(view('late output', 'line')); await Promise.all([pending, f.editor._picoBasicClosing]);
     assert.deepEqual(f.editor.state, before);
     assert.ok(f.calls.some(c => c[0] === 'cancel'));
     assert.ok(f.calls.some(c => c[0] === 'dispose'));
+    assert.deepEqual(adjacentCleanup, ['console', 'mirror', 'Pico UART']);
+    assert.equal(f.editor._codeRunRequest, null);
+    assert.equal(f.editor._codeSession, null);
+    assert.equal(f.editor._picoBasicHardware, null);
 });
 
 test('unmount during import cannot start a worker', async () => {
@@ -431,17 +564,24 @@ for (const status of ['timeout', 'output-limit', 'simulation-limit']) {
 const terminalSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx', import.meta.url), 'utf8');
 const terminalClass = between(terminalSource, 'class VduTerminal extends React.Component {', '    render () {');
 const Terminal = new Function('React', 'VduDecoder', 'PALETTE', `return ${terminalClass}}`)(
-    {Component: class { constructor(props) { this.props = props; } }, createRef: () => ({current: null})},
+    {Component: class {
+        constructor(props) { this.props = props; }
+        setState(update) { Object.assign(this.state, update); }
+    }, createRef: () => ({current: null})},
     VduDecoder, ['#000000', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff']);
 
 function terminal(output, resetKey = 1) {
     const operations = [];
-    const ctx = Object.fromEntries(['fillRect', 'fillText', 'beginPath', 'moveTo', 'lineTo', 'stroke'].map(
-        key => [key, (...args) => operations.push([key, ...args])]));
+    const paints = [];
+    const ctx = Object.fromEntries(['fillRect', 'fillText', 'beginPath', 'moveTo', 'lineTo', 'stroke', 'closePath', 'fill',
+        'save', 'rect', 'clip', 'restore'].map(key => [key, (...args) => {
+        operations.push([key, ...args]);
+        if (key === 'fillRect' || key === 'fillText') paints.push([key, ctx.fillStyle, ...args]);
+    }]));
     const component = new Terminal({output, resetKey});
     component._canvasRef.current = {width: 320, height: 256, getContext: () => ctx};
     component.componentDidMount();
-    return {component, operations, update(next, key = component.props.resetKey) {
+    return {component, operations, paints, ctx, update(next, key = component.props.resetKey) {
         const previous = component.props;
         component.props = {output: next, resetKey: key};
         component.componentDidUpdate(previous);
@@ -478,5 +618,120 @@ test('replaced or shortened output resets even without an explicit run key', () 
     assert.deepEqual(t.operations.filter(op => op[0] === 'fillText').slice(-3),
         [['fillText', 'C', 2, 13], ['fillText', 'D', 10, 13], ['fillText', 'E', 18, 13]]);
     t.update(''); t.update('Z');
-    assert.deepEqual(t.operations.at(-1), ['fillText', 'Z', 2, 13]);
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText').at(-1), ['fillText', 'Z', 2, 13]);
+});
+
+const vdu = (...bytes) => String.fromCharCode(...bytes);
+const plot = (mode, x, y) => vdu(25, mode, x & 255, (x >> 8) & 255, y & 255, (y >> 8) & 255);
+const origin = (x, y) => vdu(29, x & 255, (x >> 8) & 255, y & 255, (y >> 8) & 255);
+
+test('the canvas applies ORIGIN to absolute positions and adds relative moves exactly once', () => {
+    const t = terminal(origin(320, 256) + plot(4, 0, 0) + plot(1, 128, 256));
+    assert.deepEqual([t.component._gx, t.component._gy], [448, 512]);
+    assert.deepEqual(t.operations.filter(op => ['moveTo', 'lineTo'].includes(op[0])),
+        [['moveTo', 80, 191], ['lineTo', 112, 127]]);
+    t.update(t.component.props.output + origin(-320, -256) + plot(0, -128, -256));
+    assert.deepEqual([t.component._gx, t.component._gy], [320, 256], 'relative motion ignores the changed origin');
+    assert.equal(t.operations.filter(op => op[0] === 'stroke').length, 1);
+});
+
+test('point, triangle and rectangle PLOT families paint their actual geometry', () => {
+    const point = terminal(plot(69, 0, 0));
+    assert.deepEqual(point.operations.at(-1), ['fillRect', 0, 255, 1, 1]);
+    assert.equal(point.operations.some(op => op[0] === 'stroke'), false, 'a point is not a line from the previous cursor');
+    const triangle = terminal(plot(4, 0, 0) + plot(4, 640, 0) + plot(85, 0, 512));
+    assert.deepEqual(triangle.operations.slice(-6), [
+        ['beginPath'], ['moveTo', 0, 255], ['lineTo', 160, 255], ['lineTo', 0, 127], ['closePath'], ['fill']
+    ]);
+    const rectangle = terminal(plot(4, 640, 512) + plot(97, -320, -256));
+    assert.deepEqual(rectangle.operations.at(-1), ['fillRect', 80, 127, 81, 65]);
+    assert.deepEqual([rectangle.component._gx, rectangle.component._gy], [320, 256]);
+});
+
+test('graphics and text background colours remain independent and MODE resets drawing state', () => {
+    const t = terminal(vdu(17, 129, 18, 0, 130, 16));
+    assert.equal(t.ctx.fillStyle, '#00ff00', 'CLG uses green graphics background, not red text background');
+    t.update(t.component.props.output + vdu(12));
+    assert.equal(t.ctx.fillStyle, '#ff0000', 'CLS uses the text background');
+    t.update(t.component.props.output + origin(100, 200) + vdu(18, 0, 1, 22, 0) + plot(5, 640, 512));
+    assert.equal(t.ctx.strokeStyle, '#ffffff');
+    assert.deepEqual([t.component._originX, t.component._originY], [0, 0]);
+    assert.deepEqual(t.operations.filter(op => op[0] === 'moveTo').at(-1), ['moveTo', 0, 255]);
+});
+
+test('TAB and text cursor controls position text without treating LF as CR', () => {
+    const t = terminal(vdu(31, 3, 2) + 'A' + vdu(8) + 'B' + vdu(10) + 'C');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
+        ['fillText', 'A', 26, 45], ['fillText', 'B', 26, 45], ['fillText', 'C', 34, 61]
+    ]);
+});
+
+test('text cells erase previous glyphs and use the current text background before each character', () => {
+    const t = terminal('X' + vdu(17, 129, 18, 0, 130, 31, 0, 0) + ' ');
+    assert.deepEqual(t.paints.slice(1), [
+        ['fillRect', '#000000', 0, 0, 8, 16], ['fillText', '#ffffff', 'X', 2, 13],
+        ['fillRect', '#ff0000', 0, 0, 8, 16], ['fillText', '#ffffff', ' ', 2, 13]
+    ], 'a space overwrites X with red text background, independently of green graphics background');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'rect'), [['rect', 0, 0, 8, 16], ['rect', 0, 0, 8, 16]],
+        'glyphs are clipped to the cell which a subsequent overwrite clears');
+    assert.equal(t.operations.filter(op => op[0] === 'save').length, 2);
+    assert.equal(t.operations.filter(op => op[0] === 'clip').length, 2);
+    assert.equal(t.operations.filter(op => op[0] === 'restore').length, 2);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('horizontal VDU cursor controls wrap across both edges before the next character is drawn', () => {
+    const t = terminal(vdu(31, 39, 0, 9) + 'X' + vdu(31, 0, 1, 8) + 'Y');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
+        ['fillText', 'X', 2, 29], ['fillText', 'Y', 314, 13]
+    ]);
+    assert.deepEqual([t.component._cx, t.component._cy], [0, 1]);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('DEL backspaces, erases in text background and leaves the cursor at the erased cell', () => {
+    const t = terminal('AB' + vdu(17, 132, 127));
+    assert.deepEqual(t.paints.at(-1), ['fillRect', '#0000ff', 8, 0, 8, 16]);
+    assert.deepEqual([t.component._cx, t.component._cy], [1, 0]);
+    t.update(t.component.props.output + 'C');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
+        ['fillText', 'A', 2, 13], ['fillText', 'B', 10, 13], ['fillText', 'C', 10, 13]
+    ]);
+    assert.deepEqual([t.component._cx, t.component._cy], [2, 0]);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('DEL at the start of a row clears the previous row last cell', () => {
+    const t = terminal(vdu(31, 0, 1, 127));
+    assert.deepEqual(t.paints.at(-1), ['fillRect', '#000000', 312, 0, 8, 16]);
+    assert.deepEqual([t.component._cx, t.component._cy], [39, 0]);
+    assert.equal(t.operations.some(op => op[0] === 'fillText'), false);
+    assert.deepEqual(t.component.state.unsupported, []);
+});
+
+test('text outside the fixed preview is diagnosed and cannot erase or paint an unrelated visible cell', () => {
+    const t = terminal(vdu(31, 39, 15) + 'A' + vdu(9) + 'B' + vdu(31, 0, 0, 127));
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [['fillText', 'A', 314, 253]]);
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillRect'), [
+        ['fillRect', 0, 0, 320, 256], ['fillRect', 312, 240, 8, 16]
+    ]);
+    assert.deepEqual(t.component.state.unsupported, ['text outside 40x16 preview (scrolling unavailable)']);
+    t.update('', 2);
+    assert.deepEqual(t.component.state.unsupported, []);
+    assert.deepEqual([t.component._cx, t.component._cy], [0, 0]);
+});
+
+test('unsupported geometry and raster actions are reported instead of painted as lines', () => {
+    const t = terminal(plot(153, 640, 512) + vdu(18, 3, 1) + plot(5, 100, 100));
+    assert.deepEqual(t.component.state.unsupported, ['PLOT 153', 'GCOL 3']);
+    assert.equal(t.operations.some(op => op[0] === 'stroke' || op[0] === 'lineTo'), false);
+    assert.deepEqual([t.component._gx, t.component._gy], [100, 100], 'the final cursor still tracks the requested points');
+    t.update('', 2);
+    assert.deepEqual(t.component.state.unsupported, [], 'warnings belong only to their run');
+});
+
+test('unsupported VDU reports are bounded and duplicate commands do not grow the list', () => {
+    const t = terminal(Array.from({length: 256}, (_, mode) => plot(mode, 0, 0)).join(''));
+    assert.equal(t.component.state.unsupported.length, 16);
+    assert.equal(new Set(t.component.state.unsupported).size, 16);
 });

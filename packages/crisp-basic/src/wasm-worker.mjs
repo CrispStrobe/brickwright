@@ -166,7 +166,7 @@ async function execute(config) {
         if (completed) return;
         if (simulationEnabled && (typeof module._crisp_simulation_abi !== 'function' ||
                 module._crisp_simulation_abi() !== SIMULATION_ABI)) {
-            throw new Error('WASM module does not support simulation bridge version 1; rebuild and package CrispBASIC');
+            throw new Error(`WASM module does not support simulation bridge version ${SIMULATION_ABI}; rebuild and package CrispBASIC`);
         }
         sourcePointer = module._malloc(config.source.length + 1);
         if (!sourcePointer) throw new Error('Cannot allocate WASM source buffer');

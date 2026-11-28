@@ -50,14 +50,19 @@ cannot run, return to blocks or derive another language while its generation-err
 banner remains. Whitespace edits preserve the refusal; removing or replacing the
 banner admits an explicit authored correction.
 
-For portable digital/time programs, explicitly select **Generate portable
-Circuit calls**, then **From blocks**. This requests the pinned producer's
+For portable digital/time programs, explicitly select **Portable BASIC ↔
+pseudocode**, then **From blocks**. This requests the pinned producer's
 `mode: 'crispbasic'`; it does not enable circuit access or rewrite edited source.
 Select **Connect Circuit** separately to run the generated calls against a
 supported board in the current circuit. Timing uses integer simulated
-milliseconds; toggle and unsupported operations refuse. Live portable calls
-currently refuse **To blocks**, naming their source lines and preserving the
-existing project. Ordinary supported BASIC retains its existing conversion path.
+milliseconds. Toggle emits `PROCdigitalToggle` against the retained electrical
+output latch; unsupported operations such as `wait until` still refuse.
+Live portable calls, including toggle, currently refuse **To blocks**, naming
+their source lines and preserving the
+existing project. Switching between BASIC and pseudocode with portable mode
+enabled uses the separate qualified reverse reader, including reusable numeric
+procedures and recognized checked computed delays. Saved portable source keeps
+its required-runtime marker. Ordinary supported BASIC retains its existing conversion path.
 [GENERATOR.md](GENERATOR.md) documents maps, numeric conversion and the reverse
 boundary.
 
@@ -88,10 +93,12 @@ and WASM digests, the actual import list, and licence hashes. The deterministic
 manifest records every shipped asset. `package:crispbasic:check` rejects missing,
 extra, modified and stale files. An invalid build leaves the prior payload
 intact. Source, toolchain and runtime notices accompany the shipped binary.
-Version `0.1.0-dev.5` has 20 manifest-listed payload assets, plus `manifest.json`;
+Version `0.1.0-dev.8` has 20 manifest-listed payload assets, plus `manifest.json`;
 the added runtime modules are `src/simulation-host.mjs` and
 `src/simulation-protocol.mjs`. Rebuild and repackage the C/WASM artifact when
-upgrading; the simulation API checks its ABI marker before enabling the bridge.
+upgrading; the simulation API requires ABI marker `2` before enabling the bridge.
+Simulation capabilities advertise contract version `2`, while worker record
+framing remains version `1`.
 
 Each run owns a fresh interpreter worker. Cancellation during either lazy-load
 phase revokes the old run's right to create a worker. Run/Reset/Dispose wait for
@@ -103,14 +110,16 @@ the current BASIC buffer.
 ## Rendering boundary
 
 The existing canvas renders a VDU subset: text, colours, MODE clearing and
-basic MOVE/DRAW output. The integration checks fixed output bytes and actual
+absolute/relative lines, points, filled triangles and axis-aligned rectangles.
+It supports fixed text cells, cursor movement and graphics origins. The
+integration checks fixed output bytes and actual
 pixels for these primitives. The terminal now consumes output already present
 when it mounts, preserves partial VDU commands across chunks, and resets the
 decoder/cursors/canvas for a new run, including identical repeated output.
 
-This remains a partial renderer. Screen modes, cursor behavior, scrolling,
-origins, plotting modes, filled shapes and palette semantics are not fully
-qualified. Graphics queries such as `POINT` remain unavailable in the
+This remains a partial renderer with a fixed 320×256 canvas and eight-colour
+palette. Full screen-mode dimensions, scrolling, raster operations and palette
+semantics remain outside its qualification. Graphics queries such as `POINT` remain unavailable in the
 restricted interpreter. Text output is a transcript, not a complete terminal
 screen model. No source debugger is supplied by this integration.
 
@@ -118,18 +127,26 @@ screen model. No source debugger is supplied by this integration.
 
 `@crispstrobe/crispbasic/simulation` exposes the dependency-free deterministic
 reference host described in [SIMULATION.md](SIMULATION.md). It defines logical
-pin modes, reads/writes, explicitly scheduled input stimuli, integer-millisecond
-time, bounded traces and reset/disposal semantics.
+pin modes, reads/writes and latch toggles, explicitly scheduled input stimuli,
+integer-millisecond time, bounded traces and reset/disposal semantics.
 
 The package now implements a bounded BASIC request/reply bridge for WASM
 embedders. `createWasmSession({simulation: {}})` creates a fresh reference host
-and installs the ordinary `PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`,
-`PROCdelay` and `FNmillis` library. A synchronous
+and installs the ordinary `PROCpinMode`, `PROCdigitalWrite`, `PROCdigitalToggle`,
+`FNdigitalRead`, `PROCdelay` and `FNmillis` library. A synchronous
 `simulation.createHost({signal, runId})` factory can supply a custom host;
 operations may return Promises while cancellation and request/time/I/O limits
 remain parent-owned. The factory, disposer and synchronous operation work must
 return promptly. Board adapters must check cancellation/disposal before
 deferred changes; ignored late replies do not undo external side effects.
+
+The retained electrical output latch starts at `0` in each run and survives pin
+mode changes. `PROCdigitalToggle` requires output mode and inverts that latch in
+one request, creating one trace record and advancing no time. It remains correct
+when the solved net is clamped to a different level. Legacy custom hosts with
+only the original five operations keep working; calling an absent toggle method
+raises catchable `ERR208` (`unavailable`) without a read/write fallback. The
+session's toggle capability identifies bridge support, not custom-host support.
 
 The Code tab's **Connect Circuit** checkbox explicitly enables the GUI-owned
 adapter. Open a supported circuit before enabling it. The run acquires that
@@ -137,6 +154,13 @@ same canvas board, applies the documented logical pin map and uses the existing
 solver for digital drive and electrical sense. `PROCdelay` advances solver time
 in cooperative batches; `FNmillis` starts at zero relative to the acquired clock.
 Starting BASIC does not reset the circuit's controls or component history.
+
+For saved motor/joint bindings in a CAD-enabled build, also select **Connect
+CAD motors** after opening the CAD Editor. One owner coordinates the electrical
+clock with 5 ms mechanical intervals. Stop awaits submitted physics work and
+preserves the paused world for the next run. See the executable
+[CAD robot example](examples/cad-robot/README.md) for the saved Scout project,
+exact substep policy and same-world behavior.
 
 Stop, Reset, unmount, circuit edits and project replacement release the captured
 pin/clock ownership. Competing debugger, firmware and coupled-simulation starts
@@ -222,9 +246,11 @@ the emitted build below a URL prefix and drives the complete editor and Circuit
 through their production controls. Test reports, screenshots and logs are
 retained with the workflow's production evidence artifact.
 
-The ten scenarios cover generated and imported BASIC, the explicit portable
-generation choice, digital/timing execution, reverse refusal without project
-mutation, toggle refusal with Run disabled, physical error lines,
+The eleven scenarios cover generated and imported BASIC, the explicit portable
+generation choice, digital/timing execution, generated active-low latch toggle
+under an electrical clamp, reverse refusal without project mutation, a separate
+`wait until` refusal with Run disabled after an editor newline, physical error
+lines,
 Latin-1 input/output, repeated VDU pixels, Stop/Reset/reuse, live Circuit GPIO
 and timing, circuit-file replacement during blocked input, and explicit missing
 board/runtime failures. Replacement is exercised while the original connection

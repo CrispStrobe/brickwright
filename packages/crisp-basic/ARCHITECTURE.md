@@ -120,23 +120,36 @@ reference host still advertises `basicBridge: false`; the configured session
 describes its separate enabled bridge capability. The complete API and error
 mapping are in [SIMULATION.md](SIMULATION.md).
 
-The ordinary `PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay` and
-`FNmillis` definitions live in a separate bounded `libase` buffer. They neither
-consume nor renumber user source lines, and normal user `DEF` overrides remain
+The ordinary `PROCpinMode`, `PROCdigitalWrite`, `PROCdigitalToggle`,
+`FNdigitalRead`, `PROCdelay` and `FNmillis` definitions live in a separate bounded
+`libase` buffer. They neither consume nor renumber user source lines, and normal
+user `DEF` overrides remain
 possible. One private FN evaluator hook parses and validates the operation's
-complete argument list, then enters an `EM_ASYNC_JS` suspension. A new
-`crisp_simulation_abi()` export prevents enabling the feature with an old module.
+complete argument list, then enters an `EM_ASYNC_JS` suspension. The
+`crisp_simulation_abi()` export must equal `2`, preventing an old module from
+enabling the current bridge.
 Domain errors use the authored call site; unexpected hidden-library errors have
 no editor line.
 
-The versioned worker channel carries run/request IDs, fixed scalar arguments,
-five allowlisted operations and typed replies. Both ends validate the complete
-record, and only one request may be outstanding. The parent enforces a cumulative
+The version-1 worker channel carries run/request IDs, fixed scalar arguments,
+six allowlisted operations and typed replies. Simulation ABI and contract
+version `2` append operation `6` for atomic latch toggle; the record framing
+remains unchanged. Both ends validate the complete record, and only one request
+may be outstanding. The parent enforces a cumulative
 request budget (default 4096, maximum 1000000) in addition to deadline and I/O
 limits. Host trace, stimulus and time budgets also terminate the run as
 `simulation-limit`; BASIC cannot catch these limits. Ordinary domain failures
 map to catchable `ERR201..209`, with a stable `simulationCode` on an unhandled
 bridge error. No VDU control encoding or SYS/raw-memory capability is added.
+
+The reference and Circuit hosts own per-run output latches, initially `0` and
+retained across mode changes. `PROCdigitalToggle` inverts that request in one
+operation without sensing the net or advancing time. It requires output mode
+and consumes one request and one trace record. The Circuit host continues to
+read the solved electrical level. Legacy custom hosts may retain their original
+five methods; an absent `digitalToggle` produces catchable `unavailable` only
+when requested, with no read/write approximation. The session's toggle
+capability advertises bridge support, not a guarantee about a custom adapter.
 
 Each fresh host belongs to exactly one run; weak ownership tracking rejects
 reuse across runs or sessions. The parent aborts the host's signal before its
@@ -186,7 +199,7 @@ See [VALIDATION.md](VALIDATION.md) for the tested revision and observed results.
 
 The owning `sb3-creator` producer now has an explicit `mode: 'crispbasic'`,
 integrated through the exact pin and both generated mirrors. The Code tab's
-**Generate portable Circuit calls** choice selects it independently of the
+**Portable BASIC ↔ pseudocode** choice selects it independently of the
 runtime's **Connect Circuit** option. Existing default/retro output remains
 unchanged. Digital writes normalize to `0` or `1`; delays convert seconds to
 integer simulated milliseconds; timer reset moves a program-owned offset.
@@ -196,16 +209,28 @@ refusal for live portable calls, before project mutation; ordinary supported
 BASIC still converts. Existing hardware comments remain comments, including
 colon-separated text within `REM`. See [GENERATOR.md](GENERATOR.md).
 
-A solved electrical read is not an output latch. Toggle is deliberately
-refused rather than implemented by blindly inverting `FNdigitalRead`. The next
-generator extension is a meaning-preserving reverse representation, or an
-explicit latch model with corresponding producer, runtime and solver tests.
+A solved electrical read is not an output latch. The generator now emits
+`PROCdigitalToggle` against the explicit host latch, with producer, runtime,
+solver and production-browser coverage for that distinction. The explicit
+reverse reader now emits a bounded source representation carrying
+`# @crispbasic-portable 1` and project metadata requiring CrispBASIC execution.
+It preserves qualified polarity, latch operations, clock units, scalar
+expressions and pen paths. Original and regenerated programs are compared
+against exact output bytes and complete ordered pin traces in real WASM runs.
+Authored runtime overrides and unsupported or ambiguous forms refuse the whole
+conversion. The marker survives decompilation, saved files and editor reopening;
+generic generators, CLI retargeting and **To blocks** reject it before mutation.
+This source round trip does not qualify ordinary Scratch VM execution of the
+same timing/electrical semantics. That remains a separate runtime integration.
 Extend board and peripheral capabilities only with corresponding solver tests.
 No physical-pin connection is claimed.
 
-The GUI renderer currently implements only part of the VDU semantics. It is
-not a correctness oracle for the full graphics language. CrispBASIC's engine
-should not import the React component or `bw-board`.
+The GUI renderer implements absolute/relative lines, origins, points, filled
+triangles/rectangles and opaque fixed-grid text with horizontal cursor wrapping
+and DEL. Unsupported geometry/raster actions and text outside the 40×16 preview
+produce visible, bounded diagnostics. It is not a correctness oracle for the
+full graphics language. CrispBASIC's engine should not import the React component
+or `bw-board`. [PORTABILITY.md](PORTABILITY.md) gives the exact support inventory.
 
 ### 2. Source debugger
 
@@ -222,17 +247,17 @@ unsupported debugger operation must never silently run.
 
 ### 3. Portable physical-computing library
 
-The first five ordinary BASIC procedures/functions and their deterministic
-simulation bridge are implemented. Their pin modes, integer-millisecond units,
-range errors and unavailable features are explicit. The board-solver adapter is
-implemented; the next portable-host step is the corresponding library on a
-PicoBB target. Compare
-observable pin/timing traces using independent target evidence. Do not treat the
-JavaScript reference host as evidence of physical-device equivalence.
+The six ordinary BASIC procedures/functions and their deterministic simulation
+bridge are implemented. Their pin modes, retained electrical output latches,
+integer-millisecond units, range errors and unavailable features are explicit.
+The board-solver adapter is implemented; the next portable-host step is the
+corresponding library on a PicoBB target. Compare observable pin/timing and latch
+traces using independent target evidence. Do not treat the JavaScript reference
+host as evidence of physical-device equivalence.
 
 Do not reserve new language keywords or silently emit placeholder hardware
-operations. The existing non-6502 BASIC generator uses commented hardware
-stubs; those do not already implement this library.
+operations. Default non-6502 BASIC generation keeps its commented hardware
+stubs; the explicit `mode: 'crispbasic'` emits the supported library calls.
 
 ### 4. Embedded profiles and a small-device compiler
 
@@ -253,8 +278,9 @@ running this same BBCSDL core twice is not independent evidence.
 The extraction unit is `packages/crisp-basic/`. Runtime, build inputs, tests,
 examples, license notices and this roadmap live together. The root workflow
 sets up the SDK/build tools and invokes package commands. The portable generator
-adoption changes only the existing `sb3-creator` pin; the board, Circuit and
-interpreter pins retain their identities. The existing external BBCSDL
+adoption uses an exact `sb3-creator` pin and the electrical profile expansion
+uses an exact `bw-board` pin. The Circuit and interpreter pins retain their
+identities. The existing external BBCSDL
 reference build keeps its role. The npm development dependencies are locked Playwright and esbuild for browser
 qualification and JSX transformation; runtime code has no npm dependencies.
 Brickwright integration tests also use the repository's existing pinned

@@ -173,13 +173,40 @@ test('real VDU output paints the mounted renderer and survives an identical seco
     const first = await runSource(page, source);
     assert.equal(first.diagnostic, null);
     const pixel = () => page.locator('[data-testid="bw-vdu-terminal"] canvas').evaluate(canvas =>
-        [...canvas.getContext('2d').getImageData(80, 192, 1, 1).data]);
+        // Logical Y=256 is canvas Y=191; sample inside the descending
+        // segment at pixel centre (80.5,190.5), away from its antialias edge.
+        [...canvas.getContext('2d').getImageData(80, 190, 1, 1).data]);
     const colour = await pixel();
     assert.ok(colour[0] > 200 && colour[1] < 20 && colour[2] < 20, JSON.stringify(colour));
     const second = await runSource(page, source);
     assert.equal(second.raw, first.raw);
     assert.ok(second.runId > first.runId);
     assert.deepEqual(await pixel(), colour);
+});
+
+test('real BASIC canvas uses origins, relative lines, points, triangles and rectangles', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    const sample = (x, y) => page.locator('[data-testid="bw-vdu-terminal"] canvas').evaluate((canvas, point) =>
+        [...canvas.getContext('2d').getImageData(...point, 1, 1).data], [x, y]);
+    const first = await runSource(page, 'MODE 0\nORIGIN 320,256\nGCOL 0,1\nMOVE 0,0\nDRAW BY 640,0\nGCOL 0,2\nPLOT 69,320,256\nEND\n');
+    assert.equal(first.diagnostic, null);
+    assert.deepEqual(await sample(160, 191), [255, 0, 0, 255], 'relative line retains the shifted origin');
+    assert.deepEqual(await sample(160, 127), [0, 255, 0, 255], 'absolute point includes the origin');
+    const second = await runSource(page, 'MODE 0\nGCOL 0,2\nMOVE 0,0\nMOVE 640,0\nPLOT 85,0,512\nGCOL 0,4\nMOVE 640,512\nPLOT 101,1000,800\nEND\n');
+    assert.equal(second.diagnostic, null);
+    assert.deepEqual(await sample(40, 222), [0, 255, 0, 255], 'the triangle has a filled interior');
+    assert.deepEqual(await sample(220, 90), [0, 0, 255, 255], 'the rectangle has a filled interior');
+    assert.equal(await page.locator('[data-testid="bw-vdu-unsupported"]').count(), 0);
+});
+
+test('unsupported canvas commands produce visible diagnostics and reset with a new run', {timeout: 15000}, async t => {
+    const {page} = await pageFor(t);
+    const result = await runSource(page, 'MODE 0\nPLOT 153,64,64\nGCOL 3,1\nDRAW 100,100\nEND\n');
+    assert.equal(result.diagnostic, null, 'the interpreter and renderer have separate capabilities');
+    const notice = page.locator('[data-testid="bw-vdu-unsupported"]');
+    assert.match(await notice.textContent(), /PLOT 153.*GCOL 3/);
+    await runSource(page, 'MODE 0\nPRINT "clear"\nEND\n');
+    assert.equal(await notice.count(), 0);
 });
 
 test('the input form resumes recursion and clears its waiting state', {timeout: 15000}, async t => {

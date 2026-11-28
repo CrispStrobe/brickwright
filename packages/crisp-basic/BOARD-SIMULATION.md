@@ -7,9 +7,12 @@ profile and does not acquire a circuit. No physical hardware is accessed.
 
 The implementation belongs to Brickwright's GUI integration, outside the
 interpreter package. The package still has no React or `bw-board` dependency.
-The adapter uses the existing pinned `bw-board` revision
-`cc18f3c8d84d68e008450e65ddf838b8ec03c7f7`; this change does not move the pin or
-modify the solver.
+The adapter consumes `bw-board` revision
+[`49a21d82112b9bdca91bec9ffb4c7412fb05a849`](https://github.com/CrispStrobe/bw-board/commit/49a21d82112b9bdca91bec9ffb4c7412fb05a849).
+That revision owns the reusable `portable-gpio.js` profile inventory and resolver;
+the GUI adapter owns run lifecycle, time, resource limits and cleanup. See
+[PORTABILITY.md](PORTABILITY.md) for the distinction between host platforms,
+electrical model support and native MCU interpreter ports.
 
 ## Selecting a board and pins
 
@@ -19,25 +22,58 @@ failure. The adapter never creates an inferred replacement bench. The circuit
 must contain exactly one supported GPIO controller; ambiguous multi-controller
 circuits and unsupported controllers are refused.
 
-Logical pin numbers have these meanings:
+The 18 admitted profiles define these logical pin numbers:
 
-| Circuit controller | BASIC logical IDs | Circuit terminals |
-| --- | --- | --- |
-| Arduino Uno / Nano | `0..13`, `14..19` | `d0..d13`, `a0..a5` |
-| Arduino Mega | `0..53`, `54..69` | `d0..d53`, `a0..a15` |
-| Raspberry Pi Pico | `0..22`, `25`, `26..28` | Corresponding `gpn` terminals |
-| STC-style `mcu` | `8 × port + bit`, ports/bits `0..7` | `Pport.bit`, such as `P1.0` → `8` |
+| Circuit kind | BASIC logical IDs | Circuit terminals | Modeled logic supply |
+| --- | --- | --- | --- |
+| `mcu` | `8 × port + bit`, ports/bits `0..7` | `Pport.bit`, such as `P1.0` → `8` | Bench voltage |
+| `stc15_mcu` | `0..31`, `33,34,36,37,44,45` | P0–P3, P4.1/P4.2/P4.4/P4.5, P5.4/P5.5 | 5 V |
+| `arduino_uno` | `0..13`, `14..19` | `d0..d13`, `a0..a5` | 5 V |
+| `arduino_nano` | `0..13`, `14..19` | `d0..d13`, `a0..a5` | 5 V |
+| `arduino_mega` | `0..53`, `54..69` | `d0..d53`, `a0..a15` | 5 V |
+| `pi_pico` | `0..22`, `25..28` | Corresponding `gpN` terminals | 3.3 V |
+| `microbit` | `0..2` | `p0..p2` | 3.3 V |
+| `microbit_breakout` | `0,1,2,8,12,16` | Corresponding `pN` terminals | 3.3 V |
+| `calliopemini` | `0..3` | `p0..p3` | 3.3 V |
+| `circuit_playground_express` | `0..7` | `a0..a7`; no Arduino analog offset | 3.3 V |
+| `pybadge` | `0,1,2,3,5,6,7,9..19,26..28` | RX/TX → 0/1; Dn → n; FREE → 7; A0–A5 → 14–19; MISO/MOSI/SCK → 26/27/28 | 3.3 V |
+| `esp8266` | `0..5`, `12..15` | Corresponding `gpioN` terminals | 3.3 V |
+| `esp32_4848s040` | `1,2,40,43,44` | H1 `gpio1`, `gpio2`, `gpio40`, `gpio43`, `gpio44` | 3.3 V |
+| `attiny85` | `8..13` | `pb0..pb5` | 5 V |
+| `attiny88` | `8..15`, `16..23`, `24..31` | `pb0..pb7`, `pc0..pc7`, `pd0..pd7` | 5 V |
+| `attiny88_qfn32` | `0..3`, `8..15`, `16..23`, `24..31` | `pa0..pa3`, `pb0..pb7`, `pc0..pc7`, `pd0..pd7` | 5 V |
+| `stm32f030` | `0..7`, `9,10,17` | `pa0..pa7`, `pa9`, `pa10`, `pb1` | 3.3 V |
+| `eater6502` | `0..7`, `8..15` | `via1.pa0..via1.pa7`, `via1.pb0..via1.pb7` | 5 V |
 
-Only terminals actually exposed by that controller are included. Power, ground,
-reset and reference pads are excluded. Nano's analog-only A6/A7 are excluded.
-Unknown pins are rejected; values are never clamped or redirected to another
-terminal. The host exposes a frozen controller/pin-map capability record for
-inspection. This mapping is a library contract, not a CPU register interface or
-package-pin numbering scheme.
+Only admitted terminals actually exposed by the controller are included. Power,
+ground and reference pads are excluded, as are Nano A6/A7, Pico GP23/24/29,
+ESP8266 flash pins/GPIO16 and STM32 boot/reset/crystal/SWD pads. The ATtiny
+electrical models expose some reset-capable port pads; the host does not model
+reset or fuses. Generation uses a stricter map and excludes ATtiny85 PB5 and
+ATtiny88 PC6. These host profiles also do not imply matching `DEVICE` syntax:
+ESP32-S040 and ATtiny88 QFN-only PA pins currently require authored BASIC.
+PyBadge's SDA/SCL and STEMMA aliases are excluded. The generator admits its
+D2/D3/D5/D6/D9–D13 and A0–A5 pads; RX/TX, FREE and SPI pads require authored
+BASIC. STC15 uses the registered DIP-40 model's
+actual port pads, including P4/P5, and excludes power/ground. Reset, crystal
+and fuse behavior are not emulated. Its accepted generator device spelling
+does not grant access to unexposed ports.
+
+The resolver matches complete canonical terminal names without case sensitivity.
+Duplicate logical aliases refuse. Unverified kinds and missing/incompatible
+registered models refuse rather than falling back to a generic controller.
+Unknown pins are rejected; IDs are never clamped or redirected. A 3.3 V model
+keeps its modeled output voltage on a 5 V bench.
+
+The host exposes frozen `controller`, `profile`, `pins` and `pinMap` capability
+records. Profile metadata includes the label, numbering/help, nominal voltage,
+`execution: 'host-driven-circuit'`, `hardware: false` and
+`nativeInterpreter: false`. This is a library/electrical-model contract; it
+does not run CrispBASIC on the component's CPU or use package-pin numbering.
 
 ## Drive and sense semantics
 
-The five BASIC calls are unchanged:
+The portable library provides six BASIC calls:
 
 | Call | Circuit behavior |
 | --- | --- |
@@ -45,6 +81,7 @@ The five BASIC calls are unchanged:
 | `PROCpinMode(pin, "input-pullup")` | Use the solver's input pull-up mode. |
 | `PROCpinMode(pin, "output")` | Apply the retained output latch using the solver's push-pull drive. |
 | `PROCdigitalWrite(pin, level)` | Set numeric `0` or `1`; requires output mode. |
+| `PROCdigitalToggle(pin)` | Invert the retained electrical output latch and apply it to the solver; requires output mode. |
 | `FNdigitalRead(pin)` | Read the solved electrical level, including when configured as an output. |
 | `PROCdelay(milliseconds)` | Cooperatively advance the circuit by the requested integer milliseconds. |
 | `FNmillis` | Read integer milliseconds elapsed since this BASIC run acquired the board. |
@@ -57,6 +94,16 @@ reads therefore sense the net; the standalone reference host instead reads its
 logical latch. An unconnected circuit input follows the solver's regularized
 electrical solution; the reference host's `floating-input` stimulus rule does
 not establish a circuit floating-net detector.
+
+Toggle uses the output request, even when a clamp makes the solved net disagree
+with that request. For example, a high latch held electrically low toggles to a
+low latch. It never inverts `FNdigitalRead`. ACTIVE LOW is a generator-level
+logical interpretation; it does not change this electrical latch operation.
+Successful writes and toggles update the same retained latch. A successful
+toggle consumes one request and one `digital-toggle` trace record containing
+`pin`, `terminal` and the resulting `value`; it performs no read and advances no
+time. Pin, mode and trace-budget refusals occur before driving the solver.
+Unexpected solver failures retain the ordinary host-error and cleanup behavior.
 
 These operations exercise the solver's existing electrical models. They do not
 qualify MCU-specific thresholds, timing or physical-device fidelity. Analog
@@ -137,7 +184,9 @@ stale callbacks cannot remove its guards or restore an earlier owner's methods.
 
 The BASIC Reset control clears BASIC output and ends the active connection. It
 does not rewind capacitors, motors, circuit controls or the solver clock. Use
-the Circuit's own reset when a fresh electrical history is required.
+the Circuit's own reset when a fresh electrical history is required. The next
+BASIC run receives new zero latches; it cannot inherit the previous run's
+output request.
 
 ## Example
 
@@ -159,14 +208,66 @@ END
 
 The electrical pull-up reads high while the switch is open and low when it is
 closed. An external resistor/LED on D13 must be wired into the same Circuit
-board. The code generator's existing hardware comments remain comments; this
-milestone executes authored library calls without changing generator semantics.
+board. The code generator's default hardware comments remain comments. Select
+**Portable BASIC ↔ pseudocode** and then **From blocks** for the explicit
+portable generation mode, including `toggle` as `PROCdigitalToggle`. See
+[GENERATOR.md](GENERATOR.md) for its pin maps, polarity rules and refusals.
+
+The [robot motor example](examples/robot-motor/README.md) supplies a complete
+saved Circuit and BASIC source. It drives an H-bridge and an inductive DC motor
+forward, reverse, brake and coast. The test loads the same Circuit JSON and runs
+the actual WASM interpreter while checking current, signed speed, shaft travel
+and cancellation. Pulldowns disable the driver after Stop or an interpreter
+error even if the circuit was initially powered. Stop preserves residual rotor
+state; it does not reset or instantaneously brake the motor.
+
+### Shared Circuit and CAD clock
+
+In a CAD-enabled build, **Connect CAD motors** extends a connected Circuit run
+to the saved Circuit-to-CAD motor bindings. Open the CAD Editor first. The
+adapter verifies the document identity and connections before acquiring either
+clock. It uses one owner for BASIC, Circuit and CAD; competing firmware,
+debugger and independent coupling sessions still refuse while that owner is
+active. No reset is performed when BASIC acquires the existing world.
+
+Electrical delays retain exact integer-millisecond timing. Motor torque is
+integrated over each fixed 5 ms mechanical interval and the resulting average
+torque drives that interval. A 2 ms delay followed by 3 ms produces one physics
+step. Ending between boundaries never invents a rounded-up or partial step.
+Mechanical feedback is published at completed boundaries. The captured clocks
+may have different absolute origins, while `FNmillis` starts at zero per run.
+
+Stop releases GPIO synchronously, then waits for any submitted physics step.
+The final snapshot is reconciled before shaft ownership and the Circuit model
+reservation are released. The CAD controller's `releasePaused()` keeps the
+world, poses, velocities and last completed clock available for reacquisition;
+cleanup submits no extra motion step. Run/Reset await this handoff. A bounded
+cleanup timeout or invalid final clock remains visible, and late replies cannot
+mutate a replacement board. A BASIC execution error remains the primary error
+if cleanup also fails. Model edits are refused while asynchronous cleanup is
+pending, so undo/rebuild cannot capture temporary BASIC drives.
+
+The [CAD robot example](examples/cad-robot/README.md) uses the shipped Scout
+project and runs for 205 ms, or 41 mechanical steps. Real-worker tests check
+signed motion with both motor polarities, free-body movement, a second run in
+the identical retained world, and Stop after submission of an actual physics
+command. Robot Lab worlds and physical hardware remain separate execution
+targets. This qualification covers the saved Scout motor/joint path.
 
 ## Qualification scope
 
 Focused tests use the actual pinned solver, the actual compiled BASIC runtime
 and the editor's production lifecycle/control seams. They check fixed
 electrical/time results as well as cancellation, ownership and resource bounds.
+The latch tests include a high output request clamped to a low electrical read,
+mixed writes and toggles, retained state across modes, fresh-run state, and
+refusals before mutation. Generated active-low toggle is also exercised in the
+production scenario set.
+The canonical profile tests check every admitted model terminal against the
+registered models, including voltage, drive, release and sensing. Consumer tests
+exercise all newly admitted controller kinds through the GUI-owned host, and the
+robot test additionally verifies current/velocity against a steady-state oracle,
+reversed motor leads, Stop during a delay and interpreter-error cleanup.
 The production gate additionally builds the full webpack workbench and drives
 its real editor and Circuit file controls in Chromium. See
 [VALIDATION.md](VALIDATION.md) for the exact revision, commands and observed

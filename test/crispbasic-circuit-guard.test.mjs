@@ -1,14 +1,18 @@
 // Dependency-free tests of the real session/host guard and disposal code.
-// The real bw-board/Circuit snapshot and undo contract is tested separately.
+// Only this two-pin fixture's controller map is injected. Registered profiles,
+// real bw-board/Circuit snapshots and undo behavior are qualified separately.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {EventEmitter, getEventListeners} from 'node:events';
 
 const read = name => readFileSync(new URL(`../overlay/scratch-gui/src/lib/${name}.js`, import.meta.url), 'utf8');
-const hostSource = read('crispbasic-board-host').replace("import {getDevice} from 'bw-board/devices.js';", '')
-    .replaceAll('export function ', 'function ');
-const createHost = new Function('getDevice', `${hostSource}\nreturn createCrispBasicBoardHost;`)(() => undefined);
+const hostSource = read('crispbasic-board-host')
+    .replace("import {resolvePortableGpioController} from 'bw-board/portable-gpio.js';", '')
+    .replaceAll('export function ', 'function ').replaceAll('export const ', 'const ');
+const createHost = new Function('resolvePortableGpioController', `${hostSource}\nreturn createCrispBasicBoardHost;`)(
+    board => ({controller: board.parts[0], pins: [8, 9],
+        pinMap: [{pin: 8, terminal: 'P1.0'}, {pin: 9, terminal: 'P1.1'}]}));
 const sessionSource = read('crispbasic-circuit-session')
     .replace("import {createCrispBasicBoardHost} from './crispbasic-board-host.js';", '')
     .replace('export async function ', 'async function ');

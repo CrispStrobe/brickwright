@@ -21,7 +21,7 @@ export const WASM_CAPABILITIES = freeze({
     debug: {pause: false, step: false, breakpoints: false, variables: false, callStack: false},
     hardware: false,
     simulation: {available: true, enabled: false, basicBridge: false,
-        contractVersion: 1, maxRequests: 4096},
+        contractVersion: 2, digitalToggle: true, maxRequests: 4096},
     sandboxed: true,
     isolation: 'webassembly-worker',
     host: {

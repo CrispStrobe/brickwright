@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import {mkdtemp, writeFile, rm} from 'node:fs/promises';
+import {mkdtemp, open, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -47,7 +47,7 @@ export class NativeSession {
     #disposed = false;
     #options;
 
-    constructor({executable = DEFAULT_EXECUTABLE, timeoutMs = 5000,
+    constructor({executable = DEFAULT_EXECUTABLE, runner, timeoutMs = 5000,
         maxOutputBytes = 1024 * 1024, onEvent, simulation} = {}) {
         if (simulation !== undefined) {
             throw new TypeError('The simulation bridge requires createWasmSession; it is unavailable in the native backend');
@@ -55,11 +55,23 @@ export class NativeSession {
         if (typeof executable !== 'string' || !executable || executable.includes('\0')) {
             throw new TypeError('executable must be a nonempty path');
         }
+        if (runner !== undefined && (!runner || typeof runner !== 'object' || Array.isArray(runner) ||
+            typeof runner.executable !== 'string' || !runner.executable || runner.executable.includes('\0') ||
+            (runner.args !== undefined && (!Array.isArray(runner.args) || runner.args.some(argument =>
+                typeof argument !== 'string' || argument.includes('\0')))))) {
+            throw new TypeError('runner must provide an executable and optional string args array');
+        }
         if (onEvent !== undefined && typeof onEvent !== 'function') {
             throw new TypeError('onEvent must be a function');
         }
         this.#options = {
             executable: resolve(executable),
+            // Configuration belongs to the embedding application, never BASIC
+            // source. spawn receives an argv array and never invokes a shell.
+            runner: runner === undefined ? null : {
+                executable: runner.executable.includes('/') ? resolve(runner.executable) : runner.executable,
+                args: [...(runner.args || [])]
+            },
             timeoutMs: positiveInteger(timeoutMs, 'timeoutMs'),
             maxOutputBytes: positiveInteger(maxOutputBytes, 'maxOutputBytes'),
             onEvent
@@ -199,6 +211,7 @@ export class NativeSession {
         let exitCode = null;
         let exitSignal = null;
         let directory;
+        let inputHandle;
         const abort = () => this.#stop(active, 'cancelled');
         signal?.addEventListener('abort', abort, {once: true});
         if (signal?.aborted) abort();
@@ -242,10 +255,22 @@ export class NativeSession {
                 directory = await mkdtemp(join(tmpdir(), 'crispbasic-'));
                 const program = join(directory, 'program.bas');
                 await writeFile(program, prepared.numberedSource, {encoding: 'latin1', mode: 0o600});
+                if (!active.interactive && !active.reason) {
+                    // An immediately executed INKEY(0) can beat a parent's
+                    // first pipe write. Noninteractive input is already final;
+                    // inherit a readable descriptor so all supplied bytes and
+                    // EOF exist before the interpreter starts.
+                    const input = join(directory, 'input.bin');
+                    await writeFile(input, Buffer.concat(active.inputQueue), {mode: 0o600});
+                    active.inputQueue = [];
+                    inputHandle = await open(input, 'r');
+                }
                 if (!active.reason) {
-                    const child = spawn(this.#options.executable, [program], {
+                    const runner = this.#options.runner;
+                    const child = spawn(runner?.executable || this.#options.executable,
+                        runner ? [...runner.args, this.#options.executable, program] : [program], {
                         cwd: directory,
-                        stdio: ['pipe', 'pipe', 'pipe', 'pipe'],
+                        stdio: [inputHandle?.fd ?? 'pipe', 'pipe', 'pipe', 'pipe'],
                         detached: process.platform !== 'win32',
                         windowsHide: true
                     });
@@ -270,7 +295,7 @@ export class NativeSession {
                         child.stdio[3].on('data', chunk => {
                             if (!active.reason) onControl(chunk);
                         });
-                        child.stdin.on('error', error => {
+                        child.stdin?.on('error', error => {
                             // The program may complete without consuming all supplied input.
                             if (error.code !== 'EPIPE' && error.code !== 'ERR_STREAM_DESTROYED') {
                                 this.#stop(active, 'host-error', hostError(`Native input failed: ${error.message}`));
@@ -288,7 +313,7 @@ export class NativeSession {
                         });
                         for (const bytes of active.inputQueue) child.stdin.write(bytes);
                         active.inputQueue = [];
-                        if (active.inputEnded) child.stdin.end();
+                        if (active.inputEnded) child.stdin?.end();
                     });
                 }
             }
@@ -297,6 +322,11 @@ export class NativeSession {
         } finally {
             clearTimeout(timer);
             signal?.removeEventListener('abort', abort);
+            try { await inputHandle?.close(); } catch (error) {
+                if (!active.reason) active.reason = {
+                    status: 'host-error', error: hostError(`Cannot close native input: ${error.message}`)
+                };
+            }
             if (directory) {
                 try { await rm(directory, {recursive: true, force: true}); } catch (error) {
                     if (!active.reason) active.reason = {

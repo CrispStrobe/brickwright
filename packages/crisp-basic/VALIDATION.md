@@ -1,5 +1,318 @@
 # Validation records
 
+## ARMv7 port and ARM CPU emulation — 2026-11-28
+
+Runtime `0.1.0-dev.8` adds a Linux ARMv7-A hard-float interpreter using the
+pinned upstream ARM32 layout, explicit cross-build targets and an optional
+native session/CLI CPU runner. The exact code checkpoint is
+[`00d05d0377b1000b498e451439a12097a4078ec2`](https://github.com/CrispStrobe/brickwright/commit/00d05d0377b1000b498e451439a12097a4078ec2)
+on `feature/crispbasic-emulator-ports-20261128`.
+
+[CPU-emulation run 46129143522](https://github.com/CrispStrobe/brickwright/actions/runs/46129143522)
+passed both jobs. Each cross-built the real interpreter on an Ubuntu 24.04
+x86-64 host, verified the resulting ELF target and executed guest instructions
+through QEMU user-mode. The runner used Node 22.23.5, GCC cross compilers
+13.3.0 (`13.3.0-6ubuntu2~24.04.1`) and Ubuntu's QEMU package
+`1:8.2.2+ds-0ubuntu1.18`.
+
+| Guest executable | Emulated CPU | Source/contract checks | Runtime, CLI and fixed-output corpus checks | Failures / skips |
+| --- | --- | ---: | ---: | --- |
+| ELF32 ARM EABI hard-float | `qemu-arm -cpu cortex-a7` | 122 | 53 | 0 / 0 |
+| ELF64 AArch64 | `qemu-aarch64 -cpu cortex-a53` | 122 | 53 | 0 / 0 |
+
+This is **350 passing test executions** across the two CPU jobs, including
+shared tests repeated for both targets. Each job also ran the documented CLI
+example and received the fixed sum-of-squares output with exit code zero.
+The suites cover recursive calls, arrays, strings, DATA/READ/RESTORE, byte I/O,
+interactive input, source-mapped errors, explicit exit codes, fresh memory,
+floating SYS calling conventions, timeout, output limits and cancellation.
+Protocol-failure fixtures run on the host; language fixtures run on the
+selected guest executable. Missing binaries are failures, not passing skips.
+
+The original integration remains pinned to BBCSDL
+`6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f`. The ARMv7 build adds SHA-256-locked
+`src/bbasmb_arm_32.c` and `src/bbdata_arm_32.s`; it compiles for ARMv7-A,
+Thumb-2, VFPv3-D16 and the hard-float ABI. The `ARMHF` switch is applied only
+to `bbexec`, matching the upstream console build's SYS argument packing.
+
+### Retained artifact identities
+
+The workflow retains each target's executable, upstream license and
+`native-build.json`. Both downloaded ZIPs were checked against GitHub's
+artifact digest, and each contained executable was checked against the
+SHA-256 in its build receipt.
+
+| Target | Actions artifact ID | ZIP bytes | Binary SHA-256 |
+| --- | ---: | ---: | --- |
+| `linux-armv7` | `15256992882` | 78,891 | `b3115ad7f257a217fd8a12c16803383b2bf7b6581f542ae28f9091fc7fd4e19a` |
+| `linux-arm64` | `15257177197` | 106,376 | `5b39b7fd2bd4b555ab83384b39a21edb0e7eb48813b211bcb1ae69b94260ff12` |
+
+ZIP SHA-256 values:
+
+- ARMv7: `045625a5c16f1d6e86fb20f77216e7c453bc061fe21be1f48b5e2ddd27881147`
+- ARM64: `35225f7fee3b471b8433981cdb8ae290b452ec69939134c017a8685493d3b67e`
+
+Artifacts use the workflow's seven-day retention. The source/target locks,
+build commands and workflow remain committed for reproduction. Different
+compilers or system libraries can produce different binary digests.
+
+### Direct-host checks and exact boundary
+
+The same code passed all 122 source/contract checks and all 53 real native
+runtime/CLI/corpus checks locally on Linux x64 with Debian GCC 14.2.0 and
+NASM 2.16.03. Its native binary SHA-256 was
+`391e9f868e0cd3a4404b58f6fe8dfc7cb30b467b29deb6fbd7ee9a58810af292`.
+The hosted Native ARM64 job in
+[runtime run 46129143504](https://github.com/CrispStrobe/brickwright/actions/runs/46129143504)
+also passed the 122 source/contract and 53 native checks. Other jobs in that
+broader run are separate from the completed CPU qualification above.
+
+No physical ARMv7 board or guest Linux kernel was used. QEMU user-mode
+emulates the CPU while providing Linux system-call translation; it does not
+model a complete Raspberry Pi board or electrical peripherals. These ARM
+executables cannot run inside Brickwright's RISC-V32 Linux guest. Native
+execution retains trusted host access and does not implement the WASM
+simulation bridge. ARMv6, soft-float, bare-metal MCU and retro-CPU runtimes
+remain separate ports. [CPU-EMULATION.md](CPU-EMULATION.md) records commands,
+sysroot compatibility and deployment requirements.
+
+## Portable controllers, source round trips and motor physics — 2026-11-28
+
+This integration is saved incrementally on
+[`feature/crispbasic-portable-simulators-20261128`](https://github.com/CrispStrobe/brickwright/tree/feature/crispbasic-portable-simulators-20261128).
+Its owning producers are `bw-board` at
+[`8be0fbc8e91f1ed2cebb26883210efceef9234cc`](https://github.com/CrispStrobe/bw-board/commit/8be0fbc8e91f1ed2cebb26883210efceef9234cc)
+and `sb3-creator` at
+[`2c991d9a590d189eaad66c96951d4815a9f34e29`](https://github.com/CrispStrobe/sb3-creator/commit/2c991d9a590d189eaad66c96951d4815a9f34e29).
+The compiler, lightweight mode helper, both GUI mirrors, authoring inventory
+and vendor pins are adopted through the official sync. The gallery is unchanged
+and passes its 5,941-file check. The feature pin is deliberate, using the sync's
+supported `--allow-stale` option for the requested branch-only incubation. The 22 mapped compiler files match the exact producer after the
+sync's documented import rewrites.
+
+The runtime implementation is
+[`597fc385277769c10c9c5791081b19002e638b6f`](https://github.com/CrispStrobe/brickwright/commit/597fc385277769c10c9c5791081b19002e638b6f),
+integrated in the consumer's
+[`8620eaae7cbe82d93b17d954ef2e71c632ec5ff9`](https://github.com/CrispStrobe/brickwright/commit/8620eaae7cbe82d93b17d954ef2e71c632ec5ff9)
+checkpoint. In [run 46124192458](https://github.com/CrispStrobe/brickwright/actions/runs/46124192458),
+both native architecture jobs and the WASM job passed. Native x64 and ARM64
+each passed 117 source/fixture/bridge checks and 42 actual native runtime/CLI
+checks. The portable CLI jobs downloaded the same artifact and passed on
+Linux ARM64 (15 checks), macOS 15 ARM64 (15) and Windows Server 2025 x64 (14),
+with zero failures or skips. Windows does not declare the POSIX signal test;
+all hosts qualify parent-owned timeout/output/request limits.
+
+The shared runtime artifact is `15254599855`, with archive SHA-256
+`1784baf08733e9992d00faa464396e7e980b5571d436c016b1cfeb7b47d621a7`.
+Each portable job verified this same artifact. Native ARM64 uses upstream
+`double` while x64 uses `long double`; the common corpus does not prove
+bit-identical results at every floating-point precision boundary.
+
+### Consumer execution evidence
+
+The integrated local native/source/WASM CLI/robot check passed 172 tests
+(117 source/fixture/bridge, 42 native, nine WASM CLI and four motor cases),
+with freshly rebuilt native and WASM artifacts. Subsequent editor/compiler
+integration passed all **292** `test:brickwright` checks, with zero failures
+or skips, including the real round-trip suite below. Nine pin-identity and
+localization checks also passed without skips. Hosted production status is
+recorded with the closing integration receipt.
+
+Real Chromium 158 executed all 14 focused editor/renderer/Circuit scenarios,
+with zero failures or skips. This includes the actual C/WASM interpreter,
+relative/absolute canvas geometry, unsupported-operation diagnostics, input,
+Stop/Reset, asynchronous circuit cancellation and board replacement. The
+complete production GUI is a separate workflow gate; focused browser success
+does not substitute for its final-head result.
+
+The permanent `tests/roundtrip.test.mjs` suite has 35 passing checks: a real
+artifact requirement, six complete original/regenerated programs, 24 accepted
+expressions and four explicit refusals. It compares byte-identical VDU output,
+text and the complete ordered pin trace, including timestamps and operation
+counts. Cases cover numbered/structured loops, active-low reads and output
+latches, elapsed time, integer canvas paths, negative arithmetic/Boolean values,
+quoted strings and temporary-variable collisions. The four rejected constant
+comparisons would discard an electrical read; the original program is executed
+to prove that read exists. This is same-interpreter semantic regression
+qualification, not an independent language-implementation oracle.
+
+The motor example uses the real Circuit solver and WASM interpreter. Four
+checks exercise forward/reverse/brake/coast, swapped motor leads, Stop during
+an outstanding delay and interpreter-error cleanup. Independent anchors cover
+steady-state speed/current and signed shaft travel. Cancellation releases the
+pins/clock, preserves physical rotor state and a preexisting power-on state,
+and allows a fresh owner without late work. It does not qualify CAD body/world
+motion; BASIC and the existing CAD coupling retain exclusive clock ownership.
+
+The sync now applies its import rewrites to the old comparison base as well
+as incoming files; upstream import changes no longer appear to delete local
+work solely because of vendored filenames. The final identity check covers
+the exact resulting file set.
+
+The first consumer checkpoints exposed two test-integration failures: the
+existing dependency-free circuit-guard harness still removed the old import
+instead of the new profile resolver, and an old canvas pixel anchor sampled
+outside the corrected Y coordinate. The harness now injects only its declared
+two-pin mapping while real profile tests remain separate; the pixel test now
+samples the full-coverage interior of the actual descending line. All 17 guard
+checks and the 14 real browser scenarios pass after those corrections.
+
+The final producer follow-up also aligns reserved-marker detection/stripping
+with parser whitespace, including BOM/NBSP/vertical-tab/form-feed. This prevents
+a saved runtime requirement from being treated as an ordinary comment during
+a generic export. Editor, CLI and direct MakeCode guards run before destination
+writes or project mutation; unsupported marker versions refuse explicitly.
+
+## Native ARM64 and portable CLI — 2026-11-28
+
+Runtime `0.1.0-dev.7` adds a native Linux ARM64 build and an explicit
+`--backend wasm` CLI with capability discovery and versioned logical-pin
+fixtures. The simulation ABI/contract stays at version 2 and the BBCSDL pin
+stays `6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f`.
+
+The native architecture implementation
+[`b8f6e35366601d42df12e3aba436d13322f5524c`](https://github.com/CrispStrobe/brickwright/commit/b8f6e35366601d42df12e3aba436d13322f5524c)
+passed both the Linux x64 and Linux ARM64 jobs of
+[run 46123563640](https://github.com/CrispStrobe/brickwright/actions/runs/46123563640).
+Each job built the real target executable and passed 111 source/bridge checks
+plus 42 native runtime/CLI checks. The added ELF machine and binary-receipt
+assertion proves that the ARM64 job executed an ARM64 artifact.
+
+The subsequent CLI and input-race changes pass **168 local tests with zero
+failures or skips**: 117 source/fixture/bridge checks, 42 native runtime/CLI
+checks and nine real WASM CLI checks. Local native execution used GCC and
+NASM 2.16.03 on Linux x64. WASM CLI execution used the integration lane's
+Emscripten 3.1.64 build of the unchanged core; its build metadata must be
+regenerated with the final package revision before packaging qualification.
+
+The first local native run exposed the existing pipe-startup race in
+noninteractive `INKEY(0)`. Supplying the finalized input on an inherited private
+file descriptor before process launch fixes that race; the input, EOF, error,
+deadline, cancellation and cleanup tests pass with the change.
+
+The workflow now downloads one exact-commit WASM artifact on Linux ARM64,
+macOS ARM64 and Windows x64 and runs the portable CLI tests without a native
+interpreter. Those jobs must be inspected at the final feature-branch head
+before claiming those host combinations passed. POSIX signal delivery is
+tested on POSIX hosts; parent-owned resource limits are tested on every host.
+
+## Explicit output-latch toggle
+
+The implementation is
+[`brickwright@2f056f5334a1b5ee6cef0e2ff40f2a562c836f84`](https://github.com/CrispStrobe/brickwright/commit/2f056f5334a1b5ee6cef0e2ff40f2a562c836f84)
+on `feature/crispbasic`. It adds `PROCdigitalToggle(pin)` as an atomic host
+operation, with runtime package `0.1.0-dev.6`, simulation ABI/contract version 2
+and the unchanged version-1 worker envelope.
+
+The owning producer is
+[`sb3-creator@b465a543aa04aac9800635034b87e7438d62adc0`](https://github.com/CrispStrobe/sb3-creator/commit/b465a543aa04aac9800635034b87e7438d62adc0)
+on `feature/crispbasic-generator`. Its
+[qualification run 46121321231](https://github.com/CrispStrobe/sb3-creator/actions/runs/46121321231)
+passed **306 tests**, zero failures or skips. `vendor-pins.json`, both compiler
+mirrors and the derived authoring inventory identify that exact revision.
+All 21 mapped producer files match after the documented import rewrites.
+The board, Circuit, BBCSDL and toolchain pins are unchanged, as is the gallery.
+
+### Hosted consumer qualification
+
+All three jobs in
+[run 46121568018](https://github.com/CrispStrobe/brickwright/actions/runs/46121568018)
+passed: **570 tests, zero failures, cancellations or skips**, including all
+**eleven complete production Chromium scenarios**. The run completed on
+2026-11-28 at 08:43:19 CET. Both native and WASM runtimes were rebuilt from the
+unchanged pinned BBCSDL source; the WASM build used Emscripten 3.1.64.
+
+| Suite | Passed |
+| --- | ---: |
+| Source preparation, reference host and bridge protocol/lifecycle | 111 |
+| Native runtime and CLI | 41 |
+| Actual WASM execution, restricted-host policy and simulation bridge | 153 |
+| Native/WASM comparisons against fixed expected results | 10 |
+| Real Chromium engine workers | 18 |
+| GUI adapter, assets, editor, board host/session, generated source and conversion | 184 |
+| Shared board ownership and existing CAD bridge/cancellation | 30 |
+| Focused Chromium editor, renderer and Circuit integration | 12 |
+| Complete production GUI in Chromium | 11 |
+| **CrispBASIC CI total** | **570** |
+
+The separate
+[BASIC oracle run 46121567986](https://github.com/CrispStrobe/brickwright/actions/runs/46121567986)
+also passed all **nine fixtures**, comparing the emulated BBC BASIC engine with
+BBCSDL and Matrix Brandy. The oracle fixtures and producer's 306 tests are
+separate from the consumer total.
+
+The WASM job rebuilt both interpreter backends and uploaded its exact runtime
+as artifact `15253719385`, 123098 bytes, archive SHA-256
+`c187eb7b638d4f304dd144cc651675d45525c1ee0b3992cd871e92f3b137c22f`.
+The production job downloaded and verified that same-run artifact, built the
+complete CAD/FPGA-enabled editor with its locked dependencies, and authenticated
+all 20 emitted runtime assets, three entry scripts and 562 lazy chunks for
+build `2f056f5`. Webpack 5.96.1 completed in 127548 ms with its three existing
+warnings (Microtronic CSS and bundle/entrypoint sizes).
+
+The [production evidence archive](https://github.com/CrispStrobe/brickwright/actions/runs/46121568018/artifacts/15254660014)
+contains the browser report, screenshots, build/asset identities and logs.
+GitHub records artifact `15254660014` as 755513 bytes, archive SHA-256
+`62c4a9668e85f89739b283a6efb2402e592da8e8a59d3ba1c1bf2b2a0bcc2b9f`.
+Workflow artifacts have a seven-day lifetime; the source record and
+reproduction commands remain in the repository.
+
+### What the new qualification establishes
+
+The real pinned solver demonstrates the distinction directly: request high,
+observe the clamped net low, toggle the retained request to low, then toggle it
+back to high while the solved read stays low. The generated-program fixture
+executes this path through the actual C/WASM engine. Both numbered and structured
+source and both polarities have fixed expected traces. There is no synthesized
+read/write pair or time advancement for toggle.
+
+The tests also cover initial zero, write/mode retention, fresh runs, BASIC
+`CLEAR`/`RUN` within the same host lifetime, once-only pin-expression evaluation,
+recursive asynchronous suspension, call-site diagnostics, user definition
+overrides, trace exhaustion before mutation, synchronous cancellation and
+revoked Circuit ownership. Bridge tests verify one operation-6 request,
+duplicate refusal, typed void replies and explicit rejection of stale ABI 1.
+An older custom host remains usable for its original methods; a missing toggle
+produces catchable `ERR208` (`unavailable`) without sensing or writing a pin.
+
+The complete GUI gate passed all eleven scenarios. Its new active-low toggle
+program pauses after requested levels high, low and high while the clamped
+net remains low, verifies stationary owned time and releases pin/clock ownership.
+The default generation path retains its hardware comments, and selecting the
+portable option preserves the current buffer until explicit regeneration.
+Reverse conversion of the generated toggle program refuses without changing
+source or project. A separate unsupported `wait until` scenario retains the
+disabled-Run and editor-newline refusal regression now that toggle generation
+succeeds. The prior exact 25000000 ns delay, LED-current, input suspension,
+error/VDU, cancellation, file-replacement and missing-runtime cases also pass.
+
+### Local reproduction and identity
+
+Local execution also passed the owning producer's 306 tests, the package's
+111 source/reference/protocol tests, all 153 genuine WASM tests, the complete
+184-test Brickwright integration suite, and ten producer-identity/mirror/SPIKE
+checks. The 184 integration tests include 21 board-host tests and 17 generated
+C/WASM programs. These are overlapping local and hosted observations, not
+additional tests in the CI total. Sync checking, the duplicated-fact mirror
+check, and packaging/authentication of all 20 runtime assets passed.
+
+The genuine local WASM build used the unchanged SDK installer
+`a7c808831a666cc903fedb906c171a718cd97341`, Emscripten 3.1.64 and BBCSDL
+`6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f`. Its build manifest verifies six
+upstream inputs, nine local inputs and 24 allowed imports. Its output identities
+are module SHA-256
+`f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655`
+and WASM SHA-256
+`c22c6cbe4cea922450c979f41869b9b4e53de238f087341048fe9b4580edce9a`.
+No local native rebuild, production GUI build or browser execution is claimed.
+The owning commands are the existing workflow commands and
+[production reproduction steps](BRICKWRIGHT.md#complete-production-gui-gate).
+
+Reverse conversion remains a qualified refusal. Toggle does not establish a
+portable-library round trip, an instruction-to-time model, peripheral support
+or physical-device equivalence. The older generator-refusal and ABI-1 results
+below describe their own exact revisions and are retained as history.
+
 ## Explicit portable generator boundary
 
 The owning producer is qualified at

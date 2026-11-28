@@ -11,6 +11,9 @@ import {fileURLToPath} from 'node:url';
 import basicToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-basic.js';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {codeDocumentEditorClass, codeDocumentLabels} from './helpers/code-document-editor.mjs';
+import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
+import {validateCrispBasicPseudocode, crispBasicModeError, CRISPBASIC_PSEUDOCODE_MARKER} from '../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
+import {extractCrispBasicEditorMethods} from '../scripts/lib/crispbasic-editor-harness.mjs';
 
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 function extract(start, end) {
@@ -18,14 +21,17 @@ function extract(start, end) {
     assert.ok(first >= 0 && last > first, `Actual editor method boundary: ${start}`);
     return source.slice(first, last);
 }
-const methods = extract('    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?') +
-    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {', '    // Read the running project into all languages at once.') +
-    extract('    setActiveCode (text) {', '    // Lazily import the compiler through the registering door') +
-    extract('    basicGenerationPlaceholder (text) {', '    // Fetch examples/index.json once');
+const methods = extractCrispBasicEditorMethods(source) +
+    extract('    convertedSource ({pseudocode, warnings = []}) {', '    /**\n     * Is the RCX extension loaded?') +
+    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
+        '    // Read the running project into all languages at once.');
 const readerImport = '(await import(/* webpackChunkName: "sb3-creator-basic" */ \'../../lib/sb3-creator-basic.js\')).default';
 assert.equal(methods.split(readerImport).length - 1, 2, 'both real BASIC-reader consumers are exercised');
+// The shared fixture supplies the production document adapters, the
+// importer's own TWO_WAY set and warning classifier, and neutral machine hooks.
 const Editor = codeDocumentEditorClass(source, methods.replaceAll(readerImport, 'readBasic'),
-    {readBasic: basicToPseudocode, DOS_LANG: {}, conversionFailure, LANG_LABEL: {...codeDocumentLabels, basic: 'BBC BASIC'}});
+    {readBasic: basicToPseudocode, DOS_LANG: {}, conversionFailure, validateCrispBasicPseudocode, crispBasicModeError,
+        LANG_LABEL: {...codeDocumentLabels, basic: 'BBC BASIC'}});
 
 function fixture(text) {
     const effects = [];
@@ -33,14 +39,13 @@ function fixture(text) {
     Object.assign(editor, {
         state: {lang: 'basic', basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false,
             basicPortableLibrary: false, basicGenerationFailed: false, basicWarnings: [],
+            libraryTarget: null, authoredSources: {},
             buffers: {basic: text, pseudocode: 'existing blocks source'}, uploads: []},
         props: {vm: {runtime: {getTargetForStage: () => ({id: 'retained-stage'})},
             loadProject() { effects.push('loadProject'); }}},
         L: {stCompiling: 'Compiling', stError: message => `Conversion refused: ${message}`},
         setState(update) { const patch = typeof update === 'function' ? update(this.state) : update;
             if (patch) Object.assign(this.state, patch); },
-        activeCode() { return this.state.buffers[this.state.lang]; },
-        invalidateArcadeReport() {},
         async runCrispBasic() { effects.push('runCrispBasic'); },
         canLiftAsm() { return false; },
         async lib() { return {default: class {
@@ -54,6 +59,7 @@ function fixture(text) {
 
 for (const text of [
     '100 REM original\n\n300 PROCdigitalWrite(13,1)\n',
+    'PROCdigitalToggle(13)\n',
     'PRINT FNdigitalRead(2)\n',
     'PROCdelay(25)\nPRINT FNmillis\n',
     'DEF PROCpinMode(p,m$)\nENDPROC\n',
@@ -81,26 +87,26 @@ test('derived languages cannot bypass portable To blocks refusal', async () => {
 });
 
 test('generation-error comments cannot replace blocks or derive another language', async () => {
-    const {editor, effects} = fixture('REM === Cannot show as BASIC ===\nREM toggle is unsupported\n');
+    const {editor, effects} = fixture('REM === Cannot show as BASIC ===\nREM wait until is unsupported\n');
     editor.state.basicGenerationFailed = true;
-    editor.state.basicWarnings = ['toggle needs an output latch; generation refused'];
+    editor.state.basicWarnings = ['wait until needs a polling interval; generation refused'];
     const buffers = editor.state.buffers;
     await editor.compile();
     const result = await editor.deriveBuffer(editor.activeCode(), 'basic', 'python');
     assert.deepEqual(effects, []);
     assert.equal(editor.state.buffers, buffers);
     assert.equal(editor.state.conversionReport.preserved, false);
-    assert.match(result.error, /output latch/);
+    assert.match(result.error, /polling interval/);
 });
 
 test('editing a generation-error buffer preserves refusal until its banner is removed', async () => {
-    const placeholder = 'REM === Cannot show as BASIC ===\nREM toggle is unsupported\n';
+    const placeholder = 'REM === Cannot show as BASIC ===\nREM wait until is unsupported\n';
     const {editor, effects} = fixture(placeholder);
     editor.state.basicGenerationFailed = true;
-    editor.state.basicWarnings = ['toggle needs an output latch; generation refused'];
+    editor.state.basicWarnings = ['wait until needs a polling interval; generation refused'];
     editor.setActiveCode(`${placeholder}\n`);
     assert.equal(editor.state.basicGenerationFailed, true, 'a newline does not turn an error buffer into authored code');
-    assert.deepEqual(editor.state.basicWarnings, ['toggle needs an output latch; generation refused']);
+    assert.deepEqual(editor.state.basicWarnings, ['wait until needs a polling interval; generation refused']);
     const buffers = editor.state.buffers;
     await editor.runBasic();
     await editor.compile();
@@ -109,9 +115,9 @@ test('editing a generation-error buffer preserves refusal until its banner is re
     assert.equal(editor.state.buffers, buffers);
     assert.equal(editor.state.buffers.basic, `${placeholder}\n`);
     assert.equal(editor.state.conversionReport.preserved, false);
-    assert.match(result.error, /output latch/);
+    assert.match(result.error, /polling interval/);
 
-    editor.setActiveCode('REM toggle was replaced by explicit writes\nPRINT 7\nEND\n');
+    editor.setActiveCode('REM wait until was replaced by explicit timed polling\nPRINT 7\nEND\n');
     assert.equal(editor.state.basicGenerationFailed, false, 'replacing the banner admits authored correction');
     assert.deepEqual(editor.state.basicWarnings, []);
     await editor.runBasic();
@@ -154,13 +160,133 @@ test('portable generation is explicit and cannot leak into retro profiles', asyn
     }
 });
 
+const portablePseudo = `DEVICE ARDUINO-UNO
+PIN led = D13 OUTPUT ACTIVE LOW
+PIN button = D2 INPUT ACTIVE LOW
+GLOBAL count
+WHEN flag clicked:
+  set count to 0
+  REPEAT UNTIL read button:
+    toggle led
+    change count by 1
+    wait 0.001 seconds
+  print count
+  print timer`;
+
+function generatePortable(source, lineNumbers = false) {
+    const creator = new SB3Creator();
+    creator.parse(source);
+    assert.deepEqual(creator.warnings, []);
+    const result = creator.generateBASIC(undefined, {profile: 'bbc', mode: 'crispbasic', lineNumbers});
+    assert.equal(result.ok, true, JSON.stringify(result));
+    return result.basic;
+}
+
+test('explicit portable editor conversion preserves a durable requirement and can regenerate BASIC after reopening', async () => {
+    for (const numbered of [false, true]) {
+        const original = generatePortable(portablePseudo, numbered);
+        const {editor, effects} = fixture(original);
+        editor.state.basicPortableLibrary = true;
+        const read = await editor.deriveBuffer(original, 'basic', 'pseudocode');
+        assert.equal(read.error, undefined);
+        assert.equal(validateCrispBasicPseudocode(read.code), true);
+        assert.equal(read.code.split(CRISPBASIC_PSEUDOCODE_MARKER).length - 1, 1);
+        assert.deepEqual(effects, [], 'reading portable source does not pass it through the blocks parser');
+        // A persisted marker is an explicit request for its runtime even when
+        // the new editor has not retained the previous checkbox state.
+        editor.state.basicPortableLibrary = false;
+        editor.lib = async () => ({default: SB3Creator});
+        const regenerated = await editor.deriveBuffer(read.code, 'pseudocode', 'basic');
+        assert.equal(regenerated.error, undefined);
+        assert.equal(regenerated.basicGenerationFailed, false);
+        assert.equal(regenerated.basicPortableLibrary, true);
+        assert.match(regenerated.code, /PROCdigitalToggle/);
+        assert.match(regenerated.code, /PROCdelay/);
+        assert.equal(basicToPseudocode(regenerated.code, {mode: 'crispbasic'}).ok, true);
+    }
+});
+
+test('portable editor mode refuses cross-language conversion before a compiler or destination write', async () => {
+    const original = generatePortable(portablePseudo);
+    const marked = basicToPseudocode(original, {mode: 'crispbasic'}).pseudocode;
+    for (const target of ['python', 'javascript', 'c', 'micropython', 'forth']) {
+        for (const [from, text] of [['basic', original], ['pseudocode', marked]]) {
+            const {editor, effects} = fixture(text);
+            editor.state.basicPortableLibrary = true;
+            const buffers = editor.state.buffers;
+            const result = await editor.deriveBuffer(text, from, target);
+            assert.equal(result.code, undefined);
+            assert.match(result.error, /requires CrispBASIC mode/);
+            assert.equal(editor.state.buffers, buffers);
+            assert.deepEqual(effects, []);
+        }
+    }
+    for (const [profile, engine] of [['bbc', 'z80'], ['ms', 'crispbasic'], ['i8086', 'crispbasic']]) {
+        const {editor, effects} = fixture(marked);
+        Object.assign(editor.state, {basicProfile: profile, basicEngine: engine, basicPortableLibrary: true});
+        const result = await editor.deriveBuffer(marked, 'pseudocode', 'basic');
+        assert.match(result.error, /requires CrispBASIC mode/);
+        assert.deepEqual(effects, []);
+    }
+});
+
+test('saved portable pseudocode cannot replace blocks, including the explicit pseudocode compile path', async () => {
+    const marked = basicToPseudocode(generatePortable(portablePseudo), {mode: 'crispbasic'}).pseudocode;
+    for (const explicit of [false, true]) {
+        const {editor, effects} = fixture(marked);
+        editor.state.lang = explicit ? 'basic' : 'pseudocode';
+        editor.state.buffers.pseudocode = marked;
+        const buffers = editor.state.buffers;
+        await editor.compile(explicit ? {pseudocode: marked} : {});
+        assert.equal(editor.state.buffers, buffers);
+        assert.deepEqual(effects, []);
+        assert.equal(editor.state.conversionReport.preserved, false);
+        assert.match(editor.state.status, /To blocks.*not qualified/);
+        assert.equal(editor.state.busy, false);
+    }
+});
+
+test('portable marker detection agrees with parser whitespace and UTF-8 BOM admission', async () => {
+    for (const prefix of ['\ufeff', '\u00a0', '\v', '\f']) {
+        const marked = `${prefix}${CRISPBASIC_PSEUDOCODE_MARKER}\nWHEN flag clicked:\n  print 1`;
+        const {editor, effects} = fixture(marked);
+        editor.state.lang = 'pseudocode';
+        editor.state.buffers.pseudocode = marked;
+        const result = await editor.deriveBuffer(marked, 'pseudocode', 'python');
+        assert.match(result.error, /requires CrispBASIC mode/);
+        await editor.compile();
+        assert.deepEqual(effects, []);
+        assert.match(editor.state.status, /To blocks.*not qualified/);
+    }
+});
+
+test('future, duplicate and malformed portable markers refuse before editor parsing', async () => {
+    for (const directive of ['# @crispbasic-portable 2', '# @crispbasic-portable',
+        `${CRISPBASIC_PSEUDOCODE_MARKER}\n${CRISPBASIC_PSEUDOCODE_MARKER}`]) {
+        const marked = `${directive}\nWHEN flag clicked:\n  print 1`;
+        const {editor, effects} = fixture(marked);
+        editor.state.lang = 'pseudocode';
+        editor.state.buffers.pseudocode = marked;
+        for (const target of ['pseudocode', 'basic', 'python']) {
+            const result = await editor.deriveBuffer(marked, 'pseudocode', target);
+            assert.match(result.error, /Unsupported or duplicate CrispBASIC/);
+            assert.equal(result.code, undefined);
+        }
+        await editor.compile();
+        assert.deepEqual(effects, []);
+        assert.equal(editor.state.buffers.pseudocode, marked);
+        assert.match(editor.state.status, /Unsupported or duplicate CrispBASIC/);
+    }
+});
+
 test('Brickwright CLI refuses portable BASIC and saved error banners without overwriting its output', () => {
     const dir = mkdtempSync(join(tmpdir(), 'crispbasic-cli-'));
     try {
         const input = join(dir, 'portable.bas'), output = join(dir, 'existing.bw');
         for (const [source, diagnostic] of [
             ['PROCdelay(25)\n', /To blocks.*PROCdelay/],
-            ['REM === Cannot show as BASIC ===\nREM CrispBASIC: toggle requires an output latch\n\n', /generation was refused/]
+            ['PROCdigitalToggle(13)\n', /To blocks.*PROCdigitalToggle/],
+            ['REM === Cannot show as BASIC ===\nREM CrispBASIC: wait until requires a polling interval\n\n', /generation was refused/]
         ]) {
             writeFileSync(input, source);
             writeFileSync(output, 'KEEP EXISTING PROJECT\n');

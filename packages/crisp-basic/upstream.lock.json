@@ -34,6 +34,14 @@
         "sha256": "e21ab96847df67433dae1c10a84671ce4fcdf98b6df0baaeb49bf30cabd77f20"
       },
       {
+        "path": "src/bbasmb_arm_64.c",
+        "sha256": "6e8c7f0ef317ee7ee8a2383317abb435190cef8db913dd88d2d97104aafee0fc"
+      },
+      {
+        "path": "src/bbdata_arm_64.s",
+        "sha256": "be4a6ca4966f53ae632bd469b46f3fd5f970d6308748d54ff040b5bcc9d558a4"
+      },
+      {
         "path": "src/bbccos.c",
         "sha256": "995b5ecdff8b4a51786c419053ae342c58bcc3a9f5b61b64d7d3427bf988b62d"
       },
@@ -52,6 +60,14 @@
       {
         "path": "src/bbdata_wasm32.c",
         "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
+      },
+      {
+        "path": "src/bbasmb_arm_32.c",
+        "sha256": "cef3b7b1459682cabab5d7bf7aeda653a8098ad1db236386b8d7f03c3f5a1f5f"
+      },
+      {
+        "path": "src/bbdata_arm_32.s",
+        "sha256": "744e0167d7b1124486607ee72a76afd8bf515894979384869371bc7047f69301"
       }
     ]
   }

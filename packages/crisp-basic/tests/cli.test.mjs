@@ -6,14 +6,14 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
+import {executable, nativeCliArgs} from './native-test-target.mjs';
 
 const cli = fileURLToPath(new URL('../bin/crispbasic.mjs', import.meta.url));
-const executable = fileURLToPath(new URL('../.build/crispbasic-native', import.meta.url));
 const textLines = text => text.replace(/\r\n/g, '\n');
 
 function runCli(args) {
     return new Promise((resolve, reject) => {
-        execFile(process.execPath, [cli, ...args], {
+        execFile(process.execPath, [cli, ...nativeCliArgs(args)], {
             timeout: 10000,
             maxBuffer: 2 * 1024 * 1024
         }, (error, stdout, stderr) => {
@@ -124,7 +124,7 @@ UNTIL FALSE
     // Leave stdout unread: the CLI queues more than the pipe capacity, then
     // the native program enters its silent loop. Closing the downstream pipe
     // must clean up that process, not crash Node and abandon it.
-    const child = spawn(process.execPath, [cli, filename, '--timeout', '5000'], {
+    const child = spawn(process.execPath, [cli, ...nativeCliArgs([filename, '--timeout', '5000'])], {
         stdio: ['pipe', 'pipe', 'pipe']
     });
     let stderr = '';

@@ -1,17 +1,18 @@
 import assert from 'node:assert/strict';
-import {access, mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {access, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {constants} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import {createNativeSession} from '../index.mjs';
+import {verifyNativeBinary} from '../scripts/native-targets.mjs';
+import {executable, target, receiptPath, nativeOptions} from './native-test-target.mjs';
 
-const executable = fileURLToPath(new URL('../.build/crispbasic-native', import.meta.url));
 const textLines = text => text.replace(/\r\n/g, '\n');
 
 function sessionFor(t, options = {}) {
-    const session = createNativeSession({executable, ...options});
+    const session = createNativeSession(nativeOptions(options));
     t.after(() => session.dispose());
     return session;
 }
@@ -26,6 +27,18 @@ async function fakeExecutable(t, body) {
 
 test('native integration requires a built executable; absence is not a passing skip', async () => {
     await access(executable, constants.X_OK);
+});
+
+test('native artifact and build receipt match the selected Linux CPU target', async () => {
+    const bytes = await readFile(executable);
+    assert.deepEqual([...bytes.subarray(0, 4)], [0x7f, 0x45, 0x4c, 0x46]);
+    verifyNativeBinary(bytes, target);
+    const receipt = JSON.parse(await readFile(receiptPath, 'utf8'));
+    assert.equal(receipt.target, target.name);
+    assert.equal(receipt.binarySha256, createHash('sha256').update(bytes).digest('hex'));
+    const session = createNativeSession();
+    try { assert.ok(session.capabilities.platforms.includes(receipt.target)); }
+    finally { await session.dispose(); }
 });
 
 test('the real core executes structured BASIC, procedures, functions, arrays and strings', async t => {
@@ -63,6 +76,23 @@ DEF FNdouble(value%) = value% * 2
     assert.equal(session.state, 'idle');
     assert.ok(result.output instanceof Uint8Array);
     assert.equal(result.text, Buffer.from(result.output).toString('latin1'));
+});
+
+test('native floating SYS arguments retain their register positions, including a leading zero on ARM', async t => {
+    const session = sessionFor(t);
+    // On x64 the upstream 80-bit variant represents positive zero as an
+    // integer even for 0.0; on ARM a direct 0.0 literal retains its float tag.
+    // A stored zero# also reloads as an integer on both ABIs. Use a direct
+    // floating expression so this test checks the C ABI, not value tagging.
+    const leadingFloat = target.architecture === 'x64' ? '1E-30' : '0.0';
+    const result = await session.run(`SYS "atan2", ${leadingFloat}, -1.0 TO angle#
+PRINT STR$(ABS(angle# - PI) < 1E-12)
+SYS "ldexp", 1.5, 3 TO scaled#
+PRINT STR$(scaled#)
+END
+`);
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '-1\r\n12\r\n');
 });
 
 test('raw VDU bytes are preserved without ANSI translation or UTF-8 replacement', async t => {
