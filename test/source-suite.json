@@ -19,6 +19,8 @@
   "pseudocode-importer-attribution.test.mjs",
   "retarget.test.mjs",
   "rp2040-debug.test.mjs",
+  "runtime-package-build-boundary.test.mjs",
+  "runtime-package-inventory.test.mjs",
   "sb3-creator-motion-target.test.mjs",
   "sb1-converter-deferral.test.mjs",
   "scratch-storage-worker-attribution.test.mjs",
