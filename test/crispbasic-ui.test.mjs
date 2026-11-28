@@ -420,17 +420,20 @@ for (const status of ['timeout', 'output-limit', 'simulation-limit']) {
 const terminalSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx', import.meta.url), 'utf8');
 const terminalClass = between(terminalSource, 'class VduTerminal extends React.Component {', '    render () {');
 const Terminal = new Function('React', 'VduDecoder', 'PALETTE', `return ${terminalClass}}`)(
-    {Component: class { constructor(props) { this.props = props; } }, createRef: () => ({current: null})},
+    {Component: class {
+        constructor(props) { this.props = props; }
+        setState(update) { Object.assign(this.state, update); }
+    }, createRef: () => ({current: null})},
     VduDecoder, ['#000000', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff']);
 
 function terminal(output, resetKey = 1) {
     const operations = [];
-    const ctx = Object.fromEntries(['fillRect', 'fillText', 'beginPath', 'moveTo', 'lineTo', 'stroke'].map(
+    const ctx = Object.fromEntries(['fillRect', 'fillText', 'beginPath', 'moveTo', 'lineTo', 'stroke', 'closePath', 'fill'].map(
         key => [key, (...args) => operations.push([key, ...args])]));
     const component = new Terminal({output, resetKey});
     component._canvasRef.current = {width: 320, height: 256, getContext: () => ctx};
     component.componentDidMount();
-    return {component, operations, update(next, key = component.props.resetKey) {
+    return {component, operations, ctx, update(next, key = component.props.resetKey) {
         const previous = component.props;
         component.props = {output: next, resetKey: key};
         component.componentDidUpdate(previous);
@@ -468,4 +471,64 @@ test('replaced or shortened output resets even without an explicit run key', () 
         [['fillText', 'C', 2, 13], ['fillText', 'D', 10, 13], ['fillText', 'E', 18, 13]]);
     t.update(''); t.update('Z');
     assert.deepEqual(t.operations.at(-1), ['fillText', 'Z', 2, 13]);
+});
+
+const vdu = (...bytes) => String.fromCharCode(...bytes);
+const plot = (mode, x, y) => vdu(25, mode, x & 255, (x >> 8) & 255, y & 255, (y >> 8) & 255);
+const origin = (x, y) => vdu(29, x & 255, (x >> 8) & 255, y & 255, (y >> 8) & 255);
+
+test('the canvas applies ORIGIN to absolute positions and adds relative moves exactly once', () => {
+    const t = terminal(origin(320, 256) + plot(4, 0, 0) + plot(1, 128, 256));
+    assert.deepEqual([t.component._gx, t.component._gy], [448, 512]);
+    assert.deepEqual(t.operations.filter(op => ['moveTo', 'lineTo'].includes(op[0])),
+        [['moveTo', 80, 191], ['lineTo', 112, 127]]);
+    t.update(t.component.props.output + origin(-320, -256) + plot(0, -128, -256));
+    assert.deepEqual([t.component._gx, t.component._gy], [320, 256], 'relative motion ignores the changed origin');
+    assert.equal(t.operations.filter(op => op[0] === 'stroke').length, 1);
+});
+
+test('point, triangle and rectangle PLOT families paint their actual geometry', () => {
+    const point = terminal(plot(69, 0, 0));
+    assert.deepEqual(point.operations.at(-1), ['fillRect', 0, 255, 1, 1]);
+    assert.equal(point.operations.some(op => op[0] === 'stroke'), false, 'a point is not a line from the previous cursor');
+    const triangle = terminal(plot(4, 0, 0) + plot(4, 640, 0) + plot(85, 0, 512));
+    assert.deepEqual(triangle.operations.slice(-6), [
+        ['beginPath'], ['moveTo', 0, 255], ['lineTo', 160, 255], ['lineTo', 0, 127], ['closePath'], ['fill']
+    ]);
+    const rectangle = terminal(plot(4, 640, 512) + plot(97, -320, -256));
+    assert.deepEqual(rectangle.operations.at(-1), ['fillRect', 80, 127, 81, 65]);
+    assert.deepEqual([rectangle.component._gx, rectangle.component._gy], [320, 256]);
+});
+
+test('graphics and text background colours remain independent and MODE resets drawing state', () => {
+    const t = terminal(vdu(17, 129, 18, 0, 130, 16));
+    assert.equal(t.ctx.fillStyle, '#00ff00', 'CLG uses green graphics background, not red text background');
+    t.update(t.component.props.output + vdu(12));
+    assert.equal(t.ctx.fillStyle, '#ff0000', 'CLS uses the text background');
+    t.update(t.component.props.output + origin(100, 200) + vdu(18, 0, 1, 22, 0) + plot(5, 640, 512));
+    assert.equal(t.ctx.strokeStyle, '#ffffff');
+    assert.deepEqual([t.component._originX, t.component._originY], [0, 0]);
+    assert.deepEqual(t.operations.filter(op => op[0] === 'moveTo').at(-1), ['moveTo', 0, 255]);
+});
+
+test('TAB and text cursor controls position text without treating LF as CR', () => {
+    const t = terminal(vdu(31, 3, 2) + 'A' + vdu(8) + 'B' + vdu(10) + 'C');
+    assert.deepEqual(t.operations.filter(op => op[0] === 'fillText'), [
+        ['fillText', 'A', 26, 45], ['fillText', 'B', 26, 45], ['fillText', 'C', 34, 61]
+    ]);
+});
+
+test('unsupported geometry and raster actions are reported instead of painted as lines', () => {
+    const t = terminal(plot(153, 640, 512) + vdu(18, 3, 1) + plot(5, 100, 100));
+    assert.deepEqual(t.component.state.unsupported, ['PLOT 153', 'GCOL 3']);
+    assert.equal(t.operations.some(op => op[0] === 'stroke' || op[0] === 'lineTo'), false);
+    assert.deepEqual([t.component._gx, t.component._gy], [100, 100], 'the final cursor still tracks the requested points');
+    t.update('', 2);
+    assert.deepEqual(t.component.state.unsupported, [], 'warnings belong only to their run');
+});
+
+test('unsupported VDU reports are bounded and duplicate commands do not grow the list', () => {
+    const t = terminal(Array.from({length: 256}, (_, mode) => plot(mode, 0, 0)).join(''));
+    assert.equal(t.component.state.unsupported.length, 16);
+    assert.equal(new Set(t.component.state.unsupported).size, 16);
 });
