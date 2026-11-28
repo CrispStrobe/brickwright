@@ -1,0 +1,37 @@
+baseline: GREEN
+
+1. an action tag is un-pinned back to @v4
+   .github/workflows/build.yml: RED, for the stated reason
+
+2. a NEW mutable fetch appears in a script nobody declared
+   scripts/integrate.mjs: RED, for the stated reason
+
+3. a declared fetch site is removed but its census row stays
+   scripts/vendor.mjs: RED, for the stated reason
+
+4. the WASM pin is abbreviated back to seven characters
+   scripts/sync-emu8051-wasm.mjs: RED, for the stated reason
+
+5. CI's ancestry FLOOR is abbreviated
+   .github/workflows/build.yml: RED, for the stated reason
+
+6. a vendor pin is recorded as a short sha
+   vendor-pins.json: RED, for the stated reason
+
+7. a sync script falls back to the mutable ref when resolution fails
+   scripts/sync-sb3creator.mjs: RED, for the stated reason
+
+8. a sync script stops resolving the ref at all
+   scripts/sync-sb3creator.mjs: RED, for the stated reason
+
+9. the raw-CDN detector is edited into uselessness
+   test/fetch-pinning.test.mjs: RED, for the stated reason
+
+10. the self-exclusion is widened to hide another file
+   test/fetch-pinning.test.mjs: RED, for the stated reason
+
+11. a waived fetch site loses its stated reason
+   test/fetch-pinning.test.mjs: RED, for the stated reason
+
+7 mutated file(s) restored byte-for-byte.
+11/11 mutations caught; tree restored, gate green.

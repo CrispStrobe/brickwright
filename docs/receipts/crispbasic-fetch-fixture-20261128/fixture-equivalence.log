@@ -1,0 +1,18 @@
+{
+  "equal": true,
+  "realScannerRefusalAsserted": true,
+  "versions": [
+    {
+      "sha": "fd48bb07d08d76a15c34cc96f672721a144af147",
+      "sourceSha256": "bdebc5b96f81a030c3ea60517f3e2b96d66b1a0447a6d0da22ff192e2b14562d",
+      "bytes": 269,
+      "sha256": "916d13ea856294326d38d9ce73c688857cd19d663c56760d8cbd4375a6bc2518"
+    },
+    {
+      "sha": "3f1f9a41d6d986027b41bcec9eb29e55ac1d8331",
+      "sourceSha256": "2cee8ecfac1e41240cef01a4041561b4fd7708d92024dcb06a12fd7f1b8ef8ad",
+      "bytes": 269,
+      "sha256": "916d13ea856294326d38d9ce73c688857cd19d663c56760d8cbd4375a6bc2518"
+    }
+  ]
+}
