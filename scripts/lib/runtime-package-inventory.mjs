@@ -75,9 +75,35 @@ export function validateRuntimePackageInventory (inventory) {
             }
             text(pkg.cacheName, label + '.cacheName');
             object(pkg.integrity, label + '.integrity');
-            // A published digest is not a verified installation. This schema's
-            // first implementation records the existing unverified download.
-            if (pkg.integrity.status !== 'unverified') fail(label + '.integrity.status must be unverified');
+            // Pinned digests describe the accepted bytes; the runtime still has
+            // to verify each installation. Neither status is license clearance.
+            if (pkg.integrity.status === 'sha256-pinned') {
+                const integrity = pkg.integrity;
+                if (integrity.algorithm !== 'SHA-256') fail(label + '.integrity.algorithm must be SHA-256');
+                if (!/^[a-f0-9]{40}$/.test(integrity.sourceRevision || '')) {
+                    fail(label + '.integrity.sourceRevision must be an immutable Git revision');
+                }
+                const source = httpsUrl(integrity.sourceBaseUrl, label + '.integrity.sourceBaseUrl');
+                if (!source.pathname.endsWith('/') || source.search || source.hash ||
+                    !source.pathname.split('/').includes(integrity.sourceRevision)) {
+                    fail(label + '.integrity.sourceBaseUrl must name the exact revision and end in /');
+                }
+                object(integrity.artifacts, label + '.integrity.artifacts');
+                const members = Object.keys(integrity.artifacts).sort();
+                if (JSON.stringify(members) !== JSON.stringify(pkg.files.slice().sort())) {
+                    fail(label + '.integrity.artifacts must cover exactly the declared members');
+                }
+                for (const name of pkg.files) {
+                    const artifact = integrity.artifacts[name];
+                    const at = label + '.integrity.artifacts.' + name;
+                    object(artifact, at);
+                    if (!/^[a-f0-9]{64}$/.test(artifact.sha256 || '')) fail(at + '.sha256 must be a SHA-256 digest');
+                    if (!Number.isSafeInteger(artifact.bytes) || artifact.bytes <= 0) fail(at + '.bytes must be positive');
+                    if (!/^[a-f0-9]{40}$/.test(artifact.gitBlobSha || '')) fail(at + '.gitBlobSha must be a Git blob identity');
+                }
+            } else if (pkg.integrity.status !== 'unverified') {
+                fail(label + '.integrity.status must be unverified or sha256-pinned');
+            }
             object(pkg.buildExclusions, label + '.buildExclusions');
             for (const key of ['directories', 'filenames']) {
                 strings(pkg.buildExclusions[key], label + '.buildExclusions.' + key);

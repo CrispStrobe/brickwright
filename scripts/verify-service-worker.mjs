@@ -51,6 +51,10 @@ import {chromium} from 'playwright';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SW_PATH = resolve(root, 'overlay/scratch-gui/sw.js');
 const SHIPPED_SW = readFileSync(SW_PATH, 'utf8');
+const TOOLCHAIN_PACKAGE = JSON.parse(readFileSync(resolve(root,
+    'overlay/scratch-gui/src/lib/runtime-package-inventory.json'), 'utf8'))
+    .packages.find(record => record.id === 'sdcc-wasm' && record.delivery === 'optional-user-download');
+if (!TOOLCHAIN_PACKAGE) throw new Error('the optional SDCC package is missing from the inventory');
 const PORT = Number(process.env.SW_GATE_PORT || 8127);
 
 /** Long enough that a healthy step never reaches it, short enough that a hung
@@ -372,6 +376,70 @@ SCENARIOS['library-previews-on-demand'] = async browser => {
     }
 };
 
+// A compiler installation belongs to the user, not to the currently deployed
+// app. Exercise a real worker UPDATE after the cache has been populated: merely
+// opening an already active worker would never run its activation cleanup.
+SCENARIOS['optional-toolchain-survives-update'] = async browser => {
+    const context = await freshContext(browser);
+    const requested = [];
+    context.on('request', request => {
+        if (new URL(request.url()).pathname.includes('/static/sdcc-wasm/')) requested.push(request.url());
+    });
+    try {
+        const page = await openControlled(context);
+        const cacheName = TOOLCHAIN_PACKAGE.cacheName;
+        const url = new URL('static/sdcc-wasm/sdcc.wasm', TOOLCHAIN_PACKAGE.origin).href;
+        const body = 'optional-installation-fixture';
+        const obsolete = ['brickwright-v1', `${cacheName}-extra`, 'bw-sdcc-wasm-v0'];
+        if ((await cacheKeys(page)).includes(cacheName)) {
+            throw new Error('a fresh activation created an optional compiler cache before user installation');
+        }
+        if (requested.length) throw new Error(`compiler prefetch before installation: ${requested.join(', ')}`);
+
+        const seeded = await page.evaluate(async ({cacheName, url, body, obsolete}) => {
+            const cache = await caches.open(cacheName);
+            await cache.put(url, new Response(body));
+            for (const name of obsolete) {
+                await (await caches.open(name)).put(url, new Response('obsolete'));
+            }
+            return (await cache.match(url))?.text();
+        }, {cacheName, url, body, obsolete});
+        if (seeded !== body) throw new Error('the optional-cache fixture did not land; retention would be vacuous');
+
+        state.sw += '\n// optional-toolchain-update-fixture\n';
+        await page.evaluate(async () => {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (!registration?.active || registration.active !== navigator.serviceWorker.controller) {
+                throw new Error('the previous worker must control the page before its update');
+            }
+            window.__toolchainPreviousWorker = registration.active;
+            await registration.update();
+        });
+        await page.waitForFunction(async () => {
+            const registration = await navigator.serviceWorker.getRegistration();
+            return registration?.active && registration.active !== window.__toolchainPreviousWorker &&
+                registration.active.state === 'activated' &&
+                navigator.serviceWorker.controller === registration.active;
+        }, null, {timeout: COND_TIMEOUT_MS});
+
+        const keys = await cacheKeys(page);
+        if (!keys.includes(cacheName)) throw new Error('worker activation erased the optional compiler installation');
+        const survivingObsolete = obsolete.filter(name => keys.includes(name));
+        if (survivingObsolete.length) {
+            throw new Error(`worker activation kept obsolete/lookalike caches: ${survivingObsolete.join(', ')}`);
+        }
+        await context.setOffline(true);
+        const retained = await page.evaluate(async ({cacheName, url}) => {
+            if (!(await caches.keys()).includes(cacheName)) return null;
+            return (await (await caches.open(cacheName)).match(url))?.text();
+        }, {cacheName, url});
+        if (retained !== body) throw new Error('the installed compiler bytes did not survive the update offline');
+        if (requested.length) throw new Error(`worker lifecycle requested compiler payloads: ${requested.join(', ')}`);
+    } finally {
+        await context.close();
+    }
+};
+
 // (e) is added below SCENARIOS' literal so (a)-(d) read in their original order.
 SCENARIOS['unhashed-chunk-after-deploy'] = async (browser) => {
     /** An unhashed lazy chunk (`chunks/[name].js`) keeps its URL across builds.
@@ -438,8 +506,14 @@ const MUTATIONS = [
         why: 'without the purge, renaming CACHE stops being a recovery: the poisoned ' +
             'caches simply accumulate beside the new one.',
         apply: (src) => src.replace(
-            'await Promise.all(keys.filter(k => k !== CACHE && k !== PREVIEW_CACHE && k !== RENDERED_PREVIEW_CACHE).map(k => caches.delete(k)));',
+            'await Promise.all(keys.filter(k => k !== CACHE && k !== PREVIEW_CACHE && k !== RENDERED_PREVIEW_CACHE && !OPTIONAL_TOOLCHAIN_CACHES.has(k)).map(k => caches.delete(k)));',
             'await Promise.all(keys.filter(() => false).map(k => caches.delete(k)));')
+    },
+    {
+        name: 'activate-erases-optional-toolchain',
+        scenario: 'optional-toolchain-survives-update',
+        why: 'an application worker update must not remove a separately installed compiler.',
+        apply: (src) => src.replace(' && !OPTIONAL_TOOLCHAIN_CACHES.has(k)', '')
     },
     {
         name: 'stale-while-revalidate-serves-cached-failures',

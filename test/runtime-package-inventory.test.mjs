@@ -19,11 +19,15 @@ test('the actual downloader takes its origin, cache and members from the invento
     // If any old hard-coded identity survives, the observed download is wrong.
     // No files or network are touched by this fixture.
     const script = `
+        import {createHash} from 'node:crypto';
         import inventory from ${JSON.stringify(new URL('runtime-package-inventory.cjs', overlay).href)};
         const record = inventory.packages.find(item => item.id === 'sdcc-wasm');
         record.origin = 'https://inventory.example.invalid/';
         record.cacheName = 'inventory-fixture-cache';
         record.files = ['fixture.js', 'fixture.wasm'];
+        record.integrity.artifacts = Object.fromEntries(record.files.map(name => [name, {
+            sha256: createHash('sha256').update('fixture').digest('hex'), bytes: 7
+        }]));
         const loader = await import(${JSON.stringify(new URL('sdcc-wasm/toolchain-source.js', overlay).href)});
         const bodies = new Map();
         const opened = [];
