@@ -7,6 +7,9 @@ import {readFileSync} from 'node:fs';
 import {EventEmitter} from 'node:events';
 import {VduDecoder} from 'bw-board/vdu-decoder.js';
 import {validateCrispBasicPseudocode, crispBasicModeError} from '../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
+import {basicProfileFor, hiddenCodeDrafts, standaloneBasicDrafts}
+    from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
+import {extractCrispBasicEditorMethods} from '../scripts/lib/crispbasic-editor-harness.mjs';
 
 const editorSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 function between(source, start, end) {
@@ -15,11 +18,13 @@ function between(source, start, end) {
     assert.ok(a >= 0 && b > a, `Actual method boundaries: ${start}`);
     return source.slice(a, b);
 }
-const editorMethods = between(editorSource, '    async loadCrispBasicRunner () {', '    // Fetch examples/index.json once') +
-    between(editorSource, '    componentWillUnmount () {', '    // Current-locale string table') +
-    between(editorSource, '    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?');
+const editorMethods = extractCrispBasicEditorMethods(editorSource) +
+    between(editorSource, '    convertedSource ({pseudocode, warnings = []}) {', '    /**\n     * Is the RCX extension loaded?');
+const labels = between(editorSource, 'const LANG_LABEL = ', '\n');
 const Editor = new Function('DOS_LANG', 'validateCrispBasicPseudocode', 'crispBasicModeError',
-    `return class {${editorMethods}}`)({}, validateCrispBasicPseudocode, crispBasicModeError);
+    'basicProfileFor', 'hiddenCodeDrafts', 'standaloneBasicDrafts',
+    `${labels} return class {${editorMethods}}`)({}, validateCrispBasicPseudocode, crispBasicModeError,
+    basicProfileFor, hiddenCodeDrafts, standaloneBasicDrafts);
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -28,7 +33,7 @@ const deferred = () => {
 const done = {status: 'completed', exitCode: 0};
 const turn = () => new Promise(resolve => setImmediate(resolve));
 
-function fixture({loadGate = null, disposeGate = null} = {}) {
+function fixture({loadGate = null, disposeGate = null, runFailure = null, disposeFailure = null} = {}) {
     const entered = deferred();
     const completion = deferred();
     const calls = [];
@@ -37,10 +42,18 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
     let runnerOptions;
     let created = 0;
     const runner = {
-        async run(source, options) { calls.push(['run', source, options]); entered.resolve(); return completion.promise; },
+        async run(source, options) {
+            calls.push(['run', source, options]); entered.resolve();
+            if (runFailure) throw runFailure;
+            return completion.promise;
+        },
         cancel() { calls.push(['cancel']); completion.resolve({status: 'cancelled'}); return true; },
         async reset() { calls.push(['reset']); completion.resolve({status: 'cancelled'}); },
-        async dispose() { calls.push(['dispose']); if (disposeGate) await disposeGate.promise; },
+        async dispose() {
+            calls.push(['dispose']);
+            if (disposeGate) await disposeGate.promise;
+            if (disposeFailure) throw disposeFailure;
+        },
         writeInput(value) { calls.push(['input', value]); },
         endInput() { calls.push(['end-input']); }
     };
@@ -48,6 +61,8 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
     Object.assign(editor, {
         state: {lang: 'basic', basicProfile: 'bbc', basicEngine: 'crispbasic', basicFilename: 'lesson.bas',
             basicOutputRunId: 0, basicInputMethod: null, basicInputValue: '', basicInputError: '',
+            basicLineNumbers: false, basicPortableLibrary: false, basicWarnings: [],
+            libraryTarget: null, authoredSources: {},
             buffers: {basic: 'PRINT "hello"\n'}, running: false, basicResetting: false},
         props: {vm: {runtime: {}}},
         L: {basicCrispLoading: 'loading', basicCrispRunning: 'running', basicCrispError: 'error',
@@ -59,7 +74,6 @@ function fixture({loadGate = null, disposeGate = null} = {}) {
         setState(update) { const patch = typeof update === 'function' ? update(this.state) : update;
             if (patch) Object.assign(this.state, patch); },
         setHighlightedLine(line) { highlights.push(line); },
-        activeCode() { return this.state.buffers[this.state.lang]; },
         async loadCrispBasicRunner() {
             if (loadGate) await loadGate.promise;
             return {createCrispBasicRunner(options) { created++; runnerOptions = options; emit = options.onEvent; return runner; }};
@@ -162,6 +176,56 @@ test('the three 8086 BASIC routes retain their explicit selection', async () => 
     }
 });
 
+test('the selected machine resolves a stale BBC preference before Run and portable generation', async () => {
+    const f = fixture();
+    Object.assign(f.editor.state, {libraryTarget: 'i8086', basicProfile: 'bbc', basicPortableLibrary: true});
+    const routed = [];
+    f.editor.runBasicOn8086 = source => routed.push(source);
+    assert.equal(f.editor.selectedBasicProfile().id, 'i8086');
+    assert.deepEqual(f.editor.basicGenerationOptions(), {profile: 'ms', lineNumbers: false});
+    await f.editor.runBasic();
+    assert.deepEqual(routed, [f.editor.state.buffers.basic]);
+    assert.equal(f.created, 0);
+
+    f.editor.state.libraryTarget = 'arduino-uno';
+    assert.equal(f.editor.selectedBasicProfile(), undefined, 'an unrelated machine does not inherit BBC Run');
+    await f.editor.runBasic();
+    assert.equal(f.created, 0);
+    assert.equal(routed.length, 1);
+});
+
+test('standalone Pico BASIC edits and runs its own draft while retaining the BBC source', async () => {
+    const f = fixture();
+    const original = f.editor.state.buffers.basic;
+    Object.assign(f.editor.state, {libraryTarget: 'pico', basicProfile: 'pico-piccolo'});
+    f.editor.state.buffers['pico-piccolo'] = 'print "old Piccolo"\n';
+    f.editor.setActiveCode('print "new Piccolo"\n');
+    assert.equal(f.editor.activeCode(), 'print "new Piccolo"\n');
+    assert.equal(f.editor.state.buffers.basic, original);
+    const routed = [];
+    f.editor.runPicoBasic = (source, profile) => routed.push([source, profile.id, profile.media]);
+    await f.editor.runBasic();
+    assert.deepEqual(routed, [['print "new Piccolo"\n', 'pico-piccolo', 'piccolobasic-rp2040']]);
+    assert.equal(f.created, 0);
+    Object.assign(f.editor.state, {libraryTarget: null, basicProfile: 'bbc'});
+    assert.equal(f.editor.activeCode(), original);
+});
+
+test('editing BASIC preserves standalone and machine-hidden authored drafts', () => {
+    const f = fixture();
+    f.editor.state.libraryTarget = 'pico';
+    Object.assign(f.editor.state.buffers, {pseudocode: 'DEVICE pico\n', javascript: 'const retained = 1;',
+        asm: 'retained assembly', nqc: 'retained NQC', 'pico-stefan': '10 PRINT "retained Stefan"'});
+    f.editor.state.authoredSources = {javascript: 'const retained = 1;'};
+    f.editor.setActiveCode('PRINT "new BBC"\n');
+    assert.equal(f.editor.state.buffers.basic, 'PRINT "new BBC"\n');
+    assert.equal(f.editor.state.buffers.javascript, 'const retained = 1;');
+    assert.equal(f.editor.state.authoredSources.javascript, 'const retained = 1;');
+    assert.equal(f.editor.state.buffers.asm, 'retained assembly');
+    assert.equal(f.editor.state.buffers.nqc, 'retained NQC');
+    assert.equal(f.editor.state.buffers['pico-stefan'], '10 PRINT "retained Stefan"');
+});
+
 test('Z80 refuses unnumbered, mixed or malformed numbering before loading its ROM', async () => {
     const originalFetch = globalThis.fetch;
     let fetched = 0;
@@ -251,6 +315,41 @@ test('BBC generation retains subset warnings and reports failed generation separ
         else assert.match(result.code, /Cannot show as BASIC/);
     }
 });
+
+test('portable generation follows the resolved profile and selected engine', () => {
+    for (const [libraryTarget, basicProfile, basicEngine, expected] of [
+        [null, 'bbc', 'crispbasic', {profile: 'bbc', lineNumbers: false, mode: 'crispbasic'}],
+        [null, 'bbc', 'z80', {profile: 'bbc', lineNumbers: false}],
+        ['i8086', 'bbc', 'crispbasic', {profile: 'ms', lineNumbers: false}],
+        ['pico', 'bbc', 'crispbasic', {profile: 'bbc', lineNumbers: false}]
+    ]) {
+        const f = fixture();
+        Object.assign(f.editor.state, {libraryTarget, basicProfile, basicEngine, basicPortableLibrary: true});
+        assert.deepEqual(f.editor.basicGenerationOptions(), expected);
+    }
+});
+
+for (const outcome of ['throws', 'BASIC error result']) {
+    test(`${outcome} survives disposal failure and the next Run waits for cleanup`, async () => {
+        const gate = deferred();
+        const primary = {kind: 'basic', filename: 'lesson.bas', line: 3, message: 'original BASIC failure'};
+        const f = fixture({disposeGate: gate, disposeFailure: new Error('secondary disposal failure'),
+            runFailure: outcome === 'throws' ? primary : null});
+        const pending = f.editor.runBasic();
+        await f.entered.promise;
+        if (outcome !== 'throws') f.completion.resolve({status: 'error', error: primary});
+        await turn();
+        assert.ok(f.calls.some(call => call[0] === 'dispose'));
+        assert.equal(f.editor.state.running, true, 'cleanup still owns Run');
+        await f.editor.runBasic();
+        assert.equal(f.created, 1);
+        gate.resolve();
+        await pending;
+        assert.equal(f.editor.state.running, false);
+        assert.equal(f.editor.state.basicDiagnostic.message, 'lesson.bas:3: original BASIC failure');
+        assert.deepEqual(f.highlights, [null, 3]);
+    });
+}
 
 test('Stop during the cold import prevents a late worker from starting', async () => {
     const gate = deferred(); const f = fixture({loadGate: gate});
@@ -356,15 +455,26 @@ test('a failed reset still disposes the adapter and reports the error', async ()
 
 test('unmount disposes an active session and all late view updates are ignored', async () => {
     const f = fixture(); const pending = f.editor.runBasic(); await f.entered.promise;
+    const adjacentCleanup = [];
+    f.editor._codeRunRequest = {source: 'owned console'};
+    f.editor._codeSession = {dispose() { adjacentCleanup.push('console'); }};
+    f.editor._picoBasicHardware = {
+        unmirror() { adjacentCleanup.push('mirror'); },
+        session: {close() { adjacentCleanup.push('Pico UART'); }}
+    };
     const previousWindow = globalThis.window;
     globalThis.window = {removeEventListener() {}};
     try { f.editor.componentWillUnmount(); }
     finally { if (previousWindow === undefined) delete globalThis.window; else globalThis.window = previousWindow; }
     const before = {...f.editor.state};
-    f.emit(view('late output', 'line')); await pending;
+    f.emit(view('late output', 'line')); await Promise.all([pending, f.editor._picoBasicClosing]);
     assert.deepEqual(f.editor.state, before);
     assert.ok(f.calls.some(c => c[0] === 'cancel'));
     assert.ok(f.calls.some(c => c[0] === 'dispose'));
+    assert.deepEqual(adjacentCleanup, ['console', 'mirror', 'Pico UART']);
+    assert.equal(f.editor._codeRunRequest, null);
+    assert.equal(f.editor._codeSession, null);
+    assert.equal(f.editor._picoBasicHardware, null);
 });
 
 test('unmount during import cannot start a worker', async () => {

@@ -5715,7 +5715,7 @@ class PseudocodeImporter extends React.Component {
             // Run owns a fresh adapter. Do not enable the next Run until its
             // worker and callbacks have been disposed, even on a host failure.
             try { if (run.runner) await run.runner.dispose(); }
-            catch (error) { failure = error; }
+            catch (error) { if (!failure && !result?.error) failure = error; }
             if (owns()) {
                 this._crispBasicRun = null;
                 const error = failure || (result && result.error);
@@ -7509,14 +7509,14 @@ class PseudocodeImporter extends React.Component {
                                 ■ {this.L.stop}
                             </button>
                         ) : null}
-                        {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                        {this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
                             <button type="button" onClick={() => this.resetCrispBasic()}
                                 disabled={this.state.basicResetting || (this.state.running && !this.state.crispBasicActive)}
                                 style={actionBtn} data-testid="bw-crispbasic-reset">
                                 {this.L.basicCrispReset}
                             </button>
                         ) : null}
-                        {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                        {this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
                             <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}>
                                 <input type="checkbox" checked={Boolean(this.state.basicConnectCircuit)}
                                     disabled={this.state.running || this.state.basicResetting}
@@ -7526,7 +7526,7 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.basicConnectCircuit}
                             </label>
                         ) : null}
-                        {process.env.BW_ENABLE_CAD && this.state.lang === 'basic' && this.state.basicProfile === 'bbc' &&
+                        {process.env.BW_ENABLE_CAD && this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' &&
                             this.state.basicEngine === 'crispbasic' && this.state.basicConnectCircuit ? (
                             <label style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}
                                 title={this.L.basicConnectCadHint}>
@@ -7849,7 +7849,7 @@ class PseudocodeImporter extends React.Component {
                         </label>}
                     </div>
                 )}
-                {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                {this.state.lang === 'basic' && this.selectedBasicProfile()?.id === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
                     <div style={{padding: '6px 12px', fontSize: 12, color: '#475569', flexShrink: 0}}
                         data-testid="bw-crispbasic-capabilities">
                         {this.L.basicCrispScope}

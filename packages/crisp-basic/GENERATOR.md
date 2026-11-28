@@ -2,7 +2,7 @@
 
 The shared implementation belongs to `CrispStrobe/sb3-creator`. Brickwright's
 `vendor-pins.json` adopts
-[`2c991d9a590d189eaad66c96951d4815a9f34e29`](https://github.com/CrispStrobe/sb3-creator/tree/2c991d9a590d189eaad66c96951d4815a9f34e29),
+[`b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a`](https://github.com/CrispStrobe/sb3-creator/tree/b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a),
 and the existing sync derives both tracked compiler mirrors. This revision
 provides explicit portable generation and a qualified BASIC-to-pseudocode
 source conversion. The ordinary BASIC-to-Blocks reader keeps its refusal
@@ -81,6 +81,7 @@ raises catchable `ERR208` (`unavailable`). There is no sensed-read fallback.
 | micro:bit / breakout | P0, P1, P2, P8, P12, P16 → their numbers; the host validates the actual exposed subset |
 | Calliope mini | P0..P3 → 0..3 |
 | Circuit Playground Express (`CPX`) | A0..A7 → 0..7, without the Arduino offset |
+| PyBadge | D2, D3, D5, D6, D9..D13 → their numbers; A0..A5 → 14..19 |
 | ATtiny85 | PB0..PB4 → 8..12; reset-capable PB5 excluded |
 | ATtiny88 DIP | PB0..PB7 → 8..15; PC0..PC5 → 16..21; PC7 → 23; PD0..PD7 → 24..31; PC6 and PA pads excluded |
 | STM32F030 | PA0..PA7, PA9, PA10 → the bit number; PB1 → 17 |
@@ -92,9 +93,10 @@ The map is not a claim about physical packages or connections. Unsupported
 devices, pins, aliases, modes, input writes, PORT and peripheral PART declarations
 refuse. Explicit CHIP/MAP layouts also refuse; the portable Eater mapping refers
 only to the default VIA. Analog I/O, PWM, tones and interrupts are not implemented
-by this library. The host's 16 electrical profiles are broader than these
+by this library. The host's 18 electrical profiles are broader than these
 language maps: ESP32-S040 and ATtiny88 QFN-only PA pins currently require authored
-BASIC. This is not a native MCU firmware generator.
+BASIC. PyBadge's RX/TX, FREE and SPI host pads also require authored BASIC;
+SDA/SCL and STEMMA aliases remain excluded. This is not a native MCU firmware generator.
 
 Wait and supported timed statements convert seconds to integer simulated
 milliseconds, rounding nearest with half upward: `0.0004 → 0`, `0.0005 → 1`,
@@ -137,12 +139,20 @@ The strict reverse subset includes:
 - Static device/pin metadata and exactly matching ordered pin-mode preludes;
   proven 0/1 electrical writes, atomic latch toggles and solved reads with ACTIVE
   LOW compensation.
-- Literal integer millisecond delays and `FNmillis`, recovered as rounded
+- Literal integer millisecond delays, the recognized checked computed waits
+  described below, and `FNmillis`, recovered as rounded
   portable timer milliseconds. Conversion does not rewind the solver.
 - Lowercase unsuffixed numeric scalars, finite numeric literals, qualified
   arithmetic and comparisons, and quoted literal PRINT strings. BBC comparison
   values retain their -1/0 meaning when used as numbers; digital reads are not
   duplicated by normalization.
+- Lowercase numeric procedures after the main `END`, with read-only numeric
+  parameters and forward, nested or recursive calls. Arguments retain one
+  evaluation each, left to right, including electrical reads and numeric
+  BBC Boolean values. Generated parameter names avoid authored globals.
+- `PI`, `SQR`, `LN`, signed integer `MOD`, and degree-based trigonometry in the
+  exact forms `SIN(RAD(x))`, `COS(RAD(x))`, `TAN(RAD(x))`, `DEG(ASN(x))`,
+  `DEG(ACS(x))` and `DEG(ATN(x))`. Ceiling uses `-INT(-x)`, evaluating `x` once.
 - Structured IF/ELSE, WHILE, FOREVER and literal-count FOR loops whose private
   counters are unobserved, plus recognized generated numbered control-flow
   shapes. Numbered input must be complete, unique and increasing.
@@ -157,6 +167,32 @@ unsupported graphics and altered helper definitions refuse the whole conversion.
 The reader returns no partial pseudocode. Diagnostics name physical source lines
 and numbered BASIC lines where present. Runtime request/work budgets still apply;
 translation can add bookkeeping instructions or clock observations.
+
+Numeric procedures use lowercase unsuffixed names and definitions after the
+top-level `END`. Assigning parameters, `LOCAL`, `BYREF`, arrays, typed/string
+parameters, nested definitions, mismatched calls and early `ENDPROC` refuse.
+Free references to another procedure's parameter also refuse because BBC's
+dynamic scope cannot silently become a pseudocode global. Different procedures
+may use the same parameter spelling; generated argument names remain distinct.
+Static pin setup still belongs to the main-program prelude.
+
+A computed wait is reversible only with the recognized adjacent range guard
+and half-up integer rounding. For a qualified scalar or procedure parameter:
+
+```basic
+IF seconds<0 OR seconds>2147483.647 THEN ERROR 204,"CrispBASIC wait seconds outside 0..2147483.647"
+PROCdelay(INT(seconds*1000+0.5))
+```
+
+The recreated program preserves that guard, its BASIC error, evaluation order
+and timing: 0.0015 seconds followed by 0.0025 seconds advances 2 ms then 3 ms.
+An arbitrary computed `PROCdelay` expression still refuses. See the executable
+[reusable pulse example](examples/procedure-pulses.bas).
+
+Math-domain errors remain BASIC errors. General radian trigonometric forms
+refuse because converting through degrees could change floating-point rounding.
+Signed `MOD` retains BBC integer-remainder semantics, which is another reason
+the saved source must keep its CrispBASIC runtime requirement.
 
 For authored pin calls, metadata must describe their executable setup. For
 example, this source can use the portable reader:

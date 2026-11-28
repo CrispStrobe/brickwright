@@ -8,7 +8,7 @@ profile and does not acquire a circuit. No physical hardware is accessed.
 The implementation belongs to Brickwright's GUI integration, outside the
 interpreter package. The package still has no React or `bw-board` dependency.
 The adapter consumes `bw-board` revision
-[`8be0fbc8e91f1ed2cebb26883210efceef9234cc`](https://github.com/CrispStrobe/bw-board/commit/8be0fbc8e91f1ed2cebb26883210efceef9234cc).
+[`49a21d82112b9bdca91bec9ffb4c7412fb05a849`](https://github.com/CrispStrobe/bw-board/commit/49a21d82112b9bdca91bec9ffb4c7412fb05a849).
 That revision owns the reusable `portable-gpio.js` profile inventory and resolver;
 the GUI adapter owns run lifecycle, time, resource limits and cleanup. See
 [PORTABILITY.md](PORTABILITY.md) for the distinction between host platforms,
@@ -22,11 +22,12 @@ failure. The adapter never creates an inferred replacement bench. The circuit
 must contain exactly one supported GPIO controller; ambiguous multi-controller
 circuits and unsupported controllers are refused.
 
-The 16 admitted profiles define these logical pin numbers:
+The 18 admitted profiles define these logical pin numbers:
 
 | Circuit kind | BASIC logical IDs | Circuit terminals | Modeled logic supply |
 | --- | --- | --- | --- |
 | `mcu` | `8 × port + bit`, ports/bits `0..7` | `Pport.bit`, such as `P1.0` → `8` | Bench voltage |
+| `stc15_mcu` | `0..31`, `33,34,36,37,44,45` | P0–P3, P4.1/P4.2/P4.4/P4.5, P5.4/P5.5 | 5 V |
 | `arduino_uno` | `0..13`, `14..19` | `d0..d13`, `a0..a5` | 5 V |
 | `arduino_nano` | `0..13`, `14..19` | `d0..d13`, `a0..a5` | 5 V |
 | `arduino_mega` | `0..53`, `54..69` | `d0..d53`, `a0..a15` | 5 V |
@@ -35,6 +36,7 @@ The 16 admitted profiles define these logical pin numbers:
 | `microbit_breakout` | `0,1,2,8,12,16` | Corresponding `pN` terminals | 3.3 V |
 | `calliopemini` | `0..3` | `p0..p3` | 3.3 V |
 | `circuit_playground_express` | `0..7` | `a0..a7`; no Arduino analog offset | 3.3 V |
+| `pybadge` | `0,1,2,3,5,6,7,9..19,26..28` | RX/TX → 0/1; Dn → n; FREE → 7; A0–A5 → 14–19; MISO/MOSI/SCK → 26/27/28 | 3.3 V |
 | `esp8266` | `0..5`, `12..15` | Corresponding `gpioN` terminals | 3.3 V |
 | `esp32_4848s040` | `1,2,40,43,44` | H1 `gpio1`, `gpio2`, `gpio40`, `gpio43`, `gpio44` | 3.3 V |
 | `attiny85` | `8..13` | `pb0..pb5` | 5 V |
@@ -50,6 +52,12 @@ electrical models expose some reset-capable port pads; the host does not model
 reset or fuses. Generation uses a stricter map and excludes ATtiny85 PB5 and
 ATtiny88 PC6. These host profiles also do not imply matching `DEVICE` syntax:
 ESP32-S040 and ATtiny88 QFN-only PA pins currently require authored BASIC.
+PyBadge's SDA/SCL and STEMMA aliases are excluded. The generator admits its
+D2/D3/D5/D6/D9–D13 and A0–A5 pads; RX/TX, FREE and SPI pads require authored
+BASIC. STC15 uses the registered DIP-40 model's
+actual port pads, including P4/P5, and excludes power/ground. Reset, crystal
+and fuse behavior are not emulated. Its accepted generator device spelling
+does not grant access to unexposed ports.
 
 The resolver matches complete canonical terminal names without case sensitivity.
 Duplicate logical aliases refuse. Unverified kinds and missing/incompatible
@@ -213,15 +221,38 @@ and cancellation. Pulldowns disable the driver after Stop or an interpreter
 error even if the circuit was initially powered. Stop preserves residual rotor
 state; it does not reset or instantaneously brake the motor.
 
-### CAD and Robot Lab boundary
+### Shared Circuit and CAD clock
 
-CAD/circuit coupling and BASIC each require exclusive ownership of the circuit
-clock, so they cannot run together through these adapters. CAD coupling uses
-reset origins and fixed 5 ms mechanical frames; BASIC preserves existing circuit
-history and supports individual integer-millisecond delays. Direct integration
-needs one shared clock owner, a defined policy for sub-5 ms delays and cleanup
-across both electrical and mechanical state. The robot example qualifies the
-electrical motor model, without CAD body or Robot Lab world motion.
+In a CAD-enabled build, **Connect CAD motors** extends a connected Circuit run
+to the saved Circuit-to-CAD motor bindings. Open the CAD Editor first. The
+adapter verifies the document identity and connections before acquiring either
+clock. It uses one owner for BASIC, Circuit and CAD; competing firmware,
+debugger and independent coupling sessions still refuse while that owner is
+active. No reset is performed when BASIC acquires the existing world.
+
+Electrical delays retain exact integer-millisecond timing. Motor torque is
+integrated over each fixed 5 ms mechanical interval and the resulting average
+torque drives that interval. A 2 ms delay followed by 3 ms produces one physics
+step. Ending between boundaries never invents a rounded-up or partial step.
+Mechanical feedback is published at completed boundaries. The captured clocks
+may have different absolute origins, while `FNmillis` starts at zero per run.
+
+Stop releases GPIO synchronously, then waits for any submitted physics step.
+The final snapshot is reconciled before shaft ownership and the Circuit model
+reservation are released. The CAD controller's `releasePaused()` keeps the
+world, poses, velocities and last completed clock available for reacquisition;
+cleanup submits no extra motion step. Run/Reset await this handoff. A bounded
+cleanup timeout or invalid final clock remains visible, and late replies cannot
+mutate a replacement board. A BASIC execution error remains the primary error
+if cleanup also fails. Model edits are refused while asynchronous cleanup is
+pending, so undo/rebuild cannot capture temporary BASIC drives.
+
+The [CAD robot example](examples/cad-robot/README.md) uses the shipped Scout
+project and runs for 205 ms, or 41 mechanical steps. Real-worker tests check
+signed motion with both motor polarities, free-body movement, a second run in
+the identical retained world, and Stop after submission of an actual physics
+command. Robot Lab worlds and physical hardware remain separate execution
+targets. This qualification covers the saved Scout motor/joint path.
 
 ## Qualification scope
 

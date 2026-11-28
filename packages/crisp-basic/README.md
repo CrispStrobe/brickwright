@@ -1,7 +1,7 @@
 # CrispBASIC
 
-CrispBASIC is a BBC BASIC-compatible runtime project, incubated in Brickwright
-on `feature/crispbasic`. It is intended to become an independent repository.
+CrispBASIC is a BBC BASIC-compatible runtime project maintained in Brickwright's
+`packages/crisp-basic` directory. It is intended to become an independent repository.
 
 **CrispBASIC runs real BASIC through the pinned BBCSDL C interpreter in native
 processes and restricted WebAssembly workers.** Both use the original tokenizer
@@ -18,14 +18,20 @@ electrical solver, and integer-millisecond delays advance its clock cooperativel
 The portable generator emits an explicit `PROCdigitalToggle` operation backed
 by retained output latches, including when the solved electrical level differs
 from the requested output. Explicit portable mode now reads a qualified BASIC
-subset back into pseudocode, including digital pins, simulated time and simple
-pen paths. Saved source retains a CrispBASIC requirement; generic Blocks and
+subset back into pseudocode, including digital pins, simulated time, reusable
+numeric procedures, checked computed waits, qualified math and simple pen
+paths. Saved source retains a CrispBASIC requirement; generic Blocks and
 other execution targets refuse that source before changing a project.
 Full graphics, source debugging and physical-board targets remain subsequent work.
 
-See [PORTABILITY.md](PORTABILITY.md) for supported host platforms, all 16
+The optional **Connect CAD motors** path coordinates the Circuit clock with
+the saved CAD motor/joint connections and preserves the paused physical world
+after completion or Stop. The [CAD robot example](examples/cad-robot/README.md)
+uses the shipped Scout project and the real physics worker.
+
+See [PORTABILITY.md](PORTABILITY.md) for supported host platforms, all 18
 electrical controller profiles, two-way source conversion, canvas behavior and
-the real motor-circuit example.
+the real motor-circuit and CAD robot examples.
 
 ## Try it
 

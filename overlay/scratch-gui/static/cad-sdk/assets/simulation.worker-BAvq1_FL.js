@@ -46,7 +46,7 @@ function s6(...e) {
 function O3(e) {
   return new DataView(e.buffer, e.byteOffset, e.byteLength);
 }
-function e2(e, n) {
+function n2(e, n) {
   return e << 32 - n | e >>> n;
 }
 const Z7 = /* @ts-ignore */ typeof Uint8Array.from([]).toHex == "function" && typeof Uint8Array.fromHex == "function", $7 = /* @__PURE__ */ Array.from({ length: 256 }, (e, n) => n.toString(16).padStart(2, "0"));
@@ -120,8 +120,8 @@ class n9 {
     const o = n === t ? i : O3(n), a = this.outputLen, c = a / 4, s = this.get();
     if (a % 4 || c > s.length)
       throw new Error("invalid outputLen");
-    for (let d = 0; d < c; d++)
-      o.setUint32(4 * d, s[d], l);
+    for (let h = 0; h < c; h++)
+      o.setUint32(4 * h, s[h], l);
   }
   digest() {
     const { buffer: n, outputLen: t } = this;
@@ -244,15 +244,15 @@ class r9 extends n9 {
     for (let m = 0; m < 16; m++, i += 4)
       _2[m] = t.getUint32(i, !1);
     for (let m = 16; m < 64; m++) {
-      const h = _2[m - 15], g = _2[m - 2], v = e2(h, 7) ^ e2(h, 18) ^ h >>> 3, y = e2(g, 17) ^ e2(g, 19) ^ g >>> 10;
+      const d = _2[m - 15], g = _2[m - 2], v = n2(d, 7) ^ n2(d, 18) ^ d >>> 3, y = n2(g, 17) ^ n2(g, 19) ^ g >>> 10;
       _2[m] = y + _2[m - 7] + v + _2[m - 16] | 0;
     }
-    let { A: r, B: l, C: q, D: o, E: a, F: c, G: s, H: d } = this;
+    let { A: r, B: l, C: q, D: o, E: a, F: c, G: s, H: h } = this;
     for (let m = 0; m < 64; m++) {
-      const h = e2(a, 6) ^ e2(a, 11) ^ e2(a, 25), g = d + h + Q7(a, c, s) + i9[m] + _2[m] | 0, y = (e2(r, 2) ^ e2(r, 13) ^ e2(r, 22)) + e9(r, l, q) | 0;
-      d = s, s = c, c = a, a = o + g | 0, o = q, q = l, l = r, r = g + y | 0;
+      const d = n2(a, 6) ^ n2(a, 11) ^ n2(a, 25), g = h + d + Q7(a, c, s) + i9[m] + _2[m] | 0, y = (n2(r, 2) ^ n2(r, 13) ^ n2(r, 22)) + e9(r, l, q) | 0;
+      h = s, s = c, c = a, a = o + g | 0, o = q, q = l, l = r, r = g + y | 0;
     }
-    r = r + this.A | 0, l = l + this.B | 0, q = q + this.C | 0, o = o + this.D | 0, a = a + this.E | 0, c = c + this.F | 0, s = s + this.G | 0, d = d + this.H | 0, this.set(r, l, q, o, a, c, s, d);
+    r = r + this.A | 0, l = l + this.B | 0, q = q + this.C | 0, o = o + this.D | 0, a = a + this.E | 0, c = c + this.F | 0, s = s + this.G | 0, h = h + this.H | 0, this.set(r, l, q, o, a, c, s, h);
   }
   roundClean() {
     s6(_2);
@@ -998,7 +998,7 @@ const q9 = {
   "Paste objects": "Objekte einfügen",
   "Restore coded project": "Codeprojekt wiederherstellen",
   "Restored iteration {0}": "Version {0} wiederhergestellt"
-}, h9 = {
+}, d9 = {
   "Project actions": "Projektaktionen",
   "New project": "Neues Projekt",
   "Open project": "Projekt öffnen",
@@ -1119,7 +1119,7 @@ const q9 = {
   "Based on nominal threaded length; end runouts are trimmed": "Bezogen auf die Nenngewindelänge; die Ausläufe an den Enden werden beschnitten",
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
-}, d9 = {
+}, h9 = {
   "An edge length match refers to a missing edge.": "Eine Kantenlängenbeziehung verweist auf eine fehlende Kante.",
   "Match lengths between straight edges.": "Gleiche die Längen gerader Kanten ab.",
   "Invalid region edge length match.": "Ungültige Kantenlängenbeziehung in der Region.",
@@ -4242,7 +4242,7 @@ function K9(e) {
   return o4 = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", o4;
 }
 function u(e, ...n) {
-  const t = typeof e == "string" ? e : e.reduce((r, l, q) => r + (q ? `{${q - 1}}` : "") + l, ""), i = o4 === "de" ? k9[t] ?? v9[t] ?? y9[t] ?? S9[t] ?? q9[t] ?? w9[t] ?? _9[t] ?? a9[t] ?? s9[t] ?? m9[t] ?? o9[t] ?? c9[t] ?? d9[t] ?? f9[t] ?? b9[t] ?? p9[t] ?? g9[t] ?? A9[t] ?? x9[t] ?? h9[t] ?? u9[t] ?? E9[t] ?? D9[t] ?? M9[t] ?? C9[t] ?? z9[t] ?? I9[t] ?? P9[t] ?? R9[t] ?? F9[t] ?? T9[t] ?? B9[t] ?? V9[t] ?? t : t;
+  const t = typeof e == "string" ? e : e.reduce((r, l, q) => r + (q ? `{${q - 1}}` : "") + l, ""), i = o4 === "de" ? k9[t] ?? v9[t] ?? y9[t] ?? S9[t] ?? q9[t] ?? w9[t] ?? _9[t] ?? a9[t] ?? s9[t] ?? m9[t] ?? o9[t] ?? c9[t] ?? h9[t] ?? f9[t] ?? b9[t] ?? p9[t] ?? g9[t] ?? A9[t] ?? x9[t] ?? d9[t] ?? u9[t] ?? E9[t] ?? D9[t] ?? M9[t] ?? C9[t] ?? z9[t] ?? I9[t] ?? P9[t] ?? R9[t] ?? F9[t] ?? T9[t] ?? B9[t] ?? V9[t] ?? t : t;
   return typeof e == "string" ? i : i.replace(/\{(\d+)\}/g, (r, l) => String(n[Number(l)]));
 }
 const N9 = 44, m6 = 256, m4 = "[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}", O9 = new RegExp(`^(?:${m4}#\\d{1,5}/){0,8}${m4}:f\\d{1,6}$`), P4 = (e) => typeof e == "string" && e.length <= 1e3 && O9.test(e), c4 = (e) => !!e && typeof e == "object" && !Array.isArray(e), T4 = (e) => c4(e) && Object.hasOwn(e, "references");
@@ -4297,7 +4297,7 @@ const W9 = ["1:5", "1:2", "1:1", "2:1", "5:1"], u4 = 4, j3 = 24, c6 = { number: 
   "symmetry",
   "circular-runout",
   "total-runout"
-], X9 = ["straightness", "flatness", "circularity", "cylindricity"], Y9 = ["parallelism", "perpendicularity", "angularity", "concentricity", "symmetry", "circular-runout", "total-runout"], u6 = ["straightness", "parallelism", "perpendicularity", "angularity", "position", "concentricity"], h6 = "ABCDEFGHJKLMNPRSTUVWXYZ".split(""), J9 = 24;
+], X9 = ["straightness", "flatness", "circularity", "cylindricity"], Y9 = ["parallelism", "perpendicularity", "angularity", "concentricity", "symmetry", "circular-runout", "total-runout"], u6 = ["straightness", "parallelism", "perpendicularity", "angularity", "position", "concentricity"], d6 = "ABCDEFGHJKLMNPRSTUVWXYZ".split(""), J9 = 24;
 function Q9(e) {
   if (typeof e != "string" || e.length > 2100)
     return !1;
@@ -4312,11 +4312,11 @@ function Q9(e) {
     return !1;
   }
 }
-const Pe = (e) => !!e && typeof e == "object" && !Array.isArray(e), ye = (e) => typeof e == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(e) && !["constructor", "prototype", "__proto__"].includes(e), l0 = (e) => typeof e == "string" && /^vertex:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every(ye), d6 = (e) => typeof e == "string" && /^arc:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every(ye), n3 = (e) => e.startsWith("circle:") && ye(e.slice(7)), f6 = (e) => typeof e == "string" && (/^bounds:(sw|se|nw|ne)$/.test(e) || n3(e) || l0(e));
+const Pe = (e) => !!e && typeof e == "object" && !Array.isArray(e), ye = (e) => typeof e == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(e) && !["constructor", "prototype", "__proto__"].includes(e), l0 = (e) => typeof e == "string" && /^vertex:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every(ye), h6 = (e) => typeof e == "string" && /^arc:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every(ye), n3 = (e) => e.startsWith("circle:") && ye(e.slice(7)), f6 = (e) => typeof e == "string" && (/^bounds:(sw|se|nw|ne)$/.test(e) || n3(e) || l0(e));
 function t3(e, n) {
   return Number.isFinite(e) && Number.isFinite(n) && e >= 10 && e <= 265 && n >= 28 && n <= 176;
 }
-const p6 = (e) => Array.isArray(e) && e.length === 3 && Array.from(e).every((n) => typeof n == "number" && Number.isFinite(n) && Math.abs(n) <= 1e6), h4 = (e) => typeof e == "number" ? Number.isFinite(e) && Math.abs(e) <= 1e5 : typeof e == "string" && !!e.trim() && e.length <= 160 && !/[\u0000-\u001f]/.test(e), g6 = (e) => Pe(e) && h4(e.at) && h4(e.position);
+const p6 = (e) => Array.isArray(e) && e.length === 3 && Array.from(e).every((n) => typeof n == "number" && Number.isFinite(n) && Math.abs(n) <= 1e6), d4 = (e) => typeof e == "number" ? Number.isFinite(e) && Math.abs(e) <= 1e5 : typeof e == "string" && !!e.trim() && e.length <= 160 && !/[\u0000-\u001f]/.test(e), g6 = (e) => Pe(e) && d4(e.at) && d4(e.position);
 function en(e) {
   if (e.drawings === void 0)
     return;
@@ -4341,7 +4341,7 @@ function en(e) {
     if (i.explode !== void 0 && (e.version < 50 || !v2(i.source) || !Pe(i.explode) || Object.keys(i.explode).some((r) => r !== "view" && r !== "factor") || !ye(i.explode.view) || !e.assembly?.views?.some((r) => r.id === i.explode.view) || typeof i.explode.factor != "number" || !(i.explode.factor > 0 && i.explode.factor <= 1)) || i.partsList !== void 0 && (e.version < 22 || !v2(i.source) || typeof i.partsList != "boolean") || (i.exactEdges !== void 0 || i.autoDimensions !== void 0) && (e.version < Z9 || !v2(i.source) || i.exactEdges !== void 0 && i.exactEdges !== !0 || i.autoDimensions !== void 0 && (i.autoDimensions !== !0 || i.exactEdges !== !0)))
       throw t();
     if ((i.datums !== void 0 || i.tolerances !== void 0) && nn(i, e.version, t), i.section !== void 0) {
-      if (e.version < 10 || !Pe(i.section) || !["u", "v"].includes(String(i.section.axis)) || !h4(i.section.position))
+      if (e.version < 10 || !Pe(i.section) || !["u", "v"].includes(String(i.section.axis)) || !d4(i.section.position))
         throw t();
       const r = i.section.jog;
       if (r !== void 0 && (e.version < 17 || !g6(r)))
@@ -4370,7 +4370,7 @@ function en(e) {
       for (const l of i.curveDimensions) {
         if (!Pe(l) || !ye(l.id) || r.has(l.id) || !ye(l.bodyId) || l.view !== 0 && l.view !== 1 && l.view !== 2 || !Array.isArray(l.at) || l.at.length !== 2 || !t3(l.at[0], l.at[1]))
           throw t();
-        const q = l.source, o = Pe(q) && d6(q.anchor);
+        const q = l.source, o = Pe(q) && h6(q.anchor);
         if (q !== "cylinder" && (!Pe(q) || !ye(q.sketchId) || !ye(q.profileId) || typeof q.anchor != "string" || !o && !n3(q.anchor)) || l.kind !== "radius" && (o ? l.kind !== "arc-length" : l.kind !== "diameter"))
           throw t();
         r.add(l.id);
@@ -4384,7 +4384,7 @@ function en(e) {
         if (!Pe(l) || !ye(l.id) || r.has(l.id) || !ye(l.sketchId) || typeof l.from != "string" || !Array.isArray(l.at) || l.at.length !== 2 || !t3(l.at[0], l.at[1]) || l.kind === "aligned" && e.version < 19 || e.version < 18 && [l.from, l.to].some(l0))
           throw t();
         if (l.kind === "radius" || l.kind === "arc-length") {
-          const q = d6(l.from) || l.kind === "radius" && n3(l.from);
+          const q = h6(l.from) || l.kind === "radius" && n3(l.from);
           if (e.version < 20 || !q || l.to !== void 0)
             throw t();
         } else if (l.kind === "diameter") {
@@ -4403,10 +4403,10 @@ function nn(e, n, t) {
     throw t();
   const i = new Set([...e.edgeDimensions ?? [], ...e.curveDimensions ?? []].map((q) => q.id)), r = /* @__PURE__ */ new Set(), l = (q) => ye(q.id) && !i.has(q.id) && Q9(q.target) && (q.view === 0 || q.view === 1 || q.view === 2) && Array.isArray(q.at) && q.at.length === 2 && t3(q.at[0], q.at[1]);
   if (e.datums !== void 0) {
-    if (!Array.isArray(e.datums) || !e.datums.length || e.datums.length > h6.length)
+    if (!Array.isArray(e.datums) || !e.datums.length || e.datums.length > d6.length)
       throw t();
     for (const q of e.datums) {
-      if (!Pe(q) || Object.keys(q).some((o) => !["id", "letter", "target", "view", "at"].includes(o)) || !l(q) || !h6.includes(q.letter) || r.has(q.letter))
+      if (!Pe(q) || Object.keys(q).some((o) => !["id", "letter", "target", "view", "at"].includes(o)) || !l(q) || !d6.includes(q.letter) || r.has(q.letter))
         throw t();
       i.add(q.id), r.add(q.letter);
     }
@@ -4430,17 +4430,17 @@ function nn(e, n, t) {
 function v2(e) {
   return Pe(e) && e.kind === "assembly";
 }
-function d4(e) {
+function h4(e) {
   return e.kind === "outline" ? [e] : e.kind === "region" && Array.isArray(e.loops) ? e.loops.filter((n) => n?.kind === "outline") : [];
 }
 function tn(e, n) {
-  for (const { points: t, vertexIds: i } of d4(e))
+  for (const { points: t, vertexIds: i } of h4(e))
     if (i !== void 0 && (n < 18 || !Array.isArray(i) || i.length !== t.length || !Array.from(i).every(ye) || new Set(i).size !== i.length))
       throw new Error(u("Invalid outline vertex identities."));
 }
 function rn(e, n, t) {
-  const i = d4(e);
-  for (const r of d4(n)) {
+  const i = h4(e);
+  for (const r of h4(n)) {
     if (r.relations !== void 0 || n.kind === "region" && Array.isArray(n.edgeMatches) && n.edgeMatches.some((s) => s?.target === r.id || s?.reference === r.id) || n.kind === "region" && Array.isArray(n.placements) && n.placements.some((s) => s?.target === r.id && s.targetEdge || s?.reference === r.id && s.referenceEdge))
       continue;
     const l = i.find((s) => s.id === r.id && s.vertexIds);
@@ -4450,13 +4450,13 @@ function rn(e, n, t) {
       r.vertexIds = l.vertexIds.slice();
       continue;
     }
-    const q = (s) => JSON.stringify(s), o = new Map(l.points.map((s, d) => [q(s), d])), a = r.points.map((s) => {
-      const d = o.get(q(s));
-      return d === void 0 ? void 0 : l.vertexIds[d];
-    }), c = a.flatMap((s, d) => s === void 0 ? [d] : []);
+    const q = (s) => JSON.stringify(s), o = new Map(l.points.map((s, h) => [q(s), h])), a = r.points.map((s) => {
+      const h = o.get(q(s));
+      return h === void 0 ? void 0 : l.vertexIds[h];
+    }), c = a.flatMap((s, h) => s === void 0 ? [h] : []);
     if (c.length === 1 && a.length === l.points.length) {
-      const s = c[0], d = l.vertexIds[s];
-      a.includes(d) || (a[s] = d);
+      const s = c[0], h = l.vertexIds[s];
+      a.includes(h) || (a[s] = h);
     }
     r.vertexIds = a.map((s) => s ?? t());
   }
@@ -4496,16 +4496,16 @@ function cn(e, n) {
   if (!k2(e, "format version selectedFile quality evidence") || e.format !== "brickwright-library-collision-report" || e.version !== 1)
     return !1;
   const t = e.selectedFile;
-  if (!D5(t) || t.format !== "stl" || ![n.original, ...n.derivatives].some((h) => L2(h, t)))
+  if (!D5(t) || t.format !== "stl" || ![n.original, ...n.derivatives].some((d) => L2(d, t)))
     return !1;
   const i = e.quality, r = n.quality;
-  if (!r || !k2(i, "fileSha256 toolVersion checkedOn policy checks diagnostics triangles boundsMm signedVolumeMm3 quality") || i.fileSha256 !== t.sha256 || i.toolVersion !== "brickwright-stl-quality/1" || i.checkedOn !== r.checkedOn || i.toolVersion !== r.toolVersion || i.fileSha256 !== r.fileSha256 || !k2(i.checks, "parseable closedPositiveVolume withinSizeLimits withinTriangleLimits") || !Object.values(i.checks).every((h) => h === "pass"))
+  if (!r || !k2(i, "fileSha256 toolVersion checkedOn policy checks diagnostics triangles boundsMm signedVolumeMm3 quality") || i.fileSha256 !== t.sha256 || i.toolVersion !== "brickwright-stl-quality/1" || i.checkedOn !== r.checkedOn || i.toolVersion !== r.toolVersion || i.fileSha256 !== r.fileSha256 || !k2(i.checks, "parseable closedPositiveVolume withinSizeLimits withinTriangleLimits") || !Object.values(i.checks).every((d) => d === "pass"))
     return !1;
   const { physics: l, collisionReport: q, ...o } = r;
-  if (!L2(i.quality, o) || !L2(i.policy, r.screeningPolicy) || !["parseable", "closedPositiveVolume", "withinSizeLimits", "withinTriangleLimits"].every((h) => r[h] === !0) || !Array.isArray(i.diagnostics) || i.diagnostics.length > 100 || !i.diagnostics.every((h) => typeof h == "string" && h.length <= 4096 && !/[\u0000-\u001f]/.test(h)))
+  if (!L2(i.quality, o) || !L2(i.policy, r.screeningPolicy) || !["parseable", "closedPositiveVolume", "withinSizeLimits", "withinTriangleLimits"].every((d) => r[d] === !0) || !Array.isArray(i.diagnostics) || i.diagnostics.length > 100 || !i.diagnostics.every((d) => typeof d == "string" && d.length <= 4096 && !/[\u0000-\u001f]/.test(d)))
     return !1;
   const a = i.policy;
-  if (!D5(a) || a.maxAnalysisBytes !== 16777216 || a.maxAnalysisTriangles !== 83333 || t.bytes > a.maxAnalysisBytes || a.maxTriangles > a.maxAnalysisTriangles || !Number.isSafeInteger(i.triangles) || i.triangles < 1 || i.triangles > a.maxTriangles || !k2(i.boundsMm, "min max") || !b6(i.boundsMm.min) || !b6(i.boundsMm.max) || !i.boundsMm.max.every((h, g) => h >= i.boundsMm.min[g] && h - i.boundsMm.min[g] <= a.maxExtentMm) || !U5(i.signedVolumeMm3))
+  if (!D5(a) || a.maxAnalysisBytes !== 16777216 || a.maxAnalysisTriangles !== 83333 || t.bytes > a.maxAnalysisBytes || a.maxTriangles > a.maxAnalysisTriangles || !Number.isSafeInteger(i.triangles) || i.triangles < 1 || i.triangles > a.maxTriangles || !k2(i.boundsMm, "min max") || !b6(i.boundsMm.min) || !b6(i.boundsMm.max) || !i.boundsMm.max.every((d, g) => d >= i.boundsMm.min[g] && d - i.boundsMm.min[g] <= a.maxExtentMm) || !U5(i.signedVolumeMm3))
     return !1;
   const c = e.evidence;
   if (!k2(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== t.sha256 || c.checkedOn !== i.checkedOn || !L2(c.toMillimetresZUp, a.toMillimetresZUp) || c.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10", "1.1.0-bw.11"].includes(c.engineVersion) || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !mn(c.geometrySha256) || !U5(c.sourceVolumeMm3))
@@ -4513,8 +4513,8 @@ function cn(e, n) {
   const s = c.certificate;
   if (!(k2(s, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || k2(s, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || s.sourceSHA256 !== c.geometrySha256 || s.algorithm !== "manifold-compound/v1" || s.strategy !== "bsp" || !Number.isSafeInteger(s.maxHulls) || s.maxHulls < 1 || s.maxHulls > 2048 || !Number.isSafeInteger(c.hulls) || c.hulls < 1 || c.hulls > s.maxHulls)
     return !1;
-  const d = s.tolerance;
-  if (!k2(d, "volumeFraction boundsMm") || !U5(d.volumeFraction) || d.volumeFraction > 0.1 || !U5(d.boundsMm) || d.boundsMm > 1 || ![s.missingVolumeMm3, s.extraVolumeMm3, s.relativeError, s.boundsErrorMm, s.numericalResidualVolumeMm3 ?? 0].every(q0) || s.relativeError > d.volumeFraction || s.boundsErrorMm > d.boundsMm)
+  const h = s.tolerance;
+  if (!k2(h, "volumeFraction boundsMm") || !U5(h.volumeFraction) || h.volumeFraction > 0.1 || !U5(h.boundsMm) || h.boundsMm > 1 || ![s.missingVolumeMm3, s.extraVolumeMm3, s.relativeError, s.boundsErrorMm, s.numericalResidualVolumeMm3 ?? 0].every(q0) || s.relativeError > h.volumeFraction || s.boundsErrorMm > h.boundsMm)
     return !1;
   const m = (s.missingVolumeMm3 + s.extraVolumeMm3 + (s.numericalResidualVolumeMm3 ?? 0)) / c.sourceVolumeMm3;
   return !Number.isFinite(m) || Math.abs(m - s.relativeError) > Number.EPSILON * 16 * Math.max(1, m, s.relativeError) || r.physics && (r.physics.qualified !== !0 || r.physics.engine !== c.engine || r.physics.engineVersion !== c.engineVersion || r.physics.qualifierVersion !== c.qualifierVersion) ? !1 : L2(c.nativeCheck, { build: "debug", ground: !1, steps: 1, stepSeconds: 5e-3 });
@@ -4527,9 +4527,9 @@ const un = [
   "BSD-3-Clause",
   "CC-BY-3.0",
   "CC-BY-4.0"
-], hn = ["cad-script", "openscad", "jscad"];
-function dn(e) {
-  return hn.includes(e);
+], dn = ["cad-script", "openscad", "jscad"];
+function hn(e) {
+  return dn.includes(e);
 }
 const Ke = (e) => !!e && typeof e == "object" && !Array.isArray(e), Ie = (e, n = 4096) => typeof e == "string" && e.trim().length > 0 && e.length <= n && !/[\u0000-\u001f]/.test(e), a0 = (e) => typeof e == "string" && /^[a-f0-9]{64}$/.test(e), q5 = (e) => {
   if (!Ie(e, 8192))
@@ -4580,14 +4580,14 @@ function bn(e) {
       if (!Ke(a) || !Le(a, "format version rootPath dependencies") || !["brickwright-openscad-bundle", "brickwright-ldraw-bundle"].includes(String(a.format)) || a.version !== 1 || !_6(a.rootPath, c) || !Array.isArray(a.dependencies) || !a.dependencies.length || a.dependencies.length > 31 || !N2(i.original) || !i.original.path || i.original.format !== c || i.editableSource !== void 0)
         l("Invalid local source bundle (maximum 32 original files).");
       else {
-        const s = /* @__PURE__ */ new Set([a.rootPath]), d = /* @__PURE__ */ new Set([i.original.path]);
+        const s = /* @__PURE__ */ new Set([a.rootPath]), h = /* @__PURE__ */ new Set([i.original.path]);
         let m = i.original.bytes;
-        for (const h of a.dependencies) {
-          if (!Ke(h) || !Le(h, "path file author sourceUrl sourceRevision licence") || !_6(h.path, c) || s.has(h.path) || !N2(h.file) || !h.file.path || h.file.format !== c || d.has(h.file.path) || !Ie(h.author, 1e3) || !q5(h.sourceUrl) || !pn(h.sourceRevision) || !w6(h.licence)) {
+        for (const d of a.dependencies) {
+          if (!Ke(d) || !Le(d, "path file author sourceUrl sourceRevision licence") || !_6(d.path, c) || s.has(d.path) || !N2(d.file) || !d.file.path || d.file.format !== c || h.has(d.file.path) || !Ie(d.author, 1e3) || !q5(d.sourceUrl) || !pn(d.sourceRevision) || !w6(d.licence)) {
             l("Every source dependency requires a distinct local original, pinned revision and reviewed grant.");
             continue;
           }
-          s.add(h.path), d.add(h.file.path), m += h.file.bytes;
+          s.add(d.path), h.add(d.file.path), m += d.file.bytes;
         }
         m > 32768 && l("Original source bundle exceeds 32 KiB.");
       }
@@ -4611,7 +4611,7 @@ function bn(e) {
         l("Invalid quality evidence.");
       else {
         const c = [i.original, ...Array.isArray(i.derivatives) ? i.derivatives : []];
-        if (c.some((s) => N2(s) && s.sha256 === a.fileSha256) || l("Quality evidence must name an original or derivative hash."), c.some((s) => N2(s) && s.sha256 === a.fileSha256 && dn(s.format)) && l("Geometry quality evidence must identify rendered geometry, not program source."), !a.parseable && (a.closedPositiveVolume || a.withinSizeLimits || a.withinTriangleLimits) && l("Unparseable geometry cannot pass geometry checks."), a.screeningPolicy !== void 0) {
+        if (c.some((s) => N2(s) && s.sha256 === a.fileSha256) || l("Quality evidence must name an original or derivative hash."), c.some((s) => N2(s) && s.sha256 === a.fileSha256 && hn(s.format)) && l("Geometry quality evidence must identify rendered geometry, not program source."), !a.parseable && (a.closedPositiveVolume || a.withinSizeLimits || a.withinTriangleLimits) && l("Unparseable geometry cannot pass geometry checks."), a.screeningPolicy !== void 0) {
           const s = a.screeningPolicy;
           (!Ke(s) || !Le(s, "maxTriangles maxExtentMm toMillimetresZUp maxAnalysisBytes maxAnalysisTriangles") || !Number.isSafeInteger(s.maxTriangles) || s.maxTriangles < 1 || !Number.isSafeInteger(s.maxAnalysisTriangles) || s.maxAnalysisTriangles < s.maxTriangles || !Number.isSafeInteger(s.maxAnalysisBytes) || s.maxAnalysisBytes < 1 || typeof s.maxExtentMm != "number" || !Number.isFinite(s.maxExtentMm) || s.maxExtentMm <= 0 || !gn(s.toMillimetresZUp)) && l("Invalid reproducible mesh screening policy.");
         }
@@ -4794,7 +4794,7 @@ var w = {
 function a5(e) {
   return e === 10 || e === 13 || e === 8232 || e === 8233;
 }
-function h0(e, n, t) {
+function d0(e, n, t) {
   t === void 0 && (t = e.length);
   for (var i = n; i < t; i++) {
     var r = e.charCodeAt(i);
@@ -4803,7 +4803,7 @@ function h0(e, n, t) {
   }
   return -1;
 }
-var d0 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, Se = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, f0 = Object.prototype, Mn = f0.hasOwnProperty, Cn = f0.toString, s5 = Object.hasOwn || (function(e, n) {
+var h0 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, Se = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, f0 = Object.prototype, Mn = f0.hasOwnProperty, Cn = f0.toString, s5 = Object.hasOwn || (function(e, n) {
   return Mn.call(e, n);
 }), k6 = Array.isArray || (function(e) {
   return Cn.call(e) === "[object Array]";
@@ -4825,7 +4825,7 @@ var y3 = function(n, t, i) {
 };
 function p0(e, n) {
   for (var t = 1, i = 0; ; ) {
-    var r = h0(e, i, n);
+    var r = d0(e, i, n);
     if (r < 0)
       return new M5(t, n - i);
     ++t, i = r;
@@ -5270,8 +5270,8 @@ S1.parseStatement = function(e, n, t) {
       var c = this.isAwaitUsing(!1) ? "await using" : this.isUsing(!1) ? "using" : null;
       if (c)
         return this.allowUsing || this.raise(this.start, "Using declaration cannot appear in the top level when source type is `script` or in the bare case statement"), e && this.raise(this.start, "Using declaration is not allowed in single-statement positions"), c === "await using" && (this.canAwait || this.raise(this.start, "Await using cannot appear outside of async function"), this.next()), this.next(), this.parseVar(r, !1, c), this.semicolon(), this.finishNode(r, "VariableDeclaration");
-      var s = this.value, d = this.parseExpression();
-      return i === w.name && d.type === "Identifier" && this.eat(w.colon) ? this.parseLabeledStatement(r, s, d, e) : this.parseExpressionStatement(r, d);
+      var s = this.value, h = this.parseExpression();
+      return i === w.name && h.type === "Identifier" && this.eat(w.colon) ? this.parseLabeledStatement(r, s, h, e) : this.parseExpressionStatement(r, h);
   }
 };
 S1.parseBreakContinueStatement = function(e, n) {
@@ -5305,8 +5305,8 @@ S1.parseForStatement = function(e) {
     var a = this.startNode();
     return this.next(), o === "await using" && (this.canAwait || this.raise(this.start, "Await using cannot appear outside of async function"), this.next()), this.parseVar(a, !0, o), this.finishNode(a, "VariableDeclaration"), this.parseForAfterInit(e, a, n);
   }
-  var c = this.containsEsc, s = new E3(), d = this.start, m = n > -1 ? this.parseExprSubscripts(s, "await") : this.parseExpression(!0, s);
-  return this.type === w._in || (q = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (n > -1 ? (this.type === w._in && this.unexpected(n), e.await = !0) : q && this.options.ecmaVersion >= 8 && (m.start === d && !c && m.type === "Identifier" && m.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), l && q && this.raise(m.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(m, !1, s), this.checkLValPattern(m), this.parseForIn(e, m)) : (this.checkExpressionErrors(s, !0), n > -1 && this.unexpected(n), this.parseFor(e, m));
+  var c = this.containsEsc, s = new E3(), h = this.start, m = n > -1 ? this.parseExprSubscripts(s, "await") : this.parseExpression(!0, s);
+  return this.type === w._in || (q = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (n > -1 ? (this.type === w._in && this.unexpected(n), e.await = !0) : q && this.options.ecmaVersion >= 8 && (m.start === h && !c && m.type === "Identifier" && m.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), l && q && this.raise(m.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(m, !1, s), this.checkLValPattern(m), this.parseForIn(e, m)) : (this.checkExpressionErrors(s, !0), n > -1 && this.unexpected(n), this.parseFor(e, m));
 };
 S1.parseForAfterInit = function(e, n, t) {
   return (this.type === w._in || this.options.ecmaVersion >= 6 && this.isContextual("of")) && n.declarations.length === 1 ? (this.type === w._in ? ((n.kind === "using" || n.kind === "await using") && !n.declarations[0].init && this.raise(this.start, "Using declaration is not allowed in for-in loops"), this.options.ecmaVersion >= 9 && t > -1 && this.unexpected(t)) : this.options.ecmaVersion >= 9 && (e.await = t > -1), this.parseForIn(e, n)) : (t > -1 && this.unexpected(t), this.parseFor(e, n));
@@ -5436,7 +5436,7 @@ S1.parseClassElement = function(e) {
     (this.eatContextual("get") || this.eatContextual("set")) && (this.isClassElementNameStart() ? q = a : i = a);
   }
   if (i ? (t.computed = !1, t.key = this.startNodeAt(this.lastTokStart, this.lastTokStartLoc), t.key.name = i, this.finishNode(t.key, "Identifier")) : this.parseClassElementName(t), n < 13 || this.type === w.parenL || q !== "method" || r || l) {
-    var c = !t.static && h3(t, "constructor"), s = c && e;
+    var c = !t.static && d3(t, "constructor"), s = c && e;
     c && q !== "method" && this.raise(t.key.start, "Constructor can't have get/set modifier"), t.kind = c ? "constructor" : q, this.parseClassMethod(t, r, l, s);
   } else
     this.parseClassField(t);
@@ -5450,12 +5450,12 @@ S1.parseClassElementName = function(e) {
 };
 S1.parseClassMethod = function(e, n, t, i) {
   var r = e.key;
-  e.kind === "constructor" ? (n && this.raise(r.start, "Constructor can't be a generator"), t && this.raise(r.start, "Constructor can't be an async method")) : e.static && h3(e, "prototype") && this.raise(r.start, "Classes may not have a static property named prototype");
+  e.kind === "constructor" ? (n && this.raise(r.start, "Constructor can't be a generator"), t && this.raise(r.start, "Constructor can't be an async method")) : e.static && d3(e, "prototype") && this.raise(r.start, "Classes may not have a static property named prototype");
   var l = e.value = this.parseMethod(n, t, i);
   return e.kind === "get" && l.params.length !== 0 && this.raiseRecoverable(l.start, "getter should have no params"), e.kind === "set" && l.params.length !== 1 && this.raiseRecoverable(l.start, "setter should have exactly one param"), e.kind === "set" && l.params[0].type === "RestElement" && this.raiseRecoverable(l.params[0].start, "Setter cannot use rest params"), this.finishNode(e, "MethodDefinition");
 };
 S1.parseClassField = function(e) {
-  return h3(e, "constructor") ? this.raise(e.key.start, "Classes can't have a field named 'constructor'") : e.static && h3(e, "prototype") && this.raise(e.key.start, "Classes can't have a static field named 'prototype'"), this.eat(w.eq) ? (this.enterScope(B5 | S3), e.value = this.parseMaybeAssign(), this.exitScope()) : e.value = null, this.semicolon(), this.finishNode(e, "PropertyDefinition");
+  return d3(e, "constructor") ? this.raise(e.key.start, "Classes can't have a field named 'constructor'") : e.static && d3(e, "prototype") && this.raise(e.key.start, "Classes can't have a static field named 'prototype'"), this.eat(w.eq) ? (this.enterScope(B5 | S3), e.value = this.parseMaybeAssign(), this.exitScope()) : e.value = null, this.semicolon(), this.finishNode(e, "PropertyDefinition");
 };
 S1.parseClassStaticBlock = function(e) {
   e.body = [];
@@ -5488,7 +5488,7 @@ function Fn(e, n) {
   var t = n.key.name, i = e[t], r = "true";
   return n.type === "MethodDefinition" && (n.kind === "get" || n.kind === "set") && (r = (n.static ? "s" : "i") + n.kind), i === "iget" && r === "iset" || i === "iset" && r === "iget" || i === "sget" && r === "sset" || i === "sset" && r === "sget" ? (e[t] = "true", !1) : i ? !0 : (e[t] = r, !1);
 }
-function h3(e, n) {
+function d3(e, n) {
   var t = e.computed, i = e.key;
   return !t && (i.type === "Identifier" && i.name === n || i.type === "Literal" && i.value === n);
 }
@@ -5801,31 +5801,31 @@ He.checkLValInnerPattern = function(e, n, t) {
       this.checkLValPattern(e, n, t);
   }
 };
-var Xe = function(n, t, i, r, l) {
+var Ye = function(n, t, i, r, l) {
   this.token = n, this.isExpr = !!t, this.preserveSpace = !!i, this.override = r, this.generator = !!l;
-}, he = {
-  b_stat: new Xe("{", !1),
-  b_expr: new Xe("{", !0),
-  b_tmpl: new Xe("${", !1),
-  p_stat: new Xe("(", !1),
-  p_expr: new Xe("(", !0),
-  q_tmpl: new Xe("`", !0, !0, function(e) {
+}, de = {
+  b_stat: new Ye("{", !1),
+  b_expr: new Ye("{", !0),
+  b_tmpl: new Ye("${", !1),
+  p_stat: new Ye("(", !1),
+  p_expr: new Ye("(", !0),
+  q_tmpl: new Ye("`", !0, !0, function(e) {
     return e.tryReadTemplateToken();
   }),
-  f_stat: new Xe("function", !1),
-  f_expr: new Xe("function", !0),
-  f_expr_gen: new Xe("function", !0, !1, null, !0),
-  f_gen: new Xe("function", !1, !1, null, !0)
+  f_stat: new Ye("function", !1),
+  f_expr: new Ye("function", !0),
+  f_expr_gen: new Ye("function", !0, !1, null, !0),
+  f_gen: new Ye("function", !1, !1, null, !0)
 }, o5 = ve.prototype;
 o5.initialContext = function() {
-  return [he.b_stat];
+  return [de.b_stat];
 };
 o5.curContext = function() {
   return this.context[this.context.length - 1];
 };
 o5.braceIsBlock = function(e) {
   var n = this.curContext();
-  return n === he.f_expr || n === he.f_stat ? !0 : e === w.colon && (n === he.b_stat || n === he.b_expr) ? !n.isExpr : e === w._return || e === w.name && this.exprAllowed ? Re.test(this.input.slice(this.lastTokEnd, this.start)) : e === w._else || e === w.semi || e === w.eof || e === w.parenR || e === w.arrow ? !0 : e === w.braceL ? n === he.b_stat : e === w._var || e === w._const || e === w.name ? !1 : !this.exprAllowed;
+  return n === de.f_expr || n === de.f_stat ? !0 : e === w.colon && (n === de.b_stat || n === de.b_expr) ? !n.isExpr : e === w._return || e === w.name && this.exprAllowed ? Re.test(this.input.slice(this.lastTokEnd, this.start)) : e === w._else || e === w.semi || e === w.eof || e === w.parenR || e === w.arrow ? !0 : e === w.braceL ? n === de.b_stat : e === w._var || e === w._const || e === w.name ? !1 : !this.exprAllowed;
 };
 o5.inGeneratorContext = function() {
   for (var e = this.context.length - 1; e >= 1; e--) {
@@ -5848,33 +5848,33 @@ w.parenR.updateContext = w.braceR.updateContext = function() {
     return;
   }
   var e = this.context.pop();
-  e === he.b_stat && this.curContext().token === "function" && (e = this.context.pop()), this.exprAllowed = !e.isExpr;
+  e === de.b_stat && this.curContext().token === "function" && (e = this.context.pop()), this.exprAllowed = !e.isExpr;
 };
 w.braceL.updateContext = function(e) {
-  this.context.push(this.braceIsBlock(e) ? he.b_stat : he.b_expr), this.exprAllowed = !0;
+  this.context.push(this.braceIsBlock(e) ? de.b_stat : de.b_expr), this.exprAllowed = !0;
 };
 w.dollarBraceL.updateContext = function() {
-  this.context.push(he.b_tmpl), this.exprAllowed = !0;
+  this.context.push(de.b_tmpl), this.exprAllowed = !0;
 };
 w.parenL.updateContext = function(e) {
   var n = e === w._if || e === w._for || e === w._with || e === w._while;
-  this.context.push(n ? he.p_stat : he.p_expr), this.exprAllowed = !0;
+  this.context.push(n ? de.p_stat : de.p_expr), this.exprAllowed = !0;
 };
 w.incDec.updateContext = function() {
 };
 w._function.updateContext = w._class.updateContext = function(e) {
-  e.beforeExpr && e !== w._else && !(e === w.semi && this.curContext() !== he.p_stat) && !(e === w._return && Re.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === w.colon || e === w.braceL) && this.curContext() === he.b_stat) ? this.context.push(he.f_expr) : this.context.push(he.f_stat), this.exprAllowed = !1;
+  e.beforeExpr && e !== w._else && !(e === w.semi && this.curContext() !== de.p_stat) && !(e === w._return && Re.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === w.colon || e === w.braceL) && this.curContext() === de.b_stat) ? this.context.push(de.f_expr) : this.context.push(de.f_stat), this.exprAllowed = !1;
 };
 w.colon.updateContext = function() {
   this.curContext().token === "function" && this.context.pop(), this.exprAllowed = !0;
 };
 w.backQuote.updateContext = function() {
-  this.curContext() === he.q_tmpl ? this.context.pop() : this.context.push(he.q_tmpl), this.exprAllowed = !1;
+  this.curContext() === de.q_tmpl ? this.context.pop() : this.context.push(de.q_tmpl), this.exprAllowed = !1;
 };
 w.star.updateContext = function(e) {
   if (e === w._function) {
     var n = this.context.length - 1;
-    this.context[n] === he.f_expr ? this.context[n] = he.f_expr_gen : this.context[n] = he.f_gen;
+    this.context[n] === de.f_expr ? this.context[n] = de.f_expr_gen : this.context[n] = de.f_gen;
   }
   this.exprAllowed = !0;
 };
@@ -5967,7 +5967,7 @@ R1.parseExprOp = function(e, n, t, i, r) {
     o && (l = w.logicalAND.binop);
     var a = this.value;
     this.next();
-    var c = this.start, s = this.startLoc, d = this.parseExprOp(this.parseMaybeUnary(null, !1, !1, r), c, s, l, r), m = this.buildBinary(n, t, e, d, a, q || o);
+    var c = this.start, s = this.startLoc, h = this.parseExprOp(this.parseMaybeUnary(null, !1, !1, r), c, s, l, r), m = this.buildBinary(n, t, e, h, a, q || o);
     return (q && this.type === w.coalesce || o && (this.type === w.logicalOR || this.type === w.logicalAND)) && this.raiseRecoverable(this.start, "Logical expressions and coalesce expressions cannot be mixed. Wrap either by parentheses"), this.parseExprOp(m, n, t, i, r);
   }
   return e;
@@ -6042,12 +6042,12 @@ R1.parseSubscript = function(e, n, t, i, r, l, q) {
     var s = this.startNodeAt(n, t);
     s.object = e, c ? (s.property = this.parseExpression(), this.expect(w.bracketR)) : this.type === w.privateId && e.type !== "Super" ? s.property = this.parsePrivateIdent() : s.property = this.parseIdent(this.options.allowReserved !== "never"), s.computed = !!c, o && (s.optional = a), e = this.finishNode(s, "MemberExpression");
   } else if (!i && this.eat(w.parenL)) {
-    var d = new E3(), m = this.yieldPos, h = this.awaitPos, g = this.awaitIdentPos;
+    var h = new E3(), m = this.yieldPos, d = this.awaitPos, g = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
-    var v = this.parseExprList(w.parenR, this.options.ecmaVersion >= 8, !1, d);
+    var v = this.parseExprList(w.parenR, this.options.ecmaVersion >= 8, !1, h);
     if (r && !a && this.shouldParseAsyncArrow())
-      return this.checkPatternErrors(d, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = m, this.awaitPos = h, this.awaitIdentPos = g, this.parseSubscriptAsyncArrow(n, t, v, q);
-    this.checkExpressionErrors(d, !0), this.yieldPos = m || this.yieldPos, this.awaitPos = h || this.awaitPos, this.awaitIdentPos = g || this.awaitIdentPos;
+      return this.checkPatternErrors(h, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = m, this.awaitPos = d, this.awaitIdentPos = g, this.parseSubscriptAsyncArrow(n, t, v, q);
+    this.checkExpressionErrors(h, !0), this.yieldPos = m || this.yieldPos, this.awaitPos = d || this.awaitPos, this.awaitIdentPos = g || this.awaitIdentPos;
     var y = this.startNodeAt(n, t);
     y.callee = e, y.arguments = v, o && (y.optional = a), e = this.finishNode(y, "CallExpression");
   } else if (this.type === w.backQuote) {
@@ -6068,7 +6068,7 @@ R1.parseExprAtom = function(e, n, t) {
     case w.name:
       var l = this.start, q = this.startLoc, o = this.containsEsc, a = this.parseIdent(!1);
       if (this.options.ecmaVersion >= 8 && !o && a.name === "async" && !this.canInsertSemicolon() && this.eat(w._function))
-        return this.overrideContext(he.f_expr), this.parseFunction(this.startNodeAt(l, q), 0, !1, !0, n);
+        return this.overrideContext(de.f_expr), this.parseFunction(this.startNodeAt(l, q), 0, !1, !0, n);
       if (r && !this.canInsertSemicolon()) {
         if (this.eat(w.arrow))
           return this.parseArrowExpression(this.startNodeAt(l, q), [a], !1, n);
@@ -6087,12 +6087,12 @@ R1.parseExprAtom = function(e, n, t) {
     case w._false:
       return i = this.startNode(), i.value = this.type === w._null ? null : this.type === w._true, i.raw = this.type.keyword, this.next(), this.finishNode(i, "Literal");
     case w.parenL:
-      var s = this.start, d = this.parseParenAndDistinguishExpression(r, n);
-      return e && (e.parenthesizedAssign < 0 && !this.isSimpleAssignTarget(d) && (e.parenthesizedAssign = s), e.parenthesizedBind < 0 && (e.parenthesizedBind = s)), d;
+      var s = this.start, h = this.parseParenAndDistinguishExpression(r, n);
+      return e && (e.parenthesizedAssign < 0 && !this.isSimpleAssignTarget(h) && (e.parenthesizedAssign = s), e.parenthesizedBind < 0 && (e.parenthesizedBind = s)), h;
     case w.bracketL:
       return i = this.startNode(), this.next(), i.elements = this.parseExprList(w.bracketR, !0, !0, e), this.finishNode(i, "ArrayExpression");
     case w.braceL:
-      return this.overrideContext(he.b_expr), this.parseObj(!1, e);
+      return this.overrideContext(de.b_expr), this.parseObj(!1, e);
     case w._function:
       return i = this.startNode(), this.next(), this.parseFunction(i, 0);
     case w._class:
@@ -6150,7 +6150,7 @@ R1.parseParenAndDistinguishExpression = function(e, n) {
   var t = this.start, i = this.startLoc, r, l = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var q = this.start, o = this.startLoc, a = [], c = !0, s = !1, d = new E3(), m = this.yieldPos, h = this.awaitPos, g;
+    var q = this.start, o = this.startLoc, a = [], c = !0, s = !1, h = new E3(), m = this.yieldPos, d = this.awaitPos, g;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== w.parenR; )
       if (c ? c = !1 : this.expect(w.comma), l && this.afterTrailingComma(w.parenR, !0)) {
         s = !0;
@@ -6162,11 +6162,11 @@ R1.parseParenAndDistinguishExpression = function(e, n) {
         );
         break;
       } else
-        a.push(this.parseMaybeAssign(!1, d, this.parseParenItem));
+        a.push(this.parseMaybeAssign(!1, h, this.parseParenItem));
     var v = this.lastTokEnd, y = this.lastTokEndLoc;
     if (this.expect(w.parenR), e && this.shouldParseArrow(a) && this.eat(w.arrow))
-      return this.checkPatternErrors(d, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = m, this.awaitPos = h, this.parseParenArrowList(t, i, a, n);
-    (!a.length || s) && this.unexpected(this.lastTokStart), g && this.unexpected(g), this.checkExpressionErrors(d, !0), this.yieldPos = m || this.yieldPos, this.awaitPos = h || this.awaitPos, a.length > 1 ? (r = this.startNodeAt(q, o), r.expressions = a, this.finishNodeAt(r, "SequenceExpression", v, y)) : r = a[0];
+      return this.checkPatternErrors(h, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = m, this.awaitPos = d, this.parseParenArrowList(t, i, a, n);
+    (!a.length || s) && this.unexpected(this.lastTokStart), g && this.unexpected(g), this.checkExpressionErrors(h, !0), this.yieldPos = m || this.yieldPos, this.awaitPos = d || this.awaitPos, a.length > 1 ? (r = this.startNodeAt(q, o), r.expressions = a, this.finishNodeAt(r, "SequenceExpression", v, y)) : r = a[0];
   } else
     r = this.parseParenExpression();
   if (this.options.preserveParens) {
@@ -6338,15 +6338,15 @@ R1.parseAwait = function(e) {
   var n = this.startNode();
   return this.next(), n.argument = this.parseMaybeUnary(null, !0, !1, e), this.finishNode(n, "AwaitExpression");
 };
-var d3 = ve.prototype;
-d3.raise = function(e, n) {
+var h3 = ve.prototype;
+h3.raise = function(e, n) {
   var t = p0(this.input, e);
   n += " (" + t.line + ":" + t.column + ")", this.sourceFile && (n += " in " + this.sourceFile);
   var i = new SyntaxError(n);
   throw i.pos = e, i.loc = t, i.raisedAt = this.pos, i;
 };
-d3.raiseRecoverable = d3.raise;
-d3.curPosition = function() {
+h3.raiseRecoverable = h3.raise;
+h3.curPosition = function() {
   if (this.options.locations)
     return new M5(this.curLine, this.pos - this.lineStart);
 };
@@ -7341,7 +7341,7 @@ G1.fullCharCodeAtPos = function() {
 G1.skipBlockComment = function() {
   var e = this.options.onComment && this.curPosition(), n = this.pos, t = this.input.indexOf("*/", this.pos += 2);
   if (t === -1 && this.raise(this.pos - 2, "Unterminated comment"), this.pos = t + 2, this.options.locations)
-    for (var i = void 0, r = n; (i = h0(this.input, r, this.pos)) > -1; )
+    for (var i = void 0, r = n; (i = d0(this.input, r, this.pos)) > -1; )
       ++this.curLine, r = this.lineStart = i;
   this.options.onComment && this.options.onComment(
     !0,
@@ -7392,7 +7392,7 @@ G1.skipSpace = function() {
         }
         break;
       default:
-        if (e > 8 && e < 14 || e >= 5760 && d0.test(String.fromCharCode(e)))
+        if (e > 8 && e < 14 || e >= 5760 && h0.test(String.fromCharCode(e)))
           ++this.pos;
         else
           break e;
@@ -7596,14 +7596,14 @@ G1.readRegexp = function() {
 };
 G1.readInt = function(e, n, t) {
   for (var i = this.options.ecmaVersion >= 12 && n === void 0, r = t && this.input.charCodeAt(this.pos) === 48, l = this.pos, q = 0, o = 0, a = 0, c = n ?? 1 / 0; a < c; ++a, ++this.pos) {
-    var s = this.input.charCodeAt(this.pos), d = void 0;
+    var s = this.input.charCodeAt(this.pos), h = void 0;
     if (i && s === 95) {
       r && this.raiseRecoverable(this.pos, "Numeric separator is not allowed in legacy octal numeric literals"), o === 95 && this.raiseRecoverable(this.pos, "Numeric separator must be exactly one underscore"), a === 0 && this.raiseRecoverable(this.pos, "Numeric separator is not allowed at the first of digits"), o = s;
       continue;
     }
-    if (s >= 97 ? d = s - 97 + 10 : s >= 65 ? d = s - 65 + 10 : s >= 48 && s <= 57 ? d = s - 48 : d = 1 / 0, d >= e)
+    if (s >= 97 ? h = s - 97 + 10 : s >= 65 ? h = s - 65 + 10 : s >= 48 && s <= 57 ? h = s - 48 : h = 1 / 0, h >= e)
       break;
-    o = s, q = q * e + d;
+    o = s, q = q * e + h;
   }
   return i && o === 95 && this.raiseRecoverable(this.pos - 1, "Numeric separator is not allowed at the last of digits"), this.pos === l || n != null && this.pos - l !== n ? null : q;
 };
@@ -7815,15 +7815,15 @@ ve.acorn = {
   TokenType: te,
   tokTypes: w,
   keywordTypes: I4,
-  TokContext: Xe,
-  tokContexts: he,
+  TokContext: Ye,
+  tokContexts: de,
   isIdentifierChar: M2,
   isIdentifierStart: l2,
   Token: O4,
   isNewLine: a5,
   lineBreak: Re,
   lineBreakG: Dn,
-  nonASCIIwhitespace: d0
+  nonASCIIwhitespace: h0
 };
 function at(e, n) {
   return ve.parse(e, n);
@@ -7895,14 +7895,14 @@ function mt(e, n) {
 function $0(e, n, t) {
   const i = [], r = t ? e.length : e.length - 1, l = () => new Error(u("Rounded outline exceeds the curve size or detail limit."));
   for (let q = 0; q < r; q++) {
-    const o = e[q], a = e[(q + 1) % e.length], c = n[q], s = a[0] - o[0], d = a[1] - o[1];
-    if (Math.hypot(s, d) < 1e-5)
+    const o = e[q], a = e[(q + 1) % e.length], c = n[q], s = a[0] - o[0], h = a[1] - o[1];
+    if (Math.hypot(s, h) < 1e-5)
       throw new Error(u(t ? "Outline edges must form one closed loop without crossings or overlaps." : "Consecutive path points must be distinct."));
     i.push(o);
-    const h = st(o, a, c, e.length);
-    if (!h)
+    const d = st(o, a, c, e.length);
+    if (!d)
       continue;
-    const { center: [g, v], radius: y, start: b, sweep: C, segments: P } = h;
+    const { center: [g, v], radius: y, start: b, sweep: C, segments: P } = d;
     if (i.length + P - 1 > E6)
       throw l();
     for (let M = 1; M < P; M++) {
@@ -7920,64 +7920,64 @@ const ct = ["ccw-minor", "cw-minor", "ccw-major", "cw-major"], H0 = 32, X0 = 48;
 function ut(e, n, t) {
   return (e + 1) % t === n || (n + 1) % t === e;
 }
-function ht(e) {
+function dt(e) {
   return e.kind === "radius" || e.kind === "tangent" || e.kind === "arc-tangent";
 }
-function dt(e, n) {
+function ht(e, n) {
   const { points: t, vertexIds: i, relations: r } = e;
   if (r === void 0)
     return [];
   const l = () => new Error(u("Invalid outline constraint definitions."));
   if (!Array.isArray(t) || t.length < 3 || t.length > H0 || !t.every(Ae) || !Array.isArray(i) || i.length !== t.length || !Array.isArray(r) || !r.length || r.length > X0)
     throw l();
-  const q = new Map(i.map((d, m) => [d, m])), o = /* @__PURE__ */ new Set(), a = /* @__PURE__ */ new Set(), c = (d) => {
-    if (typeof d != "number" && (typeof d != "string" || !d.trim() || d.length > 160))
+  const q = new Map(i.map((h, m) => [h, m])), o = /* @__PURE__ */ new Set(), a = /* @__PURE__ */ new Set(), c = (h) => {
+    if (typeof h != "number" && (typeof h != "string" || !h.trim() || h.length > 160))
       throw l();
-    const m = n(d);
+    const m = n(h);
     if (!Number.isFinite(m) || m < 0.01 || m > 1e5)
       throw new Error(u("Dimension must be between 0.01 and 100000 mm"));
     return m;
-  }, s = (d) => {
-    if (!Array.isArray(d) || d.length !== 2 || d.some((h) => typeof h != "string"))
+  }, s = (h) => {
+    if (!Array.isArray(h) || h.length !== 2 || h.some((d) => typeof d != "string"))
       throw l();
-    const m = q.get(d[0]);
-    if (m === void 0 || d[1] !== i[(m + 1) % t.length])
+    const m = q.get(h[0]);
+    if (m === void 0 || h[1] !== i[(m + 1) % t.length])
       throw l();
     return m;
   };
-  return Array.from(r, (d) => {
-    if (!d || typeof d != "object" || Array.isArray(d))
+  return Array.from(r, (h) => {
+    if (!h || typeof h != "object" || Array.isArray(h))
       throw l();
-    const m = s(d.edge);
-    switch (d.kind) {
+    const m = s(h.edge);
+    switch (h.kind) {
       case "horizontal":
       case "vertical":
-        return { kind: d.kind, edge: m };
+        return { kind: h.kind, edge: m };
       case "length":
-        return { kind: d.kind, edge: m, length: c(d.length) };
+        return { kind: h.kind, edge: m, length: c(h.length) };
       case "radius": {
-        if (!ct.includes(d.sweep))
+        if (!ct.includes(h.sweep))
           throw l();
         if (o.has(m))
           throw new Error(u("An arc can have only one driving radius."));
-        return o.add(m), { kind: d.kind, edge: m, radius: c(d.radius), sweep: d.sweep };
+        return o.add(m), { kind: h.kind, edge: m, radius: c(h.radius), sweep: h.sweep };
       }
       case "tangent":
       case "arc-tangent": {
-        const h = s(d.other), g = `${m}:${h}`;
-        if (!ut(m, h, t.length))
-          throw new Error(u(d.kind === "tangent" ? "Choose an adjoining straight segment for tangency." : "Choose an adjoining arc as the tangent reference."));
+        const d = s(h.other), g = `${m}:${d}`;
+        if (!ut(m, d, t.length))
+          throw new Error(u(h.kind === "tangent" ? "Choose an adjoining straight segment for tangency." : "Choose an adjoining arc as the tangent reference."));
         if (a.has(g))
           throw new Error(u("This tangent is already defined."));
-        return a.add(g), { kind: d.kind, edge: m, other: h };
+        return a.add(g), { kind: h.kind, edge: m, other: d };
       }
       case "parallel":
       case "perpendicular":
       case "equal": {
-        const h = s(d.other);
-        if (m === h)
+        const d = s(h.other);
+        if (m === d)
           throw l();
-        return { kind: d.kind, edge: m, other: h };
+        return { kind: h.kind, edge: m, other: d };
       }
       default:
         throw l();
@@ -8049,19 +8049,19 @@ function kt(e, n) {
     const c = q.get(a);
     if (c)
       return c;
-    const s = i.get(a), d = r.get(a);
-    if (!d)
+    const s = i.get(a), h = r.get(a);
+    if (!h)
       return s;
     if (l.has(a))
       throw new Error(u("Region loop positions cannot contain a cycle."));
     l.add(a);
-    const m = C6(o(d.reference), d.referenceEdge), h = C6(s, d.targetEdge);
-    if (!Ae(m) || !Ae(h) || s.points.length > j4 || !s.points.every(Ae))
+    const m = C6(o(h.reference), h.referenceEdge), d = C6(s, h.targetEdge);
+    if (!Ae(m) || !Ae(d) || s.points.length > j4 || !s.points.every(Ae))
       throw t();
-    const g = m[0] + n(d.offset[0]), v = m[1] + n(d.offset[1]);
+    const g = m[0] + n(h.offset[0]), v = m[1] + n(h.offset[1]);
     if (!Ae([g, v]))
       throw new Error(u("The positioned loop is outside the sketch coordinate range."));
-    const [y, b] = [g - h[0], v - h[1]];
+    const [y, b] = [g - d[0], v - d[1]];
     if (Math.abs(y) <= 1e-9 && Math.abs(b) <= 1e-9)
       return l.delete(a), q.set(a, s), s;
     const C = s.points.map(([M, B]) => [M + y, B + b]);
@@ -8096,7 +8096,7 @@ function H3(e, n) {
       throw t2();
     const q = r.radius ** 2;
     return S5(l).some(([o, a]) => {
-      const c = ([s, d]) => (s - r.center[0]) ** 2 + (d - r.center[1]) ** 2;
+      const c = ([s, h]) => (s - r.center[0]) ** 2 + (h - r.center[1]) ** 2;
       return Math.max(c(o), c(a)) >= q && St(r.center, o, a) <= q;
     });
   }
@@ -8120,19 +8120,19 @@ function At(e, n = (t) => typeof t == "number" ? t : NaN) {
     if (o.kind === "circle") {
       if (!Array.isArray(o.center) || o.center.length !== 2 || ![...o.center, o.radius].every((v) => typeof v == "number" || typeof v == "string" && v.trim()) || !Number.isInteger(o.segments) || o.segments < 12 || o.segments > 256)
         throw t2();
-      const d = [n(o.center[0]), n(o.center[1])], m = n(o.radius);
-      if (!Ae(d) || !Number.isFinite(m) || m < 0.01 || m > 1e5)
+      const h = [n(o.center[0]), n(o.center[1])], m = n(o.radius);
+      if (!Ae(h) || !Number.isFinite(m) || m < 0.01 || m > 1e5)
         throw t2();
-      s = { ...o, center: d, radius: m };
-      const [h, g] = d;
+      s = { ...o, center: h, radius: m };
+      const [d, g] = h;
       a = Array.from({ length: o.segments }, (v, y) => {
         const b = y * 2 * Math.PI / o.segments;
-        return [h + m * Math.cos(b), g + m * Math.sin(b)];
+        return [d + m * Math.cos(b), g + m * Math.sin(b)];
       }), c = Math.PI * m ** 2;
     } else if (o.kind === "outline") {
       e8(o, !0), a = G4(o.points, o.bulges), s = o;
-      const [d, m] = a[0];
-      c = S5(a).reduce((h, [[g, v], [y, b]]) => h + (g - d) * (b - m) - (v - m) * (y - d), 0) / 2;
+      const [h, m] = a[0];
+      c = S5(a).reduce((d, [[g, v], [y, b]]) => d + (g - h) * (b - m) - (v - m) * (y - h), 0) / 2;
     } else
       throw t2();
     if (i += a.length, i > vt)
@@ -8166,7 +8166,7 @@ function z6(e, n) {
   const t = w4(e, n);
   if (t < 0)
     throw new Error(u("An edge length match refers to a missing edge."));
-  if (e.bulges?.[t] || e.relations?.some((i) => ht(i) && w4(e, i.edge) === t))
+  if (e.bulges?.[t] || e.relations?.some((i) => dt(i) && w4(e, i.edge) === t))
     throw new Error(u("Match lengths between straight edges."));
   return t;
 }
@@ -8186,16 +8186,16 @@ function Et(e) {
   for (const c of i) {
     if (!c || typeof c.reference != "string" || typeof c.target != "string" || c.reference === c.target)
       throw r();
-    const s = n.get(c.reference), d = n.get(c.target);
-    if (!s || !d)
+    const s = n.get(c.reference), h = n.get(c.target);
+    if (!s || !h)
       throw r();
-    const m = z6(s, c.referenceEdge), h = z6(d, c.targetEdge);
-    if (d.points.length < 3 || d.points.length > H0 || !d.points.every(Ae))
+    const m = z6(s, c.referenceEdge), d = z6(h, c.targetEdge);
+    if (h.points.length < 3 || h.points.length > H0 || !h.points.every(Ae))
       throw new Error(u("Region length matches can move outlines with 3–32 points."));
-    const g = t.get(d.id) ?? [];
-    if (g.some((v) => v.targetIndex === h))
+    const g = t.get(h.id) ?? [];
+    if (g.some((v) => v.targetIndex === d))
       throw new Error(u("A straight edge can have only one region length reference."));
-    g.push({ reference: s.id, referenceIndex: m, targetIndex: h }), t.set(d.id, g);
+    g.push({ reference: s.id, referenceIndex: m, targetIndex: d }), t.set(h.id, g);
   }
   const l = /* @__PURE__ */ new Set(), q = /* @__PURE__ */ new Set(), o = [];
   function a(c) {
@@ -8232,21 +8232,21 @@ function p3(e) {
   let a = q ? o + (1n << 52n) : o, c = 1n;
   const s = q ? q - 1023 - 52 : -1074;
   s >= 0 ? a <<= BigInt(s) : c <<= BigInt(-s);
-  let d = Math.floor(Math.log10(t));
+  let h = Math.floor(Math.log10(t));
   const m = (B) => B >= 0 ? a - c * 10n ** BigInt(B) : a * 10n ** BigInt(-B) - c;
-  for (; m(d) < 0n; )
-    d--;
-  for (; m(d + 1) >= 0n; )
-    d++;
-  const h = 5 - d, g = h >= 0 ? a * 10n ** BigInt(h) : a, v = h >= 0 ? c : c * 10n ** BigInt(-h);
+  for (; m(h) < 0n; )
+    h--;
+  for (; m(h + 1) >= 0n; )
+    h++;
+  const d = 5 - h, g = d >= 0 ? a * 10n ** BigInt(d) : a, v = d >= 0 ? c : c * 10n ** BigInt(-d);
   let y = g / v;
-  g % v * 2n >= v && y++, y >= 1000000n && (y /= 10n, d++);
+  g % v * 2n >= v && y++, y >= 1000000n && (y /= 10n, h++);
   const C = String(y).padStart(6, "0");
-  if (d >= 6 || d < -5) {
+  if (h >= 6 || h < -5) {
     const B = C.slice(1).replace(/0+$/, "");
-    return n + C[0] + (B ? "." + B : "") + "e" + (d >= 0 ? "+" : "") + d;
+    return n + C[0] + (B ? "." + B : "") + "e" + (h >= 0 ? "+" : "") + h;
   }
-  const P = d + 1, M = P <= 0 ? "0." + "0".repeat(-P) + C : C.slice(0, P) + (P < C.length ? "." + C.slice(P) : "");
+  const P = h + 1, M = P <= 0 ? "0." + "0".repeat(-P) + C : C.slice(0, P) + (P < C.length ? "." + C.slice(P) : "");
   return n + (M.includes(".") ? M.replace(/0+$/, "").replace(/\.$/, "") : M);
 }
 const i3 = {
@@ -8293,7 +8293,7 @@ function T6(e, n) {
   n.some((s) => s.boolean) && C1(u("function requires numeric arguments"));
   const r = n[0], l = n[1], q = (s) => ((s.length || s.angle) && C1(u("function requires a dimensionless argument")), s.value), o = () => {
     n.some((s) => s.length !== r.length || s.angle !== r.angle) && C1(u("function arguments must have matching units"));
-  }, a = (s, d = 0, m = 0) => S2({ value: s, length: d, angle: m });
+  }, a = (s, h = 0, m = 0) => S2({ value: s, length: h, angle: m });
   if (["sin", "cos", "tan"].includes(e)) {
     (r.length || r.angle !== 0 && r.angle !== 1) && C1(u("trigonometry requires degrees or a scalar angle"));
     const s = r.value * Math.PI / 180;
@@ -8304,23 +8304,23 @@ function T6(e, n) {
     return a((e === "asin" ? Math.asin(s) : e === "acos" ? Math.acos(s) : Math.atan(s)) * 180 / Math.PI);
   }
   if (e === "rangeCount") {
-    const [s, d, m] = n.map(q);
+    const [s, h, m] = n.map(q);
     m || C1(u("Range step must be nonzero"));
-    const h = (d - s) / m;
-    return a(Math.max(0, Math.floor(h + 4 * Number.EPSILON * Math.max(1, Math.abs(h))) + 1));
+    const d = (h - s) / m;
+    return a(Math.max(0, Math.floor(d + 4 * Number.EPSILON * Math.max(1, Math.abs(d))) + 1));
   }
   if (e === "rangeAt") {
-    const [s, d, m, h] = n.map(q), g = (d - s) / m, v = m === 0 ? 0 : Math.max(0, Math.floor(g + 4 * Number.EPSILON * Math.max(1, Math.abs(g))) + 1);
-    return (!Number.isInteger(h) || h < 0 || h >= v) && C1(u("List index is outside the available values")), a(s + m * h);
+    const [s, h, m, d] = n.map(q), g = (h - s) / m, v = m === 0 ? 0 : Math.max(0, Math.floor(g + 4 * Number.EPSILON * Math.max(1, Math.abs(g))) + 1);
+    return (!Number.isInteger(d) || d < 0 || d >= v) && C1(u("List index is outside the available values")), a(s + m * d);
   }
   if (e === "randomValue") {
     (r.length !== l.length || r.angle !== l.angle) && C1(u("function arguments must have matching units"));
-    const s = q(n[2]), d = q(n[3]);
-    (!Number.isInteger(d) || d < 0 || d > 1e6) && C1(u("List index is outside the available values"));
+    const s = q(n[2]), h = q(n[3]);
+    (!Number.isInteger(h) || h < 0 || h > 1e6) && C1(u("List index is outside the available values"));
     const m = new DataView(new ArrayBuffer(8));
     m.setFloat64(0, s, !0);
-    let h = m.getUint32(0, !0) ^ m.getUint32(4, !0) ^ Math.imul(d + 1, 2654435761);
-    return h = Math.imul(h ^ h >>> 16, 569420461), h = Math.imul(h ^ h >>> 15, 1935289751), h ^= h >>> 15, a(Math.min(r.value, l.value) + (h >>> 0) / 4294967296 * Math.abs(r.value - l.value), r.length, r.angle);
+    let d = m.getUint32(0, !0) ^ m.getUint32(4, !0) ^ Math.imul(h + 1, 2654435761);
+    return d = Math.imul(d ^ d >>> 16, 569420461), d = Math.imul(d ^ d >>> 15, 1935289751), d ^= d >>> 15, a(Math.min(r.value, l.value) + (d >>> 0) / 4294967296 * Math.abs(r.value - l.value), r.length, r.angle);
   }
   if (e === "atan2")
     return o(), a(Math.atan2(r.value, l.value) * 180 / Math.PI);
@@ -8346,15 +8346,15 @@ function zt(e) {
       t++;
       continue;
     }
-    const d = /^"(?:\\.|[^"\\])*"|^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|^[A-Za-z][A-Za-z0-9_]*|^(?:==|!=|<=|>=|&&|\|\|)|^[(),+*/%!?<>:-]/.exec(e.slice(t))?.[0];
-    d || C1(u`unsupported expression near “${e.slice(t, t + 12)}”`), n.push(d), t += d.length, n.length > 512 && G2(u("expression has too many tokens"));
+    const h = /^"(?:\\.|[^"\\])*"|^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|^[A-Za-z][A-Za-z0-9_]*|^(?:==|!=|<=|>=|&&|\|\|)|^[(),+*/%!?<>:-]/.exec(e.slice(t))?.[0];
+    h || C1(u`unsupported expression near “${e.slice(t, t + 12)}”`), n.push(h), t += h.length, n.length > 512 && G2(u("expression has too many tokens"));
   }
   let i = 0;
-  const r = (d) => ({ value: d, length: 0, angle: 0 }), l = (d) => {
-    n[i++] !== d && C1(u("expected a number, parameter or parenthesis"));
+  const r = (h) => ({ value: h, length: 0, angle: 0 }), l = (h) => {
+    n[i++] !== h && C1(u("expected a number, parameter or parenthesis"));
   };
-  function q(d) {
-    d > 32 && G2(u("expression is too deeply nested"));
+  function q(h) {
+    h > 32 && G2(u("expression is too deeply nested"));
     const m = n[i++];
     if (m?.startsWith('"'))
       try {
@@ -8363,54 +8363,54 @@ function zt(e) {
         C1(u("Expected a text literal"));
       }
     if (["+", "-", "!"].includes(m))
-      return { kind: "unary", op: m, value: q(d + 1) };
+      return { kind: "unary", op: m, value: q(h + 1) };
     if (m === "(") {
-      const h = c(d + 1);
-      return n[i++] !== ")" && C1(u("missing closing parenthesis")), h;
+      const d = c(h + 1);
+      return n[i++] !== ")" && C1(u("missing closing parenthesis")), d;
     }
     if (m && /^(?:\d|\.)/.test(m)) {
-      let h = r(Number(m));
+      let d = r(Number(m));
       if (Object.hasOwn(i3, n[i])) {
         const g = i3[n[i++]];
-        h = { ...g, value: h.value * g.value };
+        d = { ...g, value: d.value * g.value };
       }
-      return { kind: "literal", value: S2(h) };
+      return { kind: "literal", value: S2(d) };
     }
     if (m && /^[A-Za-z]/.test(m)) {
       if (n[i] === "(") {
         i++;
-        const h = [];
+        const d = [];
         if (n[i] !== ")")
           do {
-            if (h.push(c(d + 1)), h.length > (m === "pick" ? 257 : ["formatSCAD", "formatText"].includes(m) ? 256 : 32) && G2(u("too many function arguments")), n[i] !== ",")
+            if (d.push(c(h + 1)), d.length > (m === "pick" ? 257 : ["formatSCAD", "formatText"].includes(m) ? 256 : 32) && G2(u("too many function arguments")), n[i] !== ",")
               break;
             i++;
           } while (!0);
-        return n[i++] !== ")" && C1(u("missing closing parenthesis")), { kind: "call", name: m, args: h };
+        return n[i++] !== ")" && C1(u("missing closing parenthesis")), { kind: "call", name: m, args: d };
       }
       return Object.hasOwn(i3, m) && C1(u("put a number before a unit")), m === "true" || m === "false" ? { kind: "literal", value: { ...r(m === "true" ? 1 : 0), boolean: !0 } } : { kind: "name", name: m };
     }
     return C1(u("expected a number, parameter or parenthesis"));
   }
   const o = [["||"], ["&&"], ["==", "!="], ["<", "<=", ">", ">="], ["+", "-"], ["*", "/", "%"]];
-  function a(d, m) {
-    if (d === o.length)
+  function a(h, m) {
+    if (h === o.length)
       return q(m);
-    let h = a(d + 1, m);
-    for (; o[d].includes(n[i]); ) {
-      const g = n[i++], v = a(d + 1, m);
-      h = { kind: "binary", op: g, a: h, b: v };
+    let d = a(h + 1, m);
+    for (; o[h].includes(n[i]); ) {
+      const g = n[i++], v = a(h + 1, m);
+      d = { kind: "binary", op: g, a: d, b: v };
     }
-    return h;
+    return d;
   }
-  function c(d) {
-    d > 32 && G2(u("expression is too deeply nested"));
-    const m = a(0, d);
+  function c(h) {
+    h > 32 && G2(u("expression is too deeply nested"));
+    const m = a(0, h);
     if (n[i] !== "?")
       return m;
     i++;
-    const h = c(d + 1);
-    return l(":"), { kind: "conditional", test: m, yes: h, no: c(d + 1) };
+    const d = c(h + 1);
+    return l(":"), { kind: "conditional", test: m, yes: d, no: c(h + 1) };
   }
   const s = c(0);
   return i !== n.length && C1(u`unexpected token “${n[i]}”`), s;
@@ -8419,61 +8419,61 @@ function E2(e, n, t = {}) {
   (typeof e != "string" || !e.trim()) && C1(u("expression must contain 1–1024 characters")), e.length > 1024 && G2(u("expression must contain 1–1024 characters"));
   let i = b5.get(e);
   if (i || (i = zt(e), b5.size >= 256 && b5.delete(b5.keys().next().value), b5.set(e, i)), t.references) {
-    const h = [{ node: i, bound: /* @__PURE__ */ new Set() }];
-    for (; h.length; ) {
-      const { node: g, bound: v } = h.pop();
+    const d = [{ node: i, bound: /* @__PURE__ */ new Set() }];
+    for (; d.length; ) {
+      const { node: g, bound: v } = d.pop();
       if (g.kind === "name")
         v.has(g.name) || t.references.add(g.name);
       else if (g.kind === "unary")
-        h.push({ node: g.value, bound: v });
+        d.push({ node: g.value, bound: v });
       else if (g.kind === "binary")
-        h.push({ node: g.a, bound: v }, { node: g.b, bound: v });
+        d.push({ node: g.a, bound: v }, { node: g.b, bound: v });
       else if (g.kind === "conditional")
-        h.push({ node: g.test, bound: v }, { node: g.yes, bound: v }, { node: g.no, bound: v });
+        d.push({ node: g.test, bound: v }, { node: g.yes, bound: v }, { node: g.no, bound: v });
       else if (g.kind === "call")
         if (["sumRange", "filterAt", "minRange", "maxRange"].includes(g.name) && g.args[0]?.kind === "name") {
           const y = /* @__PURE__ */ new Set([...v, g.args[0].name]);
-          g.args.slice(1).forEach((b, C) => h.push({ node: b, bound: (g.name === "minRange" || g.name === "maxRange" ? C >= 3 : C === 3) ? y : v }));
+          g.args.slice(1).forEach((b, C) => d.push({ node: b, bound: (g.name === "minRange" || g.name === "maxRange" ? C >= 3 : C === 3) ? y : v }));
         } else
-          g.args.forEach((y) => h.push({ node: y, bound: v }));
+          g.args.forEach((y) => d.push({ node: y, bound: v }));
     }
   }
-  const r = (h) => ({ value: h, length: 0, angle: 0 }), l = (h) => ((h.length || h.angle) && C1(u("condition requires a dimensionless value")), h.value !== 0), q = (h) => ({ ...r(h ? 1 : 0), boolean: !0 }), o = (h) => {
-    h.boolean && C1(u("arithmetic requires numeric values"));
-  }, a = (h, g) => {
-    (h.length !== g.length || h.angle !== g.angle) && C1(u("comparison requires matching units"));
+  const r = (d) => ({ value: d, length: 0, angle: 0 }), l = (d) => ((d.length || d.angle) && C1(u("condition requires a dimensionless value")), d.value !== 0), q = (d) => ({ ...r(d ? 1 : 0), boolean: !0 }), o = (d) => {
+    d.boolean && C1(u("arithmetic requires numeric values"));
+  }, a = (d, g) => {
+    (d.length !== g.length || d.angle !== g.angle) && C1(u("comparison requires matching units"));
   }, c = new Map(t.bindings);
   let s = 0;
-  function d(h) {
-    if (h.kind === "text")
-      return h.value;
-    if (h.kind === "conditional")
-      return d(l(m(h.test)) ? h.yes : h.no);
-    if (h.kind === "call" && ["formatSCAD", "formatText"].includes(h.name))
-      return h.args.map((g) => {
+  function h(d) {
+    if (d.kind === "text")
+      return d.value;
+    if (d.kind === "conditional")
+      return h(l(m(d.test)) ? d.yes : d.no);
+    if (d.kind === "call" && ["formatSCAD", "formatText"].includes(d.name))
+      return d.args.map((g) => {
         if (g.kind === "text")
           return g.value;
         const v = m(g);
-        return v.boolean ? String(v.value !== 0) : h.name === "formatSCAD" ? p3(v.value) : String(v.value);
+        return v.boolean ? String(v.value !== 0) : d.name === "formatSCAD" ? p3(v.value) : String(v.value);
       }).join("");
     C1(u("Expected a text literal"));
   }
-  function m(h) {
-    if (h.kind === "text" && C1(u("Expected a numeric modeling argument")), ++s > 65536 && G2(u("expression evaluation budget exceeded")), h.kind === "literal")
-      return h.value;
-    if (h.kind === "name")
-      return S2(c.get(h.name) ?? n(h.name, c));
-    if (h.kind === "call") {
-      if (h.name === "assertValue") {
-        if ((h.args.length < 2 || h.args.length > 3) && C1(u("Assertion requires condition and value")), !l(m(h.args[0]))) {
-          const b = h.args[2] ? d(h.args[2]) : "";
+  function m(d) {
+    if (d.kind === "text" && C1(u("Expected a numeric modeling argument")), ++s > 65536 && G2(u("expression evaluation budget exceeded")), d.kind === "literal")
+      return d.value;
+    if (d.kind === "name")
+      return S2(c.get(d.name) ?? n(d.name, c));
+    if (d.kind === "call") {
+      if (d.name === "assertValue") {
+        if ((d.args.length < 2 || d.args.length > 3) && C1(u("Assertion requires condition and value")), !l(m(d.args[0]))) {
+          const b = d.args[2] ? h(d.args[2]) : "";
           C1(b ? u`Source assertion failed: ${b}` : u("Assertion failed"));
         }
-        return m(h.args[1]);
+        return m(d.args[1]);
       }
-      if (h.name === "minRange" || h.name === "maxRange") {
-        (![5, 6].includes(h.args.length) || h.args[0].kind !== "name") && C1(u("Invalid range reduction"));
-        const b = h.args[0].name, [C, P, M] = h.args.slice(1, 4).map((A) => {
+      if (d.name === "minRange" || d.name === "maxRange") {
+        (![5, 6].includes(d.args.length) || d.args[0].kind !== "name") && C1(u("Invalid range reduction"));
+        const b = d.args[0].name, [C, P, M] = d.args.slice(1, 4).map((A) => {
           const N = m(A);
           return (N.boolean || N.length || N.angle) && C1(u("function requires a dimensionless argument")), N.value;
         }), B = (P - C) / M, x = M === 0 ? 0 : Math.max(0, Math.floor(B + 4 * Number.EPSILON * Math.max(1, Math.abs(B))) + 1);
@@ -8482,25 +8482,25 @@ function E2(e, n, t = {}) {
         let T;
         try {
           for (let A = 0; A < x; A++) {
-            if (c.set(b, r(C + A * M)), h.args.length === 6 && !l(m(h.args[4])))
+            if (c.set(b, r(C + A * M)), d.args.length === 6 && !l(m(d.args[4])))
               continue;
-            const N = m(h.args.at(-1));
-            T = T6(h.name === "minRange" ? "min" : "max", T ? [T, N] : [N]);
+            const N = m(d.args.at(-1));
+            T = T6(d.name === "minRange" ? "min" : "max", T ? [T, N] : [N]);
           }
           return T || C1(u("Range reduction contains no values")), T;
         } finally {
           I ? c.set(b, I) : c.delete(b);
         }
       }
-      if (h.name === "sumRange" || h.name === "filterAt") {
-        const b = h.name === "sumRange" ? 5 : 6;
-        (h.args.length !== b || h.args[0].kind !== "name") && C1(u("Invalid range reduction"));
-        const C = h.args[0].name, [P, M, B] = h.args.slice(1, 4).map((J) => {
+      if (d.name === "sumRange" || d.name === "filterAt") {
+        const b = d.name === "sumRange" ? 5 : 6;
+        (d.args.length !== b || d.args[0].kind !== "name") && C1(u("Invalid range reduction"));
+        const C = d.args[0].name, [P, M, B] = d.args.slice(1, 4).map((J) => {
           const L = m(J);
           return (L.boolean || L.length || L.angle) && C1(u("function requires a dimensionless argument")), L.value;
         }), x = (M - P) / B, I = B === 0 ? 0 : Math.max(0, Math.floor(x + 4 * Number.EPSILON * Math.max(1, Math.abs(x))) + 1);
         (!B || !Number.isSafeInteger(I) || I > 256) && C1(u("Range reduction exceeds 256 values"));
-        const T = h.name === "filterAt" ? m(h.args[5]) : void 0;
+        const T = d.name === "filterAt" ? m(d.args[5]) : void 0;
         T && (T.boolean || T.length || T.angle || !Number.isInteger(T.value) || T.value < 0) && C1(u("List index is outside the available values"));
         const A = c.get(C);
         let N = 0, O = 0;
@@ -8508,8 +8508,8 @@ function E2(e, n, t = {}) {
           for (let J = 0; J < I; J++) {
             const L = P + J * B;
             c.set(C, r(L));
-            const t1 = m(h.args[4]);
-            if (h.name === "sumRange")
+            const t1 = m(d.args[4]);
+            if (d.name === "sumRange")
               (t1.boolean || t1.length || t1.angle) && C1(u("function requires a dimensionless argument")), N += t1.value;
             else if (l(t1) && O++ === T.value)
               return r(L);
@@ -8519,25 +8519,25 @@ function E2(e, n, t = {}) {
           A ? c.set(C, A) : c.delete(C);
         }
       }
-      if (h.name === "pick") {
-        h.args.length < 2 && C1(u("pick requires an index and values"));
-        const b = m(h.args[0]);
-        return (b.boolean || b.length || b.angle || !Number.isInteger(b.value) || b.value < 0 || b.value >= h.args.length - 1) && C1(u("List index is outside the available values")), m(h.args[b.value + 1]);
+      if (d.name === "pick") {
+        d.args.length < 2 && C1(u("pick requires an index and values"));
+        const b = m(d.args[0]);
+        return (b.boolean || b.length || b.angle || !Number.isInteger(b.value) || b.value < 0 || b.value >= d.args.length - 1) && C1(u("List index is outside the available values")), m(d.args[b.value + 1]);
       }
-      return T6(h.name, h.args.map(m));
+      return T6(d.name, d.args.map(m));
     }
-    if (h.kind === "conditional")
-      return m(l(m(h.test)) ? h.yes : h.no);
-    if (h.kind === "unary") {
-      const b = m(h.value);
-      return h.op === "!" ? q(!l(b)) : (o(b), S2({ ...b, value: h.op === "-" ? -b.value : b.value }));
+    if (d.kind === "conditional")
+      return m(l(m(d.test)) ? d.yes : d.no);
+    if (d.kind === "unary") {
+      const b = m(d.value);
+      return d.op === "!" ? q(!l(b)) : (o(b), S2({ ...b, value: d.op === "-" ? -b.value : b.value }));
     }
-    const g = m(h.a), v = h.op;
+    const g = m(d.a), v = d.op;
     if (v === "&&")
-      return q(l(g) && l(m(h.b)));
+      return q(l(g) && l(m(d.b)));
     if (v === "||")
-      return q(l(g) || l(m(h.b)));
-    const y = m(h.b);
+      return q(l(g) || l(m(d.b)));
+    const y = m(d.b);
     return ["==", "!=", "<", "<=", ">", ">="].includes(v) ? (a(g, y), (v === "==" || v === "!=") && !!g.boolean != !!y.boolean ? q(v === "!=") : q(v === "==" ? g.value === y.value : v === "!=" ? g.value !== y.value : v === "<" ? g.value < y.value : v === "<=" ? g.value <= y.value : v === ">" ? g.value > y.value : g.value >= y.value)) : (o(g), o(y), v === "+" || v === "-" ? ((g.length !== y.length || g.angle !== y.angle) && C1(u("addition/subtraction requires matching units (for example width + 5 mm)")), S2({ ...g, value: g.value + (v === "+" ? y.value : -y.value) })) : ((v === "/" || v === "%") && y.value === 0 && C1(u("division by zero")), v === "%" ? (a(g, y), S2({ ...g, value: g.value % y.value })) : S2({ value: v === "*" ? g.value * y.value : g.value / y.value, length: g.length + (v === "*" ? y.length : -y.length), angle: g.angle + (v === "*" ? y.angle : -y.angle) })));
   }
   return m(i);
@@ -8691,35 +8691,35 @@ function $t(e, n) {
   const t = e.nodes[n];
   if (t?.kind !== "exact-feature")
     throw new Error(u`${n} is not an exact feature`);
-  const i = a8(t, e), r = /* @__PURE__ */ new Map(), l = [], q = /* @__PURE__ */ new Map(), o = [], a = (d) => {
-    typeof d == "string" ? o.push(d) : Array.isArray(d) ? d.forEach(a) : P3(d) && Object.values(d).forEach(a);
-  }, c = (d) => {
-    const m = r.get(d);
+  const i = a8(t, e), r = /* @__PURE__ */ new Map(), l = [], q = /* @__PURE__ */ new Map(), o = [], a = (h) => {
+    typeof h == "string" ? o.push(h) : Array.isArray(h) ? h.forEach(a) : P3(h) && Object.values(h).forEach(a);
+  }, c = (h) => {
+    const m = r.get(h);
     if (m !== void 0)
       return m;
-    const h = e.nodes[d], { id: g, name: v, color: y, physics: b, provenance: C, generator: P, ...M } = h, B = l.length;
-    r.set(d, B), l.push(null);
+    const d = e.nodes[h], { id: g, name: v, color: y, physics: b, provenance: C, generator: P, ...M } = d, B = l.length;
+    r.set(h, B), l.push(null);
     const x = { ...M };
-    if (h.kind === "exact-feature" && delete x.display, h.kind === "exact-body" && (delete x.display, delete x.measures, delete x.origin, x.brep = Ot(h)), h.kind === "boolean" && (x.inputs = h.inputs.map(c)), (h.kind === "mirror" || h.kind === "split" || h.kind === "pattern" || h.kind === "exact-feature") && (x.source = c(h.source)), h.kind === "extrusion" || h.kind === "revolution") {
-      const I = e.sketches?.[h.sketchId];
-      if (I && !q.has(h.sketchId)) {
+    if (d.kind === "exact-feature" && delete x.display, d.kind === "exact-body" && (delete x.display, delete x.measures, delete x.origin, x.brep = Ot(d)), d.kind === "boolean" && (x.inputs = d.inputs.map(c)), (d.kind === "mirror" || d.kind === "split" || d.kind === "pattern" || d.kind === "exact-feature") && (x.source = c(d.source)), d.kind === "extrusion" || d.kind === "revolution") {
+      const I = e.sketches?.[d.sketchId];
+      if (I && !q.has(d.sketchId)) {
         const { id: T, ...A } = I.profile;
-        q.set(h.sketchId, { plane: I.plane, profile: A }), a(A);
+        q.set(d.sketchId, { plane: I.plane, profile: A }), a(A);
       }
-      x.sketchId = I ? g3(q.get(h.sketchId)) : null;
+      x.sketchId = I ? g3(q.get(d.sketchId)) : null;
     }
     return a(x), l[B] = x, B;
   };
-  c(t.source), i.edges && T4(i.edges) && (i.edges = U9(i.edges, (d) => {
-    const m = r.get(d);
+  c(t.source), i.edges && T4(i.edges) && (i.edges = U9(i.edges, (h) => {
+    const m = r.get(h);
     return m === void 0 ? void 0 : `n${m}`;
   })), typeof t.size == "string" && o.push(t.size);
   let s = null;
   if (e.parametric) {
-    const d = new Set(o.flatMap((m) => m.match(Zt) ?? []));
+    const h = new Set(o.flatMap((m) => m.match(Zt) ?? []));
     try {
       const m = z3(e.parametric);
-      s = Object.fromEntries(Object.keys(m).filter((h) => d.has(h)).sort().map((h) => [h, m[h]]));
+      s = Object.fromEntries(Object.keys(m).filter((d) => h.has(d)).sort().map((d) => [d, m[d]]));
     } catch {
       s = e.parametric.parameters;
     }
@@ -8821,31 +8821,31 @@ function Jt(e, n) {
     throw o();
   if (r === void 0 && l === void 0)
     throw q();
-  const a = new Map(i.map((h, g) => [h, g])), c = t.slice(), s = /* @__PURE__ */ new Set(), d = (h) => typeof h == "number" || typeof h == "string";
-  for (const h of r ?? []) {
-    if (!Z2(h) || !a.has(h.vertexId) || s.has(h.vertexId) || ![h.x, h.y].every(d))
+  const a = new Map(i.map((d, g) => [d, g])), c = t.slice(), s = /* @__PURE__ */ new Set(), h = (d) => typeof d == "number" || typeof d == "string";
+  for (const d of r ?? []) {
+    if (!Z2(d) || !a.has(d.vertexId) || s.has(d.vertexId) || ![d.x, d.y].every(h))
       throw q();
-    s.add(h.vertexId), c[a.get(h.vertexId)] = [Me(h.x, n), Me(h.y, n)];
+    s.add(d.vertexId), c[a.get(d.vertexId)] = [Me(d.x, n), Me(d.y, n)];
   }
   const m = /* @__PURE__ */ new Map();
-  for (const h of l ?? []) {
-    if (!Z2(h) || ![h.distance, h.direction].every(d))
+  for (const d of l ?? []) {
+    if (!Z2(d) || ![d.distance, d.direction].every(h))
       throw o();
-    const g = a.get(h.from), v = a.get(h.to);
+    const g = a.get(d.from), v = a.get(d.to);
     if (g === void 0 || v !== g + 1)
       throw o();
-    if (s.has(h.to) || m.has(v))
+    if (s.has(d.to) || m.has(v))
       throw new Error(u("A point can have only one driver. Remove its lock or its other segment constraint."));
-    m.set(v, h);
+    m.set(v, d);
   }
-  for (let h = 1; h < c.length; h++) {
-    const g = m.get(h);
+  for (let d = 1; d < c.length; d++) {
+    const g = m.get(d);
     if (!g)
       continue;
-    const v = A5(g.distance, n), y = Me(g.direction, n, "deg") % 360, b = (y % 360 + 360) % 360 / 90, C = y * Math.PI / 180, [P, M] = Number.isInteger(b) ? [[1, 0], [0, 1], [-1, 0], [0, -1]][b] : [Math.cos(C), Math.sin(C)], [B, x] = c[h - 1], I = [B + P * v, x + M * v];
+    const v = A5(g.distance, n), y = Me(g.direction, n, "deg") % 360, b = (y % 360 + 360) % 360 / 90, C = y * Math.PI / 180, [P, M] = Number.isInteger(b) ? [[1, 0], [0, 1], [-1, 0], [0, -1]][b] : [Math.cos(C), Math.sin(C)], [B, x] = c[d - 1], I = [B + P * v, x + M * v];
     if (!Ae(I))
       throw new Error(u("The driven point lies outside the sketch coordinate range."));
-    c[h] = I;
+    c[d] = I;
   }
   return c;
 }
@@ -8962,7 +8962,7 @@ function ei(e) {
           throw new Error(u("Region outline constraints require document version 35"));
         if (e.version < 31)
           throw new Error(u("Outline constraints require document version 31"));
-        const q = dt(l, (o) => Me(o, e));
+        const q = ht(l, (o) => Me(o, e));
         if (e.version < 32 && q.some((o) => o.kind === "radius"))
           throw new Error(u("Driving arc radii require document version 32"));
         if (e.version < 33 && q.some((o) => o.kind === "tangent"))
@@ -9009,7 +9009,7 @@ function u8(e) {
   } while (e.peek() !== ")");
   return t && e.expect(")"), { parts: i, scad: n === "formatSCAD" };
 }
-const h8 = (e, n) => e.parts.map((t) => typeof t == "string" ? t : n(t, e.scad)).join(""), ni = { sans: { 0: [2, 32], 1: [8, 8], 2: [9, 22], 3: [7, 40], 4: [17, 8], 5: [8, 28], 6: [4, 50], 7: [8, 0], 8: [4, 58], 9: [4, 48], ǻ: [18, 64], Á: [18, 16], ĥ: [17, 24], Κ: [14, 0], "»": [16, 0], "∆": [11, 4], ў: [13, 36], ţ: [18, 22], "«": [16, 0], í: [10, 8], ņ: [15, 20], µ: [12, 13], ỳ: [15, 28], Ι: [13, 0], Ύ: [15, 8], ѕ: [3, 40], Ш: [13, 0], M: [17, 6], Ψ: [17, 18], ũ: [13, 34], ŭ: [13, 30], "―": [5, 0], "{": [9, 24], "¼": [29, 12], Ḿ: [22, 14], ι: [5, 14], Ĳ: [18, 12], Ê: [19, 12], Ά: [18, 16], ")": [3, 14], ε: [7, 40], э: [6, 26], ш: [13, 0], Я: [13, 14], a: [11, 32], Ę: [16, 13], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 22], Ů: [9, 38], "¢": [9, 22], В: [13, 30], І: [13, 0], ē: [11, 28], β: [10, 42], "≠": [21, 0], "‼": [12, 32], "¥": [24, 0], Ĥ: [19, 12], U: [7, 14], Ñ: [16, 28], F: [11, 0], ϑ: [6, 58], Ќ: [17, 8], å: [13, 56], Ϋ: [12, 18], ō: [7, 24], "”": [8, 16], ö: [4, 42], ć: [8, 30], þ: [11, 31], "]": [9, 0], А: [13, 8], "′": [5, 0], Ы: [15, 14], ẁ: [22, 32], ĭ: [8, 16], R: [13, 14], Ż: [12, 10], ħ: [19, 12], õ: [5, 44], "˙": [1, 10], ê: [12, 40], "″": [10, 0], "„": [8, 16], ч: [9, 13], δ: [3, 54], Â: [19, 20], Į: [16, 13], ω: [7, 42], Ţ: [14, 8], "´": [5, 8], Ĉ: [9, 38], И: [13, 8], Љ: [12, 34], р: [10, 31], Ω: [9, 32], т: [9, 0], П: [9, 0], Ö: [4, 50], z: [11, 0], "™": [25, 8], Θ: [7, 32], Ř: [19, 26], Ň: [19, 20], É: [18, 8], и: [13, 0], "³": [6, 32], "[": [9, 0], ζ: [6, 37], "∏": [9, 0], Έ: [18, 8], Ρ: [10, 14], ğ: [11, 84], ª: [10, 28], ї: [7, 18], T: [9, 0], š: [9, 52], є: [6, 22], Þ: [12, 14], j: [6, 22], Σ: [13, 0], ϒ: [8, 22], ℓ: [8, 41], ĉ: [9, 34], ī: [10, 0], О: [2, 32], ξ: [11, 47], Ď: [14, 26], "&": [9, 62], G: [7, 30], ΰ: [12, 48], "`": [5, 8], ŏ: [5, 40], ý: [15, 28], º: [2, 24], "∞": [3, 52], ź: [16, 8], я: [13, 14], Ё: [15, 18], ń: [15, 20], " ": [0, 0], Г: [7, 0], Ь: [10, 14], "¤": [14, 32], Ĝ: [13, 42], p: [10, 31], Ю: [9, 32], ο: [2, 24], S: [3, 38], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 24], y: [10, 20], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 46], б: [4, 46], ƒ: [13, 24], у: [10, 20], J: [5, 12], ŷ: [16, 32], ŕ: [13, 20], ώ: [12, 50], "˘": [3, 16], D: [8, 14], ł: [13, 0], ĺ: [10, 8], ц: [13, 0], Л: [7, 20], $: [15, 40], w: [17, 24], о: [2, 24], Д: [16, 12], Ç: [8, 42], Ŝ: [9, 50], C: [3, 26], Ḁ: [15, 32], Ĵ: [11, 24], È: [18, 8], ﬁ: [19, 22], X: [13, 0], ô: [8, 36], Ė: [14, 10], г: [7, 0], Ŀ: [8, 10], х: [13, 0], ŋ: [10, 24], Ч: [9, 10], ü: [12, 32], ь: [10, 14], Ÿ: [12, 18], "€": [15, 31], в: [13, 26], Η: [13, 0], С: [3, 26], ß: [5, 58], њ: [18, 14], Ű: [17, 30], c: [3, 22], "¶": [9, 9], Ή: [18, 8], Ὅ: [9, 52], γ: [9, 16], "­": [5, 0], ":": [2, 32], ś: [8, 48], " ": [0, 0], У: [9, 20], "¾": [27, 38], Ί: [18, 8], ŉ: [14, 20], Ģ: [12, 38], m: [14, 24], Е: [13, 0], ž: [17, 12], á: [16, 40], "×": [13, 0], п: [9, 0], Ǻ: [19, 36], K: [14, 0], "¨": [2, 18], Y: [10, 0], E: [13, 0], Ô: [8, 44], Є: [6, 26], Ï: [15, 18], ġ: [9, 78], έ: [12, 48], " ": [0, 0], ϋ: [7, 38], й: [16, 16], b: [9, 31], ύ: [10, 28], ﬂ: [18, 12], ф: [11, 26], Ŋ: [13, 18], Ũ: [10, 34], Щ: [17, 0], L: [7, 0], ď: [15, 39], Ο: [2, 32], Ĭ: [16, 16], ŧ: [21, 14], À: [18, 16], Ϊ: [15, 18], ḁ: [13, 56], "½": [21, 24], "'": [5, 0], ĳ: [12, 32], Р: [10, 14], "˛": [3, 13], Ć: [8, 34], Т: [9, 0], "£": [16, 20], ů: [12, 38], Ō: [7, 32], а: [11, 32], Ğ: [10, 46], v: [9, 8], Ї: [15, 18], û: [16, 26], Ź: [16, 8], "ˉ": [5, 0], Ĺ: [12, 8], "₤": [24, 20], Č: [9, 38], x: [13, 0], è: [11, 36], Ń: [18, 16], ḿ: [19, 32], μ: [12, 13], ".": [1, 16], "‘": [4, 8], π: [14, 8], l: [5, 0], Ъ: [12, 14], " ": [0, 0], Ś: [8, 46], Ü: [9, 32], à: [16, 40], η: [10, 12], ó: [7, 32], "¦": [10, 0], Ő: [12, 48], Ž: [17, 12], е: [6, 28], Î: [19, 12], e: [6, 28], ό: [7, 32], Ĕ: [16, 16], ļ: [10, 8], " ": [0, 0], Ѓ: [12, 8], ò: [7, 32], ﬄ: [31, 24], "^": [8, 0], ⁿ: [10, 8], к: [12, 0], "￼": [108, 39], ū: [15, 14], "ˆ": [6, 12], Ẅ: [16, 40], č: [9, 34], "’": [4, 8], Ν: [13, 8], "-": [5, 0], Q: [3, 38], ј: [6, 22], ě: [12, 40], œ: [7, 44], "#": [34, 0], Џ: [13, 0], Å: [15, 32], ș: [8, 48], "¸": [5, 16], "=": [10, 0], ρ: [7, 25], Ћ: [15, 6], ú: [15, 22], "˚": [2, 24], д: [16, 8], "¯": [5, 0], u: [10, 14], З: [7, 40], Α: [13, 8], "⅝": [17, 74], é: [11, 36], Ş: [8, 54], B: [13, 30], "…": [3, 46], H: [13, 0], î: [11, 12], ν: [7, 12], Ό: [7, 40], "−": [5, 0], "⅜": [15, 84], ǰ: [11, 24], ā: [16, 32], ĵ: [11, 24], Ĩ: [16, 20], "*": [16, 0], ă: [14, 48], Χ: [13, 0], "†": [13, 0], "°": [2, 32], Ξ: [15, 0], Ķ: [19, 8], ŵ: [23, 36], "΄": [5, 8], ǽ: [17, 62], Β: [13, 30], Ļ: [12, 8], Õ: [5, 52], "№": [20, 32], χ: [13, 21], ί: [10, 22], Ζ: [11, 0], Ľ: [12, 8], ť: [18, 22], o: [2, 24], Ѕ: [3, 38], "�": [11, 28], d: [10, 31], ",": [4, 8], '"': [10, 0], ľ: [10, 8], ė: [7, 38], Í: [18, 8], Ú: [12, 22], " ": [0, 0], Ŷ: [16, 12], Ý: [15, 8], ŝ: [9, 52], " ": [0, 0], ą: [14, 45], "​": [0, 0], ã: [14, 52], æ: [12, 54], ĩ: [8, 20], "~": [3, 26], ŀ: [6, 10], Ċ: [4, 36], "¡": [6, 16], ẅ: [19, 42], К: [12, 0], Γ: [7, 0], P: [10, 14], "%": [9, 44], ϖ: [13, 38], _: [5, 0], ñ: [13, 32], Ŕ: [18, 22], "‚": [4, 8], "⅞": [17, 52], Æ: [22, 0], "₣": [19, 0], Ū: [12, 14], ы: [15, 14], ѓ: [12, 8], Œ: [14, 23], "΅": [7, 28], Ą: [16, 21], Њ: [18, 14], "›": [8, 0], ћ: [19, 12], "<": [8, 0], "¬": [7, 0], t: [13, 14], Ц: [13, 0], ù: [15, 22], ï: [7, 18], Ф: [19, 36], Ò: [7, 40], I: [13, 0], "˝": [10, 16], "·": [1, 16], "¿": [6, 44], ſ: [5, 12], Ђ: [15, 18], ű: [20, 30], Ǽ: [27, 8], φ: [8, 38], ";": [5, 24], Ș: [8, 46], Ġ: [8, 40], n: [10, 12], ά: [13, 50], ϊ: [7, 32], "\uFEFF": [0, 0], ģ: [13, 76], "∂": [3, 54], κ: [14, 3], "‡": [23, 0], ň: [16, 24], "√": [10, 0], ę: [9, 41], į: [9, 23], Τ: [9, 0], "≈": [6, 52], ΐ: [12, 42], ĸ: [14, 3], g: [8, 68], ǿ: [16, 34], "²": [8, 18], Ã: [16, 28], Ј: [5, 12], "©": [5, 68], "≥": [13, 0], Ă: [16, 24], ґ: [9, 0], ÿ: [12, 38], Ł: [15, 0], " ": [0, 0], "∫": [5, 24], "\\": [5, 0], Ì: [18, 8], ъ: [12, 14], ς: [3, 38], Ē: [18, 0], "!": [6, 16], ç: [8, 38], Й: [16, 24], Б: [12, 14], đ: [18, 31], ċ: [4, 32], Ā: [18, 8], Ẃ: [19, 30], ø: [11, 26], â: [17, 44], "}": [9, 26], Δ: [11, 4], "‰": [11, 66], Ä: [15, 26], ř: [14, 24], "—": [5, 0], N: [13, 8], "⁄": [5, 0], М: [17, 6], Ó: [7, 40], "˜": [3, 20], " ": [0, 0], "ˇ": [6, 12], ų: [13, 27], Ў: [12, 36], Ŭ: [10, 30], ĝ: [14, 80], Ω: [9, 32], s: [3, 40], "?": [6, 44], Ņ: [18, 16], Ī: [18, 0], Μ: [17, 6], "•": [1, 16], н: [13, 0], "(": [3, 14], "◊": [12, 0], α: [8, 42], Ħ: [26, 0], м: [14, 16], з: [7, 40], Ґ: [9, 0], Û: [13, 26], і: [6, 10], V: [8, 4], Ŗ: [18, 22], "@": [6, 80], ʼ: [4, 8], "℅": [10, 51], i: [6, 10], ќ: [17, 8], "≤": [13, 0], ё: [8, 46], υ: [5, 20], ĕ: [9, 44], ﬃ: [32, 34], ż: [12, 10], Э: [6, 24], ő: [12, 40], Ŏ: [5, 48], ю: [9, 24], İ: [14, 10], Ě: [19, 12], "‹": [8, 0], ķ: [21, 8], ì: [10, 8], "±": [18, 0], "|": [5, 0], "§": [5, 68], џ: [13, 0], љ: [12, 25], q: [10, 31], "˳": [2, 24], ή: [15, 20], Ж: [19, 0], "®": [15, 54], Н: [13, 0], Ε: [13, 0], "₧": [23, 26], л: [7, 11], σ: [6, 30], θ: [5, 30], " ": [0, 0], "∑": [13, 0], Ώ: [14, 40], ẃ: [22, 32], "+": [13, 0], Ë: [15, 18], Š: [9, 50], " ": [0, 0], ð: [10, 38], щ: [17, 0], "℮": [8, 34], Φ: [19, 36], ş: [8, 56], " ": [0, 0], ı: [5, 0], ä: [13, 50], "¹": [8, 6], W: [14, 22], λ: [10, 28], ">": [8, 0], τ: [10, 16], Ų: [10, 27], Ŵ: [20, 34], "‛": [4, 8], Ð: [16, 14], Λ: [8, 4], "·": [1, 16], Х: [13, 0], Υ: [10, 0], r: [8, 12], ж: [19, 0], Ø: [11, 30], Ỳ: [15, 8], "÷": [7, 32], с: [3, 22], h: [11, 12], f: [13, 12], "“": [8, 16], A: [13, 8], O: [2, 32], Đ: [16, 14], Ǿ: [16, 38], "⅛": [17, 58], Ẁ: [19, 30], Ť: [15, 12], ψ: [11, 24], ŗ: [13, 20] }, serif: { 0: [2, 32], 1: [10, 18], 2: [9, 32], 3: [4, 58], 4: [20, 18], 5: [9, 36], 6: [2, 46], 7: [10, 1], 8: [3, 62], 9: [3, 48], ǻ: [19, 82], Á: [26, 29], ĥ: [24, 44], Κ: [25, 32], "»": [16, 0], "∆": [11, 4], ў: [21, 48], ţ: [16, 22], "«": [16, 0], í: [16, 20], ņ: [23, 38], µ: [11, 36], ỳ: [23, 40], Ι: [13, 16], Ύ: [27, 40], ѕ: [1, 52], Ш: [29, 32], M: [26, 24], Ψ: [27, 44], ũ: [19, 52], ŭ: [19, 40], "―": [5, 0], "{": [13, 22], "¼": [37, 24], Ḿ: [31, 32], ι: [5, 12], Ĳ: [24, 32], Ê: [27, 28], Ά: [26, 29], ")": [3, 16], ε: [2, 58], э: [4, 33], ш: [29, 32], Я: [21, 34], a: [12, 42], Ę: [24, 38], Z: [15, 8], " ": [0, 0], k: [23, 29], Ù: [20, 40], Ů: [17, 64], "¢": [11, 30], В: [17, 36], І: [13, 16], ē: [10, 30], β: [7, 51], "≠": [21, 0], "‼": [12, 32], "¥": [36, 32], Ĥ: [35, 44], U: [15, 32], Ñ: [24, 44], F: [19, 16], ϑ: [8, 58], Ќ: [24, 66], å: [14, 74], Ϋ: [24, 60], ō: [7, 28], "”": [4, 36], ö: [4, 56], ć: [6, 40], þ: [15, 50], "]": [9, 8], А: [21, 21], "′": [5, 0], Ы: [29, 44], ẁ: [30, 38], ĭ: [14, 24], R: [21, 32], Ż: [16, 24], ħ: [26, 32], õ: [5, 52], "˙": [1, 16], ê: [11, 42], "″": [10, 0], "„": [4, 36], ч: [21, 38], δ: [2, 56], Â: [27, 33], Į: [16, 38], ω: [4, 60], Ţ: [22, 22], "´": [5, 8], Ĉ: [7, 50], И: [29, 32], Љ: [17, 54], р: [15, 49], Ω: [15, 36], т: [17, 16], П: [21, 24], Ö: [4, 60], z: [15, 8], "™": [41, 32], Θ: [15, 44], Ř: [27, 48], Ň: [27, 36], É: [26, 24], и: [29, 32], "³": [5, 46], "[": [9, 8], ζ: [3, 48], "∏": [21, 24], Έ: [26, 24], Ρ: [16, 28], ğ: [8, 106], ª: [11, 38], ї: [13, 40], T: [17, 16], š: [7, 68], є: [4, 34], Þ: [20, 30], j: [10, 28], Σ: [18, 8], ϒ: [11, 52], ℓ: [8, 40], ĉ: [7, 44], ī: [16, 12], О: [2, 32], ξ: [4, 78], Ď: [18, 38], "&": [14, 68], G: [8, 40], ΰ: [13, 60], "`": [5, 8], ŏ: [5, 40], ý: [23, 40], º: [2, 18], "∞": [3, 50], ź: [20, 16], я: [20, 36], Ё: [23, 44], ń: [23, 40], " ": [0, 0], Г: [15, 16], Ь: [16, 28], "¤": [14, 32], Ĝ: [14, 52], p: [15, 49], Ю: [17, 48], ο: [2, 28], S: [1, 50], "/": [5, 0], Ŧ: [25, 16], ђ: [26, 36], y: [18, 32], Π: [21, 24], "‗": [10, 0], "–": [5, 0], ë: [7, 58], б: [4, 44], ƒ: [12, 30], у: [18, 32], J: [11, 16], ŷ: [24, 44], ŕ: [18, 38], ώ: [9, 68], "˘": [3, 12], D: [12, 22], ł: [19, 12], ĺ: [16, 20], ц: [23, 28], Л: [14, 42], $: [15, 46], w: [25, 30], о: [2, 28], Д: [18, 30], Ç: [6, 52], Ŝ: [7, 62], C: [1, 38], Ḁ: [23, 53], Ĵ: [17, 28], È: [26, 24], ﬁ: [22, 34], X: [29, 37], ô: [8, 40], Ė: [22, 32], г: [15, 16], Ŀ: [16, 32], х: [29, 33], ŋ: [18, 36], Ч: [21, 36], ü: [18, 56], ь: [16, 26], Ÿ: [24, 60], "€": [15, 40], в: [17, 36], Η: [29, 32], С: [1, 38], ß: [11, 60], њ: [32, 42], Ű: [25, 52], c: [1, 32], "¶": [16, 20], Ή: [34, 40], Ὅ: [9, 52], γ: [2, 48], "­": [5, 0], ":": [2, 32], ś: [6, 60], " ": [0, 0], У: [18, 32], "¾": [30, 58], Ί: [18, 24], ŉ: [20, 50], Ģ: [13, 46], m: [24, 52], Е: [21, 16], ž: [21, 24], á: [17, 50], "×": [13, 0], п: [21, 24], Ǻ: [26, 56], K: [25, 32], "¨": [2, 28], Y: [22, 32], E: [21, 16], Ô: [8, 44], Є: [4, 38], Ï: [15, 44], ġ: [6, 110], έ: [7, 66], " ": [0, 0], ϋ: [8, 60], й: [32, 48], b: [13, 43], ύ: [11, 40], ﬂ: [24, 32], ф: [17, 40], Ŋ: [24, 28], Ũ: [18, 56], Щ: [30, 34], L: [15, 16], ď: [18, 47], Ο: [2, 32], Ĭ: [16, 28], ŧ: [19, 16], À: [26, 29], Ϊ: [15, 44], ḁ: [14, 74], "½": [26, 38], "'": [5, 0], ĳ: [22, 56], Р: [16, 28], "˛": [3, 22], Ć: [6, 46], Т: [17, 16], "£": [12, 54], ů: [18, 60], Ō: [7, 32], а: [12, 42], Ğ: [11, 52], v: [17, 24], Ї: [15, 44], û: [22, 40], Ź: [20, 16], "ˉ": [5, 0], Ĺ: [20, 24], "₤": [20, 54], Č: [7, 54], x: [29, 33], è: [10, 38], Ń: [26, 28], ḿ: [29, 60], μ: [11, 36], ".": [1, 16], "‘": [2, 18], π: [12, 36], l: [11, 12], Ъ: [18, 28], " ": [0, 0], Ś: [6, 58], Ü: [17, 60], à: [17, 50], η: [9, 28], ó: [7, 36], "¦": [10, 0], Ő: [12, 52], Ž: [21, 24], е: [5, 30], Î: [19, 28], e: [5, 30], ό: [7, 36], Ĕ: [24, 28], ļ: [16, 18], " ": [0, 0], Ѓ: [20, 24], ò: [7, 36], ﬄ: [35, 58], "^": [8, 0], ⁿ: [18, 28], к: [19, 56], "￼": [118, 59], ū: [21, 28], "ˆ": [6, 12], Ẅ: [24, 54], č: [7, 48], "’": [2, 18], Ν: [21, 20], "-": [5, 0], Q: [5, 40], ј: [10, 28], ě: [11, 46], œ: [7, 53], "#": [34, 0], Џ: [23, 32], Å: [23, 53], ș: [6, 58], "¸": [5, 14], "=": [10, 0], ρ: [6, 30], Ћ: [25, 40], ú: [21, 36], "˚": [2, 32], д: [20, 30], "¯": [5, 0], u: [16, 28], З: [5, 54], Α: [21, 21], "⅝": [17, 86], é: [10, 38], Ş: [6, 64], B: [17, 36], "…": [3, 48], H: [29, 32], î: [17, 24], ν: [3, 34], Ό: [7, 40], "−": [5, 0], "⅜": [13, 100], ǰ: [15, 28], ā: [17, 42], ĵ: [15, 24], Ĩ: [16, 40], "*": [19, 0], ă: [15, 54], Χ: [29, 37], "†": [13, 6], "°": [2, 32], Ξ: [31, 28], Ķ: [30, 38], ŵ: [31, 42], "΄": [5, 8], ǽ: [17, 71], Β: [17, 36], Ļ: [20, 22], Õ: [5, 56], "№": [28, 38], χ: [13, 28], ί: [10, 20], Ζ: [15, 8], Ľ: [20, 22], ť: [16, 22], o: [2, 28], Ѕ: [1, 50], "�": [10, 44], d: [13, 41], ",": [2, 18], '"': [10, 0], ľ: [16, 18], ė: [6, 46], Í: [18, 24], Ú: [20, 40], " ": [0, 0], Ŷ: [28, 44], Ý: [27, 40], ŝ: [7, 64], " ": [0, 0], ą: [15, 64], "​": [0, 0], ã: [15, 66], æ: [12, 63], ĩ: [14, 36], "~": [3, 28], ŀ: [12, 28], Ċ: [2, 54], "¡": [6, 16], ẅ: [27, 58], К: [19, 58], Γ: [15, 16], P: [16, 28], "%": [9, 64], ϖ: [9, 68], _: [5, 0], ñ: [21, 56], Ŕ: [26, 40], "‚": [2, 18], "⅞": [18, 56], Æ: [33, 22], "₣": [27, 16], Ū: [20, 32], ы: [29, 42], ѓ: [20, 24], Œ: [18, 36], "΅": [7, 28], Ą: [24, 43], Њ: [32, 44], "›": [8, 0], ћ: [26, 32], "<": [8, 0], "¬": [7, 0], t: [11, 16], Ц: [22, 28], ù: [21, 36], ï: [13, 40], Ф: [27, 52], Ò: [7, 40], I: [13, 16], "˝": [10, 20], "·": [1, 16], "¿": [5, 44], ſ: [8, 24], Ђ: [21, 40], ű: [26, 48], Ǽ: [38, 30], φ: [11, 28], ";": [3, 34], Ș: [6, 56], Ġ: [9, 56], n: [18, 32], ά: [15, 48], ϊ: [7, 40], "\uFEFF": [0, 0], ģ: [10, 100], "∂": [3, 56], κ: [15, 29], "‡": [23, 12], ň: [24, 48], "√": [10, 0], ę: [8, 52], į: [15, 50], Τ: [17, 16], "≈": [6, 56], ΐ: [12, 40], ĸ: [23, 29], g: [5, 94], ǿ: [16, 34], "²": [9, 26], Ã: [24, 45], Ј: [11, 16], "©": [3, 84], "≥": [13, 0], Ă: [24, 33], ґ: [15, 16], ÿ: [20, 60], Ł: [23, 16], " ": [0, 0], "∫": [1, 49], "\\": [5, 0], Ì: [18, 24], ъ: [18, 26], ς: [2, 42], Ē: [26, 16], "!": [6, 16], ç: [6, 46], Й: [32, 48], Б: [18, 28], đ: [21, 39], ċ: [2, 48], Ā: [26, 21], Ẃ: [27, 34], ø: [11, 26], â: [18, 54], "}": [13, 22], Δ: [11, 4], "‰": [11, 96], Ä: [23, 49], ř: [19, 46], "—": [5, 0], N: [21, 20], "⁄": [5, 0], М: [26, 24], Ó: [7, 40], "˜": [3, 24], " ": [0, 0], "ˇ": [6, 16], ų: [19, 50], Ў: [21, 48], Ŭ: [18, 44], ĝ: [11, 106], Ω: [15, 36], s: [1, 52], "?": [5, 44], Ņ: [26, 26], Ī: [18, 16], Μ: [26, 24], "•": [1, 16], н: [29, 32], "(": [3, 16], "◊": [12, 0], α: [10, 40], Ħ: [42, 32], м: [28, 24], з: [5, 45], Ґ: [15, 16], Û: [21, 44], і: [12, 28], V: [16, 20], Ŗ: [26, 38], "@": [8, 83], ʼ: [2, 18], "℅": [8, 54], i: [12, 28], ќ: [24, 64], "≤": [13, 0], ё: [7, 58], υ: [6, 32], ĕ: [8, 42], ﬃ: [33, 60], ż: [16, 24], Э: [4, 36], ő: [12, 48], Ŏ: [5, 44], ю: [17, 44], İ: [14, 32], Ě: [27, 32], "‹": [8, 0], ķ: [28, 35], ì: [16, 20], "±": [18, 0], "|": [5, 0], "§": [2, 76], џ: [23, 32], љ: [17, 50], q: [15, 45], "˳": [2, 32], ή: [14, 36], Ж: [25, 100], "®": [22, 77], Н: [29, 32], Ε: [21, 16], "₧": [27, 42], л: [14, 40], σ: [6, 30], θ: [5, 32], " ": [0, 0], "∑": [18, 8], Ώ: [20, 44], ẃ: [30, 38], "+": [13, 0], Ë: [23, 44], Š: [7, 66], " ": [0, 0], ð: [9, 36], щ: [31, 36], "℮": [8, 34], Φ: [27, 52], ş: [6, 66], " ": [0, 0], ı: [11, 12], ä: [14, 70], "¹": [12, 12], W: [22, 26], λ: [9, 32], ">": [8, 0], τ: [7, 26], Ų: [18, 54], Ŵ: [28, 38], "‛": [2, 18], Ð: [20, 24], Λ: [16, 19], "·": [1, 16], Х: [29, 37], Υ: [22, 32], r: [13, 30], ж: [25, 96], Ø: [11, 30], Ỳ: [27, 40], "÷": [7, 30], с: [1, 32], h: [18, 32], f: [16, 28], "“": [4, 36], A: [21, 21], O: [2, 32], Đ: [20, 24], Ǿ: [16, 38], "⅛": [20, 66], Ẁ: [27, 34], Ť: [23, 32], ψ: [12, 30], ŗ: [18, 36] }, mono: { 0: [2, 14], 1: [8, 2], 2: [9, 10], 3: [7, 17], 4: [17, 2], 5: [8, 10], 6: [4, 20], 7: [8, 0], 8: [4, 25], 9: [4, 20], ǻ: [18, 32], Á: [18, 4], ĥ: [18, 9], Κ: [14, 0], "»": [16, 0], "∆": [11, 2], ў: [13, 14], ţ: [18, 7], "«": [16, 0], í: [16, 2], ņ: [15, 7], µ: [12, 6], ỳ: [15, 10], Ι: [13, 0], Ύ: [16, 3], ѕ: [3, 18], Ш: [13, 0], M: [17, 2], Ψ: [17, 8], ũ: [13, 13], ŭ: [13, 11], "―": [5, 0], "{": [9, 10], "¼": [29, 4], Ḿ: [22, 4], ι: [5, 4], Ĳ: [10, 4], Ê: [20, 5], Ά: [19, 5], ")": [3, 4], ε: [7, 14], э: [6, 10], ш: [13, 0], Я: [13, 5], a: [11, 15], Ę: [16, 7], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 7], Ů: [9, 20], "¢": [9, 8], В: [13, 13], І: [13, 0], ē: [11, 11], β: [10, 19], "≠": [21, 0], "‼": [12, 8], "¥": [24, 0], Ĥ: [20, 5], U: [7, 5], Ñ: [16, 10], F: [11, 0], ϑ: [6, 58], Ќ: [17, 2], å: [13, 30], Ϋ: [12, 8], ō: [7, 12], "”": [8, 4], ö: [4, 20], ć: [8, 12], þ: [11, 13], "]": [9, 0], А: [13, 2], "′": [5, 0], Ы: [15, 6], ẁ: [24, 6], ĭ: [14, 6], R: [13, 6], Ż: [12, 4], ħ: [19, 6], õ: [5, 20], "˙": [1, 4], ê: [13, 16], "″": [10, 0], "„": [8, 4], ч: [9, 5], δ: [3, 20], Â: [20, 7], Į: [16, 7], ω: [7, 14], Ţ: [14, 3], "´": [5, 2], Ĉ: [10, 17], И: [14, 2], Љ: [13, 14], р: [10, 13], Ω: [9, 10], т: [9, 0], П: [9, 0], Ö: [4, 20], z: [11, 0], "™": [26, 1], Θ: [7, 12], Ř: [20, 11], Ň: [20, 7], É: [18, 2], и: [13, 0], "³": [6, 14], "[": [9, 0], ζ: [6, 15], "∏": [9, 0], Έ: [19, 3], Ρ: [10, 6], ğ: [11, 34], ª: [10, 13], ї: [13, 8], T: [9, 0], š: [10, 23], є: [6, 10], Þ: [12, 6], j: [8, 10], Σ: [13, 0], ϒ: [8, 20], ℓ: [8, 16], ĉ: [10, 15], ī: [16, 0], О: [2, 12], ξ: [11, 22], Ď: [15, 11], "&": [9, 24], G: [7, 11], ΰ: [12, 19], "`": [5, 2], ŏ: [5, 18], ý: [15, 10], º: [2, 12], "∞": [3, 24], ź: [16, 2], я: [13, 5], Ё: [15, 8], ń: [15, 6], " ": [0, 0], Г: [7, 0], Ь: [10, 6], "¤": [14, 16], Ĝ: [14, 16], p: [10, 13], Ю: [9, 16], ο: [2, 12], S: [3, 18], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 9], y: [10, 8], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 19], б: [4, 20], ƒ: [13, 12], у: [10, 8], J: [5, 6], ŷ: [17, 13], ŕ: [13, 8], ώ: [13, 17], "˘": [3, 6], D: [8, 6], ł: [19, 0], ĺ: [16, 2], ц: [13, 0], Л: [7, 6], $: [15, 16], w: [19, 4], о: [2, 12], Д: [16, 4], Ç: [8, 18], Ŝ: [10, 23], C: [3, 12], Ḁ: [15, 26], Ĵ: [12, 11], È: [18, 2], ﬁ: [19, 11], X: [13, 0], ô: [9, 17], Ė: [14, 4], г: [7, 0], Ŀ: [8, 4], х: [13, 0], ŋ: [10, 8], Ч: [9, 5], ü: [12, 13], ь: [10, 5], Ÿ: [12, 8], "€": [19, 12], в: [13, 11], Η: [13, 0], С: [3, 12], ß: [5, 23], њ: [18, 5], Ű: [17, 9], c: [3, 10], "¶": [9, 4], Ή: [19, 3], Ὅ: [9, 32], γ: [9, 4], "­": [5, 0], ":": [2, 8], ś: [8, 20], " ": [0, 0], У: [10, 9], "¾": [27, 16], Ί: [19, 3], ŉ: [14, 7], Ģ: [12, 14], m: [14, 12], Е: [13, 0], ž: [18, 5], á: [16, 17], "×": [13, 0], п: [9, 0], Ǻ: [20, 19], K: [14, 0], "¨": [2, 8], Y: [10, 0], E: [13, 0], Ô: [9, 17], Є: [6, 11], Ï: [15, 8], ġ: [9, 32], έ: [13, 17], " ": [0, 0], ϋ: [7, 16], й: [16, 6], b: [9, 13], ύ: [11, 11], ﬂ: [18, 6], ф: [11, 8], Ŋ: [13, 7], Ũ: [10, 13], Щ: [17, 0], L: [7, 0], ď: [16, 16], Ο: [2, 12], Ĭ: [16, 6], ŧ: [21, 4], À: [18, 4], Ϊ: [15, 8], ḁ: [13, 39], "½": [21, 11], "'": [5, 0], ĳ: [14, 15], Р: [10, 6], "˛": [3, 7], Ć: [8, 14], Т: [9, 0], "£": [16, 7], ů: [12, 20], Ō: [7, 12], а: [11, 15], Ğ: [10, 17], v: [9, 2], Ї: [15, 8], û: [17, 10], Ź: [16, 2], "ˉ": [5, 0], Ĺ: [12, 2], "₤": [24, 7], Č: [10, 17], x: [13, 0], è: [11, 13], Ń: [18, 4], ḿ: [19, 14], μ: [12, 6], ".": [1, 4], "‘": [4, 2], π: [14, 4], l: [11, 0], Ъ: [12, 7], " ": [0, 0], Ś: [8, 20], Ü: [9, 13], à: [16, 17], η: [10, 4], ó: [7, 14], "¦": [10, 0], Ő: [12, 16], Ž: [18, 5], е: [6, 11], Î: [20, 5], e: [6, 11], ό: [8, 15], Ĕ: [16, 6], ļ: [16, 3], " ": [0, 0], Ѓ: [12, 2], ò: [7, 14], ﬄ: [24, 22], "^": [8, 0], ⁿ: [10, 6], к: [12, 0], "￼": [92, 50], ū: [15, 5], "ˆ": [7, 5], Ẅ: [16, 15], č: [10, 15], "’": [4, 2], Ν: [13, 2], "-": [5, 0], Q: [3, 14], ј: [8, 10], ě: [13, 16], œ: [7, 22], "#": [34, 0], Џ: [13, 0], Å: [15, 17], ș: [8, 21], "¸": [5, 6], "=": [10, 0], ρ: [7, 14], Ћ: [15, 3], ú: [15, 7], "˚": [2, 15], д: [16, 2], "¯": [5, 0], u: [10, 5], З: [7, 18], Α: [13, 2], "⅝": [17, 30], é: [11, 13], Ş: [8, 24], B: [13, 13], "…": [3, 12], H: [13, 0], î: [18, 5], ν: [7, 5], Ό: [8, 15], "−": [5, 0], "⅜": [15, 34], ǰ: [14, 11], ā: [16, 15], ĵ: [14, 11], Ĩ: [16, 8], "*": [16, 0], ă: [14, 21], Χ: [13, 0], "†": [13, 0], "°": [2, 16], Ξ: [15, 0], Ķ: [19, 3], ŵ: [26, 9], "΄": [6, 3], ǽ: [17, 27], Β: [13, 13], Ļ: [12, 3], Õ: [5, 20], "№": [20, 17], χ: [13, 11], ί: [11, 7], Ζ: [11, 0], Ľ: [13, 3], ť: [19, 7], o: [2, 12], Ѕ: [3, 18], "�": [11, 38], d: [10, 13], ",": [4, 2], '"': [10, 0], ľ: [17, 3], ė: [7, 15], Í: [18, 2], Ú: [12, 7], " ": [0, 0], Ŷ: [17, 5], Ý: [15, 2], ŝ: [10, 23], " ": [0, 0], ą: [14, 22], "​": [0, 0], ã: [14, 23], æ: [12, 25], ĩ: [14, 8], "~": [3, 8], ŀ: [12, 4], Ċ: [4, 16], "¡": [6, 4], ẅ: [21, 12], К: [12, 0], Γ: [7, 0], P: [10, 6], "%": [9, 24], ϖ: [13, 42], _: [5, 0], ñ: [13, 12], Ŕ: [18, 8], "‚": [4, 2], "⅞": [17, 20], Æ: [22, 0], "₣": [19, 0], Ū: [12, 5], ы: [15, 5], ѓ: [12, 2], Œ: [15, 8], "΅": [7, 11], Ą: [16, 9], Њ: [18, 7], "›": [8, 0], ћ: [19, 6], "<": [8, 0], "¬": [7, 0], t: [13, 4], Ц: [13, 0], ù: [15, 7], ï: [13, 8], Ф: [19, 16], Ò: [7, 14], I: [13, 0], "˝": [10, 4], "·": [1, 4], "¿": [6, 18], ſ: [5, 6], Ђ: [15, 8], ű: [20, 9], Ǽ: [27, 2], φ: [8, 13], ";": [5, 6], Ș: [8, 21], Ġ: [8, 15], n: [10, 4], ά: [14, 21], ϊ: [7, 12], "\uFEFF": [0, 0], ģ: [13, 31], "∂": [4, 18], κ: [16, 0], "‡": [23, 0], ň: [17, 9], "√": [10, 0], ę: [9, 18], į: [15, 12], Τ: [9, 0], "≈": [6, 16], ΐ: [12, 15], ĸ: [16, 0], g: [8, 28], ǿ: [16, 18], "²": [8, 9], Ã: [16, 10], Ј: [5, 6], "©": [5, 27], "≥": [13, 0], Ă: [16, 8], ґ: [9, 0], ÿ: [12, 16], Ł: [15, 0], " ": [0, 0], "∫": [5, 9], "\\": [5, 0], Ì: [18, 2], ъ: [12, 5], ς: [3, 12], Ē: [18, 0], "!": [6, 4], ç: [8, 16], Й: [17, 8], Б: [12, 6], đ: [18, 13], ċ: [4, 14], Ā: [18, 2], Ẃ: [19, 9], ø: [11, 16], â: [18, 20], "}": [9, 10], Δ: [11, 2], "‰": [11, 42], Ä: [15, 10], ř: [15, 11], "—": [5, 0], N: [13, 2], "⁄": [5, 0], М: [17, 2], Ó: [7, 14], "˜": [3, 8], " ": [0, 0], "ˇ": [7, 5], ų: [13, 12], Ў: [13, 15], Ŭ: [10, 11], ĝ: [15, 33], Ω: [9, 10], s: [3, 18], "?": [6, 18], Ņ: [18, 5], Ī: [18, 0], Μ: [17, 2], "•": [1, 6], н: [13, 0], "(": [3, 4], "◊": [12, 0], α: [8, 18], Ħ: [26, 0], м: [14, 6], з: [7, 15], Ґ: [9, 0], Û: [14, 10], і: [12, 5], V: [8, 2], Ŗ: [18, 9], "@": [7, 31], ʼ: [4, 2], "℅": [10, 22], i: [12, 5], ќ: [21, 2], "≤": [13, 0], ё: [8, 19], υ: [5, 8], ĕ: [9, 17], ﬃ: [23, 23], ż: [12, 4], Э: [6, 11], ő: [12, 16], Ŏ: [5, 18], ю: [9, 13], İ: [14, 4], Ě: [20, 5], "‹": [8, 0], ķ: [21, 3], ì: [16, 2], "±": [18, 0], "|": [5, 0], "§": [5, 28], џ: [13, 0], љ: [12, 13], q: [10, 13], "˳": [2, 24], ή: [16, 7], Ж: [19, 0], "®": [15, 21], Н: [13, 0], Ε: [13, 0], "₧": [23, 9], л: [7, 6], σ: [6, 13], θ: [5, 15], " ": [0, 0], "∑": [13, 0], Ώ: [15, 13], ẃ: [24, 6], "+": [13, 0], Ë: [15, 8], Š: [10, 23], " ": [0, 0], ð: [10, 17], щ: [17, 0], "℮": [9, 12], Φ: [19, 16], ş: [8, 24], " ": [0, 0], ı: [11, 0], ä: [13, 23], "¹": [8, 2], W: [14, 7], λ: [10, 13], ">": [8, 0], τ: [10, 4], Ų: [10, 12], Ŵ: [21, 12], "‛": [4, 2], Ð: [16, 6], Λ: [8, 2], "·": [1, 4], Х: [13, 0], Υ: [10, 0], r: [8, 6], ж: [19, 0], Ø: [11, 14], Ỳ: [15, 2], "÷": [7, 8], с: [3, 10], h: [11, 4], f: [13, 6], "“": [8, 4], A: [13, 2], O: [2, 12], Đ: [16, 6], Ǿ: [16, 16], "⅛": [17, 22], Ẁ: [19, 9], Ť: [16, 5], ψ: [11, 7], ŗ: [13, 9] } };
+const d8 = (e, n) => e.parts.map((t) => typeof t == "string" ? t : n(t, e.scad)).join(""), ni = { sans: { 0: [2, 32], 1: [8, 8], 2: [9, 22], 3: [7, 40], 4: [17, 8], 5: [8, 28], 6: [4, 50], 7: [8, 0], 8: [4, 58], 9: [4, 48], ǻ: [18, 64], Á: [18, 16], ĥ: [17, 24], Κ: [14, 0], "»": [16, 0], "∆": [11, 4], ў: [13, 36], ţ: [18, 22], "«": [16, 0], í: [10, 8], ņ: [15, 20], µ: [12, 13], ỳ: [15, 28], Ι: [13, 0], Ύ: [15, 8], ѕ: [3, 40], Ш: [13, 0], M: [17, 6], Ψ: [17, 18], ũ: [13, 34], ŭ: [13, 30], "―": [5, 0], "{": [9, 24], "¼": [29, 12], Ḿ: [22, 14], ι: [5, 14], Ĳ: [18, 12], Ê: [19, 12], Ά: [18, 16], ")": [3, 14], ε: [7, 40], э: [6, 26], ш: [13, 0], Я: [13, 14], a: [11, 32], Ę: [16, 13], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 22], Ů: [9, 38], "¢": [9, 22], В: [13, 30], І: [13, 0], ē: [11, 28], β: [10, 42], "≠": [21, 0], "‼": [12, 32], "¥": [24, 0], Ĥ: [19, 12], U: [7, 14], Ñ: [16, 28], F: [11, 0], ϑ: [6, 58], Ќ: [17, 8], å: [13, 56], Ϋ: [12, 18], ō: [7, 24], "”": [8, 16], ö: [4, 42], ć: [8, 30], þ: [11, 31], "]": [9, 0], А: [13, 8], "′": [5, 0], Ы: [15, 14], ẁ: [22, 32], ĭ: [8, 16], R: [13, 14], Ż: [12, 10], ħ: [19, 12], õ: [5, 44], "˙": [1, 10], ê: [12, 40], "″": [10, 0], "„": [8, 16], ч: [9, 13], δ: [3, 54], Â: [19, 20], Į: [16, 13], ω: [7, 42], Ţ: [14, 8], "´": [5, 8], Ĉ: [9, 38], И: [13, 8], Љ: [12, 34], р: [10, 31], Ω: [9, 32], т: [9, 0], П: [9, 0], Ö: [4, 50], z: [11, 0], "™": [25, 8], Θ: [7, 32], Ř: [19, 26], Ň: [19, 20], É: [18, 8], и: [13, 0], "³": [6, 32], "[": [9, 0], ζ: [6, 37], "∏": [9, 0], Έ: [18, 8], Ρ: [10, 14], ğ: [11, 84], ª: [10, 28], ї: [7, 18], T: [9, 0], š: [9, 52], є: [6, 22], Þ: [12, 14], j: [6, 22], Σ: [13, 0], ϒ: [8, 22], ℓ: [8, 41], ĉ: [9, 34], ī: [10, 0], О: [2, 32], ξ: [11, 47], Ď: [14, 26], "&": [9, 62], G: [7, 30], ΰ: [12, 48], "`": [5, 8], ŏ: [5, 40], ý: [15, 28], º: [2, 24], "∞": [3, 52], ź: [16, 8], я: [13, 14], Ё: [15, 18], ń: [15, 20], " ": [0, 0], Г: [7, 0], Ь: [10, 14], "¤": [14, 32], Ĝ: [13, 42], p: [10, 31], Ю: [9, 32], ο: [2, 24], S: [3, 38], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 24], y: [10, 20], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 46], б: [4, 46], ƒ: [13, 24], у: [10, 20], J: [5, 12], ŷ: [16, 32], ŕ: [13, 20], ώ: [12, 50], "˘": [3, 16], D: [8, 14], ł: [13, 0], ĺ: [10, 8], ц: [13, 0], Л: [7, 20], $: [15, 40], w: [17, 24], о: [2, 24], Д: [16, 12], Ç: [8, 42], Ŝ: [9, 50], C: [3, 26], Ḁ: [15, 32], Ĵ: [11, 24], È: [18, 8], ﬁ: [19, 22], X: [13, 0], ô: [8, 36], Ė: [14, 10], г: [7, 0], Ŀ: [8, 10], х: [13, 0], ŋ: [10, 24], Ч: [9, 10], ü: [12, 32], ь: [10, 14], Ÿ: [12, 18], "€": [15, 31], в: [13, 26], Η: [13, 0], С: [3, 26], ß: [5, 58], њ: [18, 14], Ű: [17, 30], c: [3, 22], "¶": [9, 9], Ή: [18, 8], Ὅ: [9, 52], γ: [9, 16], "­": [5, 0], ":": [2, 32], ś: [8, 48], " ": [0, 0], У: [9, 20], "¾": [27, 38], Ί: [18, 8], ŉ: [14, 20], Ģ: [12, 38], m: [14, 24], Е: [13, 0], ž: [17, 12], á: [16, 40], "×": [13, 0], п: [9, 0], Ǻ: [19, 36], K: [14, 0], "¨": [2, 18], Y: [10, 0], E: [13, 0], Ô: [8, 44], Є: [6, 26], Ï: [15, 18], ġ: [9, 78], έ: [12, 48], " ": [0, 0], ϋ: [7, 38], й: [16, 16], b: [9, 31], ύ: [10, 28], ﬂ: [18, 12], ф: [11, 26], Ŋ: [13, 18], Ũ: [10, 34], Щ: [17, 0], L: [7, 0], ď: [15, 39], Ο: [2, 32], Ĭ: [16, 16], ŧ: [21, 14], À: [18, 16], Ϊ: [15, 18], ḁ: [13, 56], "½": [21, 24], "'": [5, 0], ĳ: [12, 32], Р: [10, 14], "˛": [3, 13], Ć: [8, 34], Т: [9, 0], "£": [16, 20], ů: [12, 38], Ō: [7, 32], а: [11, 32], Ğ: [10, 46], v: [9, 8], Ї: [15, 18], û: [16, 26], Ź: [16, 8], "ˉ": [5, 0], Ĺ: [12, 8], "₤": [24, 20], Č: [9, 38], x: [13, 0], è: [11, 36], Ń: [18, 16], ḿ: [19, 32], μ: [12, 13], ".": [1, 16], "‘": [4, 8], π: [14, 8], l: [5, 0], Ъ: [12, 14], " ": [0, 0], Ś: [8, 46], Ü: [9, 32], à: [16, 40], η: [10, 12], ó: [7, 32], "¦": [10, 0], Ő: [12, 48], Ž: [17, 12], е: [6, 28], Î: [19, 12], e: [6, 28], ό: [7, 32], Ĕ: [16, 16], ļ: [10, 8], " ": [0, 0], Ѓ: [12, 8], ò: [7, 32], ﬄ: [31, 24], "^": [8, 0], ⁿ: [10, 8], к: [12, 0], "￼": [108, 39], ū: [15, 14], "ˆ": [6, 12], Ẅ: [16, 40], č: [9, 34], "’": [4, 8], Ν: [13, 8], "-": [5, 0], Q: [3, 38], ј: [6, 22], ě: [12, 40], œ: [7, 44], "#": [34, 0], Џ: [13, 0], Å: [15, 32], ș: [8, 48], "¸": [5, 16], "=": [10, 0], ρ: [7, 25], Ћ: [15, 6], ú: [15, 22], "˚": [2, 24], д: [16, 8], "¯": [5, 0], u: [10, 14], З: [7, 40], Α: [13, 8], "⅝": [17, 74], é: [11, 36], Ş: [8, 54], B: [13, 30], "…": [3, 46], H: [13, 0], î: [11, 12], ν: [7, 12], Ό: [7, 40], "−": [5, 0], "⅜": [15, 84], ǰ: [11, 24], ā: [16, 32], ĵ: [11, 24], Ĩ: [16, 20], "*": [16, 0], ă: [14, 48], Χ: [13, 0], "†": [13, 0], "°": [2, 32], Ξ: [15, 0], Ķ: [19, 8], ŵ: [23, 36], "΄": [5, 8], ǽ: [17, 62], Β: [13, 30], Ļ: [12, 8], Õ: [5, 52], "№": [20, 32], χ: [13, 21], ί: [10, 22], Ζ: [11, 0], Ľ: [12, 8], ť: [18, 22], o: [2, 24], Ѕ: [3, 38], "�": [11, 28], d: [10, 31], ",": [4, 8], '"': [10, 0], ľ: [10, 8], ė: [7, 38], Í: [18, 8], Ú: [12, 22], " ": [0, 0], Ŷ: [16, 12], Ý: [15, 8], ŝ: [9, 52], " ": [0, 0], ą: [14, 45], "​": [0, 0], ã: [14, 52], æ: [12, 54], ĩ: [8, 20], "~": [3, 26], ŀ: [6, 10], Ċ: [4, 36], "¡": [6, 16], ẅ: [19, 42], К: [12, 0], Γ: [7, 0], P: [10, 14], "%": [9, 44], ϖ: [13, 38], _: [5, 0], ñ: [13, 32], Ŕ: [18, 22], "‚": [4, 8], "⅞": [17, 52], Æ: [22, 0], "₣": [19, 0], Ū: [12, 14], ы: [15, 14], ѓ: [12, 8], Œ: [14, 23], "΅": [7, 28], Ą: [16, 21], Њ: [18, 14], "›": [8, 0], ћ: [19, 12], "<": [8, 0], "¬": [7, 0], t: [13, 14], Ц: [13, 0], ù: [15, 22], ï: [7, 18], Ф: [19, 36], Ò: [7, 40], I: [13, 0], "˝": [10, 16], "·": [1, 16], "¿": [6, 44], ſ: [5, 12], Ђ: [15, 18], ű: [20, 30], Ǽ: [27, 8], φ: [8, 38], ";": [5, 24], Ș: [8, 46], Ġ: [8, 40], n: [10, 12], ά: [13, 50], ϊ: [7, 32], "\uFEFF": [0, 0], ģ: [13, 76], "∂": [3, 54], κ: [14, 3], "‡": [23, 0], ň: [16, 24], "√": [10, 0], ę: [9, 41], į: [9, 23], Τ: [9, 0], "≈": [6, 52], ΐ: [12, 42], ĸ: [14, 3], g: [8, 68], ǿ: [16, 34], "²": [8, 18], Ã: [16, 28], Ј: [5, 12], "©": [5, 68], "≥": [13, 0], Ă: [16, 24], ґ: [9, 0], ÿ: [12, 38], Ł: [15, 0], " ": [0, 0], "∫": [5, 24], "\\": [5, 0], Ì: [18, 8], ъ: [12, 14], ς: [3, 38], Ē: [18, 0], "!": [6, 16], ç: [8, 38], Й: [16, 24], Б: [12, 14], đ: [18, 31], ċ: [4, 32], Ā: [18, 8], Ẃ: [19, 30], ø: [11, 26], â: [17, 44], "}": [9, 26], Δ: [11, 4], "‰": [11, 66], Ä: [15, 26], ř: [14, 24], "—": [5, 0], N: [13, 8], "⁄": [5, 0], М: [17, 6], Ó: [7, 40], "˜": [3, 20], " ": [0, 0], "ˇ": [6, 12], ų: [13, 27], Ў: [12, 36], Ŭ: [10, 30], ĝ: [14, 80], Ω: [9, 32], s: [3, 40], "?": [6, 44], Ņ: [18, 16], Ī: [18, 0], Μ: [17, 6], "•": [1, 16], н: [13, 0], "(": [3, 14], "◊": [12, 0], α: [8, 42], Ħ: [26, 0], м: [14, 16], з: [7, 40], Ґ: [9, 0], Û: [13, 26], і: [6, 10], V: [8, 4], Ŗ: [18, 22], "@": [6, 80], ʼ: [4, 8], "℅": [10, 51], i: [6, 10], ќ: [17, 8], "≤": [13, 0], ё: [8, 46], υ: [5, 20], ĕ: [9, 44], ﬃ: [32, 34], ż: [12, 10], Э: [6, 24], ő: [12, 40], Ŏ: [5, 48], ю: [9, 24], İ: [14, 10], Ě: [19, 12], "‹": [8, 0], ķ: [21, 8], ì: [10, 8], "±": [18, 0], "|": [5, 0], "§": [5, 68], џ: [13, 0], љ: [12, 25], q: [10, 31], "˳": [2, 24], ή: [15, 20], Ж: [19, 0], "®": [15, 54], Н: [13, 0], Ε: [13, 0], "₧": [23, 26], л: [7, 11], σ: [6, 30], θ: [5, 30], " ": [0, 0], "∑": [13, 0], Ώ: [14, 40], ẃ: [22, 32], "+": [13, 0], Ë: [15, 18], Š: [9, 50], " ": [0, 0], ð: [10, 38], щ: [17, 0], "℮": [8, 34], Φ: [19, 36], ş: [8, 56], " ": [0, 0], ı: [5, 0], ä: [13, 50], "¹": [8, 6], W: [14, 22], λ: [10, 28], ">": [8, 0], τ: [10, 16], Ų: [10, 27], Ŵ: [20, 34], "‛": [4, 8], Ð: [16, 14], Λ: [8, 4], "·": [1, 16], Х: [13, 0], Υ: [10, 0], r: [8, 12], ж: [19, 0], Ø: [11, 30], Ỳ: [15, 8], "÷": [7, 32], с: [3, 22], h: [11, 12], f: [13, 12], "“": [8, 16], A: [13, 8], O: [2, 32], Đ: [16, 14], Ǿ: [16, 38], "⅛": [17, 58], Ẁ: [19, 30], Ť: [15, 12], ψ: [11, 24], ŗ: [13, 20] }, serif: { 0: [2, 32], 1: [10, 18], 2: [9, 32], 3: [4, 58], 4: [20, 18], 5: [9, 36], 6: [2, 46], 7: [10, 1], 8: [3, 62], 9: [3, 48], ǻ: [19, 82], Á: [26, 29], ĥ: [24, 44], Κ: [25, 32], "»": [16, 0], "∆": [11, 4], ў: [21, 48], ţ: [16, 22], "«": [16, 0], í: [16, 20], ņ: [23, 38], µ: [11, 36], ỳ: [23, 40], Ι: [13, 16], Ύ: [27, 40], ѕ: [1, 52], Ш: [29, 32], M: [26, 24], Ψ: [27, 44], ũ: [19, 52], ŭ: [19, 40], "―": [5, 0], "{": [13, 22], "¼": [37, 24], Ḿ: [31, 32], ι: [5, 12], Ĳ: [24, 32], Ê: [27, 28], Ά: [26, 29], ")": [3, 16], ε: [2, 58], э: [4, 33], ш: [29, 32], Я: [21, 34], a: [12, 42], Ę: [24, 38], Z: [15, 8], " ": [0, 0], k: [23, 29], Ù: [20, 40], Ů: [17, 64], "¢": [11, 30], В: [17, 36], І: [13, 16], ē: [10, 30], β: [7, 51], "≠": [21, 0], "‼": [12, 32], "¥": [36, 32], Ĥ: [35, 44], U: [15, 32], Ñ: [24, 44], F: [19, 16], ϑ: [8, 58], Ќ: [24, 66], å: [14, 74], Ϋ: [24, 60], ō: [7, 28], "”": [4, 36], ö: [4, 56], ć: [6, 40], þ: [15, 50], "]": [9, 8], А: [21, 21], "′": [5, 0], Ы: [29, 44], ẁ: [30, 38], ĭ: [14, 24], R: [21, 32], Ż: [16, 24], ħ: [26, 32], õ: [5, 52], "˙": [1, 16], ê: [11, 42], "″": [10, 0], "„": [4, 36], ч: [21, 38], δ: [2, 56], Â: [27, 33], Į: [16, 38], ω: [4, 60], Ţ: [22, 22], "´": [5, 8], Ĉ: [7, 50], И: [29, 32], Љ: [17, 54], р: [15, 49], Ω: [15, 36], т: [17, 16], П: [21, 24], Ö: [4, 60], z: [15, 8], "™": [41, 32], Θ: [15, 44], Ř: [27, 48], Ň: [27, 36], É: [26, 24], и: [29, 32], "³": [5, 46], "[": [9, 8], ζ: [3, 48], "∏": [21, 24], Έ: [26, 24], Ρ: [16, 28], ğ: [8, 106], ª: [11, 38], ї: [13, 40], T: [17, 16], š: [7, 68], є: [4, 34], Þ: [20, 30], j: [10, 28], Σ: [18, 8], ϒ: [11, 52], ℓ: [8, 40], ĉ: [7, 44], ī: [16, 12], О: [2, 32], ξ: [4, 78], Ď: [18, 38], "&": [14, 68], G: [8, 40], ΰ: [13, 60], "`": [5, 8], ŏ: [5, 40], ý: [23, 40], º: [2, 18], "∞": [3, 50], ź: [20, 16], я: [20, 36], Ё: [23, 44], ń: [23, 40], " ": [0, 0], Г: [15, 16], Ь: [16, 28], "¤": [14, 32], Ĝ: [14, 52], p: [15, 49], Ю: [17, 48], ο: [2, 28], S: [1, 50], "/": [5, 0], Ŧ: [25, 16], ђ: [26, 36], y: [18, 32], Π: [21, 24], "‗": [10, 0], "–": [5, 0], ë: [7, 58], б: [4, 44], ƒ: [12, 30], у: [18, 32], J: [11, 16], ŷ: [24, 44], ŕ: [18, 38], ώ: [9, 68], "˘": [3, 12], D: [12, 22], ł: [19, 12], ĺ: [16, 20], ц: [23, 28], Л: [14, 42], $: [15, 46], w: [25, 30], о: [2, 28], Д: [18, 30], Ç: [6, 52], Ŝ: [7, 62], C: [1, 38], Ḁ: [23, 53], Ĵ: [17, 28], È: [26, 24], ﬁ: [22, 34], X: [29, 37], ô: [8, 40], Ė: [22, 32], г: [15, 16], Ŀ: [16, 32], х: [29, 33], ŋ: [18, 36], Ч: [21, 36], ü: [18, 56], ь: [16, 26], Ÿ: [24, 60], "€": [15, 40], в: [17, 36], Η: [29, 32], С: [1, 38], ß: [11, 60], њ: [32, 42], Ű: [25, 52], c: [1, 32], "¶": [16, 20], Ή: [34, 40], Ὅ: [9, 52], γ: [2, 48], "­": [5, 0], ":": [2, 32], ś: [6, 60], " ": [0, 0], У: [18, 32], "¾": [30, 58], Ί: [18, 24], ŉ: [20, 50], Ģ: [13, 46], m: [24, 52], Е: [21, 16], ž: [21, 24], á: [17, 50], "×": [13, 0], п: [21, 24], Ǻ: [26, 56], K: [25, 32], "¨": [2, 28], Y: [22, 32], E: [21, 16], Ô: [8, 44], Є: [4, 38], Ï: [15, 44], ġ: [6, 110], έ: [7, 66], " ": [0, 0], ϋ: [8, 60], й: [32, 48], b: [13, 43], ύ: [11, 40], ﬂ: [24, 32], ф: [17, 40], Ŋ: [24, 28], Ũ: [18, 56], Щ: [30, 34], L: [15, 16], ď: [18, 47], Ο: [2, 32], Ĭ: [16, 28], ŧ: [19, 16], À: [26, 29], Ϊ: [15, 44], ḁ: [14, 74], "½": [26, 38], "'": [5, 0], ĳ: [22, 56], Р: [16, 28], "˛": [3, 22], Ć: [6, 46], Т: [17, 16], "£": [12, 54], ů: [18, 60], Ō: [7, 32], а: [12, 42], Ğ: [11, 52], v: [17, 24], Ї: [15, 44], û: [22, 40], Ź: [20, 16], "ˉ": [5, 0], Ĺ: [20, 24], "₤": [20, 54], Č: [7, 54], x: [29, 33], è: [10, 38], Ń: [26, 28], ḿ: [29, 60], μ: [11, 36], ".": [1, 16], "‘": [2, 18], π: [12, 36], l: [11, 12], Ъ: [18, 28], " ": [0, 0], Ś: [6, 58], Ü: [17, 60], à: [17, 50], η: [9, 28], ó: [7, 36], "¦": [10, 0], Ő: [12, 52], Ž: [21, 24], е: [5, 30], Î: [19, 28], e: [5, 30], ό: [7, 36], Ĕ: [24, 28], ļ: [16, 18], " ": [0, 0], Ѓ: [20, 24], ò: [7, 36], ﬄ: [35, 58], "^": [8, 0], ⁿ: [18, 28], к: [19, 56], "￼": [118, 59], ū: [21, 28], "ˆ": [6, 12], Ẅ: [24, 54], č: [7, 48], "’": [2, 18], Ν: [21, 20], "-": [5, 0], Q: [5, 40], ј: [10, 28], ě: [11, 46], œ: [7, 53], "#": [34, 0], Џ: [23, 32], Å: [23, 53], ș: [6, 58], "¸": [5, 14], "=": [10, 0], ρ: [6, 30], Ћ: [25, 40], ú: [21, 36], "˚": [2, 32], д: [20, 30], "¯": [5, 0], u: [16, 28], З: [5, 54], Α: [21, 21], "⅝": [17, 86], é: [10, 38], Ş: [6, 64], B: [17, 36], "…": [3, 48], H: [29, 32], î: [17, 24], ν: [3, 34], Ό: [7, 40], "−": [5, 0], "⅜": [13, 100], ǰ: [15, 28], ā: [17, 42], ĵ: [15, 24], Ĩ: [16, 40], "*": [19, 0], ă: [15, 54], Χ: [29, 37], "†": [13, 6], "°": [2, 32], Ξ: [31, 28], Ķ: [30, 38], ŵ: [31, 42], "΄": [5, 8], ǽ: [17, 71], Β: [17, 36], Ļ: [20, 22], Õ: [5, 56], "№": [28, 38], χ: [13, 28], ί: [10, 20], Ζ: [15, 8], Ľ: [20, 22], ť: [16, 22], o: [2, 28], Ѕ: [1, 50], "�": [10, 44], d: [13, 41], ",": [2, 18], '"': [10, 0], ľ: [16, 18], ė: [6, 46], Í: [18, 24], Ú: [20, 40], " ": [0, 0], Ŷ: [28, 44], Ý: [27, 40], ŝ: [7, 64], " ": [0, 0], ą: [15, 64], "​": [0, 0], ã: [15, 66], æ: [12, 63], ĩ: [14, 36], "~": [3, 28], ŀ: [12, 28], Ċ: [2, 54], "¡": [6, 16], ẅ: [27, 58], К: [19, 58], Γ: [15, 16], P: [16, 28], "%": [9, 64], ϖ: [9, 68], _: [5, 0], ñ: [21, 56], Ŕ: [26, 40], "‚": [2, 18], "⅞": [18, 56], Æ: [33, 22], "₣": [27, 16], Ū: [20, 32], ы: [29, 42], ѓ: [20, 24], Œ: [18, 36], "΅": [7, 28], Ą: [24, 43], Њ: [32, 44], "›": [8, 0], ћ: [26, 32], "<": [8, 0], "¬": [7, 0], t: [11, 16], Ц: [22, 28], ù: [21, 36], ï: [13, 40], Ф: [27, 52], Ò: [7, 40], I: [13, 16], "˝": [10, 20], "·": [1, 16], "¿": [5, 44], ſ: [8, 24], Ђ: [21, 40], ű: [26, 48], Ǽ: [38, 30], φ: [11, 28], ";": [3, 34], Ș: [6, 56], Ġ: [9, 56], n: [18, 32], ά: [15, 48], ϊ: [7, 40], "\uFEFF": [0, 0], ģ: [10, 100], "∂": [3, 56], κ: [15, 29], "‡": [23, 12], ň: [24, 48], "√": [10, 0], ę: [8, 52], į: [15, 50], Τ: [17, 16], "≈": [6, 56], ΐ: [12, 40], ĸ: [23, 29], g: [5, 94], ǿ: [16, 34], "²": [9, 26], Ã: [24, 45], Ј: [11, 16], "©": [3, 84], "≥": [13, 0], Ă: [24, 33], ґ: [15, 16], ÿ: [20, 60], Ł: [23, 16], " ": [0, 0], "∫": [1, 49], "\\": [5, 0], Ì: [18, 24], ъ: [18, 26], ς: [2, 42], Ē: [26, 16], "!": [6, 16], ç: [6, 46], Й: [32, 48], Б: [18, 28], đ: [21, 39], ċ: [2, 48], Ā: [26, 21], Ẃ: [27, 34], ø: [11, 26], â: [18, 54], "}": [13, 22], Δ: [11, 4], "‰": [11, 96], Ä: [23, 49], ř: [19, 46], "—": [5, 0], N: [21, 20], "⁄": [5, 0], М: [26, 24], Ó: [7, 40], "˜": [3, 24], " ": [0, 0], "ˇ": [6, 16], ų: [19, 50], Ў: [21, 48], Ŭ: [18, 44], ĝ: [11, 106], Ω: [15, 36], s: [1, 52], "?": [5, 44], Ņ: [26, 26], Ī: [18, 16], Μ: [26, 24], "•": [1, 16], н: [29, 32], "(": [3, 16], "◊": [12, 0], α: [10, 40], Ħ: [42, 32], м: [28, 24], з: [5, 45], Ґ: [15, 16], Û: [21, 44], і: [12, 28], V: [16, 20], Ŗ: [26, 38], "@": [8, 83], ʼ: [2, 18], "℅": [8, 54], i: [12, 28], ќ: [24, 64], "≤": [13, 0], ё: [7, 58], υ: [6, 32], ĕ: [8, 42], ﬃ: [33, 60], ż: [16, 24], Э: [4, 36], ő: [12, 48], Ŏ: [5, 44], ю: [17, 44], İ: [14, 32], Ě: [27, 32], "‹": [8, 0], ķ: [28, 35], ì: [16, 20], "±": [18, 0], "|": [5, 0], "§": [2, 76], џ: [23, 32], љ: [17, 50], q: [15, 45], "˳": [2, 32], ή: [14, 36], Ж: [25, 100], "®": [22, 77], Н: [29, 32], Ε: [21, 16], "₧": [27, 42], л: [14, 40], σ: [6, 30], θ: [5, 32], " ": [0, 0], "∑": [18, 8], Ώ: [20, 44], ẃ: [30, 38], "+": [13, 0], Ë: [23, 44], Š: [7, 66], " ": [0, 0], ð: [9, 36], щ: [31, 36], "℮": [8, 34], Φ: [27, 52], ş: [6, 66], " ": [0, 0], ı: [11, 12], ä: [14, 70], "¹": [12, 12], W: [22, 26], λ: [9, 32], ">": [8, 0], τ: [7, 26], Ų: [18, 54], Ŵ: [28, 38], "‛": [2, 18], Ð: [20, 24], Λ: [16, 19], "·": [1, 16], Х: [29, 37], Υ: [22, 32], r: [13, 30], ж: [25, 96], Ø: [11, 30], Ỳ: [27, 40], "÷": [7, 30], с: [1, 32], h: [18, 32], f: [16, 28], "“": [4, 36], A: [21, 21], O: [2, 32], Đ: [20, 24], Ǿ: [16, 38], "⅛": [20, 66], Ẁ: [27, 34], Ť: [23, 32], ψ: [12, 30], ŗ: [18, 36] }, mono: { 0: [2, 14], 1: [8, 2], 2: [9, 10], 3: [7, 17], 4: [17, 2], 5: [8, 10], 6: [4, 20], 7: [8, 0], 8: [4, 25], 9: [4, 20], ǻ: [18, 32], Á: [18, 4], ĥ: [18, 9], Κ: [14, 0], "»": [16, 0], "∆": [11, 2], ў: [13, 14], ţ: [18, 7], "«": [16, 0], í: [16, 2], ņ: [15, 7], µ: [12, 6], ỳ: [15, 10], Ι: [13, 0], Ύ: [16, 3], ѕ: [3, 18], Ш: [13, 0], M: [17, 2], Ψ: [17, 8], ũ: [13, 13], ŭ: [13, 11], "―": [5, 0], "{": [9, 10], "¼": [29, 4], Ḿ: [22, 4], ι: [5, 4], Ĳ: [10, 4], Ê: [20, 5], Ά: [19, 5], ")": [3, 4], ε: [7, 14], э: [6, 10], ш: [13, 0], Я: [13, 5], a: [11, 15], Ę: [16, 7], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 7], Ů: [9, 20], "¢": [9, 8], В: [13, 13], І: [13, 0], ē: [11, 11], β: [10, 19], "≠": [21, 0], "‼": [12, 8], "¥": [24, 0], Ĥ: [20, 5], U: [7, 5], Ñ: [16, 10], F: [11, 0], ϑ: [6, 58], Ќ: [17, 2], å: [13, 30], Ϋ: [12, 8], ō: [7, 12], "”": [8, 4], ö: [4, 20], ć: [8, 12], þ: [11, 13], "]": [9, 0], А: [13, 2], "′": [5, 0], Ы: [15, 6], ẁ: [24, 6], ĭ: [14, 6], R: [13, 6], Ż: [12, 4], ħ: [19, 6], õ: [5, 20], "˙": [1, 4], ê: [13, 16], "″": [10, 0], "„": [8, 4], ч: [9, 5], δ: [3, 20], Â: [20, 7], Į: [16, 7], ω: [7, 14], Ţ: [14, 3], "´": [5, 2], Ĉ: [10, 17], И: [14, 2], Љ: [13, 14], р: [10, 13], Ω: [9, 10], т: [9, 0], П: [9, 0], Ö: [4, 20], z: [11, 0], "™": [26, 1], Θ: [7, 12], Ř: [20, 11], Ň: [20, 7], É: [18, 2], и: [13, 0], "³": [6, 14], "[": [9, 0], ζ: [6, 15], "∏": [9, 0], Έ: [19, 3], Ρ: [10, 6], ğ: [11, 34], ª: [10, 13], ї: [13, 8], T: [9, 0], š: [10, 23], є: [6, 10], Þ: [12, 6], j: [8, 10], Σ: [13, 0], ϒ: [8, 20], ℓ: [8, 16], ĉ: [10, 15], ī: [16, 0], О: [2, 12], ξ: [11, 22], Ď: [15, 11], "&": [9, 24], G: [7, 11], ΰ: [12, 19], "`": [5, 2], ŏ: [5, 18], ý: [15, 10], º: [2, 12], "∞": [3, 24], ź: [16, 2], я: [13, 5], Ё: [15, 8], ń: [15, 6], " ": [0, 0], Г: [7, 0], Ь: [10, 6], "¤": [14, 16], Ĝ: [14, 16], p: [10, 13], Ю: [9, 16], ο: [2, 12], S: [3, 18], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 9], y: [10, 8], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 19], б: [4, 20], ƒ: [13, 12], у: [10, 8], J: [5, 6], ŷ: [17, 13], ŕ: [13, 8], ώ: [13, 17], "˘": [3, 6], D: [8, 6], ł: [19, 0], ĺ: [16, 2], ц: [13, 0], Л: [7, 6], $: [15, 16], w: [19, 4], о: [2, 12], Д: [16, 4], Ç: [8, 18], Ŝ: [10, 23], C: [3, 12], Ḁ: [15, 26], Ĵ: [12, 11], È: [18, 2], ﬁ: [19, 11], X: [13, 0], ô: [9, 17], Ė: [14, 4], г: [7, 0], Ŀ: [8, 4], х: [13, 0], ŋ: [10, 8], Ч: [9, 5], ü: [12, 13], ь: [10, 5], Ÿ: [12, 8], "€": [19, 12], в: [13, 11], Η: [13, 0], С: [3, 12], ß: [5, 23], њ: [18, 5], Ű: [17, 9], c: [3, 10], "¶": [9, 4], Ή: [19, 3], Ὅ: [9, 32], γ: [9, 4], "­": [5, 0], ":": [2, 8], ś: [8, 20], " ": [0, 0], У: [10, 9], "¾": [27, 16], Ί: [19, 3], ŉ: [14, 7], Ģ: [12, 14], m: [14, 12], Е: [13, 0], ž: [18, 5], á: [16, 17], "×": [13, 0], п: [9, 0], Ǻ: [20, 19], K: [14, 0], "¨": [2, 8], Y: [10, 0], E: [13, 0], Ô: [9, 17], Є: [6, 11], Ï: [15, 8], ġ: [9, 32], έ: [13, 17], " ": [0, 0], ϋ: [7, 16], й: [16, 6], b: [9, 13], ύ: [11, 11], ﬂ: [18, 6], ф: [11, 8], Ŋ: [13, 7], Ũ: [10, 13], Щ: [17, 0], L: [7, 0], ď: [16, 16], Ο: [2, 12], Ĭ: [16, 6], ŧ: [21, 4], À: [18, 4], Ϊ: [15, 8], ḁ: [13, 39], "½": [21, 11], "'": [5, 0], ĳ: [14, 15], Р: [10, 6], "˛": [3, 7], Ć: [8, 14], Т: [9, 0], "£": [16, 7], ů: [12, 20], Ō: [7, 12], а: [11, 15], Ğ: [10, 17], v: [9, 2], Ї: [15, 8], û: [17, 10], Ź: [16, 2], "ˉ": [5, 0], Ĺ: [12, 2], "₤": [24, 7], Č: [10, 17], x: [13, 0], è: [11, 13], Ń: [18, 4], ḿ: [19, 14], μ: [12, 6], ".": [1, 4], "‘": [4, 2], π: [14, 4], l: [11, 0], Ъ: [12, 7], " ": [0, 0], Ś: [8, 20], Ü: [9, 13], à: [16, 17], η: [10, 4], ó: [7, 14], "¦": [10, 0], Ő: [12, 16], Ž: [18, 5], е: [6, 11], Î: [20, 5], e: [6, 11], ό: [8, 15], Ĕ: [16, 6], ļ: [16, 3], " ": [0, 0], Ѓ: [12, 2], ò: [7, 14], ﬄ: [24, 22], "^": [8, 0], ⁿ: [10, 6], к: [12, 0], "￼": [92, 50], ū: [15, 5], "ˆ": [7, 5], Ẅ: [16, 15], č: [10, 15], "’": [4, 2], Ν: [13, 2], "-": [5, 0], Q: [3, 14], ј: [8, 10], ě: [13, 16], œ: [7, 22], "#": [34, 0], Џ: [13, 0], Å: [15, 17], ș: [8, 21], "¸": [5, 6], "=": [10, 0], ρ: [7, 14], Ћ: [15, 3], ú: [15, 7], "˚": [2, 15], д: [16, 2], "¯": [5, 0], u: [10, 5], З: [7, 18], Α: [13, 2], "⅝": [17, 30], é: [11, 13], Ş: [8, 24], B: [13, 13], "…": [3, 12], H: [13, 0], î: [18, 5], ν: [7, 5], Ό: [8, 15], "−": [5, 0], "⅜": [15, 34], ǰ: [14, 11], ā: [16, 15], ĵ: [14, 11], Ĩ: [16, 8], "*": [16, 0], ă: [14, 21], Χ: [13, 0], "†": [13, 0], "°": [2, 16], Ξ: [15, 0], Ķ: [19, 3], ŵ: [26, 9], "΄": [6, 3], ǽ: [17, 27], Β: [13, 13], Ļ: [12, 3], Õ: [5, 20], "№": [20, 17], χ: [13, 11], ί: [11, 7], Ζ: [11, 0], Ľ: [13, 3], ť: [19, 7], o: [2, 12], Ѕ: [3, 18], "�": [11, 38], d: [10, 13], ",": [4, 2], '"': [10, 0], ľ: [17, 3], ė: [7, 15], Í: [18, 2], Ú: [12, 7], " ": [0, 0], Ŷ: [17, 5], Ý: [15, 2], ŝ: [10, 23], " ": [0, 0], ą: [14, 22], "​": [0, 0], ã: [14, 23], æ: [12, 25], ĩ: [14, 8], "~": [3, 8], ŀ: [12, 4], Ċ: [4, 16], "¡": [6, 4], ẅ: [21, 12], К: [12, 0], Γ: [7, 0], P: [10, 6], "%": [9, 24], ϖ: [13, 42], _: [5, 0], ñ: [13, 12], Ŕ: [18, 8], "‚": [4, 2], "⅞": [17, 20], Æ: [22, 0], "₣": [19, 0], Ū: [12, 5], ы: [15, 5], ѓ: [12, 2], Œ: [15, 8], "΅": [7, 11], Ą: [16, 9], Њ: [18, 7], "›": [8, 0], ћ: [19, 6], "<": [8, 0], "¬": [7, 0], t: [13, 4], Ц: [13, 0], ù: [15, 7], ï: [13, 8], Ф: [19, 16], Ò: [7, 14], I: [13, 0], "˝": [10, 4], "·": [1, 4], "¿": [6, 18], ſ: [5, 6], Ђ: [15, 8], ű: [20, 9], Ǽ: [27, 2], φ: [8, 13], ";": [5, 6], Ș: [8, 21], Ġ: [8, 15], n: [10, 4], ά: [14, 21], ϊ: [7, 12], "\uFEFF": [0, 0], ģ: [13, 31], "∂": [4, 18], κ: [16, 0], "‡": [23, 0], ň: [17, 9], "√": [10, 0], ę: [9, 18], į: [15, 12], Τ: [9, 0], "≈": [6, 16], ΐ: [12, 15], ĸ: [16, 0], g: [8, 28], ǿ: [16, 18], "²": [8, 9], Ã: [16, 10], Ј: [5, 6], "©": [5, 27], "≥": [13, 0], Ă: [16, 8], ґ: [9, 0], ÿ: [12, 16], Ł: [15, 0], " ": [0, 0], "∫": [5, 9], "\\": [5, 0], Ì: [18, 2], ъ: [12, 5], ς: [3, 12], Ē: [18, 0], "!": [6, 4], ç: [8, 16], Й: [17, 8], Б: [12, 6], đ: [18, 13], ċ: [4, 14], Ā: [18, 2], Ẃ: [19, 9], ø: [11, 16], â: [18, 20], "}": [9, 10], Δ: [11, 2], "‰": [11, 42], Ä: [15, 10], ř: [15, 11], "—": [5, 0], N: [13, 2], "⁄": [5, 0], М: [17, 2], Ó: [7, 14], "˜": [3, 8], " ": [0, 0], "ˇ": [7, 5], ų: [13, 12], Ў: [13, 15], Ŭ: [10, 11], ĝ: [15, 33], Ω: [9, 10], s: [3, 18], "?": [6, 18], Ņ: [18, 5], Ī: [18, 0], Μ: [17, 2], "•": [1, 6], н: [13, 0], "(": [3, 4], "◊": [12, 0], α: [8, 18], Ħ: [26, 0], м: [14, 6], з: [7, 15], Ґ: [9, 0], Û: [14, 10], і: [12, 5], V: [8, 2], Ŗ: [18, 9], "@": [7, 31], ʼ: [4, 2], "℅": [10, 22], i: [12, 5], ќ: [21, 2], "≤": [13, 0], ё: [8, 19], υ: [5, 8], ĕ: [9, 17], ﬃ: [23, 23], ż: [12, 4], Э: [6, 11], ő: [12, 16], Ŏ: [5, 18], ю: [9, 13], İ: [14, 4], Ě: [20, 5], "‹": [8, 0], ķ: [21, 3], ì: [16, 2], "±": [18, 0], "|": [5, 0], "§": [5, 28], џ: [13, 0], љ: [12, 13], q: [10, 13], "˳": [2, 24], ή: [16, 7], Ж: [19, 0], "®": [15, 21], Н: [13, 0], Ε: [13, 0], "₧": [23, 9], л: [7, 6], σ: [6, 13], θ: [5, 15], " ": [0, 0], "∑": [13, 0], Ώ: [15, 13], ẃ: [24, 6], "+": [13, 0], Ë: [15, 8], Š: [10, 23], " ": [0, 0], ð: [10, 17], щ: [17, 0], "℮": [9, 12], Φ: [19, 16], ş: [8, 24], " ": [0, 0], ı: [11, 0], ä: [13, 23], "¹": [8, 2], W: [14, 7], λ: [10, 13], ">": [8, 0], τ: [10, 4], Ų: [10, 12], Ŵ: [21, 12], "‛": [4, 2], Ð: [16, 6], Λ: [8, 2], "·": [1, 4], Х: [13, 0], Υ: [10, 0], r: [8, 6], ж: [19, 0], Ø: [11, 14], Ỳ: [15, 2], "÷": [7, 8], с: [3, 10], h: [11, 4], f: [13, 6], "“": [8, 4], A: [13, 2], O: [2, 12], Đ: [16, 6], Ǿ: [16, 16], "⅛": [17, 22], Ẁ: [19, 9], Ť: [16, 5], ψ: [11, 7], ŗ: [13, 9] } };
 function ti(e, n, t) {
   return [...n].reduce((i, r) => {
     const [l, q] = ni[e]?.[r] ?? [128, 128];
@@ -9020,40 +9020,40 @@ function ii(e) {
   const n = e.gotText ?? (e.showType ? `${String(e.got)} (${typeof e.got})` : String(e.got)), t = `${e.requires}${e.unit ? ` (${e.unit})` : ""}`;
   return { message: `${e.api}: ${e.path} — got ${n}; requires ${t}. Example: ${e.example}`, hint: `Set ${e.path} to ${t}.` };
 }
-const d8 = 1, f8 = 1.25;
+const h8 = 1, f8 = 1.25;
 function ri(e, n, t) {
   const i = e * n / 2;
   return {
     pitch: i,
     base: i * Math.cos(t * Math.PI / 180),
-    tip: i + d8 * e,
+    tip: i + h8 * e,
     root: i - f8 * e
   };
 }
 function li(e) {
-  const n = e.module, t = e.pressureAngleDeg * Math.PI / 180, i = Math.tan(t), r = n * e.teeth / 2, l = Math.PI * n / 2, q = Math.PI * n / 4 + e.backlash / 4, o = f8 * n, a = -d8 * n, c = (s, d) => {
-    const m = r - d, h = s * s - m * m;
-    if (h < 0)
+  const n = e.module, t = e.pressureAngleDeg * Math.PI / 180, i = Math.tan(t), r = n * e.teeth / 2, l = Math.PI * n / 2, q = Math.PI * n / 4 + e.backlash / 4, o = f8 * n, a = -h8 * n, c = (s, h) => {
+    const m = r - h, d = s * s - m * m;
+    if (d < 0)
       return Number.POSITIVE_INFINITY;
-    const g = Math.sqrt(h), v = q - d * i, y = Math.atan2(-g, m) - (-g - l + v) / r, b = Math.atan2(g, m) - (g - l + v) / r;
+    const g = Math.sqrt(d), v = q - h * i, y = Math.atan2(-g, m) - (-g - l + v) / r, b = Math.atan2(g, m) - (g - l + v) / r;
     return Math.min(y, b);
   };
   return (s) => {
-    const d = Math.max(a, r - s), m = o;
-    if (d > m)
+    const h = Math.max(a, r - s), m = o;
+    if (h > m)
       return Number.POSITIVE_INFINITY;
-    const h = 64;
+    const d = 64;
     let g = 0, v = Number.POSITIVE_INFINITY;
-    for (let I = 0; I <= h; I += 1) {
-      const T = c(s, d + (m - d) * I / h);
+    for (let I = 0; I <= d; I += 1) {
+      const T = c(s, h + (m - h) * I / d);
       T < v && (v = T, g = I);
     }
-    let y = d + (m - d) * Math.max(0, g - 1) / h, b = d + (m - d) * Math.min(h, g + 1) / h;
+    let y = h + (m - h) * Math.max(0, g - 1) / d, b = h + (m - h) * Math.min(d, g + 1) / d;
     const C = (Math.sqrt(5) - 1) / 2;
     let P = b - C * (b - y), M = y + C * (b - y), B = c(s, P), x = c(s, M);
     for (let I = 0; I < 40; I += 1)
       B < x ? (b = M, M = P, x = B, P = b - C * (b - y), B = c(s, P)) : (y = P, P = M, B = x, M = y + C * (b - y), x = c(s, M));
-    return Math.min(v, B, x, c(s, d), c(s, m));
+    return Math.min(v, B, x, c(s, h), c(s, m));
   };
 }
 function qi(e, n) {
@@ -9085,9 +9085,9 @@ function ai(e, n = 12) {
     }
     s.push(v), s.sort((y, b) => y - b);
   }
-  const d = s.map((g) => r(g));
+  const h = s.map((g) => r(g));
   for (let g = 0; g < s.length; g += 1) {
-    const v = d[g];
+    const v = h[g];
     if (!Number.isFinite(v) || v <= 0)
       throw X3({
         api: "spurGear({ teeth, pressureAngle, backlash })",
@@ -9105,7 +9105,7 @@ function ai(e, n = 12) {
         example: "spurGear({ module: 1, teeth: 20, faceWidth: 6, bore: 5 })"
       });
   }
-  const m = d[d.length - 1];
+  const m = h[h.length - 1];
   if (m * i.tip < 0.05 * e.module)
     throw X3({
       api: "spurGear({ module, teeth, pressureAngle })",
@@ -9115,35 +9115,35 @@ function ai(e, n = 12) {
       unit: "mm",
       example: "spurGear({ module: 1, teeth: 20, faceWidth: 6, bore: 5 })"
     });
-  let h = s.length - 1;
+  let d = s.length - 1;
   for (let g = 0; g < s.length; g += 1)
-    if (!(s[g] < i.base) && Math.abs(c(s[g]) - d[g]) < 1e-5) {
-      h = g;
+    if (!(s[g] < i.base) && Math.abs(c(s[g]) - h[g]) < 1e-5) {
+      d = g;
       break;
     }
-  return { radii: i, rs: s, ts: d, involuteStart: h };
+  return { radii: i, rs: s, ts: h, involuteStart: d };
 }
 function g8(e) {
-  const n = e.teeth, { radii: t, rs: i, ts: r, involuteStart: l } = ai(e), q = 2 * Math.PI / n, o = (m, h) => [m * Math.cos(h), m * Math.sin(h)], a = l > 0 && l < i.length - 1 ? [[0, l], [l, i.length - 1]] : [[0, i.length - 1]], c = [], s = r[0], d = r[r.length - 1];
+  const n = e.teeth, { radii: t, rs: i, ts: r, involuteStart: l } = ai(e), q = 2 * Math.PI / n, o = (m, d) => [m * Math.cos(d), m * Math.sin(d)], a = l > 0 && l < i.length - 1 ? [[0, l], [l, i.length - 1]] : [[0, i.length - 1]], c = [], s = r[0], h = r[r.length - 1];
   for (let m = 0; m < n; m += 1) {
-    const h = m * q;
+    const d = m * q;
     for (const [v, y] of a) {
       const b = [];
       for (let C = v; C <= y; C += 1)
-        b.push(o(i[C], h - r[C]));
+        b.push(o(i[C], d - r[C]));
       c.push({ kind: "spline", points: b });
     }
-    c.push({ kind: "arc", mid: o(t.tip, h), to: o(t.tip, h + d) });
+    c.push({ kind: "arc", mid: o(t.tip, d), to: o(t.tip, d + h) });
     for (const [v, y] of [...a].reverse()) {
       const b = [];
       for (let C = y; C >= v; C -= 1)
-        b.push(o(i[C], h + r[C]));
+        b.push(o(i[C], d + r[C]));
       c.push({ kind: "spline", points: b });
     }
-    const g = h + q - s;
+    const g = d + q - s;
     c.push({
       kind: "arc",
-      mid: o(t.root, (h + s + g) / 2),
+      mid: o(t.root, (d + s + g) / 2),
       to: o(t.root, g)
     });
   }
@@ -9190,8 +9190,8 @@ function x8(e) {
     for (; c <= 0; )
       c += 2 * Math.PI;
     const s = Math.max(1, Math.ceil(c / mi));
-    for (let d = 1; d < s; d++)
-      t([o * Math.cos(a + c * d / s), o * Math.sin(a + c * d / s)]);
+    for (let h = 1; h < s; h++)
+      t([o * Math.cos(a + c * h / s), o * Math.sin(a + c * h / s)]);
     t(l.to);
   }
   const i = n[0], r = n[n.length - 1];
@@ -9333,18 +9333,18 @@ function i2(e, n = 0) {
 }
 function r5(e, n, t, i, r, l) {
   i();
-  const q = (s, d, m = -1e5, h = 1e5, g = !1, v = !1) => n(e.scalars[s], d, m, h, g, v), o = (s, d = s) => {
-    (e.scalars.length < s || e.scalars.length > d) && t(u("Unexpected profile arguments"), e.at);
+  const q = (s, h, m = -1e5, d = 1e5, g = !1, v = !1) => n(e.scalars[s], h, m, d, g, v), o = (s, h = s) => {
+    (e.scalars.length < s || e.scalars.length > h) && t(u("Unexpected profile arguments"), e.at);
   };
   if (e.name === "text2d") {
-    const [s, d = "sans", m = "left", h = "baseline"] = e.texts, g = e.textParts ? e.textParts.map((y) => typeof y == "string" ? y : l ? l(y, e.scadFormat) : String(n(y, "scalar", -1e9, 1e9, !1, !0))).join("") : s;
-    ([...g].length > 128 || /[\u0000-\u001f]/.test(g) || !["sans", "serif", "mono"].includes(d) || !["left", "center", "right"].includes(m) || !["baseline", "top", "center", "bottom"].includes(h)) && t(u("Invalid text profile options"), e.at);
+    const [s, h = "sans", m = "left", d = "baseline"] = e.texts, g = e.textParts ? e.textParts.map((y) => typeof y == "string" ? y : l ? l(y, e.scadFormat) : String(n(y, "scalar", -1e9, 1e9, !1, !0))).join("") : s;
+    ([...g].length > 128 || /[\u0000-\u001f]/.test(g) || !["sans", "serif", "mono"].includes(h) || !["left", "center", "right"].includes(m) || !["baseline", "top", "center", "bottom"].includes(d)) && t(u("Invalid text profile options"), e.at);
     const v = q(0, "mm", 0, 1e4);
-    return !v || !g.trim() ? { kind: "empty" } : { kind: "text", text: g, size: v, font: d, halign: m, valign: h, spacing: e.scalars[1] ? q(1, "scalar", 0, 10) : 1, curveSteps: e.scalars[2] ? q(2, "scalar", 1, 32, !0) : 8 };
+    return !v || !g.trim() ? { kind: "empty" } : { kind: "text", text: g, size: v, font: h, halign: m, valign: d, spacing: e.scalars[1] ? q(1, "scalar", 0, 10) : 1, curveSteps: e.scalars[2] ? q(2, "scalar", 1, 32, !0) : 8 };
   }
   if (e.name === "assert2d") {
     if (!n(e.scalars[0], "scalar", -1e9, 1e9, !1, !0)) {
-      const s = e.message ? h8(e.message, l ?? ((d) => String(n(d, "scalar", -1e9, 1e9, !1, !0)))) : void 0;
+      const s = e.message ? d8(e.message, l ?? ((h) => String(n(h, "scalar", -1e9, 1e9, !1, !0)))) : void 0;
       t(s ? u`Source assertion failed: ${s}` : u("Source assertion failed"), e.at);
     }
     return r5(e.profiles[0], n, t, i, r, l);
@@ -9356,69 +9356,69 @@ function r5(e, n, t, i, r, l) {
     if (e.name === "forValues2d")
       s = e.scalars.map((m) => n(m, "scalar", -1e6, 1e6));
     else {
-      const m = q(0, "scalar", -1e6, 1e6), h = q(1, "scalar", -1e6, 1e6), g = q(2, "scalar", -1e6, 1e6);
+      const m = q(0, "scalar", -1e6, 1e6), d = q(1, "scalar", -1e6, 1e6), g = q(2, "scalar", -1e6, 1e6);
       g === 0 && t(u("Range step must be nonzero"), e.at);
-      const v = Math.max(0, Math.floor((h - m) / g + 1e-9) + 1);
+      const v = Math.max(0, Math.floor((d - m) / g + 1e-9) + 1);
       v > 256 && t(u("Loop exceeds 256 values"), e.at), s = Array.from({ length: v }, (y, b) => m + b * g);
     }
-    const d = s.map((m) => r(e.variable, m, () => r5(e.profiles[0], n, t, i, r, l)));
-    return d.length ? { kind: "union", profiles: d } : { kind: "empty" };
+    const h = s.map((m) => r(e.variable, m, () => r5(e.profiles[0], n, t, i, r, l)));
+    return h.length ? { kind: "union", profiles: h } : { kind: "empty" };
   }
   if (e.name === "spurGear2d" || e.name === "internalSpurGear2d") {
     o(2, 4);
     const s = { module: q(0, "mm", 0.05, 100), teeth: q(1, "scalar", 6, oi, !0), pressureAngleDeg: e.scalars[2] ? q(2, "deg", 10, 35) : 20, backlash: e.scalars[3] ? q(3, "mm", 0, 10) : 0 };
-    let d = [];
+    let h = [];
     try {
-      d = e.name === "spurGear2d" ? ci(s) : ui(s);
+      h = e.name === "spurGear2d" ? ci(s) : ui(s);
     } catch (m) {
       throw m instanceof p8 && t(u("Spur gear parameters leave no valid tooth; raise teeth, lower the pressure angle or reduce backlash"), e.at), m;
     }
-    return d.length > 4096 && t(u("Profile point budget exceeded"), e.at), { kind: "polygon", contours: [d] };
+    return h.length > 4096 && t(u("Profile point budget exceeded"), e.at), { kind: "polygon", contours: [h] };
   }
   if (e.name === "circle2d") {
     o(1, 2);
-    const s = q(0, "mm", 0), d = e.scalars[1] ? q(1, "scalar", 3, 4096, !0) : 48;
-    return s ? { kind: "circle", radius: s, segments: d } : { kind: "empty" };
+    const s = q(0, "mm", 0), h = e.scalars[1] ? q(1, "scalar", 3, 4096, !0) : 48;
+    return s ? { kind: "circle", radius: s, segments: h } : { kind: "empty" };
   }
   if (e.name === "rectangle2d") {
     o(2, 3);
-    const s = [q(0, "mm", 0), q(1, "mm", 0)], d = e.scalars[2] ? q(2, "scalar", 0, 1, !1, !0) !== 0 : !1;
-    return s.includes(0) ? { kind: "empty" } : { kind: "rectangle", size: s, center: d };
+    const s = [q(0, "mm", 0), q(1, "mm", 0)], h = e.scalars[2] ? q(2, "scalar", 0, 1, !1, !0) !== 0 : !1;
+    return s.includes(0) ? { kind: "empty" } : { kind: "rectangle", size: s, center: h };
   }
   if (e.name === "polygonGenerated2d") {
-    let m = function(h) {
-      if (i(), h.name === "point") {
-        ++s > 4096 && t(u("Profile point budget exceeded"), h.at), d.push(h.scalars.map((v) => ({ text: String(n(v, "mm", -1e5, 1e5)), at: v.at })));
+    let m = function(d) {
+      if (i(), d.name === "point") {
+        ++s > 4096 && t(u("Profile point budget exceeded"), d.at), h.push(d.scalars.map((v) => ({ text: String(n(v, "mm", -1e5, 1e5)), at: v.at })));
         return;
       }
-      if (h.name === "pointChoose") {
-        m(h.parts[n(h.scalars[0], "scalar", -1e9, 1e9, !1, !0) ? 0 : 1]);
+      if (d.name === "pointChoose") {
+        m(d.parts[n(d.scalars[0], "scalar", -1e9, 1e9, !1, !0) ? 0 : 1]);
         return;
       }
-      if (h.name === "pointConcat") {
-        h.parts.forEach(m);
+      if (d.name === "pointConcat") {
+        d.parts.forEach(m);
         return;
       }
       let g;
-      if (h.name === "pointValues")
-        g = h.scalars.map((v) => n(v, "scalar", -1e6, 1e6));
+      if (d.name === "pointValues")
+        g = d.scalars.map((v) => n(v, "scalar", -1e6, 1e6));
       else {
-        const [v, y, b] = h.scalars.map((M) => n(M, "scalar", -1e6, 1e6));
-        b || t(u("Range step must be nonzero"), h.at);
+        const [v, y, b] = d.scalars.map((M) => n(M, "scalar", -1e6, 1e6));
+        b || t(u("Range step must be nonzero"), d.at);
         const C = (y - v) / b, P = C < 0 ? 0 : Math.floor(C + 4 * Number.EPSILON * Math.max(1, Math.abs(C))) + 1;
-        (!Number.isSafeInteger(P) || P > 256) && t(u("Profile point budget exceeded"), h.at), g = Array.from({ length: P }, (M, B) => v + B * b);
+        (!Number.isSafeInteger(P) || P > 256) && t(u("Profile point budget exceeded"), d.at), g = Array.from({ length: P }, (M, B) => v + B * b);
       }
       for (const v of g)
-        r(h.variable, v, () => m(h.parts[0]));
+        r(d.variable, v, () => m(d.parts[0]));
     }, s = 0;
-    const d = [];
-    return m(e.sequence), d.length < 3 ? { kind: "empty" } : r5({ ...e, name: "polygon2d", points: d }, n, t, i, r, l);
+    const h = [];
+    return m(e.sequence), h.length < 3 ? { kind: "empty" } : r5({ ...e, name: "polygon2d", points: h }, n, t, i, r, l);
   }
   if (e.name === "polygon2d") {
-    const s = e.points.map((m) => (m.length !== 2 && t(u("Profile points need two coordinates"), e.at), m.map((h) => n(h, "mm", -1e5, 1e5)))), d = e.paths ? e.paths.map((m) => m.map((h) => s[n(h, "scalar", 0, s.length - 1, !0)])) : [s];
-    for (const m of d) {
+    const s = e.points.map((m) => (m.length !== 2 && t(u("Profile points need two coordinates"), e.at), m.map((d) => n(d, "mm", -1e5, 1e5)))), h = e.paths ? e.paths.map((m) => m.map((d) => s[n(d, "scalar", 0, s.length - 1, !0)])) : [s];
+    for (const m of h) {
       m.length > 3 && m[0].every((v, y) => v === m.at(-1)[y]) && m.pop(), m.length < 3 && t(u("Extrusion profile needs at least three points"), e.at);
-      const h = (v, y, b) => (y[0] - v[0]) * (b[1] - v[1]) - (y[1] - v[1]) * (b[0] - v[0]);
+      const d = (v, y, b) => (y[0] - v[0]) * (b[1] - v[1]) - (y[1] - v[1]) * (b[0] - v[0]);
       let g = 0;
       for (let v = 0; v < m.length; v++) {
         const y = m[v], b = m[(v + 1) % m.length];
@@ -9427,18 +9427,18 @@ function r5(e, n, t, i, r, l) {
           if (v === 0 && C === m.length - 1)
             continue;
           const P = m[C], M = m[(C + 1) % m.length];
-          [0, 1].every((x) => Math.max(Math.min(y[x], b[x]), Math.min(P[x], M[x])) <= Math.min(Math.max(y[x], b[x]), Math.max(P[x], M[x])) + 1e-9) && h(y, b, P) * h(y, b, M) <= 1e-10 && h(P, M, y) * h(P, M, b) <= 1e-10 && t(u("Extrusion profile intersects itself"), e.at);
+          [0, 1].every((x) => Math.max(Math.min(y[x], b[x]), Math.min(P[x], M[x])) <= Math.min(Math.max(y[x], b[x]), Math.max(P[x], M[x])) + 1e-9) && d(y, b, P) * d(y, b, M) <= 1e-10 && d(P, M, y) * d(P, M, b) <= 1e-10 && t(u("Extrusion profile intersects itself"), e.at);
         }
       }
       Math.abs(g) < 1e-8 && t(u("Extrusion profile has zero area"), e.at);
     }
-    return d.reduce((m, h) => m + h.length, 0) > 4096 && t(u("Profile point budget exceeded"), e.at), { kind: "polygon", contours: d };
+    return h.reduce((m, d) => m + d.length, 0) > 4096 && t(u("Profile point budget exceeded"), e.at), { kind: "polygon", contours: h };
   }
   const a = e.profiles.map((s) => r5(s, n, t, i, r, l));
   if (e.name.endsWith("2d") && ["union2d", "subtract2d", "intersect2d", "hull2d", "minkowski2d"].includes(e.name))
     return a.length ? a.length === 1 && e.name !== "hull2d" ? a[0] : { kind: e.name.slice(0, -2), profiles: a } : { kind: "empty" };
   if (e.name === "affine2d")
-    return { kind: "affine", matrix: e.scalars.map((s, d) => q(d, d % 3 === 2 ? "mm" : "scalar", -1e5)), profile: a[0] };
+    return { kind: "affine", matrix: e.scalars.map((s, h) => q(h, h % 3 === 2 ? "mm" : "scalar", -1e5)), profile: a[0] };
   if (e.name === "resize2d")
     return { kind: "resize", size: [q(0, "mm", 0), q(1, "mm", 0)], auto: [q(2, "scalar", 0, 1, !0, !0) !== 0, q(3, "scalar", 0, 1, !0, !0) !== 0], profile: a[0] };
   if (e.name === "offset2d")
@@ -9479,11 +9479,11 @@ function k4(e) {
   }
   return e;
 }
-function hi(e, n, t, i) {
+function di(e, n, t, i) {
   const r = [n[0] - e[0], n[1] - e[1], n[2] - e[2]], l = [t[0] - e[0], t[1] - e[1], t[2] - e[2]], q = [i[0] - e[0], i[1] - e[1], i[2] - e[2]], o = r[0] * (l[1] * q[2] - l[2] * q[1]) - r[1] * (l[0] * q[2] - l[2] * q[0]) + r[2] * (l[0] * q[1] - l[1] * q[0]);
   return Math.abs(o) > 1e-9 * Math.hypot(...r) * Math.hypot(...l) * Math.hypot(...q);
 }
-function di(e, n = !1, t = "authored") {
+function hi(e, n = !1, t = "authored") {
   if (t === "authored")
     return w3(b3(e).sections, n);
   const { paired: i, kernel: r } = _8(e), l = w3(b3(i).sections, n);
@@ -9513,21 +9513,21 @@ function pi(e) {
     let c = n[q].pos;
     const s = q3(c, l);
     c = q3(c, s3(t.axis, Z4(s, t.axis)));
-    const d = q3(l, c);
-    let m = 1 / 0, h = 0, g = !0;
+    const h = q3(l, c);
+    let m = 1 / 0, d = 0, g = !0;
     const v = (b) => {
       let C = 0;
       for (let P = 0; P < a; P++)
-        C += b8(r[P], a3(o[b(P)], d));
+        C += b8(r[P], a3(o[b(P)], h));
       return C;
     };
     for (let b = 0; b < a; b++) {
       const C = v((M) => (b + M) % a);
-      C < m && (m = C, h = b, g = !0);
+      C < m && (m = C, d = b, g = !0);
       const P = v((M) => ((b - M) % a + a) % a);
-      P < m && (m = P, h = b, g = !1);
+      P < m && (m = P, d = b, g = !1);
     }
-    const y = { start: h, forward: g };
+    const y = { start: d, forward: g };
     i.push(y), r = w8(o, y), l = c;
   }
   return i;
@@ -9550,13 +9550,13 @@ function b3(e, n = 131072) {
   let q = 0, o = 0;
   for (const c of l) {
     c.some((v) => v.length !== 3 || v.some((y) => !Number.isFinite(y) || Math.abs(y) > 1e5)) && t();
-    const s = Math.max(1, ...c.flatMap((v) => v.map((y, b) => Math.abs(y - c[0][b])))), d = s * s * 1e-12;
+    const s = Math.max(1, ...c.flatMap((v) => v.map((y, b) => Math.abs(y - c[0][b])))), h = s * s * 1e-12;
     c.some((v) => Math.abs(v[2] - c[0][2]) > s * 1e-9) && t();
-    const m = c[0], h = c.reduce((v, y, b) => {
+    const m = c[0], d = c.reduce((v, y, b) => {
       const C = c[(b + 1) % r];
       return v + (y[0] - m[0]) * (C[1] - m[1]) - (C[0] - m[0]) * (y[1] - m[1]);
     }, 0);
-    (Math.abs(h) <= d || q && Math.sign(h) !== q) && i(), q = Math.sign(h);
+    (Math.abs(d) <= h || q && Math.sign(d) !== q) && i(), q = Math.sign(d);
     const g = (v, y, b) => (y[0] - v[0]) * (b[1] - v[1]) - (y[1] - v[1]) * (b[0] - v[0]);
     for (let v = 0; v < r; v++) {
       const y = c[v], b = c[(v + 1) % r];
@@ -9567,7 +9567,7 @@ function b3(e, n = 131072) {
         if (++o > n)
           throw new Error(u("Loft exceeds the section or vertex budget"));
         const P = c[C], M = c[(C + 1) % r];
-        [0, 1].every((x) => Math.max(Math.min(y[x], b[x]), Math.min(P[x], M[x])) <= Math.min(Math.max(y[x], b[x]), Math.max(P[x], M[x])) + s * 1e-10) && g(y, b, P) * g(y, b, M) <= d * d && g(P, M, y) * g(P, M, b) <= d * d && i();
+        [0, 1].every((x) => Math.max(Math.min(y[x], b[x]), Math.min(P[x], M[x])) <= Math.min(Math.max(y[x], b[x]), Math.max(P[x], M[x])) + s * 1e-10) && g(y, b, P) * g(y, b, M) <= h * h && g(P, M, y) * g(P, M, b) <= h * h && i();
       }
     }
   }
@@ -9578,12 +9578,12 @@ function w3(e, n) {
   const t = e[0].length, i = e.flat(), r = [Array.from({ length: t }, (o, a) => t - 1 - a)];
   for (let o = 0; o < e.length - 1; o++)
     for (let a = 0; a < t; a++) {
-      const c = o * t + a, s = o * t + (a + 1) % t, d = s + t, m = c + t;
-      if (n && hi(i[c], i[s], i[d], i[m])) {
-        const h = i.length;
-        i.push([0, 1, 2].map((g) => (i[c][g] + i[s][g] + i[d][g] + i[m][g]) / 4)), r.push([c, s, h], [s, d, h], [d, m, h], [m, c, h]);
+      const c = o * t + a, s = o * t + (a + 1) % t, h = s + t, m = c + t;
+      if (n && di(i[c], i[s], i[h], i[m])) {
+        const d = i.length;
+        i.push([0, 1, 2].map((g) => (i[c][g] + i[s][g] + i[h][g] + i[m][g]) / 4)), r.push([c, s, d], [s, h, d], [h, m, d], [m, c, d]);
       } else
-        r.push([c, s, d], [c, d, m]);
+        r.push([c, s, h], [c, h, m]);
     }
   const l = e.length * t, q = i.length > l;
   return r.push(Array.from({ length: t }, (o, a) => l - t + a)), q ? { points: i, faces: r, ruled: e } : { points: i, faces: r };
@@ -9636,8 +9636,8 @@ function bi(e, n) {
     for (let c = q + 1; c < t; c++) {
       const s = i[c][q] / a;
       if (s)
-        for (let d = q; d < r; d++)
-          i[c][d] -= s * i[q][d];
+        for (let h = q; h < r; h++)
+          i[c][h] -= s * i[q][h];
     }
   }
   const l = n.map((q) => q.map(() => 0));
@@ -9653,30 +9653,30 @@ function bi(e, n) {
 function wi(e) {
   const n = e.length, t = e[0].length, i = Math.min(3, n - 1), r = new Array(n).fill(0);
   for (let s = 0; s < t; s++) {
-    const d = s === t - 2 ? 2 : 1, m = [0];
+    const h = s === t - 2 ? 2 : 1, m = [0];
     for (let g = 1; g < n; g++) {
       const v = e[g - 1][s], y = e[g][s];
       m.push(m[g - 1] + Math.hypot(y[0] - v[0], y[1] - v[1], y[2] - v[2]));
     }
-    const h = m[n - 1];
+    const d = m[n - 1];
     for (let g = 1; g < n; g++)
-      r[g] += d * m[g] / h;
+      r[g] += h * m[g] / d;
   }
   for (let s = 1; s < n; s++)
     r[s] /= t + 1;
   r[n - 1] = 1;
   const l = new Array(i + 1).fill(0);
   for (let s = 1; s < n - i; s++) {
-    let d = 0;
+    let h = 0;
     for (let m = s; m < s + i; m++)
-      d += r[m];
-    l.push(d / i);
+      h += r[m];
+    l.push(h / i);
   }
   l.push(...new Array(i + 1).fill(1));
   const q = r.map((s) => {
-    const d = new Array(n).fill(0), m = P5(l, i, n, s);
-    return k8(l, i, m, s).forEach((h, g) => d[m - i + g] = h), d;
-  }), o = e.map((s) => s.flatMap((d) => [d[0], d[1], d[2]])), a = bi(q, o), c = Array.from({ length: t }, (s, d) => a.map((m) => [m[3 * d], m[3 * d + 1], m[3 * d + 2]]));
+    const h = new Array(n).fill(0), m = P5(l, i, n, s);
+    return k8(l, i, m, s).forEach((d, g) => h[m - i + g] = d), h;
+  }), o = e.map((s) => s.flatMap((h) => [h[0], h[1], h[2]])), a = bi(q, o), c = Array.from({ length: t }, (s, h) => a.map((m) => [m[3 * h], m[3 * h + 1], m[3 * h + 2]]));
   return { degree: i, knots: l, params: r, control: c };
 }
 function _i(e, n) {
@@ -9707,14 +9707,14 @@ function F6(e) {
     }
     Math.min(...x1) <= 1e-9 * s && l();
   }
-  const d = Math.min(...t.map((B) => Math.hypot(Math.max(...B.map((x) => x[0])) - Math.min(...B.map((x) => x[0])), Math.max(...B.map((x) => x[1])) - Math.min(...B.map((x) => x[1]))))), m = gi * d, h = i.control.map((B) => {
+  const h = Math.min(...t.map((B) => Math.hypot(Math.max(...B.map((x) => x[0])) - Math.min(...B.map((x) => x[0])), Math.max(...B.map((x) => x[1])) - Math.min(...B.map((x) => x[1]))))), m = gi * h, d = i.control.map((B) => {
     const x = Y3(B, i.knots, i.degree);
     return x.degree >= 1 ? Y3(x.control, x.knots, x.degree) : void 0;
   }), g = [.../* @__PURE__ */ new Set([...c, ...i.params])].sort((B, x) => B - x), v = new Map(i.params.map((B, x) => [B, x])), y = [];
   for (let B = 0; B + 1 < g.length; B++) {
     const x = g[B], I = g[B + 1];
     let T = 0;
-    for (const N of h) {
+    for (const N of d) {
       if (!N)
         continue;
       const O = P5(N.knots, N.degree, N.control.length, (x + I) / 2);
@@ -9742,8 +9742,8 @@ function yi(e, n) {
   for (let q = 1; q < t; q++) {
     const o = -Math.PI / 2 + Math.PI * q / t, a = Math.cos(o), c = e[2] * Math.sin(o);
     for (let s = 0; s < n; s++) {
-      const d = 2 * Math.PI * s / n;
-      i.push([e[0] * a * Math.cos(d), e[1] * a * Math.sin(d), c]);
+      const h = 2 * Math.PI * s / n;
+      i.push([e[0] * a * Math.cos(h), e[1] * a * Math.sin(h), c]);
     }
   }
   const l = i.length;
@@ -9770,7 +9770,7 @@ function Ai(e, n, t, i, r = 0, l = 360, q) {
   const o = Si(i, r, l), a = o.closed, c = q ?? o.count;
   if (c < 1)
     throw new Error(u("Elliptical sector needs at least one angular segment"));
-  const s = [], d = [], m = c + (a ? 0 : 1), h = (b, C) => {
+  const s = [], h = [], m = c + (a ? 0 : 1), d = (b, C) => {
     if (!b[0] && !b[1]) {
       const B = s.length;
       return s.push([0, 0, C]), { ids: Array(m).fill(B), center: B, tip: !0 };
@@ -9780,14 +9780,14 @@ function Ai(e, n, t, i, r = 0, l = 360, q) {
       return s.push([b[0] * Math.cos(I), b[1] * Math.sin(I), C]), T;
     }), M = s.length;
     return s.push([0, 0, C]), { ids: P, center: M, tip: !1 };
-  }, g = h(e, -t / 2), v = h(n, t / 2), y = (b, C, P) => {
-    b !== C && C !== P && b !== P && d.push([b, C, P]);
+  }, g = d(e, -t / 2), v = d(n, t / 2), y = (b, C, P) => {
+    b !== C && C !== P && b !== P && h.push([b, C, P]);
   };
   for (let b = 0; b < c; b++) {
     const C = a ? (b + 1) % c : b + 1, P = g.ids[b], M = g.ids[C], B = v.ids[b], x = v.ids[C];
     g.tip || (y(g.center, M, P), y(P, M, B)), v.tip || (y(v.center, B, x), y(B, M, x));
   }
-  return a || (y(g.center, g.ids[0], v.center), y(g.ids[0], v.ids[0], v.center), y(g.center, v.center, g.ids[c]), y(g.ids[c], v.center, v.ids[c])), { points: s, faces: d };
+  return a || (y(g.center, g.ids[0], v.center), y(g.ids[0], v.ids[0], v.center), y(g.center, v.center, g.ids[c]), y(g.ids[c], v.center, v.ids[c])), { points: s, faces: h };
 }
 class Ge extends Error {
   constructor(t, i, r, l = "invalid-source") {
@@ -9852,15 +9852,15 @@ function Ei(e) {
     S || t(u("Unsupported token; use CAD expressions and modeling functions"), l), r.push({ text: S, at: l }), l += S.length, r.length > ke.tokens && i(u("Too many source tokens"), l);
   }
   let q = 0, o = !1, a = !1, c = !1;
-  const s = () => r[q]?.text, d = () => r[q]?.at ?? n.length, m = () => {
+  const s = () => r[q]?.text, h = () => r[q]?.at ?? n.length, m = () => {
     const S = r[q++];
     return S || t(u("Unexpected end of source"), n.length), S;
-  }, h = (S) => (s() !== S && t(u`Expected “${S}”`, d()), m()), g = () => {
+  }, d = (S) => (s() !== S && t(u`Expected “${S}”`, h()), m()), g = () => {
     const S = m();
     return V6(S.text) || t(u("Expected a name"), S.at), S.text;
   };
   function v(S) {
-    const a1 = d(), H = [];
+    const a1 = h(), H = [];
     let m1 = 0;
     for (; q < r.length; ) {
       const A1 = s();
@@ -9876,118 +9876,118 @@ function Ei(e) {
     return (!H.length || m1 !== 0) && t(u("Expected a complete dimensional expression"), a1), { text: n.slice(a1, r[q]?.at ?? n.length).trim(), at: a1 };
   }
   function y() {
-    h("[");
-    const S = [v([","]), ...(h(","), [v([","])]), ...(h(","), [v(["]"])])];
-    return h("]"), S;
+    d("[");
+    const S = [v([","]), ...(d(","), [v([","])]), ...(d(","), [v(["]"])])];
+    return d("]"), S;
   }
   function b(S = 0) {
-    S > ke.depth && i(u("Shape nesting exceeds 32"), d());
+    S > ke.depth && i(u("Shape nesting exceeds 32"), h());
     const a1 = m();
     if (V6(a1.text) || t(u("Expected a shape function or named shape"), a1.at), s() !== "(")
       return { kind: "reference", name: a1.text, at: a1.at };
-    h("(");
+    d("(");
     const H = { kind: "call", name: a1.text, at: a1.at, scalars: [], shapes: [] };
     if (H.name !== "empty") if (H.name === "assertShape")
-      H.scalars.push(v([","])), h(","), H.shapes.push(b(S + 1));
+      H.scalars.push(v([","])), d(","), H.shapes.push(b(S + 1));
     else if (H.name === "assertCode")
-      H.scalars.push(v([","])), h(","), (s()?.startsWith('"') || s() === "formatText" || s() === "formatSCAD") && (H.message = u8({ peek: s, take: m, expect: h, scalar: v, fail: t, limited: i }), h(",")), H.shapes.push(b(S + 1));
+      H.scalars.push(v([","])), d(","), (s()?.startsWith('"') || s() === "formatText" || s() === "formatSCAD") && (H.message = u8({ peek: s, take: m, expect: d, scalar: v, fail: t, limited: i }), d(",")), H.shapes.push(b(S + 1));
     else if (H.name === "choose")
-      H.scalars.push(v([","])), h(","), H.shapes.push(b(S + 1)), h(","), H.shapes.push(b(S + 1));
+      H.scalars.push(v([","])), d(","), H.shapes.push(b(S + 1)), d(","), H.shapes.push(b(S + 1));
     else if (H.name === "forRange" || H.name === "forValues") {
-      if (H.variable = g(), h(","), H.name === "forRange")
+      if (H.variable = g(), d(","), H.name === "forRange")
         for (let m1 = 0; m1 < 3; m1++)
-          H.scalars.push(v([","])), h(",");
+          H.scalars.push(v([","])), d(",");
       else {
-        for (h("["); s() !== "]" && (H.scalars.push(v([",", "]"])), H.scalars.length > 256 && i(u("Loop exceeds 256 values"), H.at), s() === ","); )
-          h(",");
-        h("]"), h(",");
+        for (d("["); s() !== "]" && (H.scalars.push(v([",", "]"])), H.scalars.length > 256 && i(u("Loop exceeds 256 values"), H.at), s() === ","); )
+          d(",");
+        d("]"), d(",");
       }
       H.shapes.push(b(S + 1));
     } else if (H.name === "extrudeProfile" || H.name === "revolve")
-      for (H.name === "extrudeProfile" && (H.scalars.push(v([","])), h(",")), H.profile = i2({ peek: s, take: m, expect: h, scalar: v, fail: t, limited: i }); s() === ","; )
-        h(","), H.scalars.push(v([",", ")"])), H.scalars.length > 5 && t(u("Unexpected profile arguments"), H.at);
+      for (H.name === "extrudeProfile" && (H.scalars.push(v([","])), d(",")), H.profile = i2({ peek: s, take: m, expect: d, scalar: v, fail: t, limited: i }); s() === ","; )
+        d(","), H.scalars.push(v([",", ")"])), H.scalars.length > 5 && t(u("Unexpected profile arguments"), H.at);
     else if (H.name === "loft" || H.name === "smoothLoft") {
-      H.name === "loft" ? o = !0 : a = !0, h("["), H.sections = [];
+      H.name === "loft" ? o = !0 : a = !0, d("["), H.sections = [];
       let m1 = 0;
       for (; s() !== "]"; ) {
-        h("[");
+        d("[");
         const A1 = [];
         for (; s() !== "]" && (A1.push(y()), m1++, (A1.length > 256 || m1 > 4096) && i(u("Loft exceeds the section or vertex budget"), H.at), s() === ","); )
-          h(",");
-        if (h("]"), H.sections.push(A1), H.sections.length > 128 && i(u("Loft exceeds the section or vertex budget"), H.at), s() !== ",")
+          d(",");
+        if (d("]"), H.sections.push(A1), H.sections.length > 128 && i(u("Loft exceeds the section or vertex budget"), H.at), s() !== ",")
           break;
-        h(",");
+        d(",");
       }
-      if (h("]"), s() === ",") {
-        h(","), h("{"), c = !0;
+      if (d("]"), s() === ",") {
+        d(","), d("{"), c = !0;
         const A1 = m();
-        A1.text !== "pairing" && t(u("Loft options take only pairing"), A1.at), h(":");
+        A1.text !== "pairing" && t(u("Loft options take only pairing"), A1.at), d(":");
         const ie = m(), E1 = ie.text.startsWith('"') ? JSON.parse(ie.text) : void 0;
-        E1 !== "authored" && E1 !== "closest" && t(u('Loft pairing must be "authored" or "closest"'), ie.at), H.pairing = E1, s() === "," && h(","), s() !== "}" && t(u("Loft options take only pairing"), d()), h("}");
+        E1 !== "authored" && E1 !== "closest" && t(u('Loft pairing must be "authored" or "closest"'), ie.at), H.pairing = E1, s() === "," && d(","), s() !== "}" && t(u("Loft options take only pairing"), h()), d("}");
       }
     } else if (H.name === "polyhedron") {
       const m1 = (A1) => {
-        h("[");
+        d("[");
         const ie = [];
         for (; s() !== "]"; ) {
-          h("[");
+          d("[");
           const E1 = [];
           for (; s() !== "]" && (E1.push(v([",", "]"])), E1.length > 64 && i(u("Polyhedron face budget exceeded"), H.at), s() === ","); )
-            h(",");
-          if (h("]"), A1 && E1.length !== A1 && t(u("Polyhedron points need three coordinates"), H.at), ie.push(E1), ie.length > 512 && i(u("Polyhedron point or face budget exceeded"), H.at), s() !== ",")
+            d(",");
+          if (d("]"), A1 && E1.length !== A1 && t(u("Polyhedron points need three coordinates"), H.at), ie.push(E1), ie.length > 512 && i(u("Polyhedron point or face budget exceeded"), H.at), s() !== ",")
             break;
-          h(",");
+          d(",");
         }
-        return h("]"), ie;
+        return d("]"), ie;
       };
-      H.points = m1(3), h(","), H.faces = m1(void 0);
+      H.points = m1(3), d(","), H.faces = m1(void 0);
     } else if (H.name === "extrude") {
-      for (H.scalars.push(v([","])), h(","), h("["), H.points = []; s() !== "]" && (h("["), H.points.push([v([","]), ...(h(","), [v(["]"])])]), h("]"), H.points.length > 256 && i(u("Extrusion profile exceeds 256 points"), H.at), s() === ","); )
-        h(",");
-      h("]");
+      for (H.scalars.push(v([","])), d(","), d("["), H.points = []; s() !== "]" && (d("["), H.points.push([v([","]), ...(d(","), [v(["]"])])]), d("]"), H.points.length > 256 && i(u("Extrusion profile exceeds 256 points"), H.at), s() === ","); )
+        d(",");
+      d("]");
     } else if (["box", "cylinder", "sphere", "frustum", "ellipticFrustum", "torus", "ellipsoid", "roundedCylinder"].includes(H.name))
       for (; s() !== ")" && (H.scalars.push(v([",", ")"])), s() === ","); )
-        h(",");
+        d(",");
     else if (H.name === "affine") {
-      h("[");
+      d("[");
       for (let m1 = 0; m1 < 12; m1++)
-        H.scalars.push(v([",", "]"])), m1 < 11 && h(",");
-      h("]"), h(","), H.shapes.push(b(S + 1));
+        H.scalars.push(v([",", "]"])), m1 < 11 && d(",");
+      d("]"), d(","), H.shapes.push(b(S + 1));
     } else if (H.name === "axisRotate")
-      H.vector = y(), h(","), H.scalars.push(v([","])), h(","), H.shapes.push(b(S + 1));
+      H.vector = y(), d(","), H.scalars.push(v([","])), d(","), H.shapes.push(b(S + 1));
     else if (["move", "rotate", "scale", "mirror", "resize"].includes(H.name))
-      H.vector = y(), h(","), H.name === "resize" && s() === "[" && (H.scalars.push(...y()), h(",")), H.shapes.push(b(S + 1));
+      H.vector = y(), d(","), H.name === "resize" && s() === "[" && (H.scalars.push(...y()), d(",")), H.shapes.push(b(S + 1));
     else if (H.name === "repeat")
-      H.scalars.push(v([","])), h(","), H.vector = y(), h(","), H.shapes.push(b(S + 1));
+      H.scalars.push(v([","])), d(","), H.vector = y(), d(","), H.shapes.push(b(S + 1));
     else if (["union", "subtract", "intersect", "hull", "minkowski"].includes(H.name))
       for (; s() !== ")" && (H.shapes.push(b(S + 1)), H.shapes.length > 64 && i(u("At most 64 boolean operands"), H.at), s() === ","); )
-        h(",");
+        d(",");
     else
       t(u`Unknown modeling function “${H.name}”`, H.at);
-    return h(")"), H;
+    return d(")"), H;
   }
   const C = /* @__PURE__ */ Object.create(null), P = /* @__PURE__ */ Object.create(null), M = /* @__PURE__ */ new Map(), B = /* @__PURE__ */ new Map();
   let x, I = 0;
   for (; q < r.length; ) {
-    ++I > ke.statements && i(u("Too many statements"), d());
+    ++I > ke.statements && i(u("Too many statements"), h());
     const S = m();
     if (x && t(u("Return must be the final statement"), S.at), S.text === "param" || S.text === "const") {
       const a1 = g();
       (Object.hasOwn(C, a1) || Object.hasOwn(P, a1) || B.has(a1)) && t(u`Duplicate name “${a1}”`, S.at);
       let H;
       if (S.text === "param" || s() === ":") {
-        h(":");
+        d(":");
         const A1 = m();
         ["mm", "deg", "scalar"].includes(A1.text) || t(u("Parameter unit must be mm, deg or scalar"), A1.at), H = A1.text;
       }
-      h("=");
+      d("=");
       const m1 = v([";"]);
       S.text === "param" ? C[a1] = { unit: H, expression: m1.text } : P[a1] = { unit: H, expression: m1.text }, Object.keys(C).length > 64 && i(u("at most 64 named parameters are supported"), S.at), M.set(a1, m1.at);
     } else if (S.text === "let") {
       const a1 = g();
-      (B.has(a1) || Object.hasOwn(C, a1) || Object.hasOwn(P, a1)) && t(u`Duplicate name “${a1}”`, S.at), h("="), B.set(a1, b());
+      (B.has(a1) || Object.hasOwn(C, a1) || Object.hasOwn(P, a1)) && t(u`Duplicate name “${a1}”`, S.at), d("="), B.set(a1, b());
     } else S.text === "return" ? x = b() : t(u("Expected param, const, let or return"), S.at);
-    h(";");
+    d(";");
   }
   x || t(u("Finish the program with return shape;"));
   const T = structuredClone({ ...C, ...P });
@@ -10075,7 +10075,7 @@ function Ei(e) {
       return m1(1), Y(S.scalars[0], "scalar", -1e9, 1e9, !1, !0) || t(u("Assertion failed"), S.at), N1(S.shapes[0], a1 + 1);
     if (S.name === "assertCode") {
       if (!Y(S.scalars[0], "scalar", -1e9, 1e9, !1, !0)) {
-        const e1 = S.message ? h8(S.message, (c1, b1) => {
+        const e1 = S.message ? d8(S.message, (c1, b1) => {
           const _1 = E2(c1.text, x1);
           return _1.boolean ? String(_1.value !== 0) : b1 ? p3(_1.value) : String(_1.value);
         }) : void 0;
@@ -10094,7 +10094,7 @@ function Ei(e) {
         const Q1 = (V1 - _1) / W1, H1 = Q1 < 0 ? 0 : Math.floor(Q1 + 4 * Number.EPSILON * Math.max(1, Math.abs(Q1))) + 1;
         if (!Number.isSafeInteger(H1) || H1 > 256)
           throw new Ge(u("Loop exceeds 256 values"), S.at, n, "resource-limit");
-        e1 = Array.from({ length: H1 }, (fe, h2) => _1 + h2 * W1);
+        e1 = Array.from({ length: H1 }, (fe, d2) => _1 + d2 * W1);
       } else
         e1 = S.scalars.map((_1) => Y(_1, "scalar", -1e6, 1e6));
       const c1 = [], b1 = A;
@@ -10128,7 +10128,7 @@ function Ei(e) {
     if (S.name === "loft" || S.name === "smoothLoft")
       try {
         const e1 = S.sections.map((c1) => c1.map((b1) => b1.map((_1) => Y(_1, "mm", -1e5, 1e5))));
-        return { kind: "polyhedron", ...S.name === "loft" ? di(e1, e.version === 2, S.pairing) : vi(e1, S.pairing) };
+        return { kind: "polyhedron", ...S.name === "loft" ? hi(e1, e.version === 2, S.pairing) : vi(e1, S.pairing) };
       } catch (e1) {
         if (e1 instanceof Ge)
           throw e1;
@@ -10252,24 +10252,24 @@ function Ei(e) {
   }
   for (const [S, a1] of B)
     ce({ kind: "reference", name: S, at: a1.at });
-  let oe = N1(x), ae = 0, de = 0;
+  let oe = N1(x), ae = 0, he = 0;
   function be(S, a1 = 1, H = 0) {
     if (H > 32 && i(u("Expanded dependency depth exceeds 32")), ae += a1, ae > ke.expandedNodes && i(u`Expanded shape budget exceeds ${ke.expandedNodes} nodes`), S.kind !== "empty") {
       if (S.kind === "box")
-        de += 12 * a1;
+        he += 12 * a1;
       else if (S.kind === "cylinder" || S.kind === "frustum")
-        de += 4 * S.segments * a1;
+        he += 4 * S.segments * a1;
       else if (S.kind === "sphere")
-        de += 0.5 * (Math.ceil(S.segments / 4) * 4) ** 2 * a1;
+        he += 0.5 * (Math.ceil(S.segments / 4) * 4) ** 2 * a1;
       else if (S.kind === "polyhedron")
-        de += S.faces.reduce((m1, A1) => m1 + A1.length - 2, 0) * a1;
+        he += S.faces.reduce((m1, A1) => m1 + A1.length - 2, 0) * a1;
       else if (S.kind === "extrude")
-        de += 4 * S.points.length * a1;
+        he += 4 * S.points.length * a1;
       else if (S.kind === "profile-extrude" || S.kind === "revolve") {
         const m1 = _4(S.profile);
-        ae += m1.nodes * a1, ae > ke.expandedNodes && i(u`Expanded shape budget exceeds ${ke.expandedNodes} nodes`), de += 2 * m1.vertices * (S.kind === "revolve" ? S.segments + 1 : S.steps + 1) * a1;
+        ae += m1.nodes * a1, ae > ke.expandedNodes && i(u`Expanded shape budget exceeds ${ke.expandedNodes} nodes`), he += 2 * m1.vertices * (S.kind === "revolve" ? S.segments + 1 : S.steps + 1) * a1;
       } else "shapes" in S ? S.shapes.forEach((m1) => be(m1, a1, H + 1)) : be(S.shape, a1 * (S.kind === "repeat" ? S.count : 1), H + 1);
-      de > ke.estimatedFaces && i(u("Estimated mesh budget exceeds 200000 faces"));
+      he > ke.estimatedFaces && i(u("Estimated mesh budget exceeds 200000 faces"));
     }
   }
   try {
@@ -10290,9 +10290,9 @@ function Ei(e) {
       }
       return H;
     };
-    oe = a1(oe), ae = de = 0, be(oe);
+    oe = a1(oe), ae = he = 0, be(oe);
   }
-  return { shape: oe, parameters: C, values: Object.fromEntries(Object.keys(C).map((S) => [S, O[S]])), expandedNodes: ae, estimatedFaces: de, usesLoft: o, usesSmoothLoft: a, usesLoftPairing: c };
+  return { shape: oe, parameters: C, values: Object.fromEntries(Object.keys(C).map((S) => [S, O[S]])), expandedNodes: ae, estimatedFaces: he, usesLoft: o, usesSmoothLoft: a, usesLoftPairing: c };
 }
 const J3 = ["rounded-box", "capsule", "tube", "washer", "cone", "frustum", "polygon", "ellipse", "wedge", "pyramid", "round-roof", "torus"], Q3 = ["counterbore", "countersink", "port", "boss", "rib"], e4 = ["curved-cone", "hemisphere", "paraboloid", "vase", "teardrop", "finishing-washer"], n4 = ["bent-tube", "loft", "dovetail"], Di = [["flat", "Flat end"], ["chamfer", "Chamfered end"], ["cone", "Cone point"], ["dog", "Dog point"], ["cup", "Cup point"], ["oval", "Rounded point"], ["gimlet", "Threaded gimlet point"]];
 function N6(e) {
@@ -10300,7 +10300,7 @@ function N6(e) {
   return { style: e.tipStyle ?? "flat", length: t, diameter: e.tipDiameter ?? n.diameter * 0.6, depth: e.cupDepth ?? t * 0.4 };
 }
 function Mi(e) {
-  const n = (q, o, a, c, s, d = 0.1) => ({ key: q, label: o, value: a, min: c, max: s, step: d }), t = (q) => n("width", "Width (mm)", q, 0.1, 500), i = (q) => n("depth", "Depth (mm)", q, 0.1, 500), r = (q) => n("height", "Height (mm)", q, 0.1, 500), l = () => n("segments", "Radial segments", 64, 16, 128, 1);
+  const n = (q, o, a, c, s, h = 0.1) => ({ key: q, label: o, value: a, min: c, max: s, step: h }), t = (q) => n("width", "Width (mm)", q, 0.1, 500), i = (q) => n("depth", "Depth (mm)", q, 0.1, 500), r = (q) => n("height", "Height (mm)", q, 0.1, 500), l = () => n("segments", "Radial segments", 64, 16, 128, 1);
   return e === "rounded-box" ? [t(30), i(24), r(20), n("radius", "Corner radius (mm)", 3, 0, 200), n("detail", "Corner detail", 4, 2, 8, 1)] : e === "capsule" ? [n("length", "Overall length (mm)", 40, 0.1, 500), t(20), r(20), n("segments", "Curve segments", 24, 8, 64, 1)] : e === "tube" || e === "washer" ? [n("outerDiameter", "Outer diameter (mm)", 30, 0.2, 500), n("wallThickness", "Wall thickness (mm)", e === "tube" ? 5 : 8, 0.05, 200), r(e === "tube" ? 25 : 4), l()] : e === "cone" ? [n("diameter", "Base diameter (mm)", 26, 0.1, 500), r(30), l()] : e === "frustum" ? [n("bottomDiameter", "Bottom diameter (mm)", 30, 0.1, 500), n("topDiameter", "Top diameter (mm)", 14, 0.1, 500), r(25), l()] : e === "polygon" ? [n("diameter", "Circumdiameter (mm)", 28, 0.1, 500), r(25), n("sides", "Sides", 6, 3, 32, 1)] : e === "ellipse" ? [t(36), i(19.2), r(20), l()] : e === "wedge" ? [t(30), i(30), r(25)] : e === "pyramid" ? [t(30), i(30), r(28)] : e === "round-roof" ? [t(30), n("length", "Roof length (mm)", 30, 0.1, 500), r(15), n("segments", "Curve segments", 32, 8, 64, 1)] : e === "torus" ? [n("majorRadius", "Ring centre radius (mm)", 15, 0.2, 250), n("tubeRadius", "Ring tube radius (mm)", 5, 0.05, 100), l(), n("tubeSegments", "Cross-section segments", 24, 8, 32, 1)] : e === "counterbore" || e === "countersink" ? [n("boreDiameter", "Nominal bore diameter (mm)", 6, 0.1, 200), n("recessDiameter", "Recess diameter (mm)", 12, 0.2, 300), n("shaftLength", "Bore length (mm)", 20, 0.1, 500), ...e === "counterbore" ? [n("recessDepth", "Recess depth (mm)", 6, 0.1, 100)] : [n("seatAngle", "Seat angle (°)", 90, 30, 150, 1), n("rimHeight", "Recess rim height (mm)", 2, 0, 100)], n("clearance", "Diametral clearance (mm)", 0, 0, 5), l()] : e === "port" ? [n("length", "Overall length (mm)", 30, 0.1, 500), t(10), r(20), n("segments", "Curve segments", 32, 8, 64, 1)] : e === "boss" ? [n("outerDiameter", "Outer diameter (mm)", 14, 0.2, 200), n("boreDiameter", "Bore diameter (mm)", 6, 0.1, 199), r(20), n("ribReach", "Rib reach (mm)", 5.5, 0, 100), n("ribThickness", "Rib thickness (mm)", 2, 0.1, 50), n("ribHeight", "Rib height (mm)", 5, 0.1, 200), l()] : e === "rib" ? [n("length", "Rib length (mm)", 25, 0.1, 500), r(25), n("thickness", "Thickness (mm)", 3, 0.1, 100)] : e === "curved-cone" ? [n("diameter", "Base diameter (mm)", 26, 0.2, 500), r(30), n("exponent", "Taper exponent", 2, 0.5, 4, 0.1), n("profileSegments", "Profile segments", 16, 8, 96, 1), l()] : e === "hemisphere" ? [n("radius", "Radius (mm)", 15, 0.1, 250), n("profileSegments", "Profile segments", 16, 8, 96, 1), l()] : e === "paraboloid" ? [n("diameter", "Base diameter (mm)", 26, 0.2, 500), r(26), n("profileSegments", "Profile segments", 24, 8, 96, 1), l()] : e === "vase" ? [n("baseDiameter", "Base diameter (mm)", 20, 1, 300), n("bodyDiameter", "Body diameter (mm)", 30, 1, 300), n("mouthDiameter", "Mouth diameter (mm)", 16, 1, 300), r(32), n("bellyHeight", "Belly height (mm)", 12, 0.1, 499), n("wallThickness", "Wall thickness (mm)", 2, 0.1, 100), n("baseThickness", "Base thickness (mm)", 2, 0.1, 100), n("profileSegments", "Profile segments", 32, 8, 64, 1), l()] : e === "teardrop" ? [n("radius", "Arch radius (mm)", 8, 0.1, 100), n("apexHeight", "Apex height above centre (mm)", 12, 0.2, 250), n("length", "Cut length (mm)", 25, 0.1, 500), n("segments", "Curve segments", 32, 8, 64, 1)] : e === "finishing-washer" ? [n("outerDiameter", "Outer diameter (mm)", 18, 0.2, 300), n("boreDiameter", "Bore diameter (mm)", 6, 0.1, 200), n("seatDiameter", "Seat diameter (mm)", 14, 0.2, 299), r(5), n("seatAngle", "Seat angle (°)", 90, 30, 150, 1), n("edgeChamfer", "Rim chamfer (mm)", 1, 0, 50), l()] : e === "bent-tube" ? [n("bendRadius", "Bend radius (mm)", 20, 0.2, 300), n("outerDiameter", "Outer diameter (mm)", 10, 0.2, 200), n("wallThickness", "Wall thickness (mm)", 2, 0.05, 80), n("bendAngle", "Bend angle (°)", 90, 5, 180, 1), n("arcSegments", "Bend segments", 32, 4, 64, 1), n("segments", "Cross-section segments", 32, 16, 64, 1)] : e === "loft" ? [n("baseWidth", "Base width (mm)", 30, 0.2, 500), n("baseDepth", "Base depth (mm)", 30, 0.2, 500), n("topDiameter", "Top diameter (mm)", 16, 0.2, 500), r(25), n("wallThickness", "Wall thickness (mm)", 0, 0, 100), n("profileSegments", "Profile segments", 8, 1, 32, 1), l()] : e === "dovetail" ? [n("baseWidth", "Narrow width (mm)", 16, 0.2, 500), n("topWidth", "Wide width (mm)", 24, 0.2, 500), r(8), n("length", "Slide length (mm)", 30, 0.2, 500), n("clearance", "Profile clearance (mm)", 0, 0, 5)] : e === "ruler" ? [n("length", "Ruler length (mm)", 100, 10, 500), n("width", "Ruler width (mm)", 10, 6, 30), n("thickness", "Ruler thickness (mm)", 1, 0.5, 5)] : e === "cube" ? [n("edge", "Edge length (mm)", 30, 0.01, 1e5)] : ["screw", "thread", "nut"].includes(e) ? [n("diameter", "Core diameter (mm)", 10, 2, 80), n("length", e === "nut" ? "Nut height (mm)" : "Thread length (mm)", e === "nut" ? 8 : 20, 1, 200), n("pitch", "Thread pitch (mm)", 2, 0.5, 10), n("threadDepth", "Thread depth (mm)", 1, 0.2, 5), n("starts", "Thread starts", 1, 1, 2, 1), n("hand", "Handedness", 1, -1, 1, 2), ...e === "screw" ? [n("headDiameter", "Head diameter (mm)", 18, 3, 120), n("headHeight", "Head height (mm)", 5, 1, 30), n("slotWidth", "Drive slot width (mm)", 2, 0.5, 80)] : e === "nut" ? [n("clearance", "Radial clearance (mm)", 0.25, 0.05, 1)] : []] : e === "text" || e === "name-tag" ? [n("textHeight", "Text height (mm)", 9, 3, 40), n("textDepth", "Raised text depth (mm)", 2, 0.5, 8), ...e === "name-tag" ? [n("baseThickness", "Base thickness (mm)", 3, 1, 10), n("cornerRadius", "Corner radius (mm)", 3, 0.5, 8), n("padding", "Text padding (mm)", 4, 2, 12), n("holeRadius", "Hanging hole radius (mm)", 2, 1, 5)] : []] : e === "heart" ? [n("width", "Heart width (mm)", 34, 5, 150), n("height", "Heart height (mm)", 32, 5, 150), n("thickness", "Thickness (mm)", 5, 1, 30), n("roundness", "Lobe roundness", 1, 0.6, 1.4, 0.05), n("cleft", "Cleft height (mm)", 10, 2, 15, 0.5), n("bend", "Bend angle (°)", 0, -90, 90, 5)] : [];
 }
 function y8(e) {
@@ -10461,8 +10461,8 @@ function Ti(e) {
       s.nodeId === q && D8(a, A8(o, s.property), new xe(s.expression));
     if (o.kind === "extrusion" && typeof o.distance == "string" && (a.distance = new xe(o.distance)), o.kind === "pattern" && (a.pattern = Yt(o.pattern, (s) => typeof s == "string" ? new xe(s) : s)), (o.kind === "mirror" || o.kind === "split") && typeof o.offset == "string" && (a.offset = new xe(o.offset)), o.kind === "exact-feature" && typeof o.size == "string" && (a.size = new xe(o.size)), o.kind === "revolution")
       for (const s of ["angle", "axisOffset"]) {
-        const d = o[s];
-        typeof d == "string" && (a[s] = new xe(d));
+        const h = o[s];
+        typeof h == "string" && (a[s] = new xe(h));
       }
     if (i.has(q)) {
       for (const s of [...M8, "generator"])
@@ -10476,8 +10476,8 @@ function Ti(e) {
   return l.push({ key: "roots", kind: "roots", args: [n.roots] }), n.joints !== void 0 && l.push({ key: "joints", kind: "joints", args: [n.joints] }), n.provenance !== void 0 && l.push({ key: "sources", kind: "sources", args: [] }), l;
 }
 function Bi(e) {
-  const n = (s, d = 0, m = "invalid-source") => {
-    throw new Ge(s, d, e, m);
+  const n = (s, h = 0, m = "invalid-source") => {
+    throw new Ge(s, h, e, m);
   };
   (typeof e != "string" || new TextEncoder().encode(e).length > Y5.bytes) && n(u("Model source exceeds 8 MiB"), 0, "resource-limit");
   let t;
@@ -10491,34 +10491,34 @@ function Bi(e) {
   for (; i.length; ) {
     const s = i.pop();
     (++r > Y5.astNodes || s.depth > Y5.depth) && n(u("Model source syntax budget exceeded"), s.node.start, "resource-limit");
-    for (const d of Object.values(s.node))
-      for (const m of Array.isArray(d) ? d : [d])
+    for (const h of Object.values(s.node))
+      for (const m of Array.isArray(h) ? h : [h])
         m && typeof m == "object" && typeof m.type == "string" && i.push({ node: m, depth: s.depth + 1 });
   }
-  const l = (s, d) => (["constructor", "prototype", "__proto__"].includes(s) && n(u("Unsafe design source key"), d.start), s);
+  const l = (s, h) => (["constructor", "prototype", "__proto__"].includes(s) && n(u("Unsafe design source key"), h.start), s);
   function q(s) {
     if (s.type === "Literal" && (s.value === null || typeof s.value == "string" || typeof s.value == "boolean" || typeof s.value == "number" && Number.isFinite(s.value)))
       return s.value;
     if (s.type === "UnaryExpression" && ["+", "-"].includes(s.operator) && s.argument.type === "Literal" && typeof s.argument.value == "number") {
-      const d = s.operator === "-" ? -s.argument.value : s.argument.value;
-      if (Number.isFinite(d))
-        return d;
+      const h = s.operator === "-" ? -s.argument.value : s.argument.value;
+      if (Number.isFinite(h))
+        return h;
     }
     if (s.type === "ArrayExpression")
-      return s.elements.some((d) => !d || d.type === "SpreadElement") && n(u("Design arrays require explicit values"), s.start), s.elements.map(q);
+      return s.elements.some((h) => !h || h.type === "SpreadElement") && n(u("Design arrays require explicit values"), s.start), s.elements.map(q);
     if (s.type === "ObjectExpression") {
-      const d = /* @__PURE__ */ Object.create(null);
+      const h = /* @__PURE__ */ Object.create(null);
       for (const m of s.properties) {
         (m.type !== "Property" || m.kind !== "init" || m.method || m.computed || m.shorthand) && n(u("Design objects require explicit properties"), m.start);
-        const h = l(String(m.key.name ?? m.key.value), m);
-        Object.hasOwn(d, h) && n(u("Duplicate design source property"), m.start), d[h] = q(m.value);
+        const d = l(String(m.key.name ?? m.key.value), m);
+        Object.hasOwn(h, d) && n(u("Duplicate design source property"), m.start), h[d] = q(m.value);
       }
-      return d;
+      return h;
     }
     if (s.type === "TaggedTemplateExpression" && s.tag.type === "Identifier" && s.tag.name === "cad" && s.quasi.expressions.length === 0) {
-      const d = s.quasi.quasis[0].value.cooked;
-      if (typeof d == "string")
-        return d;
+      const h = s.quasi.quasis[0].value.cooked;
+      if (typeof h == "string")
+        return h;
     }
     return s.type === "CallExpression" && s.callee.type === "Identifier" && ["expr", "asset"].includes(s.callee.name) && s.arguments.length === 1 && s.arguments[0].type === "Literal" && typeof s.arguments[0].value == "string" ? s.callee.name === "expr" ? new xe(s.arguments[0].value) : new We(s.arguments[0].value) : ["Identifier", "BinaryExpression", "LogicalExpression", "ConditionalExpression", "UnaryExpression"].includes(s.type) || s.type === "CallExpression" && s.callee.type === "Identifier" ? new xe(e.slice(s.start, s.end)) : n(u("Unsupported design source expression"), s.start, "unsupported-feature");
   }
@@ -10526,18 +10526,18 @@ function Bi(e) {
   for (const s of t.body) {
     if (s.type === "EmptyStatement")
       continue;
-    const d = s.expression;
-    (s.type !== "ExpressionStatement" || d?.type !== "CallExpression" || d.callee.type !== "Identifier" || !o.has(d.callee.name) || d.arguments.some((b) => b.type === "SpreadElement")) && n(u("Use declarative design calls only"), s.start, "unsupported-feature");
-    const m = d.callee.name, h = d.arguments.map(q), g = ["box", "cylinder", "sphere", "combine", "mesh", "code", "extrusion", "revolution", "mirror", "pattern", "exactFeature", "exactBody", "hole", "split", "instance", "generated"].includes(m), v = g || m === "parameter" || m === "sketch";
-    v && (typeof h[0] != "string" || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,95}$/.test(h[0]) || ["constructor", "prototype", "__proto__"].includes(h[0])) && n(u("Design records require a stable identifier"), d.start);
-    const y = v ? `${g ? "node" : m}:${h[0]}` : m;
-    c.has(y) && n(u("Duplicate design source record"), d.start), c.add(y), a.push({ key: y, kind: m, args: h, node: s, call: d }), a.length > Y5.records && n(u("Too many design source records"), d.start, "resource-limit");
+    const h = s.expression;
+    (s.type !== "ExpressionStatement" || h?.type !== "CallExpression" || h.callee.type !== "Identifier" || !o.has(h.callee.name) || h.arguments.some((b) => b.type === "SpreadElement")) && n(u("Use declarative design calls only"), s.start, "unsupported-feature");
+    const m = h.callee.name, d = h.arguments.map(q), g = ["box", "cylinder", "sphere", "combine", "mesh", "code", "extrusion", "revolution", "mirror", "pattern", "exactFeature", "exactBody", "hole", "split", "instance", "generated"].includes(m), v = g || m === "parameter" || m === "sketch";
+    v && (typeof d[0] != "string" || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,95}$/.test(d[0]) || ["constructor", "prototype", "__proto__"].includes(d[0])) && n(u("Design records require a stable identifier"), h.start);
+    const y = v ? `${g ? "node" : m}:${d[0]}` : m;
+    c.has(y) && n(u("Duplicate design source record"), h.start), c.add(y), a.push({ key: y, kind: m, args: d, node: s, call: h }), a.length > Y5.records && n(u("Too many design source records"), h.start, "resource-limit");
   }
   return (!c.has("project") || !c.has("roots")) && n(u("Design source requires project and roots calls")), a;
 }
 function Ii(e, n, t = {}) {
-  const i = Bi(e), r = (m, h) => {
-    throw new Ge(m, h?.node.start ?? 0, e);
+  const i = Bi(e), r = (m, d) => {
+    throw new Ge(m, d?.node.start ?? 0, e);
   }, l = i.find((m) => m.key === "project");
   (l.args.length !== 1 || !l.args[0] || typeof l.args[0] != "object" || Array.isArray(l.args[0])) && r(u("Invalid project declaration"), l), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51].includes(l.args[0].version) || r(u("Model source uses project version 6 through 41"), l);
   const q = { ...l.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: e } };
@@ -10548,18 +10548,18 @@ function Ii(e, n, t = {}) {
   for (const m of i)
     m.kind === "parameter" && (m.args.length !== 2 && r(u("Invalid parameter declaration"), m), Object.hasOwn(c, m.args[0]) && r(u("Duplicate design source parameter"), m), c[m.args[0]] = m.args[1], s = !0);
   for (const m of i) {
-    const { kind: h, args: g } = m;
-    if (h === "project" || h === "parameter")
+    const { kind: d, args: g } = m;
+    if (d === "project" || d === "parameter")
       continue;
-    if (h === "roots" || h === "joints") {
-      (g.length !== 1 || !Array.isArray(g[0])) && r(u("Invalid design list declaration"), m), q[h] = g[0];
+    if (d === "roots" || d === "joints") {
+      (g.length !== 1 || !Array.isArray(g[0])) && r(u("Invalid design list declaration"), m), q[d] = g[0];
       continue;
     }
-    if (h === "sources") {
+    if (d === "sources") {
       (g.length || n.version < 5) && r(u("Source provenance is retained from the project"), m), n.provenance && (q.provenance = o3(n.provenance));
       continue;
     }
-    if ((!g[1] || typeof g[1] != "object" || Array.isArray(g[1])) && r(u("Design calls require an options object"), m), h === "sketch") {
+    if ((!g[1] || typeof g[1] != "object" || Array.isArray(g[1])) && r(u("Design calls require an options object"), m), d === "sketch") {
       g.length !== 2 && r(u("Invalid sketch declaration"), m);
       const b = { ...g[1], id: g[0] };
       for (const C of ["width", "depth", "radius"])
@@ -10570,7 +10570,7 @@ function Ii(e, n, t = {}) {
     const v = g[1];
     (Object.hasOwn(v, "id") || Object.hasOwn(v, "kind")) && r(u("Identity and kind belong to the design call"), m);
     let y;
-    if (h === "generated") {
+    if (d === "generated") {
       (g.length !== 3 || "generator" in v || M8.some((I) => Object.hasOwn(v, I))) && r(u("Generator recipes belong to the generated call"), m);
       const b = g[2] === null ? void 0 : y8(g[2]);
       let C = Object.hasOwn(n.nodes, g[0]) ? n.nodes[g[0]] : void 0, P = n;
@@ -10593,28 +10593,28 @@ function Ii(e, n, t = {}) {
         }
       y = { ...O6(C), ...v, id: g[0] }, b ? y.generator = b : delete y.generator;
     } else
-      y = { name: h === "combine" ? "Combination" : h[0].toUpperCase() + h.slice(1), color: "#eea52b", transform: or(), ...v, id: g[0], kind: h === "combine" ? "boolean" : h === "exactFeature" ? "exact-feature" : h === "exactBody" ? "exact-body" : h };
-    if (h === "code")
+      y = { name: d === "combine" ? "Combination" : d[0].toUpperCase() + d.slice(1), color: "#eea52b", transform: or(), ...v, id: g[0], kind: d === "combine" ? "boolean" : d === "exactFeature" ? "exact-feature" : d === "exactBody" ? "exact-body" : d };
+    if (d === "code")
       (g.length !== 4 && !(g.length === 5 && g[4] === 2) || typeof g[2] != "string" || Object.hasOwn(v, "program")) && r(u("Code calls need source and input overrides"), m), y.program = { version: g.length === 5 ? 2 : 1, language: "brickwright-cad-script", source: g[2], parameters: g[3] };
-    else if (h === "mesh") {
+    else if (d === "mesh") {
       (g.length !== 3 || !(g[2] instanceof We) || "positions" in v || "indices" in v) && r(u("Mesh calls require a project asset reference"), m);
       const b = Object.hasOwn(n.nodes, g[2].id) ? n.nodes[g[2].id] : void 0;
       if (b?.kind !== "mesh")
         return r(u("Referenced mesh asset is unavailable"), m);
       y.positions = b.positions, y.indices = b.indices, n.version >= 5 && b.provenance?.length && (y.provenance = [.../* @__PURE__ */ new Set([...y.provenance ?? [], ...b.provenance])]);
-    } else if (h === "exactFeature") {
+    } else if (d === "exactFeature") {
       (g.length > 3 || "display" in v || g.length === 3 && !(g[2] instanceof We)) && r(u("Exact feature calls may only reference their display mesh as a project asset"), m);
       const b = g.length === 3 && Object.hasOwn(n.nodes, g[2].id) ? n.nodes[g[2].id] : void 0;
       b?.kind === "exact-feature" && b.display && (y.display = b.display);
-    } else if (h === "exactBody") {
+    } else if (d === "exactBody") {
       const b = ["brep", "display", "measures", "origin", "bodyVersion"];
       (g.length !== 3 || !(g[2] instanceof We) || b.some((P) => P in v)) && r(u("Exact body calls require their imported B-rep as a project asset reference"), m);
       const C = Object.hasOwn(n.nodes, g[2].id) ? n.nodes[g[2].id] : void 0;
       if (C?.kind !== "exact-body")
         return r(u("Referenced exact body asset is unavailable"), m);
       y.bodyVersion = C.bodyVersion, y.brep = C.brep, y.measures = C.measures, y.display = C.display, C.origin && (y.origin = C.origin);
-    } else h !== "generated" && g.length !== 2 && r(u("Unexpected design call arguments"), m);
-    (h === "cylinder" || h === "sphere") && (y.segments ?? (y.segments = 48));
+    } else d !== "generated" && g.length !== 2 && r(u("Unexpected design call arguments"), m);
+    (d === "cylinder" || d === "sphere") && (y.segments ?? (y.segments = 48));
     for (const [b, C] of Object.entries(S8)) {
       const P = A8(y, b), M = Ci(y, P);
       M instanceof xe && (a.push({ nodeId: y.id, property: b, expression: M.expression }), D8(y, P, (b.startsWith("scale"), 1)), s = !0);
@@ -10629,14 +10629,14 @@ function Ii(e, n, t = {}) {
     q.nodes[y.id] = y;
   }
   s ? q.parametric = { version: 1, parameters: c, bindings: a } : delete q.parametric;
-  const d = (m) => {
+  const h = (m) => {
     if ((m instanceof xe || m instanceof We) && r(u("Expression is not supported in this design field")), m && typeof m == "object")
-      for (const h of Object.values(m))
-        d(h);
+      for (const d of Object.values(m))
+        h(d);
   };
   for (const m of Object.values(q.nodes))
-    d(m.kind === "mesh" ? { ...m, positions: void 0, indices: void 0 } : m.kind === "exact-feature" ? { ...m, display: void 0 } : m.kind === "exact-body" ? { ...m, brep: void 0, display: void 0 } : m);
-  return d(q.sketches), d(q.joints), d(Object.fromEntries(Object.entries(q).filter(([m]) => !["nodes", "sketches", "joints", "modelSource"].includes(m)))), It(q), o0(q), q;
+    h(m.kind === "mesh" ? { ...m, positions: void 0, indices: void 0 } : m.kind === "exact-feature" ? { ...m, display: void 0 } : m.kind === "exact-body" ? { ...m, brep: void 0, display: void 0 } : m);
+  return h(q.sketches), h(q.joints), h(Object.fromEntries(Object.entries(q).filter(([m]) => !["nodes", "sketches", "joints", "modelSource"].includes(m)))), It(q), o0(q), q;
 }
 function Ri(e) {
   if (e.version < 6)
@@ -10795,9 +10795,9 @@ function lr(e) {
         continue;
       q.has(c.parent) || t(u("a group names a missing parent"));
       const s = /* @__PURE__ */ new Set([c.id]);
-      let d = c.parent;
-      for (; d !== void 0; )
-        s.has(d) && t(u("groups form a cycle")), s.add(d), d = q.get(d).parent, s.size > 64 && t(u("groups nest too deep"));
+      let h = c.parent;
+      for (; h !== void 0; )
+        s.has(h) && t(u("groups form a cycle")), s.add(h), h = q.get(h).parent, s.size > 64 && t(u("groups nest too deep"));
     }
   }
   if (n.views !== void 0) {
@@ -10806,9 +10806,9 @@ function lr(e) {
     for (const c of n.views) {
       (!j2(c) || !Q5(c.id) || a.has(c.id) || !i5(c.name) || !Array.isArray(c.steps) || c.steps.length > w5.steps) && t(u("bad exploded view")), a.add(c.id);
       const s = /* @__PURE__ */ new Set();
-      for (const d of c.steps) {
-        (!j2(d) || !Q5(d.id) || s.has(d.id) || !Array.isArray(d.direction) || d.direction.length !== 3 || !d.direction.every((m) => U6(m, 1)) || Math.abs(Math.hypot(...d.direction) - 1) > 1e-6 || !U6(d.distance, 1e5)) && t(u("bad explode step")), s.add(d.id), d.group === void 0 == (d.bodies === void 0) && t(u("an explode step moves one group or a list of bodies")), d.group !== void 0 && !q.has(d.group) && t(u("an explode step names a missing group")), d.bodies !== void 0 && l(d.bodies, u("explode step bodies"));
-        for (const m of Object.keys(d))
+      for (const h of c.steps) {
+        (!j2(h) || !Q5(h.id) || s.has(h.id) || !Array.isArray(h.direction) || h.direction.length !== 3 || !h.direction.every((m) => U6(m, 1)) || Math.abs(Math.hypot(...h.direction) - 1) > 1e-6 || !U6(h.distance, 1e5)) && t(u("bad explode step")), s.add(h.id), h.group === void 0 == (h.bodies === void 0) && t(u("an explode step moves one group or a list of bodies")), h.group !== void 0 && !q.has(h.group) && t(u("an explode step names a missing group")), h.bodies !== void 0 && l(h.bodies, u("explode step bodies"));
+        for (const m of Object.keys(h))
           ["id", "group", "bodies", "direction", "distance"].includes(m) || t(u`unknown explode step field ${m}`);
       }
     }
@@ -10819,11 +10819,11 @@ function lr(e) {
     const a = /* @__PURE__ */ new Set(), c = /* @__PURE__ */ new Set();
     for (const s of n.configurations) {
       (!j2(s) || !Q5(s.id) || a.has(s.id) || !i5(s.name) || c.has(s.name) || !j2(s.parameters) || Object.keys(s.parameters).length > w5.parameters) && t(u("bad configuration")), a.add(s.id), c.add(s.name);
-      for (const [d, m] of Object.entries(s.parameters))
-        (!Object.hasOwn(o, d) || !i5(m, 512)) && t(u`configuration ${s.name} sets an unknown parameter ${d}`);
+      for (const [h, m] of Object.entries(s.parameters))
+        (!Object.hasOwn(o, h) || !i5(m, 512)) && t(u`configuration ${s.name} sets an unknown parameter ${h}`);
       l(s.suppressed, u("suppressed bodies"));
-      for (const d of Object.keys(s))
-        ["id", "name", "parameters", "suppressed"].includes(d) || t(u`unknown configuration field ${d}`);
+      for (const h of Object.keys(s))
+        ["id", "name", "parameters", "suppressed"].includes(h) || t(u`unknown configuration field ${h}`);
     }
   }
   n.active !== void 0 && !n.configurations?.some((a) => a.id === n.active) && t(u("the active configuration does not exist")), n.suppressed !== void 0 && l(n.suppressed, u("suppressed bodies")), n.mates !== void 0 && ir(e, n.mates, t);
@@ -10870,10 +10870,10 @@ function cr(e) {
   (t.length > 2e3 || e.roots.length > 2e3) && ne(u("too many objects (maximum 2000)"));
   for (const [c, s] of t) {
     (!o2(c) || !e3(s) || s.id !== c || !W6(s.name) || typeof s.color != "string" || !/^#[0-9a-fA-F]{6}$/.test(s.color)) && ne(u`bad node ${c}`), s.surface !== void 0 && (e.version < 30 || s.kind !== "mesh" || s.surface !== !0 || s.reference !== !0) && ne(u("Surface meshes require a reference body and document version 30")), s.role !== void 0 && (e.version < 7 || !["solid", "hole"].includes(String(s.role)) || s.reference === !0) && ne(u("Invalid solid/hole role")), s.useHoleRoles !== void 0 && (e.version < 7 || s.kind !== "boolean" || s.operation !== "union" || s.useHoleRoles !== !0) && ne(u("Invalid solid/hole combination"));
-    const d = s.transform;
-    if (s.generator !== void 0 && (e.version === 1 && ne(u("shape recipes require version 2 or later")), y8(s.generator)), (!e3(d) || !_5(d.position) || !_5(d.rotation, -36e4, 36e4) || !_5(d.scale, 1e-3, 1e3)) && ne(u`bad transform on ${c}`), s.generator?.preset === "cube") {
-      const m = s.size, h = s.generator.values.edge;
-      (s.kind !== "box" || !_5(m, 0.01, 1e5) || m.some((g) => g !== h) || d.scale.some((g) => g !== d.scale[0])) && ne(u("Cube edges are linked; use a Box for independent dimensions"));
+    const h = s.transform;
+    if (s.generator !== void 0 && (e.version === 1 && ne(u("shape recipes require version 2 or later")), y8(s.generator)), (!e3(h) || !_5(h.position) || !_5(h.rotation, -36e4, 36e4) || !_5(h.scale, 1e-3, 1e3)) && ne(u`bad transform on ${c}`), s.generator?.preset === "cube") {
+      const m = s.size, d = s.generator.values.edge;
+      (s.kind !== "box" || !_5(m, 0.01, 1e5) || m.some((g) => g !== d) || h.scale.some((g) => g !== h.scale[0])) && ne(u("Cube edges are linked; use a Box for independent dimensions"));
     }
     switch (s.kind) {
       case "box":
@@ -10932,7 +10932,7 @@ function cr(e) {
     if (s > 100 && ne(u("operation tree is too deep")), r.has(c) && ne(u("cyclic operation tree")), i.has(c))
       return s + l.get(c) > 100 && ne(u("operation tree is too deep")), l.get(c);
     r.add(c);
-    const d = n[c], m = Math.max(0, ...$2(d).map((h) => 1 + q(h, s + 1)));
+    const h = n[c], m = Math.max(0, ...$2(h).map((d) => 1 + q(d, s + 1)));
     return m > 100 && ne(u("operation tree is too deep")), r.delete(c), i.add(c), l.set(c, m), m;
   };
   t.forEach(([c]) => q(c, 0));
@@ -11136,7 +11136,7 @@ const g1 = (e, n, t = {}) => ({ name: e, kind: n, ...t }), k5 = (e) => g1(e, "po
   { command: "properties", label: "Properties" },
   { command: "readout", label: "Show on-canvas parameters", alias: "transform values XYZ" },
   { command: "export", label: "Export geometry", alias: "STL 3MF", requires: "canExport" }
-], hr = { undo: ["u"], redo: ["re"], delete: ["erase", "del"], duplicate: ["dup"], fit: ["zoom"], union: ["join"] }, dr = { manufacturing: "analysis", "surface-blends": "analysis", "step-evidence": "analysis", "split-body": "feature", "edit-split": "feature", undo: "history", redo: "history", copy: "edit", cut: "edit", paste: "edit", duplicate: "edit", delete: "edit", drop: "transform", union: "boolean", subtract: "boolean", intersect: "boolean", "select-all": "selection", deselect: "selection", fit: "view", home: "view", top: "view", front: "view", right: "view", back: "view", left: "view", bottom: "view", projection: "view", workplane: "view" }, fr = /* @__PURE__ */ new Set(["undo", "redo", "duplicate", "delete", "union", "subtract", "intersect", "select-all", "deselect"]), pr = /* @__PURE__ */ new Set(["undo", "redo", "cut", "paste", "duplicate", "delete", "drop", "union", "subtract", "intersect"]), gr = /* @__PURE__ */ new Set(["terminal", "code-workspace"]), P8 = (e) => {
+], dr = { undo: ["u"], redo: ["re"], delete: ["erase", "del"], duplicate: ["dup"], fit: ["zoom"], union: ["join"] }, hr = { manufacturing: "analysis", "surface-blends": "analysis", "step-evidence": "analysis", "split-body": "feature", "edit-split": "feature", undo: "history", redo: "history", copy: "edit", cut: "edit", paste: "edit", duplicate: "edit", delete: "edit", drop: "transform", union: "boolean", subtract: "boolean", intersect: "boolean", "select-all": "selection", deselect: "selection", fit: "view", home: "view", top: "view", front: "view", right: "view", back: "view", left: "view", bottom: "view", projection: "view", workplane: "view" }, fr = /* @__PURE__ */ new Set(["undo", "redo", "duplicate", "delete", "union", "subtract", "intersect", "select-all", "deselect"]), pr = /* @__PURE__ */ new Set(["undo", "redo", "cut", "paste", "duplicate", "delete", "drop", "union", "subtract", "intersect"]), gr = /* @__PURE__ */ new Set(["terminal", "code-workspace"]), P8 = (e) => {
   Object.freeze(e);
   for (const n of Object.values(e))
     n && typeof n == "object" && !Object.isFrozen(n) && P8(n);
@@ -11155,10 +11155,10 @@ P8([
   }),
   ...y4.filter((e) => !Z6.some((n) => n.name === e.command)).map(({ command: e, label: n }) => {
     const t = $6(e);
-    return { name: e, aliases: hr[e] ?? [], description: n, usage: e, category: dr[e] ?? "panel", editsModel: pr.has(e), arguments: [], headless: fr.has(e), terminal: !gr.has(e), editorBridge: !0, palette: t };
+    return { name: e, aliases: dr[e] ?? [], description: n, usage: e, category: hr[e] ?? "panel", editsModel: pr.has(e), arguments: [], headless: fr.has(e), terminal: !gr.has(e), editorBridge: !0, palette: t };
   })
 ]);
-class Ye extends Error {
+class Je extends Error {
   constructor(t) {
     super(t);
     re(this, "code", "resource-limit");
@@ -11181,15 +11181,15 @@ function xr(e, n) {
     const q = r.map((b) => b / l), o = e[i[0]], a = Math.max(1, ...i.flatMap((b) => e[b].map((C, P) => Math.abs(C - o[P]))));
     if (i.some((b) => Math.abs(e[b].reduce((C, P, M) => C + (P - o[M]) * q[M], 0)) > a * 1e-7))
       throw new Error(u("Polyhedron faces must be planar"));
-    const c = r.map(Math.abs).indexOf(Math.max(...r.map(Math.abs))), s = [0, 1, 2].filter((b) => b !== c), d = i.map((b) => s.map((C) => e[b][C])), m = (b, C, P) => (C[0] - b[0]) * (P[1] - b[1]) - (C[1] - b[1]) * (P[0] - b[0]), h = d.reduce((b, C, P) => {
-      const M = d[(P + 1) % d.length];
+    const c = r.map(Math.abs).indexOf(Math.max(...r.map(Math.abs))), s = [0, 1, 2].filter((b) => b !== c), h = i.map((b) => s.map((C) => e[b][C])), m = (b, C, P) => (C[0] - b[0]) * (P[1] - b[1]) - (C[1] - b[1]) * (P[0] - b[0]), d = h.reduce((b, C, P) => {
+      const M = h[(P + 1) % h.length];
       return b + C[0] * M[1] - C[1] * M[0];
-    }, 0), g = Math.sign(h), v = a * a * 1e-12;
-    for (let b = 0; b < d.length; b++)
-      for (let C = b + 2; C < d.length; C++) {
-        if (b === 0 && C === d.length - 1)
+    }, 0), g = Math.sign(d), v = a * a * 1e-12;
+    for (let b = 0; b < h.length; b++)
+      for (let C = b + 2; C < h.length; C++) {
+        if (b === 0 && C === h.length - 1)
           continue;
-        const P = d[b], M = d[(b + 1) % d.length], B = d[C], x = d[(C + 1) % d.length];
+        const P = h[b], M = h[(b + 1) % h.length], B = h[C], x = h[(C + 1) % h.length];
         if ([0, 1].every((T) => Math.max(Math.min(P[T], M[T]), Math.min(B[T], x[T])) <= Math.min(Math.max(P[T], M[T]), Math.max(B[T], x[T])) + a * 1e-10) && m(P, M, B) * m(P, M, x) <= v * v && m(B, x, P) * m(B, x, M) <= v * v)
           throw new Error(u("Polyhedron face intersects itself"));
       }
@@ -11198,7 +11198,7 @@ function xr(e, n) {
       let b = !1;
       for (let C = 0; C < y.length; C++) {
         const P = y[(C + y.length - 1) % y.length], M = y[C], B = y[(C + 1) % y.length];
-        if (!(g * m(d[P], d[M], d[B]) <= v || y.some((I) => I !== P && I !== M && I !== B && g * m(d[P], d[M], d[I]) >= -v && g * m(d[M], d[B], d[I]) >= -v && g * m(d[B], d[P], d[I]) >= -v))) {
+        if (!(g * m(h[P], h[M], h[B]) <= v || y.some((I) => I !== P && I !== M && I !== B && g * m(h[P], h[M], h[I]) >= -v && g * m(h[M], h[B], h[I]) >= -v && g * m(h[B], h[P], h[I]) >= -v))) {
           t.push(i[P], i[M], i[B]), y.splice(C, 1), b = !0;
           break;
         }
@@ -11278,22 +11278,22 @@ function ll(e) {
   const n = rl[e.font], t = e.size / n.resolution, i = [], r = [];
   let l = 0;
   for (const s of [...e.text]) {
-    const d = n.glyphs[s];
-    if (!d)
+    const h = n.glyphs[s];
+    if (!h)
       throw new Error(u`The selected font has no glyph for “${s}”`);
     const m = [];
-    let h = [], g = [0, 0];
-    const v = d.o?.trim().split(/\s+/) ?? [];
+    let d = [], g = [0, 0];
+    const v = h.o?.trim().split(/\s+/) ?? [];
     let y = 0;
     const b = () => [Number(v[y++]) * t + l, Number(v[y++]) * t], C = (M) => {
-      h.push(M), g = M;
+      d.push(M), g = M;
     }, P = () => {
-      if (h.length > 1 && Math.hypot(h[0][0] - h.at(-1)[0], h[0][1] - h.at(-1)[1]) < 1e-9 && h.pop(), h.length >= 3) {
-        if (r.length + h.length > 16384)
-          throw new Ye(u("Evaluated profile exceeds 16384 vertices"));
-        m.push(h), r.push(...h);
+      if (d.length > 1 && Math.hypot(d[0][0] - d.at(-1)[0], d[0][1] - d.at(-1)[1]) < 1e-9 && d.pop(), d.length >= 3) {
+        if (r.length + d.length > 16384)
+          throw new Je(u("Evaluated profile exceeds 16384 vertices"));
+        m.push(d), r.push(...d);
       }
-      h = [];
+      d = [];
     };
     for (; y < v.length; ) {
       const M = v[y++];
@@ -11310,12 +11310,12 @@ function ll(e) {
       } else
         throw new Error(u("Unsupported bundled font outline"));
     }
-    P(), m.length && i.push(m), l += d.ha * t * e.spacing;
+    P(), m.length && i.push(m), l += h.ha * t * e.spacing;
   }
   if (!r.length)
     return [];
   const q = [Math.min(...r.map((s) => s[0])), Math.min(...r.map((s) => s[1]))], o = [Math.max(...r.map((s) => s[0])), Math.max(...r.map((s) => s[1]))], a = e.halign === "center" ? -(q[0] + o[0]) / 2 : e.halign === "right" ? -o[0] : -q[0], c = e.valign === "top" ? -o[1] : e.valign === "center" ? -(q[1] + o[1]) / 2 : e.valign === "bottom" ? -q[1] : 0;
-  return i.map((s) => s.map((d) => d.map(([m, h]) => [m + a, h + c])));
+  return i.map((s) => s.map((h) => h.map(([m, d]) => [m + a, d + c])));
 }
 async function ql(e = {}) {
   var n, t = e, i = !!globalThis.window, r = !!globalThis.WorkerGlobalScope, l = globalThis.process?.versions?.node && globalThis.process?.type != "renderer";
@@ -11344,8 +11344,8 @@ async function ql(e = {}) {
       const X = [], n1 = z.size();
       for (let k1 = 0; k1 < n1; k1++) {
         const I1 = z.get(k1), X1 = I1.size(), me = [];
-        for (let le = 0; le < X1; le++)
-          me.push(K(I1.get(le)));
+        for (let qe = 0; qe < X1; qe++)
+          me.push(K(I1.get(qe)));
         X.push(me);
       }
       return X;
@@ -11419,8 +11419,8 @@ async function ql(e = {}) {
       return this._SmoothOut(z, K);
     }, t.Manifold.prototype.warp = function(z) {
       const K = F2(function(k1) {
-        const I1 = E1(k1, "double"), X1 = E1(k1 + 8, "double"), me = E1(k1 + 16, "double"), le = [I1, X1, me];
-        z(le), B1(k1, le[0], "double"), B1(k1 + 8, le[1], "double"), B1(k1 + 16, le[2], "double");
+        const I1 = E1(k1, "double"), X1 = E1(k1 + 8, "double"), me = E1(k1 + 16, "double"), qe = [I1, X1, me];
+        z(qe), B1(k1, qe[0], "double"), B1(k1 + 8, qe[1], "double"), B1(k1 + 16, qe[2], "double");
       }, "vi"), X = this._Warp(K);
       V2(K);
       const n1 = X.status();
@@ -11446,18 +11446,18 @@ async function ql(e = {}) {
       return this._SmoothByNormals(z);
     }, t.Manifold.prototype.setProperties = function(z, K) {
       const X = this.numProp(), n1 = F2(function(I1, X1, me) {
-        const le = [];
+        const qe = [];
         for (let ue = 0; ue < z; ++ue)
-          le[ue] = E1(I1 + 8 * ue, "double");
-        const Qe = [];
+          qe[ue] = E1(I1 + 8 * ue, "double");
+        const e2 = [];
         for (let ue = 0; ue < 3; ++ue)
-          Qe[ue] = E1(X1 + 8 * ue, "double");
+          e2[ue] = E1(X1 + 8 * ue, "double");
         const w2 = [];
         for (let ue = 0; ue < X; ++ue)
           w2[ue] = E1(me + 8 * ue, "double");
-        K(le, Qe, w2);
+        K(qe, e2, w2);
         for (let ue = 0; ue < z; ++ue)
-          B1(I1 + 8 * ue, le[ue], "double");
+          B1(I1 + 8 * ue, qe[ue], "double");
       }, "viii"), k1 = this._SetProperties(z, n1);
       return V2(n1), k1;
     }, t.Manifold.prototype.translate = function(...z) {
@@ -11494,9 +11494,9 @@ async function ql(e = {}) {
     }, t.Manifold.prototype.simplify = function(z = 0) {
       return this._Simplify(z);
     };
-    class d1 {
-      constructor({ numProp: K = 3, triVerts: X = new Uint32Array(), vertProperties: n1 = new Float32Array(), mergeFromVert: k1, mergeToVert: I1, runIndex: X1, runOriginalID: me, faceID: le, halfedgeTangent: Qe, runTransform: w2, runFlags: ue, tolerance: N3 = 0 } = {}) {
-        this.numProp = K, this.triVerts = X, this.vertProperties = n1, this.mergeFromVert = k1, this.mergeToVert = I1, this.runIndex = X1, this.runOriginalID = me, this.faceID = le, this.halfedgeTangent = Qe, this.runTransform = w2, this.runFlags = ue, this.tolerance = N3;
+    class h1 {
+      constructor({ numProp: K = 3, triVerts: X = new Uint32Array(), vertProperties: n1 = new Float32Array(), mergeFromVert: k1, mergeToVert: I1, runIndex: X1, runOriginalID: me, faceID: qe, halfedgeTangent: e2, runTransform: w2, runFlags: ue, tolerance: N3 = 0 } = {}) {
+        this.numProp = K, this.triVerts = X, this.vertProperties = n1, this.mergeFromVert = k1, this.mergeToVert = I1, this.runIndex = X1, this.runOriginalID = me, this.faceID = qe, this.halfedgeTangent = e2, this.runTransform = w2, this.runFlags = ue, this.tolerance = N3;
       }
       get numTri() {
         return this.triVerts.length / 3;
@@ -11537,8 +11537,8 @@ async function ql(e = {}) {
         return this.runFlags != null && K < this.runFlags.length && (this.runFlags[K] & 2) !== 0;
       }
     }
-    t.Mesh = d1, t.Manifold.prototype.getMesh = function(z = -1) {
-      return new d1(this._GetMeshJS(z));
+    t.Mesh = h1, t.Manifold.prototype.getMesh = function(z = -1) {
+      return new h1(this._GetMeshJS(z));
     }, t.ManifoldError = function(K, ...X) {
       let n1 = "Unknown error";
       switch (K) {
@@ -11668,9 +11668,9 @@ async function ql(e = {}) {
       };
     }
     t.Manifold.union = T1("Union"), t.Manifold.compose = t.Manifold.union, t.Manifold.difference = T1("Difference"), t.Manifold.intersection = T1("Intersection"), t.Manifold.levelSet = function(z, K, X, n1 = 0, k1 = -1) {
-      const I1 = { min: { x: K.min[0], y: K.min[1], z: K.min[2] }, max: { x: K.max[0], y: K.max[1], z: K.max[2] } }, X1 = F2(function(le) {
-        const Qe = E1(le, "double"), w2 = E1(le + 8, "double"), ue = E1(le + 16, "double");
-        return z([Qe, w2, ue]);
+      const I1 = { min: { x: K.min[0], y: K.min[1], z: K.min[2] }, max: { x: K.max[0], y: K.max[1], z: K.max[2] } }, X1 = F2(function(qe) {
+        const e2 = E1(qe, "double"), w2 = E1(qe + 8, "double"), ue = E1(qe + 16, "double");
+        return z([e2, w2, ue]);
       }, "di"), me = t._LevelSet(X1, I1, X, n1, k1);
       return V2(X1), me;
     }, t.ExecutionContext.prototype.fromMesh = function(z) {
@@ -11681,9 +11681,9 @@ async function ql(e = {}) {
       const n1 = this._Smooth(z, X);
       return X.delete(), n1;
     }, t.ExecutionContext.prototype.levelSet = function(z, K, X, n1 = 0, k1 = -1) {
-      const I1 = { min: { x: K.min[0], y: K.min[1], z: K.min[2] }, max: { x: K.max[0], y: K.max[1], z: K.max[2] } }, X1 = F2(function(le) {
-        const Qe = E1(le, "double"), w2 = E1(le + 8, "double"), ue = E1(le + 16, "double");
-        return z([Qe, w2, ue]);
+      const I1 = { min: { x: K.min[0], y: K.min[1], z: K.min[2] }, max: { x: K.max[0], y: K.max[1], z: K.max[2] } }, X1 = F2(function(qe) {
+        const e2 = E1(qe, "double"), w2 = E1(qe + 8, "double"), ue = E1(qe + 16, "double");
+        return z([e2, w2, ue]);
       }, "di"), me = this._LevelSet(X1, I1, X, n1, k1);
       return V2(X1), me;
     };
@@ -11706,16 +11706,16 @@ async function ql(e = {}) {
   function s(f) {
     return t.locateFile ? t.locateFile(f, c) : c + f;
   }
-  var d, m;
+  var h, m;
   if (l) {
-    var h = q("node:fs");
+    var d = q("node:fs");
     a.startsWith("file:") && (c = q("node:path").dirname(q("node:url").fileURLToPath(a)) + "/"), m = (f) => {
       f = b(f) ? new URL(f) : f;
-      var p = h.readFileSync(f);
+      var p = d.readFileSync(f);
       return p;
-    }, d = async (f, p = !0) => {
+    }, h = async (f, p = !0) => {
       f = b(f) ? new URL(f) : f;
-      var k = h.readFileSync(f, p ? void 0 : "utf8");
+      var k = d.readFileSync(f, p ? void 0 : "utf8");
       return k;
     }, process.argv.length > 1 && process.argv[1].replace(/\\/g, "/"), process.argv.slice(2);
   } else if (i || r) {
@@ -11726,7 +11726,7 @@ async function ql(e = {}) {
     r && (m = (f) => {
       var p = new XMLHttpRequest();
       return p.open("GET", f, !1), p.responseType = "arraybuffer", p.send(null), new Uint8Array(p.response);
-    }), d = async (f) => {
+    }), h = async (f) => {
       if (b(f))
         return new Promise((k, D) => {
           var R = new XMLHttpRequest();
@@ -11784,7 +11784,7 @@ async function ql(e = {}) {
   async function oe(f) {
     if (!v)
       try {
-        var p = await d(f);
+        var p = await h(f);
         return new Uint8Array(p);
       } catch {
       }
@@ -11798,7 +11798,7 @@ async function ql(e = {}) {
       g(`failed to asynchronously prepare wasm: ${R}`), N1(R);
     }
   }
-  async function de(f, p, k) {
+  async function he(f, p, k) {
     if (!f && !b(p) && !l)
       try {
         var D = fetch(p, { credentials: "same-origin" }), R = await WebAssembly.instantiateStreaming(D, k);
@@ -11827,7 +11827,7 @@ async function ql(e = {}) {
         });
       });
     U1 ?? (U1 = $1());
-    var D = await de(v, U1, k), R = p(D);
+    var D = await he(v, U1, k), R = p(D);
     return R;
   }
   var a1 = (f) => {
@@ -11939,12 +11939,12 @@ async function ql(e = {}) {
   function W1(f) {
     return this.fromWireType(A[f >>> 2 >>> 0]);
   }
-  var Q1 = {}, H1 = {}, fe = {}, h2 = class extends Error {
+  var Q1 = {}, H1 = {}, fe = {}, d2 = class extends Error {
     constructor(p) {
       super(p), this.name = "InternalError";
     }
   }, Ee = (f) => {
-    throw new h2(f);
+    throw new d2(f);
   }, ze = (f, p, k) => {
     f.forEach((Z) => fe[Z] = p);
     function D(Z) {
@@ -11967,24 +11967,24 @@ async function ql(e = {}) {
     ze([f], j, (G) => {
       var Z = {};
       for (var [Q, l1] of R.entries()) {
-        const o1 = G[Q], d1 = l1.getter, p1 = l1.getterContext, y1 = G[Q + R.length], M1 = l1.setter, T1 = l1.setterContext;
-        Z[l1.fieldName] = { read: (F1) => o1.fromWireType(d1(p1, F1)), write: (F1, z) => {
+        const o1 = G[Q], h1 = l1.getter, p1 = l1.getterContext, y1 = G[Q + R.length], M1 = l1.setter, T1 = l1.setterContext;
+        Z[l1.fieldName] = { read: (F1) => o1.fromWireType(h1(p1, F1)), write: (F1, z) => {
           var K = [];
           M1(T1, F1, y1.toWireType(K, z)), V1(K);
         }, optional: o1.optional };
       }
       return [{ name: p.name, fromWireType: (o1) => {
-        var d1 = {};
+        var h1 = {};
         for (var p1 in Z)
-          d1[p1] = Z[p1].read(o1);
-        return D(o1), d1;
-      }, toWireType: (o1, d1) => {
+          h1[p1] = Z[p1].read(o1);
+        return D(o1), h1;
+      }, toWireType: (o1, h1) => {
         for (var p1 in Z)
-          if (!(p1 in d1) && !Z[p1].optional)
+          if (!(p1 in h1) && !Z[p1].optional)
             throw new TypeError(`Missing field: "${p1}"`);
         var y1 = k();
         for (p1 in Z)
-          Z[p1].write(y1, d1[p1]);
+          Z[p1].write(y1, h1[p1]);
         return o1 !== null && o1.push(D, y1), y1;
       }, readValueFromPointer: W1, destructorFunction: D }];
     });
@@ -11995,12 +11995,12 @@ async function ql(e = {}) {
       if (!k) return p;
       p += String.fromCharCode(k);
     }
-  }, d2 = class extends Error {
+  }, h2 = class extends Error {
     constructor(p) {
       super(p), this.name = "BindingError";
     }
   }, ee = (f) => {
-    throw new d2(f);
+    throw new h2(f);
   };
   function T3(f, p, k = {}) {
     var D = p.name;
@@ -12055,12 +12055,12 @@ async function ql(e = {}) {
     }
     ee(p(f) + " instance already deleted");
   }, J2 = !1, u5 = (f) => {
-  }, h5 = (f) => {
+  }, d5 = (f) => {
     f.smartPtr ? f.smartPtrType.rawDestructor(f.smartPtr) : f.ptrType.registeredClass.rawDestructor(f.ptr);
   }, K5 = (f) => {
     f.count.value -= 1;
     var p = f.count.value === 0;
-    p && h5(f);
+    p && d5(f);
   }, p2 = (f) => globalThis.FinalizationRegistry ? (J2 = new FinalizationRegistry((p) => {
     K5(p.$$);
   }), p2 = (p) => {
@@ -12070,7 +12070,7 @@ async function ql(e = {}) {
       J2.register(p, R, p);
     }
     return p;
-  }, u5 = (p) => J2.unregister(p), p2(f)) : (p2 = (p) => p, f), d5 = () => {
+  }, u5 = (p) => J2.unregister(p), p2(f)) : (p2 = (p) => p, f), h5 = () => {
     let f = P2.prototype;
     Object.assign(f, { isAliasOf(k) {
       if (!(this instanceof P2) || !(k instanceof P2))
@@ -12223,7 +12223,7 @@ async function ql(e = {}) {
       return f[0] == "p" ? Z >>> 0 : Z;
     }
     return G(j);
-  }, s1 = (f, p, k = !1) => (...D) => q1(f, p, D, k), h1 = (f, p, k = !1) => {
+  }, s1 = (f, p, k = !1) => (...D) => q1(f, p, D, k), d1 = (f, p, k = !1) => {
     f = pe(f);
     function D() {
       if (f.includes("p"))
@@ -12252,8 +12252,8 @@ async function ql(e = {}) {
     }
     throw p.forEach(R), new r1(`${f}: ` + k.map(f1).join([", "]));
   };
-  function z1(f, p, k, D, R, j, G, Z, Q, l1, o1, d1, p1) {
-    f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, G >>>= 0, Z >>>= 0, Q >>>= 0, l1 >>>= 0, o1 >>>= 0, d1 >>>= 0, p1 >>>= 0, o1 = pe(o1), j = h1(R, j), Z && (Z = h1(G, Z)), l1 && (l1 = h1(Q, l1)), p1 = h1(d1, p1);
+  function z1(f, p, k, D, R, j, G, Z, Q, l1, o1, h1, p1) {
+    f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, G >>>= 0, Z >>>= 0, Q >>>= 0, l1 >>>= 0, o1 >>>= 0, h1 >>>= 0, p1 >>>= 0, o1 = pe(o1), j = d1(R, j), Z && (Z = d1(G, Z)), l1 && (l1 = d1(Q, l1)), p1 = d1(h1, p1);
     var y1 = f5(o1);
     T2(y1, function() {
       D1(`Cannot construct ${o1} due to unbound types`, [D]);
@@ -12264,13 +12264,13 @@ async function ql(e = {}) {
       D ? (T1 = M1.registeredClass, F1 = T1.instancePrototype) : F1 = P2.prototype;
       var z = Fe(o1, function(...me) {
         if (Object.getPrototypeOf(this) !== K)
-          throw new d2(`Use 'new' to construct ${o1}`);
+          throw new h2(`Use 'new' to construct ${o1}`);
         if (X.constructor_body === void 0)
-          throw new d2(`${o1} has no accessible constructor`);
-        var le = X.constructor_body[me.length];
-        if (le === void 0)
-          throw new d2(`Tried to invoke ctor of ${o1} with invalid number of parameters (${me.length}) - expected (${Object.keys(X.constructor_body).toString()}) parameters instead!`);
-        return le.apply(this, me);
+          throw new h2(`${o1} has no accessible constructor`);
+        var qe = X.constructor_body[me.length];
+        if (qe === void 0)
+          throw new h2(`Tried to invoke ctor of ${o1} with invalid number of parameters (${me.length}) - expected (${Object.keys(X.constructor_body).toString()}) parameters instead!`);
+        return qe.apply(this, me);
       }), K = Object.create(F1, { constructor: { value: z } });
       z.prototype = K;
       var X = new N5(o1, z, K, p1, T1, j, Z, l1);
@@ -12307,124 +12307,124 @@ async function ql(e = {}) {
     };
   }, ttfnn: function(p, k, D, R, j, G, Z, Q) {
     return function(l1) {
-      var o1 = Z(null, this), d1 = Q(null, l1), p1 = D(R, o1, d1), y1 = G(p1);
+      var o1 = Z(null, this), h1 = Q(null, l1), p1 = D(R, o1, h1), y1 = G(p1);
       return y1;
     };
   }, ttfnnn: function(p, k, D, R, j, G, Z, Q, l1) {
-    return function(o1, d1) {
-      var p1 = Z(null, this), y1 = Q(null, o1), M1 = l1(null, d1), T1 = D(R, p1, y1, M1), F1 = G(T1);
+    return function(o1, h1) {
+      var p1 = Z(null, this), y1 = Q(null, o1), M1 = l1(null, h1), T1 = D(R, p1, y1, M1), F1 = G(T1);
       return F1;
     };
-  }, ttfnntnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, d1, p1, y1) {
+  }, ttfnntnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, h1, p1, y1) {
     return function(M1, T1, F1, z, K) {
-      var X = Z(null, this), n1 = Q(null, M1), k1 = l1(null, T1), I1 = o1(null, F1), X1 = d1(null, z), me = p1(null, K), le = D(R, X, n1, k1, I1, X1, me);
+      var X = Z(null, this), n1 = Q(null, M1), k1 = l1(null, T1), I1 = o1(null, F1), X1 = h1(null, z), me = p1(null, K), qe = D(R, X, n1, k1, I1, X1, me);
       y1(k1);
-      var Qe = G(le);
-      return Qe;
+      var e2 = G(qe);
+      return e2;
     };
   }, tffnt: function(p, k, D, R, j, G, Z, Q, l1) {
     return function(o1) {
-      var d1 = Z(null, this), p1 = Q(null, o1);
-      D(R, d1, p1), l1(p1);
+      var h1 = Z(null, this), p1 = Q(null, o1);
+      D(R, h1, p1), l1(p1);
     };
   }, tffnnt: function(p, k, D, R, j, G, Z, Q, l1, o1) {
-    return function(d1, p1) {
-      var y1 = Z(null, this), M1 = Q(null, d1), T1 = l1(null, p1);
+    return function(h1, p1) {
+      var y1 = Z(null, this), M1 = Q(null, h1), T1 = l1(null, p1);
       D(R, y1, M1, T1), o1(T1);
     };
   }, ttfnnt: function(p, k, D, R, j, G, Z, Q, l1, o1) {
-    return function(d1, p1) {
-      var y1 = Z(null, this), M1 = Q(null, d1), T1 = l1(null, p1), F1 = D(R, y1, M1, T1);
+    return function(h1, p1) {
+      var y1 = Z(null, this), M1 = Q(null, h1), T1 = l1(null, p1), F1 = D(R, y1, M1, T1);
       o1(T1);
       var z = G(F1);
       return z;
     };
   }, tffnn: function(p, k, D, R, j, G, Z, Q) {
     return function(l1) {
-      var o1 = Z(null, this), d1 = Q(null, l1);
-      D(R, o1, d1);
+      var o1 = Z(null, this), h1 = Q(null, l1);
+      D(R, o1, h1);
     };
   }, tffnnn: function(p, k, D, R, j, G, Z, Q, l1) {
-    return function(o1, d1) {
-      var p1 = Z(null, this), y1 = Q(null, o1), M1 = l1(null, d1);
+    return function(o1, h1) {
+      var p1 = Z(null, this), y1 = Q(null, o1), M1 = l1(null, h1);
       D(R, p1, y1, M1);
     };
   }, ftfnn: function(p, k, D, R, j, G, Z, Q, l1) {
-    return function(o1, d1) {
-      var p1 = Q(null, o1), y1 = l1(null, d1), M1 = D(R, p1, y1), T1 = G(M1);
+    return function(o1, h1) {
+      var p1 = Q(null, o1), y1 = l1(null, h1), M1 = D(R, p1, y1), T1 = G(M1);
       return T1;
     };
   }, ttfnt: function(p, k, D, R, j, G, Z, Q, l1) {
     return function(o1) {
-      var d1 = Z(null, this), p1 = Q(null, o1), y1 = D(R, d1, p1);
+      var h1 = Z(null, this), p1 = Q(null, o1), y1 = D(R, h1, p1);
       l1(p1);
       var M1 = G(y1);
       return M1;
     };
-  }, ttfnnnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, d1) {
+  }, ttfnnnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, h1) {
     return function(p1, y1, M1, T1) {
-      var F1 = Z(null, this), z = Q(null, p1), K = l1(null, y1), X = o1(null, M1), n1 = d1(null, T1), k1 = D(R, F1, z, K, X, n1), I1 = G(k1);
+      var F1 = Z(null, this), z = Q(null, p1), K = l1(null, y1), X = o1(null, M1), n1 = h1(null, T1), k1 = D(R, F1, z, K, X, n1), I1 = G(k1);
       return I1;
     };
   }, ftftn: function(p, k, D, R, j, G, Z, Q, l1, o1) {
-    return function(d1, p1) {
-      var y1 = Q(null, d1), M1 = l1(null, p1), T1 = D(R, y1, M1);
+    return function(h1, p1) {
+      var y1 = Q(null, h1), M1 = l1(null, p1), T1 = D(R, y1, M1);
       o1(y1);
       var F1 = G(T1);
       return F1;
     };
   }, ftfn: function(p, k, D, R, j, G, Z, Q) {
     return function(l1) {
-      var o1 = Q(null, l1), d1 = D(R, o1), p1 = G(d1);
+      var o1 = Q(null, l1), h1 = D(R, o1), p1 = G(h1);
       return p1;
     };
   }, fffnn: function(p, k, D, R, j, G, Z, Q, l1) {
-    return function(o1, d1) {
-      var p1 = Q(null, o1), y1 = l1(null, d1);
+    return function(o1, h1) {
+      var p1 = Q(null, o1), y1 = l1(null, h1);
       D(R, p1, y1);
     };
   }, ttfntn: function(p, k, D, R, j, G, Z, Q, l1, o1) {
-    return function(d1, p1) {
-      var y1 = Z(null, this), M1 = Q(null, d1), T1 = l1(null, p1), F1 = D(R, y1, M1, T1);
+    return function(h1, p1) {
+      var y1 = Z(null, this), M1 = Q(null, h1), T1 = l1(null, p1), F1 = D(R, y1, M1, T1);
       o1(M1);
       var z = G(F1);
       return z;
     };
   }, ttfnnnn: function(p, k, D, R, j, G, Z, Q, l1, o1) {
-    return function(d1, p1, y1) {
-      var M1 = Z(null, this), T1 = Q(null, d1), F1 = l1(null, p1), z = o1(null, y1), K = D(R, M1, T1, F1, z), X = G(K);
+    return function(h1, p1, y1) {
+      var M1 = Z(null, this), T1 = Q(null, h1), F1 = l1(null, p1), z = o1(null, y1), K = D(R, M1, T1, F1, z), X = G(K);
       return X;
     };
-  }, ttfntt: function(p, k, D, R, j, G, Z, Q, l1, o1, d1) {
+  }, ttfntt: function(p, k, D, R, j, G, Z, Q, l1, o1, h1) {
     return function(p1, y1) {
       var M1 = Z(null, this), T1 = Q(null, p1), F1 = l1(null, y1), z = D(R, M1, T1, F1);
-      o1(T1), d1(F1);
+      o1(T1), h1(F1);
       var K = G(z);
       return K;
     };
-  }, ftfnnnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, d1, p1) {
+  }, ftfnnnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, h1, p1) {
     return function(y1, M1, T1, F1, z) {
-      var K = Q(null, y1), X = l1(null, M1), n1 = o1(null, T1), k1 = d1(null, F1), I1 = p1(null, z), X1 = D(R, K, X, n1, k1, I1), me = G(X1);
+      var K = Q(null, y1), X = l1(null, M1), n1 = o1(null, T1), k1 = h1(null, F1), I1 = p1(null, z), X1 = D(R, K, X, n1, k1, I1), me = G(X1);
       return me;
     };
-  }, ftfnnnnt: function(p, k, D, R, j, G, Z, Q, l1, o1, d1, p1, y1) {
+  }, ftfnnnnt: function(p, k, D, R, j, G, Z, Q, l1, o1, h1, p1, y1) {
     return function(M1, T1, F1, z, K) {
-      var X = Q(null, M1), n1 = l1(null, T1), k1 = o1(null, F1), I1 = d1(null, z), X1 = p1(null, K), me = D(R, X, n1, k1, I1, X1);
+      var X = Q(null, M1), n1 = l1(null, T1), k1 = o1(null, F1), I1 = h1(null, z), X1 = p1(null, K), me = D(R, X, n1, k1, I1, X1);
       y1(X1);
-      var le = G(me);
-      return le;
+      var qe = G(me);
+      return qe;
     };
   }, ftfnnn: function(p, k, D, R, j, G, Z, Q, l1, o1) {
-    return function(d1, p1, y1) {
-      var M1 = Q(null, d1), T1 = l1(null, p1), F1 = o1(null, y1), z = D(R, M1, T1, F1), K = G(z);
+    return function(h1, p1, y1) {
+      var M1 = Q(null, h1), T1 = l1(null, p1), F1 = o1(null, y1), z = D(R, M1, T1, F1), K = G(z);
       return K;
     };
-  }, ftfntnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, d1, p1, y1) {
+  }, ftfntnnn: function(p, k, D, R, j, G, Z, Q, l1, o1, h1, p1, y1) {
     return function(M1, T1, F1, z, K) {
-      var X = Q(null, M1), n1 = l1(null, T1), k1 = o1(null, F1), I1 = d1(null, z), X1 = p1(null, K), me = D(R, X, n1, k1, I1, X1);
+      var X = Q(null, M1), n1 = l1(null, T1), k1 = o1(null, F1), I1 = h1(null, z), X1 = p1(null, K), me = D(R, X, n1, k1, I1, X1);
       y1(n1);
-      var le = G(me);
-      return le;
+      var qe = G(me);
+      return qe;
     };
   }, fffn: function(p, k, D, R, j, G, Z, Q) {
     return function(l1) {
@@ -12448,7 +12448,7 @@ async function ql(e = {}) {
   function se(f, p, k, D, R, j) {
     var G = p.length;
     G < 2 && ee("argTypes array size mismatch! Must at least get return value and 'this' types!");
-    for (var Z = p[1] !== null && k !== null, Q = K1(p), l1 = !p[0].isVoid, o1 = p[0], d1 = p[1], p1 = [f, ee, D, R, V1, o1.fromWireType.bind(o1), d1?.toWireType.bind(d1)], y1 = 2; y1 < G; ++y1) {
+    for (var Z = p[1] !== null && k !== null, Q = K1(p), l1 = !p[0].isVoid, o1 = p[0], h1 = p[1], p1 = [f, ee, D, R, V1, o1.fromWireType.bind(o1), h1?.toWireType.bind(h1)], y1 = 2; y1 < G; ++y1) {
       var M1 = p[y1];
       p1.push(M1.toWireType.bind(M1));
     }
@@ -12461,11 +12461,11 @@ async function ql(e = {}) {
   var _e = function(f, p, k, D, R, j) {
     f >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0;
     var G = P1(p, k);
-    R = h1(D, R), ze([], [f], (Z) => {
+    R = d1(D, R), ze([], [f], (Z) => {
       Z = Z[0];
       var Q = `constructor ${Z.name}`;
       if (Z.registeredClass.constructor_body === void 0 && (Z.registeredClass.constructor_body = []), Z.registeredClass.constructor_body[p - 1] !== void 0)
-        throw new d2(`Cannot register multiple constructors with identical number of parameters (${p - 1}) for class '${Z.name}'! Overload resolution is currently only performed using the parameter count, not actual type info!`);
+        throw new h2(`Cannot register multiple constructors with identical number of parameters (${p - 1}) for class '${Z.name}'! Overload resolution is currently only performed using the parameter count, not actual type info!`);
       return Z.registeredClass.constructor_body[p - 1] = () => {
         D1(`Cannot construct ${Z.name} due to unbound types`, G);
       }, ze([], G, (l1) => (l1.splice(1, 0, null), Z.registeredClass.constructor_body[p - 1] = se(Q, l1, null, R, j), [])), [];
@@ -12477,24 +12477,24 @@ async function ql(e = {}) {
   }, Ve = function(f, p, k, D, R, j, G, Z, Q, l1) {
     f >>>= 0, p >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, G >>>= 0;
     var o1 = P1(k, D);
-    p = pe(p), p = ge(p), j = h1(R, j, Q), ze([], [f], (d1) => {
-      d1 = d1[0];
-      var p1 = `${d1.name}.${p}`;
-      p.startsWith("@@") && (p = Symbol[p.substring(2)]), Z && d1.registeredClass.pureVirtualFunctions.push(p);
+    p = pe(p), p = ge(p), j = d1(R, j, Q), ze([], [f], (h1) => {
+      h1 = h1[0];
+      var p1 = `${h1.name}.${p}`;
+      p.startsWith("@@") && (p = Symbol[p.substring(2)]), Z && h1.registeredClass.pureVirtualFunctions.push(p);
       function y1() {
         D1(`Cannot call ${p1} due to unbound types`, o1);
       }
-      var M1 = d1.registeredClass.instancePrototype, T1 = M1[p];
-      return T1 === void 0 || T1.overloadTable === void 0 && T1.className !== d1.name && T1.argCount === k - 2 ? (y1.argCount = k - 2, y1.className = d1.name, M1[p] = y1) : (g2(M1, p, p1), M1[p].overloadTable[k - 2] = y1), ze([], o1, (F1) => {
-        var z = se(p1, F1, d1, j, G, Q);
+      var M1 = h1.registeredClass.instancePrototype, T1 = M1[p];
+      return T1 === void 0 || T1.overloadTable === void 0 && T1.className !== h1.name && T1.argCount === k - 2 ? (y1.argCount = k - 2, y1.className = h1.name, M1[p] = y1) : (g2(M1, p, p1), M1[p].overloadTable[k - 2] = y1), ze([], o1, (F1) => {
+        var z = se(p1, F1, h1, j, G, Q);
         return M1[p].overloadTable === void 0 ? (z.argCount = k - 2, M1[p] = z) : M1[p].overloadTable[k - 2] = z, [];
       }), [];
     });
-  }, n5 = [], Je = [0, 1, , 1, null, 1, !0, 1, !1, 1];
+  }, n5 = [], Qe = [0, 1, , 1, null, 1, !0, 1, !1, 1];
   function I2(f) {
-    f >>>= 0, f > 9 && --Je[f + 1] === 0 && (Je[f] = void 0, n5.push(f));
+    f >>>= 0, f > 9 && --Qe[f + 1] === 0 && (Qe[f] = void 0, n5.push(f));
   }
-  var j1 = { toValue: (f) => (f || ee(`Cannot use deleted val. handle = ${f}`), Je[f]), toHandle: (f) => {
+  var j1 = { toValue: (f) => (f || ee(`Cannot use deleted val. handle = ${f}`), Qe[f]), toHandle: (f) => {
     switch (f) {
       case void 0:
         return 2;
@@ -12505,8 +12505,8 @@ async function ql(e = {}) {
       case !1:
         return 8;
       default: {
-        const p = n5.pop() || Je.length;
-        return Je[p] = f, Je[p + 1] = 1, p;
+        const p = n5.pop() || Qe.length;
+        return Qe[p] = f, Qe[p + 1] = 1, p;
       }
     }
   } }, t5 = { name: "emscripten::val", fromWireType: (f) => {
@@ -12552,7 +12552,7 @@ async function ql(e = {}) {
         };
         l1.values = {}, we(f, { name: p, constructor: l1, valueType: j, fromWireType: function(o1) {
           return this.constructor.values[o1];
-        }, toWireType: (o1, d1) => d1.value, readValueFromPointer: g5(p, k, D), destructorFunction: null }), T2(p, l1);
+        }, toWireType: (o1, h1) => h1.value, readValueFromPointer: g5(p, k, D), destructorFunction: null }), T2(p, l1);
         break;
       }
       case "number": {
@@ -12564,8 +12564,8 @@ async function ql(e = {}) {
         var Z = {}, Q = {}, G = {};
         we(f, { name: p, valuesMap: Z, reverseMap: Q, keysMap: G, valueType: j, fromWireType: function(o1) {
           return this.reverseMap[o1];
-        }, toWireType: function(o1, d1) {
-          return this.valuesMap[d1];
+        }, toWireType: function(o1, h1) {
+          return this.valuesMap[h1];
         }, readValueFromPointer: g5(p, k, D), destructorFunction: null }), T2(p, G), delete t[p].argCount;
         break;
       }
@@ -12614,7 +12614,7 @@ async function ql(e = {}) {
   function L8(f, p, k, D, R, j, G, Z) {
     f >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0;
     var Q = P1(p, k);
-    f = pe(f), f = ge(f), R = h1(D, R, G), T2(f, function() {
+    f = pe(f), f = ge(f), R = d1(D, R, G), T2(f, function() {
       D1(`Cannot call ${f} due to unbound types`, Q);
     }, p - 1), ze([], Q, (l1) => {
       var o1 = [l1[0], null].concat(l1.slice(1));
@@ -12787,10 +12787,10 @@ async function ql(e = {}) {
     } });
   }
   function o7(f, p, k, D, R, j) {
-    f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, _1[f] = { name: pe(p), rawConstructor: h1(k, D), rawDestructor: h1(R, j), fields: [] };
+    f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, _1[f] = { name: pe(p), rawConstructor: d1(k, D), rawDestructor: d1(R, j), fields: [] };
   }
   function m7(f, p, k, D, R, j, G, Z, Q, l1) {
-    f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, G >>>= 0, Z >>>= 0, Q >>>= 0, l1 >>>= 0, _1[f].fields.push({ fieldName: pe(p), getterReturnType: k, getter: h1(D, R), getterContext: j, setterArgumentType: G, setter: h1(Z, Q), setterContext: l1 });
+    f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, j >>>= 0, G >>>= 0, Z >>>= 0, Q >>>= 0, l1 >>>= 0, _1[f].fields.push({ fieldName: pe(p), getterReturnType: k, getter: d1(D, R), getterContext: j, setterArgumentType: G, setter: d1(Z, Q), setterContext: l1 });
   }
   var c7 = function(f, p) {
     f >>>= 0, p >>>= 0, p = pe(p), we(f, { isVoid: !0, name: p, fromWireType: () => {
@@ -12800,10 +12800,10 @@ async function ql(e = {}) {
   function u7(f, p) {
     f >>>= 0, p >>>= 0, f = j1.toValue(f), p = j1.toValue(p), f.set(p);
   }
-  var R3 = [], h7 = (f) => {
+  var R3 = [], d7 = (f) => {
     var p = R3.length;
     return R3.push(f), p;
-  }, d7 = (f, p) => {
+  }, h7 = (f, p) => {
     for (var k = new Array(f), D = 0; D < f; ++D)
       k[D] = Y4(A[p + D * 4 >>> 2 >>> 0], `parameter ${D}`);
     return k;
@@ -12815,29 +12815,29 @@ async function ql(e = {}) {
     return p === void 0 ? pe(f) : p;
   }, g7 = function(f, p, k) {
     p >>>= 0;
-    var D = 8, [R, ...j] = d7(f, p), G = R.toWireType.bind(R), Z = j.map((d1) => d1.readValueFromPointer.bind(d1));
+    var D = 8, [R, ...j] = h7(f, p), G = R.toWireType.bind(R), Z = j.map((h1) => h1.readValueFromPointer.bind(h1));
     f--;
-    var Q = new Array(f), l1 = (d1, p1, y1, M1) => {
+    var Q = new Array(f), l1 = (h1, p1, y1, M1) => {
       for (var T1 = 0, F1 = 0; F1 < f; ++F1)
         Q[F1] = Z[F1](M1 + T1), T1 += D;
       var z;
       switch (k) {
         case 0:
-          z = j1.toValue(d1).apply(null, Q);
+          z = j1.toValue(h1).apply(null, Q);
           break;
         case 2:
-          z = Reflect.construct(j1.toValue(d1), Q);
+          z = Reflect.construct(j1.toValue(h1), Q);
           break;
         case 3:
           z = Q[0];
           break;
         case 1:
-          z = j1.toValue(d1)[n6(p1)](...Q);
+          z = j1.toValue(h1)[n6(p1)](...Q);
           break;
       }
       return f7(G, y1, z);
-    }, o1 = `methodCaller<(${j.map((d1) => d1.name)}) => ${R.name}>`;
-    return h7(Fe(o1, l1));
+    }, o1 = `methodCaller<(${j.map((h1) => h1.name)}) => ${R.name}>`;
+    return d7(Fe(o1, l1));
   };
   function x7(f, p) {
     return f >>>= 0, p >>>= 0, f = j1.toValue(f), p = j1.toValue(p), f == p;
@@ -12846,7 +12846,7 @@ async function ql(e = {}) {
     return f >>>= 0, p >>>= 0, f = j1.toValue(f), p = j1.toValue(p), j1.toHandle(f[p]);
   }
   function w7(f) {
-    f >>>= 0, f > 9 && (Je[f + 1] += 1);
+    f >>>= 0, f > 9 && (Qe[f + 1] += 1);
   }
   function _7(f, p, k, D, R) {
     return f >>>= 0, p >>>= 0, k >>>= 0, D >>>= 0, R >>>= 0, R3[f](p, k, D, R);
@@ -12918,7 +12918,7 @@ async function ql(e = {}) {
   }, V2 = (f) => {
     R2.delete(i1(f)), V3(f, null), F3.push(f);
   };
-  if (d5(), W(), t.noExitRuntime && t.noExitRuntime, t.print && t.print, t.printErr && (g = t.printErr), t.wasmBinary && (v = t.wasmBinary), t.arguments && t.arguments, t.thisProgram && t.thisProgram, t.preInit)
+  if (h5(), W(), t.noExitRuntime && t.noExitRuntime, t.print && t.print, t.printErr && (g = t.printErr), t.wasmBinary && (v = t.wasmBinary), t.arguments && t.arguments, t.thisProgram && t.thisProgram, t.preInit)
     for (typeof t.preInit == "function" && (t.preInit = [t.preInit]); t.preInit.length > 0; )
       t.preInit.shift()();
   t.addFunction = F2, t.removeFunction = V2;
@@ -12957,22 +12957,22 @@ function S4(e, n, t, i = 2048, r = 64) {
     if (a.status() !== "NoError" || a.volume() <= 0)
       throw new Error(u("Convex partition requires a closed positive-volume solid"));
     const c = a.decompose().map(q), s = [];
-    let d = 0;
+    let h = 0;
     for (; c.length; ) {
-      if (++d > i * 8 || s.length + c.length > i)
+      if (++h > i * 8 || s.length + c.length > i)
         throw new Error(u("Exact convex collision exceeds its piece budget; simplify the model or supply a qualified collision assembly"));
-      const m = c.pop(), h = m.volume();
-      if (h <= 1e-5)
+      const m = c.pop(), d = m.volume();
+      if (d <= 1e-5)
         continue;
-      const g = q(m.hull()), v = Math.max(0, g.volume() - h);
-      if (v <= Math.max(1e-7, h * 1e-3) && g.numVert() <= r) {
+      const g = q(m.hull()), v = Math.max(0, g.volume() - d);
+      if (v <= Math.max(1e-7, d * 1e-3) && g.numVert() <= r) {
         const x = g.getMesh();
         s.push({ positions: new Float64Array(Array.from({ length: x.numVert * 3 }, (I, T) => x.vertProperties[Math.floor(T / 3) * x.numProp + T % 3])), indices: new Uint32Array(x.triVerts) });
         continue;
       }
       const y = m.getMesh(), b = Array.from({ length: y.numVert }, (x, I) => [y.vertProperties[I * y.numProp], y.vertProperties[I * y.numProp + 1], y.vertProperties[I * y.numProp + 2]]);
       let C, P = -1 / 0;
-      if (v > Math.max(1e-7, h * 1e-3)) {
+      if (v > Math.max(1e-7, d * 1e-3)) {
         const x = /* @__PURE__ */ new Map(), I = (T) => T.map((A) => Math.round(A * 1e5)).join(",");
         for (let T = 0; T < y.numTri; T++) {
           const A = [0, 1, 2].map((w1) => b[y.triVerts[T * 3 + w1]]), [N, O, J] = A, L = O.map((w1, N1) => w1 - N[N1]), t1 = J.map((w1, N1) => w1 - N[N1]), x1 = [L[1] * t1[2] - L[2] * t1[1], L[2] * t1[0] - L[0] * t1[2], L[0] * t1[1] - L[1] * t1[0]], Y = Math.hypot(...x1);
@@ -12987,7 +12987,7 @@ function S4(e, n, t, i = 2048, r = 64) {
             }
             if (u1.reduce((B1, O1, e1) => B1 + O1 * (ae.third[e1] - N1[e1]), 0) <= 1e-5)
               continue;
-            const de = U1.map((B1, O1) => B1 - N1[O1]), be = u1.map((B1, O1) => B1 + ae.normal[O1]), S = [de[1] * be[2] - de[2] * be[1], de[2] * be[0] - de[0] * be[2], de[0] * be[1] - de[1] * be[0]], a1 = Math.hypot(...S);
+            const he = U1.map((B1, O1) => B1 - N1[O1]), be = u1.map((B1, O1) => B1 + ae.normal[O1]), S = [he[1] * be[2] - he[2] * be[1], he[2] * be[0] - he[0] * be[2], he[0] * be[1] - he[1] * be[0]], a1 = Math.hypot(...S);
             if (a1 < 1e-10)
               continue;
             const H = S.map((B1) => B1 / a1), m1 = H.reduce((B1, O1, e1) => B1 + O1 * N1[e1], 0);
@@ -13006,11 +13006,11 @@ function S4(e, n, t, i = 2048, r = 64) {
         A[T] = 1, C = { normal: A, offset: (x.max[T] + x.min[T]) / 2 };
       }
       let [M, B] = m.splitByPlane(C.normal, C.offset).map(q);
-      if (M.isEmpty() || B.isEmpty() || Math.max(M.volume(), B.volume()) > h * (1 - 1e-9)) {
+      if (M.isEmpty() || B.isEmpty() || Math.max(M.volume(), B.volume()) > d * (1 - 1e-9)) {
         const x = m.boundingBox(), I = x.max.map((N, O) => N - x.min[O]), T = I.indexOf(Math.max(...I)), A = [0, 0, 0];
         A[T] = 1, [M, B] = m.splitByPlane(A, (x.max[T] + x.min[T]) / 2).map(q);
       }
-      if (M.isEmpty() || B.isEmpty() || Math.max(M.volume(), B.volume()) > h * (1 - 1e-9))
+      if (M.isEmpty() || B.isEmpty() || Math.max(M.volume(), B.volume()) > d * (1 - 1e-9))
         throw new Error(u("Exact convex collision could not partition this feature robustly"));
       c.push(...M.decompose().map(q), ...B.decompose().map(q));
     }
@@ -13026,35 +13026,35 @@ function al(e, n = (t) => t) {
       return !1;
     i.fill(0, 0, c * c);
     let s = 0;
-    for (let d = 0; d < a.length; d++) {
-      const m = a[d], h = a[d % 3 === 2 ? d - 2 : d + 1];
-      if (m === h || m >= c || h >= c)
+    for (let h = 0; h < a.length; h++) {
+      const m = a[h], d = a[h % 3 === 2 ? h - 2 : h + 1];
+      if (m === d || m >= c || d >= c)
         return !1;
-      const g = m * c + h;
+      const g = m * c + d;
       if (i[g])
         return !1;
-      s += i[h * c + m], i[g] = 1;
+      s += i[d * c + m], i[g] = 1;
     }
     return s * 2 === a.length;
   }, l = (a) => {
-    const c = new Float32Array(a.positions), s = new Uint32Array(a.indices), d = new e.Mesh({ numProp: 3, vertProperties: c, triVerts: s });
-    r(s, c.length / 3) || d.merge();
-    const m = new e.Manifold(d);
+    const c = new Float32Array(a.positions), s = new Uint32Array(a.indices), h = new e.Mesh({ numProp: 3, vertProperties: c, triVerts: s });
+    r(s, c.length / 3) || h.merge();
+    const m = new e.Manifold(h);
     if (m.status() !== "NoError")
       throw m.delete(), new Error(u("Collision CSG requires a closed mesh"));
     return m;
   }, q = (a) => {
     const c = a.getMesh();
-    return { positions: new Float64Array(Array.from({ length: c.numVert * 3 }, (s, d) => c.vertProperties[Math.floor(d / 3) * c.numProp + d % 3])), indices: new Uint32Array(c.triVerts) };
+    return { positions: new Float64Array(Array.from({ length: c.numVert * 3 }, (s, h) => c.vertProperties[Math.floor(h / 3) * c.numProp + h % 3])), indices: new Uint32Array(c.triVerts) };
   }, o = (a, c) => {
-    let s, d;
+    let s, h;
     try {
-      if (s = a.subtract(c), d = c.subtract(a), s.status() !== "NoError" || d.status() !== "NoError")
+      if (s = a.subtract(c), h = c.subtract(a), s.status() !== "NoError" || h.status() !== "NoError")
         throw new Error(u("Collision comparison failed"));
-      const m = Math.abs(s.volume()), h = Math.abs(d.volume()), g = Math.abs(m - h - (a.volume() - c.volume()));
-      return { missingVolumeMm3: m, extraVolumeMm3: h, numericalResidualVolumeMm3: g };
+      const m = Math.abs(s.volume()), d = Math.abs(h.volume()), g = Math.abs(m - d - (a.volume() - c.volume()));
+      return { missingVolumeMm3: m, extraVolumeMm3: d, numericalResidualVolumeMm3: g };
     } finally {
-      d?.delete(), s?.delete();
+      h?.delete(), s?.delete();
     }
   };
   return {
@@ -13062,41 +13062,41 @@ function al(e, n = (t) => t) {
      * thread's nearly coplanar union can lose volume on that avoidable roundtrip. */
     measure(a, c) {
       const s = [];
-      let d;
+      let h;
       try {
         const m = l(a);
         s.push(m);
-        const h = c.map((g) => {
+        const d = c.map((g) => {
           const v = l(g);
           return s.push(v), v;
         });
-        if (d = e.Manifold.union(h), d.status() !== "NoError")
+        if (h = e.Manifold.union(d), h.status() !== "NoError")
           throw new Error(u("Collision union is not a closed solid"));
-        return { ...o(m, d), bounds: d.boundingBox() };
+        return { ...o(m, h), bounds: h.boundingBox() };
       } finally {
-        d?.delete(), s.reverse().forEach((m) => m.delete());
+        h?.delete(), s.reverse().forEach((m) => m.delete());
       }
     },
     grid(a) {
-      const c = [], s = (d) => (c.push(d), d);
+      const c = [], s = (h) => (c.push(h), h);
       try {
-        let d = a.map((m) => s(l(m)));
+        let h = a.map((m) => s(l(m)));
         for (let m = 0; m < 3; m++)
-          for (let h = 0; h < (m === 2 ? 4 : 2); h++) {
+          for (let d = 0; d < (m === 2 ? 4 : 2); d++) {
             const g = [];
-            for (const v of d) {
+            for (const v of h) {
               const y = v.boundingBox(), b = [0, 0, 0];
               b[m] = 1;
               const C = v.splitByPlane(b, (y.max[m] + y.min[m]) / 2).map(s);
               g.push(...C.filter((P) => !P.isEmpty() && P.volume() > 1e-5));
             }
-            if (d = g, d.length > 2048)
+            if (h = g, h.length > 2048)
               throw new Error(u("Collision grid exceeds its budget"));
           }
-        return d.map(q);
+        return h.map(q);
       } finally {
-        for (const d of c.reverse())
-          d.delete();
+        for (const h of c.reverse())
+          h.delete();
       }
     },
     union(a) {
@@ -13107,28 +13107,28 @@ function al(e, n = (t) => t) {
           throw new Error(u("Collision union is not a closed solid"));
         return { ...q(s), volume: s.volume(), bounds: s.boundingBox() };
       } finally {
-        s?.delete(), c.forEach((d) => d.delete());
+        s?.delete(), c.forEach((h) => h.delete());
       }
     },
     compare(a, c) {
-      const s = l(a), d = l(c);
+      const s = l(a), h = l(c);
       try {
-        const { missingVolumeMm3: m, extraVolumeMm3: h } = o(s, d);
-        return { missingVolumeMm3: m, extraVolumeMm3: h };
+        const { missingVolumeMm3: m, extraVolumeMm3: d } = o(s, h);
+        return { missingVolumeMm3: m, extraVolumeMm3: d };
       } finally {
-        d.delete(), s.delete();
+        h.delete(), s.delete();
       }
     },
     intersect(a, c, s = 2048) {
-      const d = c.map(l), m = [];
-      let h;
+      const h = c.map(l), m = [];
+      let d;
       try {
-        h = e.Manifold.intersection(d);
+        d = e.Manifold.intersection(h);
         for (const g of a) {
           const v = l(g);
           let y;
           try {
-            if (y = v.intersect(h), !y.isEmpty() && Math.abs(y.volume()) > 1e-5) {
+            if (y = v.intersect(d), !y.isEmpty() && Math.abs(y.volume()) > 1e-5) {
               const b = q(y);
               m.push(...S4(e, b.positions, b.indices, Math.max(1, s - m.length)).map(n));
             }
@@ -13140,15 +13140,15 @@ function al(e, n = (t) => t) {
         }
         return m;
       } finally {
-        h?.delete(), d.forEach((g) => g.delete());
+        d?.delete(), h.forEach((g) => g.delete());
       }
     },
     subtract(a, c, s = 2048) {
-      const d = c.map(l);
+      const h = c.map(l);
       let m;
-      const h = [];
+      const d = [];
       try {
-        m = e.Manifold.union(d);
+        m = e.Manifold.union(h);
         const g = m.boundingBox();
         for (const v of a) {
           if ([0, 1, 2].some((P) => {
@@ -13157,7 +13157,7 @@ function al(e, n = (t) => t) {
               M = Math.min(M, v.positions[x]), B = Math.max(B, v.positions[x]);
             return B <= g.min[P] || M >= g.max[P];
           })) {
-            h.push(v);
+            d.push(v);
             continue;
           }
           const b = l(v);
@@ -13165,17 +13165,17 @@ function al(e, n = (t) => t) {
           try {
             if (C = b.subtract(m), !C.isEmpty() && Math.abs(C.volume()) > 1e-5) {
               const P = q(C);
-              h.push(...S4(e, P.positions, P.indices, Math.max(1, s - h.length)).map(n));
+              d.push(...S4(e, P.positions, P.indices, Math.max(1, s - d.length)).map(n));
             }
           } finally {
             C?.delete(), b.delete();
           }
-          if (h.length > s)
+          if (d.length > s)
             throw new Error(u("Collision subtraction exceeds its compound budget"));
         }
-        return h;
+        return d;
       } finally {
-        m?.delete(), d.forEach((g) => g.delete());
+        m?.delete(), h.forEach((g) => g.delete());
       }
     }
   };
@@ -13186,27 +13186,27 @@ function ol(e, n, t) {
   if (l.length > u4)
     throw new Error(u`Use at most ${u4} jogs in an assembly section.`);
   const q = [r, ...l.map((s) => s.position)], o = q.map(() => !1);
-  for (const [s, d] of l.entries()) {
-    if (s && d.at <= l[s - 1].at)
+  for (const [s, h] of l.entries()) {
+    if (s && h.at <= l[s - 1].at)
       throw new Error(u("Enter jog coordinates in increasing order."));
-    if (Math.abs(q[s] - d.position) < 1e-8)
+    if (Math.abs(q[s] - h.position) < 1e-8)
       throw new Error(l.length === 1 ? u("Choose different positions for the two section legs.") : u`Choose different positions for section legs ${s + 1} and ${s + 2}.`);
   }
   const a = [];
   for (const s of n.bodies) {
-    const d = (b) => b > s.bounds.min[i] && b < s.bounds.max[i];
-    if (s.reference || s.hole || !s.indices.length || !q.some(d))
+    const h = (b) => b > s.bounds.min[i] && b < s.bounds.max[i];
+    if (s.reference || s.hole || !s.indices.length || !q.some(h))
       continue;
     const m = new Float32Array(s.positions.length);
     for (let b = 0; b < m.length; b += 3)
       m[b] = s.positions[b + (i === 0 ? 1 : 0)], m[b + 1] = s.positions[b + 2], m[b + 2] = i === 0 ? s.positions[b] : -s.positions[b + 1];
-    const h = new e.Mesh({ numProp: 3, vertProperties: m, triVerts: s.indices });
-    h.merge();
-    const g = new e.Manifold(h), v = [], y = (b) => (v.push(b), b);
+    const d = new e.Mesh({ numProp: 3, vertProperties: m, triVerts: s.indices });
+    d.merge();
+    const g = new e.Manifold(d), v = [], y = (b) => (v.push(b), b);
     try {
       if (g.status() !== "NoError")
         throw new Error(u`Cannot section the evaluated body “${s.name}”.`);
-      const b = (M) => d(M) ? y(g.slice(i === 0 ? M : -M)) : void 0;
+      const b = (M) => h(M) ? y(g.slice(i === 0 ? M : -M)) : void 0;
       let C;
       for (const [M, B] of q.entries()) {
         const x = ml(b(B), l[M - 1]?.at ?? -1 / 0, l[M]?.at ?? 1 / 0, y);
@@ -13228,12 +13228,12 @@ function ol(e, n, t) {
 function ml(e, n, t, i) {
   if (!e || e.isEmpty())
     return;
-  const { min: r, max: l } = e.bounds(), [q, o] = r, [a, c] = l, s = Math.max(q, n), d = Math.min(a, t);
-  if (d <= s)
+  const { min: r, max: l } = e.bounds(), [q, o] = r, [a, c] = l, s = Math.max(q, n), h = Math.min(a, t);
+  if (h <= s)
     return;
-  if (s === q && d === a)
+  if (s === q && h === a)
     return e;
-  const m = i(e.intersect([[s, o], [d, o], [d, c], [s, c]]));
+  const m = i(e.intersect([[s, o], [h, o], [h, c], [s, c]]));
   return m.isEmpty() ? void 0 : m;
 }
 const D2 = 1e-7, t4 = 2 * Math.PI, De = (e, n) => [e[0] - n[0], e[1] - n[1]], r2 = (e, n) => [e[0] + n[0], e[1] + n[1]], Te = ([e, n], t) => [e * t, n * t], k3 = (e, n) => e[0] * n[0] + e[1] * n[1], H2 = (e, n) => e[0] * n[1] - e[1] * n[0], m3 = ([e, n]) => [-n, e], T5 = (e) => Math.hypot(...e), c3 = () => new Error(u("This curved offset collapses an edge or changes the outline topology. Try a smaller distance."));
@@ -13250,18 +13250,18 @@ function H6(e, n) {
 function cl(e, n, t, i) {
   const r = L4(e, n, t);
   if (!r) {
-    const m = De(n, e), h = T5(m), g = Te(m, 1 / h), v = Te(m3(g), -i);
-    return { a: r2(e, v), b: r2(n, v), tangentA: g, tangentB: g, length: h };
+    const m = De(n, e), d = T5(m), g = Te(m, 1 / d), v = Te(m3(g), -i);
+    return { a: r2(e, v), b: r2(n, v), tangentA: g, tangentB: g, length: d };
   }
   const { center: l, radius: q, sweep: o } = r, a = Math.sign(o), c = q + a * i;
   if (c < 1e-5)
     throw c3();
-  const s = Te(De(e, l), 1 / q), d = Te(De(n, l), 1 / q);
+  const s = Te(De(e, l), 1 / q), h = Te(De(n, l), 1 / q);
   return {
     a: r2(e, Te(s, a * i)),
-    b: r2(n, Te(d, a * i)),
+    b: r2(n, Te(h, a * i)),
     tangentA: Te(m3(s), a),
-    tangentB: Te(m3(d), a),
+    tangentB: Te(m3(h), a),
     length: c * Math.abs(o),
     arc: { center: l, radius: c, sweep: o }
   };
@@ -13280,7 +13280,7 @@ function ul(e, n) {
   const r = Te(t, 1 / i), l = ((e.radius - n.radius) * (e.radius + n.radius) + i ** 2) / (2 * i), q = r2(e.center, Te(r, l)), o = Math.sqrt(Math.max(0, (e.radius - l) * (e.radius + l)));
   return [-o, o].map((a) => r2(q, Te(m3(r), a)));
 }
-function hl(e, n) {
+function dl(e, n) {
   if (e.arc && n.arc)
     return ul(e.arc, n.arc);
   if (e.arc)
@@ -13300,30 +13300,30 @@ function Y6(e, n) {
   const { center: t, sweep: i } = e.arc, r = De(e.a, t), l = De(n, t);
   return (Math.atan2(H2(r, l), k3(r, l)) * Math.sign(i) % t4 + t4) % t4 / Math.abs(i);
 }
-function dl(e, n, t) {
-  const i = H6(e, n), r = Math.sign(i), l = t * r, q = e.map((m, h) => cl(m, e[(h + 1) % e.length], n[h], l)), o = q.map((m) => ({ point: m.a, parameter: 0 })), a = q.map((m) => ({ point: m.b, parameter: 1 })), c = q.map((m, h) => {
-    const g = (h + 1) % q.length, v = q[g];
+function hl(e, n, t) {
+  const i = H6(e, n), r = Math.sign(i), l = t * r, q = e.map((m, d) => cl(m, e[(d + 1) % e.length], n[d], l)), o = q.map((m) => ({ point: m.a, parameter: 0 })), a = q.map((m) => ({ point: m.b, parameter: 1 })), c = q.map((m, d) => {
+    const g = (d + 1) % q.length, v = q[g];
     if (T5(De(m.b, v.a)) <= D2)
-      return o[g].point = a[h].point = Te(r2(m.b, v.a), 0.5), 0;
+      return o[g].point = a[d].point = Te(r2(m.b, v.a), 0.5), 0;
     const y = Math.atan2(H2(m.tangentB, v.tangentA), k3(m.tangentB, v.tangentA));
     if (y * l > 0)
       return Math.tan(y / 4);
-    const C = hl(m, v).map((P) => {
+    const C = dl(m, v).map((P) => {
       const M = Y6(m, P), B = Y6(v, P);
       return { point: P, u: M, v: B, removed: (1 - M) * m.length + B * v.length };
     }).filter(({ u: P, v: M }) => P >= 0 && P <= 1 && M >= 0 && M <= 1).sort((P, M) => P.removed - M.removed)[0];
     if (!C)
       throw c3();
-    return a[h] = { point: C.point, parameter: C.u }, o[g] = { point: C.point, parameter: C.v }, 0;
+    return a[d] = { point: C.point, parameter: C.u }, o[g] = { point: C.point, parameter: C.v }, 0;
   }), s = { points: [], bulges: [] };
-  for (const [m, h] of q.entries()) {
+  for (const [m, d] of q.entries()) {
     const g = a[m].parameter - o[m].parameter;
-    if (g * h.length < 1e-5)
+    if (g * d.length < 1e-5)
       throw c3();
-    s.points.push(o[m].point), s.bulges.push(h.arc ? Math.tan(h.arc.sweep * g / 4) : 0), c[m] && (s.points.push(a[m].point), s.bulges.push(c[m]));
+    s.points.push(o[m].point), s.bulges.push(d.arc ? Math.tan(d.arc.sweep * g / 4) : 0), c[m] && (s.points.push(a[m].point), s.bulges.push(c[m]));
   }
-  const d = H6(s.points, s.bulges);
-  if (Math.sign(d) !== r || (Math.abs(d) - Math.abs(i)) * t <= 0)
+  const h = H6(s.points, s.bulges);
+  if (Math.sign(h) !== r || (Math.abs(h) - Math.abs(i)) * t <= 0)
     throw c3();
   return s;
 }
@@ -13332,12 +13332,12 @@ function fl(e, n, t, i) {
     throw new Error(u("Clear outline constraints before trimming or offsetting."));
   if (!Number.isFinite(i) || Math.abs(i) < 1e-5 || Math.abs(i) > 1e5)
     throw new Error(u("Offset magnitude must be between 0.00001 and 100000 mm."));
-  const r = z5(n, t), l = t.parametric ?? { version: 1, parameters: {}, bindings: [] }, q = (m, h) => typeof m == "number" ? m + h : ur(m, l, h), o = (m, h) => {
+  const r = z5(n, t), l = t.parametric ?? { version: 1, parameters: {}, bindings: [] }, q = (m, d) => typeof m == "number" ? m + d : ur(m, l, d), o = (m, d) => {
     if (m.bulges?.some(Boolean))
-      return { ...m, ...dl(m.points, m.bulges, h) };
+      return { ...m, ...hl(m.points, m.bulges, d) };
     const g = new e.CrossSection([G4(m.points)], "EvenOdd");
     try {
-      const v = g.offset(h, "Miter", 8);
+      const v = g.offset(d, "Miter", 8);
       try {
         const [y, ...b] = v.toPolygons();
         if (!y || b.length)
@@ -13350,11 +13350,11 @@ function fl(e, n, t, i) {
     } finally {
       g.delete();
     }
-  }, a = (m, h) => {
+  }, a = (m, d) => {
     const g = m.dxfWidths ? bt(m.dxfWidths) : void 0;
     if (!g && m.dxfWidths?.some((y) => y.some(Boolean)))
       throw new Error(u("Use a uniform DXF width or clear the widths before offsetting this outline."));
-    const v = o(m, h);
+    const v = o(m, d);
     return g ? v.dxfWidths = v.points.map(() => [g, g]) : delete v.dxfWidths, v;
   }, c = n.profile;
   let s;
@@ -13372,16 +13372,16 @@ function fl(e, n, t, i) {
       break;
     case "region": {
       const m = r.loopIds[0];
-      s = { ...c, loops: c.loops.map((h) => {
-        const g = h.id === m ? i : -i;
-        return h.kind === "circle" ? { ...h, radius: q(h.radius, g) } : a(h, g);
+      s = { ...c, loops: c.loops.map((d) => {
+        const g = d.id === m ? i : -i;
+        return d.kind === "circle" ? { ...d, radius: q(d.radius, g) } : a(d, g);
       }) };
       break;
     }
   }
   rn(c, s, mr);
-  const d = z5({ ...n, profile: s }, t);
-  if (r.loopIds?.[0] !== d.loopIds?.[0])
+  const h = z5({ ...n, profile: s }, t);
+  if (r.loopIds?.[0] !== h.loopIds?.[0])
     throw new Error(u("This offset changes which loop is the outside boundary. Try a smaller distance."));
   return s;
 }
@@ -13410,8 +13410,8 @@ async function pl(e = {}) {
     interference(l, q = {}) {
       const o = l.filter((g) => !g.reference && !g.hole && g.indices.length);
       if (o.length > 64)
-        throw new Ye(u("Interference check is limited to 64 bodies"));
-      const a = q.minVolumeMm3 ?? 1e-3, c = q.clearanceMm ?? 0, s = /* @__PURE__ */ new Map(), d = [], m = [], h = (g) => {
+        throw new Je(u("Interference check is limited to 64 bodies"));
+      const a = q.minVolumeMm3 ?? 1e-3, c = q.clearanceMm ?? 0, s = /* @__PURE__ */ new Map(), h = [], m = [], d = (g) => {
         let v = s.get(g.id);
         if (!v) {
           const y = new t.Mesh({ numProp: 3, vertProperties: new Float32Array(g.positions), triVerts: new Uint32Array(g.indices) });
@@ -13426,14 +13426,14 @@ async function pl(e = {}) {
             const y = o[g], b = o[v];
             if ([0, 1, 2].some((P) => y.bounds.min[P] > b.bounds.max[P] + c || b.bounds.min[P] > y.bounds.max[P] + c))
               continue;
-            const C = h(y).intersect(h(b));
+            const C = d(y).intersect(d(b));
             try {
               const P = C.volume();
               if (P > a) {
                 const M = C.boundingBox();
-                d.push({ a: y.id, b: b.id, volumeMm3: P, boundsMm: { min: [...M.min], max: [...M.max] } });
+                h.push({ a: y.id, b: b.id, volumeMm3: P, boundsMm: { min: [...M.min], max: [...M.max] } });
               } else if (c > 0) {
-                const M = h(y).minGap(h(b), c);
+                const M = d(y).minGap(d(b), c);
                 M < c && m.push({ a: y.id, b: b.id, gapMm: M });
               }
             } finally {
@@ -13444,7 +13444,7 @@ async function pl(e = {}) {
         for (const g of s.values())
           g.delete();
       }
-      return { interfering: d, closerThanClearance: m };
+      return { interfering: h, closerThanClearance: m };
     },
     hullPoints(l) {
       if (l.length < 4 || l.length > 4096 || l.some((o) => o.length !== 3 || o.some((a) => !Number.isFinite(a) || Math.abs(a) > 1e6)))
@@ -13472,12 +13472,12 @@ function gl(e) {
   return !1;
 }
 function xl(e) {
-  const n = e.transform.position, t = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [i, r, l] = t.map((c) => on(c, e.transform).map((s, d) => s - n[d])), q = new Float32Array(e.positions.length), o = [1 / 0, 1 / 0, 1 / 0], a = [-1 / 0, -1 / 0, -1 / 0];
+  const n = e.transform.position, t = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [i, r, l] = t.map((c) => on(c, e.transform).map((s, h) => s - n[h])), q = new Float32Array(e.positions.length), o = [1 / 0, 1 / 0, 1 / 0], a = [-1 / 0, -1 / 0, -1 / 0];
   for (let c = 0; c < q.length; c += 3) {
-    const s = e.positions[c], d = e.positions[c + 1], m = e.positions[c + 2];
-    for (let h = 0; h < 3; h++) {
-      const g = q[c + h] = n[h] + s * i[h] + d * r[h] + m * l[h];
-      o[h] = Math.min(o[h], g), a[h] = Math.max(a[h], g);
+    const s = e.positions[c], h = e.positions[c + 1], m = e.positions[c + 2];
+    for (let d = 0; d < 3; d++) {
+      const g = q[c + d] = n[d] + s * i[d] + h * r[d] + m * l[d];
+      o[d] = Math.min(o[d], g), a[d] = Math.max(a[d], g);
     }
   }
   return {
@@ -13493,23 +13493,23 @@ function xl(e) {
 }
 function J6(e, n, t = !1, i) {
   let r = !1;
-  const l = F5(n), q = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Set(), a = (x) => (o.add(x), x), c = /* @__PURE__ */ new Set(), s = /* @__PURE__ */ new WeakMap(), d = (x) => (c.add(x), x), m = (x, I) => {
+  const l = F5(n), q = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Set(), a = (x) => (o.add(x), x), c = /* @__PURE__ */ new Set(), s = /* @__PURE__ */ new WeakMap(), h = (x) => (c.add(x), x), m = (x, I) => {
     if (!x.numVert() || !I.numVert())
-      return d(e.CrossSection.square([0, 0]));
+      return h(e.CrossSection.square([0, 0]));
     const T = (L) => {
-      const t1 = L.toPolygons(), x1 = t1.flat(), Y = d(e.CrossSection.hull(t1));
+      const t1 = L.toPolygons(), x1 = t1.flat(), Y = h(e.CrossSection.hull(t1));
       return Math.abs(Y.area() - L.area()) <= Math.max(1e-9, Math.abs(L.area()) * 1e-10) ? [Y.toPolygons().flat()] : e.triangulate(t1).map((u1) => u1.map((w1) => x1[w1]));
     }, A = T(x), N = T(I), O = A.reduce((L, t1) => L + t1.length, 0) * N.reduce((L, t1) => L + t1.length, 0);
     if (A.length * N.length > 1e4 || O > 25e4)
-      throw new Ye(u("Planar Minkowski operation exceeds the pair budget"));
+      throw new Je(u("Planar Minkowski operation exceeds the pair budget"));
     const J = [];
     for (const L of A)
       for (const t1 of N) {
         const x1 = L.flatMap((Y) => t1.map((u1) => [Y[0] + u1[0], Y[1] + u1[1]]));
-        J.push(d(e.CrossSection.hull([x1])));
+        J.push(h(e.CrossSection.hull([x1])));
       }
-    return d(e.CrossSection.union(J));
-  }, h = (x, I, T, A) => {
+    return h(e.CrossSection.union(J));
+  }, d = (x, I, T, A) => {
     const N = x.map((J, L) => {
       if (!J)
         return 0;
@@ -13525,18 +13525,18 @@ function J6(e, n, t = !1, i) {
       return I;
     let T;
     if (x.kind === "text")
-      T = d(e.CrossSection.union(ll(x).map((A) => d(new e.CrossSection(A, "EvenOdd")))));
+      T = h(e.CrossSection.union(ll(x).map((A) => h(new e.CrossSection(A, "EvenOdd")))));
     else if (x.kind === "empty")
-      T = d(e.CrossSection.square([0, 0]));
+      T = h(e.CrossSection.square([0, 0]));
     else if (x.kind === "polygon")
-      T = d(new e.CrossSection(x.contours, "EvenOdd"));
+      T = h(new e.CrossSection(x.contours, "EvenOdd"));
     else if (x.kind === "rectangle")
-      T = d(e.CrossSection.square(x.size, x.center));
+      T = h(e.CrossSection.square(x.size, x.center));
     else if (x.kind === "circle")
-      T = d(e.CrossSection.circle(x.radius, x.segments));
+      T = h(e.CrossSection.circle(x.radius, x.segments));
     else if (x.kind === "resize") {
       const A = g(x.profile), N = A.bounds();
-      T = A.numVert() ? d(A.scale(h(x.size, x.auto, N.min, N.max))) : A;
+      T = A.numVert() ? h(A.scale(d(x.size, x.auto, N.min, N.max))) : A;
     } else if (x.kind === "offset") {
       const A = g(x.profile);
       if (!x.round)
@@ -13544,30 +13544,30 @@ function J6(e, n, t = !1, i) {
           for (let O = 0; O < N.length; O++) {
             const J = N[O], L = N[(O + N.length - 1) % N.length], t1 = N[(O + 1) % N.length], x1 = Math.hypot(L[0] - J[0], L[1] - J[1]) * Math.hypot(t1[0] - J[0], t1[1] - J[1]);
             if (x1 && Math.sqrt(Math.max(0, (1 - ((L[0] - J[0]) * (t1[0] - J[0]) + (L[1] - J[1]) * (t1[1] - J[1])) / x1) / 2)) < 1e-6)
-              throw new Ye(u("Offset corner exceeds the miter budget"));
+              throw new Je(u("Offset corner exceeds the miter budget"));
           }
-      T = d(A.offset(x.distance, x.round ? "Round" : "Miter", 1e6, x.segments));
+      T = h(A.offset(x.distance, x.round ? "Round" : "Miter", 1e6, x.segments));
     } else if (x.kind === "affine") {
       const A = x.matrix;
-      T = d(g(x.profile).transform([A[0], A[3], 0, A[1], A[4], 0, A[2], A[5], 1]));
+      T = h(g(x.profile).transform([A[0], A[3], 0, A[1], A[4], 0, A[2], A[5], 1]));
     } else if ("profile" in x) {
       const A = g(x.profile);
-      T = d(x.kind === "rotate" ? A.rotate(x.angle) : x.kind === "move" ? A.translate(x.vector) : A.scale(x.vector));
+      T = h(x.kind === "rotate" ? A.rotate(x.angle) : x.kind === "move" ? A.translate(x.vector) : A.scale(x.vector));
     } else {
       const A = x.profiles.map(g);
-      T = d(x.kind === "minkowski" ? A.reduce(m) : x.kind === "hull" ? e.CrossSection.hull(A) : x.kind === "union" ? e.CrossSection.union(A) : x.kind === "subtract" ? e.CrossSection.difference(A) : e.CrossSection.intersection(A));
+      T = h(x.kind === "minkowski" ? A.reduce(m) : x.kind === "hull" ? e.CrossSection.hull(A) : x.kind === "union" ? e.CrossSection.union(A) : x.kind === "subtract" ? e.CrossSection.difference(A) : e.CrossSection.intersection(A));
     }
     if (T.numVert() > 16384)
-      throw new Ye(u("Evaluated profile exceeds 16384 vertices"));
+      throw new Je(u("Evaluated profile exceeds 16384 vertices"));
     return s.set(x, T), T;
   }, v = (x, I, T) => {
     const A = x.numVert();
     if (2 * A * (T + 1) > 2e5)
-      throw new Ye(u("Evaluated revolution exceeds 200000 faces"));
+      throw new Je(u("Evaluated revolution exceeds 200000 faces"));
     const N = x.bounds(), O = A > 0 && N.max[0] <= 0;
     if (A && N.min[0] < -1e-8 && !O)
       throw new Error(u("Revolved profiles must stay on one side of the radial axis"));
-    const J = O ? d(x.scale([-1, 1])) : x, L = Math.abs(I);
+    const J = O ? h(x.scale([-1, 1])) : x, L = Math.abs(I);
     let t1 = a(L ? J.revolve(Math.max(1, Math.ceil(T * L / 360)), L) : e.Manifold.union([]));
     return I < 0 && (t1 = a(t1.mirror([0, 1, 0]))), O && L !== 360 && (t1 = a(t1.rotate([0, 0, 180]))), t1;
   }, y = /* @__PURE__ */ new WeakMap(), b = (x) => {
@@ -13589,7 +13589,7 @@ function J6(e, n, t = !1, i) {
     else if (x.kind === "profile-extrude") {
       const A = g(x.profile);
       if (2 * A.numVert() * (x.steps + 1) > 2e5)
-        throw new Ye(u("Evaluated extrusion exceeds 200000 faces"));
+        throw new Je(u("Evaluated extrusion exceeds 200000 faces"));
       T = a(A.extrude(x.height, x.steps - 1, x.twist, x.scaleTop));
     } else if (x.kind === "revolve")
       T = v(g(x.profile), x.angle, x.segments);
@@ -13607,15 +13607,15 @@ function J6(e, n, t = !1, i) {
       T = a(A.transform([u1 * O * O + x1, u1 * O * J + Y * L, u1 * O * L - Y * J, 0, u1 * O * J - Y * L, u1 * J * J + x1, u1 * J * L + Y * O, 0, u1 * O * L + Y * J, u1 * J * L - Y * O, u1 * L * L + x1, 0, 0, 0, 0, 1]));
     } else if (x.kind === "resize") {
       const A = b(x.shape), N = A.boundingBox();
-      T = A.numTri() ? a(A.scale(h(x.vector, x.auto, N.min, N.max))) : A;
+      T = A.numTri() ? a(A.scale(d(x.vector, x.auto, N.min, N.max))) : A;
     } else if (x.kind === "minkowski") {
       const A = x.shapes.map(b);
       T = A[0];
       for (const N of A.slice(1)) {
         if (T.numTri() * N.numTri() > 25e5)
-          throw new Ye(u("Minkowski operation exceeds the pair budget"));
+          throw new Je(u("Minkowski operation exceeds the pair budget"));
         if (T = a(T.minkowskiSum(N)), T.numTri() > 2e5)
-          throw new Ye(u("Evaluated solid exceeds 200000 faces"));
+          throw new Je(u("Evaluated solid exceeds 200000 faces"));
       }
     } else if ("shapes" in x) {
       const A = x.shapes.map(b);
@@ -13668,13 +13668,13 @@ function J6(e, n, t = !1, i) {
         break;
       // A standard hole: the profile both kernels revolve (fasteners.ts), mouth at z = 0, axis -Z.
       case "hole":
-        T = a(d(new e.CrossSection([Li(I)])).revolve(I.segments, 360));
+        T = a(h(new e.CrossSection([Li(I)])).revolve(I.segments, 360));
         break;
       case "code":
         if (T = b(v8(I.program).shape), T.isEmpty() || T.volume() <= 1e-8)
           throw new Error(u("Code produces no printable solid"));
         if (T.numTri() > 2e5)
-          throw new Ye(u("Evaluated solid exceeds 200000 faces"));
+          throw new Je(u("Evaluated solid exceeds 200000 faces"));
         break;
       case "extrusion": {
         const A = m8(I, l);
@@ -13686,7 +13686,7 @@ function J6(e, n, t = !1, i) {
           const w1 = Y - L;
           return [Math.abs(w1) < 1e-8 ? 0 : w1, u1];
         }));
-        if (T = v(d(new e.CrossSection(t1, "EvenOdd")), J, 128), T.isEmpty() || T.volume() <= 1e-8)
+        if (T = v(h(new e.CrossSection(t1, "EvenOdd")), J, 128), T.isEmpty() || T.volume() <= 1e-8)
           throw new Error(u("Revolution produces no printable solid"));
         O === "XY" ? T = a(T.rotate([-90, 0, 0])) : O === "YZ" && (T = a(T.rotate([0, 0, 90]))), L && (T = a(T.translate(O === "YZ" ? [0, L, 0] : [L, 0, 0])));
         break;
@@ -13708,7 +13708,7 @@ function J6(e, n, t = !1, i) {
       case "pattern": {
         const A = s8(I, l), N = B(I.source);
         if (N.numTri() * A.count > 5e5)
-          throw new Ye(u("Pattern exceeds the 500000 input face limit"));
+          throw new Je(u("Pattern exceeds the 500000 input face limit"));
         const O = [N];
         if (A.mode === "linear")
           for (let J = 1; J < A.count; J++) {
@@ -13810,11 +13810,11 @@ function wl(e, n) {
     throw new Error(u("Density must be positive"));
   const t = e.bounds.min.map((y, b) => (y + e.bounds.max[b]) * 5e-4);
   let i = 0;
-  const r = [0, 0, 0], l = Array.from({ length: 3 }, () => [0, 0, 0]), q = [0, 0, 0], o = [0, 0, 0], a = [0, 0, 0], c = [0, 0, 0], { indices: s, positions: d } = e;
+  const r = [0, 0, 0], l = Array.from({ length: 3 }, () => [0, 0, 0]), q = [0, 0, 0], o = [0, 0, 0], a = [0, 0, 0], c = [0, 0, 0], { indices: s, positions: h } = e;
   for (let y = 0; y < s.length; y += 3) {
     const b = s[y] * 3, C = s[y + 1] * 3, P = s[y + 2] * 3;
     for (let B = 0; B < 3; B++)
-      q[B] = d[b + B] * 1e-3 - t[B], o[B] = d[C + B] * 1e-3 - t[B], a[B] = d[P + B] * 1e-3 - t[B], c[B] = q[B] + o[B] + a[B];
+      q[B] = h[b + B] * 1e-3 - t[B], o[B] = h[C + B] * 1e-3 - t[B], a[B] = h[P + B] * 1e-3 - t[B], c[B] = q[B] + o[B] + a[B];
     const M = (q[0] * (o[1] * a[2] - o[2] * a[1]) + q[1] * (o[2] * a[0] - o[0] * a[2]) + q[2] * (o[0] * a[1] - o[1] * a[0])) / 6;
     i += M;
     for (let B = 0; B < 3; B++) {
@@ -13827,10 +13827,10 @@ function wl(e, n) {
   }
   if (!Number.isFinite(i) || i <= 1e-15)
     throw new Error(u`${e.name}: solid has no positive physical volume`);
-  const m = r.map((y) => y / i), h = i * n, g = l[0][0] + l[1][1] + l[2][2], v = l.map((y, b) => y.map((C, P) => n * ((b === P ? g : 0) - C) - h * ((b === P ? m.reduce((M, B) => M + B * B, 0) : 0) - m[b] * m[P])));
+  const m = r.map((y) => y / i), d = i * n, g = l[0][0] + l[1][1] + l[2][2], v = l.map((y, b) => y.map((C, P) => n * ((b === P ? g : 0) - C) - d * ((b === P ? m.reduce((M, B) => M + B * B, 0) : 0) - m[b] * m[P])));
   if (!v.every((y, b) => Number.isFinite(y[b]) && y[b] > 0))
     throw new Error(u("Invalid solid inertia"));
-  return { massKg: h, volumeM3: i, centerM: m.map((y, b) => y + t[b]), inertiaKgM2: v };
+  return { massKg: d, volumeM3: i, centerM: m.map((y, b) => y + t[b]), inertiaKgM2: v };
 }
 const T8 = /* @__PURE__ */ new WeakMap();
 async function A4(e) {
@@ -13866,14 +13866,14 @@ async function i4(e, n, t = {}) {
     throw new Error(u("Collision candidate exceeds the compound budget"));
   if (!q.length)
     throw new Error(u("Convex decomposition produced no collision shapes"));
-  const o = e.volume, a = t.measure ? { min: [...e.bounds.min], max: [...e.bounds.max] } : e.bounds, [c, s, d] = t.measure ? await Promise.all([E4(e), A4(q), t.measure(e, q)]) : [void 0, void 0, n.collisionCSG.measure(e, q)];
+  const o = e.volume, a = t.measure ? { min: [...e.bounds.min], max: [...e.bounds.max] } : e.bounds, [c, s, h] = t.measure ? await Promise.all([E4(e), A4(q), t.measure(e, q)]) : [void 0, void 0, n.collisionCSG.measure(e, q)];
   let m = 0;
   for (let C = 0; C < 3; C++)
-    m = Math.max(m, Math.abs(d.bounds.min[C] - a.min[C]), Math.abs(d.bounds.max[C] - a.max[C]));
-  const { missingVolumeMm3: h, extraVolumeMm3: g, numericalResidualVolumeMm3: v } = d, y = (h + g + v) / o;
+    m = Math.max(m, Math.abs(h.bounds.min[C] - a.min[C]), Math.abs(h.bounds.max[C] - a.max[C]));
+  const { missingVolumeMm3: d, extraVolumeMm3: g, numericalResidualVolumeMm3: v } = h, y = (d + g + v) / o;
   if (!Number.isFinite(y) || y > r.volumeFraction || m > r.boundsMm)
     throw new Error(u`${e.name}: collision approximation rejected (${(y * 100).toFixed(2)}% volume difference, ${m.toFixed(3)} mm bounds error). Supply a qualified collision assembly.`);
-  const b = { hulls: q, certificate: { sourceSHA256: c ?? await E4(e), algorithm: "manifold-compound/v1", strategy: t.candidates ? "supplied" : "bsp", maxHulls: i, missingVolumeMm3: h, extraVolumeMm3: g, numericalResidualVolumeMm3: v, relativeError: y, boundsErrorMm: m, tolerance: r } };
+  const b = { hulls: q, certificate: { sourceSHA256: c ?? await E4(e), algorithm: "manifold-compound/v1", strategy: t.candidates ? "supplied" : "bsp", maxHulls: i, missingVolumeMm3: d, extraVolumeMm3: g, numericalResidualVolumeMm3: v, relativeError: y, boundsErrorMm: m, tolerance: r } };
   Object.freeze(r), Object.freeze(b.certificate);
   for (const C of q)
     Object.freeze(C);
@@ -13885,18 +13885,18 @@ function kl(e, n, t, i, r) {
   return ![l, q, o, r].every(Number.isFinite) || l < 1e-9 || q < 1e-9 || r < 0 ? 1 / 0 : o + r * Math.hypot(...n.map((a, c) => a / l - i[c] / q));
 }
 function vl(e, n, t, i, r) {
-  const l = Math.hypot(...n.map((h, g) => h - i[g])), q = Math.hypot(...t.map((h, g) => h - r[g])), o = Math.hypot(...t), a = Math.hypot(...r);
+  const l = Math.hypot(...n.map((d, g) => d - i[g])), q = Math.hypot(...t.map((d, g) => d - r[g])), o = Math.hypot(...t), a = Math.hypot(...r);
   if (![l, q, o, a].every(Number.isFinite) || l > 1e-6 || q > 1e-8 || o < 1e-9 || a < 1e-9)
     return;
-  const c = Math.hypot(...t.map((h, g) => h / o - r[g] / a));
-  let s = 0, d = Math.max(1, ...n.map(Math.abs), ...i.map(Math.abs));
-  for (const h of e)
-    for (let g = 0; g < h.positions.length; g += 3) {
-      s = Math.max(s, Math.hypot(h.positions[g] - n[0], h.positions[g + 1] - n[1], h.positions[g + 2] - n[2]));
+  const c = Math.hypot(...t.map((d, g) => d / o - r[g] / a));
+  let s = 0, h = Math.max(1, ...n.map(Math.abs), ...i.map(Math.abs));
+  for (const d of e)
+    for (let g = 0; g < d.positions.length; g += 3) {
+      s = Math.max(s, Math.hypot(d.positions[g] - n[0], d.positions[g + 1] - n[1], d.positions[g + 2] - n[2]));
       for (let v = 0; v < 3; v++)
-        d = Math.max(d, Math.abs(h.positions[g + v]));
+        h = Math.max(h, Math.abs(d.positions[g + v]));
     }
-  const m = 2 * s * c + 2 * l + 256 * Number.EPSILON * Math.max(d, s);
+  const m = 2 * s * c + 2 * l + 256 * Number.EPSILON * Math.max(h, s);
   if (!(!Number.isFinite(m) || m > 0.025))
     return 0.25 + m;
 }
@@ -13909,9 +13909,9 @@ function yl(e, n, t, i, r, l = 0.25, q = 2e6) {
     for (const B of n)
       if (!r(M.id, B.id) && (a += M.hulls.length * B.hulls.length, a > q))
         return !1;
-  const c = i.map((M) => M / o), s = Math.abs(c[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], d = c.reduce((M, B, x) => M + B * s[x], 0), m = s.map((M, B) => M - d * c[B]), h = Math.hypot(...m);
+  const c = i.map((M) => M / o), s = Math.abs(c[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], h = c.reduce((M, B, x) => M + B * s[x], 0), m = s.map((M, B) => M - h * c[B]), d = Math.hypot(...m);
   for (let M = 0; M < 3; M++)
-    m[M] /= h;
+    m[M] /= d;
   const g = [c[1] * m[2] - c[2] * m[1], c[2] * m[0] - c[0] * m[2], c[0] * m[1] - c[1] * m[0]], v = /* @__PURE__ */ new Map(), y = (M, B, x) => 0 + (M[B] - t[0]) * x[0] + (M[B + 1] - t[1]) * x[1] + (M[B + 2] - t[2]) * x[2], b = (M) => {
     const B = v.get(M);
     if (B)
@@ -13992,14 +13992,14 @@ function yl(e, n, t, i, r, l = 0.25, q = 2e6) {
   return !0;
 }
 let Q6, l4;
-const q4 = () => Q6 ?? (Q6 = import("./jolt-physics.wasm-compat-DuKQWtqi.js").then((e) => e.default()));
+const q4 = () => Q6 ?? (Q6 = import("./jolt-physics.wasm-compat-C_ks13Rj.js").then((e) => e.default()));
 function B8(e) {
   if (!e)
     return q4();
   if (l4)
     return l4;
   const n = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 9, 1, 7, 0, 65, 0, 253, 15, 26, 11]);
-  return l4 = WebAssembly.validate(n) ? import("./jolt-physics.simd.wasm-compat-CAzA1e0H.js").then((t) => t.default()).catch(q4) : q4();
+  return l4 = WebAssembly.validate(n) ? import("./jolt-physics.simd.wasm-compat-Jzn8XEpM.js").then((t) => t.default()).catch(q4) : q4();
 }
 const I8 = /* @__PURE__ */ new WeakMap(), R8 = /* @__PURE__ */ new WeakMap();
 function Sl(e) {
@@ -14043,27 +14043,27 @@ async function El(e, n, t, i = {}) {
   const s = (_, E) => {
     const V = [E.bodyA, E.bodyB];
     return V.includes(_.bodyB) && !V.includes(_.bodyA) ? _.bodyA : _.bodyB;
-  }, d = /* @__PURE__ */ new Set();
+  }, h = /* @__PURE__ */ new Set();
   for (const _ of l.joints ?? []) {
     const E = _.gearMesh && l.joints.find((V) => V.id === _.gearMesh.joint);
-    E && (d.add(s(_, E)), d.add(s(E, _)));
+    E && (h.add(s(_, E)), h.add(s(E, _)));
   }
   if (i.mode !== "rigid-preview")
     for (const _ of o) {
       const E = l.nodes[_.id]?.physics?.intent ?? "rigid";
-      if (E !== "rigid" && !(E === "hinge" && l.joints?.some((V) => V.bodyA === _.id || V.bodyB === _.id)) && !(E === "gear" && d.has(_.id)))
+      if (E !== "rigid" && !(E === "hinge" && l.joints?.some((V) => V.bodyA === _.id || V.bodyB === _.id)) && !(E === "gear" && h.has(_.id)))
         throw new Error(u`${_.name}: ${E} needs a qualified mechanical model and mates. Choose rigid-preview explicitly to simulate only its rigid geometry.`);
     }
   if ([...t.values()].reduce((_, E) => _ + E.hulls.length, 0) > 4096)
     throw new Error(u("Simulation scene exceeds the 4096-convex-piece budget"));
-  const m = i.J ?? await B8(i.preferSimd ?? !1), h = new m.JoltSettings();
-  h.mMaxBodies = 512, h.mMaxBodyPairs = Math.max(1024, o.length * o.length), h.mMaxContactConstraints = 8192;
+  const m = i.J ?? await B8(i.preferSimd ?? !1), d = new m.JoltSettings();
+  d.mMaxBodies = 512, d.mMaxBodyPairs = Math.max(1024, o.length * o.length), d.mMaxContactConstraints = 8192;
   const g = new m.ObjectLayerPairFilterTable(2);
   g.EnableCollision(0, 1), g.EnableCollision(1, 1);
   const v = new m.BroadPhaseLayerInterfaceTable(2, 2), y = new m.BroadPhaseLayer(0), b = new m.BroadPhaseLayer(1);
-  v.MapObjectToBroadPhaseLayer(0, y), v.MapObjectToBroadPhaseLayer(1, b), m.destroy(y), m.destroy(b), h.mObjectLayerPairFilter = g, h.mBroadPhaseLayerInterface = v, h.mObjectVsBroadPhaseLayerFilter = new m.ObjectVsBroadPhaseLayerFilterTable(v, 2, g, 2);
-  const C = new m.JoltInterface(h);
-  m.destroy(h);
+  v.MapObjectToBroadPhaseLayer(0, y), v.MapObjectToBroadPhaseLayer(1, b), m.destroy(y), m.destroy(b), d.mObjectLayerPairFilter = g, d.mBroadPhaseLayerInterface = v, d.mObjectVsBroadPhaseLayerFilter = new m.ObjectVsBroadPhaseLayerFilterTable(v, 2, g, 2);
+  const C = new m.JoltInterface(d);
+  m.destroy(d);
   const P = C.GetPhysicsSystem(), M = P.GetBodyInterface(), B = new m.Vec3(...q.gravity);
   P.SetGravity(B), m.destroy(B);
   const x = new m.PhysicsSettings();
@@ -14071,8 +14071,8 @@ async function El(e, n, t, i = {}) {
   const I = /* @__PURE__ */ new Map();
   let T;
   const A = (_, E) => {
-    const [V, F, W, U] = E, [$, i1, q1] = _, s1 = 2 * (F * q1 - W * i1), h1 = 2 * (W * $ - V * q1), r1 = 2 * (V * i1 - F * $);
-    return [$ + U * s1 + F * r1 - W * h1, i1 + U * h1 + W * s1 - V * r1, q1 + U * r1 + V * h1 - F * s1];
+    const [V, F, W, U] = E, [$, i1, q1] = _, s1 = 2 * (F * q1 - W * i1), d1 = 2 * (W * $ - V * q1), r1 = 2 * (V * i1 - F * $);
+    return [$ + U * s1 + F * r1 - W * d1, i1 + U * d1 + W * s1 - V * r1, q1 + U * r1 + V * d1 - F * s1];
   }, N = [], O = /* @__PURE__ */ new Map(), J = /* @__PURE__ */ new Map();
   let L = !1, t1 = 0, x1, Y;
   const u1 = /* @__PURE__ */ new Map();
@@ -14099,7 +14099,7 @@ async function El(e, n, t, i = {}) {
     }
     return V;
   }
-  function de(_) {
+  function he(_) {
     return _.angleRevision !== $1 && (_.angleRad = _.motor.GetCurrentAngle(), _.angleRevision = $1), _.angleRad;
   }
   const be = /* @__PURE__ */ new Map();
@@ -14114,8 +14114,8 @@ async function El(e, n, t, i = {}) {
     const { joint: F } = V, W = x2(F.bodyA), U = x2(F.bodyB);
     if (W === U)
       throw new Error(u("Actuator bodies belong to the same rigid assembly"));
-    const $ = l.nodes[F.bodyA].transform, i1 = je(F.axisA, $.rotation), q1 = F.kind === "slider" ? je(F.anchorA.map((r1, f1) => r1 * $.scale[f1]), $.rotation).map((r1, f1) => (r1 + $.position[f1]) * 1e-3) : void 0, s1 = [[W, -1], [U, 1]].filter(([r1]) => !r1.IsStatic()), h1 = { binding: V, source: W, reactions: s1, axis: i1, anchorM: q1, impulseConfigured: !1 };
-    return be.set(_, h1), h1;
+    const $ = l.nodes[F.bodyA].transform, i1 = je(F.axisA, $.rotation), q1 = F.kind === "slider" ? je(F.anchorA.map((r1, f1) => r1 * $.scale[f1]), $.rotation).map((r1, f1) => (r1 + $.position[f1]) * 1e-3) : void 0, s1 = [[W, -1], [U, 1]].filter(([r1]) => !r1.IsStatic()), d1 = { binding: V, source: W, reactions: s1, axis: i1, anchorM: q1, impulseConfigured: !1 };
+    return be.set(_, d1), d1;
   }
   const m1 = (_) => {
     if (_.velocityMode)
@@ -14187,20 +14187,20 @@ async function El(e, n, t, i = {}) {
       for (let W = F + 1; W < V.length; W++)
         E(V[F]) === E(V[W]) && e1.DisableCollision(c1.get(V[F]), c1.get(V[W]));
   }
-  const h2 = new Map([...O1.keys()].map((_) => [_, _])), Ee = (_) => {
-    const E = h2.get(_);
+  const d2 = new Map([...O1.keys()].map((_) => [_, _])), Ee = (_) => {
+    const E = d2.get(_);
     if (E === _)
       return _;
     const V = Ee(E);
-    return h2.set(_, V), V;
+    return d2.set(_, V), V;
   }, ze = (_) => Ee(B1(_));
   for (const _ of l.joints ?? [])
-    h2.set(ze(_.bodyB), ze(_.bodyA));
-  const m5 = (l.joints ?? []).filter((_) => _.kind === "hinge" && _.limits), pe = new Set(m5.filter((_) => m5.some((E) => _.id !== E.id && B1(_.bodyB) === B1(E.bodyA))).map((_) => ze(_.bodyA))), d2 = /* @__PURE__ */ new Set(), ee = (_) => {
+    d2.set(ze(_.bodyB), ze(_.bodyA));
+  const m5 = (l.joints ?? []).filter((_) => _.kind === "hinge" && _.limits), pe = new Set(m5.filter((_) => m5.some((E) => _.id !== E.id && B1(_.bodyB) === B1(E.bodyA))).map((_) => ze(_.bodyA))), h2 = /* @__PURE__ */ new Set(), ee = (_) => {
     const E = ze(_);
-    if (!pe.has(E) || d2.has(E))
+    if (!pe.has(E) || h2.has(E))
       return;
-    d2.add(E);
+    h2.add(E);
     const V = m5.filter((W) => ze(W.bodyA) === E).length, F = Math.min(320, 80 * V);
     for (const W of l.joints ?? [])
       if (ze(W.bodyA) === E) {
@@ -14220,7 +14220,7 @@ async function El(e, n, t, i = {}) {
       const i1 = V(W), q1 = V(U);
       if (i1.length === 1 && q1.length === 1)
         continue;
-      const s1 = l.nodes[F.bodyA].transform, h1 = l.nodes[F.bodyB].transform, r1 = je(F.anchorA.map((Z1, L1) => Z1 * s1.scale[L1]), s1.rotation).map((Z1, L1) => Z1 + s1.position[L1]), f1 = je(F.axisA, s1.rotation), D1 = je(F.anchorB.map((Z1, L1) => Z1 * h1.scale[L1]), h1.rotation).map((Z1, L1) => Z1 + h1.position[L1]), z1 = je(F.axisB, h1.rotation), P1 = vl([...i1, ...q1].flatMap((Z1) => Z1.hulls), r1, f1, D1, z1);
+      const s1 = l.nodes[F.bodyA].transform, d1 = l.nodes[F.bodyB].transform, r1 = je(F.anchorA.map((Z1, L1) => Z1 * s1.scale[L1]), s1.rotation).map((Z1, L1) => Z1 + s1.position[L1]), f1 = je(F.axisA, s1.rotation), D1 = je(F.anchorB.map((Z1, L1) => Z1 * d1.scale[L1]), d1.rotation).map((Z1, L1) => Z1 + d1.position[L1]), z1 = je(F.axisB, d1.rotation), P1 = vl([...i1, ...q1].flatMap((Z1) => Z1.hulls), r1, f1, D1, z1);
       if (P1 === void 0 || !yl(i1, q1, r1, f1, (Z1, L1) => _.has(fe(Z1, L1)), P1))
         continue;
       let K1 = 0;
@@ -14262,7 +14262,7 @@ async function El(e, n, t, i = {}) {
         const E = f2.get(_), V = J2(E.bodyA, E.anchorA, E.axisA), F = J2(E.bodyB, E.anchorB, E.axisB);
         kl(V.anchor, V.axis, F.anchor, F.axis, E.radiusB) >= 0.249 && V5(_);
       }
-  }, h5 = O1.size < o.length, K5 = h5 ? o.map((_) => l.nodes[_.id].physics ?? J5()) : [], p2 = /* @__PURE__ */ new Map(), d5 = (_, E, V, F, W) => {
+  }, d5 = O1.size < o.length, K5 = d5 ? o.map((_) => l.nodes[_.id].physics ?? J5()) : [], p2 = /* @__PURE__ */ new Map(), h5 = (_, E, V, F, W) => {
     const U = new m.RVec3(0, 0, 0), $ = new m.Quat(0, 0, 0, 1), i1 = new m.BodyCreationSettings(_, U, $, V === "static" ? m.EMotionType_Static : m.EMotionType_Dynamic, V === "static" ? 0 : 1);
     if (m.destroy(U), m.destroy($), i1.mFriction = F.friction, i1.mRestitution = F.restitution, i1.mLinearDamping = 0, i1.mAngularDamping = 0, c1.has(E)) {
       const q1 = new m.CollisionGroup(e1, 0, c1.get(E));
@@ -14277,14 +14277,14 @@ async function El(e, n, t, i = {}) {
         const f1 = new m.Vec3(W.inertiaKgM2[0][r1], W.inertiaKgM2[1][r1], W.inertiaKgM2[2][r1]);
         s1.SetColumn3(r1, f1), m.destroy(f1);
       }
-      const h1 = new m.Vec4(0, 0, 0, 1);
-      s1.SetColumn4(3, h1), m.destroy(h1), q1.mInertia = s1, i1.mMassPropertiesOverride = q1, m.destroy(s1), m.destroy(q1);
+      const d1 = new m.Vec4(0, 0, 0, 1);
+      s1.SetColumn4(3, d1), m.destroy(d1), q1.mInertia = s1, i1.mMassPropertiesOverride = q1, m.destroy(s1), m.destroy(q1);
     }
     try {
       const q1 = M.CreateBody(i1);
       if (!q1)
         throw new Error(u("Jolt body allocation failed"));
-      M.AddBody(q1.GetID(), V === "static" ? m.EActivation_DontActivate : m.EActivation_Activate), N.push(q1), O.set(E, q1), W && I.set(E, W.massKg), h5 && p2.set(m.getPointer(q1), {
+      M.AddBody(q1.GetID(), V === "static" ? m.EActivation_DontActivate : m.EActivation_Activate), N.push(q1), O.set(E, q1), W && I.set(E, W.massKg), d5 && p2.set(m.getPointer(q1), {
         compound: b1.has(E) ? q1.GetShape() : void 0,
         friction: q1.GetFriction(),
         restitution: q1.GetRestitution()
@@ -14319,12 +14319,12 @@ async function El(e, n, t, i = {}) {
               throw new Error(u("Collision hull violates the solver budget"));
             $[Z1] = Math.min($[Z1], K1), i1[Z1] = Math.max(i1[Z1], K1);
           }
-          const q1 = $.map((P1, K1) => (P1 + i1[K1]) / 2), s1 = i1.map((P1, K1) => P1 - $[K1]), h1 = Math.max(...s1);
+          const q1 = $.map((P1, K1) => (P1 + i1[K1]) / 2), s1 = i1.map((P1, K1) => P1 - $[K1]), d1 = Math.max(...s1);
           if (s1.some((P1) => P1 <= 0))
             throw new Error(u("Collision hull has no finite extent"));
           Fe ?? (Fe = new m.Vec3(0, 0, 0)), s2 ?? (s2 = new m.Vec3(0, 0, 0)), g2 ?? (g2 = new m.Quat(0, 0, 0, 1));
           const r1 = new m.ConvexHullShapeSettings(), f1 = b1.get(F.id) + 1;
-          r1.mUserData = f1, r1.mMaxConvexRadius = Math.min(0.02, 0.1 * Math.min(...s1)) / h1, r1.mHullTolerance = Math.min(5e-3, t.get(F.id).certificate.tolerance.boundsMm / h1 / 4);
+          r1.mUserData = f1, r1.mMaxConvexRadius = Math.min(0.02, 0.1 * Math.min(...s1)) / d1, r1.mHullTolerance = Math.min(5e-3, t.get(F.id).certificate.tolerance.boundsMm / d1 / 4);
           const D1 = r1.mPoints;
           for (let P1 = 0; P1 < U.length; P1 += 3)
             Fe.Set((U[P1] - q1[0]) / s1[0], (U[P1 + 1] - q1[1]) / s1[1], (U[P1 + 2] - q1[2]) / s1[2]), D1.push_back(Fe);
@@ -14349,7 +14349,7 @@ async function El(e, n, t, i = {}) {
   try {
     if (i.ground ?? q.ground) {
       const _ = new m.Vec3(2, 2, 5e-3), E = new m.BoxShape(_, 1e-4);
-      m.destroy(_), d5(E, "ground", "static", { friction: q.groundFriction, restitution: q.groundRestitution });
+      m.destroy(_), h5(E, "ground", "static", { friction: q.groundFriction, restitution: q.groundRestitution });
       const V = new m.RVec3(0, 0, -5e-3);
       M.SetPosition(O.get("ground").GetID(), V, m.EActivation_DontActivate), m.destroy(V);
     }
@@ -14358,19 +14358,19 @@ async function El(e, n, t, i = {}) {
       Q2 && !q1 && (i1?.shape.Release(), Q2.set(_, { engine: m, tokens: U, inputs: $, shape: s1 }));
       try {
         const r1 = s1.GetCenterOfMass(), f1 = new m.Vec3(W.centerM[0] - r1.GetX(), W.centerM[1] - r1.GetY(), W.centerM[2] - r1.GetZ()), D1 = new m.OffsetCenterOfMassShape(s1, f1);
-        m.destroy(f1), d5(D1, _, F, V, W);
+        m.destroy(f1), h5(D1, _, F, V, W);
       } finally {
         Q2 || s1.Release();
       }
-      const h1 = O.get(_);
+      const d1 = O.get(_);
       new Set(E.map((r1) => {
         const f1 = l.nodes[r1.id].physics ?? J5();
         return f1.friction + ":" + f1.restitution;
-      })).size > 1 && h1.SetUseManifoldReduction(!1);
+      })).size > 1 && d1.SetUseManifoldReduction(!1);
       for (const r1 of E)
-        O.set(r1.id, h1), I.set(r1.id, W.massKg);
+        O.set(r1.id, d1), I.set(r1.id, W.massKg);
     }
-    if (h5) {
+    if (d5) {
       Y = new m.PartPairSimShapeFilter();
       for (const F of o) {
         const W = b1.get(F.id) + 1;
@@ -14392,8 +14392,8 @@ async function El(e, n, t, i = {}) {
         const $ = U.compound.GetSubShapeUserData(W);
         return K5[$ - 1] ?? U;
       }, V = (F, W, U, $) => {
-        const i1 = m.wrapPointer(U, m.ContactManifold), q1 = E(F, i1.mSubShapeID1), s1 = E(W, i1.mSubShapeID2), h1 = m.wrapPointer($, m.ContactSettings);
-        h1.mCombinedFriction = Math.sqrt(q1.friction * s1.friction), h1.mCombinedRestitution = Math.max(q1.restitution, s1.restitution);
+        const i1 = m.wrapPointer(U, m.ContactManifold), q1 = E(F, i1.mSubShapeID1), s1 = E(W, i1.mSubShapeID2), d1 = m.wrapPointer($, m.ContactSettings);
+        d1.mCombinedFriction = Math.sqrt(q1.friction * s1.friction), d1.mCombinedRestitution = Math.max(q1.restitution, s1.restitution);
       };
       x1.OnContactAdded = V, x1.OnContactPersisted = V, x1.OnContactRemoved = () => {
       }, P.SetContactListener(x1);
@@ -14422,8 +14422,8 @@ async function El(e, n, t, i = {}) {
         return i1.push(f1), f1;
       };
       _.kind === "pivot" ? ($.mPosition1 = q1(W.p), $.mPosition2 = q1(U.p)) : ($.mPoint1 = q1(W.p), $.mPoint2 = q1(U.p)), _.kind === "hinge" ? ($.mHingeAxis1 = s1(W.z), $.mHingeAxis2 = s1(U.z), $.mNormalAxis1 = s1(W.n), $.mNormalAxis2 = s1(U.n), _.limits && ($.mLimitsMin = _.limits[0], $.mLimitsMax = _.limits[1])) : _.kind === "slider" ? ($.mAutoDetectPoint = !1, $.mSliderAxis1 = s1(W.z), $.mSliderAxis2 = s1(U.z), $.mNormalAxis1 = s1(W.n), $.mNormalAxis2 = s1(U.n), _.limits && ($.mLimitsMin = _.limits[0] * 1e-3, $.mLimitsMax = _.limits[1] * 1e-3)) : _.kind === "pivot" ? ($.mTwistAxis1 = s1(W.z), $.mTwistAxis2 = s1(U.z), $.mPlaneAxis1 = s1(W.n), $.mPlaneAxis2 = s1(U.n), $.mSwingType = m.ESwingType_Cone, $.mNormalHalfConeAngle = _.coneAngle ?? Math.PI, $.mPlaneHalfConeAngle = _.coneAngle ?? Math.PI, $.mTwistMinAngle = -Math.PI, $.mTwistMaxAngle = Math.PI) : ($.mAutoDetectPoint = !1, $.mAxisX1 = s1(W.z), $.mAxisX2 = s1(U.z), $.mAxisY1 = s1(W.n), $.mAxisY2 = s1(U.n)), _.kind === "hinge" && z2.has(fe(B1(_.bodyA), B1(_.bodyB))) && ($.mNumPositionStepsOverride = 40);
-      const h1 = $.Create(E, V);
-      h1.AddRef(), P.AddConstraint(h1), J.set(_.id, h1), i1.forEach((r1) => m.destroy(r1)), m.destroy($), _.kind === "hinge" ? u1.set(_.id, { kind: "hinge", joint: _, motor: m.castObject(h1, m.HingeConstraint), angleRevision: -1, angleRad: 0 }) : _.kind === "slider" && u1.set(_.id, { kind: "slider", joint: _, motor: m.castObject(h1, m.SliderConstraint) });
+      const d1 = $.Create(E, V);
+      d1.AddRef(), P.AddConstraint(d1), J.set(_.id, d1), i1.forEach((r1) => m.destroy(r1)), m.destroy($), _.kind === "hinge" ? u1.set(_.id, { kind: "hinge", joint: _, motor: m.castObject(d1, m.HingeConstraint), angleRevision: -1, angleRad: 0 }) : _.kind === "slider" && u1.set(_.id, { kind: "slider", joint: _, motor: m.castObject(d1, m.SliderConstraint) });
     }
     for (const _ of l.joints ?? []) {
       const E = _.kind === "hinge" && _.gearMesh ? l.joints.find((V) => V.id === _.gearMesh.joint) : void 0;
@@ -14444,8 +14444,8 @@ async function El(e, n, t, i = {}) {
         throw new Error(u("Meshing gears must be separate moving bodies"));
       const U = new m.GearMeshConstraintSettings(), $ = new m.RVec3(...F.point), i1 = new m.Vec3(...F.axis), q1 = new m.RVec3(...W.point), s1 = new m.Vec3(...W.axis);
       U.mSpace = m.EConstraintSpace_WorldSpace, U.mPoint1 = $, U.mHingeAxis1 = i1, U.mPoint2 = q1, U.mHingeAxis2 = s1, U.mRatio = _.gearMesh.ratio, U.mNumVelocityStepsOverride = 30, U.mNumPositionStepsOverride = 10;
-      const h1 = m.castObject(U.Create(F.body, W.body), m.GearMeshConstraint);
-      [$, i1, q1, s1].forEach((r1) => m.destroy(r1)), m.destroy(U), h1.AddRef(), P.AddConstraint(h1), h1.SetConstraints(J.get(_.id), J.get(E.id)), J.set(`gear-mesh:${_.id}`, h1);
+      const d1 = m.castObject(U.Create(F.body, W.body), m.GearMeshConstraint);
+      [$, i1, q1, s1].forEach((r1) => m.destroy(r1)), m.destroy(U), d1.AddRef(), P.AddConstraint(d1), d1.SetConstraints(J.get(_.id), J.get(E.id)), J.set(`gear-mesh:${_.id}`, d1);
     }
     for (const [_, E] of O1) {
       const V = O.get(_);
@@ -14454,11 +14454,11 @@ async function El(e, n, t, i = {}) {
       E.some((se) => [...l.nodes[se.id].physics?.initialVelocityMmS ?? [], ...l.nodes[se.id].physics?.initialAngularVelocityDps ?? []].some((_e) => _e !== 0)) && a2(_);
       const F = H1.get(_), W = [0, 0, 0], U = [0, 0, 0];
       for (const se of E) {
-        const _e = l.nodes[se.id].physics, ge = Q1.get(se.id), Ve = (_e?.initialVelocityMmS ?? [0, 0, 0]).map((j1) => j1 * 1e-3), n5 = (_e?.initialAngularVelocityDps ?? [0, 0, 0]).map((j1) => j1 * Math.PI / 180), Je = ge.centerM.map((j1, t5) => j1 - F.centerM[t5]), I2 = Ve.map((j1) => j1 * ge.massKg);
+        const _e = l.nodes[se.id].physics, ge = Q1.get(se.id), Ve = (_e?.initialVelocityMmS ?? [0, 0, 0]).map((j1) => j1 * 1e-3), n5 = (_e?.initialAngularVelocityDps ?? [0, 0, 0]).map((j1) => j1 * Math.PI / 180), Qe = ge.centerM.map((j1, t5) => j1 - F.centerM[t5]), I2 = Ve.map((j1) => j1 * ge.massKg);
         for (let j1 = 0; j1 < 3; j1++)
-          W[j1] += I2[j1], U[j1] += ge.inertiaKgM2[j1].reduce((t5, I3, g5) => t5 + I3 * n5[g5], 0) + Je[(j1 + 1) % 3] * I2[(j1 + 2) % 3] - Je[(j1 + 2) % 3] * I2[(j1 + 1) % 3];
+          W[j1] += I2[j1], U[j1] += ge.inertiaKgM2[j1].reduce((t5, I3, g5) => t5 + I3 * n5[g5], 0) + Qe[(j1 + 1) % 3] * I2[(j1 + 2) % 3] - Qe[(j1 + 2) % 3] * I2[(j1 + 1) % 3];
       }
-      const [[$, i1, q1], [s1, h1, r1], [f1, D1, z1]] = F.inertiaKgM2, P1 = $ * (h1 * z1 - r1 * D1) - i1 * (s1 * z1 - r1 * f1) + q1 * (s1 * D1 - h1 * f1), K1 = [[h1 * z1 - r1 * D1, q1 * D1 - i1 * z1, i1 * r1 - q1 * h1], [r1 * f1 - s1 * z1, $ * z1 - q1 * f1, q1 * s1 - $ * r1], [s1 * D1 - h1 * f1, i1 * f1 - $ * D1, $ * h1 - i1 * s1]], Z1 = new m.Vec3(...W.map((se) => se / F.massKg)), L1 = new m.Vec3(...K1.map((se) => se.reduce((_e, ge, Ve) => _e + ge * U[Ve], 0) / P1));
+      const [[$, i1, q1], [s1, d1, r1], [f1, D1, z1]] = F.inertiaKgM2, P1 = $ * (d1 * z1 - r1 * D1) - i1 * (s1 * z1 - r1 * f1) + q1 * (s1 * D1 - d1 * f1), K1 = [[d1 * z1 - r1 * D1, q1 * D1 - i1 * z1, i1 * r1 - q1 * d1], [r1 * f1 - s1 * z1, $ * z1 - q1 * f1, q1 * s1 - $ * r1], [s1 * D1 - d1 * f1, i1 * f1 - $ * D1, $ * d1 - i1 * s1]], Z1 = new m.Vec3(...W.map((se) => se / F.massKg)), L1 = new m.Vec3(...K1.map((se) => se.reduce((_e, ge, Ve) => _e + ge * U[Ve], 0) / P1));
       M.SetLinearVelocity(V.GetID(), Z1), M.SetAngularVelocity(V.GetID(), L1), m.destroy(Z1), m.destroy(L1);
     }
     P.OptimizeBroadPhase();
@@ -14480,8 +14480,8 @@ async function El(e, n, t, i = {}) {
   function N5(_, E, V, F, W) {
     if (L || O.has(_) || !/^preview-[a-zA-Z0-9_-]+$/.test(_) || f5 >= 32 || !Number.isFinite(F) || F < 1 || F > 50 || [...E, ...V].length !== 6 || E.some((z1) => !Number.isFinite(z1) || Math.abs(z1) > 1e4) || V.some((z1) => !Number.isFinite(z1) || Math.abs(z1) > 1e4))
       throw new Error(u("Invalid preview ball or preview budget exceeded"));
-    const U = F * 1e-3, $ = W === "sphere" ? 4 * Math.PI * U ** 3 / 3 : (2 * U) ** 3, i1 = $ * 1050, q1 = W === "sphere" ? 0.4 * i1 * U ** 2 : i1 * (2 * U) ** 2 / 6, s1 = W === "box" ? new m.Vec3(U, U, U) : void 0, h1 = s1 ? new m.BoxShape(s1, Math.min(1e-4, U / 10)) : new m.SphereShape(U);
-    s1 && m.destroy(s1), d5(h1, _, "dynamic", { friction: 0.4, restitution: 0.45 }, { massKg: i1, volumeM3: $, centerM: [0, 0, 0], inertiaKgM2: [[q1, 0, 0], [0, q1, 0], [0, 0, q1]] }), f5++;
+    const U = F * 1e-3, $ = W === "sphere" ? 4 * Math.PI * U ** 3 / 3 : (2 * U) ** 3, i1 = $ * 1050, q1 = W === "sphere" ? 0.4 * i1 * U ** 2 : i1 * (2 * U) ** 2 / 6, s1 = W === "box" ? new m.Vec3(U, U, U) : void 0, d1 = s1 ? new m.BoxShape(s1, Math.min(1e-4, U / 10)) : new m.SphereShape(U);
+    s1 && m.destroy(s1), h5(d1, _, "dynamic", { friction: 0.4, restitution: 0.45 }, { massKg: i1, volumeM3: $, centerM: [0, 0, 0], inertiaKgM2: [[q1, 0, 0], [0, q1, 0], [0, 0, q1]] }), f5++;
     const r1 = O.get(_), f1 = new m.RVec3(...E.map((z1) => z1 * 1e-3)), D1 = new m.Vec3(...V.map((z1) => z1 * 1e-3));
     M.SetPosition(r1.GetID(), f1, m.EActivation_Activate), M.SetLinearVelocity(r1.GetID(), D1), m.destroy(f1), m.destroy(D1);
   }
@@ -14493,12 +14493,12 @@ async function El(e, n, t, i = {}) {
     try {
       const F = E(new m.RRayCast()), W = F.mOrigin, U = F.mDirection, $ = E(new m.RayCastSettings()), i1 = E(new m.CastRayClosestHitCollisionCollector()), q1 = E(new m.ObjectVsBroadPhaseLayerFilterJS());
       q1.ShouldCollide = () => !0;
-      const s1 = E(new m.DefaultBroadPhaseLayerFilter(q1, 0)), h1 = E(new m.ObjectLayerFilterJS());
-      h1.ShouldCollide = () => !0;
+      const s1 = E(new m.DefaultBroadPhaseLayerFilter(q1, 0)), d1 = E(new m.ObjectLayerFilterJS());
+      d1.ShouldCollide = () => !0;
       const r1 = E(new m.BodyFilter()), f1 = E(new m.IgnoreMultipleBodiesFilter()), D1 = E(new m.ShapeFilter()), z1 = P.GetNarrowPhaseQuery();
       let P1;
       return { collector: i1, dispose: V, cast(K1, Z1, L1) {
-        W.Set(K1[0] * 1e-3, K1[1] * 1e-3, K1[2] * 1e-3), U.Set((Z1[0] - K1[0]) * 1e-3, (Z1[1] - K1[1]) * 1e-3, (Z1[2] - K1[2]) * 1e-3), L1 && L1 !== P1 && (f1.Clear(), f1.IgnoreBody(L1.GetID()), P1 = L1), i1.Reset(), z1.CastRay(F, $, i1, s1, h1, L1 ? f1 : r1, D1);
+        W.Set(K1[0] * 1e-3, K1[1] * 1e-3, K1[2] * 1e-3), U.Set((Z1[0] - K1[0]) * 1e-3, (Z1[1] - K1[1]) * 1e-3, (Z1[2] - K1[2]) * 1e-3), L1 && L1 !== P1 && (f1.Clear(), f1.IgnoreBody(L1.GetID()), P1 = L1), i1.Reset(), z1.CastRay(F, $, i1, s1, d1, L1 ? f1 : r1, D1);
       } };
     } catch (F) {
       throw V(), F;
@@ -14513,7 +14513,7 @@ async function El(e, n, t, i = {}) {
     const U = W.collector.mHit, $ = U.mFraction;
     if (!F)
       return { bodyId: void 0, fraction: $ };
-    const i1 = U.mBodyID.GetIndexAndSequenceNumber(), q1 = [...O].find(([, h1]) => h1.GetID().GetIndexAndSequenceNumber() === i1);
+    const i1 = U.mBodyID.GetIndexAndSequenceNumber(), q1 = [...O].find(([, d1]) => d1.GetID().GetIndexAndSequenceNumber() === i1);
     return { bodyId: (q1 ? o[q1[1].GetShape().GetSubShapeUserData(U.mSubShapeID2) - 1] : void 0)?.id ?? q1?.[0], fraction: $ };
   }
   function O5(_, E) {
@@ -14528,15 +14528,15 @@ async function El(e, n, t, i = {}) {
       return i1;
     if (![...E, ...V, F].every(Number.isFinite) || F <= 0 || F > 1e5 || Math.hypot(...V) < 1e-9)
       throw new Error(u("Invalid body sensor ray"));
-    const q1 = E.map((r1, f1) => r1 * U.transform.scale[f1]), s1 = je(q1, U.transform.rotation).map((r1, f1) => r1 + U.transform.position[f1]), h1 = { bodyId: _, body: $, originMm: E, direction: V, rangeMm: F, source: s1, axis: je(V, U.transform.rotation) };
-    return W !== void 0 && E.length === 3 && V.length === 3 && (!i1 && U1.size === 32 && U1.delete(U1.keys().next().value), h1.originMm = [...E], h1.direction = [...V], U1.set(W, h1)), h1;
+    const q1 = E.map((r1, f1) => r1 * U.transform.scale[f1]), s1 = je(q1, U.transform.rotation).map((r1, f1) => r1 + U.transform.position[f1]), d1 = { bodyId: _, body: $, originMm: E, direction: V, rangeMm: F, source: s1, axis: je(V, U.transform.rotation) };
+    return W !== void 0 && E.length === 3 && V.length === 3 && (!i1 && U1.size === 32 && U1.delete(U1.keys().next().value), d1.originMm = [...E], d1.direction = [...V], U1.set(W, d1)), d1;
   }
   function j5(_, E, V, F, W) {
     const U = B3(_, E, V, F, W);
     if (U.projected?.revision === $1)
       return U.projected;
-    const { body: $ } = U, i1 = ce($), q1 = oe($, i1), s1 = ae($, i1), h1 = A(U.source, s1).map((z1, P1) => z1 + q1[P1] * 1e3), r1 = A(U.axis, s1), f1 = Math.hypot(...r1), D1 = h1.map((z1, P1) => z1 + r1[P1] / f1 * F);
-    return U.projected = { revision: $1, origin: h1, to: D1 };
+    const { body: $ } = U, i1 = ce($), q1 = oe($, i1), s1 = ae($, i1), d1 = A(U.source, s1).map((z1, P1) => z1 + q1[P1] * 1e3), r1 = A(U.axis, s1), f1 = Math.hypot(...r1), D1 = d1.map((z1, P1) => z1 + r1[P1] / f1 * F);
+    return U.projected = { revision: $1, origin: d1, to: D1 };
   }
   function x2(_) {
     const E = O.get(_);
@@ -14583,7 +14583,7 @@ async function El(e, n, t, i = {}) {
       E > 0 && t1 === 0 && u5();
       for (let V = 0; V < E; V++) {
         if (T) {
-          const F = O.get(T.id), W = F.GetPosition(), U = F.GetRotation(), $ = A(T.local, [U.GetX(), U.GetY(), U.GetZ(), U.GetW()]).map((D1, z1) => D1 + [W.GetX(), W.GetY(), W.GetZ()][z1]), i1 = new m.RVec3(...$), q1 = M.GetPointVelocity(F.GetID(), i1), s1 = [q1.GetX(), q1.GetY(), q1.GetZ()], h1 = $.map((D1, z1) => 400 * (T.target[z1] * 1e-3 - D1) - 40 * s1[z1]), r1 = Math.hypot(...h1), f1 = new m.Vec3(...h1.map((D1) => D1 * Math.min(1, 100 / Math.max(1e-9, r1)) * I.get(T.id)));
+          const F = O.get(T.id), W = F.GetPosition(), U = F.GetRotation(), $ = A(T.local, [U.GetX(), U.GetY(), U.GetZ(), U.GetW()]).map((D1, z1) => D1 + [W.GetX(), W.GetY(), W.GetZ()][z1]), i1 = new m.RVec3(...$), q1 = M.GetPointVelocity(F.GetID(), i1), s1 = [q1.GetX(), q1.GetY(), q1.GetZ()], d1 = $.map((D1, z1) => 400 * (T.target[z1] * 1e-3 - D1) - 40 * s1[z1]), r1 = Math.hypot(...d1), f1 = new m.Vec3(...d1.map((D1) => D1 * Math.min(1, 100 / Math.max(1e-9, r1)) * I.get(T.id)));
           F.AddForce(f1, i1), M.ActivateBody(F.GetID()), m.destroy(f1), m.destroy(i1);
         }
         $1++, C.Step(1 / 200, 1), t1 += 1 / 200, u5();
@@ -14627,7 +14627,7 @@ async function El(e, n, t, i = {}) {
       if (V.IsStatic())
         throw new Error(u("A fixed body cannot be thrown"));
       a2(_);
-      const F = new m.RVec3(...B2(_)), W = M.GetPointVelocity(V.GetID(), F), U = V.GetCenterOfMassPosition(), $ = B2(_).map((h1, r1) => h1 - [U.GetX(), U.GetY(), U.GetZ()][r1]), i1 = [W.GetX(), W.GetY(), W.GetZ()], q1 = new m.Vec3(...i1.map((h1, r1) => h1 - E[(r1 + 1) % 3] * $[(r1 + 2) % 3] + E[(r1 + 2) % 3] * $[(r1 + 1) % 3])), s1 = new m.Vec3(...E);
+      const F = new m.RVec3(...B2(_)), W = M.GetPointVelocity(V.GetID(), F), U = V.GetCenterOfMassPosition(), $ = B2(_).map((d1, r1) => d1 - [U.GetX(), U.GetY(), U.GetZ()][r1]), i1 = [W.GetX(), W.GetY(), W.GetZ()], q1 = new m.Vec3(...i1.map((d1, r1) => d1 - E[(r1 + 1) % 3] * $[(r1 + 2) % 3] + E[(r1 + 2) % 3] * $[(r1 + 1) % 3])), s1 = new m.Vec3(...E);
       M.SetLinearVelocity(V.GetID(), q1), M.SetAngularVelocity(V.GetID(), s1), M.ActivateBody(V.GetID()), m.destroy(F), m.destroy(q1), m.destroy(s1);
     },
     geometryBoundsMm(_) {
@@ -14636,15 +14636,15 @@ async function El(e, n, t, i = {}) {
       const E = O.get(_), V = o.find((f1) => f1.id === _);
       if (!E || !V)
         throw new Error(u("Unknown physics body"));
-      const F = E.GetPosition(), W = E.GetRotation(), U = W.GetX(), $ = W.GetY(), i1 = W.GetZ(), q1 = W.GetW(), s1 = [F.GetX() * 1e3, F.GetY() * 1e3, F.GetZ() * 1e3], h1 = [1 / 0, 1 / 0, 1 / 0], r1 = [-1 / 0, -1 / 0, -1 / 0];
+      const F = E.GetPosition(), W = E.GetRotation(), U = W.GetX(), $ = W.GetY(), i1 = W.GetZ(), q1 = W.GetW(), s1 = [F.GetX() * 1e3, F.GetY() * 1e3, F.GetZ() * 1e3], d1 = [1 / 0, 1 / 0, 1 / 0], r1 = [-1 / 0, -1 / 0, -1 / 0];
       for (let f1 = 0; f1 < V.positions.length; f1 += 3) {
         const D1 = V.positions[f1], z1 = V.positions[f1 + 1], P1 = V.positions[f1 + 2], K1 = 2 * ($ * P1 - i1 * z1), Z1 = 2 * (i1 * D1 - U * P1), L1 = 2 * (U * z1 - $ * D1), se = [D1 + q1 * K1 + $ * L1 - i1 * Z1, z1 + q1 * Z1 + i1 * K1 - U * L1, P1 + q1 * L1 + U * Z1 - $ * K1];
         for (let _e = 0; _e < 3; _e++) {
           const ge = se[_e] + s1[_e];
-          h1[_e] = Math.min(h1[_e], ge), r1[_e] = Math.max(r1[_e], ge);
+          d1[_e] = Math.min(d1[_e], ge), r1[_e] = Math.max(r1[_e], ge);
         }
       }
-      return { min: h1, max: r1 };
+      return { min: d1, max: r1 };
     },
     boundsMm(_) {
       if (L)
@@ -14655,9 +14655,9 @@ async function El(e, n, t, i = {}) {
       const V = t.get(_);
       if (V && O1.get(B1(_)).length > 1) {
         const W = E.GetPosition(), U = E.GetRotation(), $ = [U.GetX(), U.GetY(), U.GetZ(), U.GetW()], i1 = [W.GetX() * 1e3, W.GetY() * 1e3, W.GetZ() * 1e3], q1 = [1 / 0, 1 / 0, 1 / 0], s1 = [-1 / 0, -1 / 0, -1 / 0];
-        for (const h1 of V.hulls)
-          for (let r1 = 0; r1 < h1.positions.length; r1 += 3) {
-            const f1 = A(Array.from(h1.positions.subarray(r1, r1 + 3)), $);
+        for (const d1 of V.hulls)
+          for (let r1 = 0; r1 < d1.positions.length; r1 += 3) {
+            const f1 = A(Array.from(d1.positions.subarray(r1, r1 + 3)), $);
             for (let D1 = 0; D1 < 3; D1++) {
               const z1 = f1[D1] + i1[D1];
               q1[D1] = Math.min(q1[D1], z1), s1[D1] = Math.max(s1[D1], z1);
@@ -14752,9 +14752,9 @@ async function El(e, n, t, i = {}) {
     applyJointImpulse(_, E) {
       if (L || !Number.isFinite(E) || Math.abs(E) > 1)
         throw new Error(u("Invalid actuator impulse"));
-      const V = H(_), { binding: F, source: W, reactions: U, axis: $, anchorM: i1 } = V, { joint: q1, motor: s1 } = F, h1 = ce(W), r1 = ae(W, h1), [f1, D1, z1] = A($, r1).map((P1) => P1 * E);
+      const V = H(_), { binding: F, source: W, reactions: U, axis: $, anchorM: i1 } = V, { joint: q1, motor: s1 } = F, d1 = ce(W), r1 = ae(W, d1), [f1, D1, z1] = A($, r1).map((P1) => P1 * E);
       if (S ?? (S = new m.Vec3(0, 0, 0)), V.impulseConfigured || (A1(F), q1.kind === "hinge" && (s1.SetNumVelocityStepsOverride(40), s1.SetNumPositionStepsOverride(80)), V.impulseConfigured = !0), q1.kind === "slider") {
-        const P1 = oe(W, h1), K1 = A(i1, r1);
+        const P1 = oe(W, d1), K1 = A(i1, r1);
         a1 ?? (a1 = new m.RVec3(0, 0, 0)), a1.Set(K1[0] + P1[0], K1[1] + P1[1], K1[2] + P1[2]);
       }
       for (const [P1, K1] of U)
@@ -14767,7 +14767,7 @@ async function El(e, n, t, i = {}) {
         throw new Error(u("Invalid position servo target"));
       const { joint: W, motor: U } = F;
       ee(W.bodyA), ie(F, V);
-      const $ = E - de(F), i1 = Math.max(-Math.PI * 5 / 3, Math.min(Math.PI * 5 / 3, $ * 12));
+      const $ = E - he(F), i1 = Math.max(-Math.PI * 5 / 3, Math.min(Math.PI * 5 / 3, $ * 12));
       U.SetTargetAngularVelocity(i1), m1(F);
     },
     setHingeMotor(_, E, V) {
@@ -14806,7 +14806,7 @@ async function El(e, n, t, i = {}) {
       const E = u1.get(_);
       if (E?.kind !== "hinge")
         throw new Error(u("Unknown hinge joint"));
-      return de(E);
+      return he(E);
     },
     dispose: P2
   };
@@ -14817,19 +14817,19 @@ function Dl(e, n) {
   const t = /* @__PURE__ */ new Set([0, e.length - 1]), i = [[0, e.length - 1]];
   for (; i.length; ) {
     const [r, l] = i.pop(), q = e[r], o = e[l], a = o[0] - q[0], c = o[1] - q[1], s = a * a + c * c;
-    let d = n * n, m = -1;
-    for (let h = r + 1; h < l; h++) {
-      const g = e[h], v = s ? Math.max(0, Math.min(1, ((g[0] - q[0]) * a + (g[1] - q[1]) * c) / s)) : 0, y = (g[0] - q[0] - v * a) ** 2 + (g[1] - q[1] - v * c) ** 2;
-      y > d && (d = y, m = h);
+    let h = n * n, m = -1;
+    for (let d = r + 1; d < l; d++) {
+      const g = e[d], v = s ? Math.max(0, Math.min(1, ((g[0] - q[0]) * a + (g[1] - q[1]) * c) / s)) : 0, y = (g[0] - q[0] - v * a) ** 2 + (g[1] - q[1] - v * c) ** 2;
+      y > h && (h = y, m = d);
     }
     m >= 0 && (t.add(m), i.push([r, m], [m, l]));
   }
   return [...t].sort((r, l) => r - l);
 }
 function Ml(e) {
-  const [n, t, i] = e.scale, [r, l, q] = e.position, [o, a, c] = e.rotation.map((y) => y * Math.PI / 180), s = Math.cos(o), d = Math.sin(o), m = Math.cos(a), h = Math.sin(a), g = Math.cos(c), v = Math.sin(c);
+  const [n, t, i] = e.scale, [r, l, q] = e.position, [o, a, c] = e.rotation.map((y) => y * Math.PI / 180), s = Math.cos(o), h = Math.sin(o), m = Math.cos(a), d = Math.sin(a), g = Math.cos(c), v = Math.sin(c);
   return (y) => {
-    const b = y[0] * n, C = y[1] * t, P = y[2] * i, M = s * C - d * P, B = d * C + s * P, x = m * b + h * B, I = -h * b + m * B;
+    const b = y[0] * n, C = y[1] * t, P = y[2] * i, M = s * C - h * P, B = h * C + s * P, x = m * b + d * B, I = -d * b + m * B;
     y[0] = g * x - v * M + r, y[1] = v * x + g * M + l, y[2] = I + q;
   };
 }
@@ -14848,13 +14848,13 @@ function Cl(e) {
       throw new Error(u("Could not triangulate radial collision profile"));
     let o = !1;
     for (let a = 0; a < n.length; a++) {
-      const c = n[(a + n.length - 1) % n.length], s = n[a], d = n[(a + 1) % n.length], m = t(c, s, d);
+      const c = n[(a + n.length - 1) % n.length], s = n[a], h = n[(a + 1) % n.length], m = t(c, s, h);
       if (Math.abs(m) < 1e-7) {
         n.splice(a, 1), o = !0;
         break;
       }
-      if (!(m < 0) && !n.some((h) => h !== c && h !== s && h !== d && t(c, s, h) >= -1e-7 && t(s, d, h) >= -1e-7 && t(d, c, h) >= -1e-7)) {
-        r.push([c, s, d]), n.splice(a, 1), o = !0;
+      if (!(m < 0) && !n.some((d) => d !== c && d !== s && d !== h && t(c, s, d) >= -1e-7 && t(s, h, d) >= -1e-7 && t(h, c, d) >= -1e-7)) {
+        r.push([c, s, h]), n.splice(a, 1), o = !0;
         break;
       }
     }
@@ -14867,21 +14867,21 @@ function Cl(e) {
     q = !1;
     e: for (let o = 0; o < r.length; o++)
       for (let a = o + 1; a < r.length; a++) {
-        const c = [r[o], r[a]].flatMap((h) => h.map((g, v) => [g, h[(v + 1) % h.length]])), s = c.filter(([h, g]) => !c.some(([v, y]) => v === g && y === h));
+        const c = [r[o], r[a]].flatMap((d) => d.map((g, v) => [g, d[(v + 1) % d.length]])), s = c.filter(([d, g]) => !c.some(([v, y]) => v === g && y === d));
         if (s.length === c.length || s.length > 32)
           continue;
-        const d = new Map(s.map(([h, g]) => [h, g])), m = [s[0][0]];
-        for (; d.has(m.at(-1)); ) {
-          const h = d.get(m.at(-1));
-          if (h === m[0])
+        const h = new Map(s.map(([d, g]) => [d, g])), m = [s[0][0]];
+        for (; h.has(m.at(-1)); ) {
+          const d = h.get(m.at(-1));
+          if (d === m[0])
             break;
-          if (m.includes(h)) {
+          if (m.includes(d)) {
             m.length = 0;
             break;
           }
-          m.push(h);
+          m.push(d);
         }
-        if (!(m.length !== s.length || m.some((h, g) => t(h, m[(g + 1) % m.length], m[(g + 2) % m.length]) < -1e-7))) {
+        if (!(m.length !== s.length || m.some((d, g) => t(d, m[(g + 1) % m.length], m[(g + 2) % m.length]) < -1e-7))) {
           r[o] = m, r.splice(a, 1), q = !0;
           break e;
         }
@@ -14991,7 +14991,7 @@ async function zl(e, n, t, i) {
             let w1 = 0;
             const N1 = u1[0];
             for (let $1 = 0; $1 < t1.length; $1 += 3) {
-              const [ce, oe, ae] = t1.slice($1, $1 + 3).map((de) => u1[de].map((be, S) => be - N1[S]));
+              const [ce, oe, ae] = t1.slice($1, $1 + 3).map((he) => u1[he].map((be, S) => be - N1[S]));
               w1 += ce[0] * (oe[1] * ae[2] - oe[2] * ae[1]) + ce[1] * (oe[2] * ae[0] - oe[0] * ae[2]) + ce[2] * (oe[0] * ae[1] - oe[1] * ae[0]);
             }
             const U1 = new Uint32Array(t1);
@@ -15077,14 +15077,14 @@ async function zl(e, n, t, i) {
     }
     return t.partitionConvex(c(b, C));
   }
-  const d = /* @__PURE__ */ new Map(), m = (b) => {
-    const C = d.get(b);
+  const h = /* @__PURE__ */ new Map(), m = (b) => {
+    const C = h.get(b);
     if (C !== void 0)
       return C;
     const P = r.nodes[b], M = P.physics?.collisionHint?.kind === "annular-grid" || P.kind === "boolean" && P.inputs.some(m);
-    return d.set(b, M), M;
+    return h.set(b, M), M;
   };
-  async function h(b, C) {
+  async function d(b, C) {
     try {
       return await i4(b, t, { candidates: s(b.id, []), measure: C });
     } catch (P) {
@@ -15102,11 +15102,11 @@ async function zl(e, n, t, i) {
       }
     }
   }
-  const g = n.bodies.filter((b) => !b.reference && !b.hole), v = i ? g.filter((b) => i.bodyIds.has(b.id)).map(async (b) => [b.id, await h(b, i.measure)]) : [], y = v.length ? Promise.all(v) : void 0;
+  const g = n.bodies.filter((b) => !b.reference && !b.hole), v = i ? g.filter((b) => i.bodyIds.has(b.id)).map(async (b) => [b.id, await d(b, i.measure)]) : [], y = v.length ? Promise.all(v) : void 0;
   try {
     y && await Promise.race([i.started, y]);
     for (const b of g)
-      i?.bodyIds.has(b.id) || l.set(b.id, await h(b));
+      i?.bodyIds.has(b.id) || l.set(b.id, await d(b));
     if (y)
       for (const [b, C] of await y)
         l.set(b, C);
@@ -15144,10 +15144,10 @@ function Tl(e, n, t, i, r) {
     return;
   }
   let s;
-  const d = new Promise((P) => {
+  const h = new Promise((P) => {
     s = P;
   });
-  let m = 0, h = !1, g;
+  let m = 0, d = !1, g;
   const v = /* @__PURE__ */ new Map(), y = () => {
     clearTimeout(g), c?.terminate(), c = void 0;
   }, b = () => {
@@ -15164,7 +15164,7 @@ function Tl(e, n, t, i, r) {
         return;
       }
       if ("started" in P) {
-        clearTimeout(g), h = !0, s();
+        clearTimeout(g), d = !0, s();
         return;
       }
       v.delete(P.id), "error" in P ? M.reject(new Error(P.error)) : M.resolve(P.measurement);
@@ -15175,14 +15175,14 @@ function Tl(e, n, t, i, r) {
     const B = c;
     return B ? new Promise((x, I) => {
       const T = { id: ++m, wasmURL: t, locale: i, source: { positions: P.positions, indices: P.indices }, hulls: M };
-      v.set(T.id, { request: T, resolve: x, reject: I }), !h && g === void 0 && (g = setTimeout(b, Pl));
+      v.set(T.id, { request: T, resolve: x, reject: I }), !d && g === void 0 && (g = setTimeout(b, Pl));
       try {
         B.postMessage(T);
       } catch {
         b();
       }
     }) : r(P, M);
-  }, started: d, close: y };
+  }, started: h, close: y };
 }
 function Bl(e) {
   const n = /* @__PURE__ */ new Set(), t = /* @__PURE__ */ new Set();
@@ -15195,22 +15195,22 @@ function Bl(e) {
     visibleRoots: e.roots.filter((i) => !e.nodes[i].reference && e.nodes[i].role !== "hole")
   };
 }
-let e0, qe, U2, n0;
+let e0, le, U2, n0;
 function Il(e, n) {
   return JSON.stringify([n, Object.values(e.nodes).map((t) => {
     const i = t.physics;
     return [i?.sourcePreset, i?.collisionHint, i?.collisionAssembly];
   })]);
 }
-const n2 = /* @__PURE__ */ new Map(), D4 = /* @__PURE__ */ new Map(), v3 = {}, M4 = {}, $4 = {}, E5 = {}, H4 = {}, a4 = () => {
+const Xe = /* @__PURE__ */ new Map(), D4 = /* @__PURE__ */ new Map(), v3 = {}, M4 = {}, $4 = {}, E5 = {}, H4 = {}, a4 = () => {
   for (const e of U2.hinges) {
-    const n = qe.hingeAngle(e) * 180 / Math.PI;
+    const n = le.hingeAngle(e) * 180 / Math.PI;
     let t = n - (M4[e] ?? n);
     t = ((t + 180) % 360 + 360) % 360 - 180, v3[e] = (v3[e] ?? 0) + t, $4[e] = t / 5e-3, M4[e] = n;
   }
 }, s4 = () => {
   for (const e of U2.sliders) {
-    const n = qe.sliderPosition(e);
+    const n = le.sliderPosition(e);
     H4[e] = E5[e] === void 0 ? 0 : (n - E5[e]) / 5e-3, E5[e] = n;
   }
 };
@@ -15228,23 +15228,23 @@ const t0 = (e) => {
 }, i0 = (e) => {
   const n = {};
   for (const t of e)
-    n[t.id] = qe.bodyRay(t.bodyId, t.originMm, t.direction, t.rangeMm, t.id);
+    n[t.id] = le.bodyRay(t.bodyId, t.originMm, t.direction, t.rangeMm, t.id);
   X4 = n;
-}, F8 = () => ({ time: qe.time, angles: v3, speeds: $4, linearPositions: E5, linearSpeeds: H4, distances: X4 }), Rl = () => {
-  const e = qe.poses(U2.visibleRoots);
+}, F8 = () => ({ time: le.time, angles: v3, speeds: $4, linearPositions: E5, linearSpeeds: H4, distances: X4 }), Rl = () => {
+  const e = le.poses(U2.visibleRoots);
   for (const [n, t] of D4)
-    e.push({ id: n, ...qe.pose(n), ...t });
+    e.push({ id: n, ...le.pose(n), ...t });
   return { ...F8(), poses: e };
 };
 self.onmessage = async (e) => {
   const n = e.data;
   try {
     if (n.op === "park") {
-      qe?.dispose(), qe = void 0, U2 = void 0, self.postMessage({ request: n.request, frame: { time: 0, poses: [], angles: {}, speeds: {}, linearPositions: {}, linearSpeeds: {} } });
+      le?.dispose(), le = void 0, U2 = void 0, self.postMessage({ request: n.request, frame: { time: 0, poses: [], angles: {}, speeds: {}, linearPositions: {}, linearSpeeds: {} } });
       return;
     }
     if (n.op === "start") {
-      qe?.dispose(), qe = void 0, K9(n.locale);
+      le?.dispose(), le = void 0, K9(n.locale);
       const t = n.document, i = n0;
       if (!t && !i)
         throw new Error(u("Start simulation first"));
@@ -15252,43 +15252,43 @@ self.onmessage = async (e) => {
       });
       let r = i?.construction;
       if (t) {
-        const m = R5(t), h = Il(t, m);
-        if (r?.key !== h) {
+        const m = R5(t), d = Il(t, m);
+        if (r?.key !== d) {
           const g = await (e0 ?? (e0 = pl({ wasmURL: n.wasmURL }))), v = n.geometry?.sourceKey === m ? n.geometry : g.evaluate(t), y = Tl(t, v, n.wasmURL, n.locale, g.collisionCSG.measure);
           try {
             const b = await zl(t, v, g, y);
-            r = { key: h, geometry: v, collisions: b };
+            r = { key: d, geometry: v, collisions: b };
           } finally {
             y?.close();
           }
         }
       }
-      const { geometry: l, collisions: q } = r, o = t ? Sl(t) : i.physics, a = t ? Bl(t) : i.layout, c = t ? JSON.stringify((t.joints ?? []).filter((m) => m.kind === "fixed").map((m) => [m.bodyA, m.bodyB])) : i.fixedMates, s = i?.shapes, d = i && r === i.construction && c === i.fixedMates ? i.shapes : Al();
+      const { geometry: l, collisions: q } = r, o = t ? Sl(t) : i.physics, a = t ? Bl(t) : i.layout, c = t ? JSON.stringify((t.joints ?? []).filter((m) => m.kind === "fixed").map((m) => [m.bodyA, m.bodyB])) : i.fixedMates, s = i?.shapes, h = i && r === i.construction && c === i.fixedMates ? i.shapes : Al();
       try {
-        n2.clear(), D4.clear(), X4 = {}, qe = await El(o, l, q, { mode: n.rigidPreview ? "rigid-preview" : "mechanism", preferSimd: !0, shapeCache: d, fixBase: n.fixBase }), U2 = a;
+        Xe.clear(), D4.clear(), X4 = {}, le = await El(o, l, q, { mode: n.rigidPreview ? "rigid-preview" : "mechanism", preferSimd: !0, shapeCache: h, fixBase: n.fixBase }), U2 = a;
         for (const m of [v3, M4, $4, E5, H4])
-          for (const h of Object.keys(m))
-            delete m[h];
+          for (const d of Object.keys(m))
+            delete m[d];
         a4(), s4();
       } catch (m) {
-        throw d !== s && d.clear(), m;
+        throw h !== s && h.clear(), m;
       }
-      d !== s && s?.clear(), n0 = { fixedMates: c, layout: a, construction: r, shapes: d, physics: o };
+      h !== s && s?.clear(), n0 = { fixedMates: c, layout: a, construction: r, shapes: h, physics: o };
     } else {
-      if (!qe)
+      if (!le)
         throw new Error(u("Start simulation first"));
       if (n.op === "step") {
         if (!Number.isFinite(n.seconds) || n.seconds <= 0 || n.seconds > 0.05 || Math.abs(n.seconds * 200 - Math.round(n.seconds * 200)) > 1e-8)
           throw new Error(u("Invalid simulation step"));
         for (let t = 0; t < Math.round(n.seconds * 200); t++)
-          qe.step(5e-3), a4(), s4();
+          le.step(5e-3), a4(), s4();
       } else if (n.op === "sense")
         t0(n.rays), i0(n.rays);
       else if (n.op === "actuator-step") {
         if (n.rays) {
           t0(n.rays);
           for (const c of n.rays)
-            qe.validateBodyRay(c.bodyId, c.originMm, c.direction, c.rangeMm, c.id);
+            le.validateBodyRay(c.bodyId, c.originMm, c.direction, c.rangeMm, c.id);
         }
         const t = n.impulses, i = n.servos ?? [], r = () => new Error(u("Invalid actuator impulse")), l = () => new Error(u("Invalid position servo target"));
         if (!Array.isArray(t) || t.length > 64)
@@ -15307,33 +15307,37 @@ self.onmessage = async (e) => {
           q.add(c.id);
         }
         for (const c of i)
-          c.enabled ? (qe.setHingeServo(c.id, c.angleRad, c.torqueNm), n2.set(c.id, "hinge")) : (qe.coastHingeMotor(c.id), n2.delete(c.id));
+          c.enabled ? (le.setHingeServo(c.id, c.angleRad, c.torqueNm), Xe.set(c.id, "hinge")) : (le.coastHingeMotor(c.id), Xe.delete(c.id));
         for (const c of t)
-          qe.applyJointImpulse(c.id, c.impulse);
-        qe.step(5e-3), a4(), s4(), n.rays && i0(n.rays);
+          le.applyJointImpulse(c.id, c.impulse);
+        le.step(5e-3), a4(), s4(), n.rays && i0(n.rays);
       } else if (n.op === "motor") {
         if (!Number.isFinite(n.speedDps) || Math.abs(n.speedDps) > 720)
           throw new Error(u("Motor speed must be between -720 and 720 degrees per second"));
-        qe.setHingeMotor(n.id, n.speedDps * Math.PI / 180, n.torqueNm), n2.set(n.id, "hinge");
+        le.setHingeMotor(n.id, n.speedDps * Math.PI / 180, n.torqueNm), Xe.set(n.id, "hinge");
       } else if (n.op === "stop-motor")
-        n.action === "coast" ? qe.coastHingeMotor(n.id) : qe.stopHingeMotor(n.id), n.action === "coast" ? n2.delete(n.id) : n2.set(n.id, "hinge");
+        n.action === "coast" ? le.coastHingeMotor(n.id) : le.stopHingeMotor(n.id), n.action === "coast" ? Xe.delete(n.id) : Xe.set(n.id, "hinge");
       else if (n.op === "slider")
-        qe.setSliderMotor(n.id, n.speedMmS, n.forceN), n2.set(n.id, "slider");
+        le.setSliderMotor(n.id, n.speedMmS, n.forceN), Xe.set(n.id, "slider");
       else if (n.op === "stop-slider")
-        qe.stopSliderMotor(n.id, n.action), n.action === "coast" ? n2.delete(n.id) : n2.set(n.id, "slider");
+        le.stopSliderMotor(n.id, n.action), n.action === "coast" ? Xe.delete(n.id) : Xe.set(n.id, "slider");
       else if (n.op === "velocity")
-        qe.setLinearVelocity(n.id, n.velocityMmS);
+        le.setLinearVelocity(n.id, n.velocityMmS);
       else if (n.op === "grab")
-        qe.grabBody(n.id, n.pointMm, n.targetMm);
+        le.grabBody(n.id, n.pointMm, n.targetMm);
       else if (n.op === "release-grab")
-        qe.releaseGrab();
+        le.releaseGrab();
       else if (n.op === "ball")
-        n.shape === "box" ? qe.spawnBox(n.id, n.positionMm, n.velocityMmS, n.radiusMm) : qe.spawnSphere(n.id, n.positionMm, n.velocityMmS, n.radiusMm), D4.set(n.id, { previewRadiusMm: n.radiusMm, previewShape: n.shape ?? "sphere" });
+        n.shape === "box" ? le.spawnBox(n.id, n.positionMm, n.velocityMmS, n.radiusMm) : le.spawnSphere(n.id, n.positionMm, n.velocityMmS, n.radiusMm), D4.set(n.id, { previewRadiusMm: n.radiusMm, previewShape: n.shape ?? "sphere" });
       else if (n.op === "impulse")
-        qe.applyImpulse(n.id, n.impulseNs, n.pointMm);
-      else if (n.op === "stop-motors")
-        for (const [t, i] of n2)
-          i === "hinge" ? qe.stopHingeMotor(t) : qe.stopSliderMotor(t);
+        le.applyImpulse(n.id, n.impulseNs, n.pointMm);
+      else if (n.op === "stop-motors") {
+        if (n.action !== void 0 && n.action !== "brake" && n.action !== "coast")
+          throw new Error(u("Unsupported CAD stop action"));
+        for (const [t, i] of Xe)
+          i === "hinge" ? n.action === "coast" ? le.coastHingeMotor(t) : le.stopHingeMotor(t) : le.stopSliderMotor(t, n.action);
+        n.action === "coast" && Xe.clear();
+      }
     }
     self.postMessage({ request: n.request, frame: n.op === "actuator-step" && n.telemetryOnly === !0 ? F8() : Rl() });
   } catch (t) {

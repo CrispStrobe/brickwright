@@ -114,16 +114,17 @@ Reads observe the solved circuit voltage, while toggle changes the retained
 output request. A heavily loaded output can therefore read LOW while its
 requested latch is HIGH. Only explicit `PROCdelay` calls advance circuit time.
 
-### The 16 admitted electrical controller profiles
+### The 18 admitted electrical controller profiles
 
 The authority is `bw-board/portable-gpio.js` at
-[`8be0fbc8e91f1ed2cebb26883210efceef9234cc`](https://github.com/CrispStrobe/bw-board/blob/8be0fbc8e91f1ed2cebb26883210efceef9234cc/src/portable-gpio.js).
+[`49a21d82112b9bdca91bec9ffb4c7412fb05a849`](https://github.com/CrispStrobe/bw-board/blob/49a21d82112b9bdca91bec9ffb4c7412fb05a849/src/portable-gpio.js).
 Terminal names are matched in full, without case sensitivity. IDs are logical
 library numbers, not physical connector positions or CPU register addresses.
 
 | Circuit kind | Modeled logic supply | Admitted terminals and BASIC IDs |
 | --- | --- | --- |
 | `mcu` | Circuit bench voltage | `P0.0`–`P7.7`: `8 * port + bit`, IDs 0–63 |
+| `stc15_mcu` | 5 V | P0–P3 → 0–31; P4.1/P4.2/P4.4/P4.5 → 33/34/36/37; P5.4/P5.5 → 44/45 |
 | `arduino_uno` | 5 V | D0–D13 → 0–13; A0–A5 → 14–19 |
 | `arduino_nano` | 5 V | D0–D13 → 0–13; A0–A5 → 14–19; A6/A7 excluded |
 | `arduino_mega` | 5 V | D0–D53 → 0–53; A0–A15 → 54–69 |
@@ -132,6 +133,7 @@ library numbers, not physical connector positions or CPU register addresses.
 | `microbit_breakout` | 3.3 V | P0, P1, P2, P8, P12, P16 → their pad numbers |
 | `calliopemini` | 3.3 V | P0–P3 → 0–3 |
 | `circuit_playground_express` | 3.3 V | A0–A7 → 0–7, with no Arduino analog-pin offset |
+| `pybadge` | 3.3 V | RX/TX → 0/1; D2/D3/D5/D6/D9–D13 → their numbers; FREE → 7; A0–A5 → 14–19; MISO/MOSI/SCK → 26/27/28 |
 | `esp8266` | 3.3 V | GPIO0–GPIO5 and GPIO12–GPIO15 → their GPIO numbers |
 | `esp32_4848s040` | 3.3 V | H1 GPIO1, GPIO2, GPIO40, GPIO43, GPIO44 → those numbers |
 | `attiny85` | 5 V | PB0–PB5 → 8–13 |
@@ -153,6 +155,10 @@ and ATtiny88 PC6. Its language-level maps are also narrower than this host
 inventory: ESP32-S040 and the ATtiny88 QFN-only PA pads are currently usable
 through authored BASIC, without a corresponding portable `DEVICE` conversion
 route. See [GENERATOR.md](GENERATOR.md) for exact language maps and spellings.
+PyBadge source generation admits its D2/D3/D5/D6/D9–D13 and A0–A5 pads;
+the additional RX/TX, FREE and SPI host pads require authored BASIC. SDA/SCL
+and STEMMA aliases are excluded. STC15's port inventory describes its exposed
+DIP-40 terminals; reset, crystal and fuse behavior remain outside this host.
 
 `eater6502` here means host-driven VIA terminal simulation. It does not mean
 the CrispBASIC interpreter runs on the 6502. Likewise, the generic `mcu` profile
@@ -181,7 +187,7 @@ integration tests when electrical behavior matters.
 ## BASIC ↔ pseudocode: use the explicit portable subset
 
 The shared producer is `CrispStrobe/sb3-creator` at
-[`2c991d9a590d189eaad66c96951d4815a9f34e29`](https://github.com/CrispStrobe/sb3-creator/tree/2c991d9a590d189eaad66c96951d4815a9f34e29).
+[`b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a`](https://github.com/CrispStrobe/sb3-creator/tree/b8a8f0b39ec24a5e6daf0ab08b4ee3979db7179a).
 Brickwright consumes that exact revision through its compiler sync. The
 converter preserves a qualified source subset; it is not a general equivalence
 claim for every BBC BASIC program or for ordinary Scratch VM execution.
@@ -235,14 +241,15 @@ CrispBASIC mode and run with a fresh portable host and the same pin model.
 | Qualified reverse area | Conditions |
 | --- | --- |
 | Digital I/O | Static `REM @bw device`/`pin` metadata and matching ordered `PROCpinMode` prelude; proven 0/1 electrical writes, latch toggles and solved reads with ACTIVE LOW preserved |
-| Simulation time | Literal integer millisecond delays; `FNmillis` recovered through the portable timer representation |
-| Values | Finite numeric literals, lowercase unsuffixed numeric scalars, qualified arithmetic/comparisons and Boolean expressions; quoted literal PRINT text |
+| Simulation time | Literal integer millisecond delays and recognized adjacent range-checked computed waits; `FNmillis` recovered through the portable timer representation |
+| Values | Finite numeric literals, lowercase unsuffixed numeric scalars, qualified arithmetic/comparisons and Boolean expressions; `PI`, `SQR`, `LN`, signed integer `MOD` and the documented degree/radian trigonometric forms; quoted literal PRINT text |
+| Procedures | Lowercase numeric `DEF PROC` definitions after the main `END`, read-only numeric parameters, forward/nested/recursive calls and once-only left-to-right argument evaluation |
 | Control flow | Structured IF/ELSE and WHILE, FOREVER, literal-count FOR loops with unobserved private counters, and recognized generated numbered control-flow shapes |
 | Canvas source | Clear, known palette helper, pen up/down, integer go-to/set-x/set-y, and direct MOVE/DRAW on the generator's four-unit coordinate grid |
 
 Forward generation accepts more operations than this strict reverse subset.
-For example, a forward-generated computed delay can be valid to run yet fail
-reverse conversion without an integer/range proof. Arbitrary GOTO, EVAL,
+For example, a computed delay can be valid to run yet fail reverse conversion
+without the recognized adjacent range guard and rounding form. Arbitrary GOTO, EVAL,
 computed pin IDs, dynamic modes, arbitrary non-0/1 writes, typed/string
 variables, unqualified expressions, unsupported graphics and modified helper
 bodies refuse the whole conversion. Diagnostics identify physical source lines
@@ -265,7 +272,7 @@ drawing operations and text outside the preview produce visible bounded
 diagnostics. A command that can execute and render is not automatically
 accepted by the stricter BASIC-to-pseudocode converter.
 
-## Robot motor example and the CAD boundary
+## Robot motor and CAD examples
 
 The self-contained [robot motor example](examples/robot-motor/README.md) includes
 Circuit JSON and BASIC source. Uno D3/D7/D8 drive an H-bridge and a DC motor with
@@ -285,13 +292,22 @@ root dependencies:
 node --test packages/crisp-basic/tests/robot-motor.test.mjs
 ```
 
-CAD body motion and Robot Lab world motion are not connected to this BASIC
-host. BASIC and CAD/circuit coupling currently require exclusive ownership of
-the same circuit clock. CAD uses reset origins and fixed 5 ms coupling frames;
-BASIC preserves existing circuit history and permits individual millisecond
-delays. A future coupled adapter needs one clock owner, an explicit sub-5 ms
-policy and cancellation/cleanup spanning both electrical and mechanical state.
-The existing mutual exclusion remains in place.
+The [CAD robot example](examples/cad-robot/README.md) extends this path to the
+shipped Scout encoder project. **Connect CAD motors** uses its saved motor/joint
+bindings and one shared owner for BASIC, Circuit and CAD. Electrical time is
+exact to the requested integer millisecond; torque accumulates until each 5 ms
+mechanical boundary. The 2 + 3 + 200 ms example completes 41 physics steps.
+An incomplete final interval is not rounded up or submitted as a partial step.
+
+Stop releases GPIO, awaits an already-submitted physics command and preserves
+its final paused world. The next run starts `FNmillis` at zero and reacquires
+the same poses, velocities and completed mechanical clock. Tests use the actual
+interpreter, solver and shipped CAD worker to observe motor polarity, free-body
+motion, repeated runs and Stop after a real command submission. Run
+`node --test test/crispbasic-cad-physics.test.mjs` after staging the pinned SDK.
+The production editor scenarios load the saved project through its File menu.
+Independent clock owners remain mutually exclusive. Robot Lab worlds and
+physical hardware are separate targets.
 
 ## Reproduce and extend the support boundary
 

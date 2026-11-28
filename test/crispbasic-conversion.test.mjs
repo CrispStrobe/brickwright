@@ -12,6 +12,9 @@ import basicToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-basic.
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import {validateCrispBasicPseudocode, crispBasicModeError, CRISPBASIC_PSEUDOCODE_MARKER} from '../overlay/scratch-gui/src/lib/sb3-creator-crispbasic-mode.js';
+import {basicProfileFor, hiddenCodeDrafts, standaloneBasicDrafts}
+    from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
+import {extractCrispBasicEditorMethods} from '../scripts/lib/crispbasic-editor-harness.mjs';
 
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 function extract(start, end) {
@@ -19,17 +22,18 @@ function extract(start, end) {
     assert.ok(first >= 0 && last > first, `Actual editor method boundary: ${start}`);
     return source.slice(first, last);
 }
-const methods = extract('    async deriveBuffer (src, from, to) {', '    /**\n     * Is the RCX extension loaded?') +
-    extract('    async compile ({strict = false, pseudocode = null} = {}) {', '    // Read the running project into all languages at once.') +
-    extract('    setActiveCode (text) {', '    // Lazily import the compiler through the registering door') +
-    extract('    basicGenerationPlaceholder (text) {', '    // Fetch examples/index.json once');
+const methods = extractCrispBasicEditorMethods(source) +
+    extract('    convertedSource ({pseudocode, warnings = []}) {', '    /**\n     * Is the RCX extension loaded?') +
+    extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
+        '    // Read the running project into all languages at once.');
+const labels = extract('const LANG_LABEL = ', '\n');
 const readerImport = '(await import(/* webpackChunkName: "sb3-creator-basic" */ \'../../lib/sb3-creator-basic.js\')).default';
 assert.equal(methods.split(readerImport).length - 1, 2, 'both real BASIC-reader consumers are exercised');
-const Editor = new Function('readBasic', 'TWO_WAY', 'DOS_LANG', 'conversionFailure', 'LANG_LABEL',
-    'validateCrispBasicPseudocode', 'crispBasicModeError',
-    `return class {${methods.replaceAll(readerImport, 'readBasic')}}`)(
-    basicToPseudocode, new Set(['basic', 'pseudocode']), {}, conversionFailure, {basic: 'BBC BASIC'},
-    validateCrispBasicPseudocode, crispBasicModeError);
+const Editor = new Function('readBasic', 'TWO_WAY', 'DOS_LANG', 'conversionFailure',
+    'validateCrispBasicPseudocode', 'crispBasicModeError', 'basicProfileFor', 'hiddenCodeDrafts', 'standaloneBasicDrafts',
+    `${labels} return class {${methods.replaceAll(readerImport, 'readBasic')}}`)(
+    basicToPseudocode, new Set(['basic', 'pseudocode']), {}, conversionFailure,
+    validateCrispBasicPseudocode, crispBasicModeError, basicProfileFor, hiddenCodeDrafts, standaloneBasicDrafts);
 
 function fixture(text) {
     const effects = [];
@@ -37,14 +41,13 @@ function fixture(text) {
     Object.assign(editor, {
         state: {lang: 'basic', basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false,
             basicPortableLibrary: false, basicGenerationFailed: false, basicWarnings: [],
+            libraryTarget: null, authoredSources: {},
             buffers: {basic: text, pseudocode: 'existing blocks source'}, uploads: []},
         props: {vm: {runtime: {getTargetForStage: () => ({id: 'retained-stage'})},
             loadProject() { effects.push('loadProject'); }}},
         L: {stCompiling: 'Compiling', stError: message => `Conversion refused: ${message}`},
         setState(update) { const patch = typeof update === 'function' ? update(this.state) : update;
             if (patch) Object.assign(this.state, patch); },
-        activeCode() { return this.state.buffers[this.state.lang]; },
-        invalidateArcadeReport() {},
         async runCrispBasic() { effects.push('runCrispBasic'); },
         canLiftAsm() { return false; },
         async lib() { return {default: class {

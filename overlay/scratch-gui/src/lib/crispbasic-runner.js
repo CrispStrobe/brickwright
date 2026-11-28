@@ -223,8 +223,16 @@ export class CrispBasicRunner {
                 const failed = error => { cleanupError = {kind: 'host', message: hostMessage(error)}; };
                 try { await active.session?.dispose(); } catch (error) { failed(error); }
                 try { active.circuit?.dispose(); } catch (error) { failed(error); }
+                try { await active.circuit?.whenDisposed(); } catch (error) { failed(error); }
                 try { active.controller.abort(); } catch (error) { failed(error); }
-                if (cleanupError) active.reason = {status: 'host-error', error: cleanupError};
+                if (cleanupError) {
+                    // A BASIC/host failure remains the primary diagnosis. Keep
+                    // a separate cleanup failure visible without hiding it.
+                    if (active.reason && ['error', 'host-error'].includes(active.reason.status)) {
+                        active.reason = {...active.reason, cleanupError};
+                    } else if (result && ['error', 'host-error'].includes(result.status)) result = {...result, cleanupError};
+                    else active.reason = {status: 'host-error', error: cleanupError};
+                }
             } finally {
                 active.finished = true;
                 if (this._active === active) this._active = null;

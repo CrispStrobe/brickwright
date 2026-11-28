@@ -50,8 +50,8 @@ cannot run, return to blocks or derive another language while its generation-err
 banner remains. Whitespace edits preserve the refusal; removing or replacing the
 banner admits an explicit authored correction.
 
-For portable digital/time programs, explicitly select **Generate portable
-Circuit calls**, then **From blocks**. This requests the pinned producer's
+For portable digital/time programs, explicitly select **Portable BASIC ↔
+pseudocode**, then **From blocks**. This requests the pinned producer's
 `mode: 'crispbasic'`; it does not enable circuit access or rewrite edited source.
 Select **Connect Circuit** separately to run the generated calls against a
 supported board in the current circuit. Timing uses integer simulated
@@ -59,7 +59,10 @@ milliseconds. Toggle emits `PROCdigitalToggle` against the retained electrical
 output latch; unsupported operations such as `wait until` still refuse.
 Live portable calls, including toggle, currently refuse **To blocks**, naming
 their source lines and preserving the
-existing project. Ordinary supported BASIC retains its existing conversion path.
+existing project. Switching between BASIC and pseudocode with portable mode
+enabled uses the separate qualified reverse reader, including reusable numeric
+procedures and recognized checked computed delays. Saved portable source keeps
+its required-runtime marker. Ordinary supported BASIC retains its existing conversion path.
 [GENERATOR.md](GENERATOR.md) documents maps, numeric conversion and the reverse
 boundary.
 
@@ -90,7 +93,7 @@ and WASM digests, the actual import list, and licence hashes. The deterministic
 manifest records every shipped asset. `package:crispbasic:check` rejects missing,
 extra, modified and stale files. An invalid build leaves the prior payload
 intact. Source, toolchain and runtime notices accompany the shipped binary.
-Version `0.1.0-dev.6` has 20 manifest-listed payload assets, plus `manifest.json`;
+Version `0.1.0-dev.8` has 20 manifest-listed payload assets, plus `manifest.json`;
 the added runtime modules are `src/simulation-host.mjs` and
 `src/simulation-protocol.mjs`. Rebuild and repackage the C/WASM artifact when
 upgrading; the simulation API requires ABI marker `2` before enabling the bridge.
@@ -107,14 +110,16 @@ the current BASIC buffer.
 ## Rendering boundary
 
 The existing canvas renders a VDU subset: text, colours, MODE clearing and
-basic MOVE/DRAW output. The integration checks fixed output bytes and actual
+absolute/relative lines, points, filled triangles and axis-aligned rectangles.
+It supports fixed text cells, cursor movement and graphics origins. The
+integration checks fixed output bytes and actual
 pixels for these primitives. The terminal now consumes output already present
 when it mounts, preserves partial VDU commands across chunks, and resets the
 decoder/cursors/canvas for a new run, including identical repeated output.
 
-This remains a partial renderer. Screen modes, cursor behavior, scrolling,
-origins, plotting modes, filled shapes and palette semantics are not fully
-qualified. Graphics queries such as `POINT` remain unavailable in the
+This remains a partial renderer with a fixed 320×256 canvas and eight-colour
+palette. Full screen-mode dimensions, scrolling, raster operations and palette
+semantics remain outside its qualification. Graphics queries such as `POINT` remain unavailable in the
 restricted interpreter. Text output is a transcript, not a complete terminal
 screen model. No source debugger is supplied by this integration.
 
@@ -149,6 +154,13 @@ same canvas board, applies the documented logical pin map and uses the existing
 solver for digital drive and electrical sense. `PROCdelay` advances solver time
 in cooperative batches; `FNmillis` starts at zero relative to the acquired clock.
 Starting BASIC does not reset the circuit's controls or component history.
+
+For saved motor/joint bindings in a CAD-enabled build, also select **Connect
+CAD motors** after opening the CAD Editor. One owner coordinates the electrical
+clock with 5 ms mechanical intervals. Stop awaits submitted physics work and
+preserves the paused world for the next run. See the executable
+[CAD robot example](examples/cad-robot/README.md) for the saved Scout project,
+exact substep policy and same-world behavior.
 
 Stop, Reset, unmount, circuit edits and project replacement release the captured
 pin/clock ownership. Competing debugger, firmware and coupled-simulation starts
