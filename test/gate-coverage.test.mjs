@@ -27,8 +27,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readdirSync, readFileSync} from 'node:fs';
 import path from 'node:path';
-import {directlyExecutesGate} from '../scripts/lib/gate-execution.mjs';
-import {directlyExecutesPromisifiedGate} from '../scripts/lib/gate-promisified-exec.mjs';
+import {directlyExecutesPromisifiedGate, directlyExecutesChildProcessGate} from '../scripts/lib/gate-promisified-exec.mjs';
 import {stepReferenceProblems} from '../scripts/lib/workflow-step-refs.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -310,13 +309,16 @@ const aliasInvokes = (run, gate, scripts = packageScripts) => Object.entries(scr
  * together, "exercised by something" quietly included "written down somewhere".
  *
  * So: RUN BY A WORKFLOW is a `run:` scalar that invokes it, directly or through
- * an npm alias. EXERCISED BY A TEST imports the gate or passes its path as the
- * actual Node/fork entry argument. Immutable values and called local wrappers
- * can carry that path; an unrelated spawn elsewhere cannot. Anything else is a
+ * an npm alias. EXERCISED BY A TEST is a test that SPAWNS it — the gate's path
+ * is the actual program argument of an imported Node child call. Anything else is a
  * MENTION, which is worth reporting and is not coverage.
  *
- * The execution helper follows syntax and dataflow without executing a test.
- * Source-link metadata alongside a Git or Python subprocess stays metadata.
+ * The AST recognizer follows unique immutable path bindings into the program
+ * argument. A source-file inventory plus an unrelated child process is only a
+ * mention: fetch-pinning reads verify-machine-video-boot's source while running
+ * a Python probe, which used to give the browser gate false execution credit.
+ * Imported function identity, shadowing, reassignment and Node's argument
+ * position are checked; unsupported call forms fail closed.
  */
 const runByWorkflow = gate => workflowRuns.some(run =>
     runInvokesGate(run, gate) || aliasInvokes(run, gate));
@@ -354,15 +356,13 @@ const referencesGatePath = (text, gate) => {
         /\b(?:join|resolve)\s*\(/.test(statement) &&
         new RegExp(`['"]scripts['"][\\s\\S]*?['"]${name}['"]`).test(statement));
 };
-const exercisedIn = ({text, raw, file}, gate) => {
+const exercisedIn = ({text, raw}, gate) => {
     // Never let an unrelated direct call credit this promisified path.
     if (/\bpromisify\s*\(\s*execFile\s*\)/.test(raw || '') && raw.includes(`scripts/${gate}`)) {
         return directlyExecutesPromisifiedGate(raw, gate);
     }
-    return importsGate(text, gate) || directlyExecutesGate(raw || text, gate, {
-        root: ROOT,
-        filename: path.join(ROOT, 'test', file || 'fixture.test.mjs')
-    });
+    return importsGate(text, gate) || (referencesGatePath(text, gate) &&
+        directlyExecutesChildProcessGate(raw || text, gate));
 };
 
 /**
@@ -498,453 +498,6 @@ test('an inherited inventory cannot admit a new orphan, changed source or newly 
     world.runs = ['node scripts/' + gate];
     assert.deepEqual(newlyWiredKnown(known, wired), [gate],
         'real workflow wiring requires removal from the inherited inventory');
-});
-
-// Execution provenance fixtures: source strings are parsed, never executed.
-const EXECUTION_PROOF_GATE = 'verify-fixture.mjs';
-const EXECUTION_PROOF_CASES = [
-    [
-        "direct literal Node launch",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']));",
-        true
-    ],
-    [
-        "joined immutable path",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const here=dirname(fileURLToPath(import.meta.url)); const S=join(here,'..','scripts','verify-fixture.mjs'); test('x',()=>execFileSync(process.execPath,[S]));",
-        true
-    ],
-    [
-        "real descriptor wrapper",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const verifiers=[{script:'scripts/verify-fixture.mjs'}]; test('x',async t=>{const run=(script,args)=>spawnSync(process.execPath,[resolve(ROOT,script),...args]); for(const {script} of verifiers) await t.test(script,()=>run(script,['--help']));});",
-        true
-    ],
-    [
-        "descriptor Array.forEach wrapper",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const verifiers=[{script:'scripts/verify-fixture.mjs'}]; const run=script=>spawnSync(process.execPath,[resolve(ROOT,script)]); test('x',()=>verifiers.forEach(({script})=>run(script)));",
-        true
-    ],
-    [
-        "imported namespace child process",
-        "import test from 'node:test'; import * as cp from 'node:child_process'; test('x',()=>cp.spawnSync(process.execPath,['scripts/verify-fixture.mjs']));",
-        true
-    ],
-    [
-        "imported child alias",
-        "import test from 'node:test'; import {execFileSync as launch} from 'node:child_process'; test('x',()=>launch(process.execPath,['scripts/verify-fixture.mjs']));",
-        true
-    ],
-    [
-        "node:test namespace",
-        "import * as t from 'node:test'; import {spawnSync} from 'node:child_process'; t.test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']));",
-        true
-    ],
-    [
-        "node preload plus real entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['--import','./scripts/lib/register-gui-scope.mjs','scripts/verify-fixture.mjs']));",
-        true
-    ],
-    [
-        "fork real entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>fork('scripts/verify-fixture.mjs',[]));",
-        true
-    ],
-    [
-        "assertion callback",
-        "import test from 'node:test'; import assert from 'node:assert/strict'; import {spawnSync} from 'node:child_process'; test('x',()=>assert.doesNotThrow(()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'])));",
-        true
-    ],
-    [
-        "metadata with unrelated Git and Python launches",
-        // gate-shapes-allow: parsed adversarial source, never executed; Git metadata cannot prove a gate launch.
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const CENSUS=[{file:'scripts/verify-fixture.mjs',kind:'raw'}]; test('x',()=>{execFileSync('git',['status']);spawnSync('/usr/bin/python3',['-I','-B','-c','pass']);});",
-        false
-    ],
-    [
-        "uncalled wrapper",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const script='scripts/verify-fixture.mjs'; const run=()=>spawnSync(process.execPath,[script]); test('x',()=>42);",
-        false
-    ],
-    [
-        "descriptor unused by wrapper",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const verifiers=[{script:'scripts/verify-fixture.mjs'}]; const run=script=>spawnSync(process.execPath,['scripts/other.mjs']); test('x',()=>{for(const {script} of verifiers)run(script);});",
-        false
-    ],
-    [
-        "gate is merely data argv",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['scripts/other.mjs','scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "gate is preload only",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['--import','scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "eval argument is not an entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['-e','0','scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "Python receives gate argument",
-        // gate-shapes-allow: parsed negative fixture; a non-Node executable receiving the path is not gate execution.
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync('python',['scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "spawner is locally declared",
-        "import test from 'node:test'; const spawnSync=()=>{}; test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "spawner import has wrong provenance",
-        "import test from 'node:test'; import {spawnSync} from './fake-process.mjs'; test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "spawner is shadowed by parameter",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const run=spawnSync=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']); test('x',()=>run(()=>{}));",
-        false
-    ],
-    [
-        "process is shadowed",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const run=process=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']); test('x',()=>run({execPath:'python'}));",
-        false
-    ],
-    [
-        "immutable path is reassigned",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); let script='scripts/verify-fixture.mjs'; script='scripts/other.mjs'; test('x',()=>spawnSync(process.execPath,[script]));",
-        false
-    ],
-    [
-        "descriptor mutation through alias",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const verifiers=[{script:'scripts/verify-fixture.mjs'}]; const alias=verifiers; alias[0].script='scripts/other.mjs'; test('x',()=>{for(const {script} of verifiers)spawnSync(process.execPath,[script]);});",
-        false
-    ],
-    [
-        "removed descriptor",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const verifiers=[{script:'scripts/verify-fixture.mjs'}]; verifiers.pop(); test('x',()=>{for(const {script} of verifiers)spawnSync(process.execPath,[script]);});",
-        false
-    ],
-    [
-        "explicitly skipped test",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test.skip('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "literal false branch",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{if(false)spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "unproven callback consumer",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const script='scripts/verify-fixture.mjs'; test('x',()=>unknownWrapper(()=>spawnSync(process.execPath,[script])));",
-        false
-    ],
-    [
-        "unknown executable",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.env.NODE,['scripts/verify-fixture.mjs']));",
-        false
-    ],
-    [
-        "relative entry with a different cwd",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'],{cwd:'/elsewhere'}));",
-        false
-    ],
-    [
-        "fork relative entry with options shorthand cwd",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>fork('scripts/verify-fixture.mjs',{cwd:'/elsewhere'}));",
-        false
-    ],
-    [
-        "malformed syntax",
-        "import {spawnSync} from 'node:child_process'; scripts/verify-fixture.mjs ; {",
-        false
-    ],
-    [
-        "for-of break stops entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{for(const script of ['scripts/verify-fixture.mjs']){break;spawnSync(process.execPath,[script]);}});",
-        false
-    ],
-    [
-        "for-of continue stops entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{for(const script of ['scripts/verify-fixture.mjs']){continue;spawnSync(process.execPath,[script]);}});",
-        false
-    ],
-    [
-        "for-of return stops later iterations",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{for(const script of ['other','scripts/verify-fixture.mjs']){if(script==='other')return;spawnSync(process.execPath,[script]);}});",
-        false
-    ],
-    [
-        "some short circuits",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>[true,false].some(stop=>{if(stop)return true;spawnSync(process.execPath,['scripts/verify-fixture.mjs']);return false;}));",
-        false
-    ],
-    [
-        "every short circuits",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>[true,false].every(stop=>{if(stop)return false;spawnSync(process.execPath,['scripts/verify-fixture.mjs']);return true;}));",
-        false
-    ],
-    [
-        "unhandled explicit throw stops entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{try {throw Error('stop');}finally{}spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "throw in invoked wrapper stops entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); function halt(){throw Error('stop');} test('x',()=>{halt();spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "unknown options cannot imply root cwd",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const options=JSON.parse('{\"cwd\":\"/elsewhere\"}');test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'],options));",
-        false
-    ],
-    [
-        "unknown options spread cannot imply root cwd",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const options=JSON.parse('{\"cwd\":\"/elsewhere\"}');test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'],{...options}));",
-        false
-    ],
-    [
-        "unknown descriptor spread can overwrite path",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const entry={script:'scripts/verify-fixture.mjs',...JSON.parse('{\"script\":\"other\"}')};test('x',()=>spawnSync(process.execPath,[entry.script]));",
-        false
-    ],
-    [
-        "unknown computed key can overwrite path",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const entry={script:'scripts/verify-fixture.mjs',[process.env.KEY]:'other'};test('x',()=>spawnSync(process.execPath,[entry.script]));",
-        false
-    ],
-    [
-        "later lexical spawner declaration shadows throughout block",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{spawnSync(process.execPath,['scripts/verify-fixture.mjs']);const spawnSync=()=>{};});",
-        false
-    ],
-    [
-        "later lexical process declaration shadows throughout block",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{spawnSync(process.execPath,['scripts/verify-fixture.mjs']);const process={execPath:'python'};});",
-        false
-    ],
-    [
-        "var spawner shadows throughout function",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{spawnSync(process.execPath,['scripts/verify-fixture.mjs']);if(false){var spawnSync=()=>{};}});",
-        false
-    ],
-    [
-        "explicit cwd following spread is known",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const options=JSON.parse('{}');test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'],{...options,cwd:ROOT,shell:false}));",
-        true
-    ],
-    [
-        "absolute entry does not depend on unknown cwd",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const options={cwd:process.env.SOME_CWD,shell:false};test('x',()=>spawnSync(process.execPath,[resolve(ROOT,'scripts/verify-fixture.mjs')],options));",
-        true
-    ],
-    [
-        "fork with non-Node executable",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>fork('scripts/verify-fixture.mjs',[],{execPath:'python'}));",
-        false
-    ],
-    [
-        "fork unknown shorthand options",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const options=JSON.parse('{\"cwd\":\"/elsewhere\"}');test('x',()=>fork('scripts/verify-fixture.mjs',options));",
-        false
-    ],
-    [
-        "fork eval execArgv does not run the gate entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>fork('scripts/verify-fixture.mjs',[],{execArgv:['-e','0']}));",
-        false
-    ],
-    [
-        "fork another execArgv entry does not run the gate",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>fork('scripts/verify-fixture.mjs',[],{execArgv:['scripts/other.mjs']}));",
-        false
-    ],
-    [
-        "fork known preload retains the gate entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>fork('scripts/verify-fixture.mjs',[],{execArgv:['--import','./scripts/lib/register-gui-scope.mjs'],cwd:ROOT}));",
-        true
-    ],
-    [
-        "custom shell cannot claim direct execution",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>execFileSync(process.execPath,['scripts/verify-fixture.mjs'],{shell:'/other-shell'}));",
-        false
-    ],
-    [
-        "boolean shell cannot claim direct execution",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'],{shell:true}));",
-        false
-    ],
-    [
-        "unknown shell options cannot claim an absolute entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const options=JSON.parse('{}');test('x',()=>spawnSync(process.execPath,[resolve(ROOT,'scripts/verify-fixture.mjs')],options));",
-        false
-    ],
-    [
-        "chdir invalidates a relative child entry",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{process.chdir('/elsewhere');spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "chdir invalidates cwd and relative path builders",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{process.chdir('/elsewhere');spawnSync(process.execPath,[resolve('scripts/verify-fixture.mjs')],{cwd:process.cwd()});});",
-        false
-    ],
-    [
-        "imported chdir alias invalidates the current directory",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); import {chdir as move} from 'node:process';test('x',()=>{move('/elsewhere');spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "absolute entry remains independent after chdir",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{process.chdir('/elsewhere');spawnSync(process.execPath,[resolve(ROOT,'scripts/verify-fixture.mjs')]);});",
-        true
-    ],
-    [
-        "explicit absolute child cwd remains known after chdir",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{process.chdir('/elsewhere');spawnSync(process.execPath,['scripts/verify-fixture.mjs'],{cwd:ROOT});});",
-        true
-    ],
-    [
-        "prototype inherited cwd cannot imply repository root",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>execFileSync(process.execPath,['scripts/verify-fixture.mjs'],{__proto__:{cwd:'/elsewhere'}}));",
-        false
-    ],
-    [
-        "prototype inherited shell cannot imply a direct child",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>execFileSync(process.execPath,[resolve(ROOT,'scripts/verify-fixture.mjs')],{__proto__:{shell:'/other-shell'}}));",
-        false
-    ],
-    [
-        "computed prototype key is an ordinary own property",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>execFileSync(process.execPath,['scripts/verify-fixture.mjs'],{['__proto__']:{cwd:'/elsewhere'}}));",
-        true
-    ],
-    [
-        "switch selects a known matching case",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const target='selected';test('x',()=>{switch(target){case 'other':break;case 'selected':spawnSync(process.execPath,['scripts/verify-fixture.mjs']);break;}});",
-        true
-    ],
-    [
-        "switch selects default after no matching case",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch('selected'){case 'other':break;default:spawnSync(process.execPath,['scripts/verify-fixture.mjs']);}});",
-        true
-    ],
-    [
-        "switch preserves case fallthrough",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch(1){case 1:case 2:spawnSync(process.execPath,['scripts/verify-fixture.mjs']);break;}});",
-        true
-    ],
-    [
-        "switch local break prevents later case execution",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch(1){case 1:break;case 2:spawnSync(process.execPath,['scripts/verify-fixture.mjs']);}});",
-        false
-    ],
-    [
-        "switch local break permits following function statements",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch(1){case 1:break;}spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        true
-    ],
-    [
-        "switch propagates function return",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch(1){case 1:return;}spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "switch propagates explicit throw",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch(1){case 1:throw Error('stop');}spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "switch propagates enclosing loop continue",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{for(const value of [1]){switch(value){case 1:continue;}spawnSync(process.execPath,['scripts/verify-fixture.mjs']);}});",
-        false
-    ],
-    [
-        "unknown switch discriminant cannot invent later execution",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); const target=process.env.TARGET;test('x',()=>{switch(target){default:break;}spawnSync(process.execPath,['scripts/verify-fixture.mjs']);});",
-        false
-    ],
-    [
-        "unknown switch case cannot select a default",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch('selected'){case process.env.TARGET:break;default:spawnSync(process.execPath,['scripts/verify-fixture.mjs']);}});",
-        false
-    ],
-    [
-        "switch cases share lexical shadowing before declaration",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch('selected'){case 'selected':spawnSync(process.execPath,['scripts/verify-fixture.mjs']);break;case 'other':const spawnSync=()=>{};break;}});",
-        false
-    ],
-    [
-        "switch default before a matching case is skipped",
-        "import test from 'node:test'; import {spawnSync,execFileSync,fork} from 'node:child_process'; import {resolve,join,dirname} from 'node:path'; import {fileURLToPath} from 'node:url'; const ROOT=resolve(import.meta.dirname,'..'); test('x',()=>{switch('selected'){default:spawnSync(process.execPath,['scripts/verify-fixture.mjs']);break;case 'selected':break;}});",
-        false
-    ]
-];
-
-for (const [name, source, expected] of EXECUTION_PROOF_CASES) {
-    test('gate execution provenance: ' + name, () => {
-        const fixtureFile = path.join(ROOT, 'test/gate-execution-fixture.test.mjs');
-        assert.equal(directlyExecutesGate(source, EXECUTION_PROOF_GATE, {
-            root: ROOT, filename: fixtureFile,
-            loadModule: file => file === path.join(ROOT, 'test/fake-process.mjs') ?
-                'export function spawnSync() {}' : null
-        }), expected, name);
-    });
-}
-
-test('actual Cowgol descriptor CLIs reach all three imported Node launches', () => {
-    const filename = path.join(ROOT, 'test/cowgol-verifier-cli.test.mjs');
-    const source = readFileSync(filename, 'utf8');
-    for (const gate of ['verify-cowgol-cpm-system.mjs', 'verify-cowgol-dos.mjs', 'verify-cowgol-dos-disk.mjs']) {
-        assert.equal(directlyExecutesGate(source, gate, {root: ROOT, filename}), true, gate);
-    }
-});
-
-test('actual corpus callback wrapper reaches its immutable oracle path', () => {
-    const filename = path.join(ROOT, 'test/corpus-differential.test.mjs');
-    assert.equal(directlyExecutesGate(readFileSync(filename, 'utf8'), 'oracle-differential.mjs',
-        {root: ROOT, filename}), true);
-});
-
-test('actual fetch-pinning metadata does not execute the machine video gate', () => {
-    const filename = path.join(ROOT, 'test/fetch-pinning.test.mjs');
-    assert.equal(directlyExecutesGate(readFileSync(filename, 'utf8'), 'verify-machine-video-boot.mjs',
-        {root: ROOT, filename}), false);
-});
-
-test('the existing imported promisify recognizer keeps real launches separate from metadata', () => {
-    const imports = "import {execFile} from 'node:child_process'; import {promisify} from 'node:util'; ";
-    assert.equal(directlyExecutesPromisifiedGate(imports +
-        "promisify(execFile)(process.execPath,['scripts/verify-fixture.mjs']);", EXECUTION_PROOF_GATE), true);
-    assert.equal(directlyExecutesPromisifiedGate(imports +
-        "const metadata={file:'scripts/verify-fixture.mjs'}; promisify(execFile)('git',['status']);",
-    EXECUTION_PROOF_GATE), false);
-});
-
-test('a local callback helper cannot escape the repository through a symlink', async () => {
-    const {mkdtempSync, mkdirSync, writeFileSync, symlinkSync, unlinkSync, rmSync} = await import('node:fs');
-    const {tmpdir} = await import('node:os');
-    const temporary = mkdtempSync(path.join(tmpdir(), 'gate-execution-boundary-'));
-    try {
-        const root = path.join(temporary, 'repo'), directory = path.join(root, 'scripts/lib');
-        mkdirSync(directory, {recursive: true});
-        const external = path.join(temporary, 'outside.mjs'), link = path.join(directory, 'wrapper.mjs');
-        const wrapper = 'export function run(callback) { return callback(); }';
-        writeFileSync(external, wrapper);
-        symlinkSync(external, link);
-        const source = "import test from 'node:test'; import {spawnSync} from 'node:child_process'; " +
-            "import {run} from '../scripts/lib/wrapper.mjs'; " +
-            "test('x',()=>run(()=>spawnSync(process.execPath,['scripts/verify-fixture.mjs'])));";
-        assert.equal(directlyExecutesGate(source, EXECUTION_PROOF_GATE, {
-            root, filename: path.join(root, 'test/escaped.test.mjs')
-        }), false);
-        unlinkSync(link);
-        writeFileSync(link, wrapper);
-        assert.equal(directlyExecutesGate(source, EXECUTION_PROOF_GATE, {
-            root, filename: path.join(root, 'test/local.test.mjs')
-        }), true);
-    } finally { rmSync(temporary, {recursive: true, force: true}); }
 });
 
 test('a wrapper runs a gate; a mention of one does not', () => {
@@ -1102,18 +655,17 @@ test('the rule reports two facts and does not confuse them', () => {
     const gate = 'verify-example.mjs';
     const scripts = {'verify:example': `node scripts/${gate}`};
     const mentionOnly = [{file: 'a.test.mjs', text: `assert.ok(yml.includes('${gate}'));`}];
-    const exercises = [{file: 'b.test.mjs',
-        text: `import {join} from 'node:path';
-            import {execFileSync} from 'node:child_process';
-            const S = join(process.cwd(), 'scripts', '${gate}');
-            execFileSync(process.execPath, [S]);`}];
+    const executionSource = `import {execFileSync} from 'node:child_process';
+        import {join} from 'node:path';
+        const S = join(import.meta.dirname, '..', 'scripts', '${gate}');
+        execFileSync(process.execPath, [S]);`;
+    const exercises = [{file: 'b.test.mjs', text: executionSource, raw: executionSource}];
 
     assert.equal(classifyGate(gate, {runs: [`node scripts/${gate}`], sources: [], scripts}), 'workflow');
     assert.equal(classifyGate(gate, {runs: ['PROOF_URL=x npm run verify:example'], sources: [], scripts}),
         'workflow', 'an env-prefixed alias is a workflow run, which is the whole point of this lane');
     assert.equal(classifyGate(gate, {runs: [], sources: exercises, scripts}), 'test');
     for (const source of [
-        // gate-shapes-allow: adversarial source fixture proves metadata plus an unrelated Python child earns no execution credit.
         `import {execFileSync} from 'node:child_process';
             const rows = [{file: 'scripts/${gate}'}];
             execFileSync('/usr/bin/python3', ['-c', probe]);`,

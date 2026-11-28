@@ -13,7 +13,6 @@ on:
       - 'test/gate-direct-exec.test.mjs'
       - 'test/gate-promisified-exec.test.mjs'
       - 'scripts/lib/gate-promisified-exec.mjs'
-      - 'scripts/lib/gate-execution.mjs'
       - 'test/fixtures/gate-coverage-inherited.json'
       - 'docs/receipts/2026-11-28-cowgol-gate-wiring-audit.json'
 
