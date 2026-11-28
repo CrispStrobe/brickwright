@@ -58,3 +58,36 @@ GCC, NASM, Git and Node.js are build/runtime tools obtained separately and are
 not vendored into this package. No Matrix Brandy, PicoBB, SDL or Box2D runtime
 is linked by either backend. Additional backends need their own pinned dependency
 records and notices when implemented.
+
+## bw-board GPIO profile catalog
+
+The generated `src/board-target-catalog.mjs` contains the canonical GPIO profile
+data from `CrispStrobe/bw-board`, commit
+`cda715c16d4b733ceb73f7720a236b5ea9e3f21d`, source `src/portable-gpio.js`.
+The catalog records that source's exact Git blob identity and is verified by
+`scripts/sync-board-targets.mjs`. The standalone runtime does not include the
+upstream electrical solver. The upstream MIT notice is reproduced unmodified:
+
+```text
+MIT License
+
+Copyright (c) 2026 CrispStrobe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

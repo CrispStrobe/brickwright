@@ -244,7 +244,7 @@ jobs:
         # No native interpreter, compiler, npm dependencies or GUI build is
         # needed on these hosts. POSIX signal delivery is tested on POSIX;
         # parent-owned timeout/output/request limits run on every platform.
-        run: node --test tests/cli-options.test.mjs tests/wasm-cli.test.mjs
+        run: node --test tests/cli-options.test.mjs tests/board-target-cli.test.mjs tests/wasm-cli.test.mjs tests/board-targets-wasm.test.mjs
 
   production:
     # This gate consumes the exact runtime already qualified above. It builds

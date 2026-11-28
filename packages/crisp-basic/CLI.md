@@ -53,6 +53,28 @@ mapped source error. The Latin-1 `text` view preserves VDU byte values and is
 not a graphics renderer. Capability discovery and fixture validation do not
 need a built engine; execution fails clearly when a required artifact is absent.
 
+## Named board targets
+
+Use `--list-targets` for the complete JSON catalog and
+`--backend wasm --target NAME` to run with the exact admitted logical pins of
+a board profile. The requested families accept `8051`, `stc15`, `stm32`,
+`pico`/`rp2040`, `nano`, `esp8266`/`8266`, `microbit` and `microbit-breakout`.
+This is host-driven logical simulation, with no MCU firmware execution or
+physical hardware. The broad names select STM32F030 and the classic AVR Nano.
+
+```sh
+node bin/crispbasic.mjs --list-targets
+node bin/crispbasic.mjs --backend wasm --target pico --capabilities
+node bin/crispbasic.mjs --backend wasm --target nano \
+  --simulation examples/board-targets/nano.json examples/board-targets/nano.bas --json
+```
+
+With a named target, fixture pins and stimuli may use exact terminal names.
+A fixture may restrict the target's pin set but cannot expand it. Capabilities
+and JSON run results include the canonical target and active terminal map.
+See [BOARD-TARGETS.md](BOARD-TARGETS.md) for all targets, alias boundaries,
+API usage and executable examples.
+
 ## Deterministic logical-pin fixtures
 
 ```sh
