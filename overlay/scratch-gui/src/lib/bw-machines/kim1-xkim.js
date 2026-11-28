@@ -1,25 +1,31 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import downloadBlob from '../download-blob.js';
 import {createKim1Tty} from './kim1-tty.js';
+import {
+    readXkimFatImage, XKIM_FAT_IMAGE_LIMIT, XKIM_FILE_COUNT, XKIM_FILE_LIMIT, XKIM_SHORT_NAME, XKIM_TOTAL_LIMIT
+} from './kim1-xkim-fat.js';
 
 export const XKIM_SOURCE = 'https://github.com/CorshamTech/xKIM/tree/0ce44974504514563e86cdf84ac8a9848b8bcdb5';
 
-export async function readXkimMedia (romFile, files) {
+export async function readXkimMedia (romFile, files, diskImage) {
     if (romFile?.size !== 8192) throw new Error('Choose the 8 KiB xKIM ROM for $E000–$FFFF.');
-    if (files.length > 64 || files.reduce((total, file) => total + file.size, 0) > 2097152) {
+    if (diskImage && files.length) throw new Error('Choose either a single FAT image or loose Corsham files.');
+    if (diskImage?.size > XKIM_FAT_IMAGE_LIMIT) throw new Error('Choose a FAT image up to 128 MiB.');
+    if (files.length > XKIM_FILE_COUNT || files.reduce((total, file) => total + file.size, 0) > XKIM_TOTAL_LIMIT) {
         throw new Error('Choose up to 64 Corsham files and 2 MiB in total.');
     }
     const names = new Set();
     for (const file of files) {
         const name = file.name.toUpperCase();
-        if (!/^[a-z0-9_-]{1,8}(\.[a-z0-9_-]{1,3})?$/i.test(file.name) || names.has(name) || file.size > 65536) {
+        if (!XKIM_SHORT_NAME.test(file.name) || names.has(name) || file.size > XKIM_FILE_LIMIT) {
             throw new Error('Corsham files need unique 8.3 names and at most 64 KiB each.');
         }
         names.add(name);
     }
     const [image, mounted] = await Promise.all([
         romFile.arrayBuffer(),
-        Promise.all(files.map(async file => ({name: file.name, bytes: new Uint8Array(await file.arrayBuffer())})))
+        diskImage ? diskImage.arrayBuffer().then(buffer => readXkimFatImage(new Uint8Array(buffer))) :
+            Promise.all(files.map(async file => ({name: file.name, bytes: new Uint8Array(await file.arrayBuffer())})))
     ]);
     return {rom: new Uint8Array(image), files: mounted};
 }
@@ -57,6 +63,6 @@ export function createXkimTerminal ({rom, files}) {
         exportFiles: async snapshot => downloadBlob('xkim-files.zip', await createXkimArchive(snapshot)),
         title: 'xKIM · Corsham files',
         inputLabel: 'xKIM command',
-        help: 'D lists files. T displays a file. S saves a memory range as Intel HEX. Export files downloads the current session files.'
+        help: 'D lists files. T displays a file. S saves a memory range as Intel HEX and L reloads it. Export files downloads the current session files.'
     });
 }

@@ -172,7 +172,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const [cpmProfile, setCpmProfile] = React.useState(kim1CpmProfiles[0]);
     const [cpmFile, setCpmFile] = React.useState(null);
     const [xkimRom, setXkimRom] = React.useState(null);
-    const [xkimFiles, setXkimFiles] = React.useState([]);
+    const [xkimMedia, setXkimMedia] = React.useState([]);
+    const [xkimMediaKind, setXkimMediaKind] = React.useState('files');
     const controllerRequest = React.useRef(null);
     React.useEffect(() => () => { controllerRequest.current = null; }, []);
     const [launching, setLaunching] = React.useState(null);
@@ -606,21 +607,30 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                     {group.xkim && <MachineEntry title="Corsham xKIM" infoPrefix={infoPrefix}
                                         rowAttributes={{'data-testid': 'bw-mm-xkim'}}
                                         info={<>Use the 8 KiB ROM built from the <a href={XKIM_SOURCE} target="_blank" rel="noreferrer">upstream xKIM source</a>.
-                                            {' '}Choose optional files with 8.3 names. The guest can change session copies. Use Export files in Controller to save them.</>}
+                                            {' '}Choose loose 8.3 files or a FAT12/16/32 image up to 128 MiB. For an image, only compatible root files are imported.
+                                            {' '}The guest changes session copies. Export files in Controller keeps them in a ZIP.</>}
                                         actions={<>
                                             <label style={fieldsStyle}>ROM
                                                 <input type="file" accept=".rom,.bin" aria-label="xKIM ROM" disabled={launching !== null}
                                                     style={{maxWidth: 140}} onChange={event => setXkimRom(event.target.files?.[0] || null)} />
                                             </label>
-                                            <label style={fieldsStyle}>Files
-                                                <input type="file" multiple aria-label="xKIM Corsham files" disabled={launching !== null}
-                                                    style={{maxWidth: 140}} onChange={event => setXkimFiles(Array.from(event.target.files || []))} />
-                                            </label>
+                                            <select value={xkimMediaKind} aria-label="xKIM storage type" disabled={launching !== null}
+                                                onChange={event => { setXkimMedia([]); setXkimMediaKind(event.target.value); }}>
+                                                <option value="files">Loose files</option>
+                                                <option value="fat">FAT image</option>
+                                            </select>
+                                            <input key={xkimMediaKind} type="file" multiple={xkimMediaKind === 'files'}
+                                                aria-label={xkimMediaKind === 'files' ? 'xKIM Corsham files' : 'xKIM FAT image'}
+                                                disabled={launching !== null} style={{maxWidth: 140}}
+                                                onChange={event => setXkimMedia(Array.from(event.target.files || []))} />
                                             <button type="button" style={btn} disabled={launching !== null || !xkimRom}
                                                 onClick={() => launch('kim1-xkim', async () => {
                                                     const request = {};
                                                     controllerRequest.current = request;
-                                                    const media = await readXkimMedia(xkimRom, xkimFiles);
+                                                    if (xkimMediaKind === 'fat' && !xkimMedia[0]) throw new Error('Choose an xKIM FAT image.');
+                                                    const media = await readXkimMedia(
+                                                        xkimRom, xkimMediaKind === 'files' ? xkimMedia : [], xkimMediaKind === 'fat' ? xkimMedia[0] : null
+                                                    );
                                                     if (controllerRequest.current !== request) return false;
                                                     const session = await createXkimTerminal(media);
                                                     if (controllerRequest.current !== request) {

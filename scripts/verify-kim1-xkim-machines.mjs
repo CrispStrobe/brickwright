@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import JSZip from 'jszip';
 import {chromium} from 'playwright';
 
-const [url, rom] = process.argv.slice(2);
+const [url, rom, fatImage] = process.argv.slice(2);
 assert.ok(url && rom, 'Pass the frontend URL and a locally built upstream xKIM ROM.');
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const page = await browser.newPage({viewport: {width: 1600, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
@@ -27,10 +27,21 @@ try {
     await run.click();
     await library.getByText(/Choose the 8 KiB xKIM ROM/).waitFor();
     await row.getByLabel('xKIM ROM').setInputFiles(rom);
-    await row.getByLabel('xKIM Corsham files').setInputFiles([
-        {name: 'HELLO.TXT', mimeType: 'text/plain', buffer: Buffer.from('HELLO FROM BRICKWRIGHT\r\n')},
-        {name: 'README.ME', mimeType: 'text/plain', buffer: Buffer.from('SECOND FILE\r\n')}
-    ]);
+    if (fatImage) {
+        await row.getByLabel('xKIM storage type').selectOption('fat');
+        await run.click();
+        await library.getByText('Choose an xKIM FAT image.', {exact: true}).waitFor();
+        const imageInput = row.getByLabel('xKIM FAT image');
+        await imageInput.setInputFiles({name: 'invalid.img', mimeType: 'application/octet-stream', buffer: Buffer.alloc(512)});
+        await run.click();
+        await library.getByText(/choose a valid FAT12, FAT16 or FAT32 volume/).waitFor();
+        await imageInput.setInputFiles(fatImage);
+    } else {
+        await row.getByLabel('xKIM Corsham files').setInputFiles([
+            {name: 'HELLO.TXT', mimeType: 'text/plain', buffer: Buffer.from('HELLO FROM BRICKWRIGHT\r\n')},
+            {name: 'README.ME', mimeType: 'text/plain', buffer: Buffer.from('SECOND FILE\r\n')}
+        ]);
+    }
     await run.click();
     await library.waitFor({state: 'hidden'});
 
@@ -116,7 +127,7 @@ try {
     await terminal.waitFor({state: 'hidden'});
     await unrelatedWidget.waitFor();
     assert.deepEqual(errors, []);
-    console.log('xKIM booted, saved and reloaded Intel HEX, and exported the exact session files through Controller.');
+    console.log(`xKIM booted from ${fatImage ? 'a FAT image' : 'loose files'}, saved and reloaded Intel HEX, and exported the exact session files through Controller.`);
 } catch (error) {
     console.error(await page.getByTestId('bw-serial-console').allTextContents());
     console.error(await page.getByTestId('bw-machine-manager').allTextContents());
