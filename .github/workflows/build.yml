@@ -4203,6 +4203,15 @@ jobs:
             bw_browser_audit_0151	${{ steps['bw_browser_audit_0151'].outcome }}	${{ steps['bw_browser_audit_0151'].conclusion }}
             bw_browser_audit_0152	${{ steps['bw_browser_audit_0152'].outcome }}	${{ steps['bw_browser_audit_0152'].conclusion }}
             bw_browser_audit_0153	${{ steps['bw_browser_audit_0153'].outcome }}	${{ steps['bw_browser_audit_0153'].conclusion }}
+            bw_browser_code_basic_profiles	${{ steps['bw_browser_code_basic_profiles'].outcome }}	${{ steps['bw_browser_code_basic_profiles'].conclusion }}
+            bw_browser_code_asm_blink	${{ steps['bw_browser_code_asm_blink'].outcome }}	${{ steps['bw_browser_code_asm_blink'].conclusion }}
+            bw_browser_code_machine_recovery	${{ steps['bw_browser_code_machine_recovery'].outcome }}	${{ steps['bw_browser_code_machine_recovery'].conclusion }}
+            bw_browser_machine_catalog_handoffs	${{ steps['bw_browser_machine_catalog_handoffs'].outcome }}	${{ steps['bw_browser_machine_catalog_handoffs'].conclusion }}
+            bw_browser_machine_firmware_library	${{ steps['bw_browser_machine_firmware_library'].outcome }}	${{ steps['bw_browser_machine_firmware_library'].conclusion }}
+            bw_browser_machine_pico_littlefs	${{ steps['bw_browser_machine_pico_littlefs'].outcome }}	${{ steps['bw_browser_machine_pico_littlefs'].conclusion }}
+            bw_browser_microtronic_controller	${{ steps['bw_browser_microtronic_controller'].outcome }}	${{ steps['bw_browser_microtronic_controller'].conclusion }}
+            bw_browser_tms1600_controller	${{ steps['bw_browser_tms1600_controller'].outcome }}	${{ steps['bw_browser_tms1600_controller'].conclusion }}
+          BW_BROWSER_RUNNER_TERMINALS_V1_3: |
             bw_browser_audit_0264	${{ steps['bw_browser_audit_0264'].outcome }}	${{ steps['bw_browser_audit_0264'].conclusion }}
             bw_browser_audit_0154	${{ steps['bw_browser_audit_0154'].outcome }}	${{ steps['bw_browser_audit_0154'].conclusion }}
             bw_browser_audit_0155	${{ steps['bw_browser_audit_0155'].outcome }}	${{ steps['bw_browser_audit_0155'].conclusion }}
@@ -4211,7 +4220,6 @@ jobs:
             bw_browser_audit_0158	${{ steps['bw_browser_audit_0158'].outcome }}	${{ steps['bw_browser_audit_0158'].conclusion }}
             bw_browser_audit_0159	${{ steps['bw_browser_audit_0159'].outcome }}	${{ steps['bw_browser_audit_0159'].conclusion }}
             bw_browser_audit_0160	${{ steps['bw_browser_audit_0160'].outcome }}	${{ steps['bw_browser_audit_0160'].conclusion }}
-          BW_BROWSER_RUNNER_TERMINALS_V1_3: |
             bw_browser_audit_0161	${{ steps['bw_browser_audit_0161'].outcome }}	${{ steps['bw_browser_audit_0161'].conclusion }}
             bw_browser_audit_0162	${{ steps['bw_browser_audit_0162'].outcome }}	${{ steps['bw_browser_audit_0162'].conclusion }}
             bw_browser_audit_0163	${{ steps['bw_browser_audit_0163'].outcome }}	${{ steps['bw_browser_audit_0163'].conclusion }}
@@ -4262,6 +4270,7 @@ jobs:
             bw_browser_audit_0204	${{ steps['bw_browser_audit_0204'].outcome }}	${{ steps['bw_browser_audit_0204'].conclusion }}
             bw_browser_audit_0205	${{ steps['bw_browser_audit_0205'].outcome }}	${{ steps['bw_browser_audit_0205'].conclusion }}
             bw_browser_audit_0206	${{ steps['bw_browser_audit_0206'].outcome }}	${{ steps['bw_browser_audit_0206'].conclusion }}
+            bw_browser_code_arcade_run	${{ steps['bw_browser_code_arcade_run'].outcome }}	${{ steps['bw_browser_code_arcade_run'].conclusion }}
             cpx_circuit_face	${{ steps['cpx_circuit_face'].outcome }}	${{ steps['cpx_circuit_face'].conclusion }}
             bw_browser_audit_0208	${{ steps['bw_browser_audit_0208'].outcome }}	${{ steps['bw_browser_audit_0208'].conclusion }}
             bw_browser_audit_0209	${{ steps['bw_browser_audit_0209'].outcome }}	${{ steps['bw_browser_audit_0209'].conclusion }}
