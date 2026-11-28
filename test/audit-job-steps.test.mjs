@@ -403,7 +403,7 @@ test('runner: every current shard traverses actual workflow expressions, checked
 });
 
 test('runner: live repository rename binds the stable ID and the matching workflow through the real CLI', () => {
-    const fixture = getRunnerFixture(), shard = 'lightcad1';
+    const fixture = getRunnerFixture(), shard = runnerSourceMap(RUNNER_WORKFLOW).job.shards[0];
     const base = runnerEnvironment(shard, fixture.head, fixture.directory);
     const context = runnerContext(RUNNER_WORKFLOW, shard);
     const workflowRef = repository => repository+'/.github/workflows/build.yml@refs/pull/900/merge';
@@ -435,6 +435,30 @@ test('runner: live repository rename binds the stable ID and the matching workfl
         const refusal = receiptFrom({...result, stdout: result.stderr});
         assert.equal(refusal.complete, false, label);
         assert.equal(refusal.firstFailure.reason, reason, label);
+    }
+});
+
+test('runner: the nine Code and Controller gates each require their own complete terminal source row', () => {
+    const mapping = runnerSourceMap(RUNNER_WORKFLOW);
+    for (const id of [
+        'bw_browser_code_basic_profiles',
+        'bw_browser_code_asm_blink',
+        'bw_browser_code_machine_recovery',
+        'bw_browser_machine_catalog_handoffs',
+        'bw_browser_machine_firmware_library',
+        'bw_browser_machine_pico_littlefs',
+        'bw_browser_microtronic_controller',
+        'bw_browser_tms1600_controller',
+        'bw_browser_code_arcade_run'
+    ]) {
+        const declared = mapping.steps.filter(step => step.id === id);
+        assert.equal(declared.length, 1, id+': one preceding workflow step');
+        assert.match(declared[0].name, /^Browser gate — /, id+': covered browser gate');
+        const row = '            '+id+"\t${{ steps['"+id+"'].outcome }}\t${{ steps['"+id+"'].conclusion }}\n";
+        assert.equal(RUNNER_WORKFLOW.split(row).length, 2, id+': one exact terminal source row');
+        const omitted = RUNNER_WORKFLOW.replace(row, '');
+        assert.throws(() => runnerSourceMap(omitted), /exact scalar ID\/outcome\/conclusion source mapping/,
+            id+': the original missing-row regression must refuse');
     }
 });
 

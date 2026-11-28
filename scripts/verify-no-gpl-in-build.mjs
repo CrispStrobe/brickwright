@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * No GPL payload may reach the build output — and therefore the shipping app.
+ * Exclude registered optional-only payloads and known prohibited signatures
+ * from the build output. This is not a complete dependency or licence audit.
  *
  * THE GATE THAT DID NOT EXIST. On 2026-08-10, commit 305893119 added SDCC as
  * WebAssembly ("add SDCC WASM binaries + headers (4.7 MiB, GPL-2+)") and
@@ -20,6 +21,7 @@ import {existsSync, readdirSync, readFileSync, statSync, openSync, readSync, clo
 import {join, relative, resolve} from 'node:path';
 import {gunzipSync, constants as zlibConstants} from 'node:zlib';
 import {contentOffences} from './lib/lgpl-sparse-tripwire.mjs';
+import {readRuntimePackageInventory, optionalPackageBuildExclusions} from './lib/runtime-package-inventory.mjs';
 
 const build = resolve(process.argv[2] || 'packages/scratch-gui/build');
 if (!existsSync(build)) {
@@ -27,17 +29,11 @@ if (!existsSync(build)) {
     process.exit(2);
 }
 
-/** Directory names that may never appear in the output, and why. */
-const FORBIDDEN_DIRS = new Map([
-    ['sdcc-wasm', 'SDCC is GPL-2.0-or-later; it is fetched from its own GPL origin on request']
-]);
-/** Filenames that betray a GPL payload even under an innocent directory. */
-const FORBIDDEN_FILES = new Map([
-    ['sdcc.wasm', 'the SDCC compiler'],
-    ['sdas8051.wasm', 'the SDCC assembler'],
-    ['sdld.wasm', 'the SDCC linker'],
-    ['cc1.wasm', 'the SDCC C front end']
-]);
+// The inventory holds selected delivery decisions, including the JS glue as
+// well as WASM. Generic members such as runtime.json are only excluded under
+// their package directory. Known signatures below remain independent controls.
+const {directories: FORBIDDEN_DIRS, filenames: FORBIDDEN_FILES} =
+    optionalPackageBuildExclusions(readRuntimePackageInventory());
 
 /**
  * GPL BOOT MEDIA, recognised by CONTENT, not by name: the Linux-on-RISC-V
@@ -117,21 +113,22 @@ const countFiles = dir => readdirSync(dir, {withFileTypes: true})
 walk(build);
 
 if (offences.length) {
-    console.error(`GPL payload in the build output at ${build}:`);
+    console.error(`Registered optional-only payload or known prohibited signature in the build output at ${build}:`);
     for (const line of offences) console.error(`  ${line}`);
     console.error('\nThis build directory is bundled into the .app by tauri.conf.json,');
-    console.error('so this would ship (L)GPL code inside a BSD-3-Clause application.');
+    console.error('so these files violate Brickwright\'s bundled-payload policy.');
     if (offences.some(o => /sparse-solver/.test(o))) {
         console.error('The LGPL sparse-solver family (KLU, CSparse, mathjs\'s sparse module) must not be');
         console.error('used, ported or bundled — bw-board ROADMAP §"Backends and licence policy".');
         console.error('Find what imports it (the bundle\'s source map names the module) and remove it.');
     }
     if (offences.some(o => !/sparse-solver/.test(o))) {
-        console.error('The SDCC toolchain belongs at https://github.com/CrispStrobe/sdcc-wasm');
-        console.error('and is fetched on request — see src/lib/sdcc-wasm/toolchain-source.js.');
+        console.error('Check the runtime-package inventory and the external source for the reported payload.');
+        console.error('Registered optional toolchains are downloaded on request, never copied into this build.');
     }
     process.exit(1);
 }
 
 const total = countFiles(build);
-console.log(`No GPL payload and no LGPL sparse solver in the build output: ${total} files checked under ${relative(process.cwd(), build) || '.'}.`);
+console.log(`No registered optional-only payloads or known prohibited signatures found: ${total} files checked under ${relative(process.cwd(), build) || '.'}.`);
+console.log('Scope: selected package paths/names and known content signatures; not a complete dependency or licence audit.');

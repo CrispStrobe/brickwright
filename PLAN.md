@@ -105,11 +105,36 @@ Preserve exact-artifact vendor-chip and emulator eligibility checks: firmware
 allowed on physical silicon can still be unsuitable for Simulator. An MIT core
 does not qualify all bundled wireless libraries or a complete firmware image.
 
+LP1a implementation: the [claimed first slice](lanes/2026-11-28-lp1-toolchain-inventory.md)
+now shares the existing SDCC origin, cache identity and nine members between the
+loader and a selected-package inventory. The output guard rejects its directory
+and eight distinctive JS/WASM filenames, while retaining the existing boot-media
+and sparse-code checks. Forty-six focused source controls pass; this is not a
+complete dependency/license audit or a new compiler/runtime adoption.
+
+LP1b implementation: the [verified-installation/cache slice](lanes/2026-11-28-lp1-verified-installation-cache.md)
+pins all nine SDCC members to immutable supplier bytes. Managed downloads,
+cached reuse, offline installed-state inspection and browser blob resolution
+check SHA-256 and byte length; corrupt entries are repaired individually, and
+missing members cannot bypass verification through an origin URL. Service-worker
+activation retains the exact optional cache without prefetching or creating it.
+Forty-nine focused controls pass, including same-length corruption for every
+member and actual worker activation. A live-origin check accepted all nine
+members (6,737,737 bytes) and resolved them offline through verified snapshots.
+Independent review closed a final-write cancellation gap with a regression test.
+
+LP1 follow-up: complete compiler-component, linked-runtime and generated-output
+license evidence. Full browser update/mutation qualification remains hosted:
+the local browser executable is unavailable. Explicit development mode and
+direct Node staged-toolchain harnesses are outside this managed-installation
+guarantee. Applicable hosted gates and upstream identity still control landing;
+the inherited integration failures are not waived by these focused results.
+
 Status: **plan recorded; incremental implementation and per-target qualification
 follow in claimed slices**. Existing runtime candidates and unrelated blockers
-retain their recorded status. The first independent implementation is LP1's
-SDCC-backed package inventory and known-payload build boundary; it does not add
-an interpreter, accept a new compiler payload or claim verified installation.
+retain their recorded status. LP1's SDCC-backed inventory, known-payload boundary
+and verified managed installation do not add an interpreter or accept a new
+compiler payload, and do not complete LP1's separate license qualification.
 
 ## Code execution and game export (Python and JavaScript) — 2026-11-27
 

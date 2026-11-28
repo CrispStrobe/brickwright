@@ -10,6 +10,7 @@
   "i8086-pseudocode-examples.test.mjs",
   "lego-spike-roundtrip.test.mjs",
   "no-tracked-package-examples.test.mjs",
+  "optional-toolchain-cache-retention.test.mjs",
   "overlay-packages-pairs.test.mjs",
   "project-bundle-archive.test.mjs",
   "project-bundle-integrity.test.mjs",
@@ -19,10 +20,15 @@
   "pseudocode-importer-attribution.test.mjs",
   "retarget.test.mjs",
   "rp2040-debug.test.mjs",
+  "runtime-package-build-boundary.test.mjs",
+  "runtime-package-inventory.test.mjs",
+  "runtime-package-module-interop.test.mjs",
   "sb3-creator-motion-target.test.mjs",
   "sb1-converter-deferral.test.mjs",
   "scratch-storage-worker-attribution.test.mjs",
   "sound-tab-deferral.test.mjs",
+  "sync-examples-remote.test.mjs",
   "test-setup.test.mjs",
+  "toolchain-integrity.test.mjs",
   "vector-art-registration.test.mjs"
 ]
