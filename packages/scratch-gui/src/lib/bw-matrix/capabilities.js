@@ -93,6 +93,7 @@ export const ARTEFACTS = Object.freeze([
     'py', // MicroPython / CircuitPython source
     'bas', // BASIC text typed into a ROM interpreter
     'com', // DOS .COM program
+    'exe', // DOS MZ executable
     'cpm', // CP/M-80 (Z80) .COM program, run on the CP/M BDOS service layer
     'elf', // RISC-V ELF object/executable, loaded + relocated by the rv32 ELF loader
     'img', // bootable 1.44M floppy image (a .COM wrapped in a boot sector)
@@ -105,6 +106,8 @@ export const LANGUAGES = Object.freeze([
     {id: 'javascript', label: 'JavaScript', reader: 'sb3-creator-javascript.js', emitter: 'generateJavaScript'},
     {id: 'c', label: 'C', reader: 'sb3-creator-c.js', emitter: 'generateC'},
     {id: 'basic', label: 'BASIC', reader: 'sb3-creator-basic.js', emitter: 'generateBASIC'},
+    {id: 'cowgol', label: 'Cowgol', reader: 'sb3-creator-cowgol-reader.js', emitter: 'generateCowgol',
+        readerNote: 'Checked integer, control-flow, canvas and circuit subset; unsupported source is refused', readerTask: 'L5'},
     // The reader lifts the 8086 emitter's own shapes and refuses the rest by
     // name (plan task L1); 8051/6502/Z80/AVR assembly is still one-way.
     {
@@ -590,9 +593,15 @@ const ESP_C = via('c');
  * `native` is a fact object or a null-reason object; `lowered` is a list,
  * possibly empty, of {via} entries whose reach is the landing cell's.
  */
+const cowgolVia = lowered => ({
+    native: no('no-port', 'No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends'),
+    lowered: lowered.map(route => ({...route, note: 'Cowgol checked subset → pseudocode; target backend restrictions still apply'}))
+});
+
 export const CELLS = Object.freeze({
     8051: {
         pseudocode: {native: AST, lowered: [via('c')]},
+        cowgol: cowgolVia([via('c')]),
         python: {native: no('ram', STC_RAM), lowered: [via('c')]},
         javascript: {native: no('ram', `STC12C5A60S2: 1,280 B RAM; ${JS_MIN}`), lowered: [via('c')]},
         c: {
@@ -612,6 +621,7 @@ export const CELLS = Object.freeze({
     },
     avr: {
         pseudocode: {native: AST, lowered: [via('c')]},
+        cowgol: cowgolVia([via('c')]),
         python: {native: no('ram', AVR_RAM), lowered: [via('c')]},
         javascript: {native: no('ram', `ATmega328P: 2 KB RAM; ${JS_MIN}`), lowered: [via('c')]},
         // DEVICE_GROUPS says `compile: false` for every AVR while the C tab
@@ -630,6 +640,7 @@ export const CELLS = Object.freeze({
     },
     rp2040: {
         pseudocode: {native: AST, lowered: [via('micropython'), via('c')]},
+        cowgol: cowgolVia([via('micropython'), via('c')]),
         python: {native: MPY, lowered: [via('micropython'), via('c')]},
         javascript: {
             native: open('js', 'Kaluma (Apache-2.0) or Espruino (MPL-2.0)', 'none', 'N5'),
@@ -652,6 +663,7 @@ export const CELLS = Object.freeze({
     },
     stm32: {
         pseudocode: {native: AST, lowered: [via('c')]},
+        cowgol: cowgolVia([via('c')]),
         python: {native: no('flash', `${F030}; ${MPY_MIN}`), lowered: [via('c')]},
         javascript: {native: no('flash', `${F030}; ${JS_MIN}`), lowered: [via('c')]},
         c: {native: shipped('bin', 'arm-none-eabi-gcc bare-metal', 'hosted'), lowered: [via('c')]},
@@ -661,6 +673,7 @@ export const CELLS = Object.freeze({
     },
     esp8266: {
         pseudocode: {native: AST, lowered: [ESP_C]},
+        cowgol: cowgolVia([ESP_C]),
         python: {native: no('licence', ESP_SDK), lowered: [ESP_C]},
         javascript: {native: no('licence', `${ESP_SDK} (Espruino's ESP8266 port links it too)`), lowered: [ESP_C]},
         c: {
@@ -678,6 +691,7 @@ export const CELLS = Object.freeze({
     },
     microbit: {
         pseudocode: {native: AST, lowered: [via('micropython')]},
+        cowgol: cowgolVia([via('micropython')]),
         python: {native: MPY, lowered: [via('micropython')]},
         javascript: {native: open('ts', 'PXT static TypeScript (MIT)', 'hosted', 'N5'), lowered: [via('micropython')]},
         c: {
@@ -700,6 +714,7 @@ export const CELLS = Object.freeze({
     },
     w65c02: {
         pseudocode: {native: AST, lowered: [via('c'), via('basic')]},
+        cowgol: cowgolVia([via('c'), via('basic')]),
         python: {
             native: no('no-port', 'no MicroPython or other Python for the 6502'),
             lowered: [via('c'), via('basic')]
@@ -717,6 +732,10 @@ export const CELLS = Object.freeze({
     },
     z80: {
         pseudocode: {native: AST, lowered: [via('basic'), via('c')]},
+        cowgol: {...cowgolVia([via('basic'), via('c')]),
+            native: open('cpm', 'Cowgol cpmz / cpm', 'hosted', 'L5', {
+                note: 'Native compiler and CP/M Run path implemented on the companion feature branches; deployment required'
+            })},
         python: {
             native: no('no-port', 'no MicroPython or other Python for the Z80'),
             lowered: [via('basic'), via('c')]
@@ -743,6 +762,10 @@ export const CELLS = Object.freeze({
         micropython: {native: no('no-port', 'no MicroPython for the Z80'), lowered: [via('basic'), via('c')]}
     },
     i8086: {
+        cowgol: {...cowgolVia([via('asm'), via('c')]),
+            native: open('exe', 'Cowgol msdos', 'hosted', 'L5', {
+                note: 'Native compiler and DOS MZ Run path implemented on the companion feature branches; deployment required'
+            })},
         pseudocode: {
             native: AST,
             lowered: [via('asm', {note: 'pseudocode-8086.js lowers in the browser'}), via('c')]
@@ -801,6 +824,7 @@ export const CELLS = Object.freeze({
     // console profile in generateC whose C the same shecc compiles.
     riscv32: {
         pseudocode: {native: AST, lowered: [viaOpen('c', 'N12')]},
+        cowgol: cowgolVia([viaOpen('c', 'N12')]),
         python: {native: no('no-port', 'no Python port wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
         javascript: {native: no('no-port', 'no JavaScript engine wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]},
         c: {
@@ -821,6 +845,7 @@ export const CELLS = Object.freeze({
         micropython: {native: no('no-port', 'no MicroPython port wired for this RV32IMA SoC'), lowered: [viaOpen('c', 'N12')]}
     },
     samd51: {
+        cowgol: cowgolVia([via('ts', {evidence: EVIDENCE.DECLARED})]),
         pseudocode: {
             native: AST,
             lowered: [via('ts', {

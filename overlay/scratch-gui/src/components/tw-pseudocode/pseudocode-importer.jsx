@@ -220,6 +220,17 @@ const L10N = {
         runTclRiscvTitle: 'Build Jim Tcl with this program as C and run it on the RISC-V board', runForthRiscv: '▶ Forth on RISC-V',
         runForthRiscvTitle: 'Build zForth with this program as C and run it on the RISC-V board', runFeRiscvTitle: 'Build the fe interpreter with this program as C and run it on the RISC-V board',
         runViaBlocksTitle: 'Convert to blocks, then build them as C for the selected board in the debugger',
+        cowgolRunBlocks: '▶ Run as Blocks',
+        cowgolRunBlocksTitle: 'Convert the checked Cowgol subset and run its blocks on the canvas and virtual circuit',
+        cowgolRunCpm: '▶ Cowgol on CP/M',
+        cowgolRunDos: '▶ Cowgol on DOS',
+        cowgolDownloadDos: 'Download DOS .EXE',
+        cowgolDownload8080: 'Download 8080 CP/M .COM',
+        cowgolDownloadCpm: 'Download CP/M .COM',
+        cowgolExportC: 'Export compiled C',
+        cowgolCompiling: 'Compiling with Cowgol on the hosted service…',
+        cowgolStale: 'The source, project or selected machine changed. The compiled program was not applied.',
+        cowgolNote: 'Cowgol is an editable optional language. To blocks and Run as Blocks accept a checked sequential integer subset, including supported canvas and circuit calls. Unsupported constructs are refused before replacing your project. Native CP/M and DOS compilation and C export use the hosted Cowgol compiler, which must be installed on the service. CP/M and DOS programs use their console; canvas and circuit host calls use the Blocks route.',
         nqcCompile: '⚙ Compile .rcx', nqcSend: '🧱 Send to RCX',
         nqcEmpty: 'Type some NQC first.',
         nqcNoCompiler: 'This build has no local NQC compiler.',
@@ -572,6 +583,17 @@ const L10N = {
         runTclRiscvTitle: 'Jim Tcl mit diesem Programm als C bauen und auf dem RISC-V-Board ausführen', runForthRiscv: '▶ Forth auf RISC-V',
         runForthRiscvTitle: 'zForth mit diesem Programm als C bauen und auf dem RISC-V-Board ausführen', runFeRiscvTitle: 'Den fe-Interpreter mit diesem Programm als C bauen und auf dem RISC-V-Board ausführen',
         runViaBlocksTitle: 'In Blöcke umwandeln und sie im Debugger als C für das gewählte Board bauen',
+        cowgolRunBlocks: '▶ Als Blöcke ausführen',
+        cowgolRunBlocksTitle: 'Die geprüfte Cowgol-Teilmenge umwandeln und als Blöcke auf Bühne und virtueller Schaltung ausführen',
+        cowgolRunCpm: '▶ Cowgol unter CP/M',
+        cowgolRunDos: '▶ Cowgol unter DOS',
+        cowgolDownloadDos: 'DOS-.EXE herunterladen',
+        cowgolDownload8080: '8080-CP/M-.COM herunterladen',
+        cowgolDownloadCpm: 'CP/M-.COM herunterladen',
+        cowgolExportC: 'Kompiliertes C exportieren',
+        cowgolCompiling: 'Cowgol wird auf dem Compiler-Dienst kompiliert…',
+        cowgolStale: 'Quelltext, Projekt oder ausgewählte Maschine wurde geändert. Das kompilierte Programm wurde nicht angewendet.',
+        cowgolNote: 'Cowgol ist eine editierbare optionale Sprache. Zu Blöcken und Als Blöcke ausführen unterstützen eine geprüfte sequenzielle Ganzzahl-Teilmenge mit unterstützten Zeichen- und Schaltungsaufrufen. Nicht unterstützte Konstrukte werden abgelehnt, bevor das Projekt ersetzt wird. Native CP/M- und DOS-Kompilierung und C-Export benötigen den installierten Cowgol-Compiler auf dem Dienst. CP/M- und DOS-Programme verwenden ihre Konsole; Zeichen- und Schaltungsaufrufe verwenden den Weg über Blöcke.',
         nqcCompile: '⚙ .rcx kompilieren', nqcSend: '🧱 An RCX senden',
         nqcEmpty: 'Zuerst NQC eingeben.',
         nqcNoCompiler: 'Dieser Build hat keinen lokalen NQC-Compiler.',
@@ -957,6 +979,7 @@ const CODE_FILES = {
     // fe (rxi), a tiny Lisp run as fe.exe on the DOS bench (DOS_TOOLCHAINS 'fe').
     fe:          {ext: 'fe',  mime: 'text/plain',      base: 'program'},
     forth:       {ext: 'fth', mime: 'text/plain',      base: 'program'},
+    cowgol:      {ext: 'cow', mime: 'text/plain',      base: 'program'},
     tcl:         {ext: 'tcl', mime: 'text/plain',      base: 'program'}
 };
 const CODE_ACCEPT = [...new Set(Object.values(CODE_FILES).map(f => `.${f.ext}`)), '.s', '.lst'].join(',');
@@ -969,7 +992,7 @@ const CODE_ACCEPT = [...new Set(Object.values(CODE_FILES).map(f => `.${f.ext}`))
 const BW_AUTOSAVE_KEY = 'bw-code-autosave';
 // Code-tab languages most people never need: they stay out of the language row
 // until chosen from its "+" menu (remembered per browser), opened, or written in.
-const BW_OPTIONAL_LANGS = [['fe', 'λ fe', 'Lisp (fe: DOS, or any board via blocks)'], ['tcl', '○ Tcl', 'Tcl (Jim: DOS, or any board via blocks)'], ['forth', '🔺 Forth', 'Forth (zForth: DOS, or any board via blocks)']];
+const BW_OPTIONAL_LANGS = [['cowgol', 'Cowgol', 'Cowgol (checked subset to Blocks, canvas and circuits)'], ['fe', 'λ fe', 'Lisp (fe: DOS, or any board via blocks)'], ['tcl', '○ Tcl', 'Tcl (Jim: DOS, or any board via blocks)'], ['forth', '🔺 Forth', 'Forth (zForth: DOS, or any board via blocks)']];
 const BW_EXTRA_LANGS_KEY = 'bw-code-extra-languages';
 const readExtraLangs = () => {
     try {
@@ -979,7 +1002,7 @@ const readExtraLangs = () => {
 };
 const BW_AUTOSAVE_MAX = 512 * 1024;   // localStorage is ~5MB total; don't hog it
 
-const LANG_LABEL = {pseudocode: 'Pseudocode', python: 'Python', javascript: 'JavaScript', c: 'C', basic: 'BASIC', asm: 'ASM', micropython: 'micro:bit', nqc: 'NQC', fe: 'fe (Lisp)', tcl: 'Tcl', forth: 'Forth'};
+const LANG_LABEL = {pseudocode: 'Pseudocode', python: 'Python', javascript: 'JavaScript', c: 'C', basic: 'BASIC', asm: 'ASM', micropython: 'micro:bit', nqc: 'NQC', fe: 'fe (Lisp)', tcl: 'Tcl', forth: 'Forth', cowgol: 'Cowgol'};
 
 const DEVICE_HELP = {
     microbit: 'Run MicroPython in the right-hand micro:bit simulator, use its A/B buttons and sensor sliders, or download a .hex for a real board.',
@@ -1010,7 +1033,7 @@ const deviceHelp = id => DEVICE_HELP[id] || (/^(arduino|atmega|attiny)/.test(id 
 // DEVICE_CHIP_LABELS imported from ../../lib/device-labels.js
 // fe and Tcl read and write through bw-lang/fe.js and bw-lang/tcl.js (Tcl
 // keeps what blocks cannot say as raw blocks; fe refuses it by name).
-const TWO_WAY = new Set(['pseudocode', 'python', 'javascript', 'c', 'basic', 'fe', 'tcl', 'forth']);
+const TWO_WAY = new Set(['pseudocode', 'python', 'javascript', 'c', 'basic', 'fe', 'tcl', 'forth', 'cowgol']);
 
 /**
  * The DOS-interpreter languages' halves, loaded on demand: the module's
@@ -1020,6 +1043,13 @@ const TWO_WAY = new Set(['pseudocode', 'python', 'javascript', 'c', 'basic', 'fe
  * syntax, so the refusal is still a valid file to open).
  */
 const DOS_LANG = {
+    cowgol: {
+        load: () => import(/* webpackChunkName: "bw-lang-cowgol" */ '../../lib/bw-lang/cowgol.js'),
+        generate: (m, proj) => {
+            const r = m.generateCowgol(proj);
+            return r.ok ? r.cowgol : `# === Cannot show as Cowgol ===\n${r.reasons.map(s => '# ' + s).join('\n')}\n`;
+        }
+    },
     fe: {
         load: () => import(/* webpackChunkName: "bw-lang-fe" */ '../../lib/bw-lang/fe.js'),
         generate: (m, proj) => {
@@ -1101,6 +1131,12 @@ const classifyConversionWarnings = warnings => {
 // when those tabs are active, so you know what round-trips to blocks).
 // Section header keys map to L10N.h — code snippets stay English (they ARE code).
 const SUPPORTED = {
+    cowgol: [
+        ['Structure', ['include "cowgol.coh";', 'var count: int32 := 0;', 'One sequential flag script; no concurrent event handlers']],
+        ['Control', ['if condition then … else … end if;', 'while condition loop … end loop;', 'loop … end loop;', 'Typed integer arithmetic; unsupported operations are reported']],
+        ['IO', ['print("hello"); print_nl();', 'include "brickwright.coh"; for canvas and circuit host calls',
+            'To blocks / Run as Blocks use the checked conversion subset', 'Full source compilation uses the separate Cowgol compiler route']]
+    ],
     python: [
         ['Structure', ['def when_flag_clicked():', 'def do_myblock(a, b):', 'x = 0 / xs = []  (module state)', 'when_flag_clicked()  (run)']],
         ['Control', ['if / elif / else:', 'while cond:  →  repeat until', 'while True:  →  forever', 'for _ in range(n):', 'return  →  stop this script']],
@@ -1423,6 +1459,7 @@ class PseudocodeImporter extends React.Component {
         if (!this.allowsCodeLanguage(lang)) return;
         const target = asmTargetForDevice(device);
         const actions = {
+            cowgol: () => this.runCowgolAsBlocks(),
             tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
             forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
             fe: () => target === 'riscv32' ? this.runFeOnRiscv() : this.runFeOnDosInterp(),
@@ -2856,6 +2893,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentWillUnmount () {
+        if (this._cowgolCompile) this._cowgolCompile.abort();
         window.removeEventListener('bw-hardware-state', this.onHardwareState);
         window.removeEventListener('bw-library-code', this.openLibraryCode);
         window.removeEventListener('bw-code-machine-selected', this.onLibraryMachineSelected);
@@ -3010,7 +3048,8 @@ class PseudocodeImporter extends React.Component {
         return device(text);
     }
 
-    convertedSource ({pseudocode, warnings = []}) {
+    convertedSource ({ok, pseudocode, warnings = [], reasons = []}) {
+        if (ok === false) throw new Error((reasons.length ? reasons : warnings).join(' · ') || 'Source conversion was refused.');
         if (pseudocode?.trim() || !warnings.length) return pseudocode;
         throw new Error(warnings.join(' · '));
     }
@@ -4934,6 +4973,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     stopCodeRun () {
+        if (this._cowgolCompile) this._cowgolCompile.abort();
         if (this._picoBasicHardware) {
             if (this.state.busy) this.closePicoBasicHardware();
             else this._picoBasicHardware.session?.terminal.send([3]);
@@ -5917,8 +5957,65 @@ class PseudocodeImporter extends React.Component {
     // fe, Tcl and Forth interpreters exist only as DOS programs. On any other
     // board the program runs as its blocks, which the debugger builds as C.
     async runViaBlocksOnDevice () {
-        await this.compile();
-        if (this.state.conversionReport?.preserved) showCircuitDebugger();
+        const source = this.activeCode();
+        const lang = this.state.lang;
+        const device = this.codeDevice();
+        const applied = await this.compile();
+        if (applied && !this._unmounted && this.state.lang === lang &&
+            this.activeCode() === source && this.codeDevice() === device) showCircuitDebugger();
+    }
+    async runCowgolAsBlocks () {
+        if (this.state.busy || this.state.running) return;
+        const source = this.activeCode();
+        try {
+            const applied = await this.compile({strict: true});
+            if (!applied || this._unmounted || this.state.lang !== 'cowgol' || this.activeCode() !== source) return;
+            this.props.vm.greenFlag();
+        } catch (error) {
+            // compile() already reports the refusal and preserves the loaded project.
+        }
+    }
+    async compileCowgolSource (target, run = false) {
+        if (this.state.busy || this.state.running) return;
+        const source = this.activeCode();
+        const buffers = this.state.buffers;
+        const device = this.codeDevice();
+        const stage = this.props.vm.runtime.getTargetForStage();
+        const request = new AbortController();
+        this._cowgolCompile = request;
+        const owns = () => !this._unmounted && this._cowgolCompile === request;
+        const current = () => owns() && !request.signal.aborted && this.state.lang === 'cowgol' &&
+            this.state.buffers === buffers && this.codeDevice() === device &&
+            this.props.vm.runtime.getTargetForStage() === stage;
+        this.setState({busy: true, status: this.L.cowgolCompiling});
+        try {
+            const {compileCowgol, cowgolCpmConfig, cowgolDosConfig} = await import('../../lib/bw-lang/cowgol-compile.js');
+            if (!current()) return;
+            const out = await compileCowgol(source, target, {signal: request.signal});
+            if (!current()) {
+                if (owns()) this.setState({status: this.L.cowgolStale});
+                return;
+            }
+            if (run && target === 'dos') {
+                await runMachineConfig(cowgolDosConfig(), {fetcher: () => ({bytes: out.bytes})});
+            } else if (run) {
+                const {runCpmCom} = await import('../../lib/bw-machines/run-machine.js');
+                if (!current()) return;
+                await runCpmCom(cowgolCpmConfig(), out.bytes);
+            } else {
+                await downloadBlob(out.filename, new Blob([out.bytes], {
+                    type: target === 'cowgol-cgen' ? 'text/x-csrc' : 'application/octet-stream'
+                }));
+            }
+            if (owns()) this.setState({status: `${out.toolchain}: ${out.bytes.length} bytes`});
+        } catch (error) {
+            if (owns()) this.setState({status: this.L.stError(error.message)});
+        } finally {
+            if (owns()) {
+                this._cowgolCompile = null;
+                this.setState({busy: false});
+            }
+        }
     }
     async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {
         if (pseudocode == null && this.state.lang === 'basic' && this.standaloneBasicProfile()) return;
@@ -5971,7 +6068,7 @@ class PseudocodeImporter extends React.Component {
                 source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (DOS_LANG[lang]) {
                 const res = (await DOS_LANG[lang].load()).default(source);
-                if (strict && res.warnings.length) throw new Error(res.warnings.join(' · '));
+                if (strict && lang !== 'cowgol' && res.warnings.length) throw new Error(res.warnings.join(' · '));
                 source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'c') {
                 // Keil C51 is a different dialect — sbit/sfr/_at_/reg5x headers that SDCC
@@ -6009,7 +6106,12 @@ class PseudocodeImporter extends React.Component {
                 if (!ok) missing.push(name);
                 else appliedUploads.add(u);
             });
-            if (strict && (parseWarnings.length || creator.warnings.length)) throw new Error([...parseWarnings, ...creator.warnings].join(' · '));
+            // A successful Cowgol reader reports its signed-int32 execution
+            // profile as advice. It refuses lossy source with ok:false; actual
+            // pseudocode parser warnings must still block a strict run.
+            if (strict && ((lang !== 'cowgol' && parseWarnings.length) || creator.warnings.length)) {
+                throw new Error([...parseWarnings, ...creator.warnings].join(' · '));
+            }
             const context = codeArtworkMatches(this.props.vm, this._codeArtwork) ? this._codeArtwork : null;
             if (lang === 'pseudocode' && this._makeCodeProject && this._makeCodeProject.files &&
                 typeof this._makeCodeImportedCode === 'string' && source === this._makeCodeImportedCode) {
@@ -6173,6 +6275,7 @@ class PseudocodeImporter extends React.Component {
                 conversionReport: {direction: `${LANG_LABEL[lang] || lang} → Blocks`, preserved: true,
                     changed: classified.changed, unsupported: classified.unsupported}
             }));
+            return true;
         } catch (e) {
             const failure = conversionFailure(e);
             publishEditor({status: this.L.stError(failure.message), conversionReport: {
@@ -6429,7 +6532,7 @@ class PseudocodeImporter extends React.Component {
         const languageNote = standalone ? notes[standalone.dialect] + ' ' + local(
             'Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',
             'BASIC ausführen sendet den Quelltext an die UART-Konsole des Pico. Für diesen Dialekt ist keine Blockumwandlung verfügbar.'
-        ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
+        ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote, cowgol: this.L.cowgolNote}[lang];
         const note = basicProfile?.id === 'pico-bbcbasic' ? languageNote + ' ' + local(
             'SAVE and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
             'SAVE und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.'
@@ -7181,6 +7284,46 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.runBasic}
                             </button>
                         ) : null}
+                        {this.state.lang === 'cowgol' && this.activeCode().trim() ? (
+                            <React.Fragment>
+                                <button type="button" onClick={() => this.runCowgolAsBlocks()}
+                                    disabled={this.state.running || this.state.busy}
+                                    title={this.L.cowgolRunBlocksTitle} style={actionBtn}
+                                    data-testid={menu ? 'bw-cowgol-blocks-run-menu' : 'bw-cowgol-blocks-run'}>
+                                    {this.L.cowgolRunBlocks}
+                                </button>
+                                {remoteToolchainsAllowed() && (!this.codeDevice() || this.codeDevice() === 'z80') &&
+                                    <button type="button" onClick={() => this.compileCowgolSource('z80-cpm', true)}
+                                        disabled={this.state.running || this.state.busy} style={actionBtn}
+                                        data-testid={menu ? 'bw-cowgol-cpm-run-menu' : 'bw-cowgol-cpm-run'}>
+                                        {this.L.cowgolRunCpm}
+                                    </button>}
+                                {remoteToolchainsAllowed() && (!this.codeDevice() || this.codeDevice() === 'i8086') &&
+                                    <button type="button" onClick={() => this.compileCowgolSource('dos', true)}
+                                        disabled={this.state.running || this.state.busy} style={actionBtn}
+                                        data-testid={menu ? 'bw-cowgol-dos-run-menu' : 'bw-cowgol-dos-run'}>
+                                        {this.L.cowgolRunDos}
+                                    </button>}
+                                {menu && remoteToolchainsAllowed() && <React.Fragment>
+                                    <button type="button" onClick={() => this.compileCowgolSource('dos')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolDownloadDos}
+                                    </button>
+                                    <button type="button" onClick={() => this.compileCowgolSource('i8080-cpm')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolDownload8080}
+                                    </button>
+                                    <button type="button" onClick={() => this.compileCowgolSource('z80-cpm')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolDownloadCpm}
+                                    </button>
+                                    <button type="button" onClick={() => this.compileCowgolSource('cowgol-cgen')}
+                                        disabled={this.state.running || this.state.busy}>
+                                        {this.L.cowgolExportC}
+                                    </button>
+                                </React.Fragment>}
+                            </React.Fragment>
+                        ) : null}
                         {this.state.lang === 'fe' && this.activeCode().trim() ? (
                             <button onClick={() => this.runFeOnDosInterp()} disabled={this.state.running}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
@@ -7218,7 +7361,7 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.runTcl}
                             </button>
                         ) : null}
-                        {['fe', 'tcl', 'forth'].includes(this.state.lang) && this.currentDevice() &&
+                        {['fe', 'tcl', 'forth', 'cowgol'].includes(this.state.lang) && this.currentDevice() &&
                             this.activeCode().trim() ? (
                             <button onClick={() => this.runViaBlocksOnDevice()}
                                 disabled={this.state.running || this.state.busy}

@@ -9,7 +9,7 @@ export const CODE_DOCUMENT_MAX_BYTES = 512 * 1024;
 export const OWNED_CONSOLE_EXECUTION = 'owned-console-v1';
 export const CODE_DOCUMENT_LANGUAGES = Object.freeze([
     'pseudocode', 'python', 'javascript', 'c', 'basic', 'asm', 'micropython',
-    'nqc', 'fe', 'tcl', 'forth'
+    'nqc', 'fe', 'tcl', 'forth', 'cowgol'
 ]);
 
 const languages = new Set(CODE_DOCUMENT_LANGUAGES);

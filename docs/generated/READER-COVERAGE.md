@@ -14,19 +14,19 @@ each reader is a measured figure, not folklore.
 Each run of a fixture through its reader is one of three outcomes:
 
 - **clean** — lifted with nothing dropped.
-- **degraded** — lifted, but the reader met a construct it cannot represent and
-  kept going with a placeholder, naming the loss. The program imports and is
-  quietly missing something. This is the outcome a mapped/refused ratio hides,
-  and it is broken out here for exactly that reason.
-- **refused** — the reader threw, or the 8086 lifter returned `ok:false`:
+- **degraded** — accepted with warnings, restricted semantics or placeholders.
+  Inspect the reason: a placeholder names lost behavior, while Cowgol's int32
+  advisory limits the domain in which translation preserves arithmetic.
+  Neither is counted as an unqualified clean result.
+- **refused** — the reader threw or explicitly returned `ok:false`:
   nothing was produced.
 
 ## Overall
 
-491 clean · 401 degraded · 15 refused (of 907; 54% clean)
+537 clean · 398 degraded · 19 refused (of 954; 56% clean)
 
-- round-trip (emit → read back): 491 clean · 399 degraded · 4 refused (of 894; 55% clean)
-- native (real source fed to the reader): 0 clean · 2 degraded · 11 refused (of 13; 0% clean)
+- round-trip (emit → read back): 533 clean · 396 degraded · 4 refused (of 933; 57% clean)
+- native (real source fed to the reader): 4 clean · 2 degraded · 15 refused (of 21; 19% clean)
 
 ## By method, language and device family
 
@@ -36,7 +36,7 @@ source straight to the reader — for the 8086 lifter that is hand-written asm i
 is designed to REFUSE as foreign, so a high refused count there is the reader
 working, not failing.
 
-Two readers refuse by design rather than by inability, and their refused counts
+Some readers refuse by design rather than by inability, and their refused counts
 should be read that way. The 8086 lifter is v1: it lifts the control-flow and
 variable programs the ▶ button lowers and refuses pins, ports, displays, tones,
 PWM, keypad, broadcast, "say for secs" and the multi-script scheduler form BY
@@ -44,10 +44,16 @@ NAME (plan L1) — every shipped `i8086_*` example happens to use one of those,
 so all five round-trips are named v1 refusals, and all eleven hand-written
 programs are refused as foreign. The refusal reasons below say which.
 
+Cowgol accepts a sequential signed-int32/host-API subset and refuses unsupported
+source before returning executable pseudocode. Its accepted results carry an
+int32 range advisory and are therefore counted as **degraded**, conservatively;
+that does not mean the reader inserted placeholder code. Pointer/array,
+recursion, quotient/remainder and inline-host-code probes expose the boundary.
+
 | method | reader (language) | device family | outcome |
 | --- | --- | --- | --- |
 | round-trip | python | 6502 | 4 clean · 1 degraded · 0 refused (of 5; 80% clean) |
-| round-trip | python | 8051 | 40 clean · 32 degraded · 0 refused (of 72; 56% clean) |
+| round-trip | python | 8051 | 41 clean · 31 degraded · 0 refused (of 72; 57% clean) |
 | round-trip | python | arduino | 22 clean · 59 degraded · 0 refused (of 81; 27% clean) |
 | round-trip | python | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | python | microbit | 2 clean · 8 degraded · 0 refused (of 10; 20% clean) |
@@ -55,7 +61,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | round-trip | python | spike | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | python | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | javascript | 6502 | 4 clean · 1 degraded · 0 refused (of 5; 80% clean) |
-| round-trip | javascript | 8051 | 40 clean · 32 degraded · 0 refused (of 72; 56% clean) |
+| round-trip | javascript | 8051 | 41 clean · 31 degraded · 0 refused (of 72; 57% clean) |
 | round-trip | javascript | arduino | 22 clean · 59 degraded · 0 refused (of 81; 27% clean) |
 | round-trip | javascript | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | javascript | microbit | 10 clean · 0 degraded · 0 refused (of 10; 100% clean) |
@@ -64,7 +70,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | round-trip | javascript | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | c | 6502 | 4 clean · 1 degraded · 0 refused (of 5; 80% clean) |
 | round-trip | c | 8051 | 63 clean · 9 degraded · 0 refused (of 72; 88% clean) |
-| round-trip | c | arduino | 60 clean · 21 degraded · 0 refused (of 81; 74% clean) |
+| round-trip | c | arduino | 59 clean · 22 degraded · 0 refused (of 81; 73% clean) |
 | round-trip | c | i8086 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | c | microbit | 0 clean · 10 degraded · 0 refused (of 10; 0% clean) |
 | round-trip | c | pico | 0 clean · 8 degraded · 0 refused (of 8; 0% clean) |
@@ -79,27 +85,33 @@ programs are refused as foreign. The refusal reasons below say which.
 | round-trip | basic | spike | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | basic | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | micropython | 6502 | 1 clean · 1 degraded · 0 refused (of 2; 50% clean) |
-| round-trip | micropython | 8051 | 46 clean · 26 degraded · 0 refused (of 72; 64% clean) |
-| round-trip | micropython | arduino | 37 clean · 44 degraded · 0 refused (of 81; 46% clean) |
+| round-trip | micropython | 8051 | 48 clean · 23 degraded · 0 refused (of 71; 68% clean) |
+| round-trip | micropython | arduino | 36 clean · 45 degraded · 0 refused (of 81; 44% clean) |
 | round-trip | micropython | i8086 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
 | round-trip | micropython | microbit | 4 clean · 6 degraded · 0 refused (of 10; 40% clean) |
 | round-trip | micropython | pico | 4 clean · 4 degraded · 0 refused (of 8; 50% clean) |
 | round-trip | micropython | spike | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | round-trip | micropython | z80 | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
+| round-trip | cowgol | 8051 | 20 clean · 0 degraded · 0 refused (of 20; 100% clean) |
+| round-trip | cowgol | arduino | 17 clean · 0 degraded · 0 refused (of 17; 100% clean) |
+| round-trip | cowgol | microbit | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
+| round-trip | cowgol | pico | 2 clean · 0 degraded · 0 refused (of 2; 100% clean) |
 | round-trip | asm | 8086 | 0 clean · 1 degraded · 4 refused (of 5; 0% clean) |
 | native | c | 8051 | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
 | native | c | arduino | 0 clean · 1 degraded · 0 refused (of 1; 0% clean) |
+| native | cowgol | arduino | 1 clean · 0 degraded · 0 refused (of 1; 100% clean) |
+| native | cowgol | generic | 3 clean · 0 degraded · 4 refused (of 7; 43% clean) |
 | native | asm | 8086 | 0 clean · 0 degraded · 11 refused (of 11; 0% clean) |
 
 ## Why readers degrade, by construct
 
-| fixtures | construct kept as a placeholder |
+| fixtures | warning, restriction or placeholder |
 | --- | --- |
-| 196 | dropped expression statement |
-| 88 | no pins found |
+| 192 | dropped expression statement |
+| 87 | no pins found |
 | 41 | no dialect form for "…" |
 | 32 | unstructured "…" |
-| 22 | dropped call in expression |
+| 26 | dropped call in expression |
 | 13 | no clock #define found |
 | 11 | no register header found |
 | 11 | no main() and no @bw script markers |
@@ -122,7 +134,6 @@ programs are refused as foreign. The refusal reasons below say which.
 | 3 | procedure handle_op with parameters not lifted yet |
 | 3 | procedure handle_digit with parameters not lifted yet |
 | 2 | Port 2 has 8 output pins |
-| 2 | stc12_seg_shownum: no equivalent on this board; the block was not translated |
 | 2 | early ENDPROC |
 | 2 | top-level declaration dropped (no block equivalent): static int _servo_angle [ 2 ] |
 | 1 | stc12_setpart: no equivalent on this board; the block was not translated |
@@ -141,6 +152,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | 1 | statement dropped (not representable as a block): = ( unsigned char ) ( 0 ) |
 | 1 | statement dropped (not representable as a block): = ( unsigned char ) ( bw_tab_font [ … |
 | 1 | stc12_setport: no equivalent on this board; the block was not translated |
+| 1 | stc12_seg_shownum: no equivalent on this board; the block was not translated |
 | 1 | stc12_led_only: no equivalent on this board; the block was not translated |
 | 1 | data_deletealloflist: no equivalent on this board; the block was not translated |
 | 1 | data_addtolist: no equivalent on this board; the block was not translated |
@@ -150,10 +162,7 @@ programs are refused as foreign. The refusal reasons below say which.
 | 1 | no dialect form for "…"Chip: "…" C"…" |
 | 1 | no dialect form for "…":"…":"…" |
 | 1 | devices_settime: no equivalent on this board; the block was not translated |
-| 1 | devices_clearmatrix: no equivalent on this board; the block was not translated |
-| 1 | devices_setpixel: no equivalent on this board; the block was not translated |
 | 1 | devices_setneopixel: no equivalent on this board; the block was not translated |
-| 1 | devices_showdigit: no equivalent on this board; the block was not translated |
 | 1 | no dialect form for "…"Started "…" times"…" |
 | 1 | devices_eepromwrite: no equivalent on this board; the block was not translated |
 | 1 | no dialect form for "…"Hello "…", I am thinking of a number from 1 to 100."…" |
@@ -180,6 +189,10 @@ programs are refused as foreign. The refusal reasons below say which.
 | 2 | refused (refused): line N: the "…" statement is not lifted yet (displays, tones, PWM, keypad, broadcast and " |
 | 1 | lift-fail: line N: expected a statement anchor (`…`, `…`, …), found label BW_HAT4 |
 | 1 | lift-fail: line N: expected a value into DX:AX, found keypad |
+| 1 | line N: Expected uint8, found int32 |
+| 1 | line N: Expected ;, found [ |
+| 1 | line N: Cowgol / uses integer quotient/remainder; the pseudocode operators differ |
+| 1 | line N: unsupported token "…" |
 
 ## Per-fixture ledger (non-clean outcomes)
 
@@ -269,7 +282,6 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | 8051 | 79-a2-sampler | degraded | dropped call in expression |
 | round-trip | javascript | 8051 | 79-a2-sampler | degraded | dropped call in expression |
 | round-trip | basic | 8051 | 79-a2-sampler | degraded | no dialect form for "…" |
-| round-trip | micropython | 8051 | 79-a2-sampler | degraded | stc12_seg_shownum: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | python | 8051 | 80-a2-lcd-moving-text | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | 80-a2-lcd-moving-text | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | 80-a2-lcd-moving-text | degraded | devices_lcdclear: no equivalent on this board; the block was not translated; devices_lcdcursor: no equivalent on this board; the block was not translated; devices_lcdprint: no equivalent on this board; the block was not translated; no pins found |
@@ -348,8 +360,10 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | basic | arduino | arduino-05-while-statement | degraded | no dialect form for "…"; unstructured "…" |
 | round-trip | python | arduino | arduino-06-knock | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-06-knock | degraded | dropped expression statement |
-| round-trip | python | arduino | arduino-06-ping | degraded | dropped expression statement |
-| round-trip | javascript | arduino | arduino-06-ping | degraded | dropped expression statement |
+| round-trip | python | arduino | arduino-06-ping | degraded | dropped call in expression; dropped expression statement |
+| round-trip | javascript | arduino | arduino-06-ping | degraded | dropped call in expression; dropped expression statement |
+| round-trip | c | arduino | arduino-06-ping | degraded | no pins found |
+| round-trip | micropython | arduino | arduino-06-ping | degraded | no pins found |
 | round-trip | python | arduino | arduino-07-row-column-scanning | degraded | dropped expression statement |
 | round-trip | javascript | arduino | arduino-07-row-column-scanning | degraded | dropped expression statement |
 | round-trip | python | arduino | arduino-08-char-analysis | degraded | dropped expression statement |
@@ -471,9 +485,6 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | 8051 | disp-lcd | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | disp-lcd | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | disp-lcd | degraded | devices_lcdclear: no equivalent on this board; the block was not translated; devices_lcdprint: no equivalent on this board; the block was not translated; devices_lcdcursor: no equivalent on this board; the block was not translated; no pins found |
-| round-trip | python | 8051 | disp-led-matrix | degraded | dropped expression statement |
-| round-trip | javascript | 8051 | disp-led-matrix | degraded | dropped expression statement |
-| round-trip | micropython | 8051 | disp-led-matrix | degraded | devices_clearmatrix: no equivalent on this board; the block was not translated; devices_setpixel: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | python | 8051 | disp-mono-lcd | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | disp-mono-lcd | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | disp-mono-lcd | degraded | devices_oledclear: no equivalent on this board; the block was not translated; devices_oledprint: no equivalent on this board; the block was not translated; devices_oledcursor: no equivalent on this board; the block was not translated; no pins found |
@@ -483,10 +494,9 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | round-trip | python | 8051 | disp-rgb-light | degraded | dropped expression statement |
 | round-trip | javascript | 8051 | disp-rgb-light | degraded | dropped expression statement |
 | round-trip | micropython | 8051 | disp-rgb-light | degraded | devices_setneopixel: no equivalent on this board; the block was not translated; no pins found |
-| round-trip | python | 8051 | disp-sevenseg | degraded | dropped expression statement |
-| round-trip | javascript | 8051 | disp-sevenseg | degraded | dropped expression statement |
+| round-trip | python | 8051 | disp-sevenseg | degraded | dropped call in expression |
+| round-trip | javascript | 8051 | disp-sevenseg | degraded | dropped call in expression |
 | round-trip | c | 8051 | disp-sevenseg | degraded | 7 output pins × 20 mA = up to 140 mA at maximum pin ratings (actual current depends on ser; Port 1 has 7 output pins |
-| round-trip | micropython | 8051 | disp-sevenseg | degraded | devices_showdigit: no equivalent on this board; the block was not translated; no pins found |
 | round-trip | c | 6502 | eater6502-blink | degraded | 8 output pins × 20 mA = up to 160 mA at maximum pin ratings (actual current depends on ser |
 | round-trip | python | 6502 | eater6502-full-build | degraded | dropped expression statement |
 | round-trip | javascript | 6502 | eater6502-full-build | degraded | dropped expression statement |
@@ -604,15 +614,31 @@ fixture appears here so its verdict is traceable to the program that caused it.
 | native | asm | 8086 | ether2 | refused | refused (foreign): no Brickwright anchors found: this reader lifts programs the ▶ button lowered, not hand-wr |
 | native | c | 8051 | stc12-blink | degraded | inferred DEVICE STC89C52RC from <8051.h>; no clock #define found; polarity of "…" is unknown; statement dropped (not representable as a block): __asm nop __endasm |
 | native | c | arduino | atmega328p-blink | degraded | inferred DEVICE ATMEGA328P from <avr/io.h>; no clock #define found; no pins found; statement dropped (not representable as a block): __asm__ __volatile__ ( "…" ) |
+| native | cowgol | generic | pointer-refusal | refused | line N: Expected uint8, found int32 |
+| native | cowgol | generic | array-refusal | refused | line N: Expected ;, found [ |
+| native | cowgol | generic | integer-division-refusal | refused | line N: Cowgol / uses integer quotient/remainder; the pseudocode operators differ |
+| native | cowgol | generic | inline-host-code-refusal | refused | line N: unsupported token "…" |
+
+## Source-generation boundary probes
+
+These probes test whether an emitter can produce source at all. They are
+separate from reader totals: a refused concurrent program has no Cowgol source
+to feed into a reader.
+
+| language | fixture | emitter outcome | reasons |
+| --- | --- | --- | --- |
+| cowgol | concurrent-flag-scripts | refused | Cowgol requires exactly one flag script; found 2 |
 
 ## Fixture provenance
 
-Every fixture is either already tracked in this repository or drawn from a
-corpus this repository pins, with its licence recorded here.
+Every fixture is tracked in this repository, explicitly authored in the fixture
+module, or drawn from a corpus this repository pins, with its licence recorded
+here.
 
 | source | languages | origin | licence |
 | --- | --- | --- | --- |
-| program.bw corpus | python, javascript, c, basic, micropython | overlay/scratch-gui/examples — 179 device-tagged programs, round-tripped (parse → emit → read back). Emitter gaps not fed to a reader: python 0, javascript 0, c 0, basic 3, micropython 3 | BSD-3 (repo); Arduino-port programs CC0 |
+| program.bw corpus | python, javascript, c, basic, micropython, cowgol | overlay/scratch-gui/examples — 179 device-tagged programs, round-tripped (parse → emit → read back). Emitter gaps not fed to a reader: python 0, javascript 0, c 0, basic 3, micropython 4, cowgol 139 | BSD-3 (repo); Arduino-port programs CC0 |
 | examples-i8086.js | asm | overlay/scratch-gui/src/lib/bw-asm/examples-i8086.js — 11 MASM programs (6 Amey Thakur, 5 ours), fed native | MIT (Amey Thakur set) / BSD-3 (ours) |
 | oracle C fixtures | c | test/fixtures/oracle/{stc12-blink,atmega328p-blink}.c — real device C, fed native to the pin-inferring reader | BSD-3 (repo) |
+| Cowgol boundary probes | cowgol | scripts/reader-coverage-fixtures.mjs — authored native control/canvas/GPIO, pointer/array/recursion/division/inline-code probes; concurrent-handler emitter refusal counted separately | BSD-3 (repo) |
 | Amey Thakur external corpus (not folded in) | asm | /mnt/volume1/code/retro-corpus-8086 (525 .asm, env I8086_CORPUS) — a larger asm input, deliberately excluded from committed figures so CI stays reproducible | MIT |

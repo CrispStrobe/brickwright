@@ -1,6 +1,7 @@
 /**
  * Fixtures for the reader coverage audit (plan L3), assembled from sources that
- * already live in this repository — nothing is hand-authored here.
+ * already live in this repository, plus explicitly labelled Cowgol boundary
+ * probes defined below. Probe inputs and provenance are part of this file.
  *
  * Two acquisition methods, both reproducible from the tree:
  *
@@ -16,7 +17,7 @@
  *    lifter (bw-asm/examples-i8086.js, 11 MASM programs) and the device-C reader
  *    (the two oracle .c fixtures). These are fed to the reader verbatim.
  *
- * The five emitters and the SB3 creator resolve `jszip`/`scratch-vm` only from
+ * The emitters and the SB3 creator resolve `jszip`/`scratch-vm` only from
  * the INTEGRATED tree (packages/scratch-gui), which is where the other gates
  * import them from; the corpus itself is always read from overlay/, the source
  * of truth in git. In a worktree, set BW_INTEGRATED_ROOT to a checkout whose
@@ -39,7 +40,11 @@ const INTEGRATED = process.env.BW_INTEGRATED_ROOT
     ? path.resolve(process.env.BW_INTEGRATED_ROOT)
     : path.join(root, 'packages/scratch-gui');
 
-const SB3 = (await import(path.join(INTEGRATED, 'src/lib/sb3-creator.js'))).default;
+// An external dependency-only root can be used with register-gui-scope.mjs.
+// Read the tracked overlay source when that root has no integrated source copy.
+const integratedCreator = path.join(INTEGRATED, 'src/lib/sb3-creator.js');
+const SB3 = (await import(fs.existsSync(integratedCreator)
+    ? integratedCreator : path.join(overlayLib, 'sb3-creator.js'))).default;
 
 // device id → coarse family, for the "per device family" grouping.
 const FAMILY = {
@@ -73,11 +78,12 @@ const EMITTERS = {
     javascript: proj => String(new SB3().generateJavaScript(proj, {})),
     c: proj => String(new SB3().generateC(proj)),
     basic: proj => { const r = new SB3().generateBASIC(proj, {profile: 'bbc', lineNumbers: true}); return r && r.ok ? r.basic : null; },
-    micropython: proj => { const r = new SB3().generateMicroPython(proj); return r && r.ok ? r.py : null; }
+    micropython: proj => { const r = new SB3().generateMicroPython(proj); return r && r.ok ? r.py : null; },
+    cowgol: proj => { const r = new SB3().generateCowgol(proj); return r && r.ok ? r.cowgol : null; }
 };
 
 const fixtures = [];
-const notEmitted = {python: 0, javascript: 0, c: 0, basic: 0, micropython: 0};
+const notEmitted = {python: 0, javascript: 0, c: 0, basic: 0, micropython: 0, cowgol: 0};
 let parseFailed = 0;
 let corpusPrograms = 0;
 
@@ -155,10 +161,60 @@ for (const c of nativeC) {
     fixtures.push({lang: 'c', family: c.family, name: c.name, source: fs.readFileSync(p, 'utf8'), kind: 'native'});
 }
 
+// Explicit native-source probes cover the checked bridge and its refusal
+// boundary. These are authored audit inputs, not claims about an external
+// Cowgol corpus. Every row is passed to the actual pinned reader unchanged.
+const cowgolNative = [
+    {name: 'int32-control-flow', family: 'generic', source: `include "cowgol.coh";
+include "brickwright.coh";
+var count: int32 := 0;
+while count < 3 loop
+    if count == 1 then bw_print_text("middle"); else bw_print_number(count); end if;
+    count := count + 1;
+end loop;`},
+    {name: 'turtle-canvas-host', family: 'generic', source: `include "cowgol.coh";
+include "brickwright.coh";
+bw_canvas_clear(0);
+bw_pen_colour(0x123456);
+bw_pen_down();
+bw_go_to(-20, 10);
+bw_move(30);
+bw_turn(90);
+bw_pen_up();`},
+    {name: 'active-low-gpio-and-latch', family: 'arduino', source: `include "cowgol.coh";
+include "brickwright.coh";
+# @bw-declaration "DEVICE ARDUINO-UNO"
+# @bw-declaration "PIN led = D13 OUTPUT ACTIVE LOW"
+# @bw-declaration "PIN button = D2 INPUT ACTIVE LOW"
+bw_pin_mode(13, 1);
+bw_pin_mode(2, 2);
+if bw_digital_read(2) == 0 then bw_digital_write(13, 0); end if;
+bw_digital_toggle(13);`},
+    {name: 'pointer-refusal', family: 'generic', source: 'var value: int32 := 1; var pointer: [int32] := 0 as [int32];'},
+    {name: 'array-refusal', family: 'generic', source: 'var values: int32[4];'},
+    {name: 'recursion-refusal', family: 'generic', source: 'sub again() is again(); end sub; again();'},
+    {name: 'integer-division-refusal', family: 'generic', source: 'var result: int32 := 3 / 2; bw_print_number(result);'},
+    {name: 'inline-host-code-refusal', family: 'generic', source: '@asm "host_callback();";'}
+];
+for (const fixture of cowgolNative) fixtures.push({...fixture, lang: 'cowgol', kind: 'native'});
+
+// Parallel Scratch handlers have no sequential Cowgol output. An emitter
+// refusal is kept OUT of reader totals: feeding an empty placeholder to the
+// reader would turn the correct refusal into fictitious reader coverage.
+const concurrent = new SB3();
+concurrent.parse('WHEN flag clicked:\n  say 1\nWHEN flag clicked:\n  say 2\n');
+const concurrentResult = concurrent.generateCowgol();
+export const EMITTER_PROBES = [{
+    lang: 'cowgol', name: 'concurrent-flag-scripts',
+    outcome: concurrentResult.ok ? 'accepted' : 'refused',
+    reasons: concurrentResult.reasons || [],
+    source: 'Two independent WHEN flag clicked handlers; source defined in scripts/reader-coverage-fixtures.mjs'
+}];
+
 export const FIXTURES = fixtures;
 
 export const FIXTURE_SOURCES = [
-    {id: 'program.bw corpus', langs: ['python', 'javascript', 'c', 'basic', 'micropython'],
+    {id: 'program.bw corpus', langs: ['python', 'javascript', 'c', 'basic', 'micropython', 'cowgol'],
         origin: `overlay/scratch-gui/examples — ${corpusPrograms} device-tagged programs, round-tripped (parse → emit → read back). Emitter gaps not fed to a reader: ${Object.entries(notEmitted).map(([l, n]) => `${l} ${n}`).join(', ')}${parseFailed ? `; ${parseFailed} .bw failed to parse` : ''}`,
         licence: 'BSD-3 (repo); Arduino-port programs CC0'},
     {id: 'examples-i8086.js', langs: ['asm'],
@@ -166,6 +222,9 @@ export const FIXTURE_SOURCES = [
         licence: 'MIT (Amey Thakur set) / BSD-3 (ours)'},
     {id: 'oracle C fixtures', langs: ['c'],
         origin: 'test/fixtures/oracle/{stc12-blink,atmega328p-blink}.c — real device C, fed native to the pin-inferring reader',
+        licence: 'BSD-3 (repo)'},
+    {id: 'Cowgol boundary probes', langs: ['cowgol'],
+        origin: 'scripts/reader-coverage-fixtures.mjs — authored native control/canvas/GPIO, pointer/array/recursion/division/inline-code probes; concurrent-handler emitter refusal counted separately',
         licence: 'BSD-3 (repo)'},
     {id: 'Amey Thakur external corpus (not folded in)', langs: ['asm'],
         origin: '/mnt/volume1/code/retro-corpus-8086 (525 .asm, env I8086_CORPUS) — a larger asm input, deliberately excluded from committed figures so CI stays reproducible',

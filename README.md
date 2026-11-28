@@ -103,7 +103,10 @@ program as text, and you can edit either side; the two stay in sync.
 - The same converter round-trips more: **C**, **BBC BASIC** (numbered or
   structured), and **MicroPython** in two real dialects — for the **micro:bit**
   and the **Raspberry Pi Pico** — plus live **Forth** (zForth), **Tcl**
-  (Jim Tcl / partcl) and **Lisp** (`fe`) tabs. It reads hand-written code back
+  (Jim Tcl / partcl), **Lisp** (`fe`) and **Cowgol** tabs. Cowgol is available
+  from **Code → +**, with a checked integer, turtle-canvas and digital-circuit
+  subset, plus native CP/M/DOS compiler routes. See [Cowgol support and limits](docs/COWGOL.md).
+  It reads hand-written code back
   too: edit the C or BASIC a program became and import it to blocks again.
 - Beyond the round trip, programs can be **compiled and run on emulated DOS and
   CP/M machines** through real toolchains — **GW-BASIC** and **uBASIC**,

@@ -865,6 +865,14 @@ behind it and still wants its own lane.
 
 ### Lane L — lowered halves to add or complete
 
+**L5. Cowgol checked subset. FEATURE BRANCH 2026-11-28.** The Cowgol reader and
+emitter are owned by `sb3-creator`. This lane adds typed integer control flow
+and the supported canvas/circuit host calls, with explicit refusal of source
+outside the subset. Full Cowgol compilation is a separate `stc-compiler` route.
+Existing target backends retain their restrictions; pointer/record semantics,
+concurrent event scripts and full graphics APIs are not inferred. See
+[Cowgol integration](COWGOL.md) for the supported contract and validation.
+
 **N12. RISC-V from the dialect. OPEN 2026-09-25, unclaimed.** The riscv32
 column joined the matrix on 2026-09-25 (it had been listed as a console while
 two local roads shipped: `riscv-asm.js` assembles RV32IM and shecc-in-wasm

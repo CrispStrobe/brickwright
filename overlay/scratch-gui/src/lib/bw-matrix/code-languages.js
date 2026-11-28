@@ -27,6 +27,15 @@ export function standaloneBasicDrafts (buffers) {
 
 export function codeLanguageAvailable (lang, device, {remoteImages = true, riscvHosted = true} = {}) {
     if (!device || lang === 'pseudocode') return true;
+    if (lang === 'cowgol') {
+        // The checked subset runs through blocks, independently of a native
+        // Cowgol compiler. Keep it available on extension-owned devices too.
+        if (device === 'spike') return true;
+        const capability = cell(lang, device);
+        return Boolean(capability && (capability.native?.sim || capability.native?.silicon ||
+            capability.lowered.some(route => route.sim || route.silicon))) ||
+            (!deviceById(device) && device !== 'i80386');
+    }
     if (lang === 'basic') return (device !== 'pico' || remoteImages) && basicProfilesFor(device).length > 0;
     if (['fe', 'forth', 'tcl'].includes(lang)) return device === 'i8086' || (device === 'riscv32' && riscvHosted);
     if (device === 'spike') return lang === 'python';

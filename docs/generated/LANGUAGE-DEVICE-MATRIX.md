@@ -21,6 +21,7 @@ question from whether the row agrees with the code.
 | **JavaScript** | **L** via C · sim + silicon<br>native — (ram: STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more) | **L** via C · sim + silicon<br>native — (ram: ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more) | **L** via MicroPython, C · sim + silicon<br>open: N5 | **L** via C · sim + silicon<br>native — (flash: STM32F030: 16–32 KB flash, 4 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more) | **L** via C · sim<br>native — (licence: the MicroPython and NodeMCU ESP8266 ports link Espressif's closed SDK, which this simulator does not run (Espruino's ESP8266 port links it too)) | **L** via C, BASIC · sim + silicon<br>native — (no-port: no JavaScript engine for the 6502) | **L** via BASIC, C · sim + silicon<br>native — (no-port: no JavaScript engine for the Z80) | native — (no-port: no JavaScript engine wired for this RV32IMA SoC)<br>open: N12 | **L** via ASM, C · sim + silicon<br>native — (no-port: no JavaScript engine for the 8086) | **L** via MicroPython · sim + silicon<br>open: N5 | **L** via ts · sim<br>open: L4<br>_declared_ |
 | **C** | **N** SDCC mcs51 (local) · sim + silicon · tier 2a · needs emu8051 (standing)<br>**L** via C · sim + silicon | **N** avr-gcc (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** arm-none-eabi-gcc bare-metal (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** arm-none-eabi-gcc bare-metal (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** xtensa-lx106-elf-gcc + bw8266 runtime (hosted) · sim · tier 2c<br>**L** via C · sim | **N** cc65 (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** SDCC -mz80 (bench ROM) (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** shecc (wasm) in the browser; hosted gcc fallback (local) · sim · tier 2c | **N** SmallerC (WASM) + i8086-asm.js (local) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **L** via MicroPython · sim + silicon<br>open: N7 | **L** via ts · sim<br>_declared_ |
 | **BASIC** | **L** via C · sim + silicon<br>open: N8 | **L** via C · sim + silicon<br>open: N8 | **N** PicoBB BBC BASIC, PiccoloBASIC, and Stefan’s BASIC (none) · sim · tier 2c<br>**L** via MicroPython, C · sim + silicon | **L** via C · sim + silicon<br>native — (flash: STM32F030: 16–32 KB flash, 4 KB RAM; no BASIC fits beside a program) | **L** via C · sim<br>native — (no-port: no permissively licensed BASIC for the ESP8266 without the SDK found) | **N** MS BASIC ROM (`ms` profile) (none) · sim · tier 2c<br>**L** via BASIC · sim | **N** BBC BASIC (`bbc` profile) (none) · sim · tier 2c<br>**L** via BASIC · sim | native — (no-port: no BASIC interpreter wired for this RV32IMA SoC)<br>open: N12 | **N** uBASIC (BSD-3-Clause) via ia16-elf-gcc, on the DOS bench (local) · no reach · tier 2c<br>**L** via ASM · sim + silicon | **L** via MicroPython · sim + silicon<br>native — (no-port: no BASIC interpreter for the nRF52833 found) | **L** via ts · sim<br>native — (no-port: no permissively licensed BASIC for the SAMD51 found)<br>_declared_ |
+| **Cowgol** (reader: Checked integer, control-flow, canvas and circuit subset; unsupported source is refused; L5) | **L** via C · sim + silicon<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via C · sim + silicon<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via MicroPython, C · sim + silicon<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via C · sim + silicon<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via C · sim<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via C, BASIC · sim + silicon<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via BASIC, C · sim + silicon<br>open: L5 | native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends)<br>open: N12 | **L** via ASM, C · sim + silicon<br>open: L5 | **L** via MicroPython · sim + silicon<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends) | **L** via ts · sim<br>native — (no-port: No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends)<br>_declared_ |
 | **ASM** (reader: 8086 only: lifts what the ▶ button lowered, refuses hand-written assembly by name; L1) | **N** sdas8051 (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** avr-gcc (as) (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** arm-none-eabi-as (hosted) · sim · tier 2c<br>**L** via C · sim + silicon | **N** arm-none-eabi-as (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon |  | **N** ca65 + ld65 (hosted) · sim + silicon · tier 2c<br>**L** via C · sim + silicon | **N** sdasz80 + sdldz80 (hosted) · sim + silicon · tier 2c<br>open: N1 | **N** riscv-asm.js (RV32IM, local) (local) · sim · tier 2c | **N** i8086-asm.js (MASM and NASM dialects) (local) · sim + silicon · tier 2a · needs nasm (standing), retro-corpus-8086 (absent)<br>**L** via ASM · sim + silicon | **N** arm-none-eabi-as (hosted) · silicon · tier 2c |  |
 | **MicroPython** | **L** via C · sim + silicon<br>native — (ram: STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports)) | **L** via C · sim + silicon<br>native — (ram: ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports)) | **N** MicroPython (none) · sim + silicon · tier 2a<br>**L** via MicroPython · sim + silicon | **L** via C · sim + silicon<br>native — (flash: STM32F030: 16–32 KB flash, 4 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports)) | **L** via C · sim<br>native — (licence: the MicroPython and NodeMCU ESP8266 ports link Espressif's closed SDK, which this simulator does not run) | **L** via C, BASIC · sim + silicon<br>native — (no-port: no MicroPython for the 6502) | **L** via BASIC, C · sim + silicon<br>native — (no-port: no MicroPython for the Z80) | native — (no-port: no MicroPython port wired for this RV32IMA SoC)<br>open: N12 | **L** via ASM, C · sim + silicon<br>native — (no-port: no MicroPython for the 8086) | **N** MicroPython (none) · sim + silicon · tier 2a<br>**L** via MicroPython · sim + silicon | **N** CircuitPython (none) · no reach · tier 3<br>**L** via ts · sim<br>_declared_ |
 
@@ -61,8 +62,9 @@ question from whether the row agrees with the code.
 | task | cells | which |
 | --- | --- | --- |
 | L4 | 4 | javascript/arcade, javascript/pybadge, javascript/pybadge-lc, javascript/samd51 |
+| L5 | 2 | cowgol/z80, cowgol/i8086 |
 | N1 | 1 | asm/z80 |
-| N12 | 5 | pseudocode/riscv32, python/riscv32, javascript/riscv32, basic/riscv32, micropython/riscv32 |
+| N12 | 6 | pseudocode/riscv32, python/riscv32, javascript/riscv32, basic/riscv32, cowgol/riscv32, micropython/riscv32 |
 | N5 | 3 | javascript/pico, javascript/microbit, javascript/calliopemini |
 | N7 | 2 | c/microbit, c/calliopemini |
 | N8 | 13 | basic/stc12c5a60s2, basic/stc12c5a16s2, basic/stc15f2k60s2, basic/stc15w408as, basic/stc89c52rc, basic/stc89c52, basic/arduino-uno, basic/arduino-nano, basic/arduino-mega, basic/atmega328p, basic/atmega168p, basic/attiny88, basic/attiny85 |
@@ -73,53 +75,70 @@ question from whether the row agrees with the code.
 | --- | --- | --- | --- |
 | Python | stc12c5a60s2 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stc12c5a60s2 | ram | STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | stc12c5a60s2 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stc12c5a60s2 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | stc12c5a16s2 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stc12c5a16s2 | ram | STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | stc12c5a16s2 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stc12c5a16s2 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | stc15f2k60s2 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stc15f2k60s2 | ram | STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | stc15f2k60s2 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stc15f2k60s2 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | stc15w408as | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stc15w408as | ram | STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | stc15w408as | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stc15w408as | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | stc89c52rc | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stc89c52rc | ram | STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | stc89c52rc | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stc89c52rc | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | stc89c52 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stc89c52 | ram | STC12C5A60S2: 1,280 B RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | stc89c52 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stc89c52 | ram | STC12C5A60S2: 1,280 B RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | arduino-uno | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | arduino-uno | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | arduino-uno | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | arduino-uno | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | arduino-nano | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | arduino-nano | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | arduino-nano | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | arduino-nano | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | arduino-mega | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | arduino-mega | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | arduino-mega | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | arduino-mega | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | atmega328p | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | atmega328p | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | atmega328p | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | atmega328p | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | atmega168p | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | atmega168p | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | atmega168p | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | atmega168p | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | attiny88 | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | attiny88 | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | attiny88 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | attiny88 | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | attiny85 | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | attiny85 | ram | ATmega328P: 2 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
+| Cowgol | attiny85 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | attiny85 | ram | ATmega328P: 2 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
+| Cowgol | pico | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | Python | stm32f030 | flash | STM32F030: 16–32 KB flash, 4 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | JavaScript | stm32f030 | flash | STM32F030: 16–32 KB flash, 4 KB RAM; Kaluma and Espruino need a Cortex-M with 64 KB RAM or more |
 | BASIC | stm32f030 | flash | STM32F030: 16–32 KB flash, 4 KB RAM; no BASIC fits beside a program |
+| Cowgol | stm32f030 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | stm32f030 | flash | STM32F030: 16–32 KB flash, 4 KB RAM; MicroPython needs roughly 256 KB flash and 16 KB RAM (its smallest official ports) |
 | Python | esp8266 | licence | the MicroPython and NodeMCU ESP8266 ports link Espressif's closed SDK, which this simulator does not run |
 | JavaScript | esp8266 | licence | the MicroPython and NodeMCU ESP8266 ports link Espressif's closed SDK, which this simulator does not run (Espruino's ESP8266 port links it too) |
 | BASIC | esp8266 | no-port | no permissively licensed BASIC for the ESP8266 without the SDK found |
+| Cowgol | esp8266 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | esp8266 | licence | the MicroPython and NodeMCU ESP8266 ports link Espressif's closed SDK, which this simulator does not run |
 | Python | eater6502 | no-port | no MicroPython or other Python for the 6502 |
 | JavaScript | eater6502 | no-port | no JavaScript engine for the 6502 |
+| Cowgol | eater6502 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | eater6502 | no-port | no MicroPython for the 6502 |
 | Python | z80 | no-port | no MicroPython or other Python for the Z80 |
 | JavaScript | z80 | no-port | no JavaScript engine for the Z80 |
@@ -127,16 +146,23 @@ question from whether the row agrees with the code.
 | Python | riscv32 | no-port | no Python port wired for this RV32IMA SoC |
 | JavaScript | riscv32 | no-port | no JavaScript engine wired for this RV32IMA SoC |
 | BASIC | riscv32 | no-port | no BASIC interpreter wired for this RV32IMA SoC |
+| Cowgol | riscv32 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | MicroPython | riscv32 | no-port | no MicroPython port wired for this RV32IMA SoC |
 | Python | i8086 | no-port | no MicroPython or other Python for the 8086 |
 | JavaScript | i8086 | no-port | no JavaScript engine for the 8086 |
 | MicroPython | i8086 | no-port | no MicroPython for the 8086 |
 | BASIC | microbit | no-port | no BASIC interpreter for the nRF52833 found |
+| Cowgol | microbit | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | BASIC | calliopemini | no-port | no BASIC interpreter for the nRF52833 found |
+| Cowgol | calliopemini | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | BASIC | arcade | no-port | no permissively licensed BASIC for the SAMD51 found |
+| Cowgol | arcade | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | BASIC | pybadge | no-port | no permissively licensed BASIC for the SAMD51 found |
+| Cowgol | pybadge | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | BASIC | pybadge-lc | no-port | no permissively licensed BASIC for the SAMD51 found |
+| Cowgol | pybadge-lc | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 | BASIC | samd51 | no-port | no permissively licensed BASIC for the SAMD51 found |
+| Cowgol | samd51 | no-port | No Cowgol runtime is integrated for this board; the checked subset uses its existing pseudocode backends |
 
 ## Oracles the tiers rest on (bw-board census at the pinned sha)
 

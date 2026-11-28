@@ -120,6 +120,8 @@ export const SB3_CREATOR_FILES = Object.freeze([
     ['sb3-creator-chostruntime.js', 'src/utils/cHostRuntime.js'],
     ['sb3-creator-chost.js', 'src/utils/cHostToPseudocode.js'],
     ['sb3-creator-basic.js', 'src/utils/basicToPseudocode.js'],
+    ['sb3-creator-cowgol.js', 'src/utils/cowgol.js'],
+    ['sb3-creator-cowgol-reader.js', 'src/utils/cowgolToPseudocode.js'],
     ['cubeDirections.js', 'src/utils/cubeDirections.js'],
     ['ev3Dialect.js', 'src/utils/ev3Dialect.js'],
     ['cpxDialect.js', 'src/utils/cpxDialect.js'],
@@ -148,6 +150,8 @@ export const SB3_CREATOR_FILES = Object.freeze([
  * The seven-entry gap is asserted separately, as the latent hazard it is.
  */
 export const SB3_CREATOR_IMPORT_REWRITES = Object.freeze([
+    ['cowgol.js', 'sb3-creator-cowgol.js'],
+    ['cowgolToPseudocode.js', 'sb3-creator-cowgol-reader.js'],
     ['pythonToPseudocode.js', 'sb3-creator-python.js'],
     ['micropythonToPseudocode.js', 'sb3-creator-micropython.js'],
     ['spike3Python.js', 'sb3-creator-spike3.js'],
