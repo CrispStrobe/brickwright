@@ -26,6 +26,7 @@
   "sb1-converter-deferral.test.mjs",
   "scratch-storage-worker-attribution.test.mjs",
   "sound-tab-deferral.test.mjs",
+  "sync-examples-remote.test.mjs",
   "test-setup.test.mjs",
   "toolchain-integrity.test.mjs",
   "vector-art-registration.test.mjs"

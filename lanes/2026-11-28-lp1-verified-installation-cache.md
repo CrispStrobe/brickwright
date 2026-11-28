@@ -67,9 +67,11 @@ It preserves PR #1856 and merges the two preceding documentation-only claims.
 The completing documentation commit does not change the reviewed executable
 source.
 
-**49 focused controls pass on Node 24.22.3, with no skips:**
+**63 focused controls pass on Node 24.22.3, with no skips:**
 
 - Existing download/GPL boundary, shared inventory and output guard: 32.
+- Native distribution policy: 14, including all eight profiles and denial
+  before network access.
 - New integrity suite: 13, including same-size corruption of each of the nine
   downloaded and cached members, verified offline snapshots/MIME types,
   individual repair, unknown-member rejection, policy-before-network,
@@ -99,14 +101,57 @@ with mutations for both obsolete-cache deletion and optional-cache retention.
 absent executable and Playwright has no installed browser. Its launch failed
 before product code; no environment failure is counted as a passing gate.
 
-PR #1856's official build and its nine LP1a controls passed, but inherited vendor
-identity and broader unit/integration failures still block landing. Its available
-unit failures are in unchanged integration inputs; this receipt does not claim
-a complete baseline rerun or waive any gate. The Pico prerequisite is preserved
-in [sb3-creator PR #260](https://github.com/CrispStrobe/sb3-creator/pull/260);
-its consumer pin must wait for qualified upstream landing.
+PR #1856's initial official build and its nine LP1a controls passed. Its Pico
+prerequisite is now merged through
+[sb3-creator PR #260](https://github.com/CrispStrobe/sb3-creator/pull/260),
+after upstream lint/test/build and browser success. Consumer candidate
+`bb557027ba0b8efef41c9b78a5193b9f5992ce8e` adopts the preserved minimal
+revision and passes the complete hosted
+[vendor-freshness job](https://github.com/CrispStrobe/brickwright/actions/runs/46141726925).
+That job includes upstream byte identity, transpiler, examples gallery and
+runtime gallery pins; the inherited Pico blocker is cleared. Its independent
+remote discovery repair has 13 passing real CLI controls.
+
+Earlier broader unit/integration failures remain unresolved. Their available
+failures are in unchanged integration inputs; this receipt does not claim a
+complete baseline rerun or waive any gate.
 
 Component/runtime/output license statuses stay explicitly pending. Explicit
 development mode, arbitrary direct Node staging and physical-device behavior
 are not covered by this managed optional-installation guarantee.
 
+## Discovered fetch-pinning prerequisite
+
+Hosted qualification at `eadf983a7f327e51b073562e4ffe537f21a76abc` finds the
+new integrity manifest's SHA-addressed raw GitHub origin absent from the
+repository's fetch-site census. This is an LP1b integration omission.
+
+This lane also owns the bounded declaration in `test/fetch-pinning.test.mjs`:
+register the inventory origin as a SHA-constant fetch site and extract its
+commit segment for the existing exact 40-hex assertion. Do not change detector
+scope, exclusions, waivers or the mutation prover. Run the scanner and retain
+the existing proof that an unpinned fetch is rejected before publication.
+
+### Qualification correction
+
+The actual optional download origin remains `https://crispstrobe.github.io/sdcc-wasm/`.
+The new URL is `integrity.sourceBaseUrl`, used as immutable provenance. The
+fetch-site census records that distinction with a `source-link` row; the
+existing `SHA_CONSTANTS` assertion now extracts and checks its exact commit
+segment. The detector, exclusions, three-row waiver set and mutation prover
+are unchanged. This corrects a failure introduced by LP1b, not an inherited
+baseline defect.
+
+Local complete scanner/prover execution remains unavailable: their unchanged
+CAD pin input hashes require over 20 MB of absent tracked payloads, exceeding
+this sparse workspace's free space. No missing payload or skipped input is
+counted as a passing full gate. The combined candidate must pass the unchanged
+hosted scanner and mutation proof before landing.
+
+Bounded local proof uses the unchanged raw detector and pin-constant assertion:
+the real manifest yields exactly the declared source hit; its full SHA passes,
+while `main`, a seven-character abbreviation, an uppercase SHA and a missing
+source URL all fail. The manifest is unchanged at blob
+`84ea367a2bb149891829c2c930fb4d7478a5032f`. The correction changes only
+11 lines in `test/fetch-pinning.test.mjs`, reviewed at blob
+`dc6f87ee7a928e883d41921106580c764f701384`; syntax and scoped whitespace pass.

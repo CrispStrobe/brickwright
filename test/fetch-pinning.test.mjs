@@ -644,6 +644,15 @@ const CENSUS = [
            + 'it; locally the box gcc is used and the executed-C leg skips by name when neither is present.'
     },
     {
+        file: 'overlay/scratch-gui/src/lib/runtime-package-inventory.json',
+        kind: 'raw',
+        text: 'raw.githubusercontent.com/CrispStrobe/sdcc-wasm/64ea6915733cf6d6563dfe9424c8cc71b4731e06/static/sdcc-wasm/',
+        class: 'source-link',
+        why: 'Immutable source provenance for the optional SDCC package, recorded alongside its separate '
+           + 'managed download origin and per-member byte lengths and SHA-256 values. SHA_CONSTANTS below '
+           + 'rejects abbreviated or movable refs in this source URL.'
+    },
+    {
         file: 'overlay/scratch-gui/src/lib/bw-machines/lessons.js',
         kind: 'raw',
         text: 'raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${LINUX_MEDIA_COMMIT}/riscv32-linux',
@@ -713,6 +722,8 @@ const SHA_CONSTANTS = [
     ['scripts/vendor.mjs', /const GUI_COMMIT = '([0-9a-zA-Z]+)'/],
     ['scripts/sync-emu8051-wasm.mjs', /const PIN = '([0-9a-zA-Z]+)'/],
     ['scripts/sync-labwired-wasm.mjs', /const PIN = '([0-9a-zA-Z]+)'/],
+    ['overlay/scratch-gui/src/lib/runtime-package-inventory.json',
+        /"sourceBaseUrl"\s*:\s*"https:\/\/raw\.githubusercontent\.com\/CrispStrobe\/sdcc-wasm\/([^/]+)\//],
     ['.github/workflows/build.yml', /^\s*FLOOR=(\S+)/m],
     // The unit job now decodes the registered local carrier instead of fetching
     // the supplier. Its admission constant must still name a complete commit.
