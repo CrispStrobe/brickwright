@@ -2778,7 +2778,8 @@ OpenCASCADE code. Its NOTICE, LICENSE and full MIT and Apache-2.0 texts are part
 of the SDK's `NOTICE.txt`. The kernel lives under `static/cad-sdk/assets/exact/`
 and is fetched only when a user runs an exact feature, exact measurement, STEP
 export, STEP import (also of assemblies), STEP evidence, a surface-blend
-inspection, a drawing from exact edges, an exact section or a manufacturing check
+inspection, a drawing from exact edges (also its datums and tolerance frames), an
+exact section, a manufacturing check or the faces offered for assembly mates
 (from the CAD tab's File menu, its toolbar or the terminal); the service worker caches it only after such a request.
 
 The optional Scout TT project generator retains the Adafruit CAD Parts MIT

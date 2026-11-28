@@ -1,6 +1,6 @@
-import { d as h, f as p, t as x } from "./geometry.worker-BDK-0LR6.js";
-import { buildExactModel as M, edgeBreaks as k, faceMark as D, faceCentre as E } from "./manufacturing-Dl15QaT1.js";
-import "./printability-DJe_UDPa.js";
+import { d as h, f as p, t as x } from "./geometry.worker-RK0f-gvM.js";
+import { buildExactModel as M, edgeBreaks as k, faceMark as D, faceCentre as E } from "./manufacturing-B4mipg2c.js";
+import "./printability-CZ7dAjWG.js";
 const v = 1;
 function w(e, o) {
   const c = [], d = /* @__PURE__ */ new Set(), t = (i) => {

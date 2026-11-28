@@ -1,7 +1,7 @@
 var gt = Object.defineProperty;
 var yt = (l, t, o) => t in l ? gt(l, t, { enumerable: !0, configurable: !0, writable: !0, value: o }) : l[t] = o;
 var R = (l, t, o) => yt(l, typeof t != "symbol" ? t + "" : t, o);
-import { t as ht } from "./geometry.worker-BDK-0LR6.js";
+import { t as ht } from "./geometry.worker-RK0f-gvM.js";
 const j = (l, t) => l[0] * t[0] + l[1] * t[1] + l[2] * t[2], $ = (l, t) => [l[0] - t[0], l[1] - t[1], l[2] - t[2]], G = (l, t) => j($(l, t), $(l, t));
 function W(l, t, o, r) {
   const e = $(o, t), n = $(r, t), s = $(l, t), i = e[1] * n[2] - e[2] * n[1], c = e[2] * n[0] - e[0] * n[2], f = e[0] * n[1] - e[1] * n[0], a = i * i + c * c + f * f;
