@@ -69,3 +69,59 @@ existing enforcement in place:
   and emitted helper, including wrapped hue changes and negative controls.
   The committed tests invoke the full project exporter, which remains part of
   the hosted integration gate.
+
+## Shared workflow scanner follow-up
+
+Hosted qualification of `8918704a` exposed one additional shared-tool defect:
+JavaScript receipt properties inside a YAML block scalar were interpreted as
+checkout fields. CP1/CP5 browser execution passed, but that census failure also
+blocked the PXT controls gate.
+
+The canonical owner is `CrispStrobe/bw-circuit-ui`. Its initial proposed fix is saved
+in PR #186 at `f2ee9d32244f898a7c329a10e36070e46c72eed6`, scanner Git blob
+`6e79894bc2c4f09a38f13c4c98de04eb33ade3c3`. Independent review then found a
+multiline quoted-YAML counterexample; the producer is correcting it before
+any adoption. This checkpoint saves the consumer regression while canonical
+repair, hosted qualification and normal merge remain pending.
+
+The exact 43 consumer workflow sources were loaded with the actual scanner,
+vendor-pin helper and complete existing consumer test file. With the added
+regression, the old scanner passes 7/9 and fails the two scalar cases at the
+same production workflow line. The proposed canonical scanner passes all 9,
+auditing all 33 external checkout sites. The new regression retains exact
+line numbers and rejects missing, moving, dynamic and duplicate checkout refs,
+as well as raw clones inside scripts.
+
+This standalone tooling adoption has its own producer history. The installed
+runtime CUI pin and sealed HDD/source identities remain unchanged.
+
+## Independent hosted-gate repairs
+
+The desktop UART fixture was probing the same reader mutex as the worker.
+The worker could therefore correctly return Busy before the observer detected
+ownership. Commit `3fe655d9ceaee0edb3b840e4fba9e4b3b1f3ea53` replaces that
+competing probe with a per-connection, one-shot `cfg(test)` rendezvous after a
+real retryable read under acquired ownership. Busy, Close, Cancelled, peer EOF
+and second-socket assertions remain. The five-second setup bound and 300 ms
+cancellation bound are unchanged. Independent source review found no trait,
+lifetime or lock issue; actual Rust compilation/execution requires hosted CI.
+
+Build preflight and focused debugger qualification also found exactly two
+tracked-pair mismatches. Commit `9f719245aa4c7e5c5f95f49fba59f4005089e7f0`
+copies the canonical overlay ROM provenance blobs to the package mirrors:
+
+- `i8086-bios.provenance.json`: `8030af9615a3fd225491d82036fd15981603cc7b`.
+- `i8086-demos.provenance.json`: `5c4a04ef505bbeac76fb85ee68553e44bd872075`.
+
+The current Board pin is `cda715c16d4b733ceb73f7720a236b5ea9e3f21d`;
+all ROM, assembler and source-content hashes already agree. This preserves the
+canonical original metadata verbatim and retains the existing parity gate.
+
+The known mirror preflight prevents every unit shard from reaching its full
+tests. These independent repairs are integrated now to let that matrix advance.
+The separate shared-scanner adoption still requires its checked upstream merge.
+
+At the preceding `8918704a` head, native x64/ARM64, real WASM including
+14 mounted-browser scenarios, ARM CPU emulation and all three portable CLI
+platforms passed. These results are historical evidence; this new candidate
+must receive its own required hosted qualification.
