@@ -6,13 +6,15 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as documentApi from '../overlay/scratch-gui/src/lib/code-source-document.js';
 import * as profileApi from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
+import * as compilerApi from '../overlay/scratch-gui/src/lib/crispbasic-compiler.js';
+import {compileSource} from '../packages/crisp-basic/src/compiler/index.mjs';
 import {createCrispBasicEditorHarness} from '../scripts/lib/crispbasic-editor-harness.mjs';
 
 const editorSource = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx',
     import.meta.url), 'utf8');
 const generated = createCrispBasicEditorHarness(editorSource);
 
-function shell (source = generated) {
+function shell (source = generated, compiler = compilerApi) {
     // Rendering and actual workers remain covered by verify-crispbasic-browser.
     // Only React's synchronous state boundary is supplied here; the constructor,
     // editing methods, document model and profile lookup are production code.
@@ -25,7 +27,8 @@ function shell (source = generated) {
     }}};
     const namespaces = new Map([
         ['/test-gui/lib/code-source-document.js', documentApi],
-        ['/test-gui/lib/bw-matrix/code-languages.js', profileApi]
+        ['/test-gui/lib/bw-matrix/code-languages.js', profileApi],
+        ['/test-gui/lib/crispbasic-compiler.js', compiler]
     ]);
     const render = source.indexOf('    render() {');
     assert.ok(render > 0, 'generated shell must retain its actual class and constructor');
@@ -100,4 +103,41 @@ test('the browser-shell regression control detects a missing production adapter'
     const editor = shell(withoutSnapshot);
     assert.throws(() => editor.setActiveCode('PRINT "unreachable"\n'), /codeDocumentSnapshot is not a function/);
     assert.equal(editor.activeCode(), 'PRINT "before"\n');
+});
+
+for (const [device, target] of [[null, 'native'], ['arduino-uno', 'arduino-uno']]) {
+    test(`the browser shell binds the actual Compile BASIC method and preserves authored source for ${target}`, async () => {
+        const requests = [];
+        const editor = shell(generated, {prepareCompiledBasic: options => {
+            requests.push(options);
+            return compilerApi.prepareCompiledBasic({...options, baseURL: 'https://example.invalid/compiler/',
+                loadCompiler: async () => ({compileSource})});
+        }});
+        editor.state.libraryTarget = device;
+        editor.setActiveCode('PRINT "compiled shell"\nEND\n');
+        const original = editor.state.codeDocument;
+        await editor.compileCrispBasic();
+        assert.equal(requests.length, 1);
+        assert.equal(requests[0].device, device);
+        assert.equal(requests[0].source, original.code);
+        assert.equal(editor.state.lang, 'c', editor.state.status);
+        assert.equal(editor.state.codeDocument.lang, 'basic');
+        assert.equal(editor.state.codeDocument.code, original.code);
+        assert.equal(editor.state.codeDocument.projections.c.sourceRevision, original.revision);
+        assert.ok(editor.activeCode().startsWith(`/* CrispBASIC C99 target: ${target} */\n`));
+        assert.equal(editor.state.basicDiagnostic, null);
+        assert.equal(editor.state.busy, false);
+    });
+}
+
+test('the compiled browser-shell control detects a missing production projection import', async () => {
+    const missing = generated.replace('selectCodeDocumentLanguage, addCodeProjection,', 'selectCodeDocumentLanguage,');
+    assert.notEqual(missing, generated);
+    const editor = shell(missing, {prepareCompiledBasic: options =>
+        compilerApi.prepareCompiledBasic({...options, baseURL: 'https://example.invalid/compiler/',
+            loadCompiler: async () => ({compileSource})})});
+    await editor.compileCrispBasic();
+    assert.equal(editor.state.lang, 'basic');
+    assert.match(editor.state.status, /addCodeProjection is not defined/);
+    assert.equal(editor.state.buffers.c, '');
 });

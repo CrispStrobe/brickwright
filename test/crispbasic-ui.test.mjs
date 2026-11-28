@@ -188,10 +188,22 @@ test('the selected machine resolves a stale BBC preference before Run and portab
     assert.equal(f.created, 0);
 
     f.editor.state.libraryTarget = 'arduino-uno';
-    assert.equal(f.editor.selectedBasicProfile(), undefined, 'an unrelated machine does not inherit BBC Run');
+    const compiled = [];
+    f.editor.compileCrispBasic = () => compiled.push(f.editor.activeCode());
+    assert.equal(f.editor.selectedBasicProfile().id, 'bbc-c99');
+    assert.equal(f.editor.selectedBasicProfile().compiled, true);
+    assert.deepEqual(f.editor.basicGenerationOptions(), {profile: 'bbc', lineNumbers: false});
+    await f.editor.runBasic();
+    assert.deepEqual(compiled, [f.editor.state.buffers.basic], 'Uno dispatches to its qualified C99 route');
+    assert.equal(f.created, 0, 'Uno must not create the browser interpreter');
+    assert.equal(routed.length, 1, 'Uno must not reuse the stale 8086 route');
+
+    f.editor.state.libraryTarget = 'arduino-mega';
+    assert.equal(f.editor.selectedBasicProfile(), undefined, 'an unsupported machine does not inherit BBC Run');
     await f.editor.runBasic();
     assert.equal(f.created, 0);
     assert.equal(routed.length, 1);
+    assert.equal(compiled.length, 1, 'an unsupported machine must not reuse the Uno compiler route');
 });
 
 test('standalone Pico BASIC edits and runs its own draft while retaining the BBC source', async () => {

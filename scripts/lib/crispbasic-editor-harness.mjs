@@ -13,6 +13,7 @@ function extract(source, start, end) {
 // production methods, including the profile/draft and unmount dependencies.
 export function extractCrispBasicEditorMethods(sourceText) {
     return [
+        ['    async compileCrispBasic () {', '    async runCrispBasic (code) {'],
         ['    async runCrispBasic (code) {', '    // Fetch examples/index.json once'],
         ['    componentWillUnmount () {', '    // Current-locale string table'],
         ['    activeCode () {', '    // Lazily import the compiler'],
@@ -35,19 +36,21 @@ export function createCrispBasicEditorHarness(sourceText) {
     // already receives them from the shared codeDocumentEditorClass fixture.
     const methods = extractCrispBasicEditorMethods(sourceText) +
         extract(sourceText, '    codeRuntimeFor (lang, target) {', '    authoredCodeState (') +
-        extract(sourceText, '    withRetainedDrafts (', '    restoreStandaloneBasic (');
+        extract(sourceText, '    withRetainedDrafts (', '    restoreStandaloneBasic (') +
+        extract(sourceText, '    genOpts (lang = this.state.lang) {', '    setGenOpt (patch) {');
     const controls = extract(sourceText,
-        "                        {this.state.lang === 'basic' && this.activeCode().trim() ? (",
+        "                        {this.state.lang === 'basic' && !this.selectedBasicProfile()?.compiled && this.activeCode().trim() ? (",
         "                        {this.state.lang === 'fe' && this.activeCode().trim() ? (");
     const output = extract(sourceText, '                {/* VDU terminal for BBC BASIC', '                {this.state.codeRunLabel ? (');
     return `
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {createCrispBasicRunner} from '/adapter.js';
+import {prepareCompiledBasic} from '/test-gui/lib/crispbasic-compiler.js';
 import VduTerminal from '/terminal.js';
 import {basicProfileFor, hiddenCodeDrafts, standaloneBasicDrafts}
     from '/test-gui/lib/bw-matrix/code-languages.js';
-import {createCodeDocument, editCodeDocument, selectCodeDocumentLanguage,
+import {createCodeDocument, editCodeDocument, selectCodeDocumentLanguage, addCodeProjection,
     restoreCodeDocumentState, codeTargetFromSource, OWNED_CONSOLE_EXECUTION}
     from '/test-gui/lib/code-source-document.js';
 // This focused shell has no CAD pane. Its full-editor counterpart qualifies CAD.

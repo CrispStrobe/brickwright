@@ -13,11 +13,13 @@ import test, {before, after} from 'node:test';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import {packageCrispBasic, CRISPBASIC_DESTINATION} from './package-crispbasic.mjs';
 import {createCrispBasicEditorHarness} from './lib/crispbasic-editor-harness.mjs';
+import {packageCrispBasicCompiler} from './package-crispbasic-compiler.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageRequire = createRequire(new URL('../packages/crisp-basic/package.json', import.meta.url));
 const rootRequire = createRequire(new URL('../package.json', import.meta.url));
 const gui = resolve(root, 'overlay/scratch-gui/src');
+const compilerAssets = resolve(root, 'packages/scratch-gui/static/crispbasic-compiler');
 const boardSource = dirname(rootRequire.resolve('bw-board/board.js'));
 const mime = new Map([['.js', 'text/javascript'], ['.mjs', 'text/javascript'], ['.wasm', 'application/wasm'], ['.json', 'application/json']]);
 let browser, server, origin;
@@ -25,6 +27,7 @@ const dynamic = new Map();
 
 before(async () => {
     await packageCrispBasic({check: true});
+    await packageCrispBasicCompiler();
     const {transform} = packageRequire('esbuild');
     const source = await readFile(resolve(gui, 'components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
     // Parse the whole edited component too: the focused harness intentionally
@@ -88,9 +91,13 @@ window.unmountEditor = mountCrispBasicEditor(document.getElementById('editor'), 
                 bytes = await readFile(filename);
                 type = mime.get(extname(filename)) || 'application/octet-stream';
             }
-            else if (pathname.startsWith('/workbench/static/crispbasic/')) {
-                const filename = resolve(CRISPBASIC_DESTINATION, pathname.slice('/workbench/static/crispbasic/'.length));
-                const rel = relative(CRISPBASIC_DESTINATION, filename);
+            else if (pathname.startsWith('/workbench/static/crispbasic/') ||
+                pathname.startsWith('/workbench/static/crispbasic-compiler/')) {
+                const compiled = pathname.startsWith('/workbench/static/crispbasic-compiler/');
+                const directory = compiled ? compilerAssets : CRISPBASIC_DESTINATION;
+                const prefix = compiled ? '/workbench/static/crispbasic-compiler/' : '/workbench/static/crispbasic/';
+                const filename = resolve(directory, pathname.slice(prefix.length));
+                const rel = relative(directory, filename);
                 if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) { response.writeHead(403).end(); return; }
                 bytes = await readFile(filename);
                 type = mime.get(extname(filename)) || 'application/octet-stream';
@@ -165,6 +172,48 @@ test('browser loads the engine on Run and executes actual generated BBC BASIC be
     assert.ok(requests.some(url => url.endsWith('/workbench/static/crispbasic/browser.mjs')));
     assert.equal(await page.evaluate(() => crossOriginIsolated), false);
     assert.equal(await page.locator('[data-testid="bw-basic-run"]').isEnabled(), true);
+});
+
+test('Compile BASIC loads the locked compiler on demand and retains the authored document', {timeout: 15000}, async t => {
+    const {page, requests} = await pageFor(t);
+    assert.equal(requests.some(url => url.includes('/static/crispbasic-compiler/')), false);
+    const source = 'PRINT "compiled browser"\nEND\n';
+    await page.getByTestId('bw-crispbasic-source').fill(source);
+    await page.getByTestId('bw-basic-compile').click();
+    await page.waitForFunction(() => !crispBasicEditor.state.busy &&
+        (crispBasicEditor.state.lang === 'c' || crispBasicEditor.state.basicDiagnostic));
+    const result = await page.evaluate(() => ({lang: crispBasicEditor.state.lang,
+        document: crispBasicEditor.state.codeDocument, c: crispBasicEditor.activeCode(),
+        diagnostic: crispBasicEditor.state.basicDiagnostic}));
+    assert.equal(result.diagnostic, null);
+    assert.equal(result.lang, 'c');
+    assert.equal(result.document.lang, 'basic');
+    assert.equal(result.document.code, source);
+    assert.equal(result.document.projections.c.sourceRevision, result.document.revision);
+    assert.equal(result.document.projections.c.code, result.c);
+    assert.match(result.c, /^\/\* CrispBASIC C99 target: native \*\//);
+    assert.match(result.c, /int main\(/);
+    assert.ok(requests.some(url => url.endsWith('/workbench/static/crispbasic-compiler/src/compiler/index.mjs')));
+    assert.equal(requests.some(url => url.includes('/static/crispbasic/')), false,
+        'the compiler route must not load an interpreter');
+});
+
+test('Compile BASIC exposes a source refusal without replacing the authored listing', {timeout: 15000}, async t => {
+    const {page, requests} = await pageFor(t);
+    const source = 'REM physical line one\nPRINT EVAL("1+1")\n';
+    await page.getByTestId('bw-crispbasic-source').fill(source);
+    await page.getByTestId('bw-basic-compile').click();
+    await page.waitForFunction(() => !crispBasicEditor.state.busy && Boolean(crispBasicEditor.state.basicDiagnostic));
+    const result = await page.evaluate(() => ({lang: crispBasicEditor.state.lang,
+        source: crispBasicEditor.activeCode(), diagnostic: crispBasicEditor.state.basicDiagnostic,
+        highlightedLine: crispBasicEditor.state.highlightedLine, c: crispBasicEditor.state.buffers.c}));
+    assert.equal(result.lang, 'basic');
+    assert.equal(result.source, source);
+    assert.equal(result.c, '');
+    assert.equal(result.diagnostic.line, 2);
+    assert.equal(result.highlightedLine, 2);
+    assert.match(result.diagnostic.message, /EVAL/);
+    assert.equal(requests.some(url => url.includes('/static/crispbasic/')), false);
 });
 
 test('real VDU output paints the mounted renderer and survives an identical second run', {timeout: 15000}, async t => {
