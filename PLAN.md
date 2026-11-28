@@ -105,6 +105,19 @@ Preserve exact-artifact vendor-chip and emulator eligibility checks: firmware
 allowed on physical silicon can still be unsuitable for Simulator. An MIT core
 does not qualify all bundled wireless libraries or a complete firmware image.
 
+LP1a implementation: the [claimed first slice](lanes/2026-11-28-lp1-toolchain-inventory.md)
+now shares the existing SDCC origin, cache identity and nine members between the
+loader and a selected-package inventory. The output guard rejects its directory
+and eight distinctive JS/WASM filenames, while retaining the existing boot-media
+and sparse-code checks. Forty-six focused source controls pass; this is not a
+complete dependency/license audit or a new compiler/runtime adoption.
+
+LP1 follow-up: pin and verify all nine downloaded artifacts before cache/import,
+finish component/runtime license evidence, and preserve the optional compiler
+cache across service-worker activation. Current downloads are explicitly
+unverified; cache retention across upgrades and behavioral no-prefetch proof
+remain open. Keep those changes in separately qualified checkpoints.
+
 Status: **plan recorded; incremental implementation and per-target qualification
 follow in claimed slices**. Existing runtime candidates and unrelated blockers
 retain their recorded status. The first independent implementation is LP1's
