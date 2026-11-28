@@ -10,11 +10,13 @@ const mediaInfo = makeT({
         animation6502: 'Watch the 6502 copy four frames to video RAM at $2000. The screen updates when the guest publishes a frame.',
         tali65c02: 'Choose ACIA in Controller. Define a word, or write grayscale pixels at $3000. Switch to Screen to see the framebuffer.', forthCpm: 'zForth on CP/M',
         ackPascal: 'Prints the primes first. The DOS service then reports a file-close error.',
+        dosForth: 'In Controller, enter : SQUARE DUP * ; and then 7 SQUARE . on separate lines.',
         ubasic: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.'},
     de: {minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb',
         animation6502: 'Der 6502 kopiert vier Bilder in den Bildspeicher ab $2000. Die Anzeige übernimmt fertige Bilder.',
         tali65c02: 'Wähle im Controller ACIA. Definiere ein Wort oder schreibe Graustufenpixel ab $3000. Wähle Bildschirm für die Bildausgabe.', forthCpm: 'zForth unter CP/M',
         ackPascal: 'Gibt zuerst die Primzahlen aus. Danach meldet der DOS-Dienst einen Fehler beim Schließen der Datei.',
+        dosForth: 'Gib im Controller : SQUARE DUP * ; und danach 7 SQUARE . in zwei Zeilen ein.',
         ubasic: 'Öffne das Beispiel in BAS. Bearbeite das Programm und starte es erneut, um die neue Ausgabe im Controller zu sehen.'}
 });
 
@@ -51,6 +53,10 @@ export const libraryMedia = [
         code: {language: 'c', path: 'src/sieve.c', compilerTarget: 'z80-cpm'}},
     {id: 'fe-dos', title: 'fe Lisp (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'forth-dos', title: 'zForth (DOS)', machine: 'i8086', license: 'MIT'},
+    {id: 'f83', title: 'F83 Forth (DOS)', machine: 'i8086', license: 'LicenseRef-Public-Domain',
+        licenseFile: 'PUBLIC-DOMAIN.txt', infoKey: 'dosForth', revision: '03f2234017ed9a59ec224da2457d732396e27aeb'},
+    {id: 'volksforth', title: 'VolksForth (DOS)', machine: 'i8086', license: 'BSD-2-Clause',
+        licenseFile: 'LICENSE', infoKey: 'dosForth', revision: '03f2234017ed9a59ec224da2457d732396e27aeb'},
     {id: 'tcl-dos', title: 'partcl Tcl (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'ubasic-dos', title: 'uBASIC (DOS)', machine: 'i8086', license: 'BSD-3-Clause',
         infoKey: 'ubasic',

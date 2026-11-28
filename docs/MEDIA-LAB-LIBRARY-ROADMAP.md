@@ -18,7 +18,8 @@ This inventory covers the 34 manifests on media-lab main at `5e54caab98d7ca6f641
 | PicoBB | Existing RP2040 entry using the reviewed filesystem-enabled revision. |
 | TOPBENCH and Native 386 Sieve | Both run from the 80386 Machines group. Sieve loads the MIT raw binary in 32-bit protected mode and validates its AT UART output and guest halt. |
 | Whetstone | The existing benchmark panel retains the separately reviewed Painter Engineering permission and runtime notices. No new Machines entry was added under that grant. |
-| F83, VolksForth and Small-C | The reviewed revision contains fetch recipes and manifests. Publish pinned, redistributable program bytes, then exercise the interactive Forth prompts and Small-C's shared DOS files. |
+| F83 and VolksForth | These interactive Forth-83 interpreters run under 8086 in Machines. Fetch the exact upstream COM files by commit and verify their SHA-256 at launch. Controller accepts interactive word definitions and execution. F83 is public domain and VolksForth is BSD-2-Clause. |
+| Small-C | The fetch recipe and compiler stage are available. Verify the DOS filesystem shared by the compiler, assembler and linker before adding the full workflow. |
 | MINIX 2.0.4 | Runs under 80386 in Machines with a checksum-pinned floppy and the bundled free AT BIOS. Boot with `=` in Controller and log in as `root`. The GUI regression exercises the keyboard, full screen and a root-directory listing from the shell. [Floppy and licence](https://github.com/CrispStrobe/brickwright-media-lab/pull/45) |
 | MINIX 1.7.5 | The 8086 release reaches the boot monitor. Its RAM disk still exceeds the current memory profile. |
 | Multitasking MS-DOS | The MIT beta recipe reaches its banner and then faults before a prompt. Build the mainstream version and verify the interactive shell before admitting it. |
