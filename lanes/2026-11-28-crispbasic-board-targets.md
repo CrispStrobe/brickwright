@@ -35,3 +35,37 @@ sources parse and their locale attributes satisfy the existing literal rule.
 Current-head CI, the fresh runtime build, supplier/mirror identity and complete
 production-editor qualification remain required before merging implementation
 to main. Queued/unassigned hosted jobs are not treated as successful checks.
+
+## Concurrent integration review
+
+The later aggregate `0f56c8be9ed2dfd2e5ce589cc746eda7a54ebd31` was
+reviewed against the chosen `75ef2427` base. It leaves the Board and Circuit UI
+pins unchanged and does not modify the CrispBASIC package or runtime tests.
+Its additional `crispBasicMode.js` copy has the same Git blob as the existing
+prefixed module. The newer sb3-creator pin adds Cowgol/RISC-V work and leaves
+that CrispBASIC mode source unchanged. No missing target dependency was found;
+the exact, already reviewed producer pins remain authoritative for this lane.
+
+## Final inherited-gate corrections
+
+The old integration logs exposed four further deterministic failures in the
+inherited tests/inventory. Each correction keeps the product behavior and
+existing enforcement in place:
+
+- The console blur fixture now uses the production AT VGA widget shape, so the
+  four existing lifecycle and pointer tests execute their assertions. The exact
+  original test file passes 0/4 before the fixture correction and 4/4 after it.
+- The Arcade motion test is declared for its exact existing GUI package import.
+  Six checks through the unchanged boundary judge confirm the old missing-entry
+  failure, the reviewed entry, unrelated-test and unknown-specifier refusals,
+  and preservation of all remaining inventory entries.
+- The supported-language test now executes the actual render method and
+  examines its output. Six tests pass, including the original locale/ASM
+  checks; four deliberate mutations are refused (lost null guard, wrong
+  language, lost standalone exclusion and empty disclosure).
+- Arcade tests now accept the implemented hue path and still refuse unsupported
+  saturation/brightness/transparency, dynamic parameters and legacy opcodes.
+  Three focused tests pass using the actual parser, exporter statement methods
+  and emitted helper, including wrapped hue changes and negative controls.
+  The committed tests invoke the full project exporter, which remains part of
+  the hosted integration gate.

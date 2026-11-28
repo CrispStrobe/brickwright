@@ -14,7 +14,7 @@
  * the same check and must come out different. A check that passes both is
  * measuring nothing.
  *
- * What stays unmapped (the mouse, sampled audio, pen hue) must be NAMED —
+ * What stays unmapped (the mouse, sampled audio, unsupported pen parameters) must be NAMED —
  * checked here too, as the refusal text, and the program still compiles.
  */
 import test from 'node:test';
@@ -22,7 +22,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {projectToArcade, MOUSE_WHY} from '../overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js';
-import {analyseTone} from '../overlay/scratch-gui/src/lib/bw-makecode/arcade-runtime.js';
+import {analyseTone, helperSource} from '../overlay/scratch-gui/src/lib/bw-makecode/arcade-runtime.js';
 import {arcadeSimAvailable, compileArcade, compileArcadeFiles, runArcadeSim} from '../scripts/lib/makecode-arcade-sim.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -596,11 +596,11 @@ WHEN sprite clicked:
     assert.ok(r.success, JSON.stringify(r.diagnostics.slice(0, 3)));
 });
 
-test('what stays unmapped keeps a specific name: pen hue, list monitors, computed clone targets', () => {
+test('what stays unmapped keeps a specific name: pen saturation, list monitors, computed clone targets', () => {
     const {out} = exportOf(`SPRITE a:
 LIST xs
 WHEN flag clicked:
-  change pen color by 10
+  change pen saturation by 10
   show list xs
   create clone of a
 `, project => {
@@ -611,4 +611,93 @@ WHEN flag clicked:
     assert.match(text, /pen hue, saturation, brightness and transparency/);
     assert.match(text, /show list: Arcade has no list monitors/);
     assert.match(text, /create clone of a computed sprite name/);
+});
+
+
+const penSource = 'GLOBAL whichParameter = "color"\nSPRITE a:\nWHEN flag clicked:\n  change pen color by 10\n';
+const penExport = patch => exportOf(penSource, project => {
+    const block = opcodeOf(project, 'pen_changePenColorParamBy')[0];
+    assert.ok(block, 'the actual parser produced the pen parameter block');
+    if (patch) patch(block, project);
+});
+
+test('static pen hue exports relative and absolute palette changes with an explicit approximation warning', () => {
+    for (const [opcode, relative] of [['pen_changePenColorParamBy', true], ['pen_setPenColorParamTo', false]]) {
+        const {out} = penExport(block => { block.opcode = opcode; });
+        assert.deepEqual(out.unsupported, []);
+        assert.ok(out.warnings.includes('Scratch pen hue is quantized to the Arcade palette.'));
+        const call = out.ts.match(/_scratchPenHue\([^,\n]+,\s*10,\s*(true|false),\s*__bwScratchHueTable\)/);
+        assert.ok(call, 'the exported statement calls the real hue helper and generated palette table');
+        assert.equal(call[1], String(relative), opcode);
+    }
+});
+
+test('unsupported pen parameters, dynamic menu choices and legacy opcodes stay named refusals', () => {
+    const variants = [];
+    for (const opcode of ['pen_changePenColorParamBy', 'pen_setPenColorParamTo']) {
+        for (const parameter of ['saturation', 'brightness', 'transparency']) variants.push({
+            label: opcode + ' ' + parameter,
+            patch: (block, project) => {
+                block.opcode = opcode;
+                const menu = project.targets.flatMap(target => Object.entries(target.blocks))
+                    .find(([id]) => id === block.inputs.COLOR_PARAM[1])?.[1];
+                assert.ok(menu, 'the original pen menu shadow exists');
+                menu.fields.colorParam[0] = parameter;
+            }
+        });
+        variants.push({
+            label: opcode + ' dynamic parameter',
+            patch: (block, project) => {
+                block.opcode = opcode;
+                const variable = project.targets.flatMap(target => Object.entries(target.variables))
+                    .find(([, value]) => value[0] === 'whichParameter');
+                assert.ok(variable, 'the dynamic menu uses an actual project variable');
+                block.inputs.COLOR_PARAM = [3, [12, 'whichParameter', variable[0]], block.inputs.COLOR_PARAM[1]];
+            }
+        });
+    }
+    for (const opcode of ['pen_setPenHueToNumber', 'pen_changePenHueBy',
+        'pen_setPenShadeToNumber', 'pen_changePenShadeBy']) variants.push({
+        label: opcode,
+        patch: block => {
+            block.opcode = opcode;
+            block.inputs = {[opcode.includes('Shade') ? 'SHADE' : 'HUE']: block.inputs.VALUE};
+        }
+    });
+    for (const {label, patch} of variants) {
+        const {out} = penExport(patch);
+        assert.match(out.unsupported.join('\n'), /pen hue, saturation, brightness and transparency/, label);
+        assert.doesNotMatch(out.ts, /_scratchPenHue\(/, label + ' cannot silently become a supported hue change');
+    }
+});
+
+test('the emitted hue helper wraps changes and keeps the original palette base; broken variants fail', () => {
+    const source = helperSource(new Set(['penHue'])).at(-1);
+    const execute = text => new Function(text
+        .replace('(sprite: Sprite, value: number, relative: boolean, table: number[][])',
+            '(sprite, value, relative, table)')
+        .replace('const base: number', 'const base')
+        .replace('const previous: number', 'const previous') + '\nreturn _scratchPenHue;')();
+    const table = Array.from({length: 100}, (_, hue) => Array.from({length: 16}, (_, base) => (hue + base) % 16));
+    const observe = implementation => {
+        const sprite = {data: {_pc: 3}}, states = [];
+        for (const [value, relative] of [[95, true], [10, true], [-10, false], [-195, true], [200, false]]) {
+            implementation(sprite, value, relative, table);
+            states.push([sprite.data._pcHue, sprite.data._pcBase, sprite.data._pc]);
+        }
+        return states;
+    };
+    const expected = [95, 5, 90, 95, 0].map(hue => [hue, 3, table[hue][3]]);
+    assert.deepEqual(observe(execute(source)), expected);
+    for (const [before, after] of [
+        ['previous + value', 'value'],
+        ['((relative ? previous + value : value) % 100 + 100) % 100', '(relative ? previous + value : value)'],
+        ['[base]', '[sprite.data["_pc"]]']
+    ]) {
+        const mutated = source.replace(before, after);
+        assert.notEqual(mutated, source, 'each mutation changes the actual emitted helper');
+        const implementation = execute(mutated);
+        assert.throws(() => assert.deepEqual(observe(implementation), expected),
+            'a wrong hue, lost wrap or changed base must fail the same observation');
+    }
 });
