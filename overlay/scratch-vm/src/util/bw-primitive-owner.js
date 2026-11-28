@@ -34,16 +34,26 @@ function installFrameDeltaNumber(owner){
 // A loan alone does not authorize interpretation of arbitrary input sockets.
 const roles=Object.freeze(Object.fromEntries(Object.entries({
     control_wait_until:[],
-    arcade_createCallable:[],arcade_objectField:[],procedures_call:[],arcade_callFunction:[],
+    arcade_registerSpriteCreated:[],arcade_registerWallHandler:[],arcade_registerLegacyWallHandler:[],
+    arcade_registerTileHandler:[],arcade_registerTilemapEvent:[],
+    arcade_registerUpdateHandler:[],arcade_registerIntervalHandler:[],arcade_registerButtonHandler:[],arcade_registerPlayerButtonHandler:[],
+    arcade_registerMultiplayerButtonHandler:[],arcade_registerControlEvent:[],arcade_registerMultiplayerConnection:[],
+    arcade_registerDestroyedHandler:[],
+    arcade_registerOverlapHandler:[],arcade_registerLifeZeroHandler:[],arcade_registerCountdownHandler:[],arcade_registerScenePushHandler:[],
+    arcade_registerScenePopHandler:[],arcade_registerScoreHandler:[],arcade_registerParallelHandler:[],arcade_registerForeverHandler:[],
+
+    arcade_createCallable:[],arcade_callCallable:[],arcade_runCallableDispatch:[],arcade_getCaptured:[],arcade_objectField:[],procedures_call:[],arcade_callFunction:[],
     arcade_spriteProperty:[],arcade_sceneMillis:[],arcade_frameDeltaTime:[],arcade_highScore:[],arcade_gameOver:[],arcade_legacyGameOver:[],
     arcade_setSpriteImage:[],arcade_blitImage:[],arcade_drawImage:[],arcade_drawImageCircle:[],
     arcade_setImagePixel:[],arcade_mutateImage:[],arcade_createImageSprite:[],arcade_spawnImageProjectile:[],arcade_spawnImageSprite:[],
     arcade_setSpriteProperty:[],arcade_setSpritePosition:[],
     arcade_imageProperty:[],arcade_imagePixel:[],arcade_scrollImage:[],
     arcade_tilesOfType:[],arcade_randomTileOfType:[],arcade_placeOnRandomTile:[],
+    // Role only: no getInfo/canonical word registers this disabled handler control.
+    arcade_structuredTry:[],arcade_structuredJump:[],
     arcade_throwValue:['VALUE'],arcade_createOwnedImageSprite:['KIND'],
     arcade_returnValue:['VALUE'],arcade_functionArgument:['VALUE'],
-    arcade_setLocal:['VALUE'],arcade_setCaptured:['VALUE'],
+    arcade_getLocal:[],arcade_setLocal:['VALUE'],arcade_setCaptured:['VALUE'],
     arcade_setObjectField:['VALUE'],arcade_inspectValue:['VALUE','LIMIT'],
     arcade_sourceValueBinary:['LEFT','RIGHT'],arcade_sourceValueUnary:['VALUE'],
     arrays_create1D:[],arrays_create2D:[],arrays_createEmpty:[],

@@ -192,7 +192,7 @@ module.exports = makeExt(`// Name: Arcade
       this._callableValues=new dependencies.CallableValues(runtime,Scratch.BWValues,classCallables?.provider,classCallables?.subscribeLifecycle);
       classCallableOwner=this._callableValues;
       this._callableDispatch=new dependencies.CallableDispatch(runtime,this._callableValues,
-        (invocation,util)=>this._callableProcedure(invocation,util));
+        (invocation,util,args)=>this._callableProcedure(invocation,util,args,'arcade_runCallableDispatch'));
       this._renderables=new WeakMap();this._screen=null;this._extensionSprites=new Map();this._frameHandlers=new WeakMap();this._extensionCreationWaits=[];
       this._scenePushHandlers = [];this._scenePopHandlers = [];
       this._scrollerVersion = 'v0.1.2';
@@ -2020,13 +2020,23 @@ module.exports = makeExt(`// Name: Arcade
         for(const {script,target} of scripts){
           if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
           const thread=runtime._pushThread(script.blockId,target);thread.bwArcadeEvent={...event,TOKEN:registration.token};thread.bwArcadeCaptures=registration.captures;
-          const caller=util?.thread,active=runtime.sequencer.activeThread;
-          try{if(!deferred){runtime.sequencer.activeThread=thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}}
-          finally{if(util){util.thread=caller;util.sequencer=runtime.sequencer;}runtime.sequencer.activeThread=active;}
-          if(thread.status!==thread.constructor.STATUS_DONE && !thread.isKilled && runtime.threads.includes(thread))
-            yield new Promise(resolve=>this._terrainWaits.add({thread,resolve}));
-          if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
-          if(exceptionOwners.get(this).failure(thread))faulted=true;
+          const caller=util?.thread,active=runtime.sequencer.activeThread,exceptions=exceptionOwners.get(this);
+          let structuredInvocation=null;
+          try{exceptionOwners.get(this).bindStructuredRegistration(registration,thread);}
+          catch(error){runtime.sequencer.retireThread(thread);throw error;}
+          try{
+            try{if(!deferred){runtime.sequencer.activeThread=thread;
+              structuredInvocation=exceptions.beginStructuredInvocation?.(thread);
+              dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}}
+            finally{if(util){util.thread=caller;util.sequencer=runtime.sequencer;}runtime.sequencer.activeThread=active;}
+            if(thread.status!==thread.constructor.STATUS_DONE && !thread.isKilled && runtime.threads.includes(thread)){
+              const suspension=structuredInvocation&&exceptions.suspendStructuredInvocation(structuredInvocation);
+              try{yield new Promise(resolve=>this._terrainWaits.add({thread,resolve}));}
+              finally{if(suspension)exceptions.resumeStructuredInvocation(structuredInvocation,suspension);}
+            }
+            if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
+            if(exceptionOwners.get(this).failure(thread))faulted=true;
+          }finally{if(structuredInvocation)exceptions.closeStructuredInvocation(structuredInvocation);}
         }
       }
       return faulted;
@@ -2351,6 +2361,9 @@ module.exports = makeExt(`// Name: Arcade
       return values.size?[...values]:[''];
     }
     declareParameterConstraint(args,util) {return procedureOwners.get(this).declare(args,util);}
+    // Internal disabled control body; getInfo and the parser do not register it.
+    structuredJump(args,util) {if(!exceptionOwners.get(this).jumpStructured(args,util))throw new Error('Structured jump requires its actual owned entry');}
+    structuredTry(args,util) {if(!exceptionOwners.get(this).startStructuredHandler(args,util))throw new Error('Structured try requires its actual owned entry');}
     throwValue(args,util) {return exceptionOwners.get(this).raise(args,util);}
     _objectError(error) {
       exceptionOwners.get(this).rethrow(error);
@@ -2440,6 +2453,8 @@ module.exports = makeExt(`// Name: Arcade
     }
     _pumpFunctionCalls() {
       for (const call of this._functionCalls) {
+        const transfer=exceptionOwners.get(this).takeManagedTransfer(call.thread,call.caller);
+        if(transfer){this._functionCalls.delete(call);call.reject(transfer);continue;}
         const failure=exceptionOwners.get(this).failure(call.thread) || exceptionOwners.get(this).failure(call.caller);
         if(failure){this._functionCalls.delete(call);call.unlink?.();call.reject(failure);continue;}
         if (call.caller && (call.caller.status === call.caller.constructor.STATUS_DONE || call.caller.isKilled || !this._runtime.threads.includes(call.caller))) {
@@ -2491,7 +2506,7 @@ module.exports = makeExt(`// Name: Arcade
       const exceptions=exceptionOwners.get(this);
       let unlink;
       const cleanup=()=>{classCallableHosts.get(this)?.abortThread(thread);managedReturnHosts.get(this).forget(thread);};
-      try {unlink=util.thread ? exceptions.link(thread,util.thread,cleanup,args.bwExceptionCaller) :
+      try {unlink=util.thread ? exceptions.linkManagedCall(thread,args,util,cleanup) :
         exceptions.linkPhysicalUpdate(thread,args,util,cleanup);}catch(error){runtime.sequencer.retireThread(thread);throw error;}
       // A sentinel caller frame retains arguments/locals while the native
       // sequencer replaces body frames. Each invocation owns its own cells.
@@ -2512,7 +2527,7 @@ module.exports = makeExt(`// Name: Arcade
       catch(error){unlink();classCallableHosts.get(this)?.abortThread(thread);runtime.sequencer.retireThread(thread);return this._objectError(error);}
       managedReturnHosts.get(this).bind(thread,target,name,definition,util.thread);
       const managedCaller=util.thread;
-      const complete=value=>{const failure=exceptions.failure(thread) || exceptions.failure(managedCaller);if(failure)throw failure;unlink();if(classSignature && (managedCaller.isKilled || !runtime.threads.includes(managedCaller)))return Scratch.BWValues.UNDEFINED;try{this._objectHeap.validateTransport(value);return classCallableHosts.get(this)?.result(classSignature,value) ?? value;}catch(error){return this._objectError(error);}};
+      const complete=value=>{const transfer=exceptions.takeManagedTransfer(thread,managedCaller);if(transfer)throw transfer;const failure=exceptions.failure(thread) || exceptions.failure(managedCaller);if(failure)throw failure;unlink();if(classSignature && (managedCaller.isKilled || !runtime.threads.includes(managedCaller)))return Scratch.BWValues.UNDEFINED;try{this._objectHeap.validateTransport(value);return classCallableHosts.get(this)?.result(classSignature,value) ?? value;}catch(error){return this._objectError(error);}};
       thread.bwArcadeEvent = util.thread?.bwArcadeEvent;
       thread.bwArcadeCaptures = args.bwCallableCaptures || util.thread?.bwArcadeCaptures;
       thread.bwFunctionNames = new Set(util.thread?.bwFunctionNames || []);
@@ -2524,7 +2539,9 @@ module.exports = makeExt(`// Name: Arcade
         const currentLoan=dependencies.primitiveOwner.current(util,args);
         const step=()=>{
           if(currentLoan)return dependencies.primitiveOwner.stepNested(util,args,thread);
-          sequencer.activeThread=thread;return sequencer.stepThread(thread);
+          return dependencies.primitiveOwner.stepChild(runtime,thread,()=>{
+            sequencer.activeThread=thread;return sequencer.stepThread(thread);
+          });
         };
         try {
           const deadline=Date.now()+0.75*runtime.currentStepTime;
@@ -2537,6 +2554,7 @@ module.exports = makeExt(`// Name: Arcade
             step();
         }
         finally {util.thread = caller;util.sequencer = sequencer;sequencer.activeThread = active;}
+        const transfer=exceptions.takeManagedTransfer(thread,caller);if(transfer)throw transfer;
         const failure=exceptions.failure(thread) || exceptions.failure(caller);if(failure)throw failure;
         if (!runtime.threads.includes(caller)) {unlink();sequencer.retireThread(caller);sequencer.retireThread(thread);return 0;}
       }
@@ -2547,7 +2565,16 @@ module.exports = makeExt(`// Name: Arcade
       const thread = util?.thread;if (!thread) return;
       let frame = thread.stackFrames.length - 1;
       while (frame >= 0 && thread.stackFrames[frame].params == null) frame--;
-      if (frame < 0 || (frame === 0 && thread.stackFrames[0].waitingReporter)) {thread.bwReturnValue = managedReturnHosts.get(this).value(args,util);util.sequencer.retireThread(thread);return;}
+      const sequencer=util.sequencer;
+      const managed=frame < 0 || (frame === 0 && thread.stackFrames[0].waitingReporter);
+      const read=()=>managed?managedReturnHosts.get(this).value(args,util):undefined;
+      const settle=value=>{
+        if(managed){thread.bwReturnValue=value;sequencer.retireThread(thread);return;}
+        while(thread.stack.length>frame+1)thread.popStack();
+        thread.goToNextBlock();
+      };
+      if(exceptionOwners.get(this).returnStructured(args,util,Math.max(0,frame),read,settle))return;
+      if (managed) {settle(read());return;}
       // A command procedure discards its value but an early return must leave
       // only this invocation, including any nested loop/control frames.
       while (thread.stack.length > frame + 1) thread.popStack();
@@ -2568,29 +2595,37 @@ module.exports = makeExt(`// Name: Arcade
     createCallable(args,util) {
       try {return this._callableValues.create(util?.target || util?.thread?.target,String(args.NAME),
         {locals:this._localParams(util),inheritedCaptures:util?.thread?.bwArcadeCaptures,
+          structuredCaptures:exceptionOwners.get(this).captureStructuredLocals(args,util),
           ownerProcedure:util?.thread?.stackFrames.find(frame=>frame.waitingReporter&&frame.params)?.waitingReporter,
           sourceModule:util?.target?.blocks.getBlock(util?.thread?.topBlock)?.opcode==='arcade_whenSourceStarts',util,operationArgs:args});}
       catch(error){return this._objectError(error);}
     }
-    _callableProcedure(invocation,util) {
+    _callableProcedure(invocation,util,operationArgs=null,operationOpcode='arcade_callCallable') {
       const caller=util?.thread;
-      const failed=error=>{this._callableValues.failInvocation(invocation);return this._objectError(error);};
+      const exceptions=exceptionOwners.get(this);let callerLease=null;
+      const release=()=>{exceptions.releaseCaller(callerLease);callerLease=null;};
+      const failed=error=>{release();this._callableValues.failInvocation(invocation);return this._objectError(error);};
       let result;
-      try {result=this.callFunction({NAME:invocation.definition.procedure,
-        ARGS:JSON.stringify(invocation.args,Scratch.BWValues.jsonReplacer),bwCallableCaptures:invocation.captures},util);}catch(error){return failed(error);}
-      const complete=value=>{try{const failure=exceptionOwners.get(this).failure(caller);if(failure){this._callableValues.failInvocation(invocation);throw failure;}if(!this._callableValues.hasTypedInvocation(invocation))return value;if(caller && (caller.isKilled || !this._runtime.threads.includes(caller)))return Scratch.BWValues.UNDEFINED;return this._callableValues.complete(invocation,value);}catch(error){return this._objectError(error);}};
+      try {
+        const witness=this._callableValues.structuredInvocation(invocation,(provider,map)=>exceptions.captureStructuredInvocation(operationArgs,util,provider,map,operationOpcode));
+        if(witness)callerLease=exceptions.captureCaller(operationArgs,util,operationOpcode);
+        result=this.callFunction({NAME:invocation.definition.procedure,
+          ARGS:JSON.stringify(invocation.args,Scratch.BWValues.jsonReplacer),bwCallableCaptures:invocation.captures,
+          ...(witness?{bwStructuredCatchInvocation:witness,bwExceptionCaller:callerLease}:{})},util);
+      }catch(error){return failed(error);}
+      const complete=value=>{release();try{const failure=exceptionOwners.get(this).failure(caller);if(failure){this._callableValues.failInvocation(invocation);throw failure;}if(!this._callableValues.hasTypedInvocation(invocation))return value;if(caller && (caller.isKilled || !this._runtime.threads.includes(caller)))return Scratch.BWValues.UNDEFINED;return this._callableValues.complete(invocation,value);}catch(error){return this._objectError(error);}};
       return result && typeof result.then==='function'?result.then(complete,failed):complete(result);
     }
     callCallable(args,util) {
       try {const argsText=String(args.ARGS),rawValues=JSON.parse(argsText),values=JSON.parse(argsText,(_key,value)=>Scratch.BWValues.encode(Scratch.BWValues.decode(value)));
         if(Array.isArray(rawValues))rawValues.forEach(value=>this._objectHeap.validateTransport(value));
-        return this._callableProcedure(this._callableValues.invocation(args.CALLABLE,values,rawValues),util);}
+        return this._callableProcedure(this._callableValues.invocation(args.CALLABLE,values,rawValues),util,args);}
       catch(error){return this._objectError(error);}
     }
     holdCallable(reference) {return this._callableValues.hold(reference);}
     invokeHeldCallable(reference,args,event) {return this._callableDispatch.dispatch(reference,args,event);}
     whenCallableDispatched(args,util) {return this._callableDispatch.matches(args.NAME,util);}
-    runCallableDispatch(_args,util) {return this._callableDispatch.run(util);}
+    runCallableDispatch(args,util) {return this._callableDispatch.run(util,args);}
     _localParams(util) {
       const frames = util?.thread?.stackFrames || [];
       for (let i = frames.length - 1; i >= 0; i--) {
@@ -2608,12 +2643,15 @@ module.exports = makeExt(`// Name: Arcade
       const params = this._localParams(util);
       if (params) {
         const name=String(args.NAME),value=dependencies.currentNumberInput(this._runtime,args,util,'arcade_setLocal');
+        if(exceptionOwners.get(this).writeStructuredLocal(args,util,Scratch.BWValues.decode(value)))return;
         try {procedureOwners.get(this).write(params,name,value,util,args);}
         catch(error){return exceptionOwners.get(this).rejectConstraint(args,util,error);}
         params[name]=value;
       }
     }
     getLocal(args, util) {
+      const lexical=exceptionOwners.get(this).readStructuredLocal(args,util);
+      if(lexical)return Scratch.BWValues.encode(lexical.value);
       const params = this._localParams(util);
       const name = String(args.NAME);
       return params && Object.prototype.hasOwnProperty.call(params, name) ? params[name] : 0;
@@ -2623,12 +2661,14 @@ module.exports = makeExt(`// Name: Arcade
       const values = this._localParams(util);
       for (const key of String(args.CAPTURES || '').split(/\\s+/).filter(Boolean)) if (values) captures.set(key, {values, key});
       const kind=this._kindValue(args.KIND);if(kind==null)return;
-      this._createdHandlers.push({kind, token: String(args.TOKEN), captures});
+      this._createdHandlers.push({kind, token: String(args.TOKEN),
+        captures:exceptionOwners.get(this).captureStructuredRegistration(args,util,captures)});
     }
     _terrainRegistration(args, util) {
       const captures = new Map(util?.thread?.bwArcadeCaptures || []), values = this._localParams(util);
       for (const key of String(args.CAPTURES || '').split(/\\s+/).filter(Boolean)) if (values) captures.set(key, {values, key});
-      return {kind:this._kindValue(args.KIND), token: String(args.TOKEN), captures};
+      return {kind:this._kindValue(args.KIND), token: String(args.TOKEN),
+        captures:exceptionOwners.get(this).captureStructuredRegistration(args,util,captures)};
     }
     registerLegacyWallHandler(args,util) {
       const index=Number(Scratch.BWValues.decode(args.INDEX));
@@ -2698,6 +2738,8 @@ module.exports = makeExt(`// Name: Arcade
           const thread = runtime._pushThread(script.blockId, target);
           thread.bwArcadeEvent = {TOKEN:registration.token, first:sprite.id, location};
           thread.bwArcadeCaptures = registration.captures;
+          try{exceptionOwners.get(this).bindStructuredRegistration(registration,thread);}
+          catch(error){runtime.sequencer.retireThread(thread);throw error;}
           const caller = util?.thread, active = runtime.sequencer.activeThread;
           try {runtime.sequencer.activeThread = thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}
           finally {if (util) {util.thread = caller;util.sequencer = runtime.sequencer;}runtime.sequencer.activeThread = active;}
@@ -2731,12 +2773,14 @@ module.exports = makeExt(`// Name: Arcade
     }
     getCaptured(args, util) {
       const cell = util?.thread?.bwArcadeCaptures?.get(String(args.NAME));
-      return cell ? cell.values[cell.key] : 0;
+      const lexical=exceptionOwners.get(this).readStructuredCaptured(args,util,cell);
+      return lexical ? Scratch.BWValues.encode(lexical.value) : cell ? cell.values[cell.key] : 0;
     }
     setCaptured(args, util) {
       const cell = util?.thread?.bwArcadeCaptures?.get(String(args.NAME));
       if (cell) {
         const value=dependencies.currentNumberInput(this._runtime,args,util,'arcade_setCaptured');
+        if(exceptionOwners.get(this).writeStructuredCaptured(args,util,cell,Scratch.BWValues.decode(value)))return;
         try {procedureOwners.get(this).write(cell.values,cell.key,value,util,args);}
         catch(error){return exceptionOwners.get(this).rejectConstraint(args,util,error);}
         cell.values[cell.key]=value;
@@ -3458,6 +3502,10 @@ module.exports = makeExt(`// Name: Arcade
           pending.thread = runtime._pushThread(next.script.blockId, next.target);
           pending.thread.bwArcadeEvent = {...pending.event, TOKEN: next.token};
           pending.thread.bwArcadeCaptures = next.captures;
+          if(next.captures){
+            try{exceptionOwners.get(this).bindStructuredRegistration(next,pending.thread);}
+            catch(error){runtime.sequencer.retireThread(pending.thread);this._creationWaits.delete(pending);pending.reject(error);}
+          }
         } else {
           this._creationWaits.delete(pending);
           pending.resolve(pending.id);
@@ -3500,6 +3548,10 @@ module.exports = makeExt(`// Name: Arcade
           const next = handlers.shift();
           thread = runtime._pushThread(next.script.blockId, next.target);
           thread.bwArcadeEvent = {...event, TOKEN: next.token};thread.bwArcadeCaptures = next.captures;
+          if(next.captures){
+            try{exceptionOwners.get(this).bindStructuredRegistration(next,thread);}
+            catch(error){runtime.sequencer.retireThread(thread);throw error;}
+          }
           const activeThread = sequencer.activeThread;
           try { if(creationContext?.stepNested)creationContext.stepNested(thread);else {sequencer.activeThread = thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>sequencer.stepThread(thread));} }
           finally { util.thread = caller;util.sequencer = sequencer;sequencer.activeThread = activeThread; }
@@ -6672,6 +6724,8 @@ module.exports = makeExt(`// Name: Arcade
           const thread = runtime._pushThread(script.blockId, target);
           thread.bwArcadeEvent = {TOKEN: registration.token, data: reference};
           thread.bwArcadeCaptures = registration.captures;
+          try{exceptionOwners.get(this).bindStructuredRegistration(registration,thread);}
+          catch(error){runtime.sequencer.retireThread(thread);throw error;}
           const caller = util?.thread, active = runtime.sequencer.activeThread;
           try {runtime.sequencer.activeThread = thread;runtime.sequencer.stepThread(thread);}
           finally {if (util) {util.thread = caller;util.sequencer = runtime.sequencer;}runtime.sequencer.activeThread = active;}
@@ -6688,7 +6742,8 @@ module.exports = makeExt(`// Name: Arcade
       if (this._tilemapHandlers.some(handler => handler.event === event && handler.token === token)) return;
       const captures = new Map(util?.thread?.bwArcadeCaptures || []), values = this._localParams(util);
       for (const key of String(args.CAPTURES || '').split(/\\s+/).filter(Boolean)) if (values) captures.set(key, {values, key});
-      this._tilemapHandlers.push({event, token, captures});
+      this._tilemapHandlers.push({event, token,
+        captures:exceptionOwners.get(this).captureStructuredRegistration(args,util,captures)});
     }
     unregisterTilemapEvent(args) {
       const index = this._tilemapHandlers.findIndex(handler => handler.event === String(args.EVENT) && handler.token === String(args.TOKEN));

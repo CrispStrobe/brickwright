@@ -6,6 +6,7 @@ let nextCallableId = 0;
 const classState = new WeakMap();
 const namedState = new WeakMap();
 const invocationState = new WeakMap();
+const structuredState = new WeakMap();
 
 class ArcadeCallableValues {
     constructor(runtime, values, classProvider = null, subscribeLifecycle = null) {
@@ -16,6 +17,7 @@ class ArcadeCallableValues {
         this.resources = new Map();
         this.resetListeners = new Set();
         invocationState.set(this,new WeakMap());
+        structuredState.set(this,{resources:new WeakMap(),invocations:new WeakMap()});
         this.generation = 0;
         this.disposed = false;
         namedState.set(this,{host:createNamedCallableHost(runtime,values,subscribeLifecycle),declarations:new WeakMap(),invocations:new WeakMap()});
@@ -115,7 +117,7 @@ class ArcadeCallableValues {
         declarations.set(procedure, registered);
     }
 
-    create(target, procedure, {locals, inheritedCaptures = new Map(), ownerProcedure, sourceModule=false, util, operationArgs} = {}) {
+    create(target, procedure, {locals, inheritedCaptures = new Map(), ownerProcedure, sourceModule=false, util, operationArgs, structuredCaptures=null} = {}) {
         this.assertRuntime();
         const definition = this.definitions.get(target)?.get(procedure);
         if (!definition) throw new Error('Unknown callable definition');
@@ -134,13 +136,15 @@ class ArcadeCallableValues {
             let cell;
             if (classDeclaration && classState.get(this).provider.ownsReceiver(classDeclaration, name))
                 cell = classState.get(this).provider.receiverCell(classDeclaration, name, util);
+            else if (structuredCaptures && (cell=structuredCaptures.cell(name))) {}
             else if (locals && Object.prototype.hasOwnProperty.call(locals, name)) cell = {values:locals, key:name};
             else cell = inheritedCaptures.get(name);
             if (!cell || !cell.values || typeof cell.values !== 'object' || Array.isArray(cell.values) ||
                 typeof cell.key !== 'string' || !Object.prototype.hasOwnProperty.call(cell.values, cell.key))
                 throw new Error('Missing callable capture cell: ' + name);
             if (mode === 'value') {
-                let value = cell.values[cell.key];
+                const lexical=structuredCaptures?.read(cell);
+                let value = lexical ? this.values.encode(lexical.value) : cell.values[cell.key];
                 if (Array.isArray(value)) value = this.values.arrayReference(this.runtime,value);
                 else {
                     const decoded=this.values.decode(value);
@@ -153,9 +157,13 @@ class ArcadeCallableValues {
                 captures.set(name, Object.freeze({values:Object.freeze({value}),key:'value'}));
             } else captures.set(name, Object.freeze({values:cell.values, key:cell.key}));
         }
+        if(structuredCaptures&&!structuredCaptures.current())throw Error('Catch capture creation outlived its owned activation');
         const id = 'callable:' + ++nextCallableId;
         const reference = this.values.reference(this.runtime, 'callable', id);
-        this.resources.set(id, Object.freeze({reference, target, definition, captures, generation:this.generation}));
+        if(structuredCaptures&&!structuredCaptures.current())throw Error('Catch capture publication outlived its owned activation');
+        const resource=Object.freeze({reference, target, definition, captures, generation:this.generation});
+        if(structuredCaptures)structuredState.get(this).resources.set(resource,structuredCaptures);
+        this.resources.set(id, resource);
         if (!definition.captures.length) labels.set(procedure, reference);
         return reference;
     }
@@ -218,8 +226,18 @@ class ArcadeCallableValues {
         if(namedDeclaration){if(args.length)throw new Error('Named declaration invocation requires zero actual arguments');namedState.get(this).invocations.set(invocation,{resource,declaration:namedDeclaration});}
         const declaration = classState.get(this).declarations.get(resource.definition);
         if (declaration) classState.get(this).invocations.set(invocation, {signature:classState.get(this).provider.invocation(declaration, supplied, rawArgs),resource});
-        invocationState.get(this).set(invocation,{failed:false});
+        invocationState.get(this).set(invocation,{failed:false,captures:invocation.captures});
+        const provider=structuredState.get(this).resources.get(resource);
+        if(provider)structuredState.get(this).invocations.set(invocation,provider);
         return invocation;
+    }
+
+    structuredInvocation(invocation,admit) {
+        const provider=structuredState.get(this).invocations.get(invocation);
+        if(!provider)return null;
+        if(invocationState.get(this).get(invocation)?.captures!==invocation.captures||this.resource(invocation.reference).target!==invocation.target)
+            throw Error('Catch capture requires its actual issued callable invocation');
+        return admit(provider,invocation.captures);
     }
 
     // Failed invocations still require settlement checking, including v1 calls

@@ -3,6 +3,8 @@ import {withVmPackageExports} from './lib/vm-package-exports.mjs';
 import {patchPrimitiveOwner} from './lib/primitive-owner-hooks.mjs';
 import {patchProcedureConstraints} from './lib/procedure-constraint-hooks.mjs';
 import {patchArcadeExceptions} from './lib/arcade-exception-hooks.mjs';
+import engineActivationHooks from './lib/engine-activation-hooks.cjs';
+const {patchThreadActivations,patchExecuteActivations,stripThreadActivations,stripExecuteActivations,patchSequencerActivations}=engineActivationHooks;
 // Lay our owned scratch-vm delta (built-in extensions + their registration in the builtinExtensions
 // map) over the installed node_modules/scratch-vm. Run AFTER `npm install`, BEFORE `npm run build`.
 //
@@ -202,7 +204,7 @@ writeFileSync(keyboardPath, keyboardSource);
 // report", which otherwise repeats an asynchronous call returning null.
 // Track promise completion separately from its payload on the owning frame.
 const executePath = path.join(DEST, 'src', 'engine', 'execute.js');
-let executeSource = readFileSync(executePath, 'utf8');
+let executeSource = stripExecuteActivations(readFileSync(executePath, 'utf8'));
 executeSource = patchNestedExecuteContext(executeSource);
 writeFileSync(executePath, executeSource);
 executeSource = patchPrimitiveOwner(executeSource);
@@ -225,7 +227,12 @@ if (!executeSource.includes('bwPromiseReported')) {
 }
 
 executeSource = patchArcadeExceptions(executeSource);
+executeSource = patchExecuteActivations(executeSource);
 writeFileSync(executePath, executeSource);
+
+// Empty authored branches must complete before the sequencer releases them.
+const structuredSequencerPath=path.join(DEST,'src','engine','sequencer.js');
+writeFileSync(structuredSequencerPath,patchSequencerActivations(readFileSync(structuredSequencerPath,'utf8')));
 
 // Validate the actual ordinary-procedure call before installing its body frame.
 const procedurePath = path.join(DEST, 'src', 'blocks', 'scratch3_procedures.js');
@@ -235,7 +242,8 @@ writeFileSync(procedurePath, patchProcedureConstraints(readFileSync(procedurePat
 // Ordinary Scratch procedures can be called from those functions; recursion
 // checks must retain both managed ancestry and real Scratch call frames.
 const managedThreadPath = path.join(DEST, 'src', 'engine', 'thread.js');
-writeFileSync(managedThreadPath, patchArcadeManagedThread(readFileSync(managedThreadPath, 'utf8')));
+writeFileSync(managedThreadPath,patchThreadActivations(patchArcadeManagedThread(
+    stripThreadActivations(readFileSync(managedThreadPath,'utf8')))));
 
 // Per-device palettes: _refreshExtensionPrimitives must propagate color changes.
 // Upstream only updates `name` on refresh; our stc12 extension changes color1/color2
