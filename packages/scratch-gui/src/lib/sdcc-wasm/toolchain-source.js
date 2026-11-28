@@ -35,7 +35,7 @@
  */
 
 import {remoteToolchainsAllowed} from '../distribution-policy.js';
-import runtimePackageInventory from '../runtime-package-inventory.cjs';
+import runtimePackageInventory from '../runtime-package-inventory.mjs';
 
 const sdccPackage = runtimePackageInventory.packages.find(record => record.id === 'sdcc-wasm');
 
