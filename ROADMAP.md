@@ -2,6 +2,49 @@
 
 The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
 
+## Languages across Simulator and silicon — 2026-11-28
+
+See the [current audit and execution sequence](PLAN.md#language-execution-across-simulator-and-silicon--2026-11-28),
+[existing capability matrix](docs/LANGUAGE-DEVICE-MATRIX-PLAN.md) and
+[code-runtime acceptance criteria](docs/CODE-RUNTIME-AND-GAME-EXPORT.md).
+This track extends current routes without declaring every language available
+on every machine. Existing R1/R2/J1 source and worker work, including PR #1855's
+Pico simulator fix, stays with its current owners. New execution adapters depend
+on its qualification.
+
+| Phase | Work | Required evidence |
+| --- | --- | --- |
+| LP0 | Reconcile current language/runtime/target routes using the existing capability registry | Actual callers, pins and artifacts; separate host, language simulation, firmware simulation, compile and silicon capabilities; declared versus measured support visible |
+| LP1 | Generalize optional runtime/toolchain packages and distribution checks from SDCC | Exact versions/hashes, component licenses, source/build recipes and output exceptions; explicit download/cache/remove; prohibited payload absent from web/native bundles and pre-cache |
+| LP2 | Qualify explicit MicroPython and CPython modes through R3/R4 | Exact authored source or explicit refusal, shared clock/device API, Pico and micro:bit first; selected SAMD/CircuitPython and SPIKE profiles later; Simulator and board results recorded independently |
+| LP3 | Complete compiled-C routes and expand board cells | Target/ABI/startup/linker/runtime profile; Pico flash-resident power-cycle boot first, then micro:bit/selected SAMD; exact artifacts run on declared emulators and reach hardware through actual transports |
+| LP4 | Qualify one JavaScript-on-silicon runtime through J2 and the common bridge | Kaluma on Pico first; measured RAM/flash and language subset; input/PWM/output and Stop/reset lifecycle; separate Simulator/silicon evidence, no browser-engine compatibility inference |
+| LP5 | Evaluate portable WASM when a workload justifies it | Compatible device interpreter/AOT runtime, imported API and memory budget, full license inventory and independently qualified execution; no universal MCU claim |
+
+LP1 starts with a shared SDCC package inventory driving download membership
+and the known-payload build guard. Hash-verified installs and cache migration
+remain follow-up gates, followed by optional AVR/ARM GCC or Clang packages.
+A compiler running as WASM may emit native AVR/ARM/8051 firmware; the chip does
+not need a WASM runtime for that path.
+
+New vendored components must be **non-NC and non-GPL**. Optional user-downloaded
+GPL WASM tools are permitted with their own distribution obligations; this
+supersedes the older matrix plan's hosted-only GPL sentence. Keep compiler,
+linked runtime/firmware and program/asset licenses separate. Preserve explicit
+LGPL exceptions and the exact-artifact gate for vendor-chip-restricted or
+unaudited firmware; the optional allowance does not authorize NC payloads.
+
+Reuse the existing MicroPython/Skulpt/Pyodide evaluation and JS host track.
+MicroPython bytecode, native machine code, C compiled to WASM, firmware on an
+emulated CPU and source lowered through blocks are different results and must
+be labeled accordingly. Keep the advanced retro-language routes; widen board
+coverage after current source semantics and modern reference routes are dependable.
+
+Status: **planned; claim and land bounded slices in LP0/LP1 → LP2/LP3 →
+LP4 → LP5 order**, with R1/R2/J1 as dependencies for new execution behavior.
+No pending runtime, silicon, installed-application or license qualification is
+closed by this plan.
+
 ## Code runtimes and game export (Python and JavaScript) — 2026-11-27
 
 See the [full plan and acceptance criteria](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)
@@ -1425,6 +1468,11 @@ add explicit runtime, host-platform and convertibility axes. A program can run
 in Python while being unsupported for conversion to blocks; an imported game can
 be admitted by one execution backend and refused by another. Retain the existing
 native/lowered distinction without treating it as whole-program equivalence.
+
+2026-11-28 follow-on: [LP0–LP5](#languages-across-simulator-and-silicon--2026-11-28)
+reconcile these cells with actual host/Simulator/silicon routes and add explicit
+runtime/artifact distribution policy. Preserve this registry; the new track adds
+evidence and route dimensions rather than another capability table.
 
 `docs/LANGUAGE-DEVICE-MATRIX-PLAN.md`. Every (language, device) cell is **native**, **lowered**
 (through the dialect AST) or both; there is no refused cell, only `native: null` with a cited
