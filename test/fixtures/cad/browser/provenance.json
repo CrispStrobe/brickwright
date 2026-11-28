@@ -3,8 +3,9 @@
   "cadSdk": {
     "repository": "https://github.com/CrispStrobe/CrispCAD",
     "previousRepositoryName": "CrispStrobe/brickwright-cad",
-    "commit": "02287df59bdb8ba7f3685a9241dd6b299276b1c3",
-    "consumerManifest": "overlay/scratch-gui/static/cad-sdk/manifest.json"
+    "commit": "0b577f63d60424ead19e1aaa9cf602f81fee60ff",
+    "consumerManifest": "overlay/scratch-gui/static/cad-sdk/manifest.json",
+    "previousCommit": "02287df59bdb8ba7f3685a9241dd6b299276b1c3"
   },
   "fixtures": {
     "dwg": {
@@ -25,12 +26,18 @@
         "command": "TZ=UTC node scripts/gen-cad-browser-dwg-fixture.mjs",
         "nodeVersion": "24.22.3",
         "factoryOptions": {},
-        "worker": "overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-FWEoDxb0.js",
-        "workerBytes": 1850080,
-        "workerSha256": "b61636ee4049a98623f2eea55d3bd514d4536de4a2f9ff11958c5037e6e21d4d",
+        "worker": "overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-HdMvwdR2.js",
+        "workerBytes": 1860163,
+        "workerSha256": "ed3a1c7f4579a62e43bf3436e4b9cc04118fed9a2565aa4786146b507d3526bd",
         "clock": "2026-01-01T00:00:00.000Z",
         "uuidSequence": "00000000-0000-4000-8000-000000000001, incrementing the final twelve decimal digits",
-        "verification": "Two fresh codec contexts produced identical bytes; the unmodified shipping worker read protocol decoded CUT and GUIDES."
+        "verification": "Two fresh codec contexts produced identical bytes; the unmodified shipping worker read protocol decoded CUT and GUIDES.",
+        "previousWorker": {
+          "cadSdkCommit": "02287df59bdb8ba7f3685a9241dd6b299276b1c3",
+          "worker": "overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-FWEoDxb0.js",
+          "workerBytes": 1850080,
+          "workerSha256": "b61636ee4049a98623f2eea55d3bd514d4536de4a2f9ff11958c5037e6e21d4d"
+        }
       },
       "license": "BSD-3-Clause",
       "licenseFile": "LICENSE-CRISPCAD.txt"
