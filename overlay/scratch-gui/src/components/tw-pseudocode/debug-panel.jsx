@@ -550,6 +550,7 @@ class DebugPanel extends React.Component {
                 serialInFn: machinePreset === 'CPM64K_TMS9918' || hasBbcKeyboard || io?.dosKeyboard
                     ? byte => runner.sendSerial(byte) : null,
                 mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
+                captureFloppy: runner.captureFloppy,
                 focusController: nextKind !== 'i8086'});
             if (nextKind === 'i8086') this._showPcController();
         }

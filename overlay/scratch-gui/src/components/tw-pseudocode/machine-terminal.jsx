@@ -1,5 +1,6 @@
 import React from 'react';
 import MachineScreenHeader from './machine-screen-header.jsx';
+import useMachineExport from './use-machine-export.js';
 
 const LinuxTerminal = React.lazy(() =>
     import(/* webpackChunkName: "bw-xterm" */ './linux-terminal.jsx')
@@ -9,31 +10,7 @@ export default function MachineTerminal({session, isFullScreen, onToggleFullScre
     const [text, setText] = React.useState('');
     const [line, setLine] = React.useState('');
     const output = React.useRef(null);
-    const exportOwner = React.useRef(null);
-    const [exportBusy, setExportBusy] = React.useState(false);
-    const [exportError, setExportError] = React.useState('');
-    React.useEffect(() => {
-        setExportBusy(false);
-        setExportError('');
-        return () => { exportOwner.current = null; };
-    }, [session]);
-    const runExport = async action => {
-        if (exportOwner.current) return;
-        const request = {};
-        exportOwner.current = request;
-        setExportBusy(true);
-        setExportError('');
-        try {
-            await action();
-        } catch (error) {
-            if (exportOwner.current === request) setExportError(error.message || String(error));
-        } finally {
-            if (exportOwner.current === request) {
-                exportOwner.current = null;
-                setExportBusy(false);
-            }
-        }
-    };
+    const {runExport, exportBusy, exportError} = useMachineExport(session);
     React.useEffect(() => session.raw ? undefined : session.subscribe(setText), [session]);
     React.useLayoutEffect(() => {
         if (output.current) output.current.scrollTop = output.current.scrollHeight;

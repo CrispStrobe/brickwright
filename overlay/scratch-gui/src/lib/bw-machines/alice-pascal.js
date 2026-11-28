@@ -62,7 +62,9 @@ export async function createAlicePascalMachine (floppy, signal) {
         {name: 'DEMO.PAS', bytes: dosText([
             'program Demo(output);', 'begin', '    writeln(6 * 7)', 'end.'
         ])},
-        {name: 'FDAUTO.BAT', bytes: dosText(['@ECHO OFF', 'APIN +s DEMO.PAS DEMO.AP', 'ALICE DEMO.AP'])}
+        {name: 'FDAUTO.BAT', bytes: dosText([
+            '@ECHO OFF', 'IF NOT EXIST DEMO.AP APIN +s DEMO.PAS DEMO.AP', 'ALICE DEMO.AP'
+        ])}
     ]);
     const config = localFreedosVgaMachine({floppy: {size: bytes.length, name: 'ALICE Pascal'}});
     return {config, fetcher: ref => ref.url === 'local-media:floppy' ? {bytes} : defaultImageFetcher(ref)};

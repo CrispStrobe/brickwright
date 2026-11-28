@@ -35,7 +35,7 @@ test('xKIM export preserves empty and binary files byte for byte', async () => {
 });
 
 test('native FAT export streams bounded chunks, then finalizes or discards the staged image', async t => {
-    const {saveXkimDiskImage} = await import('../overlay/scratch-gui/src/lib/bw-machines/kim1-xkim-download.js');
+    const {saveDiskImage} = await import('../overlay/scratch-gui/src/lib/bw-machines/disk-image-download.js');
     const calls = [];
     const descriptors = Object.fromEntries(['window', 'FileReader'].map(key =>
         [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
@@ -55,7 +55,7 @@ test('native FAT export streams bounded chunks, then finalizes or discards the s
         }
     };
     const bytes = new Uint8Array(700 * 1024).map((_, index) => index & 255);
-    await saveXkimDiskImage('saved.img', bytes, () => true);
+    await saveDiskImage('saved.img', bytes, () => true);
     const finish = calls.pop();
     assert.equal(finish.command, 'finish_fat_image_export');
     assert.equal(finish.size, bytes.length);
@@ -71,7 +71,7 @@ test('native FAT export streams bounded chunks, then finalizes or discards the s
     }
     assert.equal(position, bytes.length);
     calls.length = 0;
-    await saveXkimDiskImage('cancelled.img', bytes, () => calls.length === 0);
+    await saveDiskImage('cancelled.img', bytes, () => calls.length === 0);
     assert.deepEqual(calls.map(call => call.command), ['stage_fat_image_chunk', 'discard_fat_image_export']);
     assert.equal(calls[0].id, calls[1].id);
 });

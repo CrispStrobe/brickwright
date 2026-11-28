@@ -1619,6 +1619,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         disposeTerminal?.();
         disposeTerminal = null;
         delete runner.terminal;
+        delete runner.captureFloppy;
         terminalFrame = null;
         const device = String(built?.device || projectStc(null)?.device || '').toLowerCase();
         const selectedTargetKind = selectDebugTargetKind(device, targetKind);
@@ -3990,6 +3991,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         wireMachineBench(result, createDebugSession);
         if (typeof result.adapter?.mouseIn === 'function' && machine.canTakeMouse?.()) {
             runner.mouseIn = event => result.adapter.mouseIn(event);
+        }
+        if (entries.floppy && typeof result.adapter.captureFloppy === 'function') {
+            const captureFloppy = () => {
+                if (destroyed || runner.captureFloppy !== captureFloppy || i8086ExecutionResult !== result) {
+                    throw new Error('The floppy session is closed.');
+                }
+                return result.adapter.captureFloppy();
+            };
+            runner.captureFloppy = captureFloppy;
         }
         const name = bootMedia.name || S('noun.floppy');
         const readyMsg = bootMedia.slot === 'floppy'

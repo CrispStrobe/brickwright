@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {decodeTextPixels, fixedTextGlyphs} from './lib/i80386-vga-text.mjs';
 
@@ -31,11 +32,27 @@ const press = async (...keys) => {
         await page.waitForFunction(before => Number(window.__benchTarget?.timeNs?.()) > before + 30_000_000, before);
     }
 };
-try {
-    await page.goto(url, {waitUntil: 'domcontentloaded'});
+const openMachines = async () => {
     await page.getByTestId('bw-file-menu-trigger').click();
     await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
     await manager.getByRole('combobox', {name: 'Machine type'}).selectOption('i80386');
+};
+const runDosCommand = async command => {
+    await press('F8');
+    await waitForGuest(/DOS command/i);
+    await press('f');
+    await waitForGuest(/System Command:/i);
+    const keys = {' ': 'Space', '.': 'Period', ';': 'Semicolon', '>': 'Shift+Period'};
+    await press(...Array.from(command, char => keys[char] || char), 'Enter');
+};
+const listSavedResult = async () => {
+    await runDosCommand('dir result.pas');
+    const listing = await waitForGuest(/RESULT\s+PAS\s+[1-9]\d*/i, 15000);
+    assert.doesNotMatch(listing, /file not found/i);
+};
+try {
+    await page.goto(url, {waitUntil: 'domcontentloaded'});
+    await openMachines();
     const row = manager.locator('[data-machine-media="alice-pascal"]');
     const run = row.getByRole('button', {name: 'Run', exact: true});
     assert.ok(await run.isDisabled());
@@ -62,14 +79,39 @@ try {
     await waitForGuest(/^\s*>\s*$/m);
     await press('t','e','x','t','Space','r','e','s','u','l','t','Period','p','a','s','Enter');
     await waitForGuest(/Printing to file.*result[.]pas/i, 15000);
-    await press('F8');
-    await waitForGuest(/DOS command/i);
-    await press('f');
-    await waitForGuest(/System Command:/i);
-    await press('d','i','r','Space','r','e','s','u','l','t','Period','p','a','s','Enter');
-    const listing = await waitForGuest(/RESULT\s+PAS\s+\d+/i, 15000);
-    assert.doesNotMatch(listing, /file not found/i);
+    await listSavedResult();
     console.log('ALICE saved RESULT.PAS and the guest DOS directory listed it.');
+    await waitForGuest(/Hit SPACE to continue/i, 15000);
+    await press('Space');
+    await waitForGuest(/File.*DEMO[.]AP/i);
+    // A stale startup script would recompile this different source over the saved workspace.
+    const changedSource = 'program changed; begin writeln end.';
+    await runDosCommand(`echo ${changedSource}>demo.pas`);
+    await waitForGuest(/Hit SPACE to continue/i, 15000);
+    const saveImage = page.getByTestId('bw-machine-console').getByRole('button', {name: 'Save image', exact: true});
+    const downloadEvent = page.waitForEvent('download', {timeout: 15000});
+    await saveImage.click();
+    const download = await downloadEvent;
+    assert.equal(download.suggestedFilename(), 'freedos-session.img');
+    const buffer = await readFile(await download.path());
+    assert.equal(buffer.length, 1228800);
+    assert.equal(buffer.readUInt16LE(510), 0xaa55);
+    assert.ok(buffer.includes(changedSource), 'the exported disk contains the changed input to APIN');
+    console.log('Controller downloaded the 1.2 MB floppy.');
+
+    await page.evaluate(() => { window.__aliceBeforeReload = window.__benchTarget; });
+    await openMachines();
+    await manager.getByTestId('bw-mm-free386-floppy').setInputFiles({
+        name: download.suggestedFilename(), mimeType: 'application/octet-stream', buffer
+    });
+    await manager.getByTestId('bw-mm-free386-run').click();
+    await manager.waitFor({state: 'hidden'});
+    await page.waitForFunction(() => window.__benchTarget && window.__benchTarget !== window.__aliceBeforeReload);
+    const reopened = await waitForGuest(/writeln\s*\(6\s*\*\s*7\)/i);
+    assert.match(reopened, /File.*DEMO[.]AP/i);
+    await canvas.click();
+    await listSavedResult();
+    console.log('The downloaded floppy booted again and preserved DEMO.AP and RESULT.PAS.');
     assert.deepEqual(errors, []);
 } catch (error) {
     console.error(errors, await manager.allTextContents(), await page.evaluate(guestText));
