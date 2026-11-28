@@ -39,8 +39,58 @@
         "runtime.json"
       ],
       "integrity": {
-        "status": "unverified",
-        "note": "The current loader does not verify artifact digests; the download origin is mutable."
+        "status": "sha256-pinned",
+        "algorithm": "SHA-256",
+        "sourceRevision": "64ea6915733cf6d6563dfe9424c8cc71b4731e06",
+        "sourceBaseUrl": "https://raw.githubusercontent.com/CrispStrobe/sdcc-wasm/64ea6915733cf6d6563dfe9424c8cc71b4731e06/static/sdcc-wasm/",
+        "artifacts": {
+          "cc1.js": {
+            "sha256": "b6c4f425e9bd5ce615e8b303f21c17380b9555e808d9b86950b33cdaeefc52c0",
+            "bytes": 79782,
+            "gitBlobSha": "66e5336e67a0603515d99a2c68c8e04663149323"
+          },
+          "cc1.wasm": {
+            "sha256": "a482b8019d48f1f1c02415b0bb274795f5830ffe4b1a93a7e152b9cec8bf8cd2",
+            "bytes": 840689,
+            "gitBlobSha": "4fa2a22fc2645d7a20de633ed22d3f4faf78f9e9"
+          },
+          "sdcc.js": {
+            "sha256": "790e64b384af78d6bfcf383c60718a2e311af57edff55ab51ef38e3ac627f43d",
+            "bytes": 159171,
+            "gitBlobSha": "18ce107cea88ff09593f752348751faefe81bd51"
+          },
+          "sdcc.wasm": {
+            "sha256": "36c4207dc8a8e8571497cc4b07cae2a3cc98824c289035aa5df8f1e57c47db6d",
+            "bytes": 1830464,
+            "gitBlobSha": "b07527fc90e52a4aaf6d0e720aaadc61c59ee1ff"
+          },
+          "sdas8051.js": {
+            "sha256": "018dd43e30ccf67b95540ddcc4cb8d864a55c4832dd5ac6d6022ab437e7abab1",
+            "bytes": 139284,
+            "gitBlobSha": "f16f606edf46d3ffa8711b806ece20491c788c7f"
+          },
+          "sdas8051.wasm": {
+            "sha256": "9c015efff6543e7bfafde2271f1c26ea57984e2f7fdcf6563fa5907827e127e4",
+            "bytes": 122680,
+            "gitBlobSha": "9df5562d866fe67a6f79a14bc7e725404b1777c2"
+          },
+          "sdld.js": {
+            "sha256": "ec88194074885f7c9787a90d2b442289889cfc5db7209d69402afb962a16a710",
+            "bytes": 136817,
+            "gitBlobSha": "f368582d22011be5b7d6b1df1a6644c87e48c545"
+          },
+          "sdld.wasm": {
+            "sha256": "d5292272e7ebfbc6dfa5e1cd1c51f1642e11ba7efb3b0c7c3d6f3df23aba55e5",
+            "bytes": 142118,
+            "gitBlobSha": "e74179b111cbbf99e122997c4e46e30187dd8b4c"
+          },
+          "runtime.json": {
+            "sha256": "468ca59509852f309b0bf53b456ad89880c3c2d33623806ee1279314be82fcb7",
+            "bytes": 3286732,
+            "gitBlobSha": "063f6224f8d621844159704c2e6212ab124da5ed"
+          }
+        },
+        "note": "Digests and byte lengths were measured from immutable supplier bytes and checked against their Git blob identities. Managed downloads, cache reuse and browser imports verify these bytes; compiler-component, linked-runtime and generated-output license review remains separate."
       },
       "buildExclusions": {
         "directories": [

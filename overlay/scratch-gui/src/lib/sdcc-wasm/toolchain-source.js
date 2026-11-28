@@ -46,6 +46,12 @@ export const TOOLCHAIN_CACHE = sdccPackage.cacheName;
 /** Every file `loadToolchain` asks for, so the cache can be filled in one pass. */
 export const TOOLCHAIN_FILES = Object.freeze(sdccPackage.files.slice());
 
+// Capture the reviewed manifest before any async operation. Runtime callers
+// cannot replace a digest while a download or cached read is being checked.
+const integrity = Object.freeze({...sdccPackage.integrity});
+const artifacts = Object.freeze(Object.fromEntries(TOOLCHAIN_FILES.map(name =>
+    [name, Object.freeze({...integrity.artifacts?.[name]})])));
+
 const IS_NODE = typeof process === 'object' && typeof process?.versions?.node === 'string';
 
 export function getToolchainMode (storage) {
@@ -162,6 +168,78 @@ import {cacheStorageStore} from './toolchain-store.js';
 
 const fileUrl = (base, name) => new URL(`static/sdcc-wasm/${name}`, base).href;
 
+const requireToolchainPolicy = () => {
+    if (!remoteToolchainsAllowed()) {
+        throw new Error('This distribution cannot download executable toolchains; use Build online.');
+    }
+};
+
+const requireIntegrity = () => {
+    if (integrity.status !== 'sha256-pinned' || integrity.algorithm !== 'SHA-256' ||
+        !/^[a-f0-9]{40}$/.test(integrity.sourceRevision || '') ||
+        TOOLCHAIN_FILES.some(name => !/^[a-f0-9]{64}$/.test(artifacts[name].sha256 || '') ||
+            !Number.isSafeInteger(artifacts[name].bytes) || artifacts[name].bytes <= 0)) {
+        throw new Error('The SDCC package has no complete pinned SHA-256 manifest.');
+    }
+    if (!globalThis.crypto?.subtle?.digest) {
+        throw new Error('SDCC package verification requires Web Crypto SHA-256.');
+    }
+};
+
+const integrityFailure = name => {
+    const error = new Error(`${name}: SDCC package integrity check failed. Install the compiler again.`);
+    error.code = 'TOOLCHAIN_INTEGRITY';
+    return error;
+};
+
+const bodyBytes = async body => {
+    if (body instanceof Uint8Array) return Uint8Array.from(body);
+    if (body instanceof ArrayBuffer) return new Uint8Array(body.slice(0));
+    if (body && typeof body.arrayBuffer === 'function') return new Uint8Array(await body.arrayBuffer());
+    throw new Error('The toolchain store did not return readable artifact bytes.');
+};
+
+const verifyBytes = async (name, bytes) => {
+    const expected = artifacts[name];
+    if (!Object.hasOwn(artifacts, name)) throw new Error(`Unknown SDCC package member: ${name}`);
+    if (bytes.byteLength !== expected.bytes) throw integrityFailure(name);
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+    const hex = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    if (hex !== expected.sha256) throw integrityFailure(name);
+    return bytes;
+};
+
+const contentType = name => name.endsWith('.js') ? 'text/javascript' :
+    (name.endsWith('.wasm') ? 'application/wasm' : 'application/json');
+const verifiedResponse = (name, bytes) => new Response(bytes, {
+    headers: {'content-type': contentType(name)}
+});
+
+// Presence is not installation. Inspect and resume both read the real bytes,
+// and a cached response never becomes executable just because its key exists.
+const storedEntry = async (store, url, name) => {
+    const body = store ? await store.read(url) : null;
+    if (body === null || body === undefined) return {bytes: null, size: 0, invalid: false};
+    const bytes = await bodyBytes(body);
+    try {
+        await verifyBytes(name, bytes);
+        return {bytes, size: bytes.byteLength, invalid: false};
+    } catch (error) {
+        if (error.code !== 'TOOLCHAIN_INTEGRITY') throw error;
+        return {bytes: null, size: bytes.byteLength, invalid: true};
+    }
+};
+
+const fetchVerified = async (base, name, fetch_, signal) => {
+    if (!fetch_) throw new Error('no fetch is available to finish the toolchain installation');
+    const response = await fetch_(fileUrl(base, name), signal ? {signal} : undefined);
+    if (!response.ok) throw new Error(`${name} returned ${response.status} from ${base}`);
+    if (signal?.aborted) throw aborted();
+    const bytes = await verifyBytes(name, await bodyBytes(response));
+    if (signal?.aborted) throw aborted();
+    return bytes;
+};
+
 /** The store to use when a caller did not bring one: the browser's. */
 const defaultStore = deps => {
     if (deps.store) return deps.store;
@@ -222,6 +300,7 @@ const aborted = () => {
  * "half the download" was true of disk and false of transfer.
  */
 export async function measureToolchain (base = GPL_TOOLCHAIN_ORIGIN, deps = {}) {
+    requireToolchainPolicy();
     const fetch_ = deps.fetch || (typeof fetch === 'undefined' ? null : fetch);
     if (!fetch_) throw new Error('no fetch is available');
     const sizes = {};
@@ -237,9 +316,8 @@ export async function measureToolchain (base = GPL_TOOLCHAIN_ORIGIN, deps = {}) 
 }
 
 export async function primeToolchainCache (base = GPL_TOOLCHAIN_ORIGIN, deps = {}) {
-    if (!remoteToolchainsAllowed()) {
-        throw new Error('This distribution cannot download executable toolchains; use Build online.');
-    }
+    requireToolchainPolicy();
+    requireIntegrity();
     const fetch_ = deps.fetch || (typeof fetch === 'undefined' ? null : fetch);
     const store = defaultStore(deps);
     if (!store || !fetch_) throw new Error('no toolchain store or no fetch is available');
@@ -257,11 +335,9 @@ export async function primeToolchainCache (base = GPL_TOOLCHAIN_ORIGIN, deps = {
         if (signal && signal.aborted) throw aborted();
         const url = fileUrl(base, name);
 
-        // RESUME IS JUST THIS. A file already in the store is not fetched again,
-        // so a cancelled download continues from where it stopped rather than
-        // starting over — and the store's `has` refuses a zero-byte file, so a
-        // write interrupted between open and rename is not mistaken for one.
-        if (await store.has(url)) {
+        const entry = await storedEntry(store, url, name);
+        if (signal?.aborted) throw aborted();
+        if (entry.bytes) {
             stored.push(name);
             // Advertised transfer size, NOT store.bytes(): the denominator is a
             // sum of transfer sizes, and mixing the two made the bar exceed its
@@ -271,16 +347,14 @@ export async function primeToolchainCache (base = GPL_TOOLCHAIN_ORIGIN, deps = {
                 done: stored.length, bytes: sizeOf(name), bytesDone, totalBytes});
             continue;
         }
+        if (entry.invalid) await store.remove(url);
         onProgress({name, index, total, state: 'fetching',
             done: stored.length, bytes: sizeOf(name), bytesDone, totalBytes});
-        const response = await fetch_(url, signal ? {signal} : undefined);
-        if (!response.ok) {
-            throw new Error(`${name} returned ${response.status} from ${base}`);
-        }
-        // Re-checked after the await: a cancel that arrives mid-flight must not
-        // be recorded as a completed file.
-        if (signal && signal.aborted) throw aborted();
-        await store.put(url, typeof response.clone === 'function' ? response.clone() : response);
+        const bytes = await fetchVerified(base, name, fetch_, signal);
+        // Store the exact verified snapshot, including a usable module MIME
+        // type, rather than reopening a body after its digest was accepted.
+        await store.put(url, verifiedResponse(name, bytes));
+        if (signal?.aborted) throw aborted();
         stored.push(name);
         bytesDone += sizeOf(name);
         onProgress({name, index, total, state: 'stored',
@@ -295,21 +369,25 @@ export async function primeToolchainCache (base = GPL_TOOLCHAIN_ORIGIN, deps = {
  * to know whether they can compile.
  */
 export async function inspectToolchain (base = GPL_TOOLCHAIN_ORIGIN, deps = {}) {
+    requireIntegrity();
     const store = defaultStore(deps);
-    if (!store) return {complete: false, present: [], missing: TOOLCHAIN_FILES.slice(), bytes: 0};
+    if (!store) return {complete: false, present: [], missing: TOOLCHAIN_FILES.slice(), invalid: [], bytes: 0};
     const present = [];
     const missing = [];
+    const invalid = [];
     let bytes = 0;
     for (const name of TOOLCHAIN_FILES) {
         const url = fileUrl(base, name);
-        if (await store.has(url)) {
+        const entry = await storedEntry(store, url, name);
+        bytes += entry.size;
+        if (entry.bytes) {
             present.push(name);
-            if (store.bytes) bytes += await store.bytes(url);
         } else {
             missing.push(name);
+            if (entry.invalid) invalid.push(name);
         }
     }
-    return {complete: missing.length === 0, present, missing, bytes, kind: store.kind};
+    return {complete: missing.length === 0, present, missing, invalid, bytes, kind: store.kind};
 }
 
 /** Remove it again and free the space. Reports what it actually removed. */
@@ -333,17 +411,41 @@ export async function removeToolchain (base = GPL_TOOLCHAIN_ORIGIN, deps = {}) {
  * `locateFile` routes the .wasm through the same resolver.
  */
 export async function cachedResolver (base = GPL_TOOLCHAIN_ORIGIN, deps = {}) {
-    const caches_ = deps.caches || (typeof caches === 'undefined' ? null : caches);
+    requireToolchainPolicy();
+    requireIntegrity();
+    const store = defaultStore(deps);
+    const fetch_ = deps.fetch || (typeof fetch === 'undefined' ? null : fetch);
     const URL_ = deps.URL || URL;
-    const cache = caches_ ? await caches_.open(TOOLCHAIN_CACHE) : null;
-    const urls = new Map();
-    if (cache) {
-        for (const name of TOOLCHAIN_FILES) {
-            const hit = await cache.match(fileUrl(base, name));
-            if (hit) urls.set(name, URL_.createObjectURL(await hit.blob()));
+    const snapshots = new Map();
+    for (const name of TOOLCHAIN_FILES) {
+        if (deps.signal?.aborted) throw aborted();
+        const url = fileUrl(base, name);
+        const entry = await storedEntry(store, url, name);
+        if (deps.signal?.aborted) throw aborted();
+        let bytes = entry.bytes;
+        if (!bytes) {
+            if (entry.invalid) await store.remove(url);
+            bytes = await fetchVerified(base, name, fetch_, deps.signal);
+            if (store) await store.put(url, verifiedResponse(name, bytes));
+            if (deps.signal?.aborted) throw aborted();
         }
+        snapshots.set(name, bytes);
     }
-    // A name the cache does not hold falls back to the origin, so a partly
-    // filled cache degrades to slow rather than to broken.
-    return name => urls.get(name) || fileUrl(base, name);
+    // Only a complete verified snapshot receives importable URLs. A partial
+    // installation may finish at this explicit compile request, but no member
+    // can bypass verification through a raw network URL.
+    if (deps.signal?.aborted) throw aborted();
+    const urls = new Map();
+    try {
+        for (const [name, bytes] of snapshots) {
+            urls.set(name, URL_.createObjectURL(new Blob([bytes], {type: contentType(name)})));
+        }
+    } catch (error) {
+        for (const url of urls.values()) URL_.revokeObjectURL(url);
+        throw error;
+    }
+    return name => {
+        if (!urls.has(name)) throw new Error(`Unknown SDCC package member: ${name}`);
+        return urls.get(name);
+    };
 }

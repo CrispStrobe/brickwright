@@ -43,7 +43,7 @@
  * starts clean even for those clients. */
 // v4: a deploy served a mismatched tree, so v3 caches can hold entries for assets that 404'd.
 // Hashed assets are cache-first and are never revalidated, so those entries would be permanent.
-// The activate handler deletes every cache that is not the current one, which means renaming is
+// The activate handler deletes obsolete application caches, which means renaming is
 // the only thing that actually recovers a browser that is already broken.
 // v4 stands. The 2026-08-30 changes below (a bound on the document fetch, and
 // never serving a non-ok cache entry) recover a poisoned browser WITHOUT a
@@ -54,6 +54,11 @@
 const CACHE = 'brickwright-v5';
 const PREVIEW_CACHE = 'brickwright-library-previews-v1';
 const RENDERED_PREVIEW_CACHE = 'brickwright-rendered-thumbnails-v1';
+// Optional installations outlive application deployments. These exact names
+// match runtime-package-inventory.json; the activation behavior test checks the
+// inventory against the worker. Do not fetch metadata or create these caches
+// during activation: installation and removal belong to the user's request.
+const OPTIONAL_TOOLCHAIN_CACHES = new Set(['bw-sdcc-wasm-v1']);
 const PREVIEW_LIMIT = 512;
 const PREVIEW_MAX_BYTES = 256 * 1024;
 const PREVIEW_IMAGE = /\.(png|webp|avif|gif|jpe?g|svg)$/i;
@@ -119,7 +124,7 @@ self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => {
     event.waitUntil((async () => {
         const keys = await caches.keys();
-        await Promise.all(keys.filter(k => k !== CACHE && k !== PREVIEW_CACHE && k !== RENDERED_PREVIEW_CACHE).map(k => caches.delete(k)));
+        await Promise.all(keys.filter(k => k !== CACHE && k !== PREVIEW_CACHE && k !== RENDERED_PREVIEW_CACHE && !OPTIONAL_TOOLCHAIN_CACHES.has(k)).map(k => caches.delete(k)));
         await self.clients.claim();
     })());
 });

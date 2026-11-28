@@ -10,6 +10,7 @@
   "i8086-pseudocode-examples.test.mjs",
   "lego-spike-roundtrip.test.mjs",
   "no-tracked-package-examples.test.mjs",
+  "optional-toolchain-cache-retention.test.mjs",
   "overlay-packages-pairs.test.mjs",
   "project-bundle-archive.test.mjs",
   "project-bundle-integrity.test.mjs",
@@ -28,5 +29,6 @@
   "sound-tab-deferral.test.mjs",
   "sync-examples-remote.test.mjs",
   "test-setup.test.mjs",
+  "toolchain-integrity.test.mjs",
   "vector-art-registration.test.mjs"
 ]

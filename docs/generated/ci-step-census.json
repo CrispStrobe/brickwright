@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T06:34:29.078Z",
+  "generatedAt": "2026-11-28T16:41:49.188Z",
   "repo": "CrispStrobe/brickwright-lite",
   "headSha": "a87a7b447",
   "newestMainRun": 36409366028,
@@ -2019,6 +2019,13 @@
       "workflow": "samd-native-game-qualification.yml",
       "branch": "lane/samd-release-adoption-20261028",
       "sha": "48df0f93f"
+    },
+    {
+      "run": 46164509507,
+      "workflow": "service-worker-browser.yml",
+      "branch": "codex/lp1-verified-installation-cache-2026-11-28",
+      "sha": "a6c82c0c2",
+      "conclusion": "failure"
     }
   ],
   "workflowsInTree": [
@@ -2051,6 +2058,7 @@
     "robot-model-webkit-comparison.yml",
     "rust-notices.yml",
     "samd-native-game-qualification.yml",
+    "service-worker-browser.yml",
     "spike-linux-package.yml",
     "target-performance.yml",
     "tauri.yml",
@@ -8188,11 +8196,141 @@
         }
       },
       "sourceSha": "92a9ab6e7"
+    },
+    "service-worker-browser.yml": {
+      "runs": 1,
+      "stepsInFile": [
+        "Check out the candidate",
+        "Set up supported Node",
+        "Record exact checkout and probe inputs",
+        "Install locked root dependencies",
+        "Prepare official Ubuntu package mirror",
+        "Install locked Playwright Chromium",
+        "Verify all service worker scenarios and mutations",
+        "Retain probe inputs and results"
+      ],
+      "inFileInNoRun": [],
+      "steps": {
+        "Check out the candidate": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Set up supported Node": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Record exact checkout and probe inputs": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Install locked root dependencies": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Prepare official Ubuntu package mirror": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Install locked Playwright Chromium": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Verify all service worker scenarios and mutations": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Retain probe inputs and results": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "service worker browser scenarios and mutations"
+          ],
+          "clause": "${{ !cancelled() && steps.inputs.outcome == 'success' }}",
+          "class": "always"
+        }
+      },
+      "jobs": {
+        "service worker browser scenarios and mutations": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "class": "always"
+        }
+      },
+      "sourceSha": "a6c82c0c2"
     }
   },
   "lastRefresh": {
-    "workflow": "samd-native-game-qualification.yml",
-    "at": "2026-10-29T06:34:29.078Z",
-    "sourceSha": "e859cecd3"
+    "workflow": "service-worker-browser.yml",
+    "at": "2026-11-28T16:41:49.188Z",
+    "sourceSha": "a6c82c0c2"
   }
 }

@@ -10,7 +10,7 @@ import {readFileSync} from 'node:fs';
 import {
     getToolchainMode, setToolchainMode, localToolchainEnabled,
     GPL_TOOLCHAIN_ORIGIN, TOOLCHAIN_FILES
-} from '../overlay/scratch-gui/src/lib/sdcc-wasm/toolchain-source.js';
+} from './helpers/toolchain-fixture.mjs';
 
 const read = p => readFileSync(p, 'utf8');
 const CONFIGS = [
@@ -85,7 +85,7 @@ test('the route is gated on the SETTING, not on the capability', () => {
 // These are what make "opt in once, then work offline" true rather than
 // aspirational, so they are asserted here instead of only in a browser.
 import {primeToolchainCache, cachedResolver, TOOLCHAIN_CACHE, GPL_TOOLCHAIN_ORIGIN as ORIGIN}
-    from '../overlay/scratch-gui/src/lib/sdcc-wasm/toolchain-source.js';
+    from './helpers/toolchain-fixture.mjs';
 
 const fakeCaches = () => {
     const stores = new Map();
@@ -100,19 +100,16 @@ const fakeCaches = () => {
             const store = stores.get(name);
             if (!wrappers.has(name)) {
                 wrappers.set(name, {
-                    match: async url => store.get(url) || undefined,
-                    put: async (url, response) => store.set(url, response)
+                    match: async url => store.get(url)?.clone(),
+                    put: async (url, response) => store.set(url, response.clone()),
+                    delete: async url => store.delete(url)
                 });
             }
             return wrappers.get(name);
         }
     };
 };
-const fakeResponse = body => ({
-    ok: true, status: 200,
-    clone () { return this; },
-    async blob () { return {body}; }
-});
+const fakeResponse = body => new Response(`payload:${body}`, {status: 200});
 
 test('priming fetches every file the loader will ask for, once', async () => {
     const caches_ = fakeCaches();
@@ -138,7 +135,7 @@ test('priming reports a bad response instead of caching it', async () => {
         /404/, 'a 404 must not be cached as if it were the toolchain');
 });
 
-test('the resolver serves blob URLs from cache and falls back per file', async () => {
+test('the resolver serves verified blobs and finishes a partial cache through verification', async () => {
     const caches_ = fakeCaches();
     const fetch_ = async url => fakeResponse(url);
     await primeToolchainCache(ORIGIN, {caches: caches_, fetch: fetch_});
@@ -149,10 +146,13 @@ test('the resolver serves blob URLs from cache and falls back per file', async (
 
     let made = 0;
     const URL_ = {createObjectURL: () => `blob:fake-${++made}`};
-    const resolve = await cachedResolver(ORIGIN, {caches: caches_, URL: URL_});
+    const fetched = [];
+    const resolve = await cachedResolver(ORIGIN, {caches: caches_, URL: URL_,
+        fetch: async url => { fetched.push(url); return fakeResponse(url); }});
     assert.match(resolve('sdcc.wasm'), /^blob:/, 'a cached file comes from the cache');
-    assert.equal(resolve('sdld.wasm'), `${ORIGIN}static/sdcc-wasm/sdld.wasm`,
-        'a missing file degrades to the origin rather than to broken');
+    assert.match(resolve('sdld.wasm'), /^blob:/, 'a fetched file also passes through the verified snapshot');
+    assert.deepEqual(fetched, [`${ORIGIN}static/sdcc-wasm/sdld.wasm`]);
+    assert.throws(() => resolve('unknown.js'), /Unknown SDCC package member/);
 });
 
 // ---- the unification ----------------------------------------------------
