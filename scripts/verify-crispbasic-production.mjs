@@ -24,7 +24,7 @@ const mime = new Map([
 ]);
 const report = {format: 'crispbasic-production-qualification', version: 1,
     commit: process.env.GITHUB_SHA || null, buildDirectory: relative(root, build),
-    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 12,
+    serviceWorkers: 'blocked (fresh network qualification)', expectedScenarios: 14,
     scenarios: [], serverFailures: []};
 let browser, server, origin;
 
@@ -93,20 +93,24 @@ async function noInterpreterWorkers (page) {
     assert.equal(page.workers().filter(interpreterWorker).length, 0, 'run left an interpreter worker alive');
 }
 
-// Only browser preferences are initialized. Project content, source, controls
-// and circuit changes all go through the application's visible UI below.
-async function appPage (prefix = '/workbench/', keepCircuitMounted = false) {
+// Initialize browser preferences and passive worker observations. Project
+// content, source, controls and circuit changes use the visible UI below.
+async function appPage (prefix = '/workbench/', keepCircuitMounted = false, enableCad = false) {
     const context = await browser.newContext({viewport: {width: 1600, height: 1000},
         locale: 'en-US', serviceWorkers: 'block'});
     const page = await context.newPage();
     page.setDefaultTimeout(30000);
-    const evidence = {requests: [], otherEngines: [], workers: [], pageErrors: [], console: [],
+    const evidence = {requests: [], otherEngines: [], workers: [], cadRequests: [], cadWorkers: [], pageErrors: [], console: [],
         circuitPresentation: keepCircuitMounted ? 'dedicated tab, no stage portal' : 'default'};
     context.on('request', request => {
         if (request.url().includes('/static/crispbasic/')) evidence.requests.push(request.url());
+        if (request.url().includes('/static/cad-sdk/')) evidence.cadRequests.push(request.url());
         if (/bbcbasic\.com|basic\.rom/.test(request.url())) evidence.otherEngines.push(request.url());
     });
-    page.on('worker', worker => { if (interpreterWorker(worker)) evidence.workers.push(worker.url()); });
+    page.on('worker', worker => {
+        if (interpreterWorker(worker)) evidence.workers.push(worker.url());
+        if (/\/static\/cad-sdk\/assets\/simulation\.worker-/.test(worker.url())) evidence.cadWorkers.push(worker.url());
+    });
     page.on('pageerror', error => evidence.pageErrors.push(error.message));
     page.on('console', message => {
         if (evidence.console.length < 100 && ['warning', 'error'].includes(message.type())) {
@@ -114,13 +118,52 @@ async function appPage (prefix = '/workbench/', keepCircuitMounted = false) {
         }
     });
     page.on('dialog', dialog => dialog.accept());
-    await page.addInitScript(keepCircuitMounted => {
+    await page.addInitScript(({keepCircuitMounted, enableCad}) => {
         localStorage.setItem('bw-starter-v1-complete', '1');
         // Keep the real Designer mounted in its own tab while coding. The
         // default debugger-only stage portal can remount it on a tab switch;
         // that would conflate remount cancellation with the file import below.
         if (keepCircuitMounted) localStorage.setItem('bw-stage-circuit', '0');
-    }, keepCircuitMounted);
+        if (enableCad) {
+            localStorage.setItem('bw-cad-enabled', '1');
+            // Observe the real worker boundary and actual Stop click. Never
+            // alter a command, delay a reply or substitute a mechanical result.
+            const probe = window.__crispBasicCadProbe = {starts: 0, steps: 0, replies: 0,
+                inFlight: 0, failures: [], releases: [], stop: null};
+            const pending = new WeakMap();
+            const send = Worker.prototype.postMessage;
+            Worker.prototype.postMessage = function (command, ...options) {
+                if (command?.op === 'start' && typeof command.wasmURL === 'string' &&
+                    Object.hasOwn(command, 'fixBase')) probe.starts++;
+                if (command?.op === 'actuator-step') {
+                    let requests = pending.get(this);
+                    if (!requests) {
+                        requests = new Set(); pending.set(this, requests);
+                        this.addEventListener('message', event => {
+                            if (!requests.delete(event.data?.request)) return;
+                            probe.replies++; probe.inFlight--;
+                            if (event.data.error) probe.failures.push(event.data.error);
+                        });
+                    }
+                    requests.add(command.request); probe.steps++; probe.inFlight++;
+                }
+                return Reflect.apply(send, this, [command, ...options]);
+            };
+            document.addEventListener('click', event => {
+                if (event.composedPath().some(node => node?.dataset?.testid === 'bw-crispbasic-stop')) {
+                    probe.stop = {steps: probe.steps, replies: probe.replies, inFlight: probe.inFlight};
+                }
+            }, true);
+            window.addEventListener('bw-circuit-clock-owner', event => {
+                const owner = event.detail?.owner;
+                if (!event.detail?.board && owner?.board) {
+                    // The Designer may resume its own electrical clock once
+                    // notified; preserve the exact time of BASIC's handoff.
+                    probe.releases.push({timeNs: owner.board.getTime().toString()});
+                }
+            });
+        }
+    }, {keepCircuitMounted, enableCad});
     try {
         await page.goto(`${origin}${prefix}`, {waitUntil: 'domcontentloaded', timeout: 60000});
         await page.waitForFunction(() => Boolean(window.__brickwrightStore?.getState?.()?.scratchGui?.vm?.runtime),
@@ -134,13 +177,14 @@ async function appPage (prefix = '/workbench/', keepCircuitMounted = false) {
     }
 }
 
-function scenario (name, body, {prefix = '/workbench/', keepCircuitMounted = false} = {}) {
-    test(name, {timeout: 150000}, async () => {
+function scenario (name, body, {prefix = '/workbench/', keepCircuitMounted = false,
+    enableCad = false, timeoutMs = 150000} = {}) {
+    test(name, {timeout: timeoutMs}, async () => {
         const record = {name, status: 'running'};
         report.scenarios.push(record);
         let app;
         try {
-            app = await appPage(prefix, keepCircuitMounted);
+            app = await appPage(prefix, keepCircuitMounted, enableCad);
             await body(app.page, app.evidence, record);
             await noInterpreterWorkers(app.page);
             assert.deepEqual(app.evidence.pageErrors, [], 'production application raised a page error');
@@ -271,6 +315,121 @@ function boardState (page) {
             powered: board.powered, pins, inputs: pins.every(pin => pin.mode === 'input'),
             partIds: board.parts.map(part => part.id)};
     });
+}
+
+let cadPayloadPromise;
+function cadPayload () {
+    return cadPayloadPromise ||= (async () => {
+        const manifestPath = 'static/cad-sdk/manifest.json';
+        const manifestBytes = await readFile(resolve(build, manifestPath));
+        const manifest = JSON.parse(manifestBytes);
+        const pinned = JSON.parse(await readFile(resolve(root, 'overlay/scratch-gui', manifestPath), 'utf8'));
+        assert.equal(manifest.format, 'brickwright-cad-sdk');
+        assert.equal(manifest.dirty, false, 'CAD SDK must come from a committed producer');
+        assert.deepEqual(manifest, pinned, 'production must contain the pinned CAD SDK');
+        for (const [filename, sha256] of Object.entries(manifest.files)) {
+            assert.ok(!filename.startsWith('/') && !filename.split('/').includes('..'), 'safe CAD asset path');
+            const bytes = await readFile(resolve(build, 'static/cad-sdk', filename));
+            assert.equal(createHash('sha256').update(bytes).digest('hex'), sha256, `CAD asset differs: ${filename}`);
+        }
+        const project = await readFile(resolve(build, 'static/circuit-cad/scout-encoder.sb3'));
+        const source = await readFile(resolve(root, 'packages/crisp-basic/examples/cad-robot/source.bas'), 'utf8');
+        assert.match(source, /PROCdelay\(2\)[\s\S]*PROCdelay\(3\)[\s\S]*PROCdelay\(200\)/);
+        report.cad = {producerCommit: manifest.commit, assetCount: Object.keys(manifest.files).length,
+            manifestSha256: createHash('sha256').update(manifestBytes).digest('hex'),
+            projectSha256: createHash('sha256').update(project).digest('hex'),
+            sourceSha256: createHash('sha256').update(source).digest('hex')};
+        return {project, source};
+    })();
+}
+
+async function openCadRobot (page) {
+    const payload = await cadPayload();
+    await page.getByRole('tab', {name: /Circuit/}).click();
+    await page.waitForFunction(() => Boolean(window.__circuit && window.__board), null, {timeout: 60000});
+    await page.getByTestId('bw-file-menu-trigger').click();
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByText('Load from your computer', {exact: true}).click();
+    await (await chooser).setFiles({name: 'scout-encoder.sb3', mimeType: 'application/x.scratch.sb3', buffer: payload.project});
+    await page.waitForFunction(() => {
+        const runtime = window.__brickwrightStore?.getState?.()?.scratchGui?.vm?.runtime;
+        const board = runtime?.circuitBoard;
+        return board && board === window.__board && !runtime.circuitModel?.netlistError &&
+            ['uno', 'left', 'right'].every(id => board.parts.some(part => part.id === id));
+    }, null, {timeout: 60000});
+    await page.getByRole('tab', {name: 'CAD', exact: true}).click();
+    await page.waitForFunction(() => window.__bwCad?.editor?.session.state.document.id === 'robot-tt-rover',
+        null, {timeout: 120000});
+    await page.evaluate(() => window.__bwCad.editor.whenIdle());
+    await page.getByTestId('bw-cad-program-settings').click();
+    const panel = page.getByTestId('bw-cad-circuit-panel');
+    await panel.getByRole('combobox', {name: 'Circuit motor', exact: true}).first().waitFor();
+    assert.deepEqual(await panel.getByRole('combobox', {name: 'Circuit motor', exact: true})
+        .evaluateAll(inputs => inputs.map(input => input.value)), ['left', 'right']);
+    assert.deepEqual(await panel.getByRole('combobox', {name: 'CAD joint', exact: true})
+        .evaluateAll(inputs => inputs.map(input => input.value)), ['drive-a', 'drive-b']);
+    await panel.getByRole('button', {name: 'Close program settings', exact: true}).click();
+    const design = await page.evaluate(() => ({text: window.__bwCad.editor.session.serialize(),
+        revision: window.__bwCad.editor.session.state.revision}));
+    await codeTab(page);
+    return {...payload, design};
+}
+
+async function connectCadSource (page, source) {
+    await openCodeFile(page, 'cad-robot.bas', source);
+    await page.getByTestId('bw-crispbasic-connect-circuit').check();
+    await page.getByTestId('bw-crispbasic-connect-cad').check();
+}
+
+function cadState (page) {
+    return page.evaluate(() => {
+        const runtime = window.__brickwrightStore.getState().scratchGui.vm.runtime;
+        const board = runtime.circuitBoard, simulation = window.__bwCad.editor.simulation;
+        const pins = board.getPinStates();
+        return {timeNs: board.getTime().toString(), owner: Boolean(runtime.bwCrispBasicSimulation),
+            lease: Boolean(board._externalClock), inputs: pins.every(pin => pin.mode === 'input'),
+            shafts: ['left', 'right'].map(id => ({id, attached: Boolean(board.getDeviceState(id).externalShaft)})),
+            mechanical: simulation.state, frame: simulation.snapshot(), probe: structuredClone(window.__crispBasicCadProbe)};
+    });
+}
+
+async function cadInputGate (page, prompt) {
+    await page.getByTestId('bw-basic-run').click();
+    await page.getByTestId('bw-basic-output').filter({hasText: prompt}).waitFor({timeout: 120000});
+    await page.getByTestId('bw-crispbasic-input').waitFor({state: 'visible'});
+    const state = await cadState(page);
+    assert.equal(state.owner, true);
+    assert.equal(state.lease, true);
+    assert.equal(state.mechanical.state, 'running');
+    assert.ok(state.shafts.every(shaft => shaft.attached));
+    return state;
+}
+
+async function continueCadInput (page) {
+    await page.getByTestId('bw-crispbasic-input').fill('continue');
+    await page.getByTestId('bw-crispbasic-send').click();
+}
+
+async function assertCadReleased (page, design) {
+    const state = await cadState(page);
+    assert.equal(state.owner, false, 'BASIC still reserves the circuit');
+    assert.equal(state.lease, false, 'BASIC still owns the electrical clock');
+    assert.equal(state.inputs, true, 'BASIC left output pins active');
+    assert.ok(state.shafts.every(shaft => !shaft.attached), 'motor ownership survived cleanup');
+    assert.equal(state.mechanical.state, 'paused', 'the existing world must remain paused');
+    assert.equal(state.probe.inFlight, 0, 'Run finished before its mechanical request settled');
+    assert.deepEqual(state.probe.failures, []);
+    assert.equal(state.probe.replies, state.probe.steps);
+    assert.equal(state.probe.starts, 1, 'release or reacquisition restarted the physics world');
+    const preserved = await page.evaluate(() => ({text: window.__bwCad.editor.session.serialize(),
+        revision: window.__bwCad.editor.session.state.revision}));
+    assert.deepEqual(preserved, design, 'simulation changed the authored design or its history');
+    await noInterpreterWorkers(page);
+    await delay(40);
+    const idle = await cadState(page);
+    assert.deepEqual(idle.frame, state.frame, 'released mechanics advanced without an owner');
+    assert.equal(idle.probe.steps, state.probe.steps, 'cleanup invented a mechanical step');
+    return state;
 }
 
 scenario('production CodeMirror generates BBC BASIC from blocks and loads the interpreter only on Run',
@@ -714,6 +873,88 @@ scenario('production Circuit Stop and circuit-file replacement revoke a waiting 
             await successfulOutput(page, 'PRINT STR$(FNmillis)\nEND\n', '0\r\n');
         } finally { await oldBoard.dispose(); }
     }, {keepCircuitMounted: true});
+
+scenario('production BASIC drives the shipped Scout project and a second run resumes the same CAD world',
+    async (page, evidence, record) => {
+        const {source, design} = await openCadRobot(page);
+        const prompt = 'CAD program ready';
+        await connectCadSource(page, `INPUT "${prompt}" ready$\n${source}`);
+        record.designSha256 = createHash('sha256').update(design.text).digest('hex');
+        record.runs = [];
+        let previous;
+        for (let run = 0; run < 2; run++) {
+            const gate = await cadInputGate(page, prompt);
+            if (previous) assert.deepEqual(gate.frame, previous.frame,
+                'reacquiring the clock changed the retained world before BASIC advanced it');
+            await continueCadInput(page);
+            await finished(page);
+            assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+            assert.equal(await page.getByTestId('bw-code-status').locator('span').first().textContent(), 'Completed.');
+            const output = await page.getByTestId('bw-basic-output').textContent();
+            assert.match(output, /Elapsed ms:\s*205\r\n/);
+            assert.match(output, /Encoder:\s*[01]\r\n/);
+            const settled = await assertCadReleased(page, design);
+            assert.equal(settled.probe.releases.length, run + 1);
+            assert.equal(BigInt(settled.probe.releases.at(-1).timeNs) - BigInt(gate.timeNs), 205000000n);
+            assert.ok(Math.abs(settled.frame.time - gate.frame.time - 0.205) < 1e-9,
+                '205 exact electrical milliseconds must produce 41 mechanical steps');
+            assert.equal(settled.probe.steps - gate.probe.steps, 41);
+            for (const joint of ['drive-a', 'drive-b']) {
+                assert.ok(settled.frame.angles[joint] - gate.frame.angles[joint] > 0.01,
+                    `the electrical motor did not turn CAD ${joint}`);
+            }
+            record.runs.push({gate, settled, output});
+            previous = settled;
+        }
+        assert.equal(evidence.cadWorkers.length, 1, 'both runs must use one retained physics worker');
+        assert.ok(evidence.cadRequests.some(url => /simulation\.worker-/.test(url)));
+        await page.screenshot({path: resolve(artifacts, 'cad-basic-resumed.png'), fullPage: true});
+        await page.getByRole('tab', {name: 'CAD', exact: true}).click();
+        await page.screenshot({path: resolve(artifacts, 'cad-basic-preserved-world.png'), fullPage: true});
+    }, {keepCircuitMounted: true, enableCad: true, timeoutMs: 240000});
+
+scenario('production BASIC Stop releases pins and motor ownership without discarding or stepping CAD',
+    async (page, evidence, record) => {
+        const {source, design} = await openCadRobot(page);
+        const endless = source.replace(/\bEND\s*$/, 'REPEAT\nPROCdelay(5)\nUNTIL FALSE\n');
+        assert.notEqual(endless, source, 'the finite CAD example must end with END');
+        const prompt = 'CAD stop ready';
+        await connectCadSource(page, `INPUT "${prompt}" ready$\n${endless}`);
+        const gate = await cadInputGate(page, prompt);
+        await continueCadInput(page);
+        await page.waitForFunction(() => window.__crispBasicCadProbe.steps >= 45, null, {timeout: 30000});
+        await page.getByTestId('bw-crispbasic-stop').click();
+        await finished(page);
+        assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+        assert.match(await page.getByTestId('bw-code-status').textContent(), /CrispBASIC stopped/);
+        const stopped = await assertCadReleased(page, design);
+        assert.ok(stopped.probe.stop, 'no actual Stop control click was observed');
+        assert.equal(stopped.probe.steps, stopped.probe.stop.steps, 'Stop cleanup submitted another physics step');
+        assert.equal(stopped.probe.releases.length, 1);
+        assert.ok(stopped.frame.time > gate.frame.time);
+        const mechanicalNs = BigInt(Math.round((stopped.frame.time - gate.frame.time) * 1e9));
+        assert.equal(BigInt(stopped.probe.releases[0].timeNs) - BigInt(gate.timeNs), mechanicalNs,
+            'Stop must reconcile the final completed mechanics with its owned electrical clock');
+        assert.ok(Math.abs(stopped.frame.time - stopped.probe.steps * 0.005) < 1e-9);
+        record.stopped = {gate, settled: stopped, hadPendingCommandAtClick: stopped.probe.stop.inFlight > 0};
+
+        const resumePrompt = 'CAD resume ready';
+        await connectCadSource(page, `INPUT "${resumePrompt}" ready$\n${source}`);
+        const resumed = await cadInputGate(page, resumePrompt);
+        assert.deepEqual(resumed.frame, stopped.frame, 'Stop caused the next run to restart CAD');
+        await continueCadInput(page);
+        await finished(page);
+        assert.equal(await page.getByTestId('bw-crispbasic-diagnostic').count(), 0);
+        assert.match(await page.getByTestId('bw-basic-output').textContent(), /Elapsed ms:\s*205\r\n/);
+        const settled = await assertCadReleased(page, design);
+        assert.equal(settled.probe.releases.length, 2);
+        assert.equal(settled.probe.steps - resumed.probe.steps, 41);
+        assert.ok(Math.abs(settled.frame.time - resumed.frame.time - 0.205) < 1e-9);
+        assert.equal(evidence.cadWorkers.length, 1);
+        record.resumed = {gate: resumed, settled};
+        record.designSha256 = createHash('sha256').update(design.text).digest('hex');
+        await page.screenshot({path: resolve(artifacts, 'cad-basic-stop-resume.png'), fullPage: true});
+    }, {keepCircuitMounted: true, enableCad: true, timeoutMs: 240000});
 
 scenario('production Connect Circuit refuses an absent supported board and ordinary BASIC stays usable', async page => {
     await codeTab(page);
