@@ -25,6 +25,9 @@ import {asmExamplesFor, riscvCExamplesFor, arduinoSketchExamplesFor} from '../..
 import {blinkChoices, blinkMachineLabel, blinkFamily, blinkMachines, blinkProgramSource, blinkSource, blinkStarter} from '../../lib/bw-asm/blink-machines.js';
 import {requestSketchBuild, sketchBoardFor, sketchFirmware} from '../../lib/bw-debug/arduino-sketch.js';
 import {armRunFor, imageFromIntelHex} from '../../lib/bw-asm/arm-image.js';
+import {stcRunFor, stcAssemblyFirmware} from '../../lib/bw-asm/stc-image.js';
+import {STC_FIRMWARE_EXAMPLES, STC_FIRMWARE_ASSET_ROOT, loadStcFirmwareExample}
+    from '../../lib/bw-asm/stc-firmware-examples.js';
 import {
     requestAssembly, requestCBuild, asmRouteFor, cRouteFor, requestRiscvCBuild, requestBasicBuild, asmTargetForDevice, ASM_DIALECTS,
     RISCV_CC_ENDPOINT,
@@ -348,6 +351,10 @@ const L10N = {
         asmModeLabel: 'Mode:', asmSource: 'Source (editable)', asmListing: 'Listing (from compiler)',
         asmBlinkRunning: (machine, route) => `Blink 0 is running on ${machine} · ${route}`,
         asmExampleLabel: 'Example:', asmExamplePick: 'choose…',
+        stcFirmwareLabel: 'Firmware circuit:',
+        stcFirmwareReplace: name => `Open "${name}"? This replaces the current project, code and circuit. Save any work you want to keep first.`,
+        stcFirmwareLoading: 'Loading firmware and circuit…',
+        stcFirmwareSources: 'Sources, patches and licences',
         asmExampleReplace: 'Replace what is in the assembly editor?',
         asmExampleLoaded: n => `Loaded "${n}". Press Assemble & Run to build it.`,
         assembleAndRun: '🔩 Assemble & Run',
@@ -727,6 +734,10 @@ const L10N = {
         asmModeLabel: 'Modus:', asmSource: 'Source (editierbar)', asmListing: 'Listing (vom Compiler)',
         asmBlinkRunning: (machine, route) => `LED 0 blinkt auf ${machine} · ${route}`,
         asmExampleLabel: 'Beispiel:', asmExamplePick: 'wählen…',
+        stcFirmwareLabel: 'Firmware-Schaltung:',
+        stcFirmwareReplace: name => `„${name}“ öffnen? Dies ersetzt Projekt, Code und Schaltung. Speichere vorher alles, was du behalten möchtest.`,
+        stcFirmwareLoading: 'Firmware und Schaltung werden geladen…',
+        stcFirmwareSources: 'Quellen, Änderungen und Lizenzen',
         asmExampleReplace: 'Inhalt des Assembler-Editors ersetzen?',
         asmExampleLoaded: n => `„${n}" geladen. Mit Assemblieren & Ausführen bauen.`,
         assembleAndRun: '🔩 Assemblieren & Ausführen',
@@ -2159,8 +2170,63 @@ class PseudocodeImporter extends React.Component {
      * are reading.
      */
     _asmCredit () {
-        const ex = this._asmExamples().find(e => e.attribution);
+        const source = (this.state.buffers.asm || '').trim();
+        const ex = this._asmExamples().find(e => e.attribution && e.source.trim() === source);
         return ex ? ex.attribution : null;
+    }
+
+    async loadStcFirmwareCircuit (id) {
+        const example = STC_FIRMWARE_EXAMPLES.find(item => item.id === id);
+        if (!example || this.state.busy) return;
+        const german = pickLocale(this.props.locale) === 'de';
+        const name = german ? example.labelDe : example.label;
+        if (!(await confirmAsync(this.L.stcFirmwareReplace(name)))) return;
+        this.setState({busy: true, status: this.L.stcFirmwareLoading});
+        let conversionRequest = null;
+        try {
+            const {circuit, detail} = await loadStcFirmwareExample(id);
+            if (this.props.vm.stopAll) this.props.vm.stopAll();
+            const stc = {device: detail.firmware.device, clock: detail.firmware.fCpu, pins: []};
+            // Use the normal project-loading path so an earlier project's
+            // blocks cannot continue driving this firmware's circuit.
+            const compiling = this.compile({strict: true,
+                pseudocode: `DEVICE ${stc.device.toUpperCase()}\nCLOCK ${stc.clock}\n`});
+            conversionRequest = this._conversionRequest;
+            const applied = await compiling;
+            // A superseded conversion returns without throwing. An earlier
+            // project may even have the same DEVICE, so metadata equality is
+            // not proof that this particular replacement was applied.
+            if (!applied || !applied.isCurrent() ||
+                String(applied.stc?.device || '').toLowerCase() !== stc.device) {
+                throw new Error('The project changed while loading this firmware example');
+            }
+            this.setState({busy: true, status: this.L.stcFirmwareLoading});
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error('Circuit loading timed out')), 15000);
+                window.dispatchEvent(new CustomEvent('bw-load-firmware-circuit', {detail: {
+                    data: circuit,
+                    onLoaded: () => { clearTimeout(timeout); resolve(); },
+                    onError: error => { clearTimeout(timeout); reject(error); }
+                }}));
+            });
+            if (!applied.isCurrent()) {
+                throw new Error('The project changed while loading this firmware example');
+            }
+            this.publishAppliedDevice(stc);
+            try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
+            window.dispatchEvent(new CustomEvent('bw-settings-change', {
+                detail: {key: 'bw-right-pane-hidden', value: '0'}
+            }));
+            window.__bwPendingMedia = {type: 'asm', detail};
+            window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
+            this.setState({busy: false,
+                status: german ? example.descriptionDe : example.description});
+        } catch (error) {
+            // A newer conversion owns its own busy state and feedback. This
+            // cancelled loader must not mark that newer operation finished.
+            if (conversionRequest && this._conversionRequest !== conversionRequest) return;
+            this.setState({busy: false, status: error.message});
+        }
     }
 
     /**
@@ -3611,7 +3677,7 @@ class PseudocodeImporter extends React.Component {
      * `bw-asm-rom-ready` → circuit-tab stashes it → debug-panel boots it.
      * The detail grew `slotId`/`profile` because a .COM is not a ROM — see
      * `lib/bw-debug/i8086-dos-bench.js`. Auto-run is wired for the 6502, Z80
-     * and 8086 benches; other targets assemble (errors surface here) and say
+     * and 8086 benches, and STC firmware; other targets assemble (errors surface here) and say
      * so rather than pretending to have run.
      */
     chooseBlinkMachine (family, source) {
@@ -3813,6 +3879,15 @@ class PseudocodeImporter extends React.Component {
                 : (out.image ? out.image.segments.reduce((n, s) => n + s.bytes.length, 0) : 0);
             this.deliverAssembly(detail, asmBlink, machine ? this.L.asmBlinkRunning(blinkMachineLabel(machine, this.props.locale), routeName) + warn :
                 this.L.asmBuiltBench(builtLen, routeName, bench) + warn);
+        } else if (stcRunFor(out.target)) {
+            let detail;
+            try {
+                detail = stcAssemblyFirmware(out, (this.currentStc() || {}).clock);
+            } catch (e) {
+                this.setState({busy: false, status: this.L.asmTransportError(routeName, e.message)});
+                return;
+            }
+            this.deliverAssembly(detail, null, this.L.asmBuiltArm(out.bytes.length, routeName, out.target) + warn);
         } else if (armRunFor(out.target)) {
             // N4: the hosted ARM chain returns Intel HEX; the STM32F030 light
             // tier and rp2040js take a flash/SRAM image. Same firmware hand-off
@@ -6739,7 +6814,8 @@ class PseudocodeImporter extends React.Component {
                 setCircuitView({fullWidth: false, dock: 'off', rightPaneVisible: usesScratchStage(proj)});
             }
             const nb = {...this.state.buffers};
-            if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
+            if (typeof pseudocode === 'string') nb.pseudocode = source;
+            else if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts('python'));
             if (lang !== 'javascript') nb.javascript = this.state.jsExecution === OWNED_CONSOLE_EXECUTION ? '' :
                 new SB3Creator().generateJavaScript(proj, this.genOpts('javascript'));
@@ -6776,6 +6852,16 @@ class PseudocodeImporter extends React.Component {
                 conversionReport: {direction: `${LANG_LABEL[lang] || lang} → Blocks`, preserved: true,
                     changed: classified.changed, unsupported: classified.unsupported}
             }));
+            // Existing callers may ignore this receipt. Multi-step loaders
+            // use it to distinguish an applied conversion from an early
+            // cancellation, and to revoke later work when its project/editor
+            // has been superseded. React may not have committed `nb` yet.
+            return {applied: true, stc, isCurrent: () => !this._unmounted &&
+                ownsConversion() && ownsLoadedProject() &&
+                this._animationImport === ownedAnimation &&
+                this._makeCodeRequest === ownedMakeCodeRequest &&
+                this.state.lang === languageAtStart &&
+                (this.state.buffers === buffersAtStart || this.state.buffers === nb)};
         } catch (e) {
             const failure = conversionFailure(e);
             publishEditor({status: this.L.stError(failure.message), conversionReport: {
@@ -8219,6 +8305,22 @@ class PseudocodeImporter extends React.Component {
                             </label>
                         )}
                         {this.state.asmMode === 'source' && this.renderAsmExamplePicker(false)}
+                        {this.state.asmMode === 'source' && stcRunFor(asmTargetForDevice(this._asmDevice())) && (
+                            <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
+                                {this.L.stcFirmwareLabel}
+                                <select data-testid="bw-stc-firmware-examples" value=""
+                                    disabled={this.state.busy}
+                                    onChange={e => this.loadStcFirmwareCircuit(e.target.value)}>
+                                    <option value="">{this.L.asmExamplePick}</option>
+                                    {STC_FIRMWARE_EXAMPLES.map(ex => <option key={ex.id} value={ex.id}>
+                                        {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
+                                    </option>)}
+                                </select>
+                                <a href={`${STC_FIRMWARE_ASSET_ROOT}sources.tar.gz`} download>
+                                    {this.L.stcFirmwareSources}
+                                </a>
+                            </label>
+                        )}
                         {/* The licence is the CONDITION these ship under, so it
                             is visible where they are chosen rather than only in
                             THIRD-PARTY-NOTICES.md. The programs also carry their

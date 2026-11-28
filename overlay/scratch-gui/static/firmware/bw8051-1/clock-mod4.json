@@ -1,0 +1,2086 @@
+{
+  "schema": 1,
+  "title": "STC15 DIY clock: four digits and DS1302",
+  "description": "MOD4=1, NMEA=0 firmware with recorded build fixes. Common-anode digits retain active-low segment and PNP digit selection, including the rotated third digit. Adjustable voltage dividers stand in for light and temperature sensors. IAP persistence and NMEA are not qualified by this bench.",
+  "vcc": 5,
+  "board": {
+    "device": "STC15W408AS",
+    "fosc": 11059200,
+    "vcc": 5
+  },
+  "firmware": "../images/clock-mod4.hex",
+  "parts": [
+    {
+      "id": "VCC",
+      "kind": "vcc",
+      "terminals": [
+        "vcc"
+      ],
+      "params": {},
+      "x": 70,
+      "y": 60
+    },
+    {
+      "id": "GND",
+      "kind": "gnd",
+      "terminals": [
+        "gnd"
+      ],
+      "params": {},
+      "x": 70,
+      "y": 560
+    },
+    {
+      "id": "MCU",
+      "kind": "mcu",
+      "terminals": [
+        "P0.0",
+        "P0.1",
+        "P0.2",
+        "P0.3",
+        "P0.4",
+        "P0.5",
+        "P0.6",
+        "P0.7",
+        "P1.0",
+        "P1.1",
+        "P1.2",
+        "P1.3",
+        "P1.4",
+        "P1.5",
+        "P1.6",
+        "P1.7",
+        "P2.0",
+        "P2.1",
+        "P2.2",
+        "P2.3",
+        "P2.4",
+        "P2.5",
+        "P2.6",
+        "P2.7",
+        "P3.0",
+        "P3.1",
+        "P3.2",
+        "P3.3",
+        "P3.4",
+        "P3.5",
+        "P3.6",
+        "P3.7"
+      ],
+      "params": {
+        "device": "STC15W408AS"
+      },
+      "x": 140,
+      "y": 310
+    },
+    {
+      "id": "RTC",
+      "kind": "ds1302",
+      "terminals": [
+        "vcc",
+        "gnd",
+        "ce",
+        "sclk",
+        "io",
+        "x1",
+        "x2",
+        "vcc1"
+      ],
+      "params": {},
+      "x": 390,
+      "y": 460
+    },
+    {
+      "id": "Y1",
+      "kind": "crystal",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "frequency": 32768
+      },
+      "x": 570,
+      "y": 520
+    },
+    {
+      "id": "BAT",
+      "kind": "battery",
+      "terminals": [
+        "pos",
+        "neg"
+      ],
+      "params": {
+        "volts": 3
+      },
+      "x": 650,
+      "y": 500
+    },
+    {
+      "id": "LIGHT",
+      "kind": "potentiometer",
+      "terminals": [
+        "a",
+        "b",
+        "wiper"
+      ],
+      "params": {
+        "ohms": 10000,
+        "value": 0.5,
+        "label": "Light input"
+      },
+      "x": 770,
+      "y": 400
+    },
+    {
+      "id": "TEMP",
+      "kind": "potentiometer",
+      "terminals": [
+        "a",
+        "b",
+        "wiper"
+      ],
+      "params": {
+        "ohms": 10000,
+        "value": 0.5,
+        "label": "Temperature input"
+      },
+      "x": 900,
+      "y": 400
+    },
+    {
+      "id": "S1",
+      "kind": "button",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {},
+      "x": 1050,
+      "y": 400
+    },
+    {
+      "id": "S2",
+      "kind": "button",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {},
+      "x": 1050,
+      "y": 500
+    },
+    {
+      "id": "BZ",
+      "kind": "buzzer",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {},
+      "x": 1150,
+      "y": 460
+    },
+    {
+      "id": "RS0",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 360,
+      "y": 320
+    },
+    {
+      "id": "RS1",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 455,
+      "y": 320
+    },
+    {
+      "id": "RS2",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 550,
+      "y": 320
+    },
+    {
+      "id": "RS3",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 645,
+      "y": 320
+    },
+    {
+      "id": "RS4",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 740,
+      "y": 320
+    },
+    {
+      "id": "RS5",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 835,
+      "y": 320
+    },
+    {
+      "id": "RS6",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 930,
+      "y": 320
+    },
+    {
+      "id": "RS7",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 330
+      },
+      "x": 1025,
+      "y": 320
+    },
+    {
+      "id": "D0",
+      "kind": "seven_segment",
+      "terminals": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "dp",
+        "common"
+      ],
+      "params": {
+        "common": "anode"
+      },
+      "x": 460,
+      "y": 120
+    },
+    {
+      "id": "Q0",
+      "kind": "pnp",
+      "terminals": [
+        "base",
+        "collector",
+        "emitter"
+      ],
+      "params": {
+        "beta": 100,
+        "vbe": 0.7
+      },
+      "x": 440,
+      "y": 220
+    },
+    {
+      "id": "RB0",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 4700
+      },
+      "x": 440,
+      "y": 275
+    },
+    {
+      "id": "D1",
+      "kind": "seven_segment",
+      "terminals": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "dp",
+        "common"
+      ],
+      "params": {
+        "common": "anode"
+      },
+      "x": 640,
+      "y": 120
+    },
+    {
+      "id": "Q1",
+      "kind": "pnp",
+      "terminals": [
+        "base",
+        "collector",
+        "emitter"
+      ],
+      "params": {
+        "beta": 100,
+        "vbe": 0.7
+      },
+      "x": 620,
+      "y": 220
+    },
+    {
+      "id": "RB1",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 4700
+      },
+      "x": 620,
+      "y": 275
+    },
+    {
+      "id": "D2",
+      "kind": "seven_segment",
+      "terminals": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "dp",
+        "common"
+      ],
+      "params": {
+        "common": "anode"
+      },
+      "x": 820,
+      "y": 120
+    },
+    {
+      "id": "Q2",
+      "kind": "pnp",
+      "terminals": [
+        "base",
+        "collector",
+        "emitter"
+      ],
+      "params": {
+        "beta": 100,
+        "vbe": 0.7
+      },
+      "x": 800,
+      "y": 220
+    },
+    {
+      "id": "RB2",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 4700
+      },
+      "x": 800,
+      "y": 275
+    },
+    {
+      "id": "D3",
+      "kind": "seven_segment",
+      "terminals": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "dp",
+        "common"
+      ],
+      "params": {
+        "common": "anode"
+      },
+      "x": 1000,
+      "y": 120
+    },
+    {
+      "id": "Q3",
+      "kind": "pnp",
+      "terminals": [
+        "base",
+        "collector",
+        "emitter"
+      ],
+      "params": {
+        "beta": 100,
+        "vbe": 0.7
+      },
+      "x": 980,
+      "y": 220
+    },
+    {
+      "id": "RB3",
+      "kind": "resistor",
+      "terminals": [
+        "a",
+        "b"
+      ],
+      "params": {
+        "ohms": 4700
+      },
+      "x": 980,
+      "y": 275
+    }
+  ],
+  "nets": [
+    {
+      "id": "vcc",
+      "terminals": [
+        {
+          "part": "VCC",
+          "terminal": "vcc"
+        },
+        {
+          "part": "RTC",
+          "terminal": "vcc"
+        },
+        {
+          "part": "LIGHT",
+          "terminal": "a"
+        },
+        {
+          "part": "TEMP",
+          "terminal": "a"
+        },
+        {
+          "part": "BZ",
+          "terminal": "a"
+        },
+        {
+          "part": "Q0",
+          "terminal": "emitter"
+        },
+        {
+          "part": "Q1",
+          "terminal": "emitter"
+        },
+        {
+          "part": "Q2",
+          "terminal": "emitter"
+        },
+        {
+          "part": "Q3",
+          "terminal": "emitter"
+        }
+      ]
+    },
+    {
+      "id": "gnd",
+      "terminals": [
+        {
+          "part": "GND",
+          "terminal": "gnd"
+        },
+        {
+          "part": "RTC",
+          "terminal": "gnd"
+        },
+        {
+          "part": "BAT",
+          "terminal": "neg"
+        },
+        {
+          "part": "LIGHT",
+          "terminal": "b"
+        },
+        {
+          "part": "TEMP",
+          "terminal": "b"
+        },
+        {
+          "part": "S1",
+          "terminal": "b"
+        },
+        {
+          "part": "S2",
+          "terminal": "b"
+        }
+      ]
+    },
+    {
+      "id": "rtc-ce",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.0"
+        },
+        {
+          "part": "RTC",
+          "terminal": "ce"
+        }
+      ]
+    },
+    {
+      "id": "rtc-io",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.1"
+        },
+        {
+          "part": "RTC",
+          "terminal": "io"
+        }
+      ]
+    },
+    {
+      "id": "rtc-clock",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.2"
+        },
+        {
+          "part": "RTC",
+          "terminal": "sclk"
+        }
+      ]
+    },
+    {
+      "id": "crystal1",
+      "terminals": [
+        {
+          "part": "RTC",
+          "terminal": "x1"
+        },
+        {
+          "part": "Y1",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "crystal2",
+      "terminals": [
+        {
+          "part": "RTC",
+          "terminal": "x2"
+        },
+        {
+          "part": "Y1",
+          "terminal": "b"
+        }
+      ]
+    },
+    {
+      "id": "battery",
+      "terminals": [
+        {
+          "part": "RTC",
+          "terminal": "vcc1"
+        },
+        {
+          "part": "BAT",
+          "terminal": "pos"
+        }
+      ]
+    },
+    {
+      "id": "light",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.6"
+        },
+        {
+          "part": "LIGHT",
+          "terminal": "wiper"
+        }
+      ]
+    },
+    {
+      "id": "temp",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.7"
+        },
+        {
+          "part": "TEMP",
+          "terminal": "wiper"
+        }
+      ]
+    },
+    {
+      "id": "button1",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.1"
+        },
+        {
+          "part": "S1",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "button2",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.0"
+        },
+        {
+          "part": "S2",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "buzzer",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P1.5"
+        },
+        {
+          "part": "BZ",
+          "terminal": "b"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin0",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.0"
+        },
+        {
+          "part": "RS0",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment0",
+      "terminals": [
+        {
+          "part": "RS0",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "a"
+        },
+        {
+          "part": "D1",
+          "terminal": "a"
+        },
+        {
+          "part": "D2",
+          "terminal": "d"
+        },
+        {
+          "part": "D3",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin1",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.1"
+        },
+        {
+          "part": "RS1",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment1",
+      "terminals": [
+        {
+          "part": "RS1",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "b"
+        },
+        {
+          "part": "D1",
+          "terminal": "b"
+        },
+        {
+          "part": "D2",
+          "terminal": "e"
+        },
+        {
+          "part": "D3",
+          "terminal": "b"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin2",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.2"
+        },
+        {
+          "part": "RS2",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment2",
+      "terminals": [
+        {
+          "part": "RS2",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "c"
+        },
+        {
+          "part": "D1",
+          "terminal": "c"
+        },
+        {
+          "part": "D2",
+          "terminal": "f"
+        },
+        {
+          "part": "D3",
+          "terminal": "c"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin3",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.3"
+        },
+        {
+          "part": "RS3",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment3",
+      "terminals": [
+        {
+          "part": "RS3",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "d"
+        },
+        {
+          "part": "D1",
+          "terminal": "d"
+        },
+        {
+          "part": "D2",
+          "terminal": "a"
+        },
+        {
+          "part": "D3",
+          "terminal": "d"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin4",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.4"
+        },
+        {
+          "part": "RS4",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment4",
+      "terminals": [
+        {
+          "part": "RS4",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "e"
+        },
+        {
+          "part": "D1",
+          "terminal": "e"
+        },
+        {
+          "part": "D2",
+          "terminal": "b"
+        },
+        {
+          "part": "D3",
+          "terminal": "e"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin5",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.5"
+        },
+        {
+          "part": "RS5",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment5",
+      "terminals": [
+        {
+          "part": "RS5",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "f"
+        },
+        {
+          "part": "D1",
+          "terminal": "f"
+        },
+        {
+          "part": "D2",
+          "terminal": "c"
+        },
+        {
+          "part": "D3",
+          "terminal": "f"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin6",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.6"
+        },
+        {
+          "part": "RS6",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment6",
+      "terminals": [
+        {
+          "part": "RS6",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "g"
+        },
+        {
+          "part": "D1",
+          "terminal": "g"
+        },
+        {
+          "part": "D2",
+          "terminal": "g"
+        },
+        {
+          "part": "D3",
+          "terminal": "g"
+        }
+      ]
+    },
+    {
+      "id": "segment-pin7",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P2.7"
+        },
+        {
+          "part": "RS7",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "segment7",
+      "terminals": [
+        {
+          "part": "RS7",
+          "terminal": "b"
+        },
+        {
+          "part": "D0",
+          "terminal": "dp"
+        },
+        {
+          "part": "D1",
+          "terminal": "dp"
+        },
+        {
+          "part": "D2",
+          "terminal": "dp"
+        },
+        {
+          "part": "D3",
+          "terminal": "dp"
+        }
+      ]
+    },
+    {
+      "id": "digit-select0",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.2"
+        },
+        {
+          "part": "RB0",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "digit-base0",
+      "terminals": [
+        {
+          "part": "RB0",
+          "terminal": "b"
+        },
+        {
+          "part": "Q0",
+          "terminal": "base"
+        }
+      ]
+    },
+    {
+      "id": "digit-anode0",
+      "terminals": [
+        {
+          "part": "Q0",
+          "terminal": "collector"
+        },
+        {
+          "part": "D0",
+          "terminal": "common"
+        }
+      ]
+    },
+    {
+      "id": "digit-select1",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.3"
+        },
+        {
+          "part": "RB1",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "digit-base1",
+      "terminals": [
+        {
+          "part": "RB1",
+          "terminal": "b"
+        },
+        {
+          "part": "Q1",
+          "terminal": "base"
+        }
+      ]
+    },
+    {
+      "id": "digit-anode1",
+      "terminals": [
+        {
+          "part": "Q1",
+          "terminal": "collector"
+        },
+        {
+          "part": "D1",
+          "terminal": "common"
+        }
+      ]
+    },
+    {
+      "id": "digit-select2",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.4"
+        },
+        {
+          "part": "RB2",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "digit-base2",
+      "terminals": [
+        {
+          "part": "RB2",
+          "terminal": "b"
+        },
+        {
+          "part": "Q2",
+          "terminal": "base"
+        }
+      ]
+    },
+    {
+      "id": "digit-anode2",
+      "terminals": [
+        {
+          "part": "Q2",
+          "terminal": "collector"
+        },
+        {
+          "part": "D2",
+          "terminal": "common"
+        }
+      ]
+    },
+    {
+      "id": "digit-select3",
+      "terminals": [
+        {
+          "part": "MCU",
+          "terminal": "P3.5"
+        },
+        {
+          "part": "RB3",
+          "terminal": "a"
+        }
+      ]
+    },
+    {
+      "id": "digit-base3",
+      "terminals": [
+        {
+          "part": "RB3",
+          "terminal": "b"
+        },
+        {
+          "part": "Q3",
+          "terminal": "base"
+        }
+      ]
+    },
+    {
+      "id": "digit-anode3",
+      "terminals": [
+        {
+          "part": "Q3",
+          "terminal": "collector"
+        },
+        {
+          "part": "D3",
+          "terminal": "common"
+        }
+      ]
+    }
+  ],
+  "wires": [
+    {
+      "id": "vcc-1",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "RTC",
+        "terminal": "vcc"
+      }
+    },
+    {
+      "id": "vcc-2",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "LIGHT",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "vcc-3",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "TEMP",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "vcc-4",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "BZ",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "vcc-5",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "Q0",
+        "terminal": "emitter"
+      }
+    },
+    {
+      "id": "vcc-6",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "Q1",
+        "terminal": "emitter"
+      }
+    },
+    {
+      "id": "vcc-7",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "Q2",
+        "terminal": "emitter"
+      }
+    },
+    {
+      "id": "vcc-8",
+      "netId": "vcc",
+      "from": {
+        "part": "VCC",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "Q3",
+        "terminal": "emitter"
+      }
+    },
+    {
+      "id": "gnd-1",
+      "netId": "gnd",
+      "from": {
+        "part": "GND",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "RTC",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "gnd-2",
+      "netId": "gnd",
+      "from": {
+        "part": "GND",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "BAT",
+        "terminal": "neg"
+      }
+    },
+    {
+      "id": "gnd-3",
+      "netId": "gnd",
+      "from": {
+        "part": "GND",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "LIGHT",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "gnd-4",
+      "netId": "gnd",
+      "from": {
+        "part": "GND",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "TEMP",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "gnd-5",
+      "netId": "gnd",
+      "from": {
+        "part": "GND",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "S1",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "gnd-6",
+      "netId": "gnd",
+      "from": {
+        "part": "GND",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "S2",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "rtc-ce-1",
+      "netId": "rtc-ce",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.0"
+      },
+      "to": {
+        "part": "RTC",
+        "terminal": "ce"
+      }
+    },
+    {
+      "id": "rtc-io-1",
+      "netId": "rtc-io",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.1"
+      },
+      "to": {
+        "part": "RTC",
+        "terminal": "io"
+      }
+    },
+    {
+      "id": "rtc-clock-1",
+      "netId": "rtc-clock",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.2"
+      },
+      "to": {
+        "part": "RTC",
+        "terminal": "sclk"
+      }
+    },
+    {
+      "id": "crystal1-1",
+      "netId": "crystal1",
+      "from": {
+        "part": "RTC",
+        "terminal": "x1"
+      },
+      "to": {
+        "part": "Y1",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "crystal2-1",
+      "netId": "crystal2",
+      "from": {
+        "part": "RTC",
+        "terminal": "x2"
+      },
+      "to": {
+        "part": "Y1",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "battery-1",
+      "netId": "battery",
+      "from": {
+        "part": "RTC",
+        "terminal": "vcc1"
+      },
+      "to": {
+        "part": "BAT",
+        "terminal": "pos"
+      }
+    },
+    {
+      "id": "light-1",
+      "netId": "light",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.6"
+      },
+      "to": {
+        "part": "LIGHT",
+        "terminal": "wiper"
+      }
+    },
+    {
+      "id": "temp-1",
+      "netId": "temp",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.7"
+      },
+      "to": {
+        "part": "TEMP",
+        "terminal": "wiper"
+      }
+    },
+    {
+      "id": "button1-1",
+      "netId": "button1",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.1"
+      },
+      "to": {
+        "part": "S1",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "button2-1",
+      "netId": "button2",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.0"
+      },
+      "to": {
+        "part": "S2",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "buzzer-1",
+      "netId": "buzzer",
+      "from": {
+        "part": "MCU",
+        "terminal": "P1.5"
+      },
+      "to": {
+        "part": "BZ",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "segment-pin0-1",
+      "netId": "segment-pin0",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.0"
+      },
+      "to": {
+        "part": "RS0",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment0-1",
+      "netId": "segment0",
+      "from": {
+        "part": "RS0",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment0-2",
+      "netId": "segment0",
+      "from": {
+        "part": "RS0",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment0-3",
+      "netId": "segment0",
+      "from": {
+        "part": "RS0",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "d"
+      }
+    },
+    {
+      "id": "segment0-4",
+      "netId": "segment0",
+      "from": {
+        "part": "RS0",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment-pin1-1",
+      "netId": "segment-pin1",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.1"
+      },
+      "to": {
+        "part": "RS1",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment1-1",
+      "netId": "segment1",
+      "from": {
+        "part": "RS1",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "segment1-2",
+      "netId": "segment1",
+      "from": {
+        "part": "RS1",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "segment1-3",
+      "netId": "segment1",
+      "from": {
+        "part": "RS1",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "e"
+      }
+    },
+    {
+      "id": "segment1-4",
+      "netId": "segment1",
+      "from": {
+        "part": "RS1",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "segment-pin2-1",
+      "netId": "segment-pin2",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.2"
+      },
+      "to": {
+        "part": "RS2",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment2-1",
+      "netId": "segment2",
+      "from": {
+        "part": "RS2",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "c"
+      }
+    },
+    {
+      "id": "segment2-2",
+      "netId": "segment2",
+      "from": {
+        "part": "RS2",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "c"
+      }
+    },
+    {
+      "id": "segment2-3",
+      "netId": "segment2",
+      "from": {
+        "part": "RS2",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "f"
+      }
+    },
+    {
+      "id": "segment2-4",
+      "netId": "segment2",
+      "from": {
+        "part": "RS2",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "c"
+      }
+    },
+    {
+      "id": "segment-pin3-1",
+      "netId": "segment-pin3",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.3"
+      },
+      "to": {
+        "part": "RS3",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment3-1",
+      "netId": "segment3",
+      "from": {
+        "part": "RS3",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "d"
+      }
+    },
+    {
+      "id": "segment3-2",
+      "netId": "segment3",
+      "from": {
+        "part": "RS3",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "d"
+      }
+    },
+    {
+      "id": "segment3-3",
+      "netId": "segment3",
+      "from": {
+        "part": "RS3",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment3-4",
+      "netId": "segment3",
+      "from": {
+        "part": "RS3",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "d"
+      }
+    },
+    {
+      "id": "segment-pin4-1",
+      "netId": "segment-pin4",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.4"
+      },
+      "to": {
+        "part": "RS4",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment4-1",
+      "netId": "segment4",
+      "from": {
+        "part": "RS4",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "e"
+      }
+    },
+    {
+      "id": "segment4-2",
+      "netId": "segment4",
+      "from": {
+        "part": "RS4",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "e"
+      }
+    },
+    {
+      "id": "segment4-3",
+      "netId": "segment4",
+      "from": {
+        "part": "RS4",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "b"
+      }
+    },
+    {
+      "id": "segment4-4",
+      "netId": "segment4",
+      "from": {
+        "part": "RS4",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "e"
+      }
+    },
+    {
+      "id": "segment-pin5-1",
+      "netId": "segment-pin5",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.5"
+      },
+      "to": {
+        "part": "RS5",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment5-1",
+      "netId": "segment5",
+      "from": {
+        "part": "RS5",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "f"
+      }
+    },
+    {
+      "id": "segment5-2",
+      "netId": "segment5",
+      "from": {
+        "part": "RS5",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "f"
+      }
+    },
+    {
+      "id": "segment5-3",
+      "netId": "segment5",
+      "from": {
+        "part": "RS5",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "c"
+      }
+    },
+    {
+      "id": "segment5-4",
+      "netId": "segment5",
+      "from": {
+        "part": "RS5",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "f"
+      }
+    },
+    {
+      "id": "segment-pin6-1",
+      "netId": "segment-pin6",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.6"
+      },
+      "to": {
+        "part": "RS6",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment6-1",
+      "netId": "segment6",
+      "from": {
+        "part": "RS6",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "g"
+      }
+    },
+    {
+      "id": "segment6-2",
+      "netId": "segment6",
+      "from": {
+        "part": "RS6",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "g"
+      }
+    },
+    {
+      "id": "segment6-3",
+      "netId": "segment6",
+      "from": {
+        "part": "RS6",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "g"
+      }
+    },
+    {
+      "id": "segment6-4",
+      "netId": "segment6",
+      "from": {
+        "part": "RS6",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "g"
+      }
+    },
+    {
+      "id": "segment-pin7-1",
+      "netId": "segment-pin7",
+      "from": {
+        "part": "MCU",
+        "terminal": "P2.7"
+      },
+      "to": {
+        "part": "RS7",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "segment7-1",
+      "netId": "segment7",
+      "from": {
+        "part": "RS7",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "dp"
+      }
+    },
+    {
+      "id": "segment7-2",
+      "netId": "segment7",
+      "from": {
+        "part": "RS7",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "dp"
+      }
+    },
+    {
+      "id": "segment7-3",
+      "netId": "segment7",
+      "from": {
+        "part": "RS7",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "dp"
+      }
+    },
+    {
+      "id": "segment7-4",
+      "netId": "segment7",
+      "from": {
+        "part": "RS7",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "dp"
+      }
+    },
+    {
+      "id": "digit-select0-1",
+      "netId": "digit-select0",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.2"
+      },
+      "to": {
+        "part": "RB0",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "digit-base0-1",
+      "netId": "digit-base0",
+      "from": {
+        "part": "RB0",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "Q0",
+        "terminal": "base"
+      }
+    },
+    {
+      "id": "digit-anode0-1",
+      "netId": "digit-anode0",
+      "from": {
+        "part": "Q0",
+        "terminal": "collector"
+      },
+      "to": {
+        "part": "D0",
+        "terminal": "common"
+      }
+    },
+    {
+      "id": "digit-select1-1",
+      "netId": "digit-select1",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.3"
+      },
+      "to": {
+        "part": "RB1",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "digit-base1-1",
+      "netId": "digit-base1",
+      "from": {
+        "part": "RB1",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "Q1",
+        "terminal": "base"
+      }
+    },
+    {
+      "id": "digit-anode1-1",
+      "netId": "digit-anode1",
+      "from": {
+        "part": "Q1",
+        "terminal": "collector"
+      },
+      "to": {
+        "part": "D1",
+        "terminal": "common"
+      }
+    },
+    {
+      "id": "digit-select2-1",
+      "netId": "digit-select2",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.4"
+      },
+      "to": {
+        "part": "RB2",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "digit-base2-1",
+      "netId": "digit-base2",
+      "from": {
+        "part": "RB2",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "Q2",
+        "terminal": "base"
+      }
+    },
+    {
+      "id": "digit-anode2-1",
+      "netId": "digit-anode2",
+      "from": {
+        "part": "Q2",
+        "terminal": "collector"
+      },
+      "to": {
+        "part": "D2",
+        "terminal": "common"
+      }
+    },
+    {
+      "id": "digit-select3-1",
+      "netId": "digit-select3",
+      "from": {
+        "part": "MCU",
+        "terminal": "P3.5"
+      },
+      "to": {
+        "part": "RB3",
+        "terminal": "a"
+      }
+    },
+    {
+      "id": "digit-base3-1",
+      "netId": "digit-base3",
+      "from": {
+        "part": "RB3",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "Q3",
+        "terminal": "base"
+      }
+    },
+    {
+      "id": "digit-anode3-1",
+      "netId": "digit-anode3",
+      "from": {
+        "part": "Q3",
+        "terminal": "collector"
+      },
+      "to": {
+        "part": "D3",
+        "terminal": "common"
+      }
+    }
+  ]
+}

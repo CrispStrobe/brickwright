@@ -2845,3 +2845,48 @@ retained notices and exact provenance before Run.
 Copyright (c) 2026 Brickwright contributors. The vendored benchmark sources and
 full MIT licence ship in `overlay/scratch-gui/src/lib/bw-native-benchmarks/`
 (`LICENSE`).
+
+## MicroController-Lab — MIT
+
+Copyright (c) 2022 Ashrith Sagar. Six self-contained 8051 algorithms are
+adapted from `AshrithSagar/MicroController-Lab` at
+`11d6f887feaffb763b937693d440d79fda31a65c`. Brickwright adds SDAS8051 syntax,
+reproducible inputs, prediction prompts and an explicit finish address. The
+complete MIT notice accompanies each source and ships at
+`overlay/scratch-gui/static/licenses/ashrith-sagar-microcontroller-lab.MIT.txt`.
+Retained originals and Git blob identities are in the teaching fixtures.
+
+## cute-os — MIT
+
+Copyright (c) 2022 Mahmoud Karam. The optional SDCC scheduler lesson adapts
+`makaram99/cute-os` at `c489ebfb1a9186903b6c60db66bd1154ec703d71` to Timer0,
+with bounded task periods and observable completion. It ships as guest source
+and HEX in `overlay/scratch-gui/static/teaching/bw8051-1/`; the full MIT license
+is `overlay/scratch-gui/static/licenses/cute-os.MIT.txt`. No Keil startup file
+or compiler runtime from that repository is imported.
+
+## STC15lib — Apache-2.0
+
+Selected STC15lib headers by Michael Golovanov (mgoblin), pinned to v0.18.0
+at `9b6dfece57540e344da6ce5f5dc1593274ee9321`, build the selected GPIO, ADC,
+timer and hourglass firmware. Original header attribution, including STC
+vendor attribution, is retained. The complete Apache-2.0 license and source
+archive ship beside the firmware under
+`overlay/scratch-gui/static/firmware/bw8051-1/`. The HAL remains guest code.
+
+## ElectronicHourGlassKit — MIT
+
+Copyright (c) 2025 Michael Golovanov. Stage 2 and its LED helper from
+`mgoblin/ElectronicHourGlassKit` at
+`f434bb574ba5a89350bf26beca7cb0462db3c2dc` are shipped unchanged, with a
+simplified teaching circuit. The source archive and full MIT license accompany
+the image under `overlay/scratch-gui/static/firmware/bw8051-1/`.
+
+## stc_diyclock — MIT
+
+Copyright (c) 2016 Jens Jensen. Selected four-digit firmware from
+`orangetrialtruck/stc_diyclock` at `0a3972439846843dc3f4671a8bbc6f9846b2e17a`
+is built with NMEA disabled. Six build/runtime corrections are retained as
+an explicit patch; the original files, MIT license and STC MCU attribution
+remain in the accompanying source archive. The image, circuit and source
+package ship under `overlay/scratch-gui/static/firmware/bw8051-1/`.

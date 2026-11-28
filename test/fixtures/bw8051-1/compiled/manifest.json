@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "toolchain": "SDCC : mcs51/z80/z180/r2k/r2ka/r3ka/sm83/tlcs90/ez80_z80/z80n/r800/ds390/pic16/pic14/TININative/ds400/hc08/s08/stm8/pdk13/pdk14/pdk15/mos6502/mos65c02/f8 TD- 4.5.0 #15242 (Linux)",
+  "examples": [
+    {
+      "id": "lab-add16",
+      "sourceSha256": "b6d23e665a0fc885b491ff14064244572b43291ceab87ea0cda15855a3bd7cd8",
+      "hexSha256": "9667d18715e762613b7f75dc57c00d0d5f40db588bf5603378c8f52b145ac8cc",
+      "upstream": {
+        "repo": "https://github.com/AshrithSagar/MicroController-Lab",
+        "ref": "11d6f887feaffb763b937693d440d79fda31a65c",
+        "path": "Experiment-2/E2_E2.ASM",
+        "blob": "c27a6c3f361f8705780368f98557c8e5a37aad74"
+      }
+    },
+    {
+      "id": "lab-and-port",
+      "sourceSha256": "8a6fe71b0f16e6685b4a36420263c99efe0b5e0e4085af95870f0515a24921cf",
+      "hexSha256": "eb2b1387781279aad18ea88a2134f78a3b050be8b561373b3553bb795129599e",
+      "upstream": {
+        "repo": "https://github.com/AshrithSagar/MicroController-Lab",
+        "ref": "11d6f887feaffb763b937693d440d79fda31a65c",
+        "path": "Experiment-2/E2_E5.ASM",
+        "blob": "b3e499775307472ea5b2582847c7aab338cdcd0f"
+      }
+    },
+    {
+      "id": "lab-copy-array",
+      "sourceSha256": "4f65483b56544945957c69c5b5a1c359edb8c8703476a9c43d16aac3362a27d7",
+      "hexSha256": "0ee7b4bc6e430269370aee90ec0b4727a9ab1f164d01bd81d96106d80e933032",
+      "upstream": {
+        "repo": "https://github.com/AshrithSagar/MicroController-Lab",
+        "ref": "11d6f887feaffb763b937693d440d79fda31a65c",
+        "path": "Experiment-3/E3_E3.ASM",
+        "blob": "c78aa2675df06f9d798233a7e01f24e366c36b00"
+      }
+    },
+    {
+      "id": "lab-sort-array",
+      "sourceSha256": "da987059db65d110012bf4939ece521051a2fef1a3c7b36419eae77abdb16c56",
+      "hexSha256": "032836b1dd9f3f8c9adc3ed82f4119762a10b1532c5fe432c2be9f2809d18cba",
+      "upstream": {
+        "repo": "https://github.com/AshrithSagar/MicroController-Lab",
+        "ref": "11d6f887feaffb763b937693d440d79fda31a65c",
+        "path": "Experiment-3/E3_E4.ASM",
+        "blob": "5001b8e8984a8af2c391f8f61d23a60c1afcd93f"
+      }
+    },
+    {
+      "id": "lab-decimal-digits",
+      "sourceSha256": "4e5c988c1d1f3ec6774a0105c39b2a6f5592905628f11e9a8ec989043069e845",
+      "hexSha256": "04a53f1ae160d35a3444a483c284f8650fab2be4851bff6fd0b5f182d2ee8d69",
+      "upstream": {
+        "repo": "https://github.com/AshrithSagar/MicroController-Lab",
+        "ref": "11d6f887feaffb763b937693d440d79fda31a65c",
+        "path": "Experiment-3/E3_E5.ASM",
+        "blob": "46e96d48cf24aa3142ac030e8d573535e0245dd2"
+      }
+    },
+    {
+      "id": "lab-rotate16",
+      "sourceSha256": "d4cd10b36bc6bc71c577621e3982451c93dc909112963816df4c3dc744d91334",
+      "hexSha256": "bf4220db9e2b54884a1c5f6d265ab0b3840c3aa5f9585a369ca875612c8b8c20",
+      "upstream": {
+        "repo": "https://github.com/AshrithSagar/MicroController-Lab",
+        "ref": "11d6f887feaffb763b937693d440d79fda31a65c",
+        "path": "Experiment-4/E4_X2.ASM",
+        "blob": "c9d7e09e159f1a6918034fdb91e338e4614b77a6"
+      }
+    }
+  ],
+  "cuteOS": {
+    "id": "cute-os-timer0",
+    "sourceSha256": "bd572503914fd1e6e2e62d5918da04fbbd4b371e5043ad836e70907317560961",
+    "hexSha256": "4a6a022c9641abc91e14ebd5a1c8c368bc72cd5778a9742a7191d26a1afed594",
+    "upstream": {
+      "repo": "https://github.com/makaram99/cute-os",
+      "ref": "c489ebfb1a9186903b6c60db66bd1154ec703d71",
+      "path": "code/src/cuteOS.c"
+    },
+    "part": "stc89c52rc",
+    "clockHz": 12000000,
+    "timer": "Timer0 mode 1",
+    "expectedIram": {
+      "address": 48,
+      "bytes": [
+        25,
+        12,
+        6,
+        0,
+        240,
+        0,
+        165
+      ]
+    },
+    "expectedP1": 246
+  }
+}

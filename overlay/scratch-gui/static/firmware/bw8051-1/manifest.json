@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "bwBoard": "5af626649e52dbea26d1f3156620dfa420490c57",
+  "files": {
+    "hourglass-stage2.hex": "ca45fa98824dfe769222f6744f8ae3613e8a356ef56f5e7afb347835312a5798",
+    "hourglass-stage2.json": "a5c6361e6b4b539d66132d55bd45199e80a746624a2be3d0c4695f0ec16afed9",
+    "clock-mod4.hex": "c3dcf4e426abdebe07996fcb160e38b40d04e56aed1364360b7cb2285a5240bc",
+    "clock-mod4.json": "d7bc0a3d0656e8297dfc7499140ce55feefa6d5de5288f9ea025220d8b90ae9d",
+    "STC15lib.LICENSE.txt": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "ElectronicHourGlassKit.LICENSE.txt": "558e4555da717b3faaece8aab5baca30aea486363f34acd3dc7c8b8df24b0445",
+    "stc_diyclock.LICENSE.txt": "efe24cfeb6bd94aa08ddacec960fdbacd5843eb985fe5c10405432e4b4ad6b4b",
+    "sources.json": "1b8a4734e5845e690bb397a4fe97d6630047f3a49816c77f26ffd4a48f13945e",
+    "build-manifest.json": "05e1bed87c170c0aacba39d1e72607f362996504f2586243efc54724fda24861",
+    "README.md": "ca8119c6ad7e4b1ed51cbddcde6a19af2bee75ed13db5d3848e31d34d3a3ea79",
+    "sources.tar.gz": "1621dd1f9b70df791f90c0e7b18cd9e89dfdf37af44082725cccbf9bd6f7c835"
+  }
+}

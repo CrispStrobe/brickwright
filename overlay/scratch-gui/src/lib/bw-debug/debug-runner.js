@@ -65,6 +65,7 @@ import {createDebugRecorder} from './recorder.js';
 // The run board is resolved the same way for the debugger and the MicroPython
 // simulator Run — one copy of the phantom-inferred-bench rejection.
 import {resolveNetlist} from './resolve-netlist.js';
+import {stcFirmwareConfig} from '../bw-asm/stc-image.js';
 import {logicalTimeDomain} from 'bw-board/instruction-debug-events.js';
 import {createHaltOccurrenceLedger} from './halt-occurrence-ledger.js';
 import {createForkRecordingStore} from './fork-recording-store.js';
@@ -1628,7 +1629,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         disposeTerminal = null;
         delete runner.terminal;
         terminalFrame = null;
-        const device = String(built?.device || projectStc(null)?.device || '').toLowerCase();
+        const device = String(built?.device || userFirmware?.device || projectStc(null)?.device || '').toLowerCase();
         const selectedTargetKind = selectDebugTargetKind(device, targetKind);
         // The picker offers two targets and only one of them can be honoured
         // here yet. Refusing with the reason is the house rule: silently
@@ -1721,8 +1722,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const wasm = await createEmu8051({
             locateFile: (file) => new URL(`static/${file}`, document.baseURI).href
         });
-        const stc = projectStc(null) || {};
-        const fosc = Number(stc.clock) || 11059200;
+        const stc = stcFirmwareConfig(projectStc(null), built);
+        const fosc = stc.clock;
 
         // ORDER MATTERS, and getting it wrong fails silently.
         //
@@ -1805,17 +1806,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         // ccall marshals the string itself. Nothing here may touch a heap view:
         // no emu8051 build exports one (debugger-ui.md §7b).
-        wasm.ccall('emu_load_hex', 'number', ['string', 'number'],
+        const loaded = wasm.ccall('emu_load_hex', 'number', ['string', 'number'],
             [built.hex, built.hex.length]);
-
-        // A real 8051 image begins with a jump over the interrupt vectors, so
-        // all-zero code at the reset vector means nothing was loaded.
-        if (!wasm._emu_get_code(0) && !wasm._emu_get_code(1) && !wasm._emu_get_code(2)) {
-            throw new Error(
-                'the image did not reach the emulator — code memory is empty at the ' +
-                'reset vector. Something re-initialised the emulator after the load.'
-            );
-        }
+        // Handwritten assembly may legitimately begin with NOPs. Check the
+        // loader's result instead of treating three zero opcodes as an error.
+        if (loaded !== 0) throw new Error(`The 8051 image could not be loaded (${loaded})`);
 
         // The block editor asks for hover values through this, because the
         // workspace and the runner are in different component trees.
@@ -4206,7 +4201,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // symbols when the firmware brought its own (a compiled sketch's
             // table, built WITH this image); a picked .hex has none.
             return { hex: text, image: null, symbols: fw.symbols || null, c: null,
-                bytes: text.length, f_cpu: fw.fCpu || null, device: fw.device, format: 'ihx' };
+                bytes: text.length, f_cpu: fw.fCpu || null, device: fw.device || null, format: 'ihx' };
         }
         if (kind === 'rp2040js' || kind === 'stm32f0' || kind === 'stm32g0') {
             const bytes = fw.bytes || new TextEncoder().encode(fw.text || '');
