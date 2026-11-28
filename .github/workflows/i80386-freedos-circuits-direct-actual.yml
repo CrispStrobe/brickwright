@@ -33,13 +33,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: CrispStrobe/bw-board
-          ref: d21d6d8b819263eb08231134b7556efa82289a90
+          ref: 818e0263fecd320d39737a580b7a73d562603c2e
           path: board
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: CrispStrobe/bw-circuit-ui
-          ref: bd341e9b22652018df21238615d92b686b754d2f
+          ref: 659431ce46a7b6d4ae472182b069ec301aee0df3
           path: circuit-ui
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -53,8 +53,8 @@ jobs:
           evidence="$RUNNER_TEMP/freedos-circuits-evidence"
           mkdir "$evidence"
           test "$(git -C app rev-parse HEAD)" = "$BW_EXPECTED_HEAD"
-          test "$(git -C board rev-parse HEAD)" = d21d6d8b819263eb08231134b7556efa82289a90
-          test "$(git -C circuit-ui rev-parse HEAD)" = bd341e9b22652018df21238615d92b686b754d2f
+          test "$(git -C board rev-parse HEAD)" = 818e0263fecd320d39737a580b7a73d562603c2e
+          test "$(git -C circuit-ui rev-parse HEAD)" = 659431ce46a7b6d4ae472182b069ec301aee0df3
           test -z "$(git -C app status --porcelain)"
           test "$(node --version)" = v22.23.3
           cd app
@@ -133,8 +133,8 @@ jobs:
           assert.equal(manifest.commit,process.env.BW_EXPECTED_HEAD.slice(0,7),'same-head app build');
           assert.equal(source.probeHead,process.env.BW_EXPECTED_HEAD,'same-head probe');
           assert.equal(sha(readFileSync(join(evidence,'circuit-probe.mjs'))),source.generatedSha256);
-          assert.equal(pins['bw-board'],'d21d6d8b819263eb08231134b7556efa82289a90');
-          assert.equal(pins['bw-circuit-ui'],'bd341e9b22652018df21238615d92b686b754d2f');
+          assert.equal(pins['bw-board'],'818e0263fecd320d39737a580b7a73d562603c2e');
+          assert.equal(pins['bw-circuit-ui'],'659431ce46a7b6d4ae472182b069ec301aee0df3');
           console.log(JSON.stringify({schema:'brickwright-lite.i80386-freedos-circuits-admission.v2',
             appHead:process.env.BW_EXPECTED_HEAD,buildManifestCommit:manifest.commit,
             probeHead:source.probeHead,probeSha256:source.generatedSha256,
