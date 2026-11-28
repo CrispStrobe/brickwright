@@ -59,6 +59,22 @@ test('native device routing advertises only explicitly qualified machine profile
     }
 });
 
+test('explicit native compiler choices stay within the selected machine contract', () => {
+    for (const device of ['z80', 'Z80']) {
+        assert.equal(compiler.cowgolTargetForDevice(device), 'z80-cpm');
+        assert.equal(compiler.cowgolTargetForDevice(device, 'z80-cpm'), 'z80-cpm');
+        assert.equal(compiler.cowgolTargetForDevice(device, 'i8080-cpm'), 'i8080-cpm');
+    }
+    assert.equal(compiler.cowgolTargetForDevice('UNO', 'atmega328p'), 'atmega328p');
+    assert.equal(compiler.cowgolTargetForDevice('i80386', 'dos'), 'dos');
+    for (const target of [null, '', false, 'constructor', '__proto__', 'I8080-CPM', 'dos', 'riscv32', 'cowgol-cgen']) {
+        assert.equal(compiler.cowgolTargetForDevice('z80', target), null, String(target));
+    }
+    for (const device of ['i8086', 'i80386', 'riscv32', 'eater6502', 'arduino-uno', 'arduino-nano', 'atmega168p', 'pico', 'constructor', null]) {
+        assert.equal(compiler.cowgolTargetForDevice(device, 'i8080-cpm'), null, String(device));
+    }
+});
+
 test('the capability matrix records the qualified AVR profiles without widening the family', () => {
     for (const device of ['arduino-uno', 'atmega328p', 'arduino-nano', 'atmega168p']) {
         const capability = cell('cowgol', device);
@@ -295,6 +311,7 @@ function editorFixture ({device = 'arduino-uno', lang = 'pseudocode', source = p
         genOpts: () => ({}), selectedBasicProfile: () => null, canLiftAsm: () => false,
         publishAppliedDevice () {},
         L: {cowgolCompiling: 'compiling', cowgolStale: 'stale', stCompiling: 'importing', stLoaded: 'loaded',
+            cowgolNativeTargetUnavailable: 'native compiler target unavailable',
             stError: message => `error: ${message}`, stWarn: message => message}
     });
     return {editor, vm, window, events, builds, loads, machineRuns, downloads, entered, release,
@@ -325,6 +342,39 @@ test('the actual native Blocks method sends real checked Cowgol to every qualifi
         }
         assert.equal(f.editor.state.busy, false);
         assert.equal(f.editor._cowgolCompile, null);
+    }
+});
+
+test('explicit 8080 selection imports checked source through the actual editor and keeps the Z80 machine', async () => {
+    for (const lang of ['pseudocode', 'cowgol']) {
+        const source = lang === 'pseudocode' ? `DEVICE Z80\n${pseudocode}` :
+            '# @bw-declaration "DEVICE Z80"\nvar total: int32 := 2; total := total + 3; bw_print_number(total);';
+        const f = editorFixture({device: 'z80', lang, source, actualDevice: true});
+        await f.editor.runViaCowgolOnDevice({compilerTarget: 'i8080-cpm'});
+        assert.equal(f.loads.length, 1, f.editor.state.status);
+        assert.equal(f.builds.length, 1, f.editor.state.status);
+        assert.equal(f.builds[0].target, 'i8080-cpm');
+        const expected = new SB3Creator().generateCowgol(f.currentProject(), {target: 'i8080-cpm'});
+        assert.equal(expected.ok, true, expected.reasons?.join('; '));
+        assert.equal(f.builds[0].code, expected.cowgol);
+        assert.match(f.builds[0].code, /bw_checked_add/);
+        assert.equal(f.currentProject().stc.device, 'z80');
+        assert.equal(f.machineRuns.length, 1, f.editor.state.status);
+        assert.equal(f.machineRuns[0].config.machine, 'z80');
+    }
+});
+
+test('invalid explicit compiler selections refuse before the actual project import', async () => {
+    for (const [device, compilerTarget] of [['z80', 'dos'], ['i8086', 'i8080-cpm'], ['z80', null], ['z80', 'constructor']]) {
+        const f = editorFixture({device});
+        const before = JSON.stringify(f.currentProject());
+        await f.editor.runViaCowgolOnDevice({compilerTarget});
+        assert.equal(f.loads.length, 0);
+        assert.equal(f.builds.length, 0);
+        assert.equal(f.machineRuns.length, 0);
+        assert.equal(f.events.length, 0);
+        assert.equal(JSON.stringify(f.currentProject()), before);
+        assert.match(f.editor.state.status, /native compiler target unavailable/);
     }
 });
 

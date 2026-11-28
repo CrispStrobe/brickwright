@@ -232,6 +232,10 @@ const L10N = {
         cowgolRunCpmDisplayTitle: 'Boot the same CP/M 2.2 program with a TMS9918 text display in Controller',
         cowgolRunBlocksCpmSystem: '▶ Blocks via Cowgol in CP/M 2.2',
         cowgolRunBlocksCpmDisplay: '▶ Blocks via Cowgol on CP/M display',
+        cowgolRunBlocks8080CpmSystem: '▶ Blocks via Cowgol 8080 in CP/M 2.2 (Z80)',
+        cowgolRunBlocks8080CpmDisplay: '▶ Blocks via Cowgol 8080 on CP/M display (Z80)',
+        cowgolDownloadBlocks8080Cpm: 'Download Blocks via Cowgol 8080 .COM',
+        cowgolNativeTargetUnavailable: 'The selected Cowgol compiler target is not supported by this machine.',
         cowgolCpmImagesUnavailable: 'CP/M 2.2 machine images are unavailable in this build.',
         cowgolCpmTargetRequired: 'The CP/M 2.2 machine needs a Z80 or 8080 CP/M program.',
         cowgolRunDos: '▶ Cowgol on DOS',
@@ -634,6 +638,10 @@ const L10N = {
         cowgolRunCpmDisplayTitle: 'Dasselbe CP/M-2.2-Programm mit einem TMS9918-Textbildschirm im Controller starten',
         cowgolRunBlocksCpmSystem: '▶ Blöcke mit Cowgol in CP/M 2.2',
         cowgolRunBlocksCpmDisplay: '▶ Blöcke mit Cowgol auf CP/M-Bildschirm',
+        cowgolRunBlocks8080CpmSystem: '▶ Blöcke mit Cowgol 8080 in CP/M 2.2 (Z80)',
+        cowgolRunBlocks8080CpmDisplay: '▶ Blöcke mit Cowgol 8080 auf CP/M-Bildschirm (Z80)',
+        cowgolDownloadBlocks8080Cpm: 'Blöcke mit Cowgol als 8080-.COM herunterladen',
+        cowgolNativeTargetUnavailable: 'Das gewählte Cowgol-Compilerziel wird von dieser Maschine nicht unterstützt.',
         cowgolCpmImagesUnavailable: 'CP/M-2.2-Maschinenabbilder sind in diesem Build nicht verfügbar.',
         cowgolCpmTargetRequired: 'Die CP/M-2.2-Maschine benötigt ein Z80- oder 8080-CP/M-Programm.',
         cowgolRunDos: '▶ Cowgol unter DOS',
@@ -6072,21 +6080,26 @@ class PseudocodeImporter extends React.Component {
         }
     }
     /** Explicit native alternative to each board's established C/BASIC route. */
-    async runViaCowgolOnDevice ({surface = 'bench', variant} = {}) {
+    async runViaCowgolOnDevice ({surface = 'bench', variant, compilerTarget} = {}) {
         if (this.state.busy || this.state.running || !remoteToolchainsAllowed()) return;
         const source = this.activeCode();
         const lang = this.state.lang;
         const device = this.codeDevice();
-        const target = cowgolTargetForDevice(device);
-        if (!target || !['cowgol', 'pseudocode'].includes(lang)) return;
+        if (!['cowgol', 'pseudocode'].includes(lang)) return;
+        const target = cowgolTargetForDevice(device, compilerTarget);
+        if (!target) {
+            if (compilerTarget !== undefined) this.setState({status: this.L.stError(this.L.cowgolNativeTargetUnavailable)});
+            return;
+        }
         const dosSystem = surface === 'dos-system' || surface === 'dos-system-display';
         if (variant !== undefined && (target !== 'dos' || !['8086', '80186', '80286', '80386'].includes(variant))) {
             this.setState({status: this.L.stError('Select a qualified DOS CPU: 8086, 80186, 80286 or 80386.')});
             return;
         }
         if (surface !== 'bench' && !(dosSystem ? target === 'dos' && remoteMachineImagesAllowed() : surface === 'dos-display' ? target === 'dos' :
-            ['cpm-system', 'cpm-vdp'].includes(surface) && target === 'z80-cpm' && remoteMachineImagesAllowed())) return;
-        const request = {};
+            ['cpm-system', 'cpm-vdp'].includes(surface) && ['z80-cpm', 'i8080-cpm'].includes(target) &&
+                remoteMachineImagesAllowed())) return;
+        const request = {compilerTarget: target};
         this._cowgolBlocksImport = request;
         // Qualify the native runtime BEFORE applying the imported project.
         // Missing DEVICE retains this selection; a conflicting one is refused.
@@ -6153,10 +6166,14 @@ class PseudocodeImporter extends React.Component {
         }
     }
     /** Compile the checked editor source without importing or starting a project. */
-    async downloadViaCowgolOnDevice () {
+    async downloadViaCowgolOnDevice ({compilerTarget} = {}) {
         if (this.state.busy || this.state.running || !remoteToolchainsAllowed()) return;
-        const target = cowgolTargetForDevice(this.codeDevice());
-        if (!target || !['cowgol', 'pseudocode'].includes(this.state.lang)) return;
+        if (!['cowgol', 'pseudocode'].includes(this.state.lang)) return;
+        const target = cowgolTargetForDevice(this.codeDevice(), compilerTarget);
+        if (!target) {
+            if (compilerTarget !== undefined) this.setState({status: this.L.stError(this.L.cowgolNativeTargetUnavailable)});
+            return;
+        }
         return this.compileCowgolSource(target, false, {fromEditor: true});
     }
     async compileCowgolSource (target, run = false, {fromBlocks = false, fromEditor = false, surface = 'bench', variant} = {}) {
@@ -7630,12 +7647,21 @@ class PseudocodeImporter extends React.Component {
                         ) : null}
                         {menu && ['pseudocode', 'cowgol'].includes(this.state.lang) &&
                             cowgolTargetForDevice(this.codeDevice()) && this.activeCode().trim() && remoteToolchainsAllowed() ? (
-                            <button type="button" onClick={() => this.downloadViaCowgolOnDevice()}
-                                disabled={this.state.running || this.state.busy}
-                                title={this.L.cowgolDownloadNativeBlocksTitle}
-                                data-testid="bw-cowgol-native-blocks-download">
-                                {this.L.cowgolDownloadNativeBlocks}
-                            </button>
+                            <React.Fragment>
+                                <button type="button" onClick={() => this.downloadViaCowgolOnDevice()}
+                                    disabled={this.state.running || this.state.busy}
+                                    title={this.L.cowgolDownloadNativeBlocksTitle}
+                                    data-testid="bw-cowgol-native-blocks-download">
+                                    {this.L.cowgolDownloadNativeBlocks}
+                                </button>
+                                {cowgolTargetForDevice(this.codeDevice()) === 'z80-cpm' &&
+                                    <button type="button" onClick={() => this.downloadViaCowgolOnDevice({compilerTarget: 'i8080-cpm'})}
+                                        disabled={this.state.running || this.state.busy}
+                                        title={this.L.cowgolDownloadNativeBlocksTitle}
+                                        data-testid="bw-cowgol-blocks-8080-download">
+                                        {this.L.cowgolDownloadBlocks8080Cpm}
+                                    </button>}
+                            </React.Fragment>
                         ) : null}
                         {menu && ['pseudocode', 'cowgol'].includes(this.state.lang) &&
                             this.codeDevice() === 'z80' && this.activeCode().trim() &&
@@ -7652,6 +7678,18 @@ class PseudocodeImporter extends React.Component {
                                     title={this.L.cowgolRunCpmDisplayTitle}
                                     data-testid="bw-cowgol-blocks-cpm-vdp-run">
                                     {this.L.cowgolRunBlocksCpmDisplay}
+                                </button>
+                                <button type="button" onClick={() => this.runViaCowgolOnDevice({surface: 'cpm-system', compilerTarget: 'i8080-cpm'})}
+                                    disabled={this.state.running || this.state.busy}
+                                    title={this.L.cowgolRunCpmSystemTitle}
+                                    data-testid="bw-cowgol-blocks-8080-cpm-system-run">
+                                    {this.L.cowgolRunBlocks8080CpmSystem}
+                                </button>
+                                <button type="button" onClick={() => this.runViaCowgolOnDevice({surface: 'cpm-vdp', compilerTarget: 'i8080-cpm'})}
+                                    disabled={this.state.running || this.state.busy}
+                                    title={this.L.cowgolRunCpmDisplayTitle}
+                                    data-testid="bw-cowgol-blocks-8080-cpm-vdp-run">
+                                    {this.L.cowgolRunBlocks8080CpmDisplay}
                                 </button>
                             </React.Fragment>
                         ) : null}

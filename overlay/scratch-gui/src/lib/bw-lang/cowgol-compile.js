@@ -27,9 +27,16 @@ export const cowgolCanonicalDevice = device => {
     if (key === 'nano') return 'arduino-nano';
     return key || null;
 };
-export const cowgolTargetForDevice = device => {
+/** An explicit compiler choice must still belong to the selected machine.
+ * CP/M's qualified 8080-compatible output runs on the same Z80 computer.
+ * Invalid explicit choices never fall back to the device's default compiler.
+ */
+export const cowgolTargetForDevice = (device, compilerTarget) => {
     const key = cowgolCanonicalDevice(device);
-    return Object.prototype.hasOwnProperty.call(DEVICE_TARGETS, key) ? DEVICE_TARGETS[key] : null;
+    const target = Object.prototype.hasOwnProperty.call(DEVICE_TARGETS, key) ? DEVICE_TARGETS[key] : null;
+    if (compilerTarget === undefined) return target;
+    if (!target) return null;
+    return compilerTarget === target || (key === 'z80' && compilerTarget === 'i8080-cpm') ? compilerTarget : null;
 };
 
 const AVR_PROFILES = Object.freeze({

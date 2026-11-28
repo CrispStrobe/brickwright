@@ -30,8 +30,8 @@ by the web and native application wrappers.
    **Run in CP/M 2.2 with display**. These boot the existing full CP/M computer,
    mount the compiled program and launch it at the command prompt. With Z80
    selected, pseudocode and Cowgol also offer the corresponding checked
-   **Blocks via Cowgol** actions. The full-source menu also offers explicit
-   8080-compatible compiler variants, which still execute on the Z80 CPU.
+   **Blocks via Cowgol** actions for both Z80 and 8080-compatible compiler
+   output. Both compiler variants execute on the Z80 CPU.
 8. **Download Blocks via Cowgol** validates the active pseudocode or checked
    Cowgol draft and downloads the selected machine artifact. It leaves the
    current project and authored buffers intact and does not start a machine.
@@ -163,8 +163,8 @@ existing direct **Cowgol on CP/M** program bench:
 | Run in CP/M 2.2 (Z80) | Digital Research CCP and BDOS with the existing BIOS and RAM disk; serial console |
 | Run in CP/M 2.2 with display | The same full OS with the TMS9918 BIOS; 256×192 text display in Controller and serial console |
 
-The full-source actions compile the active Cowgol source directly to a Z80
-`.COM`. On the full-OS routes, the exact validated bytes become `COWGOL.COM`
+The full-source actions compile the active Cowgol source directly to the selected
+Z80 or 8080-compatible `.COM`. On the full-OS routes, the exact validated bytes become `COWGOL.COM`
 on drive A:. The runner waits for CP/M's `A>` prompt, types `COWGOL`, and
 executes the program through the real CCP and BDOS. Returning from the program
 reaches a new prompt; `DIR` shows the mounted executable. Each run starts a
@@ -173,8 +173,17 @@ the Brickwright project.
 
 With **Z80** selected, the pseudocode and Cowgol action menus also offer
 **Blocks via Cowgol in CP/M 2.2** and **Blocks via Cowgol on CP/M display**.
-They apply the same checked sequential int32 console profile as the native
-Blocks bench action. Unsupported GPIO, timing and canvas operations are refused
+The matching **Blocks via Cowgol 8080 in CP/M 2.2 (Z80)** and **Blocks via
+Cowgol 8080 on CP/M display (Z80)** actions explicitly select the qualified
+8080-compatible compiler while retaining the Z80 machine. **Download Blocks
+via Cowgol 8080 .COM** provides the same checked target without starting a guest
+or replacing the current project. Artifact download requires the hosted compiler;
+the OS actions also require machine images.
+
+These actions apply the same checked sequential int32 console profile as the native
+Blocks bench action. The compiler choice is validated against the selected machine
+before import and captured for the pending build; an incompatible explicit choice
+cannot fall back to another target. Unsupported GPIO, timing and canvas operations are refused
 before importing the source or replacing the project. The TMS9918 surface
 displays the OS console; it does not add a native turtle or pixel API to Cowgol.
 
@@ -190,8 +199,10 @@ the program command is queued, the debugger owns the running guest. A failed
 OS attachment remains an error in the editor and cannot replay stale media.
 
 `test/cowgol-computer-surfaces.test.mjs` exercises the actual editor methods and
-machine activation, including exact bytes, mounted filename, automatic command,
-Controller configuration, policy gates and stale-result cancellation.
+machine activation for both compiler variants, including exact bytes, mounted
+filename, automatic command, Controller configuration, policy gates and stale-result
+cancellation. Checked 8080 tests also reject replies naming the wrong compiler
+target or toolchain before machine activation.
 `test/cowgol-cpm-launch-ownership.test.mjs` exercises the actual panel and runner
 methods across delayed attachment, cancellation, failure and replacement.
 `scripts/verify-cowgol-cpm-system.mjs` is the separate exact-machine witness:

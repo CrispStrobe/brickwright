@@ -70,6 +70,7 @@ function fixture ({hold = null, images = true, toolchains = true, device = 'z80'
         state: {lang, buffers: {[lang]: authored}, busy: false, running: false},
         L: {cowgolCompiling: 'compiling', cowgolStale: 'stale',
             cowgolCpmImagesUnavailable: 'images unavailable', cowgolCpmTargetRequired: 'CP/M target required',
+            cowgolNativeTargetUnavailable: 'native compiler target unavailable',
             stError: message => `error: ${message}`},
         activeCode () { return this.state.buffers[this.state.lang]; },
         codeDevice: () => device,
@@ -131,23 +132,29 @@ test('full-source actions activate real CP/M 2.2 console and Controller contract
     }
 });
 
-test('checked native Blocks can use both CP/M computer surfaces without compiling stale authored text', async () => {
-    for (const surface of ['cpm-system', 'cpm-vdp']) {
+test('checked native Blocks select either CP/M compiler on both real computer surfaces', async () => {
+    for (const target of ['z80-cpm', 'i8080-cpm']) for (const surface of ['cpm-system', 'cpm-vdp']) {
         const f = fixture({lang: 'pseudocode'});
-        await f.editor.runViaCowgolOnDevice({surface});
-        assert.deepEqual(f.imports, [{strict: true, targetDevice: 'z80', cowgolTarget: 'z80-cpm'}]);
+        await f.editor.runViaCowgolOnDevice({surface, compilerTarget: target});
+        assert.deepEqual(f.imports, [{strict: true, targetDevice: 'z80', cowgolTarget: target}]);
         assert.equal(f.built.length, 1, f.editor.state.status);
+        assert.equal(f.built[0].target, target);
         assert.match(f.built[0].code, /bw_checked_add/);
         assert.notEqual(f.built[0].code, authored);
+        assert.equal(f.dispatched.length, 1, f.editor.state.status);
+        assert.equal(f.dispatched[0].kind, 'z80');
         assert.equal(f.dispatched[0].profile, 'cpm-system');
+        assert.equal(f.dispatched[0].machineView, surface === 'cpm-vdp' ? 'controller' : 'debugger');
+        assert.equal(f.dispatched[0].machinePreset, surface === 'cpm-vdp' ? 'CPM64K_TMS9918' : null);
+        assert.deepEqual(f.dispatched[0].bytes, bytes);
     }
 });
 
 test('CP/M computer actions refuse disabled images and incompatible targets before build or import', async () => {
-    for (const surface of ['cpm-system', 'cpm-vdp']) {
+    for (const target of ['z80-cpm', 'i8080-cpm']) for (const surface of ['cpm-system', 'cpm-vdp']) {
         const denied = fixture({images: false});
-        await denied.editor.compileCowgolSource('z80-cpm', true, {surface});
-        await denied.editor.runViaCowgolOnDevice({surface});
+        await denied.editor.compileCowgolSource(target, true, {surface});
+        await denied.editor.runViaCowgolOnDevice({surface, compilerTarget: target});
         assert.equal(denied.built.length, 0);
         assert.equal(denied.imports.length, 0);
         assert.equal(denied.dispatched.length, 0);
@@ -158,11 +165,56 @@ test('CP/M computer actions refuse disabled images and incompatible targets befo
         assert.match(wrong.editor.state.status, /CP\/M target required/);
     }
     const disabled = fixture({toolchains: false});
-    await disabled.editor.runViaCowgolOnDevice({surface: 'cpm-system'});
+    await disabled.editor.runViaCowgolOnDevice({surface: 'cpm-system', compilerTarget: 'i8080-cpm'});
     assert.equal(disabled.imports.length, 0);
     const wrong = fixture({device: 'riscv32'});
-    await wrong.editor.runViaCowgolOnDevice({surface: 'cpm-vdp'});
+    await wrong.editor.runViaCowgolOnDevice({surface: 'cpm-vdp', compilerTarget: 'i8080-cpm'});
     assert.equal(wrong.imports.length, 0);
+    assert.equal(wrong.built.length, 0);
+    assert.match(wrong.editor.state.status, /native compiler target unavailable/);
+    const wrongSurface = fixture();
+    await wrongSurface.editor.runViaCowgolOnDevice({surface: 'dos-display', compilerTarget: 'i8080-cpm'});
+    assert.equal(wrongSurface.imports.length, 0);
+    assert.equal(wrongSurface.built.length, 0);
+    assert.equal(wrongSurface.dispatched.length, 0);
+});
+
+test('the checked CP/M compiler choice is captured before an asynchronous import', async () => {
+    const f = fixture({hold: 'import', lang: 'pseudocode'});
+    const options = {surface: 'cpm-system', compilerTarget: 'i8080-cpm'};
+    const pending = f.editor.runViaCowgolOnDevice(options);
+    await f.entered.promise;
+    assert.equal(f.editor._cowgolBlocksImport.compilerTarget, 'i8080-cpm');
+    options.compilerTarget = 'z80-cpm';
+    f.release.resolve();
+    await pending;
+    assert.equal(f.built.length, 1, f.editor.state.status);
+    assert.equal(f.built[0].target, 'i8080-cpm');
+    assert.equal(f.dispatched.length, 1);
+    assert.equal(f.editor._cowgolBlocksImport, null);
+
+    const replaced = fixture({hold: 'import', lang: 'pseudocode'});
+    const stale = replaced.editor.runViaCowgolOnDevice({surface: 'cpm-system', compilerTarget: 'i8080-cpm'});
+    await replaced.entered.promise;
+    const newOwner = {compilerTarget: 'z80-cpm'};
+    replaced.editor._cowgolBlocksImport = newOwner;
+    replaced.release.resolve();
+    await stale;
+    assert.equal(replaced.built.length, 0);
+    assert.equal(replaced.dispatched.length, 0);
+    assert.equal(replaced.editor._cowgolBlocksImport, newOwner);
+});
+
+test('a checked 8080 CP/M request rejects another compiler target or toolchain before activation', async () => {
+    for (const replyChange of [{target: 'z80-cpm'}, {toolchain: 'cowgol-cpmz'}]) {
+        const f = fixture({lang: 'pseudocode', replyChange});
+        await f.editor.runViaCowgolOnDevice({surface: 'cpm-vdp', compilerTarget: 'i8080-cpm'});
+        assert.equal(f.built.length, 1);
+        assert.equal(f.built[0].target, 'i8080-cpm');
+        assert.equal(f.dispatched.length, 0);
+        assert.match(f.editor.state.status, /invalid artifact/);
+        assert.equal(f.editor.state.busy, false);
+    }
 });
 
 const revoke = {
