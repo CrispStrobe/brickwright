@@ -14,10 +14,17 @@
 #include <unistd.h>
 #include "bbccon.h"
 
-#if !defined(__linux__) || !(defined(__x86_64__) || defined(__aarch64__))
-#error "CrispBASIC native requires Linux x64 or ARM64"
+#if !defined(__linux__) || !(defined(__x86_64__) || defined(__aarch64__) || defined(__arm__))
+#error "CrispBASIC native requires Linux x64, ARM64 or ARMv7 hard-float"
 #endif
-_Static_assert(sizeof(void *) == 8, "CrispBASIC native requires the 64-bit upstream layout");
+#ifdef __arm__
+#if __ARM_ARCH < 7 || !defined(__ARM_PCS_VFP)
+#error "The 32-bit ARM port requires ARMv7-A with the hard-float ABI"
+#endif
+_Static_assert(sizeof(void *) == 4, "ARMv7 requires the 32-bit upstream layout");
+#else
+_Static_assert(sizeof(void *) == 8, "x64 and ARM64 require the 64-bit upstream layout");
+#endif
 
 #define SOURCE_LINE_LIMIT 4096
 #define SOURCE_LIMIT (4 * 1024 * 1024)
@@ -302,7 +309,7 @@ int main(int argc, char **argv)
     strcpy(szLoadDir, "./"); strcpy(szLibrary, "./");
     strcpy(szUserDir, "./"); strcpy(szTempDir, "./");
     *szCmdLine = 0;
-    platform = 0x41; /* Linux, 64-bit */
+    platform = sizeof(void *) == 8 ? 0x41 : 1; /* Linux; upstream bit 6 denotes 64-bit. */
     liston = 0x30;
     if (load_source(argv[1])) {
         flags = 0;

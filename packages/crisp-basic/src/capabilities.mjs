@@ -12,7 +12,7 @@ function freeze(value) {
 export const NATIVE_CAPABILITIES = freeze({
     schemaVersion: 1,
     backend: BACKEND,
-    platforms: ['linux-x64', 'linux-arm64'],
+    platforms: ['linux-x64', 'linux-arm64', 'linux-armv7'],
     language: 'BBC BASIC (BBCSDL core)',
     profile: 'native-console',
     execution: {run: true, input: true, cancellation: true, timeout: true, outputLimit: true},

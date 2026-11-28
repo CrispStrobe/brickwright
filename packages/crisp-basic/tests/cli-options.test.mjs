@@ -15,7 +15,7 @@ const capabilities = (...args) => JSON.parse(execFileSync(process.execPath,
 test('CLI capability discovery requires no program or built interpreter artifact', () => {
     const native = capabilities();
     assert.equal(native.backend, 'bbcsdl-native');
-    assert.deepEqual(native.platforms, ['linux-x64', 'linux-arm64']);
+    assert.deepEqual(native.platforms, ['linux-x64', 'linux-arm64', 'linux-armv7']);
     assert.equal(native.sandboxed, false);
     const wasm = capabilities('--backend', 'wasm');
     assert.equal(wasm.backend, 'bbcsdl-wasm');

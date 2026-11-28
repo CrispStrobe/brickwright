@@ -1,0 +1,72 @@
+name: CrispBASIC ARM CPU emulation
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'packages/crisp-basic/**'
+      - '.github/workflows/crispbasic-cpu-emulation.yml'
+  pull_request:
+    paths:
+      - 'packages/crisp-basic/**'
+      - '.github/workflows/crispbasic-cpu-emulation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  arm-cpu:
+    name: ${{ matrix.target }} on ${{ matrix.cpu }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-armv7
+            triplet: arm-linux-gnueabihf
+            emulator: qemu-arm
+            cpu: cortex-a7
+          - target: linux-arm64
+            triplet: aarch64-linux-gnu
+            emulator: qemu-aarch64
+            cpu: cortex-a53
+    defaults:
+      run:
+        working-directory: packages/crisp-basic
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install the cross compiler and CPU emulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-${{ matrix.triplet }} qemu-user
+      - name: Verify source, target and launch contracts
+        run: npm test
+      - name: Cross-build the pinned interpreter for the guest CPU
+        env:
+          CC: ${{ matrix.triplet }}-gcc
+          CRISP_BASIC_TARGET: ${{ matrix.target }}
+        run: npm run build:native
+      - name: Execute the actual guest instructions through QEMU
+        env:
+          CRISP_BASIC_TEST_NATIVE_TARGET: ${{ matrix.target }}
+          CRISP_BASIC_TEST_NATIVE_EXECUTABLE: .build/targets/${{ matrix.target }}/crispbasic-native
+          CRISP_BASIC_TEST_NATIVE_RUNNER: '{"executable":"${{ matrix.emulator }}","args":["-cpu","${{ matrix.cpu }}","-L","/usr/${{ matrix.triplet }}"]}'
+        run: npm run test:native
+      - name: Run the documented emulator CLI route
+        run: |
+          node bin/crispbasic.mjs --native-executable .build/targets/${{ matrix.target }}/crispbasic-native \
+            --native-runner ${{ matrix.emulator }} --native-runner-arg=-cpu --native-runner-arg=${{ matrix.cpu }} \
+            --native-runner-arg=-L --native-runner-arg=/usr/${{ matrix.triplet }} examples/structured.bas --json
+      - name: Retain the architecture-verified executable and provenance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crispbasic-${{ matrix.target }}-${{ github.sha }}
+          path: packages/crisp-basic/.build/targets/${{ matrix.target }}/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7

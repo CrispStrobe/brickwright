@@ -6,20 +6,23 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {patchUpstream} from '../native/patch-upstream.mjs';
+import {hostNativeTarget, nativeTarget, verifyNativeBinary} from './native-targets.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const build = join(root, '.build');
-const work = join(build, 'native');
+const target = nativeTarget(process.env.CRISP_BASIC_TARGET || hostNativeTarget());
+const cross = target.name !== hostNativeTarget();
+const work = join(build, 'native', target.name);
+const output = cross ? join(build, 'targets', target.name) : build;
 const checkout = process.env.CRISP_BASIC_UPSTREAM ? resolve(process.env.CRISP_BASIC_UPSTREAM) : join(build, 'BBCSDL');
 const lock = JSON.parse(readFileSync(join(root, 'upstream.lock.json'), 'utf8')).bbcSDL;
 const executable = value => value.includes('/') ? resolve(value) : value;
 const cc = executable(process.env.CC || 'gcc');
 const nasm = executable(process.env.NASM || 'nasm');
-const architecture = process.arch;
-if (process.platform !== 'linux' || !['x64', 'arm64'].includes(architecture)) {
-    throw new Error('The CrispBASIC native backend supports Linux x64 and ARM64. Use the WASM backend on other hosts.');
-}
-for (const folder of [build, work, join(work, 'src'), join(work, 'include'), join(build, 'tmp')]) {
+const {architecture} = target;
+if (process.platform !== 'linux') throw new Error('The native builder currently requires a Linux build host.');
+if (cross && !process.env.CC) throw new Error('Cross-building requires an explicit CC for CRISP_BASIC_TARGET=' + target.name);
+for (const folder of [build, output, work, join(work, 'src'), join(work, 'include'), join(build, 'tmp')]) {
     mkdirSync(folder, {recursive: true});
 }
 const env = {...process.env, TMPDIR: join(build, 'tmp')};
@@ -28,11 +31,11 @@ const run = (command, args, options = {}) => execFileSync(command, args, {
 });
 try {
     run(cc, ['--version'], {stdio: 'pipe'});
-    if (architecture === 'x64') run(nasm, ['--version'], {stdio: 'pipe'});
+    if (target.nasm) run(nasm, ['--version'], {stdio: 'pipe'});
 } catch {
-    throw new Error(architecture === 'x64' ?
+    throw new Error(target.nasm ?
         'Install GCC and NASM, or set CC and NASM to their executable paths.' :
-        'Install GCC and GNU binutils, or set CC to the native ARM64 compiler executable path.');
+        'Install GCC and GNU binutils, or set CC to the compiler executable for ' + target.name + '.');
 }
 if (!existsSync(join(checkout, '.git'))) {
     if (process.env.CRISP_BASIC_UPSTREAM) throw new Error('CRISP_BASIC_UPSTREAM must name a BBCSDL git checkout.');
@@ -53,39 +56,41 @@ for (const file of lock.files) {
 }
 const includes = ['-I', join(work, 'include')];
 const core = ['bbmain', 'bbexec', 'bbeval'];
-const assemblerSource = architecture === 'arm64' ? 'bbasmb_arm_64' : 'bbasmb_x86_64';
-const dataSource = architecture === 'arm64' ? 'bbdata_arm_64.s' : 'bbdata_x86_64.nas';
+const {assemblerSource, dataSource} = target;
 const host = [assemblerSource, 'bbccos', 'bbccon'];
 const objects = [];
 for (const name of [...core, ...host]) {
     const object = join(work, name + '.o');
     const flags = core.includes(name) ? ['-O2', '-ffast-math', '-fno-finite-math-only'] : ['-Os'];
     if (name === 'bbeval') flags.push('-fmath-errno');
-    run(cc, ['-Wall', '-Wno-array-bounds', '-Wno-unused-result', ...includes, ...flags,
+    run(cc, ['-Wall', '-Wno-array-bounds', '-Wno-unused-result', ...target.flags, ...includes, ...flags,
         '-c', join(work, 'src', name + '.c'), '-o', object]);
     objects.push(object);
 }
 const data = join(work, 'bbdata.o');
-if (architecture === 'arm64') {
+if (!target.nasm) {
     // The upstream rpi64 console makefile converts Mach-O symbol spelling to
     // ELF before assembling. The exact transformation is in patchUpstream.
-    run(cc, ['-c', join(work, 'src', dataSource), '-o', data]);
+    run(cc, [...target.flags, '-c', join(work, 'src', dataSource), '-o', data]);
 } else {
     run(nasm, ['-f', 'elf64', join(work, 'src', dataSource), '-o', data]);
 }
 objects.push(data);
 const hostObject = join(work, 'crispbasic.o');
-run(cc, ['-Wall', '-Wextra', '-O2', ...includes, '-c', join(root, 'native', 'crispbasic.c'), '-o', hostObject]);
+run(cc, ['-Wall', '-Wextra', '-O2', ...target.flags, ...includes, '-c', join(root, 'native', 'crispbasic.c'), '-o', hostObject]);
 objects.push(hostObject);
-const binary = join(build, 'crispbasic-native');
-run(cc, [...objects, '-ldl', '-lm', '-lrt', '-pthread', '-Wl,-z,noexecstack', '-o', binary]);
-writeFileSync(join(build, 'BBCSDL-LICENSE.txt'), readFileSync(join(work, 'licence.txt')));
-writeFileSync(join(build, 'native-build.json'), JSON.stringify({
+const binary = join(output, 'crispbasic-native');
+run(cc, [...target.flags, ...objects, '-ldl', '-lm', '-lrt', '-pthread', '-Wl,-z,noexecstack', '-o', binary]);
+verifyNativeBinary(readFileSync(binary), target);
+writeFileSync(join(output, 'BBCSDL-LICENSE.txt'), readFileSync(join(work, 'licence.txt')));
+writeFileSync(join(output, 'native-build.json'), JSON.stringify({
     version: 1, backend: 'bbcsdl-native', upstreamCommit: revision,
-    platform: process.platform, architecture, target: `${process.platform}-${architecture}`,
+    platform: 'linux', architecture, target: target.name,
+    buildHost: `${process.platform}-${process.arch}`, crossCompiled: cross,
+    compilerFlags: target.flags,
     assemblerSource: `src/${assemblerSource}.c`, dataSource: `src/${dataSource}`,
     compiler: run(cc, ['--version'], {stdio: 'pipe'}).toString().split('\n')[0],
-    assembler: architecture === 'x64' ? run(nasm, ['--version'], {stdio: 'pipe'}).toString().trim() :
+    assembler: target.nasm ? run(nasm, ['--version'], {stdio: 'pipe'}).toString().trim() :
         'GNU assembly via the selected C compiler',
     binarySha256: createHash('sha256').update(readFileSync(binary)).digest('hex')
 }, null, 2) + '\n');

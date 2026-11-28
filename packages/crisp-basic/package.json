@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build:native": "node scripts/build-native.mjs",
-    "test": "node --test tests/source.test.mjs tests/cli-options.test.mjs tests/simulation-host.test.mjs tests/simulation-bridge.test.mjs",
+    "test": "node --test tests/source.test.mjs tests/cli-options.test.mjs tests/simulation-host.test.mjs tests/simulation-bridge.test.mjs tests/native-targets.test.mjs",
     "test:native": "node --test tests/runtime.test.mjs tests/cli.test.mjs",
     "test:all": "npm test && npm run test:native && npm run test:wasm && npm run test:parity",
     "start": "node bin/crispbasic.mjs",
